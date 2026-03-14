@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crystal Forge</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <section class="boot-panel">
+        <p class="boot-panel__eyebrow">Crystal Forge</p>
+        <h1 class="boot-panel__title">Loading the forge...</h1>
+        <p class="boot-panel__text">
+          If this stays here, open the app through a local dev server instead of double-clicking
+          <code>index.html</code>.
+        </p>
+        <p class="boot-panel__text">
+          Quick start on Windows: run <code>start-server.bat</code> in this folder, then open
+          <code>http://localhost:8000</code>.
+        </p>
+        <p class="boot-panel__text">
+          Manual option: run <code>python -m http.server</code> inside the
+          <code>crystal-forge</code> folder.
+        </p>
+      </section>
+    </div>
+    <script>
+      if (window.location.protocol === "file:") {
+        const app = document.getElementById("app");
+        if (app) {
+          app.dataset.fileProtocol = "true";
+        }
+      }
+    </script>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
