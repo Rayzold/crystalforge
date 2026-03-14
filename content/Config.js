@@ -4,8 +4,15 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 3;
 export const STORAGE_KEY = "crystal-forge-save";
+export const PAGE_ROUTES = [
+  { key: "home", label: "Home", href: "./index.html" },
+  { key: "forge", label: "Forge", href: "./forge.html" },
+  { key: "city", label: "City", href: "./city.html" },
+  { key: "citizens", label: "Citizens", href: "./citizens.html" },
+  { key: "chronicle", label: "Chronicle", href: "./chronicle.html" }
+];
 export const BUILDING_QUALITY_CAP = 350;
 export const BUILDING_ACTIVE_THRESHOLD = 100;
 export const BUILDING_GRID_LIMIT = 12;
@@ -61,7 +68,20 @@ export const DEFAULT_START_STATE = {
     Nobles: 1,
     Mages: 0
   },
-  settings: { muted: false }
+  settings: {
+    muted: false,
+    audioMode: "hybrid",
+    currentPage: "home"
+  }
+};
+
+export const AUDIO_FILE_CANDIDATES = {
+  Common: ["./assets/audio/common-manifest.mp3", "./assets/audio/common-manifest.wav"],
+  Uncommon: ["./assets/audio/uncommon-manifest.mp3", "./assets/audio/uncommon-manifest.wav"],
+  Rare: ["./assets/audio/rare-manifest.mp3", "./assets/audio/rare-manifest.wav"],
+  Epic: ["./assets/audio/epic-manifest.mp3", "./assets/audio/epic-manifest.wav"],
+  Legendary: ["./assets/audio/legendary-manifest.mp3", "./assets/audio/legendary-manifest.wav"],
+  Beyond: ["./assets/audio/beyond-manifest.mp3", "./assets/audio/beyond-manifest.wav"]
 };
 
 export function createDefaultRollTables() {

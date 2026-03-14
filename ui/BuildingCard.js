@@ -33,6 +33,18 @@ function renderIcon(iconKey) {
   `;
 }
 
+function renderMedia(building) {
+  if (building.imagePath) {
+    return `
+      <div class="building-card__art">
+        <img src="${escapeHtml(building.imagePath)}" alt="${escapeHtml(building.displayName)} artwork" loading="lazy" />
+      </div>
+    `;
+  }
+
+  return `<div class="building-card__icon">${renderIcon(building.iconKey)}</div>`;
+}
+
 function renderStatList(record, inactive) {
   return Object.entries(record)
     .map(
@@ -58,7 +70,7 @@ export function renderBuildingCard(building, state) {
     <article class="building-card ${selected ? "is-selected" : ""} ${isIncomplete ? "is-incomplete" : ""}" style="--rarity-color:${RARITY_COLORS[building.rarity]}">
       <button class="building-card__select" data-action="select-building" data-building-id="${building.id}">
         <div class="building-card__header">
-          <div class="building-card__icon">${renderIcon(building.iconKey)}</div>
+          ${renderMedia(building)}
           <div>
             <h4>${escapeHtml(building.displayName)}</h4>
             <p>${escapeHtml(building.rarity)} / ${escapeHtml(building.district)}</p>
@@ -72,6 +84,10 @@ export function renderBuildingCard(building, state) {
         <div class="building-card__meta">
           <span>Auto ${formatNumber(rate, 2)}% / day</span>
           <span>${building.isComplete ? `Completed ${escapeHtml(building.completedAt ?? "today")}` : `ETA ${escapeHtml(eta)}`}</span>
+        </div>
+        <div class="building-card__meta">
+          <span>${building.mapPosition ? `Hex ${building.mapPosition.q}, ${building.mapPosition.r}` : "Unplaced on map"}</span>
+          <span>${building.isComplete ? `Active x${building.multiplier}` : "Needs placement planning"}</span>
         </div>
         <p class="building-card__effect">${escapeHtml(building.specialEffect)}</p>
         <div class="building-card__columns">

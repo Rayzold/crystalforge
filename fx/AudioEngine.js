@@ -1,3 +1,5 @@
+import { AUDIO_FILE_CANDIDATES } from "../content/Config.js";
+
 const RARITY_AUDIO = {
   Common: { base: 220, duration: 0.14, detune: 0 },
   Uncommon: { base: 260, duration: 0.18, detune: 80 },
@@ -11,6 +13,7 @@ export class AudioEngine {
   constructor() {
     this.context = null;
     this.muted = false;
+    this.resolvedAudioPaths = {};
   }
 
   setMuted(nextValue) {
@@ -28,6 +31,11 @@ export class AudioEngine {
 
   async playManifest(rarity) {
     if (this.muted) {
+      return;
+    }
+
+    const playedFile = await this.tryPlayAudioFile(rarity);
+    if (playedFile) {
       return;
     }
 
@@ -57,5 +65,41 @@ export class AudioEngine {
       overtone.start(now + 0.03);
       overtone.stop(now + profile.duration);
     }
+  }
+
+  async tryPlayAudioFile(rarity) {
+    const candidates = this.resolvedAudioPaths[rarity]
+      ? [this.resolvedAudioPaths[rarity]]
+      : AUDIO_FILE_CANDIDATES[rarity] ?? [];
+
+    for (const path of candidates) {
+      const success = await new Promise((resolve) => {
+        const audio = new Audio(path);
+        audio.volume = 0.9;
+        const timer = window.setTimeout(() => resolve(false), 350);
+        audio.addEventListener("canplaythrough", async () => {
+          try {
+            window.clearTimeout(timer);
+            await audio.play();
+            this.resolvedAudioPaths[rarity] = path;
+            resolve(true);
+          } catch (error) {
+            window.clearTimeout(timer);
+            resolve(false);
+          }
+        }, { once: true });
+        audio.addEventListener("error", () => {
+          window.clearTimeout(timer);
+          resolve(false);
+        }, { once: true });
+        audio.load();
+      });
+
+      if (success) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }

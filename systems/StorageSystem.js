@@ -12,6 +12,7 @@ import { normalizeCrystalCollection } from "./CrystalSystem.js";
 import { recalculateCityStats } from "./CityStatsSystem.js";
 import { getDistrictSummary } from "./DistrictSystem.js";
 import { normalizeShardCollection } from "./ShardSystem.js";
+import { createMapCells } from "./MapSystem.js";
 
 export function createInitialState() {
   const state = {
@@ -28,6 +29,9 @@ export function createInitialState() {
     rollTables: createDefaultRollTables(),
     buildingCatalog: structuredClone(BASE_BUILDING_CATALOG),
     districts: createDefaultDistrictState(),
+    map: {
+      cells: createMapCells()
+    },
     districtSummary: [],
     cityStats: {},
     events: { active: [], recent: [] },
@@ -36,6 +40,7 @@ export function createInitialState() {
     settings: structuredClone(DEFAULT_START_STATE.settings),
     ui: {
       selectedBuildingId: null,
+      selectedMapCell: null,
       adminOpen: false,
       lastManifestResult: null
     }
@@ -49,6 +54,29 @@ export function createInitialState() {
 
 function normalizeBuildingCatalog(sourceCatalog) {
   return { ...structuredClone(BASE_BUILDING_CATALOG), ...(sourceCatalog ?? {}) };
+}
+
+function normalizeBuildings(buildings) {
+  if (!Array.isArray(buildings)) {
+    return [];
+  }
+  return buildings.map((building) => ({
+    ...building,
+    mapPosition:
+      typeof building.mapPosition?.q === "number" && typeof building.mapPosition?.r === "number"
+        ? { q: building.mapPosition.q, r: building.mapPosition.r }
+        : null
+  }));
+}
+
+function normalizeSelectedMapCell(selectedMapCell) {
+  if (
+    typeof selectedMapCell?.q === "number" &&
+    typeof selectedMapCell?.r === "number"
+  ) {
+    return { q: selectedMapCell.q, r: selectedMapCell.r };
+  }
+  return null;
 }
 
 function normalizeRollTables(sourceTables) {
@@ -94,10 +122,13 @@ export function validateAndMigrateSave(rawSave) {
     shards: normalizeShardCollection(rawSave.shards ?? base.shards),
     resources: { ...base.resources, ...(rawSave.resources ?? {}) },
     citizens: normalizeCitizens(rawSave.citizens ?? base.citizens),
-    buildings: Array.isArray(rawSave.buildings) ? rawSave.buildings : [],
+    buildings: normalizeBuildings(rawSave.buildings),
     rollTables: normalizeRollTables(rawSave.rollTables),
     buildingCatalog: normalizeBuildingCatalog(rawSave.buildingCatalog),
     districts: normalizeDistrictState(rawSave.districts),
+    map: {
+      cells: createMapCells()
+    },
     events: {
       active: Array.isArray(rawSave.events?.active) ? rawSave.events.active : [],
       recent: Array.isArray(rawSave.events?.recent) ? rawSave.events.recent : []
@@ -105,7 +136,11 @@ export function validateAndMigrateSave(rawSave) {
     historyLog: Array.isArray(rawSave.historyLog) ? rawSave.historyLog : [],
     calendar: { dayOffset: Number(rawSave.calendar?.dayOffset ?? 0) },
     settings: { ...base.settings, ...(rawSave.settings ?? {}) },
-    ui: { ...base.ui, ...(rawSave.ui ?? {}) },
+    ui: {
+      ...base.ui,
+      ...(rawSave.ui ?? {}),
+      selectedMapCell: normalizeSelectedMapCell(rawSave.ui?.selectedMapCell)
+    },
     citizenDefinitions: createCitizenDefinitionsSnapshot()
   };
 

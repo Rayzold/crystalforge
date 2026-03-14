@@ -112,6 +112,7 @@ function createCatalogEntry(name, rarity) {
     district: override.district ?? base.district,
     tags,
     iconKey: override.iconKey ?? base.iconKey,
+    imagePath: override.imagePath ?? null,
     specialEffect: override.specialEffect ?? buildSpecialEffect({
       district: override.district ?? base.district,
       tags
@@ -141,6 +142,7 @@ export function createCatalogEntryFromInput({
   district,
   tags,
   iconKey,
+  imagePath,
   specialEffect,
   statOverrides = null
 }) {
@@ -156,6 +158,7 @@ export function createCatalogEntryFromInput({
     district: district || base.district,
     tags: nextTags,
     iconKey: iconKey || base.iconKey,
+    imagePath: imagePath || null,
     specialEffect:
       specialEffect ||
       buildSpecialEffect({

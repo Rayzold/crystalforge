@@ -21,6 +21,13 @@ import { resetDistrictLevels, setDistrictDefinition, setDistrictLevelOverride, g
 import { clearActiveEvents, triggerEvent } from "./systems/EventSystem.js";
 import { manifestSelectedRarity } from "./systems/GachaSystem.js";
 import { addHistoryEntry } from "./systems/HistoryLogSystem.js";
+import {
+  clearBuildingPlacement,
+  findMapCell,
+  forceSetBuildingPlacement,
+  getBuildingAtCell,
+  setBuildingPlacement
+} from "./systems/MapSystem.js";
 import { addShards, setShards } from "./systems/ShardSystem.js";
 import { createInitialState, exportSave, importSave, loadGameState, resetSave, saveGameState } from "./systems/StorageSystem.js";
 import { advanceTime } from "./systems/TimeSystem.js";
@@ -28,13 +35,15 @@ import { Toasts } from "./ui/Toasts.js";
 import { UIRenderer } from "./ui/UIRenderer.js";
 
 const root = document.querySelector("#app");
-const renderer = new UIRenderer(root);
+const pageKey = document.body.dataset.page ?? "home";
+const renderer = new UIRenderer(root, pageKey);
 const toasts = new Toasts();
 const animationEngine = new AnimationEngine();
 const audioEngine = new AudioEngine();
 const gameState = new GameState(loadGameState());
 
 function syncDerivedState(state) {
+  state.settings.currentPage = pageKey;
   state.districtSummary = getDistrictSummary(state);
   state.resources.population = Object.values(state.citizens).reduce((sum, value) => sum + value, 0);
   recalculateCityStats(state);
@@ -94,13 +103,21 @@ function getCurrentState() {
   return gameState.getState();
 }
 
+function setSelectedBuildingAndCell(state, buildingId) {
+  state.ui.selectedBuildingId = buildingId;
+  const building = state.buildings.find((entry) => entry.id === buildingId);
+  state.ui.selectedMapCell = building?.mapPosition
+    ? { q: building.mapPosition.q, r: building.mapPosition.r }
+    : null;
+}
+
 async function handleManifest() {
   const state = getCurrentState();
   const result = commit((draft) => {
     const manifestResult = manifestSelectedRarity(draft, draft.selectedRarity);
     if (manifestResult.ok) {
       draft.ui.lastManifestResult = manifestResult;
-      draft.ui.selectedBuildingId = manifestResult.building.id;
+      setSelectedBuildingAndCell(draft, manifestResult.building.id);
     }
     return manifestResult;
   });
@@ -183,12 +200,13 @@ function spawnBuilding({ name, rarity, quality, catalogEntry }) {
       draft.rollTables[rarity].push(name);
     }
     const timestamps = { date: formatDate(draft.calendar.dayOffset), dayOffset: draft.calendar.dayOffset };
-    manifestIntoBuilding(draft, nextCatalogEntry, Math.max(0, Number(quality)), timestamps);
+    const result = manifestIntoBuilding(draft, nextCatalogEntry, Math.max(0, Number(quality)), timestamps);
+    setSelectedBuildingAndCell(draft, result.building.id);
   });
   reportSuccess(`${name} spawned.`);
 }
 
-function editBuilding({ buildingId, quality, district, iconKey, tags, specialEffect, stats, resourceRates }) {
+function editBuilding({ buildingId, quality, district, iconKey, imagePath, tags, specialEffect, stats, resourceRates }) {
   commit((draft) => {
     const building = draft.buildings.find((entry) => entry.id === buildingId);
     if (!building) {
@@ -197,6 +215,7 @@ function editBuilding({ buildingId, quality, district, iconKey, tags, specialEff
     setBuildingQuality(building, quality);
     building.district = district;
     building.iconKey = iconKey;
+    building.imagePath = imagePath;
     building.tags = tags;
     building.specialEffect = specialEffect;
     if (stats) {
@@ -214,12 +233,76 @@ function editBuilding({ buildingId, quality, district, iconKey, tags, specialEff
       key: catalogKey,
       district,
       iconKey,
+      imagePath,
       tags,
       specialEffect,
       statOverrides: stats ?? draft.buildingCatalog[catalogKey]?.statOverrides ?? null
     };
   });
   reportSuccess("Building updated.");
+}
+
+function moveBuildingOnMap({ buildingId, q, r, source = "Player" }) {
+  const result = commit((draft) => {
+    const placementResult = setBuildingPlacement(draft, buildingId, Number(q), Number(r), source);
+    if (placementResult.ok) {
+      draft.ui.selectedBuildingId = buildingId;
+      draft.ui.selectedMapCell = { q: Number(q), r: Number(r) };
+    }
+    return placementResult;
+  });
+
+  if (!result.ok) {
+    reportError(result.reason);
+    return result;
+  }
+
+  reportSuccess(`${result.building.displayName} placed at hex ${q}, ${r}.`);
+  return result;
+}
+
+function forceMoveBuildingOnMap({ buildingId, q, r, source = "Admin" }) {
+  const result = commit((draft) => {
+    const placementResult = forceSetBuildingPlacement(draft, buildingId, Number(q), Number(r), source);
+    if (placementResult.ok) {
+      draft.ui.selectedBuildingId = buildingId;
+      draft.ui.selectedMapCell = { q: Number(q), r: Number(r) };
+    }
+    return placementResult;
+  });
+
+  if (!result.ok) {
+    reportError(result.reason);
+    return result;
+  }
+
+  if (result.displacedBuilding) {
+    reportSuccess(
+      `${result.building.displayName} force-placed at ${q}, ${r}. ${result.displacedBuilding.displayName} was cleared.`
+    );
+    return result;
+  }
+
+  reportSuccess(`${result.building.displayName} force-placed at hex ${q}, ${r}.`);
+  return result;
+}
+
+function clearPlacement(buildingId, source = "Player") {
+  const result = commit((draft) => {
+    const clearResult = clearBuildingPlacement(draft, buildingId, source);
+    if (clearResult.ok) {
+      draft.ui.selectedMapCell = null;
+    }
+    return clearResult;
+  });
+
+  if (!result.ok) {
+    reportError(result.reason);
+    return result;
+  }
+
+  reportSuccess(`${result.building.displayName} cleared from the map.`);
+  return result;
 }
 
 function manageRollTable({ mode, name, rarity, targetRarity, nextName, catalogEntry }) {
@@ -299,7 +382,7 @@ const actions = {
   },
   selectBuilding(buildingId) {
     commit((draft) => {
-      draft.ui.selectedBuildingId = buildingId;
+      setSelectedBuildingAndCell(draft, buildingId);
     });
   },
   adjustCrystal,
@@ -313,10 +396,27 @@ const actions = {
   },
   bulkCitizens,
   spawnBuilding,
-  editBuilding,
+  editBuilding(payload) {
+    editBuilding(payload);
+  },
   removeBuilding(buildingId) {
-    commit((draft) => removeBuilding(draft, buildingId));
+    commit((draft) => {
+      removeBuilding(draft, buildingId);
+      if (draft.ui.selectedBuildingId === buildingId) {
+        draft.ui.selectedBuildingId = null;
+        draft.ui.selectedMapCell = null;
+      }
+    });
     reportSuccess("Building removed.");
+  },
+  setBuildingPlacement({ buildingId, q, r }) {
+    moveBuildingOnMap({ buildingId, q, r, source: "Admin" });
+  },
+  forceSetBuildingPlacement({ buildingId, q, r }) {
+    forceMoveBuildingOnMap({ buildingId, q, r, source: "Admin" });
+  },
+  clearBuildingPlacement(buildingId) {
+    clearPlacement(buildingId, "Admin");
   },
   manageRollTable,
   saveDistrict({ districtName, definition }) {
@@ -407,9 +507,56 @@ root.addEventListener("click", async (event) => {
     }
     case "select-building":
       commit((draft) => {
-        draft.ui.selectedBuildingId = target.dataset.buildingId;
+        setSelectedBuildingAndCell(draft, target.dataset.buildingId);
       });
       break;
+    case "select-map-cell": {
+      const q = Number(target.dataset.q);
+      const r = Number(target.dataset.r);
+      const currentState = getCurrentState();
+      const occupant = getBuildingAtCell(currentState, q, r);
+
+      if (occupant) {
+        commit((draft) => {
+          setSelectedBuildingAndCell(draft, occupant.id);
+          draft.ui.selectedMapCell = { q, r };
+        });
+        reportSuccess(`${occupant.displayName} selected from hex ${q}, ${r}.`);
+        return;
+      }
+
+      const cell = findMapCell(currentState, q, r);
+      if (cell?.isReserved) {
+        reportError("The central forge core cannot be assigned.");
+        return;
+      }
+
+      const selectedBuilding = currentState.buildings.find(
+        (building) => building.id === currentState.ui.selectedBuildingId
+      );
+
+      if (!selectedBuilding) {
+        commit((draft) => {
+          draft.ui.selectedMapCell = { q, r };
+        });
+        reportError("Select a building first, then choose an outer hex.");
+        return;
+      }
+
+      moveBuildingOnMap({ buildingId: selectedBuilding.id, q, r, source: "Player" });
+      break;
+    }
+    case "clear-building-placement": {
+      const selectedBuilding = getCurrentState().buildings.find(
+        (building) => building.id === getCurrentState().ui.selectedBuildingId
+      );
+      if (!selectedBuilding) {
+        reportError("Select a building first.");
+        return;
+      }
+      clearPlacement(selectedBuilding.id, "Player");
+      break;
+    }
     case "upgrade-crystal": {
       const sourceRarity = target.dataset.rarity;
       const nextRarity = getNextRarity(sourceRarity);

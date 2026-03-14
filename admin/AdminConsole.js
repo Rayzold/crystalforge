@@ -181,6 +181,7 @@ export class AdminConsole {
               district: this.getValue("spawn-district"),
               tags: this.getValue("spawn-tags").split(","),
               iconKey: this.getValue("spawn-icon"),
+              imagePath: this.getValue("spawn-image"),
               specialEffect: this.getValue("spawn-effect")
             })
           });
@@ -191,6 +192,7 @@ export class AdminConsole {
             quality: this.getNumberInput("edit-building-quality"),
             district: this.getValue("edit-building-district"),
             iconKey: this.getValue("edit-building-icon"),
+            imagePath: this.getValue("edit-building-image"),
             tags: this.getValue("edit-building-tags").split(",").map((tag) => tag.trim()).filter(Boolean),
             specialEffect: this.getValue("edit-building-effect"),
             stats: this.getJson("edit-building-stats"),
@@ -199,6 +201,23 @@ export class AdminConsole {
           break;
         case "remove-building":
           this.actions.removeBuilding(this.getValue("edit-building-id"));
+          break;
+        case "set-building-placement":
+          this.actions.setBuildingPlacement({
+            buildingId: this.getValue("edit-building-id"),
+            q: this.getNumberInput("edit-building-q"),
+            r: this.getNumberInput("edit-building-r")
+          });
+          break;
+        case "clear-building-placement":
+          this.actions.clearBuildingPlacement(this.getValue("edit-building-id"));
+          break;
+        case "force-building-placement":
+          this.actions.forceSetBuildingPlacement({
+            buildingId: this.getValue("edit-building-id"),
+            q: this.getNumberInput("edit-building-q"),
+            r: this.getNumberInput("edit-building-r")
+          });
           break;
         case "rolltable-add":
         case "rolltable-remove":
@@ -216,6 +235,7 @@ export class AdminConsole {
               district: this.getValue("pool-district"),
               tags: this.getValue("pool-tags").split(","),
               iconKey: this.getValue("pool-icon"),
+              imagePath: this.getValue("pool-image"),
               specialEffect: this.getValue("pool-effect"),
               statOverrides: this.getJson("pool-stats")
             })
@@ -324,6 +344,7 @@ export class AdminConsole {
 
         <section class="admin-section">
           <h3>Buildings</h3>
+          <p>Optional artwork folder: <code>assets/images/buildings/</code></p>
           <div class="admin-grid">
             <label>Name<input id="spawn-name" value="Custom Tower" /></label>
             <label>Rarity<select id="spawn-rarity">${options(RARITY_ORDER, "Common")}</select></label>
@@ -331,6 +352,7 @@ export class AdminConsole {
             <label>District<input id="spawn-district" value="Arcane District" /></label>
             <label>Tags<input id="spawn-tags" value="arcane,civic" /></label>
             <label>Icon Key<input id="spawn-icon" value="star" /></label>
+            <label>Image Path<input id="spawn-image" value="./assets/images/buildings/Custom Tower.png" /></label>
           </div>
           <label>Special Effect<textarea id="spawn-effect" rows="2"></textarea></label>
           <button class="button" data-admin-action="spawn-building">Spawn Building</button>
@@ -340,13 +362,23 @@ export class AdminConsole {
             <label>Quality<input id="edit-building-quality" type="number" value="${selectedBuilding?.quality ?? 100}" min="0" max="350" /></label>
             <label>District<input id="edit-building-district" value="${escapeHtml(selectedBuilding?.district ?? "Residential District")}" /></label>
             <label>Icon Key<input id="edit-building-icon" value="${escapeHtml(selectedBuilding?.iconKey ?? "spire")}" /></label>
+            <label>Image Path<input id="edit-building-image" value="${escapeHtml(selectedBuilding?.imagePath ?? "")}" /></label>
             <label>Tags<input id="edit-building-tags" value="${escapeHtml((selectedBuilding?.tags ?? []).join(","))}" /></label>
           </div>
           <label>Special Effect<textarea id="edit-building-effect" rows="2">${escapeHtml(selectedBuilding?.specialEffect ?? "")}</textarea></label>
           <label>Stats JSON<textarea id="edit-building-stats" rows="4">${escapeHtml(JSON.stringify(selectedBuilding?.stats ?? {}, null, 2))}</textarea></label>
           <label>Resource Rates JSON<textarea id="edit-building-resources" rows="4">${escapeHtml(JSON.stringify(selectedBuilding?.resourceRates ?? {}, null, 2))}</textarea></label>
+          <div class="admin-grid admin-grid--three">
+            <label>Hex Q<input id="edit-building-q" type="number" value="${selectedBuilding?.mapPosition?.q ?? 0}" /></label>
+            <label>Hex R<input id="edit-building-r" type="number" value="${selectedBuilding?.mapPosition?.r ?? 0}" /></label>
+            <label>Current Hex<input value="${escapeHtml(selectedBuilding?.mapPosition ? `${selectedBuilding.mapPosition.q}, ${selectedBuilding.mapPosition.r}` : "Unplaced")}" readonly /></label>
+          </div>
+          <p><code>Set Placement</code> respects map rules. <code>Force Place</code> can override the forge core and occupied hexes.</p>
           <div class="admin-actions">
             <button class="button button--ghost" data-admin-action="save-building">Save Building</button>
+            <button class="button button--ghost" data-admin-action="set-building-placement">Set Placement</button>
+            <button class="button button--ghost" data-admin-action="force-building-placement">Force Place</button>
+            <button class="button button--ghost" data-admin-action="clear-building-placement">Clear Placement</button>
             <button class="button button--ghost" data-admin-action="remove-building">Remove Building</button>
           </div>
         </section>
@@ -361,6 +393,7 @@ export class AdminConsole {
             <label>District<input id="pool-district" value="Arcane District" /></label>
             <label>Tags<input id="pool-tags" value="arcane,civic" /></label>
             <label>Icon Key<input id="pool-icon" value="star" /></label>
+            <label>Image Path<input id="pool-image" value="./assets/images/buildings/Custom Tower.png" /></label>
           </div>
           <label>Special Effect<textarea id="pool-effect" rows="2"></textarea></label>
           <label>Stat Overrides JSON<textarea id="pool-stats" rows="4"></textarea></label>
@@ -411,6 +444,7 @@ export class AdminConsole {
 
         <section class="admin-section">
           <h3>Save Tools</h3>
+          <p>Optional sound folder: <code>assets/audio/</code>. Matching rarity files will override synthesized sounds automatically.</p>
           <textarea id="save-json" rows="10"></textarea>
           <div class="admin-actions">
             <button class="button button--ghost" data-admin-action="export-save">Export Save JSON</button>
