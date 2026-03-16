@@ -16,10 +16,12 @@ export function renderCityPage(state) {
       ${renderOverflowList(state)}
     `,
     aside: `
-      ${renderEmergencyPanel(state)}
-      ${renderResourcePanel(state)}
-      ${renderStatsPanel(state)}
-      ${renderDistrictPanel(state)}
+      <div class="city-aside">
+        ${renderEmergencyPanel(state)}
+        ${renderResourcePanel(state)}
+        ${renderStatsPanel(state)}
+        ${renderDistrictPanel(state)}
+      </div>
     `
   };
 }

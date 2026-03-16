@@ -47,7 +47,24 @@ function isDuplicateActive(state, eventId) {
   return state.events.active.some((event) => event.id === eventId);
 }
 
-export function triggerEvent(state, eventDefinition, source = eventDefinition.triggerSource) {
+function getEventDefinition(eventId) {
+  return EVENT_POOLS.find((eventDefinition) => eventDefinition.id === eventId) ?? null;
+}
+
+function scheduleFollowUps(state, eventDefinition, event) {
+  for (const followUp of eventDefinition.followUps ?? []) {
+    state.events.scheduled.push({
+      id: `${event.id}:${followUp.eventId}:${event.startedDayOffset}`,
+      sourceEventId: event.id,
+      sourceEventName: event.name,
+      eventId: followUp.eventId,
+      triggerDayOffset: state.calendar.dayOffset + (followUp.delayDays ?? 1),
+      chance: typeof followUp.chance === "number" ? followUp.chance : 1
+    });
+  }
+}
+
+export function triggerEvent(state, eventDefinition, source = eventDefinition.triggerSource, metadata = {}) {
   if (isDuplicateActive(state, eventDefinition.id)) {
     return null;
   }
@@ -66,17 +83,20 @@ export function triggerEvent(state, eventDefinition, source = eventDefinition.tr
     startedDayOffset: state.calendar.dayOffset,
     endsAt: formatDate(state.calendar.dayOffset + eventDefinition.durationDays),
     endsDayOffset: state.calendar.dayOffset + eventDefinition.durationDays,
-    isActive: true
+    isActive: true,
+    sourceEventId: metadata.sourceEventId ?? null,
+    sourceEventName: metadata.sourceEventName ?? null
   };
 
   state.events.active.unshift(event);
   state.events.recent.unshift(event);
   state.events.recent = state.events.recent.slice(0, MAX_RECENT_EVENTS);
+  scheduleFollowUps(state, eventDefinition, event);
 
   addHistoryEntry(state, {
     category: "Event",
     title: event.name,
-    details: `${event.description} (${event.triggerSource})`
+    details: `${event.description} (${event.triggerSource})${event.sourceEventName ? ` Followed ${event.sourceEventName}.` : ""}`
   });
 
   return event;
@@ -114,6 +134,36 @@ export function maybeTriggerHolidayEvents(state) {
   );
 }
 
+export function processScheduledEvents(state) {
+  const triggered = [];
+  const pending = [];
+
+  for (const scheduled of state.events.scheduled) {
+    if (scheduled.triggerDayOffset > state.calendar.dayOffset) {
+      pending.push(scheduled);
+      continue;
+    }
+
+    const eventDefinition = getEventDefinition(scheduled.eventId);
+    if (!eventDefinition) {
+      continue;
+    }
+
+    if (Math.random() <= scheduled.chance && meetsRequirements(state, eventDefinition)) {
+      const event = triggerEvent(state, eventDefinition, "event chain", {
+        sourceEventId: scheduled.sourceEventId,
+        sourceEventName: scheduled.sourceEventName
+      });
+      if (event) {
+        triggered.push(event);
+      }
+    }
+  }
+
+  state.events.scheduled = pending;
+  return triggered;
+}
+
 export function maybeTriggerRandomEvents(state, stepKey) {
   const chance = EVENT_STEP_CHANCES[stepKey] ?? EVENT_STEP_CHANCES.day;
   const warningFlags = getWarningFlags(state);
@@ -143,4 +193,5 @@ export function maybeTriggerRandomEvents(state, stepKey) {
 
 export function clearActiveEvents(state) {
   state.events.active = [];
+  state.events.scheduled = [];
 }

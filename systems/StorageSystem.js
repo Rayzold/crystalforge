@@ -35,7 +35,7 @@ export function createInitialState() {
     },
     districtSummary: [],
     cityStats: {},
-    events: { active: [], recent: [] },
+    events: { active: [], recent: [], scheduled: [] },
     historyLog: [],
     calendar: { dayOffset: 0 },
     townFocus: createDefaultTownFocusState(),
@@ -152,7 +152,8 @@ export function validateAndMigrateSave(rawSave) {
     },
     events: {
       active: Array.isArray(rawSave.events?.active) ? rawSave.events.active : [],
-      recent: Array.isArray(rawSave.events?.recent) ? rawSave.events.recent : []
+      recent: Array.isArray(rawSave.events?.recent) ? rawSave.events.recent : [],
+      scheduled: Array.isArray(rawSave.events?.scheduled) ? rawSave.events.scheduled : []
     },
     historyLog: Array.isArray(rawSave.historyLog) ? rawSave.historyLog : [],
     calendar: { dayOffset: Number(rawSave.calendar?.dayOffset ?? 0) },

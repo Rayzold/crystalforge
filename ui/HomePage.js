@@ -1,10 +1,12 @@
 import { PAGE_ROUTES } from "../content/Config.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js";
+import { getTownFocusHistory } from "../systems/TownFocusSystem.js";
 import { renderCalendarPanel } from "./CalendarPanel.js";
 import { renderEventPanel } from "./EventPanel.js";
 import { renderHistoryPanel } from "./HistoryPanel.js";
 import { renderTownFocusPanel } from "./TownFocusPanel.js";
+import { renderTownFocusBadge } from "./TownFocusShared.js";
 
 function getHomeProgress(state) {
   const hasBuilding = state.buildings.length > 0;
@@ -202,6 +204,36 @@ function renderWorldSummary(state) {
   `;
 }
 
+function renderPolicyHistory(state) {
+  const history = getTownFocusHistory(state, 5);
+  return `
+    <section class="scene-panel">
+      <div class="panel__header">
+        <h3>Policy Memory</h3>
+        <span class="panel__subtle">The last decrees that shaped Drift</span>
+      </div>
+      <div class="policy-history">
+        ${
+          history.length
+            ? history
+                .map(
+                  (entry) => `
+                    <article class="policy-history__card ${entry.focus ? `policy-history__card--${entry.focus.id}` : ""}">
+                      ${entry.focus ? renderTownFocusBadge(entry.focus, { compact: true }) : ""}
+                      <strong>${escapeHtml(entry.title)}</strong>
+                      <span>${escapeHtml(entry.date)}</span>
+                      <p>${escapeHtml(entry.details)}</p>
+                    </article>
+                  `
+                )
+                .join("")
+            : `<p class="empty-state">No policy decrees have been recorded yet.</p>`
+        }
+      </div>
+    </section>
+  `;
+}
+
 function renderRealmLinks() {
   return `
     <section class="scene-panel">
@@ -225,6 +257,57 @@ function renderRealmLinks() {
   `;
 }
 
+function renderHomeShelves(state) {
+  const activeTab = state.transientUi?.homeShelfTab ?? "overview";
+  const tabs = [
+    { key: "overview", label: "Overview" },
+    { key: "command", label: "Command" },
+    { key: "chronicle", label: "Chronicle" }
+  ];
+
+  const panels = {
+    overview: `
+      ${renderWorldSummary(state)}
+      ${renderFeaturedBuildings(state)}
+      ${renderPolicyHistory(state)}
+    `,
+    command: `
+      ${renderOnboardingPanel(state)}
+      ${renderRealmLinks()}
+    `,
+    chronicle: `
+      ${renderHistoryPanel(state)}
+    `
+  };
+
+  return `
+    <section class="scene-panel home-shelves">
+      <div class="panel__header">
+        <h3>Command Shelves</h3>
+        <span class="panel__subtle">Show one cluster of information at a time</span>
+      </div>
+      <div class="home-shelves__tabs">
+        ${tabs
+          .map(
+            (tab) => `
+              <button
+                class="button button--ghost ${activeTab === tab.key ? "is-active" : ""}"
+                data-action="set-home-shelf"
+                data-shelf="${tab.key}"
+              >
+                ${escapeHtml(tab.label)}
+              </button>
+            `
+          )
+          .join("")}
+      </div>
+      <div class="home-shelves__body">
+        ${panels[activeTab]}
+      </div>
+    </section>
+  `;
+}
+
 export function renderHomePage(state) {
   return {
     title: "City of Drift",
@@ -232,11 +315,7 @@ export function renderHomePage(state) {
     content: `
       ${renderLandingHero(state)}
       ${renderTownFocusPanel(state)}
-      ${renderOnboardingPanel(state)}
-      ${renderWorldSummary(state)}
-      ${renderFeaturedBuildings(state)}
-      ${renderRealmLinks()}
-      ${renderHistoryPanel(state)}
+      ${renderHomeShelves(state)}
     `,
     aside: `
       ${renderCalendarPanel(state)}

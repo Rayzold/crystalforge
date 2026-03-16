@@ -1,5 +1,6 @@
 import { escapeHtml } from "../engine/Utils.js";
 import { getEmergencyStatus } from "../systems/ResourceSystem.js";
+import { getSuggestedFocusForAlert, getSuggestedFocusForEvent } from "../systems/TownFocusSystem.js";
 
 const RARITY_WEIGHTS = {
   Common: 1,
@@ -43,6 +44,7 @@ function getCriticalEventAlerts(state) {
       severity: "critical",
       label: event.name,
       details: `${event.description} Active until ${event.endsAt}.`,
+      recommendation: getSuggestedFocusForEvent(state, event)?.name ?? "",
       actionLabel: "Review event",
       href: `./chronicle.html?focusEvent=${encodeURIComponent(event.id)}`
     });
@@ -92,9 +94,11 @@ function findBestBuildingForAlert(state, alertKey) {
 function enrichEmergencyAlerts(state, emergencies) {
   return emergencies.map((emergency) => {
     const focusBuilding = findBestBuildingForAlert(state, emergency.key);
+    const suggestedFocus = getSuggestedFocusForAlert(state, emergency.key);
     return {
       ...emergency,
       kind: "resource",
+      recommendation: suggestedFocus?.name ?? "",
       actionLabel: focusBuilding ? `Inspect ${focusBuilding.displayName}` : "Open city command",
       href: focusBuilding ? buildBuildingHref(focusBuilding) : "./city.html"
     };
@@ -129,6 +133,7 @@ export function renderCrisisBanner(state, pageKey) {
               <article class="crisis-banner__card ${alert.kind === "event" ? "is-event" : "is-resource"}">
                 <strong>${escapeHtml(alert.label)}</strong>
                 <p>${escapeHtml(alert.details)}</p>
+                ${alert.recommendation ? `<small>Recommended response: ${escapeHtml(alert.recommendation)}</small>` : ""}
                 <a class="button button--ghost" href="${alert.href}">${escapeHtml(alert.actionLabel)}</a>
               </article>
             `

@@ -37,6 +37,13 @@ Expected rarity-based manifest sound files:
 - ./assets/audio/legendary-manifest.mp3
 - ./assets/audio/beyond-manifest.mp3
 
+Expected optional ambient loop files:
+- ./assets/audio/home-ambient.mp3
+- ./assets/audio/forge-ambient.mp3
+- ./assets/audio/city-ambient.mp3
+- ./assets/audio/citizens-ambient.mp3
+- ./assets/audio/chronicle-ambient.mp3
+
 Alternative supported extension:
 - .wav
 
@@ -72,4 +79,5 @@ Full-width building card banners:
 - Put a building image into ./assets/images/buildings/
 - Set that building's imagePath in the admin console
 - Put a sound file into ./assets/audio/ using one of the rarity file names above
+- Put an ambient loop into ./assets/audio/ using one of the page ambient file names above
 - Refresh the page

@@ -1,5 +1,6 @@
 import { formatNumber } from "../engine/Utils.js";
 import { getEmergencyStatus } from "../systems/ResourceSystem.js";
+import { getSuggestedFocusForAlert } from "../systems/TownFocusSystem.js";
 
 function renderRunway(label, days, dailyDelta) {
   if (days === null) {
@@ -49,6 +50,11 @@ export function renderEmergencyPanel(state) {
                     <article class="emergency-card is-${emergency.severity}">
                       <strong>${emergency.label}</strong>
                       <p>${emergency.details}</p>
+                      ${
+                        getSuggestedFocusForAlert(state, emergency.key)
+                          ? `<small>Recommended response: ${getSuggestedFocusForAlert(state, emergency.key).name}</small>`
+                          : ""
+                      }
                     </article>
                   `
                 )

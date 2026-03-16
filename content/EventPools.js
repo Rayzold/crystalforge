@@ -28,7 +28,8 @@ export const EVENT_POOLS = [
     description: "Speculation breaks and confidence slips for a short while.",
     triggerSource: "random chance",
     durationDays: 6,
-    effects: { goldMultiplier: -0.2, prosperityFlat: -5 }
+    effects: { goldMultiplier: -0.2, prosperityFlat: -5 },
+    followUps: [{ eventId: "trade-boom", delayDays: 5, chance: 0.38 }]
   },
   {
     id: "guild-dispute",
@@ -70,7 +71,11 @@ export const EVENT_POOLS = [
     description: "Wild mana lashes the skyline and disrupts precision.",
     triggerSource: "random chance",
     durationDays: 4,
-    effects: { manaMultiplier: -0.18, securityFlat: -3, prestigeFlat: 2 }
+    effects: { manaMultiplier: -0.18, securityFlat: -3, prestigeFlat: 2 },
+    followUps: [
+      { eventId: "leyline-stabilization", delayDays: 3, chance: 0.34 },
+      { eventId: "dimensional-rift", delayDays: 2, chance: 0.14 }
+    ]
   },
   {
     id: "leyline-stabilization",
@@ -103,7 +108,8 @@ export const EVENT_POOLS = [
     triggerSource: "low gold",
     durationDays: 3,
     effects: { goldFlat: -18, securityFlat: -5 },
-    requirements: { resourcesBelow: { gold: 25 } }
+    requirements: { resourcesBelow: { gold: 25 } },
+    followUps: [{ eventId: "mercenary-arrival", delayDays: 2, chance: 0.5 }]
   },
   {
     id: "monster-attack",
@@ -114,7 +120,8 @@ export const EVENT_POOLS = [
     triggerSource: "frontier district",
     durationDays: 4,
     effects: { foodFlat: -10, defenseFlat: -6, prestigeFlat: 3 },
-    requirements: { districtLevel: { district: "Frontier District", level: 1 } }
+    requirements: { districtLevel: { district: "Frontier District", level: 1 } },
+    followUps: [{ eventId: "mercenary-arrival", delayDays: 2, chance: 0.42 }]
   },
   {
     id: "mercenary-arrival",
@@ -158,7 +165,8 @@ export const EVENT_POOLS = [
     triggerSource: "owned buildings",
     durationDays: 6,
     effects: { goldMultiplier: 0.2, prosperityFlat: 8, prestigeFlat: 4 },
-    requirements: { buildingsAny: ["Oracle Chamber", "Observatory"] }
+    requirements: { buildingsAny: ["Oracle Chamber", "Observatory"] },
+    followUps: [{ eventId: "trade-boom", delayDays: 3, chance: 0.48 }]
   },
   {
     id: "dragon-awakening",
@@ -180,7 +188,8 @@ export const EVENT_POOLS = [
     triggerSource: "owned buildings",
     durationDays: 5,
     effects: { defenseFlat: -10, securityFlat: -9, prestigeFlat: 5 },
-    requirements: { buildingsAny: ["Dungeon of the Endless"] }
+    requirements: { buildingsAny: ["Dungeon of the Endless"] },
+    followUps: [{ eventId: "monster-attack", delayDays: 2, chance: 0.78 }]
   },
   {
     id: "doublemoon-observance",

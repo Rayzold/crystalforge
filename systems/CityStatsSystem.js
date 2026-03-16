@@ -1,5 +1,6 @@
 import { sumObjectValues } from "../engine/Utils.js";
 import { getDistrictSummary } from "./DistrictSystem.js";
+import { getBuildingPlacementBonuses } from "./MapSystem.js";
 import { getCurrentTownFocus } from "./TownFocusSystem.js";
 
 const EMPTY_CITY_STATS = {
@@ -26,10 +27,11 @@ export function recalculateCityStats(state) {
     if (!building.isComplete) {
       continue;
     }
+    const placementMultiplier = 1 + getBuildingPlacementBonuses(state, building).totalPercent;
     for (const [key, value] of Object.entries(building.stats)) {
-      nextStats[key] = (nextStats[key] ?? 0) + value * building.multiplier;
+      nextStats[key] = (nextStats[key] ?? 0) + value * building.multiplier * placementMultiplier;
     }
-    nextStats.populationSupport += building.citizenEffects.populationSupport * building.multiplier;
+    nextStats.populationSupport += building.citizenEffects.populationSupport * building.multiplier * placementMultiplier;
   }
 
   for (const [citizenClass, count] of Object.entries(state.citizens)) {
@@ -80,10 +82,11 @@ export function recalculateCityStats(state) {
       .filter((building) => building.isComplete)
       .reduce(
         (record, building) => {
-          record.gold += Math.max(0, building.resourceRates.gold) * building.multiplier;
-          record.food += Math.max(0, building.resourceRates.food) * building.multiplier;
-          record.materials += Math.max(0, building.resourceRates.materials) * building.multiplier;
-          record.mana += Math.max(0, building.resourceRates.mana) * building.multiplier;
+          const placementMultiplier = 1 + getBuildingPlacementBonuses(state, building).totalPercent;
+          record.gold += Math.max(0, building.resourceRates.gold) * building.multiplier * placementMultiplier;
+          record.food += Math.max(0, building.resourceRates.food) * building.multiplier * placementMultiplier;
+          record.materials += Math.max(0, building.resourceRates.materials) * building.multiplier * placementMultiplier;
+          record.mana += Math.max(0, building.resourceRates.mana) * building.multiplier * placementMultiplier;
           return record;
         },
         { gold: 0, food: 0, materials: 0, mana: 0 }

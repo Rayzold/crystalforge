@@ -3,7 +3,7 @@ import { formatDate } from "./CalendarSystem.js";
 import { recalculateCityStats } from "./CityStatsSystem.js";
 import { advanceConstructionOneDay } from "./ConstructionSystem.js";
 import { runCitizenPromotions } from "./CitizenSystem.js";
-import { expireEvents, maybeTriggerHolidayEvents, maybeTriggerRandomEvents } from "./EventSystem.js";
+import { expireEvents, maybeTriggerHolidayEvents, maybeTriggerRandomEvents, processScheduledEvents } from "./EventSystem.js";
 import { addHistoryEntry } from "./HistoryLogSystem.js";
 import { applyDailyResources } from "./ResourceSystem.js";
 import { applyTownFocusDailyEffects, updateTownFocusAvailability } from "./TownFocusSystem.js";
@@ -24,6 +24,7 @@ export function advanceTime(state, stepKey) {
     recalculateCityStats(state);
     runCitizenPromotions(state);
     updateTownFocusAvailability(state);
+    triggeredEvents.push(...processScheduledEvents(state));
     triggeredEvents.push(...maybeTriggerHolidayEvents(state));
   }
 

@@ -4,7 +4,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const SAVE_VERSION = 4;
+export const SAVE_VERSION = 5;
 export const STORAGE_KEY = "crystal-forge-save";
 export const PAGE_ROUTES = [
   { key: "home", label: "Home", href: "./index.html" },
@@ -83,6 +83,14 @@ export const AUDIO_FILE_CANDIDATES = {
   Epic: ["./assets/audio/epic-manifest.mp3", "./assets/audio/epic-manifest.wav"],
   Legendary: ["./assets/audio/legendary-manifest.mp3", "./assets/audio/legendary-manifest.wav"],
   Beyond: ["./assets/audio/beyond-manifest.mp3", "./assets/audio/beyond-manifest.wav"]
+};
+
+export const AMBIENT_AUDIO_FILE_CANDIDATES = {
+  home: ["./assets/audio/home-ambient.mp3", "./assets/audio/home-ambient.wav"],
+  forge: ["./assets/audio/forge-ambient.mp3", "./assets/audio/forge-ambient.wav"],
+  city: ["./assets/audio/city-ambient.mp3", "./assets/audio/city-ambient.wav"],
+  citizens: ["./assets/audio/citizens-ambient.mp3", "./assets/audio/citizens-ambient.wav"],
+  chronicle: ["./assets/audio/chronicle-ambient.mp3", "./assets/audio/chronicle-ambient.wav"]
 };
 
 export function createDefaultRollTables() {

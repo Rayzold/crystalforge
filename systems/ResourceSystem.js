@@ -1,6 +1,7 @@
 import { RESOURCE_MINIMUMS } from "../content/Config.js";
 import { clamp } from "../engine/Utils.js";
 import { getDistrictSummary } from "./DistrictSystem.js";
+import { getBuildingPlacementBonuses } from "./MapSystem.js";
 import { getCurrentTownFocus } from "./TownFocusSystem.js";
 
 function createDeltaRecord() {
@@ -23,11 +24,14 @@ export function calculateDailyResourceDelta(state) {
       continue;
     }
 
-    deltas.gold += building.resourceRates.gold * building.multiplier;
-    deltas.food += building.resourceRates.food * building.multiplier;
-    deltas.materials += building.resourceRates.materials * building.multiplier;
-    deltas.mana += building.resourceRates.mana * building.multiplier;
-    deltas.prosperity += building.stats.prosperity * 0.02 * building.multiplier;
+    const placementBonus = getBuildingPlacementBonuses(state, building);
+    const placementMultiplier = 1 + placementBonus.totalPercent;
+
+    deltas.gold += building.resourceRates.gold * building.multiplier * placementMultiplier;
+    deltas.food += building.resourceRates.food * building.multiplier * placementMultiplier;
+    deltas.materials += building.resourceRates.materials * building.multiplier * placementMultiplier;
+    deltas.mana += building.resourceRates.mana * building.multiplier * placementMultiplier;
+    deltas.prosperity += building.stats.prosperity * 0.02 * building.multiplier * placementMultiplier;
   }
 
   for (const [citizenClass, count] of Object.entries(state.citizens)) {

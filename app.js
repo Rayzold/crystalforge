@@ -25,6 +25,7 @@ import {
   clearBuildingPlacement,
   findMapCell,
   forceSetBuildingPlacement,
+  getBuildingPlacementBonuses,
   getBuildingAtCell,
   setBuildingPlacement
 } from "./systems/MapSystem.js";
@@ -42,7 +43,10 @@ const renderer = new UIRenderer(root, pageKey);
 const toasts = new Toasts();
 const animationEngine = new AnimationEngine();
 const audioEngine = new AudioEngine();
+audioEngine.setPage(pageKey);
 const gameState = new GameState(loadGameState());
+let adjacencyPulseTimer = null;
+let focusCeremonyTimer = null;
 syncDerivedState(gameState.getState());
 
 function syncDerivedState(state) {
@@ -111,6 +115,37 @@ function getCurrentState() {
   return gameState.getState();
 }
 
+function exportBuildingCatalogStatus() {
+  const state = getCurrentState();
+  const rows = ["Building,Rarity,District,Manifested,Quality"];
+
+  for (const rarity of RARITY_ORDER) {
+    for (const name of state.rollTables[rarity] ?? []) {
+      const building = state.buildings.find((entry) => entry.name === name && entry.rarity === rarity) ?? null;
+      const district = state.buildingCatalog[getCatalogKey(name, rarity)]?.district ?? "";
+      rows.push(
+        [
+          `"${name.replaceAll('"', '""')}"`,
+          rarity,
+          `"${district.replaceAll('"', '""')}"`,
+          building ? "Yes" : "No",
+          building ? Number(building.quality).toFixed(2) : ""
+        ].join(",")
+      );
+    }
+  }
+
+  const blob = new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "crystal-forge-building-catalog.csv";
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 function clearUrlParams() {
   window.history.replaceState({}, "", window.location.pathname);
 }
@@ -131,6 +166,26 @@ function openTownFocusModal(focusId = null) {
     },
     state
   );
+}
+
+function showAdjacencyPulse(payload) {
+  if (adjacencyPulseTimer) {
+    window.clearTimeout(adjacencyPulseTimer);
+  }
+  renderer.setTransientUi({ adjacencyPulse: payload }, getCurrentState());
+  adjacencyPulseTimer = window.setTimeout(() => {
+    renderer.setTransientUi({ adjacencyPulse: null }, getCurrentState());
+  }, 1800);
+}
+
+function showFocusCeremony(focusId) {
+  if (focusCeremonyTimer) {
+    window.clearTimeout(focusCeremonyTimer);
+  }
+  renderer.setTransientUi({ focusCeremony: { focusId, startedAt: Date.now() } }, getCurrentState());
+  focusCeremonyTimer = window.setTimeout(() => {
+    renderer.setTransientUi({ focusCeremony: null }, getCurrentState());
+  }, 1800);
 }
 
 function setSelectedBuildingAndCell(state, buildingId) {
@@ -274,10 +329,14 @@ function editBuilding({ buildingId, quality, district, iconKey, imagePath, tags,
 
 function moveBuildingOnMap({ buildingId, q, r, source = "Player" }) {
   const result = commit((draft) => {
+    const building = draft.buildings.find((entry) => entry.id === buildingId);
+    const beforeBonus = building ? getBuildingPlacementBonuses(draft, building).totalPercent : 0;
     const placementResult = setBuildingPlacement(draft, buildingId, Number(q), Number(r), source);
     if (placementResult.ok) {
       draft.ui.selectedBuildingId = buildingId;
       draft.ui.selectedMapCell = { q: Number(q), r: Number(r) };
+      placementResult.resonanceGain =
+        getBuildingPlacementBonuses(draft, placementResult.building).totalPercent - beforeBonus;
     }
     return placementResult;
   });
@@ -288,15 +347,28 @@ function moveBuildingOnMap({ buildingId, q, r, source = "Player" }) {
   }
 
   reportSuccess(`${result.building.displayName} placed at hex ${q}, ${r}.`);
+  if ((result.resonanceGain ?? 0) > 0) {
+    showAdjacencyPulse({
+      buildingId: result.building.id,
+      q: Number(q),
+      r: Number(r),
+      gain: result.resonanceGain,
+      total: getBuildingPlacementBonuses(getCurrentState(), result.building).totalPercent
+    });
+  }
   return result;
 }
 
 function forceMoveBuildingOnMap({ buildingId, q, r, source = "Admin" }) {
   const result = commit((draft) => {
+    const building = draft.buildings.find((entry) => entry.id === buildingId);
+    const beforeBonus = building ? getBuildingPlacementBonuses(draft, building).totalPercent : 0;
     const placementResult = forceSetBuildingPlacement(draft, buildingId, Number(q), Number(r), source);
     if (placementResult.ok) {
       draft.ui.selectedBuildingId = buildingId;
       draft.ui.selectedMapCell = { q: Number(q), r: Number(r) };
+      placementResult.resonanceGain =
+        getBuildingPlacementBonuses(draft, placementResult.building).totalPercent - beforeBonus;
     }
     return placementResult;
   });
@@ -310,10 +382,28 @@ function forceMoveBuildingOnMap({ buildingId, q, r, source = "Admin" }) {
     reportSuccess(
       `${result.building.displayName} force-placed at ${q}, ${r}. ${result.displacedBuilding.displayName} was cleared.`
     );
+    if ((result.resonanceGain ?? 0) > 0) {
+      showAdjacencyPulse({
+        buildingId: result.building.id,
+        q: Number(q),
+        r: Number(r),
+        gain: result.resonanceGain,
+        total: getBuildingPlacementBonuses(getCurrentState(), result.building).totalPercent
+      });
+    }
     return result;
   }
 
   reportSuccess(`${result.building.displayName} force-placed at hex ${q}, ${r}.`);
+  if ((result.resonanceGain ?? 0) > 0) {
+    showAdjacencyPulse({
+      buildingId: result.building.id,
+      q: Number(q),
+      r: Number(r),
+      gain: result.resonanceGain,
+      total: getBuildingPlacementBonuses(getCurrentState(), result.building).totalPercent
+    });
+  }
   return result;
 }
 
@@ -445,6 +535,7 @@ const actions = {
       return;
     }
     renderer.setTransientUi({ councilModalOpen: false }, getCurrentState());
+    showFocusCeremony(focusId);
     reportSuccess(`${result.focus.name} is now the town focus.`);
   },
   setTownFocus(focusId) {
@@ -559,10 +650,19 @@ const adminConsole = new AdminConsole(actions);
 
 gameState.subscribe((state) => {
   audioEngine.setMuted(state.settings.muted);
+  audioEngine.setPage(pageKey);
   saveGameState(state);
   renderer.render(state);
   adminConsole.render(state);
 });
+
+document.addEventListener(
+  "pointerdown",
+  () => {
+    void audioEngine.unlock();
+  },
+  { once: true }
+);
 
 root.addEventListener("click", async (event) => {
   const target = event.target.closest("[data-action]");
@@ -599,8 +699,15 @@ root.addEventListener("click", async (event) => {
     case "open-town-focus-modal":
       actions.openTownFocusModal();
       break;
+    case "set-home-shelf":
+      renderer.setTransientUi({ homeShelfTab: target.dataset.shelf }, getCurrentState());
+      break;
     case "preview-town-focus":
       openTownFocusModal(target.dataset.focusId);
+      break;
+    case "export-building-catalog":
+      exportBuildingCatalogStatus();
+      reportSuccess("Building catalog status exported.");
       break;
     case "close-modal":
       if (target.dataset.modal === "building-detail-modal") {

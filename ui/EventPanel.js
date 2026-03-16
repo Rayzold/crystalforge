@@ -7,7 +7,7 @@ export function renderEventPanel(state) {
     <section class="panel event-panel">
       <div class="panel__header">
         <h3>Events</h3>
-        <span class="panel__subtle">${state.events.active.length} active</span>
+        <span class="panel__subtle">${state.events.active.length} active / ${state.events.scheduled.length} queued</span>
       </div>
       <div class="event-panel__stack">
         ${
@@ -18,6 +18,11 @@ export function renderEventPanel(state) {
                     <article class="event-card ${focusedEventId === event.id ? "is-highlighted" : ""}">
                       <h4>${escapeHtml(event.name)}</h4>
                       <p>${escapeHtml(event.description)}</p>
+                      ${
+                        event.sourceEventName
+                          ? `<small>Chained from ${escapeHtml(event.sourceEventName)}</small>`
+                          : ""
+                      }
                       <span>${escapeHtml(event.type)} / ends ${escapeHtml(event.endsAt)}</span>
                     </article>
                   `
@@ -35,7 +40,7 @@ export function renderEventPanel(state) {
               (event) => `
                 <div class="event-line ${focusedEventId === event.id ? "is-highlighted" : ""}">
                   <strong>${escapeHtml(event.name)}</strong>
-                  <span>${escapeHtml(event.startedAt)}</span>
+                  <span>${escapeHtml(event.startedAt)}${event.sourceEventName ? ` / from ${escapeHtml(event.sourceEventName)}` : ""}</span>
                 </div>
               `
             )

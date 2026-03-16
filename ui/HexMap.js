@@ -1,7 +1,14 @@
 import { MAP_CONFIG, MAP_TERRAIN_THEMES } from "../content/MapConfig.js";
 import { RARITY_COLORS } from "../content/Rarities.js";
-import { escapeHtml } from "../engine/Utils.js";
-import { canPlaceBuildingAt, getBuildingAtCell, getCellKey, getNeighborCoords } from "../systems/MapSystem.js";
+import { escapeHtml, formatNumber } from "../engine/Utils.js";
+import {
+  canPlaceBuildingAt,
+  getBuildingAtCell,
+  getBuildingPlacementBonuses,
+  getBuildingTerrain,
+  getCellKey,
+  getNeighborCoords
+} from "../systems/MapSystem.js";
 
 const HEX_NEIGHBORS = [
   [1, 0],
@@ -344,6 +351,57 @@ function renderPlacementPreview(selectedBuilding, cell, center, size, previewVal
   `;
 }
 
+function renderCellInspector(state, cell, selectedBuilding) {
+  if (!cell) {
+    return `<p class="empty-state">Hover a hex to inspect its terrain, district influence, and placement resonance.</p>`;
+  }
+
+  const occupant = getBuildingAtCell(state, cell.q, cell.r);
+  const influence = getDistrictInfluence(state, cell);
+  const previewTarget =
+    occupant ??
+    (selectedBuilding && !cell.isReserved
+      ? { ...selectedBuilding, mapPosition: { q: cell.q, r: cell.r } }
+      : selectedBuilding);
+  const placementBonus = previewTarget ? getBuildingPlacementBonuses(state, previewTarget) : null;
+  const terrain = occupant ? getBuildingTerrain(state, occupant) : cell.terrain;
+
+  return `
+    <div class="hex-map-tooltip">
+      <article>
+        <span>Hex</span>
+        <strong>${cell.q}, ${cell.r}</strong>
+        <small>${cell.isReserved ? "Reserved forge core" : escapeHtml(terrain ?? "neutral")} terrain</small>
+      </article>
+      <article>
+        <span>District Influence</span>
+        <strong>${escapeHtml(influence?.district ?? "Unclaimed")}</strong>
+        <small>${influence ? `Weight ${formatNumber(influence.weight, 0)}` : "No strong district pull yet."}</small>
+      </article>
+      <article>
+        <span>Occupant</span>
+        <strong>${escapeHtml(occupant?.displayName ?? "Empty hex")}</strong>
+        <small>${
+          occupant
+            ? `${escapeHtml(occupant.rarity)} / ${escapeHtml(occupant.district)}`
+            : selectedBuilding
+              ? `Selected: ${escapeHtml(selectedBuilding.displayName)}`
+              : "Select a building to preview placement resonance."
+        }</small>
+      </article>
+      <article>
+        <span>Placement Bonus</span>
+        <strong>${placementBonus ? `${formatNumber(placementBonus.totalPercent * 100, 1)}%` : "0%"}</strong>
+        <small>${
+          placementBonus?.reasons.length
+            ? escapeHtml(placementBonus.reasons.join(" / "))
+            : "No adjacency or terrain bonus from this view."
+        }</small>
+      </article>
+    </div>
+  `;
+}
+
 export function renderHexMap(state) {
   const cells = state.map.cells;
   const size = MAP_CONFIG.hexSize;
@@ -358,6 +416,8 @@ export function renderHexMap(state) {
       ? state.districts.definitions[selectedBuilding.district].color
       : null;
   const focalCell = hoveredMapCell ?? state.ui.selectedMapCell ?? selectedPosition ?? null;
+  const focalMapCell = focalCell ? state.map.cells.find((cell) => cell.q === focalCell.q && cell.r === focalCell.r) ?? null : null;
+  const adjacencyPulse = state.transientUi?.adjacencyPulse ?? null;
   const adjacentKeys = new Set(
     focalCell ? getNeighborCoords(focalCell.q, focalCell.r).map((cell) => getCellKey(cell.q, cell.r)) : []
   );
@@ -433,10 +493,15 @@ export function renderHexMap(state) {
                 building && state.districts.definitions[building.district]
                   ? state.districts.definitions[building.district].color
                   : null;
+              const isPulseCell =
+                adjacencyPulse &&
+                adjacencyPulse.q === cell.q &&
+                adjacencyPulse.r === cell.r &&
+                adjacencyPulse.buildingId === building?.id;
 
               return `
                 <g
-                  class="hex-map__cell ${cell.isReserved ? "is-reserved" : ""} ${building ? "is-occupied" : ""} ${isSelected ? "is-selected" : ""} ${isFocusedCell ? "is-focused" : ""} ${hoveredMapCell && hoveredMapCell.q === cell.q && hoveredMapCell.r === cell.r ? "is-hovered" : ""} ${adjacentKeys.has(cell.key) ? "is-adjacent" : ""} ${selectedBuilding && hoveredMapCell && hoveredMapCell.q === cell.q && hoveredMapCell.r === cell.r && !building && !cell.isReserved ? (previewValidation?.ok ? "is-preview-valid" : "is-preview-invalid") : ""}"
+                  class="hex-map__cell ${cell.isReserved ? "is-reserved" : ""} ${building ? "is-occupied" : ""} ${isSelected ? "is-selected" : ""} ${isFocusedCell ? "is-focused" : ""} ${hoveredMapCell && hoveredMapCell.q === cell.q && hoveredMapCell.r === cell.r ? "is-hovered" : ""} ${adjacentKeys.has(cell.key) ? "is-adjacent" : ""} ${isPulseCell ? "is-resonance-pulse" : ""} ${selectedBuilding && hoveredMapCell && hoveredMapCell.q === cell.q && hoveredMapCell.r === cell.r && !building && !cell.isReserved ? (previewValidation?.ok ? "is-preview-valid" : "is-preview-invalid") : ""}"
                   data-action="select-map-cell"
                   data-q="${cell.q}"
                   data-r="${cell.r}"
@@ -484,6 +549,14 @@ export function renderHexMap(state) {
                       ? `<text x="${center.x}" y="${center.y + 5}" text-anchor="middle" class="hex-map__core-text">${cell.q === 0 && cell.r === 0 ? "FORGE" : ""}</text>`
                       : renderCellLabel(building, center.x, center.y)
                   }
+                  ${
+                    isPulseCell
+                      ? `<g class="hex-map__pulse-tag">
+                          <circle cx="${center.x}" cy="${center.y - size * 0.48}" r="${size * 0.3}"></circle>
+                          <text x="${center.x}" y="${center.y - size * 0.42}" text-anchor="middle">+${formatNumber((adjacencyPulse.gain ?? 0) * 100, 1)}%</text>
+                        </g>`
+                      : ""
+                  }
                 </g>
               `;
             })
@@ -497,6 +570,9 @@ export function renderHexMap(state) {
         <span><i class="legend-swatch legend-swatch--adjacent"></i> Adjacency preview</span>
         <span><i class="legend-swatch legend-swatch--district"></i> District influence field</span>
         <span><i class="legend-swatch legend-swatch--crest"></i> District crest marker</span>
+      </div>
+      <div class="hex-map-panel__tooltip">
+        ${renderCellInspector(state, focalMapCell, selectedBuilding)}
       </div>
       <div class="hex-map-panel__actions">
         <button class="button button--ghost" data-action="clear-building-placement">Clear Selected Placement</button>

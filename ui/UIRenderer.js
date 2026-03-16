@@ -9,6 +9,7 @@ import { renderPageShell } from "./PageShell.js";
 import { renderTownFocusCouncilModal } from "./TownFocusCouncilModal.js";
 import { getMayorSuggestions } from "../systems/TownFocusSystem.js";
 import { getDefaultTownFocusPreviewId } from "./TownFocusShared.js";
+import { renderTownFocusCeremonyOverlay } from "./TownFocusCeremonyOverlay.js";
 
 export class UIRenderer {
   constructor(root, pageKey = "home") {
@@ -21,7 +22,10 @@ export class UIRenderer {
       focusEventId: null,
       councilModalOpen: false,
       councilModalCycleKey: null,
-      previewTownFocusId: null
+      previewTownFocusId: null,
+      homeShelfTab: "overview",
+      adjacencyPulse: null,
+      focusCeremony: null
     };
   }
 
@@ -70,7 +74,8 @@ export class UIRenderer {
     const overlays = [
       renderBuildingDetailModal(viewState, this.pageKey),
       renderBuildingCatalogModal(viewState),
-      renderTownFocusCouncilModal(viewState)
+      renderTownFocusCouncilModal(viewState),
+      renderTownFocusCeremonyOverlay(viewState)
     ].join("");
     this.root.innerHTML = renderPageShell(viewState, this.pageKey, page, overlays);
   }

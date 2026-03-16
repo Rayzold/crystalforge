@@ -61,6 +61,9 @@ export class AdminConsole {
     this.root = document.createElement("div");
     this.root.className = "admin-root";
     this.keyBuffer = "";
+    this.activeTab = "economy";
+    this.searchQuery = "";
+    this.lastState = null;
     document.body.append(this.root);
 
     document.addEventListener("keydown", (event) => {
@@ -75,8 +78,16 @@ export class AdminConsole {
     });
 
     this.root.addEventListener("click", (event) => {
-      const target = event.target.closest("[data-admin-action],[data-action]");
+      const target = event.target.closest("[data-admin-action],[data-action],[data-admin-ui]");
       if (!target) {
+        return;
+      }
+
+      if (target.dataset.adminUi === "tab") {
+        this.activeTab = target.dataset.tab;
+        if (this.lastState) {
+          this.render(this.lastState);
+        }
         return;
       }
 
@@ -97,6 +108,16 @@ export class AdminConsole {
       const target = event.target;
       if (target instanceof HTMLSelectElement && target.id === "edit-building-id") {
         this.actions.selectBuilding(target.value);
+      }
+    });
+
+    this.root.addEventListener("input", (event) => {
+      const target = event.target;
+      if (target instanceof HTMLInputElement && target.id === "admin-search") {
+        this.searchQuery = target.value;
+        if (this.lastState) {
+          this.render(this.lastState);
+        }
       }
     });
   }
@@ -307,180 +328,292 @@ export class AdminConsole {
   }
 
   render(state) {
-    const selectedBuilding = state.buildings.find((building) => building.id === state.ui.selectedBuildingId) ?? state.buildings[0];
+    this.lastState = state;
+    const searchFilter = this.searchQuery.trim().toLowerCase();
+    const matchingBuildings = state.buildings.filter((building) =>
+      `${building.displayName} ${building.rarity} ${building.district} ${(building.tags ?? []).join(" ")}`
+        .toLowerCase()
+        .includes(searchFilter)
+    );
+    const filteredBuildings = matchingBuildings.length || !searchFilter ? matchingBuildings : state.buildings;
+    const selectedBuilding =
+      state.buildings.find((building) => building.id === state.ui.selectedBuildingId) ??
+      filteredBuildings[0] ??
+      state.buildings[0];
     const selectedDistrict = state.districtSummary[0]?.name ?? "";
     const totalPopulation = Object.values(state.citizens).reduce((sum, value) => sum + value, 0);
+    const buildingOptions = [...new Map([selectedBuilding, ...filteredBuildings].filter(Boolean).map((building) => [building.id, building])).values()];
+    const filteredEvents = EVENT_POOLS.filter((event) =>
+      `${event.name} ${event.type} ${event.rarity}`.toLowerCase().includes(searchFilter)
+    );
+
+    const sections = [
+      {
+        tab: "economy",
+        title: "Crystals",
+        keywords: "crystals shards rarity economy",
+        content: `
+          <section class="admin-section">
+            <h3>Crystals</h3>
+            ${rarityControls(state, "crystal")}
+          </section>
+        `
+      },
+      {
+        tab: "economy",
+        title: "Shards",
+        keywords: "shards crystals rarity economy",
+        content: `
+          <section class="admin-section">
+            <h3>Shards</h3>
+            ${rarityControls(state, "shard")}
+          </section>
+        `
+      },
+      {
+        tab: "economy",
+        title: "Resources",
+        keywords: "resources gold food materials mana prosperity",
+        content: `
+          <section class="admin-section">
+            <h3>Resources</h3>
+            <div class="admin-grid">
+              <label>Gold<input id="resource-gold" type="number" value="${state.resources.gold}" /></label>
+              <label>Food<input id="resource-food" type="number" value="${state.resources.food}" /></label>
+              <label>Materials<input id="resource-materials" type="number" value="${state.resources.materials}" /></label>
+              <label>Mana<input id="resource-mana" type="number" value="${state.resources.mana}" /></label>
+              <label>Prosperity<input id="resource-prosperity" type="number" value="${state.resources.prosperity}" /></label>
+              <label>Population<input id="resource-population" type="number" value="${state.resources.population}" /></label>
+            </div>
+            <button class="button" data-admin-action="apply-resources">Apply Resources</button>
+          </section>
+        `
+      },
+      {
+        tab: "population",
+        title: "Citizen Management",
+        keywords: "citizens peasants workers merchants scholars clergy soldiers nobles mages population",
+        content: `
+          <section class="admin-section">
+            <h3>Citizen Management</h3>
+            <p>Live total population: <strong>${totalPopulation}</strong></p>
+            ${citizenControls(state)}
+            <div class="admin-grid admin-grid--three">
+              <label>From Class<select id="promote-from">${options(Object.keys(state.citizens), "Peasants")}</select></label>
+              <label>To Class<select id="promote-to">${options(Object.keys(state.citizens), "Workers")}</select></label>
+              <label>Amount<input id="promote-amount" type="number" value="1" min="0" /></label>
+            </div>
+            <button class="button button--ghost" data-admin-action="promote-citizens">Promote</button>
+            <div class="admin-grid admin-grid--three">
+              <label>From Class<select id="demote-from">${options(Object.keys(state.citizens), "Workers")}</select></label>
+              <label>To Class<select id="demote-to">${options(Object.keys(state.citizens), "Peasants")}</select></label>
+              <label>Amount<input id="demote-amount" type="number" value="1" min="0" /></label>
+            </div>
+            <button class="button button--ghost" data-admin-action="demote-citizens">Demote</button>
+            <label>Bulk JSON<textarea id="bulk-citizens" rows="4" placeholder='{"Peasants":10,"Clergy":5}'></textarea></label>
+            <div class="admin-actions">
+              <button class="button button--ghost" data-admin-action="bulk-citizens">Apply Bulk</button>
+              <button class="button button--ghost" data-admin-action="reset-citizens">Reset Citizens</button>
+            </div>
+          </section>
+        `
+      },
+      {
+        tab: "population",
+        title: "Districts",
+        keywords: "districts levels bonuses map",
+        content: `
+          <section class="admin-section">
+            <h3>Districts</h3>
+            <div class="admin-grid">
+              <label>District Name<input id="district-name" value="${escapeHtml(selectedDistrict)}" /></label>
+              <label>Level Override<input id="district-level" type="number" value="0" min="0" /></label>
+            </div>
+            <label>Definition JSON<textarea id="district-definition" rows="5">${escapeHtml(
+              JSON.stringify(state.districts.definitions[selectedDistrict] ?? {}, null, 2)
+            )}</textarea></label>
+            <div class="admin-actions">
+              <button class="button button--ghost" data-admin-action="save-district">Save District</button>
+              <button class="button button--ghost" data-admin-action="set-district-level">Set Level</button>
+              <button class="button button--ghost" data-admin-action="reset-district-levels">Reset Levels</button>
+            </div>
+          </section>
+        `
+      },
+      {
+        tab: "world",
+        title: "Buildings",
+        keywords: "buildings spawn edit remove placement map art image",
+        content: `
+          <section class="admin-section">
+            <h3>Buildings</h3>
+            <p>Optional artwork folder: <code>assets/images/buildings/</code></p>
+            <div class="admin-grid">
+              <label>Name<input id="spawn-name" value="Custom Tower" /></label>
+              <label>Rarity<select id="spawn-rarity">${options(RARITY_ORDER, "Common")}</select></label>
+              <label>Quality<input id="spawn-quality" type="number" value="100" min="0" max="350" /></label>
+              <label>District<input id="spawn-district" value="Arcane District" /></label>
+              <label>Tags<input id="spawn-tags" value="arcane,civic" /></label>
+              <label>Icon Key<input id="spawn-icon" value="star" /></label>
+              <label>Image Path<input id="spawn-image" value="./assets/images/buildings/Custom Tower.png" /></label>
+            </div>
+            <label>Special Effect<textarea id="spawn-effect" rows="2"></textarea></label>
+            <button class="button" data-admin-action="spawn-building">Spawn Building</button>
+
+            <div class="admin-grid">
+              <label>Edit Building<select id="edit-building-id">${buildingOptions.map((building) => `<option value="${building.id}" ${selectedBuilding?.id === building.id ? "selected" : ""}>${escapeHtml(building.displayName)} (${building.rarity})</option>`).join("")}</select></label>
+              <label>Quality<input id="edit-building-quality" type="number" value="${selectedBuilding?.quality ?? 100}" min="0" max="350" /></label>
+              <label>District<input id="edit-building-district" value="${escapeHtml(selectedBuilding?.district ?? "Residential District")}" /></label>
+              <label>Icon Key<input id="edit-building-icon" value="${escapeHtml(selectedBuilding?.iconKey ?? "spire")}" /></label>
+              <label>Image Path<input id="edit-building-image" value="${escapeHtml(selectedBuilding?.imagePath ?? "")}" /></label>
+              <label>Tags<input id="edit-building-tags" value="${escapeHtml((selectedBuilding?.tags ?? []).join(","))}" /></label>
+            </div>
+            <label>Special Effect<textarea id="edit-building-effect" rows="2">${escapeHtml(selectedBuilding?.specialEffect ?? "")}</textarea></label>
+            <label>Stats JSON<textarea id="edit-building-stats" rows="4">${escapeHtml(JSON.stringify(selectedBuilding?.stats ?? {}, null, 2))}</textarea></label>
+            <label>Resource Rates JSON<textarea id="edit-building-resources" rows="4">${escapeHtml(JSON.stringify(selectedBuilding?.resourceRates ?? {}, null, 2))}</textarea></label>
+            <div class="admin-grid admin-grid--three">
+              <label>Hex Q<input id="edit-building-q" type="number" value="${selectedBuilding?.mapPosition?.q ?? 0}" /></label>
+              <label>Hex R<input id="edit-building-r" type="number" value="${selectedBuilding?.mapPosition?.r ?? 0}" /></label>
+              <label>Current Hex<input value="${escapeHtml(selectedBuilding?.mapPosition ? `${selectedBuilding.mapPosition.q}, ${selectedBuilding.mapPosition.r}` : "Unplaced")}" readonly /></label>
+            </div>
+            <p><code>Set Placement</code> respects map rules. <code>Force Place</code> can override the forge core and occupied hexes.</p>
+            <div class="admin-actions">
+              <button class="button button--ghost" data-admin-action="save-building">Save Building</button>
+              <button class="button button--ghost" data-admin-action="set-building-placement">Set Placement</button>
+              <button class="button button--ghost" data-admin-action="force-building-placement">Force Place</button>
+              <button class="button button--ghost" data-admin-action="clear-building-placement">Clear Placement</button>
+              <button class="button button--ghost" data-admin-action="remove-building">Remove Building</button>
+            </div>
+          </section>
+        `
+      },
+      {
+        tab: "world",
+        title: "Roll Tables",
+        keywords: "roll tables rarity pools catalog",
+        content: `
+          <section class="admin-section">
+            <h3>Roll Tables</h3>
+            <div class="admin-grid">
+              <label>Name<input id="pool-name" value="Custom Tower" /></label>
+              <label>Rarity<select id="pool-rarity">${options(RARITY_ORDER, "Common")}</select></label>
+              <label>Target Rarity<select id="pool-target-rarity">${options(RARITY_ORDER, "Rare")}</select></label>
+              <label>Rename To<input id="pool-next-name" value="Custom Tower Mk II" /></label>
+              <label>District<input id="pool-district" value="Arcane District" /></label>
+              <label>Tags<input id="pool-tags" value="arcane,civic" /></label>
+              <label>Icon Key<input id="pool-icon" value="star" /></label>
+              <label>Image Path<input id="pool-image" value="./assets/images/buildings/Custom Tower.png" /></label>
+            </div>
+            <label>Special Effect<textarea id="pool-effect" rows="2"></textarea></label>
+            <label>Stat Overrides JSON<textarea id="pool-stats" rows="4"></textarea></label>
+            <div class="admin-actions">
+              <button class="button button--ghost" data-admin-action="rolltable-add">Add to Pool</button>
+              <button class="button button--ghost" data-admin-action="rolltable-remove">Remove from Pool</button>
+              <button class="button button--ghost" data-admin-action="rolltable-move">Move Between Rarities</button>
+              <button class="button button--ghost" data-admin-action="rolltable-rename">Rename Building</button>
+            </div>
+          </section>
+        `
+      },
+      {
+        tab: "world",
+        title: "Events",
+        keywords: "events trigger chains clear",
+        content: `
+          <section class="admin-section">
+            <h3>Events</h3>
+            <label>Manual Trigger<select id="event-select">${(filteredEvents.length ? filteredEvents : EVENT_POOLS).map((event) => `<option value="${event.id}">${escapeHtml(event.name)}</option>`).join("")}</select></label>
+            <div class="admin-actions">
+              <button class="button button--ghost" data-admin-action="trigger-event">Trigger Event</button>
+              <button class="button button--ghost" data-admin-action="clear-events">Clear Active Events</button>
+            </div>
+          </section>
+        `
+      },
+      {
+        tab: "system",
+        title: "Time and Construction",
+        keywords: "time construction speed calendar",
+        content: `
+          <section class="admin-section">
+            <h3>Time and Construction</h3>
+            <div class="admin-grid admin-grid--three">
+              <label>Year<input id="date-year" type="number" value="1218" /></label>
+              <label>Month<select id="date-month">${options(MONTHS, "Firethorn")}</select></label>
+              <label>Day<input id="date-day" type="number" value="17" min="1" max="28" /></label>
+            </div>
+            <button class="button button--ghost" data-admin-action="set-date">Set Current Date</button>
+            <label>Construction Speed<select id="admin-speed">${options(SPEED_MULTIPLIERS.map(String), String(state.constructionSpeedMultiplier))}</select></label>
+            <button class="button button--ghost" data-admin-action="set-speed">Set Speed</button>
+          </section>
+        `
+      },
+      {
+        tab: "system",
+        title: "Town Focus",
+        keywords: "town focus council mayor",
+        content: `
+          <section class="admin-section">
+            <h3>Town Focus</h3>
+            <p>Current focus: <strong>${escapeHtml(TOWN_FOCUS_DEFINITIONS[state.townFocus.currentFocusId]?.name ?? "None")}</strong></p>
+            <p>Next council date: <strong>${formatDate(state.townFocus.nextSelectionDayOffset)}</strong></p>
+            <p>Selection pending: <strong>${state.townFocus.isSelectionPending ? "Yes" : "No"}</strong></p>
+            <label>Focus<select id="town-focus-id">${townFocusOptions(state.townFocus.currentFocusId ?? "food-production")}</select></label>
+            <div class="admin-actions">
+              <button class="button button--ghost" data-admin-action="set-town-focus">Force Focus</button>
+              <button class="button button--ghost" data-admin-action="reopen-town-focus">Reopen Council</button>
+            </div>
+          </section>
+        `
+      },
+      {
+        tab: "system",
+        title: "Save Tools",
+        keywords: "save import export reset audio",
+        content: `
+          <section class="admin-section">
+            <h3>Save Tools</h3>
+            <p>Optional sound folder: <code>assets/audio/</code>. Matching rarity and ambient files will override synthesized audio automatically.</p>
+            <textarea id="save-json" rows="10"></textarea>
+            <div class="admin-actions">
+              <button class="button button--ghost" data-admin-action="export-save">Export Save JSON</button>
+              <button class="button button--ghost" data-admin-action="import-save">Import Save JSON</button>
+              <button class="button button--ghost" data-admin-action="reset-save">Reset Save</button>
+            </div>
+          </section>
+        `
+      }
+    ];
+
+    const visibleSections = sections.filter((section) => {
+      if (section.tab !== this.activeTab) {
+        return false;
+      }
+      if (!searchFilter) {
+        return true;
+      }
+      return `${section.title} ${section.keywords}`.toLowerCase().includes(searchFilter);
+    });
 
     const content = `
       <div class="admin-console">
-        <section class="admin-section">
-          <h3>Crystals</h3>
-          ${rarityControls(state, "crystal")}
-        </section>
-
-        <section class="admin-section">
-          <h3>Shards</h3>
-          ${rarityControls(state, "shard")}
-        </section>
-
-        <section class="admin-section">
-          <h3>Resources</h3>
-          <div class="admin-grid">
-            <label>Gold<input id="resource-gold" type="number" value="${state.resources.gold}" /></label>
-            <label>Food<input id="resource-food" type="number" value="${state.resources.food}" /></label>
-            <label>Materials<input id="resource-materials" type="number" value="${state.resources.materials}" /></label>
-            <label>Mana<input id="resource-mana" type="number" value="${state.resources.mana}" /></label>
-            <label>Prosperity<input id="resource-prosperity" type="number" value="${state.resources.prosperity}" /></label>
-            <label>Population<input id="resource-population" type="number" value="${state.resources.population}" /></label>
+        <div class="admin-toolbar">
+          <div class="admin-tabs">
+            <button class="button button--ghost ${this.activeTab === "economy" ? "is-active" : ""}" data-admin-ui="tab" data-tab="economy">Economy</button>
+            <button class="button button--ghost ${this.activeTab === "population" ? "is-active" : ""}" data-admin-ui="tab" data-tab="population">Population</button>
+            <button class="button button--ghost ${this.activeTab === "world" ? "is-active" : ""}" data-admin-ui="tab" data-tab="world">World</button>
+            <button class="button button--ghost ${this.activeTab === "system" ? "is-active" : ""}" data-admin-ui="tab" data-tab="system">System</button>
           </div>
-          <button class="button" data-admin-action="apply-resources">Apply Resources</button>
-        </section>
-
-        <section class="admin-section">
-          <h3>Citizen Management</h3>
-          <p>Live total population: <strong>${totalPopulation}</strong></p>
-          ${citizenControls(state)}
-          <div class="admin-grid admin-grid--three">
-            <label>From Class<select id="promote-from">${options(Object.keys(state.citizens), "Peasants")}</select></label>
-            <label>To Class<select id="promote-to">${options(Object.keys(state.citizens), "Workers")}</select></label>
-            <label>Amount<input id="promote-amount" type="number" value="1" min="0" /></label>
-          </div>
-          <button class="button button--ghost" data-admin-action="promote-citizens">Promote</button>
-          <div class="admin-grid admin-grid--three">
-            <label>From Class<select id="demote-from">${options(Object.keys(state.citizens), "Workers")}</select></label>
-            <label>To Class<select id="demote-to">${options(Object.keys(state.citizens), "Peasants")}</select></label>
-            <label>Amount<input id="demote-amount" type="number" value="1" min="0" /></label>
-          </div>
-          <button class="button button--ghost" data-admin-action="demote-citizens">Demote</button>
-          <label>Bulk JSON<textarea id="bulk-citizens" rows="4" placeholder='{"Peasants":10,"Clergy":5}'></textarea></label>
-          <div class="admin-actions">
-            <button class="button button--ghost" data-admin-action="bulk-citizens">Apply Bulk</button>
-            <button class="button button--ghost" data-admin-action="reset-citizens">Reset Citizens</button>
-          </div>
-        </section>
-
-        <section class="admin-section">
-          <h3>Buildings</h3>
-          <p>Optional artwork folder: <code>assets/images/buildings/</code></p>
-          <div class="admin-grid">
-            <label>Name<input id="spawn-name" value="Custom Tower" /></label>
-            <label>Rarity<select id="spawn-rarity">${options(RARITY_ORDER, "Common")}</select></label>
-            <label>Quality<input id="spawn-quality" type="number" value="100" min="0" max="350" /></label>
-            <label>District<input id="spawn-district" value="Arcane District" /></label>
-            <label>Tags<input id="spawn-tags" value="arcane,civic" /></label>
-            <label>Icon Key<input id="spawn-icon" value="star" /></label>
-            <label>Image Path<input id="spawn-image" value="./assets/images/buildings/Custom Tower.png" /></label>
-          </div>
-          <label>Special Effect<textarea id="spawn-effect" rows="2"></textarea></label>
-          <button class="button" data-admin-action="spawn-building">Spawn Building</button>
-
-          <div class="admin-grid">
-            <label>Edit Building<select id="edit-building-id">${state.buildings.map((building) => `<option value="${building.id}" ${selectedBuilding?.id === building.id ? "selected" : ""}>${escapeHtml(building.displayName)} (${building.rarity})</option>`).join("")}</select></label>
-            <label>Quality<input id="edit-building-quality" type="number" value="${selectedBuilding?.quality ?? 100}" min="0" max="350" /></label>
-            <label>District<input id="edit-building-district" value="${escapeHtml(selectedBuilding?.district ?? "Residential District")}" /></label>
-            <label>Icon Key<input id="edit-building-icon" value="${escapeHtml(selectedBuilding?.iconKey ?? "spire")}" /></label>
-            <label>Image Path<input id="edit-building-image" value="${escapeHtml(selectedBuilding?.imagePath ?? "")}" /></label>
-            <label>Tags<input id="edit-building-tags" value="${escapeHtml((selectedBuilding?.tags ?? []).join(","))}" /></label>
-          </div>
-          <label>Special Effect<textarea id="edit-building-effect" rows="2">${escapeHtml(selectedBuilding?.specialEffect ?? "")}</textarea></label>
-          <label>Stats JSON<textarea id="edit-building-stats" rows="4">${escapeHtml(JSON.stringify(selectedBuilding?.stats ?? {}, null, 2))}</textarea></label>
-          <label>Resource Rates JSON<textarea id="edit-building-resources" rows="4">${escapeHtml(JSON.stringify(selectedBuilding?.resourceRates ?? {}, null, 2))}</textarea></label>
-          <div class="admin-grid admin-grid--three">
-            <label>Hex Q<input id="edit-building-q" type="number" value="${selectedBuilding?.mapPosition?.q ?? 0}" /></label>
-            <label>Hex R<input id="edit-building-r" type="number" value="${selectedBuilding?.mapPosition?.r ?? 0}" /></label>
-            <label>Current Hex<input value="${escapeHtml(selectedBuilding?.mapPosition ? `${selectedBuilding.mapPosition.q}, ${selectedBuilding.mapPosition.r}` : "Unplaced")}" readonly /></label>
-          </div>
-          <p><code>Set Placement</code> respects map rules. <code>Force Place</code> can override the forge core and occupied hexes.</p>
-          <div class="admin-actions">
-            <button class="button button--ghost" data-admin-action="save-building">Save Building</button>
-            <button class="button button--ghost" data-admin-action="set-building-placement">Set Placement</button>
-            <button class="button button--ghost" data-admin-action="force-building-placement">Force Place</button>
-            <button class="button button--ghost" data-admin-action="clear-building-placement">Clear Placement</button>
-            <button class="button button--ghost" data-admin-action="remove-building">Remove Building</button>
-          </div>
-        </section>
-
-        <section class="admin-section">
-          <h3>Roll Tables</h3>
-          <div class="admin-grid">
-            <label>Name<input id="pool-name" value="Custom Tower" /></label>
-            <label>Rarity<select id="pool-rarity">${options(RARITY_ORDER, "Common")}</select></label>
-            <label>Target Rarity<select id="pool-target-rarity">${options(RARITY_ORDER, "Rare")}</select></label>
-            <label>Rename To<input id="pool-next-name" value="Custom Tower Mk II" /></label>
-            <label>District<input id="pool-district" value="Arcane District" /></label>
-            <label>Tags<input id="pool-tags" value="arcane,civic" /></label>
-            <label>Icon Key<input id="pool-icon" value="star" /></label>
-            <label>Image Path<input id="pool-image" value="./assets/images/buildings/Custom Tower.png" /></label>
-          </div>
-          <label>Special Effect<textarea id="pool-effect" rows="2"></textarea></label>
-          <label>Stat Overrides JSON<textarea id="pool-stats" rows="4"></textarea></label>
-          <div class="admin-actions">
-            <button class="button button--ghost" data-admin-action="rolltable-add">Add to Pool</button>
-            <button class="button button--ghost" data-admin-action="rolltable-remove">Remove from Pool</button>
-            <button class="button button--ghost" data-admin-action="rolltable-move">Move Between Rarities</button>
-            <button class="button button--ghost" data-admin-action="rolltable-rename">Rename Building</button>
-          </div>
-        </section>
-
-        <section class="admin-section">
-          <h3>Districts</h3>
-          <div class="admin-grid">
-            <label>District Name<input id="district-name" value="${escapeHtml(selectedDistrict)}" /></label>
-            <label>Level Override<input id="district-level" type="number" value="0" min="0" /></label>
-          </div>
-          <label>Definition JSON<textarea id="district-definition" rows="5">${escapeHtml(
-            JSON.stringify(state.districts.definitions[selectedDistrict] ?? {}, null, 2)
-          )}</textarea></label>
-          <div class="admin-actions">
-            <button class="button button--ghost" data-admin-action="save-district">Save District</button>
-            <button class="button button--ghost" data-admin-action="set-district-level">Set Level</button>
-            <button class="button button--ghost" data-admin-action="reset-district-levels">Reset Levels</button>
-          </div>
-        </section>
-
-        <section class="admin-section">
-          <h3>Time and Construction</h3>
-          <div class="admin-grid admin-grid--three">
-            <label>Year<input id="date-year" type="number" value="1218" /></label>
-            <label>Month<select id="date-month">${options(MONTHS, "Firethorn")}</select></label>
-            <label>Day<input id="date-day" type="number" value="17" min="1" max="28" /></label>
-          </div>
-          <button class="button button--ghost" data-admin-action="set-date">Set Current Date</button>
-          <label>Construction Speed<select id="admin-speed">${options(SPEED_MULTIPLIERS.map(String), String(state.constructionSpeedMultiplier))}</select></label>
-          <button class="button button--ghost" data-admin-action="set-speed">Set Speed</button>
-        </section>
-
-        <section class="admin-section">
-          <h3>Town Focus</h3>
-          <p>Current focus: <strong>${escapeHtml(TOWN_FOCUS_DEFINITIONS[state.townFocus.currentFocusId]?.name ?? "None")}</strong></p>
-          <p>Next council date: <strong>${formatDate(state.townFocus.nextSelectionDayOffset)}</strong></p>
-          <p>Selection pending: <strong>${state.townFocus.isSelectionPending ? "Yes" : "No"}</strong></p>
-          <label>Focus<select id="town-focus-id">${townFocusOptions(state.townFocus.currentFocusId ?? "food-production")}</select></label>
-          <div class="admin-actions">
-            <button class="button button--ghost" data-admin-action="set-town-focus">Force Focus</button>
-            <button class="button button--ghost" data-admin-action="reopen-town-focus">Reopen Council</button>
-          </div>
-        </section>
-
-        <section class="admin-section">
-          <h3>Events</h3>
-          <label>Manual Trigger<select id="event-select">${EVENT_POOLS.map((event) => `<option value="${event.id}">${escapeHtml(event.name)}</option>`).join("")}</select></label>
-          <div class="admin-actions">
-            <button class="button button--ghost" data-admin-action="trigger-event">Trigger Event</button>
-            <button class="button button--ghost" data-admin-action="clear-events">Clear Active Events</button>
-          </div>
-        </section>
-
-        <section class="admin-section">
-          <h3>Save Tools</h3>
-          <p>Optional sound folder: <code>assets/audio/</code>. Matching rarity files will override synthesized sounds automatically.</p>
-          <textarea id="save-json" rows="10"></textarea>
-          <div class="admin-actions">
-            <button class="button button--ghost" data-admin-action="export-save">Export Save JSON</button>
-            <button class="button button--ghost" data-admin-action="import-save">Import Save JSON</button>
-            <button class="button button--ghost" data-admin-action="reset-save">Reset Save</button>
-          </div>
-        </section>
+          <label class="admin-search">
+            <span>Search</span>
+            <input id="admin-search" value="${escapeHtml(this.searchQuery)}" placeholder="Filter this tab" />
+          </label>
+        </div>
+        ${
+          visibleSections.length
+            ? visibleSections.map((section) => section.content).join("")
+            : `<section class="admin-section"><p class="empty-state">No admin panels match "${escapeHtml(this.searchQuery)}" in this tab.</p></section>`
+        }
       </div>
     `;
 

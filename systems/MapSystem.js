@@ -1,4 +1,4 @@
-import { MAP_CONFIG } from "../content/MapConfig.js";
+import { MAP_ADJACENCY_CONFIG, MAP_CONFIG } from "../content/MapConfig.js";
 import { addHistoryEntry } from "./HistoryLogSystem.js";
 
 function getDistanceFromCenter(q, r) {
@@ -83,6 +83,71 @@ export function getBuildingAtCell(state, q, r) {
       (building) => building.mapPosition && building.mapPosition.q === q && building.mapPosition.r === r
     ) ?? null
   );
+}
+
+export function getBuildingTerrain(state, building) {
+  if (!building?.mapPosition) {
+    return null;
+  }
+  return findMapCell(state, building.mapPosition.q, building.mapPosition.r)?.terrain ?? null;
+}
+
+export function getPlacedNeighborBuildings(state, building) {
+  if (!building?.mapPosition) {
+    return [];
+  }
+  return getNeighborCoords(building.mapPosition.q, building.mapPosition.r)
+    .map((coords) => getBuildingAtCell(state, coords.q, coords.r))
+    .filter((neighbor) => Boolean(neighbor) && neighbor.id !== building.id);
+}
+
+export function getBuildingPlacementBonuses(state, building) {
+  if (!building?.mapPosition) {
+    return {
+      totalPercent: 0,
+      sameDistrictNeighbors: 0,
+      relatedTagNeighbors: 0,
+      terrainPercent: 0,
+      terrain: null,
+      reasons: []
+    };
+  }
+
+  const neighbors = getPlacedNeighborBuildings(state, building);
+  const sameDistrictNeighbors = neighbors.filter((neighbor) => neighbor.district === building.district).length;
+  const relatedTagNeighbors = neighbors.filter(
+    (neighbor) => neighbor.id !== building.id && neighbor.tags.some((tag) => building.tags.includes(tag))
+  ).length;
+  const terrain = getBuildingTerrain(state, building);
+  const terrainPercent = (building.tags ?? []).reduce((best, tag) => {
+    const affinity = MAP_ADJACENCY_CONFIG.terrainAffinities[tag]?.[terrain] ?? 0;
+    return Math.max(best, affinity);
+  }, 0);
+  const neighborPercent = Math.min(
+    MAP_ADJACENCY_CONFIG.maxNeighborBonusPercent,
+    sameDistrictNeighbors * MAP_ADJACENCY_CONFIG.sameDistrictPercentPerNeighbor +
+      relatedTagNeighbors * MAP_ADJACENCY_CONFIG.relatedTagPercentPerNeighbor
+  );
+
+  const reasons = [];
+  if (sameDistrictNeighbors > 0) {
+    reasons.push(`${sameDistrictNeighbors} same-district neighbor${sameDistrictNeighbors === 1 ? "" : "s"}`);
+  }
+  if (relatedTagNeighbors > 0) {
+    reasons.push(`${relatedTagNeighbors} related placement link${relatedTagNeighbors === 1 ? "" : "s"}`);
+  }
+  if (terrain && terrainPercent > 0) {
+    reasons.push(`${terrain} terrain affinity`);
+  }
+
+  return {
+    totalPercent: neighborPercent + terrainPercent,
+    sameDistrictNeighbors,
+    relatedTagNeighbors,
+    terrainPercent,
+    terrain,
+    reasons
+  };
 }
 
 export function canPlaceBuildingAt(state, buildingId, q, r) {

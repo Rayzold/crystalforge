@@ -8,6 +8,11 @@ Recommended filenames:
 - `epic-manifest.mp3`
 - `legendary-manifest.mp3`
 - `beyond-manifest.mp3`
+- `home-ambient.mp3`
+- `forge-ambient.mp3`
+- `city-ambient.mp3`
+- `citizens-ambient.mp3`
+- `chronicle-ambient.mp3`
 
 You can also use `.wav` instead of `.mp3`.
 

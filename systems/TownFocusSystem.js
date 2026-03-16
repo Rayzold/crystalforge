@@ -117,6 +117,47 @@ export function getMayorSuggestions(state) {
   });
 }
 
+export function getTownFocusHistory(state, limit = 5) {
+  return state.historyLog
+    .filter(
+      (entry) =>
+        entry.category === "Town Focus" &&
+        Object.values(TOWN_FOCUS_DEFINITIONS).some((focus) => focus.name === entry.title)
+    )
+    .slice(0, limit)
+    .map((entry) => ({
+      ...entry,
+      focus: Object.values(TOWN_FOCUS_DEFINITIONS).find((focus) => focus.name === entry.title) ?? null
+    }));
+}
+
+export function getSuggestedFocusForAlert(state, alertKey) {
+  const mapping = {
+    food: "food-production",
+    gold: "trade-drive",
+    mana: "crystal-expedition",
+    morale: "civic-restoration",
+    housing: "civic-restoration"
+  };
+  const focusId = mapping[alertKey];
+  return focusId ? TOWN_FOCUS_DEFINITIONS[focusId] ?? null : null;
+}
+
+export function getSuggestedFocusForEvent(state, event) {
+  const typeMap = {
+    economic: "trade-drive",
+    magical: "crystal-expedition",
+    social: "civic-restoration",
+    military: "defense-readiness",
+    world: "defense-readiness"
+  };
+
+  const suggestionFromType = typeMap[event?.type];
+  const mayorSuggestion = getMayorSuggestions(state).find((entry) => entry.focusId === suggestionFromType);
+  const focusId = mayorSuggestion?.focusId ?? suggestionFromType;
+  return focusId ? TOWN_FOCUS_DEFINITIONS[focusId] ?? null : null;
+}
+
 export function updateTownFocusAvailability(state) {
   if (!state.townFocus.isSelectionPending && state.calendar.dayOffset >= state.townFocus.nextSelectionDayOffset) {
     state.townFocus.isSelectionPending = true;

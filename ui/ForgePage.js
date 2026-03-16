@@ -2,6 +2,56 @@ import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { renderCrystalSelector } from "./CrystalSelector.js";
 import { renderManifestPanel } from "./ManifestPanel.js";
 
+function renderManifestShrine(state) {
+  const recentEntries = state.historyLog
+    .filter((entry) => entry.category === "Manifest")
+    .slice(0, 5)
+    .map((entry) => {
+      const building = state.buildings.find((candidate) => candidate.displayName === entry.title || candidate.name === entry.title) ?? null;
+      return { entry, building };
+    });
+
+  return `
+    <section class="scene-panel">
+      <div class="panel__header">
+        <h3>Manifest Shrine</h3>
+        <span class="panel__subtle">Recent crystal revelations</span>
+      </div>
+      <div class="manifest-shrine">
+        ${
+          recentEntries.length
+            ? recentEntries
+                .map(
+                  ({ entry, building }) => `
+                    <article class="manifest-shrine__card ${building ? `rarity-${building.rarity.toLowerCase()}` : ""}">
+                      <div class="manifest-shrine__art">
+                        ${
+                          building?.imagePath
+                            ? `<img src="${escapeHtml(building.imagePath)}" alt="${escapeHtml(entry.title)} artwork" loading="lazy" />`
+                            : `<div class="manifest-shrine__fallback">${escapeHtml(entry.title.slice(0, 1))}</div>`
+                        }
+                      </div>
+                      <div class="manifest-shrine__meta">
+                        <span>${escapeHtml(entry.date)}</span>
+                        <strong>${escapeHtml(entry.title)}</strong>
+                        <p>${escapeHtml(entry.details)}</p>
+                        ${
+                          building
+                            ? `<button class="button button--ghost" data-action="inspect-building" data-building-id="${building.id}">Open Dossier</button>`
+                            : ""
+                        }
+                      </div>
+                    </article>
+                  `
+                )
+                .join("")
+            : `<p class="empty-state">Your recent crystal revelations will gather here once the forge begins turning.</p>`
+        }
+      </div>
+    </section>
+  `;
+}
+
 function renderForgeStage(state) {
   const selectedBuilding = state.buildings.find((building) => building.id === state.ui.selectedBuildingId) ?? null;
   const visual = selectedBuilding?.imagePath
@@ -43,6 +93,7 @@ export function renderForgePage(state) {
     content: `
       ${renderForgeStage(state)}
       ${renderManifestPanel(state)}
+      ${renderManifestShrine(state)}
     `,
     aside: `
       ${renderCrystalSelector(state)}
