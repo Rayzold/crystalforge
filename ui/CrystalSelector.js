@@ -16,12 +16,12 @@ export function renderCrystalSelector(state) {
         <article>
           <span>Selected Level</span>
           <strong>${CRYSTAL_LEVEL_LABELS[selectedRarity]} / ${selectedRarity}</strong>
-          <small>${formatNumber(state.crystals[selectedRarity] ?? 0)} persistent crystals, ${formatNumber(state.shards[selectedRarity] ?? 0)} shards</small>
+          <small>${formatNumber(state.crystals[selectedRarity] ?? 0)} crystals remaining, ${formatNumber(state.shards[selectedRarity] ?? 0)} shards</small>
         </article>
         <article>
           <span>Manifest Rule</span>
-          <strong>Counts stay constant</strong>
-          <small>Manifesting uses the level as availability. Only crystal evolution changes the count.</small>
+          <strong>Each manifest costs 1 crystal</strong>
+          <small>When a level reaches 0, it disappears from the table until crystals return.</small>
         </article>
       </div>
       ${
@@ -40,6 +40,7 @@ export function renderCrystalSelector(state) {
                     data-action="select-rarity"
                     data-rarity="${rarity}"
                     style="--rarity-color:${RARITY_COLORS[rarity]}"
+                    type="button"
                   >
                     <span>${CRYSTAL_LEVEL_LABELS[rarity]}</span>
                     <span class="crystal-row__name">${rarity}</span>

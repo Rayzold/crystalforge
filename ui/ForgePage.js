@@ -89,7 +89,7 @@ function renderForgeStage(state) {
 export function renderForgePage(state) {
   return {
     title: "The Forge",
-    subtitle: "Manifest buildings through persistent crystal availability, with evolution changing crystal reality instead of spending your stock.",
+    subtitle: "Manifest buildings by spending crystals, with each reality level depleting as you pull from it.",
     content: `
       ${renderForgeStage(state)}
       ${renderManifestPanel(state)}

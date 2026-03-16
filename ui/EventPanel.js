@@ -28,23 +28,32 @@ export function renderEventPanel(state) {
                   `
                 )
                 .join("")
-            : `<p class="empty-state">No active events. The city is quiet for now.</p>`
+            : `
+                <div class="event-panel__empty empty-state">
+                  <strong>Quiet Streets</strong>
+                  <span>No active events. The city is quiet for now.</span>
+                </div>
+              `
         }
       </div>
       <div class="event-panel__recent">
         <h4>Recent</h4>
         <div class="event-panel__recent-list">
-          ${state.events.recent
-            .slice(0, 6)
-            .map(
-              (event) => `
-                <div class="event-line ${focusedEventId === event.id ? "is-highlighted" : ""}">
-                  <strong>${escapeHtml(event.name)}</strong>
-                  <span>${escapeHtml(event.startedAt)}${event.sourceEventName ? ` / from ${escapeHtml(event.sourceEventName)}` : ""}</span>
-                </div>
-              `
-            )
-            .join("")}
+          ${
+            state.events.recent.length
+              ? state.events.recent
+                  .slice(0, 6)
+                  .map(
+                    (event) => `
+                      <div class="event-line ${focusedEventId === event.id ? "is-highlighted" : ""}">
+                        <strong>${escapeHtml(event.name)}</strong>
+                        <span>${escapeHtml(event.startedAt)}${event.sourceEventName ? ` / from ${escapeHtml(event.sourceEventName)}` : ""}</span>
+                      </div>
+                    `
+                  )
+                  .join("")
+              : `<p class="event-panel__recent-empty empty-state">No recent disturbances have been recorded.</p>`
+          }
         </div>
       </div>
     </section>

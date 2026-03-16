@@ -74,10 +74,24 @@ Full-width building card banners:
 - ./ui/BuildingCard.js
 - ./styles.css
 
-4. Quick Replace Workflow
+4. Mascot Background Video
+--------------------------
+Main file:
+- ./assets/video/drift-mascot.mp4
+
+Support file:
+- ./assets/video/README.md
+
+Code locations that render or configure it:
+- ./content/Config.js
+- ./ui/PageShell.js
+- ./styles.css
+
+5. Quick Replace Workflow
 -------------------------
 - Put a building image into ./assets/images/buildings/
 - Set that building's imagePath in the admin console
 - Put a sound file into ./assets/audio/ using one of the rarity file names above
 - Put an ambient loop into ./assets/audio/ using one of the page ambient file names above
+- Replace ./assets/video/drift-mascot.mp4 if you want a different mascot background
 - Refresh the page

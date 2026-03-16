@@ -1,4 +1,4 @@
-import { PAGE_ROUTES } from "../content/Config.js";
+import { MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js";
 import { formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
 import { getCurrentTownFocus, getTownFocusAvailability } from "../systems/TownFocusSystem.js";
@@ -31,6 +31,18 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
 
   return `
     <div class="game-shell ${currentFocus ? `game-shell--focus-${currentFocus.id}` : ""}">
+      ${
+        MASCOT_MEDIA?.enabled
+          ? `
+              <div class="mascot-backdrop" aria-hidden="true">
+                <div class="mascot-backdrop__halo"></div>
+                <video class="mascot-backdrop__video" autoplay muted loop playsinline preload="metadata">
+                  <source src="${MASCOT_MEDIA.videoPath}" type="video/mp4" />
+                </video>
+              </div>
+            `
+          : ""
+      }
       <aside class="sidebar-nav">
         <div class="sidebar-nav__brand">
           <p>Crystal Forge</p>

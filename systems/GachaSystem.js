@@ -1,7 +1,7 @@
 import { pickRandom, randomInt } from "../engine/Random.js";
 import { getCatalogKey } from "../content/BuildingCatalog.js";
 import { formatDate } from "./CalendarSystem.js";
-import { hasCrystalAvailable } from "./CrystalSystem.js";
+import { hasCrystalAvailable, spendCrystal } from "./CrystalSystem.js";
 import { addHistoryEntry } from "./HistoryLogSystem.js";
 import { manifestIntoBuilding } from "./BuildingSystem.js";
 
@@ -14,6 +14,8 @@ export function manifestSelectedRarity(state, rarity) {
   if (!hasCrystalAvailable(state, rarity, 1)) {
     return { ok: false, reason: "No available crystals at that level." };
   }
+
+  spendCrystal(state, rarity, 1);
 
   const rolledName = pickRandom(pool);
   const catalogKey = getCatalogKey(rolledName, rarity);
@@ -29,7 +31,7 @@ export function manifestSelectedRarity(state, rarity) {
   addHistoryEntry(state, {
     category: "Manifest",
     title: result.building.displayName,
-    details: `${rarity} crystal manifested with quality roll ${qualityRoll}%.`
+    details: `${rarity} crystal manifested with quality roll ${qualityRoll}% and consumed 1 ${rarity} crystal.`
   });
 
   return {

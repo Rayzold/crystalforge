@@ -4,8 +4,14 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
+export const APP_VERSION = "v0.5.1";
 export const SAVE_VERSION = 5;
 export const STORAGE_KEY = "crystal-forge-save";
+export const MASCOT_MEDIA = {
+  enabled: true,
+  videoPath: "./assets/video/drift-mascot.mp4",
+  label: "Drift mascot"
+};
 export const PAGE_ROUTES = [
   { key: "home", label: "Home", href: "./index.html" },
   { key: "forge", label: "Forge", href: "./forge.html" },

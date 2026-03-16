@@ -1,4 +1,4 @@
-import { PAGE_ROUTES } from "../content/Config.js";
+import { APP_VERSION, PAGE_ROUTES } from "../content/Config.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js";
 import { getTownFocusHistory } from "../systems/TownFocusSystem.js";
@@ -50,6 +50,7 @@ function renderLandingHero(state) {
   const progress = getHomeProgress(state);
   const nextStep = progress.find((step) => !step.complete) ?? progress[progress.length - 1];
   const date = getStructuredDate(state.calendar.dayOffset);
+  const compactDate = `${date.weekday} / ${date.month} ${date.day} / ${date.year} AC`;
   const highlightedBuilding =
     [...state.buildings].sort((left, right) => right.quality - left.quality)[0] ?? null;
 
@@ -68,9 +69,10 @@ function renderLandingHero(state) {
             <a class="button button--ghost" href="./city.html">Survey the Map</a>
           </div>
           <div class="landing-hero__facts">
-            <article><span>Current Date</span><strong>${formatDate(state.calendar.dayOffset)}</strong></article>
+            <article class="landing-hero__fact landing-hero__fact--date"><span>Current Date</span><strong>${escapeHtml(compactDate)}</strong></article>
             <article><span>Active Districts</span><strong>${state.districtSummary.filter((district) => district.level > 0).length}</strong></article>
             <article><span>Population</span><strong>${formatNumber(state.resources.population)}</strong></article>
+            <article><span>Current Build</span><strong>${escapeHtml(APP_VERSION)}</strong></article>
           </div>
         </div>
         <div class="landing-hero__visual">
@@ -310,8 +312,8 @@ function renderHomeShelves(state) {
 
 export function renderHomePage(state) {
   return {
-    title: "City of Drift",
-    subtitle: "A more guided command chamber for your realm, with clearer first steps, featured structures, and direct routes into the living city.",
+    title: "Command Chamber",
+    subtitle: "A calmer overview of Drift, with the council, city pulse, and next actions gathered into cleaner shelves.",
     content: `
       ${renderLandingHero(state)}
       ${renderTownFocusPanel(state)}
