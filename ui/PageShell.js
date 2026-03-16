@@ -1,4 +1,4 @@
-import { MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js";
+import { APP_VERSION, MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js";
 import { formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
 import { getCurrentTownFocus, getTownFocusAvailability } from "../systems/TownFocusSystem.js";
@@ -60,6 +60,10 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
         <div class="sidebar-nav__footer">
           <button class="button button--ghost" data-action="open-catalog">Building Catalog</button>
           <button class="button button--ghost" data-action="open-admin">Admin Console</button>
+          <div class="sidebar-nav__build">
+            <span>Current Build</span>
+            <strong>${APP_VERSION}</strong>
+          </div>
           <p>Type <code>432</code> anywhere to open admin instantly.</p>
         </div>
       </aside>

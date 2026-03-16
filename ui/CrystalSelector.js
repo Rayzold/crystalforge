@@ -16,7 +16,8 @@ export function renderCrystalSelector(state) {
         <article>
           <span>Selected Level</span>
           <strong>${CRYSTAL_LEVEL_LABELS[selectedRarity]} / ${selectedRarity}</strong>
-          <small>${formatNumber(state.crystals[selectedRarity] ?? 0)} crystals remaining, ${formatNumber(state.shards[selectedRarity] ?? 0)} shards</small>
+          <small>${formatNumber(state.crystals[selectedRarity] ?? 0)} crystals remaining</small>
+          <small>${formatNumber(state.shards[selectedRarity] ?? 0)} shards stored</small>
         </article>
         <article>
           <span>Manifest Rule</span>
@@ -42,10 +43,10 @@ export function renderCrystalSelector(state) {
                     style="--rarity-color:${RARITY_COLORS[rarity]}"
                     type="button"
                   >
-                    <span>${CRYSTAL_LEVEL_LABELS[rarity]}</span>
+                    <span class="crystal-row__level">${CRYSTAL_LEVEL_LABELS[rarity]}</span>
                     <span class="crystal-row__name">${rarity}</span>
-                    <span>${formatNumber(state.crystals[rarity])}</span>
-                    <span>${formatNumber(state.shards[rarity])}</span>
+                    <span class="crystal-row__value">${formatNumber(state.crystals[rarity])}</span>
+                    <span class="crystal-row__value">${formatNumber(state.shards[rarity])}</span>
                   </button>
                 `;
               }).join("")}

@@ -18,7 +18,7 @@ export function renderManifestPanel(state) {
           <button class="button button--ghost" data-action="toggle-mute">${state.settings.muted ? "Audio Off" : "Audio On"}</button>
         </div>
       </div>
-      <p class="manifest-panel__text">Press MANIFEST to channel one of your available ${escapeHtml(state.selectedRarity)}-level crystals. Manifesting no longer consumes crystal availability.</p>
+      <p class="manifest-panel__text">Press MANIFEST to channel one of your available ${escapeHtml(state.selectedRarity)}-level crystals. Each manifestation consumes 1 crystal from that level.</p>
       ${
         last
           ? `
