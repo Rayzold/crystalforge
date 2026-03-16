@@ -1,5 +1,14 @@
 export const RARITY_ORDER = ["Common", "Uncommon", "Rare", "Epic", "Legendary", "Beyond"];
 
+export const CRYSTAL_LEVEL_LABELS = {
+  Common: "Level 1",
+  Uncommon: "Level 2",
+  Rare: "Level 3",
+  Epic: "Level 4",
+  Legendary: "Level 5",
+  Beyond: "Level 6"
+};
+
 export const RARITY_COLORS = {
   Common: "#b4bcc8",
   Uncommon: "#e2b35a",

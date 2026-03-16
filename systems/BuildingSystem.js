@@ -37,6 +37,7 @@ export function createBuildingInstance(state, catalogEntry, quality, timestamps)
     district: catalogEntry.district,
     iconKey: catalogEntry.iconKey,
     imagePath: catalogEntry.imagePath ?? null,
+    flavorText: catalogEntry.flavorText ?? null,
     mapPosition: null,
     tags: catalogEntry.tags,
     stats: profile.stats,

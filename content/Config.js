@@ -4,7 +4,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 export const STORAGE_KEY = "crystal-forge-save";
 export const PAGE_ROUTES = [
   { key: "home", label: "Home", href: "./index.html" },
@@ -71,7 +71,8 @@ export const DEFAULT_START_STATE = {
   settings: {
     muted: false,
     audioMode: "hybrid",
-    currentPage: "home"
+    currentPage: "home",
+    onboardingDismissed: false
   }
 };
 

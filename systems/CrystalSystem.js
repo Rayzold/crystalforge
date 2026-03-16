@@ -1,11 +1,13 @@
 import { RARITY_ORDER } from "../content/Rarities.js";
 
-export function canSpendCrystal(state, rarity, amount = 1) {
+export function hasCrystalAvailable(state, rarity, amount = 1) {
   return (state.crystals[rarity] ?? 0) >= amount;
 }
 
+// Crystal counts now represent persistent availability by reality level.
+// Spending is only used for crystal evolution and admin actions.
 export function spendCrystal(state, rarity, amount = 1) {
-  if (!canSpendCrystal(state, rarity, amount)) {
+  if (!hasCrystalAvailable(state, rarity, amount)) {
     return false;
   }
   state.crystals[rarity] -= amount;

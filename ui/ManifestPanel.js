@@ -18,7 +18,7 @@ export function renderManifestPanel(state) {
           <button class="button button--ghost" data-action="toggle-mute">${state.settings.muted ? "Audio Off" : "Audio On"}</button>
         </div>
       </div>
-      <p class="manifest-panel__text">Press MANIFEST to consume one ${escapeHtml(state.selectedRarity)} crystal and reveal a building from that pool.</p>
+      <p class="manifest-panel__text">Press MANIFEST to channel one of your available ${escapeHtml(state.selectedRarity)}-level crystals. Manifesting no longer consumes crystal availability.</p>
       ${
         last
           ? `
@@ -35,7 +35,7 @@ export function renderManifestPanel(state) {
           ? `
             <div class="upgrade-panel">
               <h4>Crystal Upgrade</h4>
-              <p>Completed Crystal Upgrade selected. Convert one crystal upward.</p>
+              <p>Completed Crystal Upgrade selected. Evolve one available crystal upward into a higher reality.</p>
               <div class="upgrade-panel__buttons">
                 ${["Common", "Uncommon", "Rare", "Epic", "Legendary"]
                   .map((rarity) => {

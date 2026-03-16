@@ -5,7 +5,7 @@ import {
   createDefaultDistrictState,
   createDefaultRollTables
 } from "../content/Config.js";
-import { BASE_BUILDING_CATALOG } from "../content/BuildingCatalog.js";
+import { BASE_BUILDING_CATALOG, buildFlavorText } from "../content/BuildingCatalog.js";
 import { safeJsonParse } from "../engine/Utils.js";
 import { createCitizenDefinitionsSnapshot, normalizeCitizens } from "./CitizenSystem.js";
 import { normalizeCrystalCollection } from "./CrystalSystem.js";
@@ -13,6 +13,7 @@ import { recalculateCityStats } from "./CityStatsSystem.js";
 import { getDistrictSummary } from "./DistrictSystem.js";
 import { normalizeShardCollection } from "./ShardSystem.js";
 import { createMapCells } from "./MapSystem.js";
+import { createDefaultTownFocusState, normalizeTownFocusState } from "./TownFocusSystem.js";
 
 export function createInitialState() {
   const state = {
@@ -37,6 +38,7 @@ export function createInitialState() {
     events: { active: [], recent: [] },
     historyLog: [],
     calendar: { dayOffset: 0 },
+    townFocus: createDefaultTownFocusState(),
     settings: structuredClone(DEFAULT_START_STATE.settings),
     ui: {
       selectedBuildingId: null,
@@ -53,15 +55,32 @@ export function createInitialState() {
 }
 
 function normalizeBuildingCatalog(sourceCatalog) {
-  return { ...structuredClone(BASE_BUILDING_CATALOG), ...(sourceCatalog ?? {}) };
+  const mergedCatalog = { ...structuredClone(BASE_BUILDING_CATALOG), ...(sourceCatalog ?? {}) };
+  return Object.fromEntries(
+    Object.entries(mergedCatalog).map(([key, entry]) => [
+      key,
+      {
+        ...entry,
+        flavorText:
+          entry.flavorText ??
+          buildFlavorText({
+            name: entry.name,
+            district: entry.district,
+            tags: entry.tags ?? [],
+            rarity: entry.rarity
+          })
+      }
+    ])
+  );
 }
 
-function normalizeBuildings(buildings) {
+function normalizeBuildings(buildings, catalog) {
   if (!Array.isArray(buildings)) {
     return [];
   }
   return buildings.map((building) => ({
     ...building,
+    flavorText: building.flavorText ?? catalog?.[building.key]?.flavorText ?? null,
     mapPosition:
       typeof building.mapPosition?.q === "number" && typeof building.mapPosition?.r === "number"
         ? { q: building.mapPosition.q, r: building.mapPosition.r }
@@ -114,6 +133,8 @@ export function validateAndMigrateSave(rawSave) {
     return base;
   }
 
+  const normalizedCatalog = normalizeBuildingCatalog(rawSave.buildingCatalog);
+
   const nextState = {
     ...base,
     ...rawSave,
@@ -122,9 +143,9 @@ export function validateAndMigrateSave(rawSave) {
     shards: normalizeShardCollection(rawSave.shards ?? base.shards),
     resources: { ...base.resources, ...(rawSave.resources ?? {}) },
     citizens: normalizeCitizens(rawSave.citizens ?? base.citizens),
-    buildings: normalizeBuildings(rawSave.buildings),
+    buildings: normalizeBuildings(rawSave.buildings, normalizedCatalog),
     rollTables: normalizeRollTables(rawSave.rollTables),
-    buildingCatalog: normalizeBuildingCatalog(rawSave.buildingCatalog),
+    buildingCatalog: normalizedCatalog,
     districts: normalizeDistrictState(rawSave.districts),
     map: {
       cells: createMapCells()
@@ -135,6 +156,7 @@ export function validateAndMigrateSave(rawSave) {
     },
     historyLog: Array.isArray(rawSave.historyLog) ? rawSave.historyLog : [],
     calendar: { dayOffset: Number(rawSave.calendar?.dayOffset ?? 0) },
+    townFocus: normalizeTownFocusState(rawSave.townFocus),
     settings: { ...base.settings, ...(rawSave.settings ?? {}) },
     ui: {
       ...base.ui,

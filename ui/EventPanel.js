@@ -1,6 +1,8 @@
 import { escapeHtml } from "../engine/Utils.js";
 
 export function renderEventPanel(state) {
+  const focusedEventId = state.transientUi?.focusEventId ?? null;
+
   return `
     <section class="panel event-panel">
       <div class="panel__header">
@@ -13,7 +15,7 @@ export function renderEventPanel(state) {
             ? state.events.active
                 .map(
                   (event) => `
-                    <article class="event-card">
+                    <article class="event-card ${focusedEventId === event.id ? "is-highlighted" : ""}">
                       <h4>${escapeHtml(event.name)}</h4>
                       <p>${escapeHtml(event.description)}</p>
                       <span>${escapeHtml(event.type)} / ends ${escapeHtml(event.endsAt)}</span>
@@ -31,7 +33,7 @@ export function renderEventPanel(state) {
             .slice(0, 6)
             .map(
               (event) => `
-                <div class="event-line">
+                <div class="event-line ${focusedEventId === event.id ? "is-highlighted" : ""}">
                   <strong>${escapeHtml(event.name)}</strong>
                   <span>${escapeHtml(event.startedAt)}</span>
                 </div>

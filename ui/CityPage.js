@@ -1,5 +1,6 @@
 import { renderBuildingGrid } from "./BuildingGrid.js";
 import { renderDistrictPanel } from "./DistrictPanel.js";
+import { renderEmergencyPanel } from "./EmergencyPanel.js";
 import { renderHexMap } from "./HexMap.js";
 import { renderOverflowList } from "./OverflowList.js";
 import { renderResourcePanel } from "./ResourcePanel.js";
@@ -15,6 +16,7 @@ export function renderCityPage(state) {
       ${renderOverflowList(state)}
     `,
     aside: `
+      ${renderEmergencyPanel(state)}
       ${renderResourcePanel(state)}
       ${renderStatsPanel(state)}
       ${renderDistrictPanel(state)}

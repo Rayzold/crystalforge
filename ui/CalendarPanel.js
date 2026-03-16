@@ -1,8 +1,10 @@
 import { SPEED_MULTIPLIERS } from "../content/Config.js";
 import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js";
+import { getTownFocusAvailability } from "../systems/TownFocusSystem.js";
 
 export function renderCalendarPanel(state) {
   const date = getStructuredDate(state.calendar.dayOffset);
+  const townFocusAvailability = getTownFocusAvailability(state);
 
   return `
     <section class="panel calendar-panel">
@@ -13,6 +15,16 @@ export function renderCalendarPanel(state) {
       <div class="calendar-panel__date">
         <strong>${formatDate(state.calendar.dayOffset)}</strong>
         <span>${date.holiday ? date.holiday.name : "No holiday today"}</span>
+      </div>
+      <div class="calendar-panel__focus ${townFocusAvailability.isSelectionPending ? "is-due" : ""}">
+        <strong>Town Focus Council</strong>
+        <span>
+          ${
+            townFocusAvailability.isSelectionPending
+              ? "A new focus can be selected right now."
+              : `${townFocusAvailability.daysUntilCouncil} day(s) until the next focus choice.`
+          }
+        </span>
       </div>
       <div class="time-controls">
         <button class="button button--ghost" data-action="advance-time" data-step="day">+1 Day</button>

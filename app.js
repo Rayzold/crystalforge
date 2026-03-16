@@ -31,7 +31,9 @@ import {
 import { addShards, setShards } from "./systems/ShardSystem.js";
 import { createInitialState, exportSave, importSave, loadGameState, resetSave, saveGameState } from "./systems/StorageSystem.js";
 import { advanceTime } from "./systems/TimeSystem.js";
+import { forceTownFocus, reopenTownFocusSelection, selectTownFocus, updateTownFocusAvailability } from "./systems/TownFocusSystem.js";
 import { Toasts } from "./ui/Toasts.js";
+import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js";
 import { UIRenderer } from "./ui/UIRenderer.js";
 
 const root = document.querySelector("#app");
@@ -41,11 +43,17 @@ const toasts = new Toasts();
 const animationEngine = new AnimationEngine();
 const audioEngine = new AudioEngine();
 const gameState = new GameState(loadGameState());
+syncDerivedState(gameState.getState());
 
 function syncDerivedState(state) {
+  if ((state.crystals[state.selectedRarity] ?? 0) <= 0) {
+    state.selectedRarity =
+      RARITY_ORDER.find((rarity) => (state.crystals[rarity] ?? 0) > 0) ?? state.selectedRarity;
+  }
   state.settings.currentPage = pageKey;
   state.districtSummary = getDistrictSummary(state);
   state.resources.population = Object.values(state.citizens).reduce((sum, value) => sum + value, 0);
+  updateTownFocusAvailability(state);
   recalculateCityStats(state);
 }
 
@@ -101,6 +109,28 @@ function setPopulationByAdjustingClasses(state, targetPopulation) {
 
 function getCurrentState() {
   return gameState.getState();
+}
+
+function clearUrlParams() {
+  window.history.replaceState({}, "", window.location.pathname);
+}
+
+function clearHoveredMapCell() {
+  if (renderer.transientUi.hoveredMapCell) {
+    renderer.setTransientUi({ hoveredMapCell: null }, getCurrentState());
+  }
+}
+
+function openTownFocusModal(focusId = null) {
+  const state = getCurrentState();
+  renderer.setTransientUi(
+    {
+      councilModalOpen: true,
+      previewTownFocusId: focusId ?? renderer.transientUi.previewTownFocusId ?? getDefaultTownFocusPreviewId(state),
+      councilModalCycleKey: state.townFocus.isSelectionPending ? String(state.townFocus.nextSelectionDayOffset) : renderer.transientUi.councilModalCycleKey
+    },
+    state
+  );
 }
 
 function setSelectedBuildingAndCell(state, buildingId) {
@@ -375,6 +405,12 @@ const actions = {
       draft.ui.adminOpen = true;
     });
   },
+  openCatalog() {
+    renderer.setTransientUi({ catalogOpen: true }, getCurrentState());
+  },
+  openTownFocusModal() {
+    openTownFocusModal();
+  },
   closeAdmin() {
     commit((draft) => {
       draft.ui.adminOpen = false;
@@ -384,6 +420,45 @@ const actions = {
     commit((draft) => {
       setSelectedBuildingAndCell(draft, buildingId);
     });
+  },
+  dismissOnboarding() {
+    commit((draft) => {
+      draft.settings.onboardingDismissed = true;
+    });
+    reportSuccess("Guide dismissed.");
+  },
+  showOnboarding() {
+    commit((draft) => {
+      draft.settings.onboardingDismissed = false;
+    });
+    reportSuccess("Guide restored.");
+  },
+  chooseTownFocus(focusId) {
+    const result = commit((draft) => {
+      if (!draft.townFocus.isSelectionPending) {
+        return { ok: false, reason: "The council cannot change focus yet." };
+      }
+      return selectTownFocus(draft, focusId, "Council");
+    });
+    if (!result.ok) {
+      reportError(result.reason);
+      return;
+    }
+    renderer.setTransientUi({ councilModalOpen: false }, getCurrentState());
+    reportSuccess(`${result.focus.name} is now the town focus.`);
+  },
+  setTownFocus(focusId) {
+    const result = commit((draft) => forceTownFocus(draft, focusId, "Admin"));
+    if (!result.ok) {
+      reportError(result.reason);
+      return;
+    }
+    reportSuccess(`${result.focus.name} force-selected.`);
+  },
+  reopenTownFocus() {
+    commit((draft) => reopenTownFocusSelection(draft, "Admin"));
+    openTownFocusModal();
+    reportSuccess("Town focus council reopened.");
   },
   adjustCrystal,
   adjustShard,
@@ -407,6 +482,9 @@ const actions = {
         draft.ui.selectedMapCell = null;
       }
     });
+    if (renderer.transientUi.inspectedBuildingId === buildingId) {
+      renderer.setTransientUi({ inspectedBuildingId: null }, getCurrentState());
+    }
     reportSuccess("Building removed.");
   },
   setBuildingPlacement({ buildingId, q, r }) {
@@ -466,10 +544,12 @@ const actions = {
   },
   importSave(text) {
     gameState.replace(importSave(text));
+    renderer.setTransientUi({ hoveredMapCell: null, inspectedBuildingId: null }, getCurrentState());
     reportSuccess("Save imported.");
   },
   resetSave() {
     gameState.replace(resetSave());
+    renderer.setTransientUi({ hoveredMapCell: null, inspectedBuildingId: null }, getCurrentState());
     reportSuccess("Save reset.");
   },
   reportError
@@ -510,6 +590,27 @@ root.addEventListener("click", async (event) => {
         setSelectedBuildingAndCell(draft, target.dataset.buildingId);
       });
       break;
+    case "inspect-building":
+      renderer.setTransientUi({ inspectedBuildingId: target.dataset.buildingId }, getCurrentState());
+      break;
+    case "open-catalog":
+      actions.openCatalog();
+      break;
+    case "open-town-focus-modal":
+      actions.openTownFocusModal();
+      break;
+    case "preview-town-focus":
+      openTownFocusModal(target.dataset.focusId);
+      break;
+    case "close-modal":
+      if (target.dataset.modal === "building-detail-modal") {
+        renderer.setTransientUi({ inspectedBuildingId: null }, getCurrentState());
+      } else if (target.dataset.modal === "building-catalog-modal") {
+        renderer.setTransientUi({ catalogOpen: false }, getCurrentState());
+      } else if (target.dataset.modal === "town-focus-council-modal") {
+        renderer.setTransientUi({ councilModalOpen: false }, getCurrentState());
+      }
+      break;
     case "select-map-cell": {
       const q = Number(target.dataset.q);
       const r = Number(target.dataset.r);
@@ -546,6 +647,15 @@ root.addEventListener("click", async (event) => {
       moveBuildingOnMap({ buildingId: selectedBuilding.id, q, r, source: "Player" });
       break;
     }
+    case "dismiss-onboarding":
+      actions.dismissOnboarding();
+      break;
+    case "show-onboarding":
+      actions.showOnboarding();
+      break;
+    case "choose-town-focus":
+      actions.chooseTownFocus(target.dataset.focusId);
+      break;
     case "clear-building-placement": {
       const selectedBuilding = getCurrentState().buildings.find(
         (building) => building.id === getCurrentState().ui.selectedBuildingId
@@ -601,6 +711,41 @@ root.addEventListener("click", async (event) => {
   }
 });
 
+root.addEventListener("mouseover", (event) => {
+  const cell = event.target.closest(".hex-map__cell");
+  if (!cell) {
+    return;
+  }
+
+  const q = Number(cell.dataset.q);
+  const r = Number(cell.dataset.r);
+  const hovered = renderer.transientUi.hoveredMapCell;
+  if (hovered && hovered.q === q && hovered.r === r) {
+    return;
+  }
+
+  renderer.setTransientUi({ hoveredMapCell: { q, r } }, getCurrentState());
+});
+
+root.addEventListener("mouseout", (event) => {
+  const cell = event.target.closest(".hex-map__cell");
+  if (!cell) {
+    return;
+  }
+
+  const nextCell = event.relatedTarget?.closest?.(".hex-map__cell");
+  if (nextCell) {
+    return;
+  }
+
+  window.setTimeout(() => {
+    if (root.querySelector(".hex-map-wrap:hover")) {
+      return;
+    }
+    clearHoveredMapCell();
+  }, 0);
+});
+
 root.addEventListener("change", (event) => {
   const target = event.target.closest("[data-action]");
   if (!target) {
@@ -622,9 +767,40 @@ root.addEventListener("change", (event) => {
 
 audioEngine.setMuted(getCurrentState().settings.muted);
 
+function applyUrlFocusTargets() {
+  const params = new URLSearchParams(window.location.search);
+  const focusBuildingId = params.get("focusBuilding");
+  const openDossier = params.get("openDossier") === "1";
+  const focusEventId = params.get("focusEvent");
+
+  if (!focusBuildingId && !focusEventId) {
+    return;
+  }
+
+  if (focusBuildingId) {
+    const building = getCurrentState().buildings.find((entry) => entry.id === focusBuildingId);
+    if (building) {
+      commit((draft) => {
+        setSelectedBuildingAndCell(draft, building.id);
+      });
+      if (openDossier) {
+        renderer.setTransientUi({ inspectedBuildingId: building.id }, getCurrentState());
+      }
+    }
+  }
+
+  if (focusEventId) {
+    renderer.setTransientUi({ focusEventId }, getCurrentState());
+  }
+
+  clearUrlParams();
+}
+
 if (!localStorage.getItem("crystal-forge-save")) {
   gameState.replace(createInitialState());
 } else {
   renderer.render(getCurrentState());
   adminConsole.render(getCurrentState());
 }
+
+applyUrlFocusTargets();

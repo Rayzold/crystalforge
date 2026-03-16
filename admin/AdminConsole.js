@@ -3,8 +3,10 @@ import { createCatalogEntryFromInput } from "../content/BuildingCatalog.js";
 import { SPEED_MULTIPLIERS } from "../content/Config.js";
 import { EVENT_POOLS } from "../content/EventPools.js";
 import { RARITY_ORDER } from "../content/Rarities.js";
+import { TOWN_FOCUS_DEFINITIONS } from "../content/TownFocusConfig.js";
 import { escapeHtml } from "../engine/Utils.js";
 import { renderModal } from "../ui/Modal.js";
+import { formatDate } from "../systems/CalendarSystem.js";
 
 function options(values, selectedValue) {
   return values
@@ -40,6 +42,15 @@ function citizenControls(state) {
           <strong>${count}</strong>
         </div>
       `
+    )
+    .join("");
+}
+
+function townFocusOptions(selectedValue) {
+  return Object.values(TOWN_FOCUS_DEFINITIONS)
+    .map(
+      (focus) =>
+        `<option value="${escapeHtml(focus.id)}" ${focus.id === selectedValue ? "selected" : ""}>${escapeHtml(focus.name)}</option>`
     )
     .join("");
 }
@@ -266,6 +277,12 @@ export class AdminConsole {
         case "set-speed":
           this.actions.setSpeedMultiplier(this.getNumberInput("admin-speed"));
           break;
+        case "set-town-focus":
+          this.actions.setTownFocus(this.getValue("town-focus-id"));
+          break;
+        case "reopen-town-focus":
+          this.actions.reopenTownFocus();
+          break;
         case "trigger-event":
           this.actions.triggerEvent(this.getValue("event-select"));
           break;
@@ -431,6 +448,18 @@ export class AdminConsole {
           <button class="button button--ghost" data-admin-action="set-date">Set Current Date</button>
           <label>Construction Speed<select id="admin-speed">${options(SPEED_MULTIPLIERS.map(String), String(state.constructionSpeedMultiplier))}</select></label>
           <button class="button button--ghost" data-admin-action="set-speed">Set Speed</button>
+        </section>
+
+        <section class="admin-section">
+          <h3>Town Focus</h3>
+          <p>Current focus: <strong>${escapeHtml(TOWN_FOCUS_DEFINITIONS[state.townFocus.currentFocusId]?.name ?? "None")}</strong></p>
+          <p>Next council date: <strong>${formatDate(state.townFocus.nextSelectionDayOffset)}</strong></p>
+          <p>Selection pending: <strong>${state.townFocus.isSelectionPending ? "Yes" : "No"}</strong></p>
+          <label>Focus<select id="town-focus-id">${townFocusOptions(state.townFocus.currentFocusId ?? "food-production")}</select></label>
+          <div class="admin-actions">
+            <button class="button button--ghost" data-admin-action="set-town-focus">Force Focus</button>
+            <button class="button button--ghost" data-admin-action="reopen-town-focus">Reopen Council</button>
+          </div>
         </section>
 
         <section class="admin-section">

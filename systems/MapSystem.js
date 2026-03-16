@@ -38,6 +38,17 @@ export function getCellKey(q, r) {
   return `${q},${r}`;
 }
 
+export function getNeighborCoords(q, r) {
+  return [
+    { q: q + 1, r },
+    { q: q + 1, r: r - 1 },
+    { q, r: r - 1 },
+    { q: q - 1, r },
+    { q: q - 1, r: r + 1 },
+    { q, r: r + 1 }
+  ];
+}
+
 export function createMapCells(radius = MAP_CONFIG.radius) {
   const cells = [];
   for (let q = -radius; q <= radius; q += 1) {

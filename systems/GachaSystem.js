@@ -1,7 +1,7 @@
 import { pickRandom, randomInt } from "../engine/Random.js";
 import { getCatalogKey } from "../content/BuildingCatalog.js";
 import { formatDate } from "./CalendarSystem.js";
-import { spendCrystal } from "./CrystalSystem.js";
+import { hasCrystalAvailable } from "./CrystalSystem.js";
 import { addHistoryEntry } from "./HistoryLogSystem.js";
 import { manifestIntoBuilding } from "./BuildingSystem.js";
 
@@ -11,8 +11,8 @@ export function manifestSelectedRarity(state, rarity) {
     return { ok: false, reason: "That rarity pool is empty." };
   }
 
-  if (!spendCrystal(state, rarity, 1)) {
-    return { ok: false, reason: "Not enough crystals." };
+  if (!hasCrystalAvailable(state, rarity, 1)) {
+    return { ok: false, reason: "No available crystals at that level." };
   }
 
   const rolledName = pickRandom(pool);

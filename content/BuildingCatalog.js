@@ -83,6 +83,28 @@ const BUILDING_OVERRIDES = {
   "Eternal Garden": { district: "Religious District", tags: ["religious", "agriculture"], iconKey: "leaf" }
 };
 
+const RARITY_TONES = {
+  Common: "humble",
+  Uncommon: "well-kept",
+  Rare: "renowned",
+  Epic: "wondrous",
+  Legendary: "myth-wreathed",
+  Beyond: "reality-bending"
+};
+
+const DISTRICT_FLAVOR_FRAGMENTS = {
+  "Agricultural District": "It smells of turned soil, rainwater, and patient labor.",
+  "Trade District": "Coin-song and negotiation linger in the air around it.",
+  "Residential District": "Warm light and routine make the structure feel inhabited even at rest.",
+  "Military District": "Every angle suggests drills, watchfulness, and hard discipline.",
+  "Industrial District": "Soot, sparks, and rhythmic work leave their mark on every surface.",
+  "Arcane District": "The air around it carries a faint static hum and a taste of mana.",
+  "Religious District": "Incense, prayer, and reverent silence gather around its threshold.",
+  "Harbor District": "Salt, distance, and motion cling to it like a second skin.",
+  "Cultural District": "Stories, songs, and practiced memory seem to settle in its walls.",
+  "Frontier District": "It feels half-civilized and half-wild, like a promise made at the city's edge."
+};
+
 function titleCaseTag(tag) {
   return tag.charAt(0).toUpperCase() + tag.slice(1);
 }
@@ -91,6 +113,13 @@ function buildSpecialEffect({ district, tags }) {
   const primaryTag = tags[0] ?? "civic";
   const secondaryTag = tags[1] ?? "stability";
   return `${titleCaseTag(primaryTag)} lattice strengthens ${district.toLowerCase()} output while reinforcing ${secondaryTag} routines.`;
+}
+
+export function buildFlavorText({ name, district, tags, rarity }) {
+  const primaryTag = tags[0] ?? "civic";
+  const tone = RARITY_TONES[rarity] ?? "storied";
+  const districtFragment = DISTRICT_FLAVOR_FRAGMENTS[district] ?? "The place carries the mood of a city learning what it wants to become.";
+  return `${name} is a ${tone} ${primaryTag} landmark within the ${district.toLowerCase()}. ${districtFragment}`;
 }
 
 function classifyBuilding(name) {
@@ -113,6 +142,14 @@ function createCatalogEntry(name, rarity) {
     tags,
     iconKey: override.iconKey ?? base.iconKey,
     imagePath: override.imagePath ?? null,
+    flavorText:
+      override.flavorText ??
+      buildFlavorText({
+        name,
+        district: override.district ?? base.district,
+        tags,
+        rarity
+      }),
     specialEffect: override.specialEffect ?? buildSpecialEffect({
       district: override.district ?? base.district,
       tags
@@ -143,6 +180,7 @@ export function createCatalogEntryFromInput({
   tags,
   iconKey,
   imagePath,
+  flavorText,
   specialEffect,
   statOverrides = null
 }) {
@@ -159,6 +197,14 @@ export function createCatalogEntryFromInput({
     tags: nextTags,
     iconKey: iconKey || base.iconKey,
     imagePath: imagePath || null,
+    flavorText:
+      flavorText ||
+      buildFlavorText({
+        name,
+        district: district || base.district,
+        tags: nextTags,
+        rarity
+      }),
     specialEffect:
       specialEffect ||
       buildSpecialEffect({

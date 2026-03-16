@@ -6,6 +6,7 @@ import { runCitizenPromotions } from "./CitizenSystem.js";
 import { expireEvents, maybeTriggerHolidayEvents, maybeTriggerRandomEvents } from "./EventSystem.js";
 import { addHistoryEntry } from "./HistoryLogSystem.js";
 import { applyDailyResources } from "./ResourceSystem.js";
+import { applyTownFocusDailyEffects, updateTownFocusAvailability } from "./TownFocusSystem.js";
 
 export function advanceTime(state, stepKey) {
   const days = STEP_DURATIONS[stepKey];
@@ -19,8 +20,10 @@ export function advanceTime(state, stepKey) {
     const completedToday = advanceConstructionOneDay(state, currentDate, state.calendar.dayOffset);
     completions.push(...completedToday);
     applyDailyResources(state);
+    applyTownFocusDailyEffects(state);
     recalculateCityStats(state);
     runCitizenPromotions(state);
+    updateTownFocusAvailability(state);
     triggeredEvents.push(...maybeTriggerHolidayEvents(state));
   }
 

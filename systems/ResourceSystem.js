@@ -1,6 +1,7 @@
 import { RESOURCE_MINIMUMS } from "../content/Config.js";
 import { clamp } from "../engine/Utils.js";
 import { getDistrictSummary } from "./DistrictSystem.js";
+import { getCurrentTownFocus } from "./TownFocusSystem.js";
 
 function createDeltaRecord() {
   return { gold: 0, food: 0, materials: 0, mana: 0, prosperity: 0 };
@@ -14,7 +15,7 @@ export function getWarningFlags(state) {
   };
 }
 
-export function applyDailyResources(state) {
+export function calculateDailyResourceDelta(state) {
   const deltas = createDeltaRecord();
 
   for (const building of state.buildings) {
@@ -80,6 +81,97 @@ export function applyDailyResources(state) {
       deltas.mana *= 1 + effects.manaMultiplier;
     }
   }
+
+  const focus = getCurrentTownFocus(state);
+  if (focus?.resourceDaily) {
+    deltas.gold += focus.resourceDaily.gold ?? 0;
+    deltas.food += focus.resourceDaily.food ?? 0;
+    deltas.materials += focus.resourceDaily.materials ?? 0;
+    deltas.mana += focus.resourceDaily.mana ?? 0;
+    deltas.prosperity += focus.resourceDaily.prosperity ?? 0;
+  }
+
+  return deltas;
+}
+
+function getRunwayDays(stockpile, dailyDelta) {
+  if (dailyDelta >= 0) {
+    return null;
+  }
+  if (stockpile <= 0) {
+    return 0;
+  }
+  return stockpile / Math.abs(dailyDelta);
+}
+
+export function getEmergencyStatus(state) {
+  const deltas = calculateDailyResourceDelta(state);
+  const emergencies = [];
+  const foodRunwayDays = getRunwayDays(state.resources.food, deltas.food);
+  const goldRunwayDays = getRunwayDays(state.resources.gold, deltas.gold);
+  const manaRunwayDays = getRunwayDays(state.resources.mana, deltas.mana);
+  const housingGap = Math.max(0, state.resources.population - (state.cityStats.populationSupport ?? 0));
+
+  if ((state.cityStats.morale ?? 0) <= 18) {
+    emergencies.push({
+      key: "morale",
+      severity: (state.cityStats.morale ?? 0) <= 8 ? "critical" : "warning",
+      label: "Morale strain",
+      details: `Morale is ${Math.round(state.cityStats.morale ?? 0)} and the city is at risk of unrest.`
+    });
+  }
+
+  if (foodRunwayDays !== null) {
+    emergencies.push({
+      key: "food",
+      severity: foodRunwayDays <= 5 ? "critical" : "warning",
+      label: "Food deficit",
+      details: foodRunwayDays <= 0
+        ? "Food reserves are already exhausted."
+        : `${foodRunwayDays.toFixed(1)} days of food remain at the current deficit.`
+    });
+  }
+
+  if (goldRunwayDays !== null && goldRunwayDays <= 10) {
+    emergencies.push({
+      key: "gold",
+      severity: goldRunwayDays <= 4 ? "critical" : "warning",
+      label: "Treasury drain",
+      details: `${goldRunwayDays.toFixed(1)} days of gold remain if spending stays ahead of income.`
+    });
+  }
+
+  if (manaRunwayDays !== null && manaRunwayDays <= 10) {
+    emergencies.push({
+      key: "mana",
+      severity: manaRunwayDays <= 4 ? "critical" : "warning",
+      label: "Mana drain",
+      details: `${manaRunwayDays.toFixed(1)} days of mana remain at the current burn rate.`
+    });
+  }
+
+  if (housingGap > 0) {
+    emergencies.push({
+      key: "housing",
+      severity: housingGap >= 10 ? "critical" : "warning",
+      label: "Housing strain",
+      details: `${housingGap} citizens exceed current support capacity.`
+    });
+  }
+
+  return {
+    deltas,
+    emergencies,
+    runway: {
+      foodDays: foodRunwayDays,
+      goldDays: goldRunwayDays,
+      manaDays: manaRunwayDays
+    }
+  };
+}
+
+export function applyDailyResources(state) {
+  const deltas = calculateDailyResourceDelta(state);
 
   state.resources.gold = clamp(state.resources.gold + deltas.gold, RESOURCE_MINIMUMS.gold, 999999);
   state.resources.food = clamp(state.resources.food + deltas.food, RESOURCE_MINIMUMS.food, 999999);

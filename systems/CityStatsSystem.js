@@ -1,5 +1,6 @@
 import { sumObjectValues } from "../engine/Utils.js";
 import { getDistrictSummary } from "./DistrictSystem.js";
+import { getCurrentTownFocus } from "./TownFocusSystem.js";
 
 const EMPTY_CITY_STATS = {
   value: 0,
@@ -62,6 +63,16 @@ export function recalculateCityStats(state) {
     nextStats.morale += effects.moraleFlat ?? 0;
     nextStats.health += effects.healthFlat ?? 0;
     nextStats.prosperity += effects.prosperityFlat ?? 0;
+  }
+
+  const townFocus = getCurrentTownFocus(state);
+  if (townFocus?.statFlat) {
+    nextStats.defense += townFocus.statFlat.defense ?? 0;
+    nextStats.security += townFocus.statFlat.security ?? 0;
+    nextStats.prestige += townFocus.statFlat.prestige ?? 0;
+    nextStats.morale += townFocus.statFlat.morale ?? 0;
+    nextStats.health += townFocus.statFlat.health ?? 0;
+    nextStats.prosperity += townFocus.statFlat.prosperity ?? 0;
   }
 
   const totalIncome = sumObjectValues(
