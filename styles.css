@@ -703,6 +703,8 @@ textarea {
   position: fixed;
   inset: 0;
   display: none;
+  z-index: 1200;
+  isolation: isolate;
 }
 
 .modal.is-open {
@@ -718,6 +720,7 @@ textarea {
 
 .modal__dialog {
   position: relative;
+  z-index: 1;
   width: min(920px, calc(100vw - 28px));
   max-height: calc(100vh - 32px);
   margin: 16px auto;
@@ -2859,7 +2862,7 @@ textarea {
 
 .construction-queue__item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: 1fr;
   gap: 12px;
   padding: 12px 14px;
   border-radius: 18px;
@@ -2877,15 +2880,31 @@ textarea {
 }
 
 .construction-queue__slot {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(141, 214, 255, 0.16);
+  background: rgba(255, 255, 255, 0.04);
   color: var(--muted);
   font-size: 0.76rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  line-height: 1.2;
+}
+
+.construction-queue__heading {
+  display: grid;
+  gap: 8px;
 }
 
 .construction-queue__meta strong {
   display: block;
   margin-top: 2px;
+  font-size: 1.06rem;
+  line-height: 1.2;
 }
 
 .construction-queue__meta small {
@@ -2894,12 +2913,14 @@ textarea {
 }
 
 .construction-queue__actions {
-  grid-auto-flow: column;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-content: start;
 }
 
 .construction-queue__actions .button {
-  min-width: 78px;
+  min-width: 0;
+  min-height: 46px;
+  white-space: nowrap;
 }
 
 .hex-map-panel__status {

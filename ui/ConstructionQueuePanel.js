@@ -17,8 +17,10 @@ function renderQueueItem(state, building, index, activeCount) {
   return `
     <article class="construction-queue__item ${isActive ? "is-active" : "is-queued"}">
       <div class="construction-queue__meta">
-        <span class="construction-queue__slot">${isActive ? `Raising now / slot ${index + 1}` : `Queued / #${index + 1}`}</span>
-        <strong>${escapeHtml(building.displayName)}</strong>
+        <div class="construction-queue__heading">
+          <span class="construction-queue__slot">${isActive ? `Raising now / slot ${index + 1}` : `Queued / #${index + 1}`}</span>
+          <strong>${escapeHtml(building.displayName)}</strong>
+        </div>
         <small>${escapeHtml(building.rarity)} / ${formatNumber(building.quality, 2)}%</small>
         <small>${isActive ? `${formatNumber(rate, 2)}% per day / ETA ${escapeHtml(eta)}` : "Will begin when a Drift slot opens."}</small>
       </div>
