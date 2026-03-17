@@ -260,6 +260,31 @@ function renderRealmLinks() {
   `;
 }
 
+function renderRollTableReview(state) {
+  const total = Object.values(state.rollTables).reduce((sum, entries) => sum + entries.length, 0);
+  return `
+    <section class="scene-panel">
+      <div class="panel__header">
+        <h3>Roll Table Review</h3>
+        <span class="panel__subtle">${total} total rollable entries across all realities</span>
+      </div>
+      <div class="rolltable-review">
+        ${Object.entries(state.rollTables)
+          .map(
+            ([rarity, entries]) => `
+              <article class="rolltable-review__card">
+                <span>${escapeHtml(rarity)}</span>
+                <strong>${entries.length}</strong>
+                <small>${entries.length === 1 ? "building can be rolled" : "buildings can be rolled"}</small>
+              </article>
+            `
+          )
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
 function renderHomeShelves(state) {
   const activeTab = state.transientUi?.homeShelfTab ?? "overview";
   const tabs = [
@@ -271,6 +296,7 @@ function renderHomeShelves(state) {
   const panels = {
     overview: `
       ${renderWorldSummary(state)}
+      ${renderRollTableReview(state)}
       ${renderFeaturedBuildings(state)}
       ${renderPolicyHistory(state)}
     `,

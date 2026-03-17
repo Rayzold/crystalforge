@@ -173,6 +173,8 @@ textarea {
 .stats-panel__grid,
 .citizen-panel__grid,
 .building-grid,
+.rolltable-review,
+.rolltable-editor-grid,
 .admin-grid {
   display: grid;
   gap: 12px;
@@ -205,7 +207,8 @@ textarea {
 
 .resource-chip,
 .stat-tile,
-.citizen-tile {
+.citizen-tile,
+.rolltable-review__card {
   padding: 14px;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.04);
@@ -214,7 +217,10 @@ textarea {
 
 .resource-chip__label,
 .stat-tile span,
-.citizen-tile span {
+.citizen-tile span,
+.rolltable-review__card span,
+.rolltable-review__card small,
+.rolltable-editor__header span {
   display: block;
   font-size: 0.82rem;
   color: var(--muted);
@@ -222,7 +228,8 @@ textarea {
 
 .resource-chip__value,
 .stat-tile strong,
-.citizen-tile strong {
+.citizen-tile strong,
+.rolltable-review__card strong {
   display: block;
   margin-top: 8px;
   font-size: 1.3rem;
@@ -606,6 +613,15 @@ textarea {
   justify-content: flex-end;
 }
 
+.rolltable-review {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.rolltable-review__card small {
+  margin-top: 6px;
+  line-height: 1.45;
+}
+
 .overflow-list,
 .history-panel__list {
   max-height: 330px;
@@ -697,6 +713,30 @@ textarea {
 .admin-root {
   position: relative;
   z-index: 5;
+}
+
+.rolltable-editor-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.rolltable-editor {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.rolltable-editor__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.rolltable-editor textarea {
+  min-height: 180px;
 }
 
 .modal {
@@ -3375,6 +3415,8 @@ textarea {
   .building-detail__signature,
   .policy-history,
   .manifest-shrine,
+  .rolltable-review,
+  .rolltable-editor-grid,
   .drift-evolution-panel__stats,
   .hex-map-tooltip,
   .home-shelves__tabs,
@@ -3402,6 +3444,7 @@ textarea {
   .lore-grid,
   .onboarding-grid,
   .landing-hero__facts,
+  .rolltable-review,
   .drift-evolution-panel__stats,
   .emergency-panel__metrics,
   .town-focus-card__projection,
@@ -3435,6 +3478,8 @@ textarea {
   .emergency-panel__metrics,
   .policy-history,
   .manifest-shrine,
+  .rolltable-review,
+  .rolltable-editor-grid,
   .drift-evolution-panel__stats,
   .hex-map-tooltip,
   .home-shelves__tabs,

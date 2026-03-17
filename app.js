@@ -157,6 +157,36 @@ function exportBuildingCatalogStatus() {
   URL.revokeObjectURL(url);
 }
 
+function setRollTableList({ rarity, names }) {
+  const parsedNames = [...new Set(
+    String(names ?? "")
+      .split(/\r?\n/)
+      .map((name) => name.trim())
+      .filter(Boolean)
+  )];
+
+  commit((draft) => {
+    draft.rollTables[rarity] = parsedNames;
+
+    for (const name of parsedNames) {
+      const catalogKey = getCatalogKey(name, rarity);
+      if (!draft.buildingCatalog[catalogKey]) {
+        draft.buildingCatalog[catalogKey] = createCatalogEntryFromInput({
+          name,
+          rarity,
+          district: "Residential District",
+          tags: ["civic"],
+          iconKey: "spire",
+          imagePath: "",
+          specialEffect: "A newly recorded structure awaiting fuller classification."
+        });
+      }
+    }
+  });
+
+  reportSuccess(`${rarity} roll list updated to ${parsedNames.length} building${parsedNames.length === 1 ? "" : "s"}.`);
+}
+
 function clearUrlParams() {
   window.history.replaceState({}, "", window.location.pathname);
 }
@@ -613,6 +643,7 @@ const actions = {
   clearBuildingPlacement(buildingId) {
     clearPlacement(buildingId, "Admin");
   },
+  setRollTableList,
   manageRollTable,
   saveDistrict({ districtName, definition }) {
     commit((draft) => setDistrictDefinition(draft, districtName, definition));

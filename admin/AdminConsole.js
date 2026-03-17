@@ -55,6 +55,26 @@ function townFocusOptions(selectedValue) {
     .join("");
 }
 
+function renderRollTableListEditor(state) {
+  return RARITY_ORDER.map(
+    (rarity) => `
+      <article class="rolltable-editor">
+        <div class="rolltable-editor__header">
+          <strong>${escapeHtml(rarity)}</strong>
+          <span>${state.rollTables[rarity]?.length ?? 0} rollable building${(state.rollTables[rarity]?.length ?? 0) === 1 ? "" : "s"}</span>
+        </div>
+        <label>
+          <span>${escapeHtml(rarity)} Pool</span>
+          <textarea id="rolltable-list-${rarity}" rows="8">${escapeHtml((state.rollTables[rarity] ?? []).join("\n"))}</textarea>
+        </label>
+        <button class="button button--ghost" data-admin-action="set-rolltable-list" data-rarity="${rarity}">
+          Apply ${escapeHtml(rarity)} List
+        </button>
+      </article>
+    `
+  ).join("");
+}
+
 export class AdminConsole {
   constructor(actions) {
     this.actions = actions;
@@ -271,6 +291,12 @@ export class AdminConsole {
               specialEffect: this.getValue("pool-effect"),
               statOverrides: this.getJson("pool-stats")
             })
+          });
+          break;
+        case "set-rolltable-list":
+          this.actions.setRollTableList({
+            rarity: target.dataset.rarity,
+            names: this.getValue(`rolltable-list-${target.dataset.rarity}`)
           });
           break;
         case "save-district":
@@ -494,6 +520,13 @@ export class AdminConsole {
         content: `
           <section class="admin-section">
             <h3>Roll Tables</h3>
+            <p>Edit each rarity pool directly. Use one building name per line, then apply the list for that rarity.</p>
+            <div class="rolltable-editor-grid">
+              ${renderRollTableListEditor(state)}
+            </div>
+          </section>
+          <section class="admin-section">
+            <h3>Single Entry Tools</h3>
             <div class="admin-grid">
               <label>Name<input id="pool-name" value="Custom Tower" /></label>
               <label>Rarity<select id="pool-rarity">${options(RARITY_ORDER, "Common")}</select></label>
