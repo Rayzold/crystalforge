@@ -1,6 +1,7 @@
 import { SPEED_MULTIPLIERS } from "../content/Config.js";
 import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js";
 import { getTownFocusAvailability } from "../systems/TownFocusSystem.js";
+import { renderConstructionQueuePanel } from "./ConstructionQueuePanel.js";
 
 export function renderCalendarPanel(state) {
   const date = getStructuredDate(state.calendar.dayOffset);
@@ -41,6 +42,7 @@ export function renderCalendarPanel(state) {
           ).join("")}
         </select>
       </label>
+      ${renderConstructionQueuePanel(state)}
     </section>
   `;
 }

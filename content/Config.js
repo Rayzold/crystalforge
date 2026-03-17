@@ -1,11 +1,12 @@
 import { BUILDING_POOLS } from "./BuildingPools.js";
 import { BASE_DISTRICT_CONFIG } from "./DistrictConfig.js";
+import { DRIFT_POPULATION_GOALS } from "./DriftEvolutionConfig.js";
 import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v0.5.1";
-export const SAVE_VERSION = 5;
+export const APP_VERSION = "v0.6.2";
+export const SAVE_VERSION = 6;
 export const STORAGE_KEY = "crystal-forge-save";
 export const MASCOT_MEDIA = {
   enabled: true,
@@ -57,21 +58,21 @@ export const DEFAULT_START_STATE = {
   crystals: { Common: 8, Uncommon: 5, Rare: 3, Epic: 1, Legendary: 1, Beyond: 0 },
   shards: { Common: 32, Uncommon: 14, Rare: 7, Epic: 0, Legendary: 0, Beyond: 0 },
   resources: {
-    gold: 120,
-    food: 90,
-    materials: 75,
-    mana: 35,
-    population: 41,
-    prosperity: 28
+    gold: 1200,
+    food: 900,
+    materials: 750,
+    mana: 350,
+    population: DRIFT_POPULATION_GOALS.startingPopulation,
+    prosperity: 280
   },
   citizens: {
-    Peasants: 18,
-    Workers: 11,
-    Merchants: 4,
-    Scholars: 3,
-    Clergy: 2,
-    Soldiers: 2,
-    Nobles: 1,
+    Peasants: 184,
+    Workers: 113,
+    Merchants: 41,
+    Scholars: 31,
+    Clergy: 20,
+    Soldiers: 20,
+    Nobles: 11,
     Mages: 0
   },
   settings: {

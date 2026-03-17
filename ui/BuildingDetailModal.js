@@ -1,7 +1,12 @@
 import { RARITY_COLORS } from "../content/Rarities.js";
 import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
-import { getBuildingDailyRate } from "../systems/ConstructionSystem.js";
+import {
+  getBuildingDailyRate,
+  getConstructionQueuePosition,
+  getDriftConstructionSlots,
+  isBuildingActivelyConstructed
+} from "../systems/ConstructionSystem.js";
 import { getBuildingPlacementBonuses } from "../systems/MapSystem.js";
 import { renderModal } from "./Modal.js";
 
@@ -48,9 +53,12 @@ export function renderBuildingDetailModal(state, pageKey) {
   }
 
   const isIncomplete = !building.isComplete;
-  const rate = getBuildingDailyRate(building, state.constructionSpeedMultiplier);
+  const isActiveConstruction = isIncomplete && isBuildingActivelyConstructed(state, building.id);
+  const rate = isActiveConstruction ? getBuildingDailyRate(building, state) : 0;
+  const queuePosition = isIncomplete ? getConstructionQueuePosition(state, building.id) : -1;
+  const driftSlots = getDriftConstructionSlots(state);
   const daysRemaining = rate > 0 && isIncomplete ? Math.ceil((100 - building.quality) / rate) : 0;
-  const eta = isIncomplete ? formatDate(state.calendar.dayOffset + daysRemaining) : null;
+  const eta = isActiveConstruction ? formatDate(state.calendar.dayOffset + daysRemaining) : null;
   const placementBonus = getBuildingPlacementBonuses(state, building);
   const signatureReadout = getSignatureReadout(building);
   const artMarkup = building.imagePath
@@ -126,9 +134,10 @@ export function renderBuildingDetailModal(state, pageKey) {
         <section class="building-detail__panel">
           <h4>Construction</h4>
           <ul class="building-detail__facts">
-            <li><span>Status</span><strong>${building.isComplete ? "Completed" : "Auto-constructing"}</strong></li>
+            <li><span>Status</span><strong>${building.isComplete ? "Completed" : isActiveConstruction ? "Auto-constructing" : "Queued"}</strong></li>
             <li><span>Rate</span><strong>${formatNumber(rate, 2)}% / day</strong></li>
-            <li><span>Forecast</span><strong>${building.isComplete ? escapeHtml(building.completedAt ?? "Completed") : escapeHtml(eta ?? "Waiting")}</strong></li>
+            <li><span>Forecast</span><strong>${building.isComplete ? escapeHtml(building.completedAt ?? "Completed") : escapeHtml(eta ?? "Waiting for a slot")}</strong></li>
+            <li><span>Drift Queue</span><strong>${building.isComplete ? "Finished" : isActiveConstruction ? `Active within ${driftSlots} slots` : `Queued #${queuePosition + 1}`}</strong></li>
           </ul>
         </section>
 

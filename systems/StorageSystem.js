@@ -13,6 +13,8 @@ import { recalculateCityStats } from "./CityStatsSystem.js";
 import { getDistrictSummary } from "./DistrictSystem.js";
 import { normalizeShardCollection } from "./ShardSystem.js";
 import { createMapCells } from "./MapSystem.js";
+import { createDefaultDriftEvolutionState, normalizeDriftEvolutionState, syncDriftEvolutionState } from "./DriftEvolutionSystem.js";
+import { normalizeConstructionPriority } from "./ConstructionSystem.js";
 import { createDefaultTownFocusState, normalizeTownFocusState } from "./TownFocusSystem.js";
 
 export function createInitialState() {
@@ -35,9 +37,11 @@ export function createInitialState() {
     },
     districtSummary: [],
     cityStats: {},
+    constructionPriority: [],
     events: { active: [], recent: [], scheduled: [] },
     historyLog: [],
     calendar: { dayOffset: 0 },
+    driftEvolution: createDefaultDriftEvolutionState(),
     townFocus: createDefaultTownFocusState(),
     settings: structuredClone(DEFAULT_START_STATE.settings),
     ui: {
@@ -49,6 +53,8 @@ export function createInitialState() {
   };
 
   state.resources.population = Object.values(state.citizens).reduce((sum, value) => sum + value, 0);
+  syncDriftEvolutionState(state);
+  normalizeConstructionPriority(state);
   state.districtSummary = getDistrictSummary(state);
   recalculateCityStats(state);
   return state;
@@ -150,6 +156,7 @@ export function validateAndMigrateSave(rawSave) {
     map: {
       cells: createMapCells()
     },
+    constructionPriority: Array.isArray(rawSave.constructionPriority) ? rawSave.constructionPriority : [],
     events: {
       active: Array.isArray(rawSave.events?.active) ? rawSave.events.active : [],
       recent: Array.isArray(rawSave.events?.recent) ? rawSave.events.recent : [],
@@ -157,6 +164,7 @@ export function validateAndMigrateSave(rawSave) {
     },
     historyLog: Array.isArray(rawSave.historyLog) ? rawSave.historyLog : [],
     calendar: { dayOffset: Number(rawSave.calendar?.dayOffset ?? 0) },
+    driftEvolution: normalizeDriftEvolutionState(rawSave.driftEvolution, Array.isArray(rawSave.buildings) ? rawSave.buildings.length : 0),
     townFocus: normalizeTownFocusState(rawSave.townFocus),
     settings: { ...base.settings, ...(rawSave.settings ?? {}) },
     ui: {
@@ -168,6 +176,8 @@ export function validateAndMigrateSave(rawSave) {
   };
 
   nextState.resources.population = Object.values(nextState.citizens).reduce((sum, value) => sum + value, 0);
+  syncDriftEvolutionState(nextState);
+  normalizeConstructionPriority(nextState);
   nextState.districtSummary = getDistrictSummary(nextState);
   recalculateCityStats(nextState);
   return nextState;

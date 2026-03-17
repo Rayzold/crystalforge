@@ -1,5 +1,6 @@
 import { sumObjectValues } from "../engine/Utils.js";
 import { getDistrictSummary } from "./DistrictSystem.js";
+import { scalePopulationSupport } from "./DriftEvolutionSystem.js";
 import { getBuildingPlacementBonuses } from "./MapSystem.js";
 import { getCurrentTownFocus } from "./TownFocusSystem.js";
 
@@ -22,6 +23,7 @@ function applyPercent(value, percent) {
 
 export function recalculateCityStats(state) {
   const nextStats = structuredClone(EMPTY_CITY_STATS);
+  let rawPopulationSupport = 0;
 
   for (const building of state.buildings) {
     if (!building.isComplete) {
@@ -31,7 +33,7 @@ export function recalculateCityStats(state) {
     for (const [key, value] of Object.entries(building.stats)) {
       nextStats[key] = (nextStats[key] ?? 0) + value * building.multiplier * placementMultiplier;
     }
-    nextStats.populationSupport += building.citizenEffects.populationSupport * building.multiplier * placementMultiplier;
+    rawPopulationSupport += building.citizenEffects.populationSupport * placementMultiplier;
   }
 
   for (const [citizenClass, count] of Object.entries(state.citizens)) {
@@ -54,7 +56,7 @@ export function recalculateCityStats(state) {
     nextStats.security += (bonuses.securityFlat ?? 0) * district.level;
     nextStats.prestige += (bonuses.prestigeFlat ?? 0) * district.level;
     nextStats.morale += (bonuses.moraleFlat ?? 0) * district.level;
-    nextStats.populationSupport += (bonuses.populationSupportFlat ?? 0) * district.level;
+    rawPopulationSupport += (bonuses.populationSupportFlat ?? 0) * district.level;
   }
 
   for (const event of state.events.active) {
@@ -112,6 +114,7 @@ export function recalculateCityStats(state) {
   }
 
   nextStats.prosperity += state.resources.prosperity;
+  nextStats.populationSupport = scalePopulationSupport(rawPopulationSupport);
   state.cityStats = nextStats;
   return nextStats;
 }

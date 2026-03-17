@@ -6,6 +6,7 @@ export function renderStatsPanel(state) {
     ["Value", stats.value],
     ["Income", stats.income],
     ["Upkeep", stats.upkeep],
+    ["Pop. Support", stats.populationSupport],
     ["Defense", stats.defense],
     ["Security", stats.security],
     ["Prestige", stats.prestige],
@@ -25,7 +26,7 @@ export function renderStatsPanel(state) {
             ([label, value]) => `
               <article class="stat-tile">
                 <span>${label}</span>
-                <strong>${formatNumber(value, 2)}</strong>
+                <strong>${formatNumber(value, label === "Pop. Support" ? 0 : 2)}</strong>
               </article>
             `
           )

@@ -3,6 +3,7 @@ import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js";
 import { getTownFocusHistory } from "../systems/TownFocusSystem.js";
 import { renderCalendarPanel } from "./CalendarPanel.js";
+import { renderDriftEvolutionPanel } from "./DriftEvolutionPanel.js";
 import { renderEventPanel } from "./EventPanel.js";
 import { renderHistoryPanel } from "./HistoryPanel.js";
 import { renderTownFocusPanel } from "./TownFocusPanel.js";
@@ -316,6 +317,7 @@ export function renderHomePage(state) {
     subtitle: "A calmer overview of Drift, with the council, city pulse, and next actions gathered into cleaner shelves.",
     content: `
       ${renderLandingHero(state)}
+      ${renderDriftEvolutionPanel(state)}
       ${renderTownFocusPanel(state)}
       ${renderHomeShelves(state)}
     `,

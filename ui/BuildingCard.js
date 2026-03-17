@@ -1,7 +1,12 @@
 import { RARITY_COLORS } from "../content/Rarities.js";
 import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
-import { getBuildingDailyRate } from "../systems/ConstructionSystem.js";
+import {
+  getBuildingDailyRate,
+  getConstructionQueuePosition,
+  getDriftConstructionSlots,
+  isBuildingActivelyConstructed
+} from "../systems/ConstructionSystem.js";
 
 function renderIcon(iconKey) {
   const shapes = {
@@ -65,9 +70,12 @@ function renderStatList(record, inactive) {
 export function renderBuildingCard(building, state) {
   const selected = state.ui.selectedBuildingId === building.id;
   const isIncomplete = !building.isComplete;
-  const rate = getBuildingDailyRate(building, state.constructionSpeedMultiplier);
+  const isActiveConstruction = isIncomplete && isBuildingActivelyConstructed(state, building.id);
+  const rate = isActiveConstruction ? getBuildingDailyRate(building, state) : 0;
+  const queuePosition = isIncomplete ? getConstructionQueuePosition(state, building.id) : -1;
+  const driftSlots = getDriftConstructionSlots(state);
   const daysRemaining = rate > 0 && isIncomplete ? Math.ceil((100 - building.quality) / rate) : 0;
-  const eta = isIncomplete ? formatDate(state.calendar.dayOffset + daysRemaining) : null;
+  const eta = isActiveConstruction ? formatDate(state.calendar.dayOffset + daysRemaining) : null;
   const progressPercent = Math.min(100, building.quality);
 
   return `
@@ -93,12 +101,24 @@ export function renderBuildingCard(building, state) {
         </div>
         <div class="progress-bar"><span style="width:${progressPercent}%"></span></div>
         <div class="building-card__meta">
-          <span>Auto ${formatNumber(rate, 2)}% / day</span>
-          <span>${building.isComplete ? `Completed ${escapeHtml(building.completedAt ?? "today")}` : `ETA ${escapeHtml(eta)}`}</span>
+          <span>${isIncomplete ? `Auto ${formatNumber(rate, 2)}% / day` : "Auto completed"}</span>
+          <span>${
+            building.isComplete
+              ? `Completed ${escapeHtml(building.completedAt ?? "today")}`
+              : isActiveConstruction
+                ? `ETA ${escapeHtml(eta)}`
+                : `Queued #${queuePosition + 1} / ${driftSlots} slots active`
+          }</span>
         </div>
         <div class="building-card__meta">
           <span>${escapeHtml(building.rarity)} building</span>
-          <span>${building.isComplete ? `Active x${building.multiplier}` : "Needs placement planning"}</span>
+          <span>${
+            building.isComplete
+              ? `Active x${building.multiplier}`
+              : isActiveConstruction
+                ? "Drift-growing now"
+                : "Waiting for an open drift slot"
+          }</span>
         </div>
         <p class="building-card__effect">${escapeHtml(building.specialEffect)}</p>
         <p class="building-card__flavor">${escapeHtml(building.flavorText ?? "No chronicle flavor recorded yet.")}</p>

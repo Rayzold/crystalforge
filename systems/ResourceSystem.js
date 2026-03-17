@@ -108,13 +108,21 @@ function getRunwayDays(stockpile, dailyDelta) {
   return stockpile / Math.abs(dailyDelta);
 }
 
+function roundDisplayNumber(value, decimals = 2) {
+  const factor = 10 ** decimals;
+  return Math.round(Number(value) * factor) / factor;
+}
+
 export function getEmergencyStatus(state) {
   const deltas = calculateDailyResourceDelta(state);
   const emergencies = [];
   const foodRunwayDays = getRunwayDays(state.resources.food, deltas.food);
   const goldRunwayDays = getRunwayDays(state.resources.gold, deltas.gold);
   const manaRunwayDays = getRunwayDays(state.resources.mana, deltas.mana);
-  const housingGap = Math.max(0, state.resources.population - (state.cityStats.populationSupport ?? 0));
+  const housingGap = roundDisplayNumber(
+    Math.max(0, state.resources.population - (state.cityStats.populationSupport ?? 0)),
+    2
+  );
 
   if ((state.cityStats.morale ?? 0) <= 18) {
     emergencies.push({

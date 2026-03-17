@@ -30,7 +30,7 @@ export const RARITY_GLOWS = {
 export const AUTO_CONSTRUCTION_RATES = {
   Common: 1,
   Uncommon: 0.5,
-  Rare: 0.25,
+  Rare: 1 / 3,
   Epic: 1 / 7,
   Legendary: 1 / 14,
   Beyond: 1 / 28

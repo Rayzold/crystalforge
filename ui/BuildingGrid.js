@@ -1,6 +1,7 @@
 import { BUILDING_GRID_LIMIT } from "../content/Config.js";
 import { RARITY_ORDER } from "../content/Rarities.js";
 import { sortBuildings } from "../engine/Utils.js";
+import { getActiveConstructionQueue, getDriftConstructionSlots } from "../systems/ConstructionSystem.js";
 import { renderBuildingCard } from "./BuildingCard.js";
 
 export function getVisibleBuildings(state) {
@@ -14,6 +15,8 @@ export function getVisibleBuildings(state) {
 export function renderBuildingGrid(state) {
   const visibleBuildings = getVisibleBuildings(state);
   const mainGrid = visibleBuildings.slice(0, BUILDING_GRID_LIMIT);
+  const activeConstruction = getActiveConstructionQueue(state);
+  const constructionSlots = getDriftConstructionSlots(state);
 
   return `
     <section class="panel building-grid-panel">
@@ -29,7 +32,7 @@ export function renderBuildingGrid(state) {
               ).join("")}
             </select>
           </label>
-          <span class="panel__subtle">${visibleBuildings.length} buildings tracked</span>
+          <span class="panel__subtle">${visibleBuildings.length} buildings tracked / ${activeConstruction.length} of ${constructionSlots} Drift slots active</span>
         </div>
       </div>
       <div class="building-grid">

@@ -1,4 +1,5 @@
 import { renderCitizenPanel } from "./CitizenPanel.js";
+import { renderDriftEvolutionPanel } from "./DriftEvolutionPanel.js";
 import { renderDistrictPanel } from "./DistrictPanel.js";
 import { renderStatsPanel } from "./StatsPanel.js";
 
@@ -30,6 +31,7 @@ export function renderCitizensPage(state) {
     title: "Citizens",
     subtitle: "A page focused on classes, social texture, and the city systems driven by your people instead of raw tables.",
     content: `
+      ${renderDriftEvolutionPanel(state, { compact: true })}
       ${renderCitizenPanel(state)}
       ${renderCitizenLore(state)}
     `,

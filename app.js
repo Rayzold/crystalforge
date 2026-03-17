@@ -17,7 +17,9 @@ import {
 } from "./systems/CitizenSystem.js";
 import { recalculateCityStats } from "./systems/CityStatsSystem.js";
 import { addCrystals, setCrystals, spendCrystal } from "./systems/CrystalSystem.js";
+import { moveConstructionPriority, normalizeConstructionPriority } from "./systems/ConstructionSystem.js";
 import { resetDistrictLevels, setDistrictDefinition, setDistrictLevelOverride, getDistrictSummary } from "./systems/DistrictSystem.js";
+import { syncDriftEvolutionState } from "./systems/DriftEvolutionSystem.js";
 import { clearActiveEvents, triggerEvent } from "./systems/EventSystem.js";
 import { manifestSelectedRarity } from "./systems/GachaSystem.js";
 import { addHistoryEntry } from "./systems/HistoryLogSystem.js";
@@ -55,6 +57,15 @@ function syncDerivedState(state) {
       RARITY_ORDER.find((rarity) => (state.crystals[rarity] ?? 0) > 0) ?? state.selectedRarity;
   }
   state.settings.currentPage = pageKey;
+  const driftUpdate = syncDriftEvolutionState(state);
+  for (const stage of driftUpdate.newStages) {
+    addHistoryEntry(state, {
+      category: "Evolution",
+      title: stage.name,
+      details: `Drift evolution reached ${stage.name} at ${driftUpdate.manifestedCount} manifested buildings.`
+    });
+  }
+  normalizeConstructionPriority(state);
   state.districtSummary = getDistrictSummary(state);
   state.resources.population = Object.values(state.citizens).reduce((sum, value) => sum + value, 0);
   updateTownFocusAvailability(state);
@@ -425,6 +436,21 @@ function clearPlacement(buildingId, source = "Player") {
   return result;
 }
 
+function reprioritizeConstruction(buildingId, direction) {
+  const result = commit((draft) => moveConstructionPriority(draft, buildingId, direction));
+  if (!result.ok) {
+    reportError(result.reason);
+    return;
+  }
+  if (!result.moved) {
+    reportSuccess("Construction priority unchanged.");
+    return;
+  }
+
+  const building = getCurrentState().buildings.find((entry) => entry.id === buildingId);
+  reportSuccess(`${building?.displayName ?? "Building"} priority updated.`);
+}
+
 function manageRollTable({ mode, name, rarity, targetRarity, nextName, catalogEntry }) {
   commit((draft) => {
     const sourceKey = getCatalogKey(name, rarity);
@@ -774,6 +800,9 @@ root.addEventListener("click", async (event) => {
       clearPlacement(selectedBuilding.id, "Player");
       break;
     }
+    case "prioritize-construction":
+      reprioritizeConstruction(target.dataset.buildingId, target.dataset.direction);
+      break;
     case "upgrade-crystal": {
       const sourceRarity = target.dataset.rarity;
       const nextRarity = getNextRarity(sourceRarity);
