@@ -26,7 +26,7 @@ export function recalculateCityStats(state) {
   let rawPopulationSupport = 0;
 
   for (const building of state.buildings) {
-    if (!building.isComplete) {
+    if (!building.isComplete || building.isRuined) {
       continue;
     }
     const placementMultiplier = 1 + getBuildingPlacementBonuses(state, building).totalPercent;
@@ -81,7 +81,7 @@ export function recalculateCityStats(state) {
 
   const totalIncome = sumObjectValues(
     state.buildings
-      .filter((building) => building.isComplete)
+      .filter((building) => building.isComplete && !building.isRuined)
       .reduce(
         (record, building) => {
           const placementMultiplier = 1 + getBuildingPlacementBonuses(state, building).totalPercent;
@@ -97,7 +97,7 @@ export function recalculateCityStats(state) {
 
   nextStats.income += totalIncome;
   nextStats.upkeep += state.buildings
-    .filter((building) => building.isComplete)
+    .filter((building) => building.isComplete && !building.isRuined)
     .reduce((sum, building) => sum + Math.max(0, building.stats.upkeep) * building.multiplier, 0);
 
   for (const district of districtSummary) {

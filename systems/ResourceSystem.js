@@ -20,7 +20,7 @@ export function calculateDailyResourceDelta(state) {
   const deltas = createDeltaRecord();
 
   for (const building of state.buildings) {
-    if (!building.isComplete) {
+    if (!building.isComplete || building.isRuined) {
       continue;
     }
 

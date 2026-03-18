@@ -7,6 +7,7 @@ import { TOWN_FOCUS_DEFINITIONS } from "../content/TownFocusConfig.js";
 import { escapeHtml } from "../engine/Utils.js";
 import { renderModal } from "../ui/Modal.js";
 import { formatDate } from "../systems/CalendarSystem.js";
+import { getManualSaveMeta } from "../systems/StorageSystem.js";
 
 function options(values, selectedValue) {
   return values
@@ -285,6 +286,12 @@ export class AdminConsole {
         case "remove-building":
           this.actions.removeBuilding(this.getValue("edit-building-id"));
           break;
+        case "ruin-building":
+          this.actions.setBuildingRuinState(this.getValue("edit-building-id"), true);
+          break;
+        case "repair-building":
+          this.actions.setBuildingRuinState(this.getValue("edit-building-id"), false);
+          break;
         case "set-building-placement":
           this.actions.setBuildingPlacement({
             buildingId: this.getValue("edit-building-id"),
@@ -397,6 +404,12 @@ export class AdminConsole {
         case "toggle-session-view":
           this.actions.toggleLiveSessionView();
           break;
+        case "save-manual-state":
+          this.actions.saveManualState();
+          break;
+        case "load-manual-state":
+          this.actions.loadManualState();
+          break;
         case "save-session-snapshot":
           this.actions.createSessionSnapshot(this.getValue("snapshot-name", "Session Snapshot"));
           break;
@@ -416,6 +429,7 @@ export class AdminConsole {
 
   render(state) {
     this.lastState = state;
+    const manualSaveMeta = getManualSaveMeta();
     const searchFilter = this.searchQuery.trim().toLowerCase();
     const matchingBuildings = state.buildings.filter((building) =>
       `${building.displayName} ${building.rarity} ${building.district} ${(building.tags ?? []).join(" ")}`
@@ -578,6 +592,8 @@ export class AdminConsole {
             <p><code>Set Placement</code> respects map rules. <code>Force Place</code> can override the forge core and occupied hexes.</p>
             <div class="admin-actions">
               <button class="button button--ghost" data-admin-action="save-building">Save Building</button>
+              <button class="button button--ghost" data-admin-action="ruin-building">Ruin Building</button>
+              <button class="button button--ghost" data-admin-action="repair-building">Repair Building</button>
               <button class="button button--ghost" data-admin-action="set-building-placement">Set Placement</button>
               <button class="button button--ghost" data-admin-action="force-building-placement">Force Place</button>
               <button class="button button--ghost" data-admin-action="clear-building-placement">Clear Placement</button>
@@ -745,8 +761,22 @@ export class AdminConsole {
           <section class="admin-section">
             <h3>Save Tools</h3>
             <p>Optional sound folder: <code>assets/audio/</code>. Matching rarity and ambient files will override synthesized audio automatically.</p>
+            ${
+              manualSaveMeta?.manualSavedAt
+                ? `
+                  <p>
+                    Last manual save:
+                    <strong>${escapeHtml(new Date(manualSaveMeta.manualSavedAt).toLocaleString())}</strong>
+                    · ${manualSaveMeta.buildingCount} building${manualSaveMeta.buildingCount === 1 ? "" : "s"}
+                    · population ${manualSaveMeta.population}
+                  </p>
+                `
+                : `<p>No manual local save recorded yet.</p>`
+            }
             <textarea id="save-json" rows="10"></textarea>
             <div class="admin-actions">
+              <button class="button button--ghost" data-admin-action="save-manual-state">Save Local State</button>
+              <button class="button button--ghost" data-admin-action="load-manual-state">Load Local State</button>
               <button class="button button--ghost" data-admin-action="export-save">Export Save JSON</button>
               <button class="button button--ghost" data-admin-action="import-save">Import Save JSON</button>
               <button class="button button--ghost" data-admin-action="clear-buildings">Delete All Buildings</button>

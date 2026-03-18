@@ -53,6 +53,7 @@ export function renderBuildingDetailModal(state, pageKey) {
   }
 
   const isIncomplete = !building.isComplete;
+  const isRuined = Boolean(building.isRuined);
   const isActiveConstruction = isIncomplete && isBuildingActivelyConstructed(state, building.id);
   const rate = isActiveConstruction ? getBuildingDailyRate(building, state) : 0;
   const queuePosition = isIncomplete ? getConstructionQueuePosition(state, building.id) : -1;
@@ -93,7 +94,7 @@ export function renderBuildingDetailModal(state, pageKey) {
           <p class="building-detail__effect">${escapeHtml(building.specialEffect)}</p>
           <p class="building-detail__flavor">${escapeHtml(building.flavorText ?? "No flavor text has been etched into the city chronicle yet.")}</p>
           <div class="building-detail__chips">
-            <span class="detail-chip">${building.isComplete ? `Active x${building.multiplier}` : "Inactive"}</span>
+            <span class="detail-chip">${isRuined ? "Ruined" : building.isComplete ? `Active x${building.multiplier}` : "Inactive"}</span>
             <span class="detail-chip">${formatNumber(building.quality, 2)}% quality</span>
             <span class="detail-chip">${building.mapPosition ? `Hex ${building.mapPosition.q}, ${building.mapPosition.r}` : "Unplaced"}</span>
           </div>
@@ -134,7 +135,7 @@ export function renderBuildingDetailModal(state, pageKey) {
         <section class="building-detail__panel">
           <h4>Construction</h4>
           <ul class="building-detail__facts">
-            <li><span>Status</span><strong>${building.isComplete ? "Completed" : isActiveConstruction ? "Auto-constructing" : "Queued"}</strong></li>
+            <li><span>Status</span><strong>${isRuined ? "Ruined / Offline" : building.isComplete ? "Completed" : isActiveConstruction ? "Auto-constructing" : "Queued"}</strong></li>
             <li><span>Rate</span><strong>${formatNumber(rate, 2)}% / day</strong></li>
             <li><span>Forecast</span><strong>${building.isComplete ? escapeHtml(building.completedAt ?? "Completed") : escapeHtml(eta ?? "Waiting for a slot")}</strong></li>
             <li><span>Drift Queue</span><strong>${building.isComplete ? "Finished" : isActiveConstruction ? `Active within ${driftSlots} slots` : `Queued #${queuePosition + 1}`}</strong></li>

@@ -69,6 +69,9 @@ function renderStatList(record, inactive) {
 }
 
 function getCompactStatus(building, { isIncomplete, isActiveConstruction, queuePosition, driftSlots, eta }) {
+  if (building.isRuined) {
+    return "Ruined / inactive until repaired";
+  }
   if (!isIncomplete) {
     return `Active x${building.multiplier}`;
   }
@@ -99,6 +102,7 @@ function getBuildingSignature(building) {
 export function renderBuildingCard(building, state) {
   const selected = state.ui.selectedBuildingId === building.id;
   const isIncomplete = !building.isComplete;
+  const isRuined = Boolean(building.isRuined);
   const isActiveConstruction = isIncomplete && isBuildingActivelyConstructed(state, building.id);
   const rate = isActiveConstruction ? getBuildingDailyRate(building, state) : 0;
   const queuePosition = isIncomplete ? getConstructionQueuePosition(state, building.id) : -1;
@@ -116,7 +120,7 @@ export function renderBuildingCard(building, state) {
   const compactStatus = getCompactStatus(building, { isIncomplete, isActiveConstruction, queuePosition, driftSlots, eta });
 
   return `
-    <article class="building-card building-card--stream ${selected ? "is-selected" : ""} ${isIncomplete ? "is-incomplete" : ""}" style="--rarity-color:${RARITY_COLORS[building.rarity]}">
+    <article class="building-card building-card--stream ${selected ? "is-selected" : ""} ${isIncomplete ? "is-incomplete" : ""} ${isRuined ? "is-ruined" : ""}" style="--rarity-color:${RARITY_COLORS[building.rarity]}">
       <button class="building-card__select" data-action="select-building" data-building-id="${building.id}">
         <div class="building-card__visual">
           ${renderMedia(building)}
@@ -143,11 +147,11 @@ export function renderBuildingCard(building, state) {
         </div>
         <div class="building-card__quality">
           <span>Quality ${formatNumber(building.quality, 2)}%</span>
-          <span>${building.isComplete ? "Complete" : "Incomplete"}</span>
+          <span>${isRuined ? "Ruined" : building.isComplete ? "Complete" : "Incomplete"}</span>
         </div>
         <div class="progress-bar"><span style="width:${progressPercent}%"></span></div>
         <div class="building-card__meta building-card__meta--compact">
-          <span>${isIncomplete ? `Auto ${formatNumber(rate, 2)}% / day` : `Completed ${escapeHtml(building.completedAt ?? "today")}`}</span>
+          <span>${isRuined ? "Bonuses offline" : isIncomplete ? `Auto ${formatNumber(rate, 2)}% / day` : `Completed ${escapeHtml(building.completedAt ?? "today")}`}</span>
           <span>${escapeHtml(building.district)}</span>
         </div>
         <div class="building-card__spotlights">

@@ -34,6 +34,7 @@ export function createBuildingInstance(state, catalogEntry, quality, timestamps)
     quality,
     multiplier: 0,
     isComplete: false,
+    isRuined: false,
     district: catalogEntry.district,
     iconKey: catalogEntry.iconKey,
     imagePath: catalogEntry.imagePath ?? null,
@@ -102,6 +103,17 @@ export function setBuildingQuality(building, quality) {
       details: `${building.displayName} completed after an admin quality update.`
     });
   }
+}
+
+export function setBuildingRuinState(building, isRuined, source = "Admin") {
+  building.isRuined = Boolean(isRuined);
+  building.history.push({
+    type: building.isRuined ? "ruined" : "repaired",
+    at: building.lastManifestedAt ?? building.createdAt ?? "Unknown",
+    details: building.isRuined
+      ? `${building.displayName} was marked ruined by ${source}.`
+      : `${building.displayName} was repaired by ${source}.`
+  });
 }
 
 export function updateBuildingMetadata(state, buildingId, updates) {

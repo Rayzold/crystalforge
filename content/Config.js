@@ -5,9 +5,10 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v0.7.21";
+export const APP_VERSION = "v0.7.24";
 export const SAVE_VERSION = 7;
 export const STORAGE_KEY = "crystal-forge-save";
+export const MANUAL_SAVE_KEY = "crystal-forge-manual-save";
 export const MASCOT_MEDIA = {
   enabled: true,
   videoPath: "./assets/video/drift-mascot.mp4",

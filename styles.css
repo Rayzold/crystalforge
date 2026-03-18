@@ -596,6 +596,17 @@ textarea {
   box-shadow: 0 0 0 1px var(--rarity-color), 0 0 28px color-mix(in srgb, var(--rarity-color) 26%, transparent);
 }
 
+.building-card.is-ruined {
+  border-color: rgba(217, 93, 125, 0.4);
+  box-shadow: 0 0 0 1px rgba(217, 93, 125, 0.2);
+}
+
+.building-card.is-ruined .building-card__banner::after {
+  background:
+    linear-gradient(180deg, rgba(30, 10, 16, 0.26), rgba(30, 10, 16, 0.34) 38%, rgba(20, 6, 10, 0.9)),
+    linear-gradient(135deg, rgba(217, 93, 125, 0.2), transparent 60%);
+}
+
 .building-card__select {
   width: 100%;
   padding: 0;
@@ -2717,6 +2728,11 @@ textarea {
   padding-top: 6px;
 }
 
+.sidebar-nav__save-actions {
+  display: grid;
+  gap: 10px;
+}
+
 .sidebar-nav__build {
   display: grid;
   gap: 4px;
@@ -2824,6 +2840,14 @@ textarea {
 
 .game-shell--page-forge.game-shell--forge-collapsed .sidebar-nav__footer .button[data-action="open-admin"]::before {
   content: "Admin";
+}
+
+.game-shell--page-forge.game-shell--forge-collapsed .sidebar-nav__footer .button[data-action="save-manual-state"]::before {
+  content: "Save";
+}
+
+.game-shell--page-forge.game-shell--forge-collapsed .sidebar-nav__footer .button[data-action="load-manual-state"]::before {
+  content: "Load";
 }
 
 .game-shell--page-forge.game-shell--forge-collapsed .sidebar-nav__build {

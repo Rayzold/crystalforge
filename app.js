@@ -6,7 +6,7 @@ import { getNextRarity, RARITY_ORDER } from "./content/Rarities.js";
 import { GameState } from "./engine/GameState.js";
 import { AnimationEngine } from "./fx/AnimationEngine.js";
 import { AudioEngine } from "./fx/AudioEngine.js";
-import { manifestIntoBuilding, removeBuilding, setBuildingQuality } from "./systems/BuildingSystem.js";
+import { manifestIntoBuilding, removeBuilding, setBuildingQuality, setBuildingRuinState } from "./systems/BuildingSystem.js";
 import { dateFromParts, formatDate } from "./systems/CalendarSystem.js";
 import {
   addCitizens,
@@ -40,10 +40,13 @@ import {
   createTestingBalanceResetState,
   createSingleCommonCrystalResetState,
   exportSave,
+  getManualSaveMeta,
   importSave,
+  loadManualState,
   loadGameState,
   resetSave,
   restoreSessionSnapshot,
+  saveManualState,
   saveGameState
 } from "./systems/StorageSystem.js";
 import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js";
@@ -781,6 +784,16 @@ const actions = {
   editBuilding(payload) {
     editBuilding(payload);
   },
+  setBuildingRuinState(buildingId, isRuined) {
+    commit((draft) => {
+      const building = draft.buildings.find((entry) => entry.id === buildingId);
+      if (!building) {
+        throw new Error("Building not found.");
+      }
+      setBuildingRuinState(building, isRuined, "Admin");
+    });
+    reportSuccess(isRuined ? "Building ruined." : "Building repaired.");
+  },
   removeBuilding(buildingId) {
     commit((draft) => {
       removeBuilding(draft, buildingId);
@@ -849,6 +862,23 @@ const actions = {
   },
   exportSave() {
     return exportSave(getCurrentState());
+  },
+  saveManualState() {
+    try {
+      saveManualState(getCurrentState());
+      reportSuccess("State saved locally.");
+    } catch (error) {
+      reportError(error.message);
+    }
+  },
+  loadManualState() {
+    try {
+      gameState.replace(loadManualState());
+      resetTransientUi();
+      reportSuccess("Saved state loaded.");
+    } catch (error) {
+      reportError(error.message);
+    }
   },
   importSave(text) {
     gameState.replace(importSave(text));
@@ -989,6 +1019,12 @@ root.addEventListener("click", async (event) => {
       break;
     case "toggle-session-view":
       actions.toggleLiveSessionView();
+      break;
+    case "save-manual-state":
+      actions.saveManualState();
+      break;
+    case "load-manual-state":
+      actions.loadManualState();
       break;
     case "preview-town-focus":
       openTownFocusModal(target.dataset.focusId);

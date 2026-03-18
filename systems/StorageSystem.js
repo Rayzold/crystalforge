@@ -1,6 +1,7 @@
 import {
   DEFAULT_START_PRESET,
   DEFAULT_START_STATE,
+  MANUAL_SAVE_KEY,
   SAVE_VERSION,
   START_STATE_PRESETS,
   STORAGE_KEY,
@@ -178,6 +179,7 @@ function normalizeBuildings(buildings, catalog) {
   }
   return buildings.map((building) => ({
     ...building,
+    isRuined: Boolean(building.isRuined),
     flavorText: building.flavorText ?? catalog?.[building.key]?.flavorText ?? null,
     mapPosition:
       typeof building.mapPosition?.q === "number" && typeof building.mapPosition?.r === "number"
@@ -294,6 +296,41 @@ export function saveGameState(state) {
     }
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(serializable));
+}
+
+export function saveManualState(state) {
+  const serializable = {
+    ...state,
+    manualSavedAt: Date.now(),
+    ui: {
+      ...state.ui,
+      adminOpen: false
+    }
+  };
+  localStorage.setItem(MANUAL_SAVE_KEY, JSON.stringify(serializable));
+  return serializable.manualSavedAt;
+}
+
+export function loadManualState() {
+  const rawText = localStorage.getItem(MANUAL_SAVE_KEY);
+  const parsed = safeJsonParse(rawText);
+  if (!parsed) {
+    throw new Error("No manual save found.");
+  }
+  return validateAndMigrateSave(parsed);
+}
+
+export function getManualSaveMeta() {
+  const rawText = localStorage.getItem(MANUAL_SAVE_KEY);
+  const parsed = safeJsonParse(rawText);
+  if (!parsed) {
+    return null;
+  }
+  return {
+    manualSavedAt: Number(parsed.manualSavedAt ?? 0) || null,
+    buildingCount: Array.isArray(parsed.buildings) ? parsed.buildings.length : 0,
+    population: Number(parsed.resources?.population ?? 0) || 0
+  };
 }
 
 export function exportSave(state) {

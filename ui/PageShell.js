@@ -1,6 +1,7 @@
 import { APP_VERSION, MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js";
 import { formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
+import { getManualSaveMeta } from "../systems/StorageSystem.js";
 import { getCurrentTownFocus, getTownFocusAvailability } from "../systems/TownFocusSystem.js";
 import { renderCrisisBanner } from "./CrisisBanner.js";
 import { renderTownFocusBadge } from "./TownFocusShared.js";
@@ -25,6 +26,7 @@ const ROUTE_GLYPHS = {
 };
 
 export function renderPageShell(state, pageKey, { title, subtitle, content, aside = "" }, overlays = "") {
+  const manualSaveMeta = getManualSaveMeta();
   const townFocusAvailability = getTownFocusAvailability(state);
   const currentFocus = getCurrentTownFocus(state);
   const summary = [
@@ -100,6 +102,20 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
         <div class="sidebar-nav__footer">
           <button class="button button--ghost" data-action="open-catalog">Building Catalog</button>
           <button class="button button--ghost" data-action="open-admin">${state.settings.liveSessionView ? "GM Console" : "Admin Console"}</button>
+          <div class="sidebar-nav__save-actions">
+            <button class="button button--ghost" data-action="save-manual-state">Save State</button>
+            <button class="button button--ghost" data-action="load-manual-state">Load State</button>
+          </div>
+          ${
+            manualSaveMeta?.manualSavedAt
+              ? `
+                <div class="sidebar-nav__build">
+                  <span>Manual Save</span>
+                  <strong>${new Date(manualSaveMeta.manualSavedAt).toLocaleString()}</strong>
+                </div>
+              `
+              : ""
+          }
           <button class="sidebar-nav__build sidebar-nav__build--mode" data-action="toggle-theme">
             <span>Theme</span>
             <strong>${state.settings.theme === "silver" ? "Silver" : "Dark"}</strong>
