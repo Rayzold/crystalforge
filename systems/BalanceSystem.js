@@ -112,13 +112,17 @@ export function createBuildingGameplayProfile(definition) {
   const resourceRates = {};
   for (const key of Object.keys(EMPTY_RESOURCES)) {
     const variance = seededFloat(`${definition.key}:resource:${key}`, 0.9, 1.1);
-    resourceRates[key] = roundTo(((basePower / 18) * (resourceWeights[key] ?? 0)) * variance, 2);
+    resourceRates[key] =
+      definition.resourceOverrides?.[key] ??
+      roundTo(((basePower / 18) * (resourceWeights[key] ?? 0)) * variance, 2);
   }
 
   const citizenEffects = {};
   for (const key of Object.keys(EMPTY_CITIZEN_EFFECTS)) {
     const variance = seededFloat(`${definition.key}:citizen:${key}`, 0.92, 1.08);
-    citizenEffects[key] = roundTo(((basePower / 20) * (citizenWeights[key] ?? 0)) * variance, 2);
+    citizenEffects[key] =
+      definition.citizenOverrides?.[key] ??
+      roundTo(((basePower / 20) * (citizenWeights[key] ?? 0)) * variance, 2);
   }
 
   return { stats, resourceRates, citizenEffects };

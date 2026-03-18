@@ -5,6 +5,7 @@ import { renderCitizensPage } from "./CitizensPage.js";
 import { renderCityPage } from "./CityPage.js";
 import { renderForgePage } from "./ForgePage.js";
 import { renderHomePage } from "./HomePage.js";
+import { renderManifestCompleteModal } from "./ManifestCompleteModal.js";
 import { renderPageShell } from "./PageShell.js";
 import { renderTownFocusCouncilModal } from "./TownFocusCouncilModal.js";
 import { getMayorSuggestions } from "../systems/TownFocusSystem.js";
@@ -24,8 +25,12 @@ export class UIRenderer {
       councilModalCycleKey: null,
       previewTownFocusId: null,
       homeShelfTab: "overview",
+      cityView: "stream",
+      buildingSort: "newest",
+      forgeNavCollapsed: true,
       adjacencyPulse: null,
-      focusCeremony: null
+      focusCeremony: null,
+      manifestCompleteModal: null
     };
   }
 
@@ -74,6 +79,7 @@ export class UIRenderer {
     const overlays = [
       renderBuildingDetailModal(viewState, this.pageKey),
       renderBuildingCatalogModal(viewState),
+      renderManifestCompleteModal(viewState),
       renderTownFocusCouncilModal(viewState),
       renderTownFocusCeremonyOverlay(viewState)
     ].join("");

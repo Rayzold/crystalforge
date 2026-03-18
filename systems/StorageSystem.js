@@ -1,12 +1,17 @@
 import {
+  DEFAULT_START_PRESET,
   DEFAULT_START_STATE,
   SAVE_VERSION,
+  START_STATE_PRESETS,
   STORAGE_KEY,
+  createEmptyCitizenCollection,
+  createEmptyCollection,
   createDefaultDistrictState,
   createDefaultRollTables
 } from "../content/Config.js";
 import { BASE_BUILDING_CATALOG, buildFlavorText } from "../content/BuildingCatalog.js";
-import { safeJsonParse } from "../engine/Utils.js";
+import { createId, safeJsonParse } from "../engine/Utils.js";
+import { formatDate } from "./CalendarSystem.js";
 import { createCitizenDefinitionsSnapshot, normalizeCitizens } from "./CitizenSystem.js";
 import { normalizeCrystalCollection } from "./CrystalSystem.js";
 import { recalculateCityStats } from "./CityStatsSystem.js";
@@ -17,16 +22,21 @@ import { createDefaultDriftEvolutionState, normalizeDriftEvolutionState, syncDri
 import { normalizeConstructionPriority } from "./ConstructionSystem.js";
 import { createDefaultTownFocusState, normalizeTownFocusState } from "./TownFocusSystem.js";
 
-export function createInitialState() {
+function getStartPreset(preset = DEFAULT_START_PRESET) {
+  return structuredClone(START_STATE_PRESETS[preset] ?? DEFAULT_START_STATE);
+}
+
+export function createInitialState(preset = DEFAULT_START_PRESET) {
+  const startState = getStartPreset(preset);
   const state = {
     version: SAVE_VERSION,
-    selectedRarity: DEFAULT_START_STATE.selectedRarity,
-    buildingFilter: DEFAULT_START_STATE.buildingFilter,
-    constructionSpeedMultiplier: DEFAULT_START_STATE.constructionSpeedMultiplier,
-    crystals: normalizeCrystalCollection(DEFAULT_START_STATE.crystals),
-    shards: normalizeShardCollection(DEFAULT_START_STATE.shards),
-    resources: structuredClone(DEFAULT_START_STATE.resources),
-    citizens: normalizeCitizens(DEFAULT_START_STATE.citizens),
+    selectedRarity: startState.selectedRarity,
+    buildingFilter: startState.buildingFilter,
+    constructionSpeedMultiplier: startState.constructionSpeedMultiplier,
+    crystals: normalizeCrystalCollection(startState.crystals),
+    shards: normalizeShardCollection(startState.shards),
+    resources: structuredClone(startState.resources),
+    citizens: normalizeCitizens(startState.citizens),
     citizenDefinitions: createCitizenDefinitionsSnapshot(),
     buildings: [],
     rollTables: createDefaultRollTables(),
@@ -43,7 +53,8 @@ export function createInitialState() {
     calendar: { dayOffset: 0 },
     driftEvolution: createDefaultDriftEvolutionState(),
     townFocus: createDefaultTownFocusState(),
-    settings: structuredClone(DEFAULT_START_STATE.settings),
+    sessionSnapshots: [],
+    settings: structuredClone(startState.settings),
     ui: {
       selectedBuildingId: null,
       selectedMapCell: null,
@@ -60,8 +71,89 @@ export function createInitialState() {
   return state;
 }
 
-function normalizeBuildingCatalog(sourceCatalog) {
-  const mergedCatalog = { ...structuredClone(BASE_BUILDING_CATALOG), ...(sourceCatalog ?? {}) };
+export function createSingleCommonCrystalResetState() {
+  const state = createInitialState("session");
+  state.selectedRarity = "Common";
+  state.crystals = createEmptyCollection(0);
+  state.crystals.Common = 1;
+  state.shards = createEmptyCollection(0);
+  state.resources = {
+    gold: 0,
+    food: 0,
+    materials: 0,
+    mana: 0,
+    population: 0,
+    prosperity: 0
+  };
+  state.citizens = createEmptyCitizenCollection(0);
+  state.buildings = [];
+  state.constructionPriority = [];
+  state.events = { active: [], recent: [], scheduled: [] };
+  state.historyLog = [];
+  state.calendar = { dayOffset: 0 };
+  state.driftEvolution = createDefaultDriftEvolutionState();
+  state.townFocus = createDefaultTownFocusState();
+  state.sessionSnapshots = [];
+  state.settings = structuredClone(getStartPreset("session").settings);
+  state.ui = {
+    selectedBuildingId: null,
+    selectedMapCell: null,
+    adminOpen: false,
+    lastManifestResult: null
+  };
+  state.districts = createDefaultDistrictState();
+  state.rollTables = createDefaultRollTables();
+  state.buildingCatalog = structuredClone(BASE_BUILDING_CATALOG);
+  state.map = { cells: createMapCells() };
+  state.resources.population = 0;
+  syncDriftEvolutionState(state);
+  normalizeConstructionPriority(state);
+  state.districtSummary = getDistrictSummary(state);
+  recalculateCityStats(state);
+  return state;
+}
+
+export function createLiveSessionResetState() {
+  return createInitialState("session");
+}
+
+export function createTestingBalanceResetState() {
+  return createInitialState("testing");
+}
+
+function stripSnapshotsForSnapshot(state) {
+  return {
+    ...structuredClone(state),
+    sessionSnapshots: []
+  };
+}
+
+export function createSessionSnapshot(state, name = "Session Snapshot") {
+  return {
+    id: createId("snapshot"),
+    name: String(name || "Session Snapshot").trim() || "Session Snapshot",
+    createdAt: Date.now(),
+    dateLabel: formatDate(state.calendar.dayOffset),
+    buildingCount: state.buildings.length,
+    payload: stripSnapshotsForSnapshot(state)
+  };
+}
+
+export function restoreSessionSnapshot(snapshot) {
+  return validateAndMigrateSave(snapshot?.payload ?? null);
+}
+
+function normalizeBuildingCatalog(sourceCatalog, sourceVersion = SAVE_VERSION) {
+  const baseCatalog = structuredClone(BASE_BUILDING_CATALOG);
+  const mergedCatalog =
+    Number(sourceVersion ?? 0) < 7
+      ? {
+          ...baseCatalog,
+          ...Object.fromEntries(
+            Object.entries(sourceCatalog ?? {}).filter(([key]) => !baseCatalog[key])
+          )
+        }
+      : { ...baseCatalog, ...(sourceCatalog ?? {}) };
   return Object.fromEntries(
     Object.entries(mergedCatalog).map(([key, entry]) => [
       key,
@@ -104,9 +196,12 @@ function normalizeSelectedMapCell(selectedMapCell) {
   return null;
 }
 
-function normalizeRollTables(sourceTables) {
+function normalizeRollTables(sourceTables, sourceVersion = SAVE_VERSION) {
   const baseTables = createDefaultRollTables();
   if (!sourceTables || typeof sourceTables !== "object") {
+    return baseTables;
+  }
+  if (Number(sourceVersion ?? 0) < 7) {
     return baseTables;
   }
   return Object.fromEntries(
@@ -139,7 +234,7 @@ export function validateAndMigrateSave(rawSave) {
     return base;
   }
 
-  const normalizedCatalog = normalizeBuildingCatalog(rawSave.buildingCatalog);
+  const normalizedCatalog = normalizeBuildingCatalog(rawSave.buildingCatalog, rawSave.version);
 
   const nextState = {
     ...base,
@@ -150,7 +245,7 @@ export function validateAndMigrateSave(rawSave) {
     resources: { ...base.resources, ...(rawSave.resources ?? {}) },
     citizens: normalizeCitizens(rawSave.citizens ?? base.citizens),
     buildings: normalizeBuildings(rawSave.buildings, normalizedCatalog),
-    rollTables: normalizeRollTables(rawSave.rollTables),
+    rollTables: normalizeRollTables(rawSave.rollTables, rawSave.version),
     buildingCatalog: normalizedCatalog,
     districts: normalizeDistrictState(rawSave.districts),
     map: {
@@ -166,6 +261,7 @@ export function validateAndMigrateSave(rawSave) {
     calendar: { dayOffset: Number(rawSave.calendar?.dayOffset ?? 0) },
     driftEvolution: normalizeDriftEvolutionState(rawSave.driftEvolution, Array.isArray(rawSave.buildings) ? rawSave.buildings.length : 0),
     townFocus: normalizeTownFocusState(rawSave.townFocus),
+    sessionSnapshots: Array.isArray(rawSave.sessionSnapshots) ? rawSave.sessionSnapshots : [],
     settings: { ...base.settings, ...(rawSave.settings ?? {}) },
     ui: {
       ...base.ui,

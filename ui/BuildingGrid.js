@@ -4,38 +4,57 @@ import { sortBuildings } from "../engine/Utils.js";
 import { getActiveConstructionQueue, getDriftConstructionSlots } from "../systems/ConstructionSystem.js";
 import { renderBuildingCard } from "./BuildingCard.js";
 
+function sortVisibleBuildings(buildings, sortKey) {
+  switch (sortKey) {
+    case "quality":
+      return [...buildings].sort((left, right) => right.quality - left.quality || right.createdDayOffset - left.createdDayOffset);
+    case "rarity":
+      return sortBuildings(buildings, RARITY_ORDER);
+    case "newest":
+    default:
+      return [...buildings].sort((left, right) => right.createdDayOffset - left.createdDayOffset || right.quality - left.quality);
+  }
+}
+
 export function getVisibleBuildings(state) {
-  const sorted = sortBuildings(state.buildings, RARITY_ORDER);
+  const sorted = sortVisibleBuildings(state.buildings, state.transientUi?.buildingSort ?? "newest");
   if (state.buildingFilter === "All") {
     return sorted;
   }
   return sorted.filter((building) => building.rarity === state.buildingFilter);
 }
 
-export function renderBuildingGrid(state) {
+export function renderBuildingGrid(state, options = {}) {
+  const { limit = BUILDING_GRID_LIMIT, showHeader = true, className = "" } = options;
   const visibleBuildings = getVisibleBuildings(state);
-  const mainGrid = visibleBuildings.slice(0, BUILDING_GRID_LIMIT);
+  const mainGrid = limit == null ? visibleBuildings : visibleBuildings.slice(0, limit);
   const activeConstruction = getActiveConstructionQueue(state);
   const constructionSlots = getDriftConstructionSlots(state);
 
   return `
-    <section class="panel building-grid-panel">
-      <div class="panel__header">
-        <h3>Forge Ledger</h3>
-        <div class="building-grid-panel__controls">
-          <label>
-            Filter
-            <select data-action="set-building-filter">
-              <option value="All" ${state.buildingFilter === "All" ? "selected" : ""}>All</option>
-              ${RARITY_ORDER.map(
-                (rarity) => `<option value="${rarity}" ${state.buildingFilter === rarity ? "selected" : ""}>${rarity}</option>`
-              ).join("")}
-            </select>
-          </label>
-          <span class="panel__subtle">${visibleBuildings.length} buildings tracked / ${activeConstruction.length} of ${constructionSlots} Drift slots active</span>
-        </div>
-      </div>
-      <div class="building-grid">
+    <section class="panel building-grid-panel ${className}">
+      ${
+        showHeader
+          ? `
+            <div class="panel__header">
+              <h3>Forge Ledger</h3>
+              <div class="building-grid-panel__controls">
+                <label>
+                  Filter
+                  <select data-action="set-building-filter">
+                    <option value="All" ${state.buildingFilter === "All" ? "selected" : ""}>All</option>
+                    ${RARITY_ORDER.map(
+                      (rarity) => `<option value="${rarity}" ${state.buildingFilter === rarity ? "selected" : ""}>${rarity}</option>`
+                    ).join("")}
+                  </select>
+                </label>
+                <span class="panel__subtle">${visibleBuildings.length} buildings tracked / ${activeConstruction.length} of ${constructionSlots} Drift slots active</span>
+              </div>
+            </div>
+          `
+          : ""
+      }
+      <div class="building-grid ${className ? `${className}__grid` : ""}">
         ${mainGrid.length ? mainGrid.map((building) => renderBuildingCard(building, state)).join("") : `<p class="empty-state">No buildings yet. Manifest your first structure.</p>`}
       </div>
     </section>

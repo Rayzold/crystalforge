@@ -1,5 +1,6 @@
 import { AdminConsole } from "./admin/AdminConsole.js";
 import { createCatalogEntryFromInput, getCatalogKey } from "./content/BuildingCatalog.js";
+import { GM_QUICK_CRYSTAL_PACKS } from "./content/Config.js";
 import { EVENT_POOLS } from "./content/EventPools.js";
 import { getNextRarity, RARITY_ORDER } from "./content/Rarities.js";
 import { GameState } from "./engine/GameState.js";
@@ -32,8 +33,20 @@ import {
   setBuildingPlacement
 } from "./systems/MapSystem.js";
 import { addShards, setShards } from "./systems/ShardSystem.js";
-import { createInitialState, exportSave, importSave, loadGameState, resetSave, saveGameState } from "./systems/StorageSystem.js";
-import { advanceTime } from "./systems/TimeSystem.js";
+import {
+  createInitialState,
+  createLiveSessionResetState,
+  createSessionSnapshot as createSessionSnapshotRecord,
+  createTestingBalanceResetState,
+  createSingleCommonCrystalResetState,
+  exportSave,
+  importSave,
+  loadGameState,
+  resetSave,
+  restoreSessionSnapshot,
+  saveGameState
+} from "./systems/StorageSystem.js";
+import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js";
 import { forceTownFocus, reopenTownFocusSelection, selectTownFocus, updateTownFocusAvailability } from "./systems/TownFocusSystem.js";
 import { Toasts } from "./ui/Toasts.js";
 import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js";
@@ -49,6 +62,8 @@ audioEngine.setPage(pageKey);
 const gameState = new GameState(loadGameState());
 let adjacencyPulseTimer = null;
 let focusCeremonyTimer = null;
+let manifestCompleteTimer = null;
+let pageEnterTimer = null;
 syncDerivedState(gameState.getState());
 
 function syncDerivedState(state) {
@@ -191,10 +206,61 @@ function clearUrlParams() {
   window.history.replaceState({}, "", window.location.pathname);
 }
 
+function isInternalPageLink(anchor) {
+  if (!anchor?.href) {
+    return false;
+  }
+  if (anchor.target && anchor.target !== "_self") {
+    return false;
+  }
+  const url = new URL(anchor.href, window.location.href);
+  if (url.origin !== window.location.origin) {
+    return false;
+  }
+  if (url.hash && url.pathname === window.location.pathname && !url.search) {
+    return false;
+  }
+  return /\.html?$/.test(url.pathname) || url.pathname.endsWith("/");
+}
+
+function startPageEnter() {
+  document.body.classList.remove("is-page-leaving");
+  document.body.classList.add("is-page-entering");
+  window.requestAnimationFrame(() => {
+    document.body.classList.add("is-page-entered");
+  });
+  if (pageEnterTimer) {
+    window.clearTimeout(pageEnterTimer);
+  }
+  pageEnterTimer = window.setTimeout(() => {
+    document.body.classList.remove("is-page-entering");
+  }, 700);
+}
+
+function navigateWithTransition(href) {
+  void audioEngine.playUiAccent("soft");
+  document.body.classList.add("is-page-leaving");
+  window.setTimeout(() => {
+    window.location.href = href;
+  }, 180);
+}
+
 function clearHoveredMapCell() {
   if (renderer.transientUi.hoveredMapCell) {
     renderer.setTransientUi({ hoveredMapCell: null }, getCurrentState());
   }
+}
+
+function resetTransientUi() {
+  renderer.setTransientUi(
+    {
+      hoveredMapCell: null,
+      inspectedBuildingId: null,
+      catalogOpen: false,
+      manifestCompleteModal: null
+    },
+    getCurrentState()
+  );
 }
 
 function openTownFocusModal(focusId = null) {
@@ -255,6 +321,37 @@ async function handleManifest() {
 
   await audioEngine.playManifest(result.rarity);
   await animationEngine.playManifestReveal(result);
+  if (manifestCompleteTimer) {
+    window.clearTimeout(manifestCompleteTimer);
+  }
+  renderer.setTransientUi(
+    {
+      manifestCompleteModal: {
+        rolledName: result.rolledName,
+        rarity: result.rarity,
+        buildingId: result.building.id,
+        qualityRoll: result.qualityRoll,
+        durationMs: 900,
+        revealPercent: false
+      }
+    },
+    getCurrentState()
+  );
+  manifestCompleteTimer = window.setTimeout(() => {
+    renderer.setTransientUi(
+      {
+        manifestCompleteModal: {
+          rolledName: result.rolledName,
+          rarity: result.rarity,
+          buildingId: result.building.id,
+          qualityRoll: result.qualityRoll,
+          durationMs: 900,
+          revealPercent: true
+        }
+      },
+      getCurrentState()
+    );
+  }, 900);
   reportSuccess(`${result.rolledName} manifested at ${result.qualityRoll}% quality.`);
 }
 
@@ -265,6 +362,24 @@ function adjustCrystal({ mode, rarity, amount }) {
     if (mode === "set") setCrystals(draft, rarity, amount);
   });
   reportSuccess(`Updated ${rarity} crystals.`);
+}
+
+function grantCrystalPack(packId) {
+  const pack = GM_QUICK_CRYSTAL_PACKS.find((entry) => entry.id === packId);
+  if (!pack) {
+    reportError("Crystal pack not found.");
+    return;
+  }
+
+  commit((draft) => {
+    for (const [rarity, amount] of Object.entries(pack.crystals ?? {})) {
+      addCrystals(draft, rarity, Number(amount) || 0);
+    }
+    for (const [rarity, amount] of Object.entries(pack.shards ?? {})) {
+      addShards(draft, rarity, Number(amount) || 0);
+    }
+  });
+  reportSuccess(`${pack.label} granted.`);
 }
 
 function adjustShard({ mode, rarity, amount }) {
@@ -608,6 +723,44 @@ const actions = {
     reportSuccess("Town focus council reopened.");
   },
   adjustCrystal,
+  grantCrystalPack,
+  toggleLiveSessionView() {
+    commit((draft) => {
+      draft.settings.liveSessionView = !draft.settings.liveSessionView;
+    });
+    reportSuccess(`Live session view ${getCurrentState().settings.liveSessionView ? "enabled" : "disabled"}.`);
+  },
+  createSessionSnapshot(name = "Session Snapshot") {
+    commit((draft) => {
+      draft.sessionSnapshots = [createSessionSnapshotRecord(draft, name), ...(draft.sessionSnapshots ?? [])].slice(0, 8);
+      addHistoryEntry(draft, {
+        category: "Snapshot",
+        title: name,
+        details: "A session snapshot was saved for later restoration."
+      });
+    });
+    reportSuccess("Session snapshot saved.");
+  },
+  restoreSessionSnapshot(snapshotId) {
+    const state = getCurrentState();
+    const snapshot = (state.sessionSnapshots ?? []).find((entry) => entry.id === snapshotId);
+    if (!snapshot) {
+      reportError("Snapshot not found.");
+      return;
+    }
+    const restored = restoreSessionSnapshot(snapshot);
+    restored.sessionSnapshots = state.sessionSnapshots;
+    restored.settings.currentPage = pageKey;
+    gameState.replace(restored);
+    resetTransientUi();
+    reportSuccess(`Restored snapshot "${snapshot.name}".`);
+  },
+  deleteSessionSnapshot(snapshotId) {
+    commit((draft) => {
+      draft.sessionSnapshots = (draft.sessionSnapshots ?? []).filter((entry) => entry.id !== snapshotId);
+    });
+    reportSuccess("Session snapshot deleted.");
+  },
   adjustShard,
   setResources,
   citizenCommand,
@@ -697,8 +850,34 @@ const actions = {
   },
   resetSave() {
     gameState.replace(resetSave());
-    renderer.setTransientUi({ hoveredMapCell: null, inspectedBuildingId: null }, getCurrentState());
+    resetTransientUi();
     reportSuccess("Save reset.");
+  },
+  sessionReset() {
+    gameState.replace(createLiveSessionResetState());
+    resetTransientUi();
+    reportSuccess("Realm reset to the live session preset.");
+  },
+  testingReset() {
+    gameState.replace(createTestingBalanceResetState());
+    resetTransientUi();
+    reportSuccess("Realm reset to the testing balance preset.");
+  },
+  clearBuildings() {
+    commit((draft) => {
+      draft.buildings = [];
+      draft.constructionPriority = [];
+      draft.ui.selectedBuildingId = null;
+      draft.ui.selectedMapCell = null;
+      draft.ui.lastManifestResult = null;
+    });
+    resetTransientUi();
+    reportSuccess("All buildings deleted.");
+  },
+  fullReset() {
+    gameState.replace(createSingleCommonCrystalResetState());
+    resetTransientUi();
+    reportSuccess("Realm fully reset. You now begin with 1 Common crystal.");
   },
   reportError
 };
@@ -721,6 +900,25 @@ document.addEventListener(
   { once: true }
 );
 
+document.addEventListener("click", (event) => {
+  const anchor = event.target.closest("a[href]");
+  if (!anchor) {
+    return;
+  }
+  if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+    return;
+  }
+  if (!isInternalPageLink(anchor)) {
+    return;
+  }
+  const url = new URL(anchor.href, window.location.href);
+  if (url.href === window.location.href) {
+    return;
+  }
+  event.preventDefault();
+  navigateWithTransition(url.href);
+});
+
 root.addEventListener("click", async (event) => {
   const target = event.target.closest("[data-action]");
   if (!target) {
@@ -742,22 +940,44 @@ root.addEventListener("click", async (event) => {
       reportSuccess(`Advanced ${result.days} days.`);
       break;
     }
+    case "advance-custom-time": {
+      const panel = target.closest(".calendar-panel");
+      const input = panel?.querySelector('[data-role="custom-days"]');
+      const days = Math.max(1, Math.floor(Number(input?.value) || 0));
+      const result = commit((draft) => advanceTimeByDays(draft, days));
+      reportSuccess(`Advanced ${result.days} days.`);
+      break;
+    }
     case "select-building":
       commit((draft) => {
         setSelectedBuildingAndCell(draft, target.dataset.buildingId);
       });
       break;
     case "inspect-building":
+      void audioEngine.playUiAccent("soft");
       renderer.setTransientUi({ inspectedBuildingId: target.dataset.buildingId }, getCurrentState());
       break;
     case "open-catalog":
+      void audioEngine.playUiAccent("soft");
       actions.openCatalog();
       break;
     case "open-town-focus-modal":
+      void audioEngine.playUiAccent("soft");
       actions.openTownFocusModal();
       break;
     case "set-home-shelf":
+      void audioEngine.playUiAccent("soft");
       renderer.setTransientUi({ homeShelfTab: target.dataset.shelf }, getCurrentState());
+      break;
+    case "set-city-view":
+      void audioEngine.playUiAccent("soft");
+      renderer.setTransientUi({ cityView: target.dataset.view }, getCurrentState());
+      break;
+    case "toggle-forge-nav":
+      renderer.setTransientUi({ forgeNavCollapsed: !renderer.transientUi.forgeNavCollapsed }, getCurrentState());
+      break;
+    case "toggle-session-view":
+      actions.toggleLiveSessionView();
       break;
     case "preview-town-focus":
       openTownFocusModal(target.dataset.focusId);
@@ -767,6 +987,7 @@ root.addEventListener("click", async (event) => {
       reportSuccess("Building catalog status exported.");
       break;
     case "close-modal":
+      void audioEngine.playUiAccent("soft");
       if (target.dataset.modal === "building-detail-modal") {
         renderer.setTransientUi({ inspectedBuildingId: null }, getCurrentState());
       } else if (target.dataset.modal === "building-catalog-modal") {
@@ -775,6 +996,25 @@ root.addEventListener("click", async (event) => {
         renderer.setTransientUi({ councilModalOpen: false }, getCurrentState());
       }
       break;
+    case "close-manifest-complete":
+      void audioEngine.playUiAccent("confirm");
+      if (manifestCompleteTimer) {
+        window.clearTimeout(manifestCompleteTimer);
+        manifestCompleteTimer = null;
+      }
+      renderer.setTransientUi({ manifestCompleteModal: null }, getCurrentState());
+      break;
+    case "manifest-place-building": {
+      void audioEngine.playUiAccent("confirm");
+      const buildingId = target.dataset.buildingId;
+      if (manifestCompleteTimer) {
+        window.clearTimeout(manifestCompleteTimer);
+        manifestCompleteTimer = null;
+      }
+      renderer.setTransientUi({ manifestCompleteModal: null }, getCurrentState());
+      navigateWithTransition(`./city.html?focusBuilding=${encodeURIComponent(buildingId)}`);
+      break;
+    }
     case "select-map-cell": {
       const q = Number(target.dataset.q);
       const r = Number(target.dataset.r);
@@ -871,6 +1111,7 @@ root.addEventListener("click", async (event) => {
       });
       break;
     case "open-admin":
+      void audioEngine.playUiAccent("soft");
       actions.openAdmin();
       break;
     default:
@@ -930,6 +1171,10 @@ root.addEventListener("change", (event) => {
       draft.constructionSpeedMultiplier = Number(target.value);
     });
   }
+
+  if (target.dataset.action === "set-building-sort") {
+    renderer.setTransientUi({ buildingSort: target.value }, getCurrentState());
+  }
 });
 
 audioEngine.setMuted(getCurrentState().settings.muted);
@@ -971,3 +1216,4 @@ if (!localStorage.getItem("crystal-forge-save")) {
 }
 
 applyUrlFocusTargets();
+startPageEnter();

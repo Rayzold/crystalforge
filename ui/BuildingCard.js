@@ -7,6 +7,7 @@ import {
   getDriftConstructionSlots,
   isBuildingActivelyConstructed
 } from "../systems/ConstructionSystem.js";
+import { renderUiIcon } from "./UiIcons.js";
 
 function renderIcon(iconKey) {
   const shapes = {
@@ -67,6 +68,34 @@ function renderStatList(record, inactive) {
     .join("");
 }
 
+function getCompactStatus(building, { isIncomplete, isActiveConstruction, queuePosition, driftSlots, eta }) {
+  if (!isIncomplete) {
+    return `Active x${building.multiplier}`;
+  }
+  if (isActiveConstruction) {
+    return `Growing now / ETA ${eta}`;
+  }
+  return `Queued #${queuePosition + 1} / ${driftSlots} slots`;
+}
+
+function getBuildingSignature(building) {
+  const primaryTag = building.tags?.[0] ?? "";
+  const signatures = {
+    agriculture: ["food", "Harvest"],
+    trade: ["gold", "Trade"],
+    industry: ["materials", "Industry"],
+    military: ["defense", "Military"],
+    arcane: ["mana", "Arcane"],
+    religious: ["health", "Sacred"],
+    civic: ["history", "Civic"],
+    housing: ["population", "Housing"],
+    harbor: ["route", "Harbor"],
+    culture: ["prestige", "Culture"],
+    frontier: ["event", "Frontier"]
+  };
+  return signatures[primaryTag] ?? ["building", "Structure"];
+}
+
 export function renderBuildingCard(building, state) {
   const selected = state.ui.selectedBuildingId === building.id;
   const isIncomplete = !building.isComplete;
@@ -77,9 +106,17 @@ export function renderBuildingCard(building, state) {
   const daysRemaining = rate > 0 && isIncomplete ? Math.ceil((100 - building.quality) / rate) : 0;
   const eta = isActiveConstruction ? formatDate(state.calendar.dayOffset + daysRemaining) : null;
   const progressPercent = Math.min(100, building.quality);
+  const [signatureIcon, signatureLabel] = getBuildingSignature(building);
+  const topStats = Object.entries(building.stats ?? {})
+    .sort((left, right) => Math.abs(right[1]) - Math.abs(left[1]))
+    .slice(0, 3);
+  const summaryRate = Object.entries(building.resourceRates ?? {})
+    .sort((left, right) => Math.abs(right[1]) - Math.abs(left[1]))
+    .slice(0, 2);
+  const compactStatus = getCompactStatus(building, { isIncomplete, isActiveConstruction, queuePosition, driftSlots, eta });
 
   return `
-    <article class="building-card ${selected ? "is-selected" : ""} ${isIncomplete ? "is-incomplete" : ""}" style="--rarity-color:${RARITY_COLORS[building.rarity]}">
+    <article class="building-card building-card--stream ${selected ? "is-selected" : ""} ${isIncomplete ? "is-incomplete" : ""}" style="--rarity-color:${RARITY_COLORS[building.rarity]}">
       <button class="building-card__select" data-action="select-building" data-building-id="${building.id}">
         <div class="building-card__visual">
           ${renderMedia(building)}
@@ -88,53 +125,59 @@ export function renderBuildingCard(building, state) {
             <span class="building-card__district">${escapeHtml(building.district)}</span>
           </div>
         </div>
+        <div class="building-card__signature">
+          <div class="building-card__signature-mark">
+            ${renderUiIcon(signatureIcon, signatureLabel)}
+          </div>
+          <div>
+            <span>${escapeHtml(signatureLabel)} Profile</span>
+            <strong>${escapeHtml(building.displayName)}</strong>
+          </div>
+        </div>
         <div class="building-card__header">
           <div>
-            <h4>${escapeHtml(building.displayName)}</h4>
-            <p>${building.mapPosition ? `Hex ${building.mapPosition.q}, ${building.mapPosition.r}` : "Unplaced on map"}</p>
+            <h4>${building.mapPosition ? `Hex ${building.mapPosition.q}, ${building.mapPosition.r}` : "Awaiting placement"}</h4>
+            <p>${escapeHtml(compactStatus)}</p>
           </div>
           <strong class="building-card__multiplier">${building.isComplete ? `x${building.multiplier}` : "--"}</strong>
         </div>
         <div class="building-card__quality">
           <span>Quality ${formatNumber(building.quality, 2)}%</span>
-          <span>${building.isComplete ? `Active x${building.multiplier}` : "Inactive"}</span>
+          <span>${building.isComplete ? "Complete" : "Incomplete"}</span>
         </div>
         <div class="progress-bar"><span style="width:${progressPercent}%"></span></div>
-        <div class="building-card__meta">
-          <span>${isIncomplete ? `Auto ${formatNumber(rate, 2)}% / day` : "Auto completed"}</span>
-          <span>${
-            building.isComplete
-              ? `Completed ${escapeHtml(building.completedAt ?? "today")}`
-              : isActiveConstruction
-                ? `ETA ${escapeHtml(eta)}`
-                : `Queued #${queuePosition + 1} / ${driftSlots} slots active`
-          }</span>
+        <div class="building-card__meta building-card__meta--compact">
+          <span>${isIncomplete ? `Auto ${formatNumber(rate, 2)}% / day` : `Completed ${escapeHtml(building.completedAt ?? "today")}`}</span>
+          <span>${escapeHtml(building.district)}</span>
         </div>
-        <div class="building-card__meta">
-          <span>${escapeHtml(building.rarity)} building</span>
-          <span>${
-            building.isComplete
-              ? `Active x${building.multiplier}`
-              : isActiveConstruction
-                ? "Drift-growing now"
-                : "Waiting for an open drift slot"
-          }</span>
+        <div class="building-card__spotlights">
+          ${topStats
+            .map(
+              ([key, value]) => `
+                <article class="building-card__spotlight ${isIncomplete ? "is-muted" : ""}">
+                  <span>${escapeHtml(key)}</span>
+                  <strong>${formatSigned(value)}</strong>
+                </article>
+              `
+            )
+            .join("")}
         </div>
         <p class="building-card__effect">${escapeHtml(building.specialEffect)}</p>
-        <p class="building-card__flavor">${escapeHtml(building.flavorText ?? "No chronicle flavor recorded yet.")}</p>
-        <div class="building-card__columns">
-          <div>
-            <h5>Stats</h5>
-            <ul class="building-card__list">${renderStatList(building.stats, isIncomplete)}</ul>
-          </div>
-          <div>
-            <h5>Resources / day</h5>
-            <ul class="building-card__list">${renderStatList(building.resourceRates, isIncomplete)}</ul>
-          </div>
-        </div>
-        <div class="building-card__footer">
-          <span>Created ${escapeHtml(building.createdAt)}</span>
-          <span>Manifested ${escapeHtml(building.lastManifestedAt)}</span>
+        <p class="building-card__flavor">${escapeHtml(building.flavorText ?? "A newly etched structure waits to define its place in Drift.")}</p>
+        <div class="building-card__resource-strip">
+          ${
+            summaryRate.length
+              ? summaryRate
+                  .map(
+                    ([key, value]) => `
+                      <span class="${isIncomplete ? "is-muted" : ""}">
+                        ${escapeHtml(key)} ${formatSigned(value)}
+                      </span>
+                    `
+                  )
+                  .join("")
+              : `<span class="is-muted">No major daily rates</span>`
+          }
         </div>
       </button>
       <div class="building-card__actions">

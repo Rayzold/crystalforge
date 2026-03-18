@@ -98,6 +98,39 @@ export class AudioEngine {
     }
   }
 
+  async playUiAccent(kind = "soft") {
+    if (this.muted) {
+      return;
+    }
+
+    await this.ensureContext();
+    const now = this.context.currentTime;
+    const profile =
+      kind === "confirm"
+        ? { base: 420, overtone: 630, duration: 0.1, gain: 0.03 }
+        : { base: this.pageKey === "chronicle" ? 246.94 : 329.63, overtone: 493.88, duration: 0.08, gain: 0.022 };
+
+    const gain = this.context.createGain();
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(profile.gain, now + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + profile.duration);
+    gain.connect(this.context.destination);
+
+    const osc = this.context.createOscillator();
+    osc.type = this.pageKey === "chronicle" ? "sine" : "triangle";
+    osc.frequency.setValueAtTime(profile.base, now);
+    osc.connect(gain);
+    osc.start(now);
+    osc.stop(now + profile.duration);
+
+    const overtone = this.context.createOscillator();
+    overtone.type = "sine";
+    overtone.frequency.setValueAtTime(profile.overtone, now + 0.01);
+    overtone.connect(gain);
+    overtone.start(now + 0.01);
+    overtone.stop(now + profile.duration);
+  }
+
   async tryPlayAudioFile(rarity) {
     const candidates = this.resolvedAudioPaths[rarity]
       ? [this.resolvedAudioPaths[rarity]]

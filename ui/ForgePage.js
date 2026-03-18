@@ -2,6 +2,26 @@ import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { renderCrystalSelector } from "./CrystalSelector.js";
 import { renderManifestPanel } from "./ManifestPanel.js";
 
+function renderForgeCommandDeck(state) {
+  const totalRolls = Object.values(state.crystals).reduce((sum, value) => sum + (Number(value) || 0), 0);
+  return `
+    <section class="forge-command">
+      <div class="forge-command__headline">
+        <p class="forge-command__eyebrow">Manifest Your Destiny</p>
+        <h2>Crystal Forge</h2>
+      </div>
+      <div class="forge-command__actions">
+        <button class="button button--ghost" data-action="open-catalog">Catalog</button>
+        <button class="button button--ghost" data-action="open-admin">Admin</button>
+      </div>
+      <div class="forge-command__footer">
+        <span>The realities answer only when invoked with precision.</span>
+        <strong>Total Rolls: ${formatNumber(totalRolls, 0)}</strong>
+      </div>
+    </section>
+  `;
+}
+
 function renderManifestShrine(state) {
   const recentEntries = state.historyLog
     .filter((entry) => entry.category === "Manifest")
@@ -88,15 +108,14 @@ function renderForgeStage(state) {
 
 export function renderForgePage(state) {
   return {
-    title: "The Forge",
-    subtitle: "Manifest buildings by spending crystals, with each reality level depleting as you pull from it.",
+    title: "Forge",
+    subtitle: "Choose a crystal and manifest.",
     content: `
-      ${renderForgeStage(state)}
-      ${renderManifestPanel(state)}
-      ${renderManifestShrine(state)}
-    `,
-    aside: `
+      ${renderForgeCommandDeck(state)}
       ${renderCrystalSelector(state)}
+      ${renderManifestPanel(state)}
+      ${renderForgeStage(state)}
+      ${renderManifestShrine(state)}
     `
   };
 }

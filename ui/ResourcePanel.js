@@ -1,4 +1,5 @@
 import { formatNumber } from "../engine/Utils.js";
+import { renderUiIcon } from "./UiIcons.js";
 
 export function renderResourcePanel(state) {
   const warnings = [];
@@ -7,12 +8,12 @@ export function renderResourcePanel(state) {
   if (state.resources.mana <= 12) warnings.push("Low mana");
 
   const entries = [
-    ["Gold", state.resources.gold],
-    ["Food", state.resources.food],
-    ["Materials", state.resources.materials],
-    ["Mana", state.resources.mana],
-    ["Population", state.resources.population],
-    ["Prosperity", state.resources.prosperity]
+    ["Gold", state.resources.gold, "gold"],
+    ["Food", state.resources.food, "food"],
+    ["Materials", state.resources.materials, "materials"],
+    ["Mana", state.resources.mana, "mana"],
+    ["Population", state.resources.population, "population"],
+    ["Prosperity", state.resources.prosperity, "prosperity"]
   ];
 
   return `
@@ -24,9 +25,12 @@ export function renderResourcePanel(state) {
       <div class="resource-panel__grid">
         ${entries
           .map(
-            ([label, value]) => `
+            ([label, value, icon]) => `
               <article class="resource-chip">
-                <span class="resource-chip__label">${label}</span>
+                <div class="resource-chip__head">
+                  ${renderUiIcon(icon, label)}
+                  <span class="resource-chip__label">${label}</span>
+                </div>
                 <strong class="resource-chip__value">${formatNumber(value, 2)}</strong>
               </article>
             `

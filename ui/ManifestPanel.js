@@ -11,21 +11,22 @@ export function renderManifestPanel(state) {
 
   return `
     <section class="panel manifest-panel">
-      <div class="panel__header">
-        <h3>Manifest Forge</h3>
-        <div class="manifest-panel__controls">
-          <button class="button" data-action="manifest">Manifest ${state.selectedRarity}</button>
-          <button class="button button--ghost" data-action="toggle-mute">${state.settings.muted ? "Audio Off" : "Audio On"}</button>
-        </div>
+      <div class="manifest-panel__hero">
+        <span class="manifest-panel__eyebrow">Manifest Chamber</span>
+        <h3>Call forth a ${escapeHtml(state.selectedRarity)} reality.</h3>
+        <p class="manifest-panel__text">Each invocation consumes 1 crystal from the selected reality level.</p>
       </div>
-      <p class="manifest-panel__text">Press MANIFEST to channel one of your available ${escapeHtml(state.selectedRarity)}-level crystals. Each manifestation consumes 1 crystal from that level.</p>
+      <div class="manifest-panel__controls manifest-panel__controls--centered">
+        <button class="button manifest-panel__button" data-action="manifest">Manifest</button>
+        <button class="button button--ghost manifest-panel__audio" data-action="toggle-mute">${state.settings.muted ? "Audio Off" : "Audio On"}</button>
+      </div>
       ${
         last
           ? `
-            <div class="manifest-result">
+            <div class="manifest-result manifest-result--forge">
               <strong>${escapeHtml(last.rolledName)}</strong>
-              <span>${escapeHtml(last.rarity)} roll / ${formatNumber(last.qualityRoll)}%</span>
-              <span>${last.overflow ? `${formatNumber(last.overflow)} overflow into shards` : last.wasNew ? "New building manifested" : "Merged with existing building"}</span>
+              <span>${escapeHtml(last.rarity)} reality / quality ${formatNumber(last.qualityRoll)}%</span>
+              <span>${last.overflow ? `${formatNumber(last.overflow)} overflow into shards` : last.wasNew ? "New structure manifested" : "Merged into an existing structure"}</span>
             </div>
           `
           : ""

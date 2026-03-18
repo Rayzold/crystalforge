@@ -9,8 +9,7 @@ import { addMonthlyChronicleIfNeeded } from "./MonthlyChronicleSystem.js";
 import { applyDailyResources } from "./ResourceSystem.js";
 import { applyTownFocusDailyEffects, updateTownFocusAvailability } from "./TownFocusSystem.js";
 
-export function advanceTime(state, stepKey) {
-  const days = STEP_DURATIONS[stepKey];
+function runTimeAdvance(state, days, stepKey = null) {
   const completions = [];
   const triggeredEvents = [];
 
@@ -47,7 +46,7 @@ export function advanceTime(state, stepKey) {
     triggeredEvents.push(...maybeTriggerHolidayEvents(state));
   }
 
-  triggeredEvents.push(...maybeTriggerRandomEvents(state, stepKey));
+  triggeredEvents.push(...maybeTriggerRandomEvents(state, stepKey ?? (days >= 28 ? "month" : days >= 7 ? "week" : days >= 3 ? "3days" : "day")));
   recalculateCityStats(state);
 
   if (days > 0) {
@@ -59,4 +58,13 @@ export function advanceTime(state, stepKey) {
   }
 
   return { days, completions, triggeredEvents };
+}
+
+export function advanceTime(state, stepKey) {
+  return runTimeAdvance(state, STEP_DURATIONS[stepKey], stepKey);
+}
+
+export function advanceTimeByDays(state, days) {
+  const normalizedDays = Math.max(1, Math.floor(Number(days) || 0));
+  return runTimeAdvance(state, normalizedDays, null);
 }

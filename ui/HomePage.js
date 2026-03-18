@@ -1,11 +1,9 @@
 import { APP_VERSION, PAGE_ROUTES } from "../content/Config.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js";
+import { getTownFocusAvailability } from "../systems/TownFocusSystem.js";
 import { getTownFocusHistory } from "../systems/TownFocusSystem.js";
-import { renderCalendarPanel } from "./CalendarPanel.js";
 import { renderDriftEvolutionPanel } from "./DriftEvolutionPanel.js";
-import { renderEventPanel } from "./EventPanel.js";
-import { renderHistoryPanel } from "./HistoryPanel.js";
 import { renderTownFocusPanel } from "./TownFocusPanel.js";
 import { renderTownFocusBadge } from "./TownFocusShared.js";
 
@@ -47,6 +45,37 @@ function getHomeProgress(state) {
   ];
 }
 
+function getRealmGoals(state) {
+  const goals = [
+    {
+      title: "Establish the Drift",
+      details: "Reach 5 manifested buildings to unlock the first evolution point.",
+      progress: state.buildings.length,
+      target: 5,
+      href: "./forge.html"
+    },
+    {
+      title: "Claim the Ring",
+      details: "Place 3 buildings on the town map.",
+      progress: state.buildings.filter((building) => building.mapPosition).length,
+      target: 3,
+      href: "./city.html"
+    },
+    {
+      title: "Awaken the Core",
+      details: "Complete 2 buildings so they begin affecting the settlement.",
+      progress: state.buildings.filter((building) => building.isComplete).length,
+      target: 2,
+      href: "./city.html"
+    }
+  ];
+
+  return goals.map((goal) => ({
+    ...goal,
+    complete: goal.progress >= goal.target
+  }));
+}
+
 function renderLandingHero(state) {
   const progress = getHomeProgress(state);
   const nextStep = progress.find((step) => !step.complete) ?? progress[progress.length - 1];
@@ -56,18 +85,23 @@ function renderLandingHero(state) {
     [...state.buildings].sort((left, right) => right.quality - left.quality)[0] ?? null;
 
   return `
-    <section class="scene-panel scene-panel--hero scene-panel--landing">
+    <section class="scene-panel scene-panel--hero scene-panel--landing scene-panel--home-hero">
       <div class="landing-hero">
         <div class="landing-hero__copy">
           <p class="world-summary__eyebrow">${escapeHtml(date.season)}</p>
-          <h2>Raise the city one manifestation at a time.</h2>
+          <h2>Command the Drift.</h2>
           <p class="landing-hero__summary">
-            The forge core is stable, the outer hexes are waiting, and the next meaningful move is clear.
+            ${
+              state.settings.liveSessionView
+                ? "A live session deck for the game master: grant crystals, place structures, advance time, and keep the settlement readable."
+                : "A quieter command deck for the realm: forge, map, and chronicle gathered into fewer, sharper decisions."
+            }
             ${date.holiday ? ` Today is ${escapeHtml(date.holiday.name)}.` : ""}
           </p>
           <div class="landing-hero__actions">
             <a class="button" href="${nextStep.href}">${escapeHtml(nextStep.cta)}</a>
-            <a class="button button--ghost" href="./city.html">Survey the Map</a>
+            <a class="button button--ghost" href="./city.html">Open City Command</a>
+            ${state.settings.liveSessionView ? `<button class="button button--ghost" data-action="open-admin">Open GM Console</button>` : `<a class="button button--ghost" href="./forge.html">Open Forge</a>`}
           </div>
           <div class="landing-hero__facts">
             <article class="landing-hero__fact landing-hero__fact--date"><span>Current Date</span><strong>${escapeHtml(compactDate)}</strong></article>
@@ -88,6 +122,62 @@ function renderLandingHero(state) {
             <p>${escapeHtml(nextStep.details)}</p>
           </div>
         </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderHomeRouteDeck() {
+  const routes = [
+    { title: "Manifest", label: "Forge", href: "./forge.html", details: "Choose a crystal, manifest a structure, and watch the roll resolve." },
+    { title: "Shape", label: "City", href: "./city.html", details: "Place buildings on the map, tune districts, and direct construction." },
+    { title: "Remember", label: "Chronicle", href: "./chronicle.html", details: "Track events, monthly stories, and the realm's living history." }
+  ];
+
+  return `
+    <section class="scene-panel scene-panel--home-route-deck">
+      <div class="panel__header">
+        <h3>Realm Routes</h3>
+        <span class="panel__subtle">The companion app's three main working areas</span>
+      </div>
+      <div class="home-route-deck">
+        ${routes
+          .map(
+            (route) => `
+              <a class="home-route-card" href="${route.href}">
+                <span>${escapeHtml(route.label)}</span>
+                <strong>${escapeHtml(route.title)}</strong>
+                <p>${escapeHtml(route.details)}</p>
+              </a>
+            `
+          )
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderRealmGoals(state) {
+  const goals = getRealmGoals(state);
+  return `
+    <section class="scene-panel">
+      <div class="panel__header">
+        <h3>Realm Goals</h3>
+        <span class="panel__subtle">Short milestones to keep the session moving</span>
+      </div>
+      <div class="policy-history">
+        ${goals
+          .map(
+            (goal) => `
+              <article class="policy-history__card ${goal.complete ? "is-complete" : ""}">
+                <strong>${escapeHtml(goal.title)}</strong>
+                <span>${formatNumber(Math.min(goal.progress, goal.target), 0)} / ${formatNumber(goal.target, 0)}</span>
+                <p>${escapeHtml(goal.details)}</p>
+                <a class="button button--ghost" href="${goal.href}">${goal.complete ? "Review" : "Go There"}</a>
+              </article>
+            `
+          )
+          .join("")}
       </div>
     </section>
   `;
@@ -237,29 +327,6 @@ function renderPolicyHistory(state) {
   `;
 }
 
-function renderRealmLinks() {
-  return `
-    <section class="scene-panel">
-      <div class="panel__header">
-        <h3>Realm Routes</h3>
-        <span class="panel__subtle">Jump directly to the part of the game you want to shape</span>
-      </div>
-      <div class="realm-links">
-        ${PAGE_ROUTES.filter((route) => route.key !== "home")
-          .map(
-            (route) => `
-              <a class="realm-link-card" href="${route.href}">
-                <span>${escapeHtml(route.label)}</span>
-                <strong>Enter ${escapeHtml(route.label)}</strong>
-              </a>
-            `
-          )
-          .join("")}
-      </div>
-    </section>
-  `;
-}
-
 function renderRollTableReview(state) {
   const total = Object.values(state.rollTables).reduce((sum, entries) => sum + entries.length, 0);
   return `
@@ -296,16 +363,17 @@ function renderHomeShelves(state) {
   const panels = {
     overview: `
       ${renderWorldSummary(state)}
+      ${renderRealmGoals(state)}
       ${renderRollTableReview(state)}
       ${renderFeaturedBuildings(state)}
       ${renderPolicyHistory(state)}
     `,
     command: `
       ${renderOnboardingPanel(state)}
-      ${renderRealmLinks()}
+      ${renderPolicyHistory(state)}
     `,
     chronicle: `
-      ${renderHistoryPanel(state)}
+      ${renderRecentSignals(state)}
     `
   };
 
@@ -337,19 +405,114 @@ function renderHomeShelves(state) {
   `;
 }
 
+function renderRecentSignals(state) {
+  const entries = state.historyLog.slice(0, 6);
+  return `
+    <section class="scene-panel">
+      <div class="panel__header">
+        <h3>Recent Signals</h3>
+        <span class="panel__subtle">A light overview before entering Chronicle</span>
+      </div>
+      <div class="recent-signals">
+        ${
+          entries.length
+            ? entries
+                .map(
+                  (entry) => `
+                    <article class="recent-signal-card">
+                      <span>${escapeHtml(entry.category)}</span>
+                      <strong>${escapeHtml(entry.title)}</strong>
+                      <p>${escapeHtml(entry.date)}</p>
+                    </article>
+                  `
+                )
+                .join("")
+            : `<p class="empty-state">No recent signals have been recorded yet.</p>`
+        }
+      </div>
+      <div class="recent-signals__actions">
+        <a class="button button--ghost" href="./chronicle.html">Open Full Chronicle</a>
+      </div>
+    </section>
+  `;
+}
+
+function renderHomeSignals(state) {
+  const townFocusAvailability = getTownFocusAvailability(state);
+  return `
+    <section class="panel home-signals-panel">
+      <div class="panel__header">
+        <h3>Command Signals</h3>
+        <span class="panel__subtle">Only the overview that matters here</span>
+      </div>
+      <div class="home-signals-panel__grid">
+        <article>
+          <span>Active Events</span>
+          <strong>${formatNumber(state.events.active.length, 0)}</strong>
+          <small>${state.events.active.length ? "Chronicle has live disturbances" : "No urgent disruptions"}</small>
+        </article>
+        <article>
+          <span>Next Council</span>
+          <strong>${townFocusAvailability.isSelectionPending ? "Due" : `${townFocusAvailability.daysUntilCouncil}d`}</strong>
+          <small>${townFocusAvailability.isSelectionPending ? "A new focus can be chosen now" : formatDate(townFocusAvailability.nextSelectionDayOffset)}</small>
+        </article>
+        <article>
+          <span>Manifested Buildings</span>
+          <strong>${formatNumber(state.buildings.length, 0)}</strong>
+          <small>${formatNumber(state.buildings.filter((building) => building.isComplete).length, 0)} complete</small>
+        </article>
+      </div>
+    </section>
+  `;
+}
+
+function renderSessionRunbook() {
+  const steps = [
+    "Grant crystals from the GM console.",
+    "Manifest new structures in the Forge.",
+    "Place them onto the town map.",
+    "Advance time from City command.",
+    "Resolve events and warnings.",
+    "Review the Chronicle at month end."
+  ];
+
+  return `
+    <section class="panel home-signals-panel">
+      <div class="panel__header">
+        <h3>Session Runbook</h3>
+        <span class="panel__subtle">One clean loop for table use</span>
+      </div>
+      <div class="policy-history">
+        ${steps
+          .map(
+            (step, index) => `
+              <article class="policy-history__card">
+                <span>Step ${index + 1}</span>
+                <strong>${escapeHtml(step)}</strong>
+              </article>
+            `
+          )
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
 export function renderHomePage(state) {
+  const liveSessionView = state.settings.liveSessionView;
   return {
     title: "Command Chamber",
-    subtitle: "A calmer overview of Drift, with the council, city pulse, and next actions gathered into cleaner shelves.",
+    subtitle: liveSessionView ? "GM overview, session signals, and the next action." : "Overview, routes, and the next decision.",
     content: `
       ${renderLandingHero(state)}
+      ${liveSessionView ? "" : renderHomeRouteDeck()}
       ${renderDriftEvolutionPanel(state)}
       ${renderTownFocusPanel(state)}
       ${renderHomeShelves(state)}
     `,
     aside: `
-      ${renderCalendarPanel(state)}
-      ${renderEventPanel(state)}
+      ${renderHomeSignals(state)}
+      ${state.settings.liveSessionView ? renderSessionRunbook() : ""}
     `
   };
 }

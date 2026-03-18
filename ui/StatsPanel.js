@@ -1,17 +1,18 @@
 import { formatNumber } from "../engine/Utils.js";
+import { renderUiIcon } from "./UiIcons.js";
 
 export function renderStatsPanel(state) {
   const stats = state.cityStats;
   const entries = [
-    ["Value", stats.value],
-    ["Income", stats.income],
-    ["Upkeep", stats.upkeep],
-    ["Pop. Support", stats.populationSupport],
-    ["Defense", stats.defense],
-    ["Security", stats.security],
-    ["Prestige", stats.prestige],
-    ["Morale", stats.morale],
-    ["Health", stats.health]
+    ["Value", stats.value, "value"],
+    ["Income", stats.income, "gold"],
+    ["Upkeep", stats.upkeep, "upkeep"],
+    ["Pop. Support", stats.populationSupport, "population"],
+    ["Defense", stats.defense, "defense"],
+    ["Security", stats.security, "security"],
+    ["Prestige", stats.prestige, "prestige"],
+    ["Morale", stats.morale, "morale"],
+    ["Health", stats.health, "health"]
   ];
 
   return `
@@ -23,9 +24,12 @@ export function renderStatsPanel(state) {
       <div class="stats-panel__grid">
         ${entries
           .map(
-            ([label, value]) => `
+            ([label, value, icon]) => `
               <article class="stat-tile">
-                <span>${label}</span>
+                <div class="stat-tile__head">
+                  ${renderUiIcon(icon, label)}
+                  <span>${label}</span>
+                </div>
                 <strong>${formatNumber(value, label === "Pop. Support" ? 0 : 2)}</strong>
               </article>
             `

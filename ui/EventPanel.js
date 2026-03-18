@@ -1,13 +1,15 @@
 import { escapeHtml } from "../engine/Utils.js";
+import { renderUiIcon } from "./UiIcons.js";
 
 export function renderEventPanel(state) {
   const focusedEventId = state.transientUi?.focusEventId ?? null;
+  const upcomingCount = state.events.scheduled.length;
 
   return `
-    <section class="panel event-panel">
+    <section class="panel event-panel event-panel--codex">
       <div class="panel__header">
-        <h3>Events</h3>
-        <span class="panel__subtle">${state.events.active.length} active / ${state.events.scheduled.length} queued</span>
+        <h3>Active Events</h3>
+        <span class="panel__subtle">${state.events.active.length} active${upcomingCount ? ` / ${upcomingCount} incoming` : ""}</span>
       </div>
       <div class="event-panel__stack">
         ${
@@ -16,14 +18,19 @@ export function renderEventPanel(state) {
                 .map(
                   (event) => `
                     <article class="event-card ${focusedEventId === event.id ? "is-highlighted" : ""}">
-                      <h4>${escapeHtml(event.name)}</h4>
+                      <div class="event-card__top">
+                        ${renderUiIcon("event", event.name)}
+                        <div>
+                          <h4>${escapeHtml(event.name)}</h4>
+                          <span>${escapeHtml(event.type)} / ends ${escapeHtml(event.endsAt)}</span>
+                        </div>
+                      </div>
                       <p>${escapeHtml(event.description)}</p>
                       ${
                         event.sourceEventName
                           ? `<small>Chained from ${escapeHtml(event.sourceEventName)}</small>`
                           : ""
                       }
-                      <span>${escapeHtml(event.type)} / ends ${escapeHtml(event.endsAt)}</span>
                     </article>
                   `
                 )
@@ -36,8 +43,8 @@ export function renderEventPanel(state) {
               `
         }
       </div>
-      <div class="event-panel__recent">
-        <h4>Recent</h4>
+      <div class="event-panel__recent event-panel__recent--codex">
+        <h4>Recent Echoes</h4>
         <div class="event-panel__recent-list">
           ${
             state.events.recent.length

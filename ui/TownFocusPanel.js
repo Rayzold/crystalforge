@@ -23,7 +23,7 @@ export function renderTownFocusPanel(state) {
           <span class="panel__subtle">
             ${
               availability.isSelectionPending
-                ? "The mayor awaits your decision."
+                ? "A new policy choice is ready."
                 : `Next council on ${formatDate(availability.nextSelectionDayOffset)}`
             }
           </span>
@@ -40,7 +40,7 @@ export function renderTownFocusPanel(state) {
           <p>${escapeHtml(currentFocus?.summary ?? "The council has not committed to a city-wide policy yet.")}</p>
         </article>
         <article>
-          <span>Mayor's Position</span>
+          <span>Council Signal</span>
           <strong>${escapeHtml(currentFocus?.mayorLine ?? "A new agenda is needed.")}</strong>
           <p>${
             availability.isSelectionPending

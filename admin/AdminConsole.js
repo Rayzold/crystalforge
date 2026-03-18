@@ -1,6 +1,6 @@
 import { MONTHS } from "../content/CalendarConfig.js";
 import { createCatalogEntryFromInput } from "../content/BuildingCatalog.js";
-import { SPEED_MULTIPLIERS } from "../content/Config.js";
+import { GM_QUICK_CRYSTAL_PACKS, GM_QUICK_EVENT_IDS, SPEED_MULTIPLIERS } from "../content/Config.js";
 import { EVENT_POOLS } from "../content/EventPools.js";
 import { RARITY_ORDER } from "../content/Rarities.js";
 import { TOWN_FOCUS_DEFINITIONS } from "../content/TownFocusConfig.js";
@@ -73,6 +73,37 @@ function renderRollTableListEditor(state) {
       </article>
     `
   ).join("");
+}
+
+function renderQuickCrystalPacks() {
+  return `
+    <div class="admin-quick-grid">
+      ${GM_QUICK_CRYSTAL_PACKS.map(
+        (pack) => `
+          <button class="button button--ghost admin-quick-card" data-admin-action="grant-crystal-pack" data-pack-id="${pack.id}">
+            <strong>${escapeHtml(pack.label)}</strong>
+            <span>${escapeHtml(pack.summary)}</span>
+          </button>
+        `
+      ).join("")}
+    </div>
+  `;
+}
+
+function renderQuickEvents() {
+  const quickEvents = EVENT_POOLS.filter((event) => GM_QUICK_EVENT_IDS.includes(event.id));
+  return `
+    <div class="admin-quick-grid">
+      ${quickEvents.map(
+        (event) => `
+          <button class="button button--ghost admin-quick-card" data-admin-action="trigger-quick-event" data-event-id="${event.id}">
+            <strong>${escapeHtml(event.name)}</strong>
+            <span>${escapeHtml(`${event.type} · ${event.rarity}`)}</span>
+          </button>
+        `
+      ).join("")}
+    </div>
+  `;
 }
 
 export class AdminConsole {
@@ -333,6 +364,12 @@ export class AdminConsole {
         case "trigger-event":
           this.actions.triggerEvent(this.getValue("event-select"));
           break;
+        case "grant-crystal-pack":
+          this.actions.grantCrystalPack(target.dataset.packId);
+          break;
+        case "trigger-quick-event":
+          this.actions.triggerEvent(target.dataset.eventId);
+          break;
         case "clear-events":
           this.actions.clearEvents();
           break;
@@ -344,6 +381,30 @@ export class AdminConsole {
           break;
         case "reset-save":
           this.actions.resetSave();
+          break;
+        case "clear-buildings":
+          this.actions.clearBuildings();
+          break;
+        case "full-reset":
+          this.actions.fullReset();
+          break;
+        case "session-reset":
+          this.actions.sessionReset();
+          break;
+        case "testing-reset":
+          this.actions.testingReset();
+          break;
+        case "toggle-session-view":
+          this.actions.toggleLiveSessionView();
+          break;
+        case "save-session-snapshot":
+          this.actions.createSessionSnapshot(this.getValue("snapshot-name", "Session Snapshot"));
+          break;
+        case "restore-session-snapshot":
+          this.actions.restoreSessionSnapshot(target.dataset.snapshotId);
+          break;
+        case "delete-session-snapshot":
+          this.actions.deleteSessionSnapshot(target.dataset.snapshotId);
           break;
         default:
           break;
@@ -374,6 +435,18 @@ export class AdminConsole {
     );
 
     const sections = [
+      {
+        tab: "economy",
+        title: "GM Quick Grants",
+        keywords: "gm game master quick grant crystals session",
+        content: `
+          <section class="admin-section">
+            <h3>GM Quick Grants</h3>
+            <p>Fast companion-mode controls for live sessions.</p>
+            ${renderQuickCrystalPacks()}
+          </section>
+        `
+      },
       {
         tab: "economy",
         title: "Crystals",
@@ -550,6 +623,18 @@ export class AdminConsole {
       },
       {
         tab: "world",
+        title: "GM Quick Events",
+        keywords: "events quick gm trigger session",
+        content: `
+          <section class="admin-section">
+            <h3>GM Quick Events</h3>
+            <p>Trigger a few common table-side moments without opening the full event list.</p>
+            ${renderQuickEvents()}
+          </section>
+        `
+      },
+      {
+        tab: "world",
         title: "Events",
         keywords: "events trigger chains clear",
         content: `
@@ -559,6 +644,22 @@ export class AdminConsole {
             <div class="admin-actions">
               <button class="button button--ghost" data-admin-action="trigger-event">Trigger Event</button>
               <button class="button button--ghost" data-admin-action="clear-events">Clear Active Events</button>
+            </div>
+          </section>
+        `
+      },
+      {
+        tab: "system",
+        title: "Session Mode",
+        keywords: "session live gm mode compact companion",
+        content: `
+          <section class="admin-section">
+            <h3>Session Mode</h3>
+            <p>Use the cleaner session-facing layout during live play, then switch back for deeper review.</p>
+            <div class="admin-actions">
+              <button class="button button--ghost" data-admin-action="toggle-session-view">
+                ${state.settings.liveSessionView ? "Disable Live Session View" : "Enable Live Session View"}
+              </button>
             </div>
           </section>
         `
@@ -601,6 +702,43 @@ export class AdminConsole {
       },
       {
         tab: "system",
+        title: "Session Snapshots",
+        keywords: "session snapshots save restore gm checkpoints",
+        content: `
+          <section class="admin-section">
+            <h3>Session Snapshots</h3>
+            <div class="admin-grid">
+              <label>Snapshot Name<input id="snapshot-name" value="Session Snapshot" /></label>
+            </div>
+            <div class="admin-actions">
+              <button class="button button--ghost" data-admin-action="save-session-snapshot">Save Snapshot</button>
+            </div>
+            <div class="admin-quick-grid">
+              ${
+                (state.sessionSnapshots ?? []).length
+                  ? state.sessionSnapshots
+                      .map(
+                        (snapshot) => `
+                          <article class="admin-snapshot-card">
+                            <strong>${escapeHtml(snapshot.name)}</strong>
+                            <span>${escapeHtml(snapshot.dateLabel ?? "Unknown date")}</span>
+                            <small>${snapshot.buildingCount ?? 0} building${snapshot.buildingCount === 1 ? "" : "s"}</small>
+                            <div class="admin-actions">
+                              <button class="button button--ghost" data-admin-action="restore-session-snapshot" data-snapshot-id="${snapshot.id}">Restore</button>
+                              <button class="button button--ghost" data-admin-action="delete-session-snapshot" data-snapshot-id="${snapshot.id}">Delete</button>
+                            </div>
+                          </article>
+                        `
+                      )
+                      .join("")
+                  : `<p class="empty-state">No session snapshots saved yet.</p>`
+              }
+            </div>
+          </section>
+        `
+      },
+      {
+        tab: "system",
         title: "Save Tools",
         keywords: "save import export reset audio",
         content: `
@@ -611,7 +749,11 @@ export class AdminConsole {
             <div class="admin-actions">
               <button class="button button--ghost" data-admin-action="export-save">Export Save JSON</button>
               <button class="button button--ghost" data-admin-action="import-save">Import Save JSON</button>
+              <button class="button button--ghost" data-admin-action="clear-buildings">Delete All Buildings</button>
               <button class="button button--ghost" data-admin-action="reset-save">Reset Save</button>
+              <button class="button button--ghost" data-admin-action="session-reset">Reset to Live Session</button>
+              <button class="button button--ghost" data-admin-action="testing-reset">Reset to Testing State</button>
+              <button class="button button--ghost" data-admin-action="full-reset">Full Reset (1 Common Crystal)</button>
             </div>
           </section>
         `

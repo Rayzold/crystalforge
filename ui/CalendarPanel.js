@@ -3,14 +3,15 @@ import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js";
 import { getTownFocusAvailability } from "../systems/TownFocusSystem.js";
 import { renderConstructionQueuePanel } from "./ConstructionQueuePanel.js";
 
-export function renderCalendarPanel(state) {
+export function renderCalendarPanel(state, options = {}) {
   const date = getStructuredDate(state.calendar.dayOffset);
   const townFocusAvailability = getTownFocusAvailability(state);
+  const { showQueue = true, compact = false } = options;
 
   return `
-    <section class="panel calendar-panel">
+    <section class="panel calendar-panel ${compact ? "calendar-panel--compact" : ""}">
       <div class="panel__header">
-        <h3>Calendar</h3>
+        <h3>Session Clock</h3>
         <span class="panel__subtle">${date.season}</span>
       </div>
       <div class="calendar-panel__date">
@@ -18,7 +19,7 @@ export function renderCalendarPanel(state) {
         <span>${date.holiday ? date.holiday.name : "No holiday today"}</span>
       </div>
       <div class="calendar-panel__focus ${townFocusAvailability.isSelectionPending ? "is-due" : ""}">
-        <strong>Town Focus Council</strong>
+        <strong>Policy Council</strong>
         <span>
           ${
             townFocusAvailability.isSelectionPending
@@ -34,15 +35,22 @@ export function renderCalendarPanel(state) {
         <button class="button button--ghost" data-action="advance-time" data-step="month">+1 Month</button>
         <button class="button button--ghost" data-action="advance-time" data-step="year">+1 Year</button>
       </div>
+      <div class="calendar-panel__custom">
+        <label class="calendar-panel__custom-days">
+          Advance by Days
+          <input type="number" min="1" step="1" value="14" data-role="custom-days" />
+        </label>
+        <button class="button" data-action="advance-custom-time">Advance Custom Span</button>
+      </div>
       <label class="speed-selector">
-        Build Speed
+        Raising Speed
         <select data-action="set-speed-multiplier">
           ${SPEED_MULTIPLIERS.map(
             (value) => `<option value="${value}" ${state.constructionSpeedMultiplier === value ? "selected" : ""}>${value}x</option>`
           ).join("")}
         </select>
       </label>
-      ${renderConstructionQueuePanel(state)}
+      ${showQueue ? renderConstructionQueuePanel(state) : ""}
     </section>
   `;
 }

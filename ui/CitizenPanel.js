@@ -1,4 +1,16 @@
 import { formatNumber } from "../engine/Utils.js";
+import { renderUiIcon } from "./UiIcons.js";
+
+const CITIZEN_ICONS = {
+  Peasants: "food",
+  Workers: "materials",
+  Merchants: "gold",
+  Scholars: "history",
+  Clergy: "health",
+  Soldiers: "defense",
+  Nobles: "prestige",
+  Mages: "mana"
+};
 
 export function renderCitizenPanel(state) {
   const support = state.cityStats.populationSupport ?? 0;
@@ -14,7 +26,10 @@ export function renderCitizenPanel(state) {
           .map(
             ([citizenClass, count]) => `
               <article class="citizen-tile">
-                <span>${citizenClass}</span>
+                <div class="citizen-tile__head">
+                  ${renderUiIcon(CITIZEN_ICONS[citizenClass] ?? "citizens", citizenClass)}
+                  <span>${citizenClass}</span>
+                </div>
                 <strong>${formatNumber(count)}</strong>
               </article>
             `

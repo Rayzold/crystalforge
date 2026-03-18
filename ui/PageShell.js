@@ -4,6 +4,17 @@ import { formatDate } from "../systems/CalendarSystem.js";
 import { getCurrentTownFocus, getTownFocusAvailability } from "../systems/TownFocusSystem.js";
 import { renderCrisisBanner } from "./CrisisBanner.js";
 import { renderTownFocusBadge } from "./TownFocusShared.js";
+import { renderUiIcon } from "./UiIcons.js";
+
+const HUD_ICON_KEYS = {
+  Gold: "gold",
+  Food: "food",
+  Materials: "materials",
+  Mana: "mana",
+  Population: "population",
+  Prosperity: "prosperity",
+  Council: "calendar"
+};
 
 export function renderPageShell(state, pageKey, { title, subtitle, content, aside = "" }, overlays = "") {
   const townFocusAvailability = getTownFocusAvailability(state);
@@ -29,8 +40,9 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
     ]
   ];
 
+  const forgeNavCollapsed = pageKey === "forge" ? Boolean(state.transientUi?.forgeNavCollapsed) : false;
   return `
-    <div class="game-shell ${currentFocus ? `game-shell--focus-${currentFocus.id}` : ""}">
+    <div class="game-shell game-shell--page-${pageKey} ${forgeNavCollapsed ? "game-shell--forge-collapsed" : ""} ${currentFocus ? `game-shell--focus-${currentFocus.id}` : ""} ${state.settings.liveSessionView ? "game-shell--live-session" : ""}">
       ${
         MASCOT_MEDIA?.enabled
           ? `
@@ -44,6 +56,21 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
           : ""
       }
       <aside class="sidebar-nav">
+        ${
+          pageKey === "forge"
+            ? `
+              <button
+                class="sidebar-nav__toggle button button--ghost"
+                type="button"
+                data-action="toggle-forge-nav"
+                aria-expanded="${forgeNavCollapsed ? "false" : "true"}"
+                title="${forgeNavCollapsed ? "Expand forge navigation" : "Collapse forge navigation"}"
+              >
+                <span>${forgeNavCollapsed ? "Open" : "Hide"}</span>
+              </button>
+            `
+            : ""
+        }
         <div class="sidebar-nav__brand">
           <p>Crystal Forge</p>
           <strong>City of Drift</strong>
@@ -51,7 +78,11 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
         <nav class="sidebar-nav__links">
           ${PAGE_ROUTES.map(
             (route) => `
-              <a class="sidebar-link ${route.key === pageKey ? "is-active" : ""}" href="${route.href}">
+              <a
+                class="sidebar-link ${route.key === pageKey ? "is-active" : ""}"
+                href="${route.href}"
+                data-short="${route.label.slice(0, 2).toUpperCase()}"
+              >
                 <span>${route.label}</span>
               </a>
             `
@@ -59,7 +90,11 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
         </nav>
         <div class="sidebar-nav__footer">
           <button class="button button--ghost" data-action="open-catalog">Building Catalog</button>
-          <button class="button button--ghost" data-action="open-admin">Admin Console</button>
+          <button class="button button--ghost" data-action="open-admin">${state.settings.liveSessionView ? "GM Console" : "Admin Console"}</button>
+          <button class="sidebar-nav__build sidebar-nav__build--mode" data-action="toggle-session-view">
+            <span>View Mode</span>
+            <strong>${state.settings.liveSessionView ? "Live Session" : "Deep Review"}</strong>
+          </button>
           <div class="sidebar-nav__build">
             <span>Current Build</span>
             <strong>${APP_VERSION}</strong>
@@ -68,7 +103,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
         </div>
       </aside>
 
-      <main class="page-stage">
+      <main class="page-stage page-stage--${pageKey}">
         ${renderCrisisBanner(state, pageKey)}
         <header class="page-hero">
           <div>
@@ -96,14 +131,20 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
                 label === "Council"
                   ? `
                       <a class="${className} hud-ribbon__item--link" href="./index.html#town-focus-council">
-                        <span>${label}</span>
+                        <div class="hud-ribbon__head">
+                          ${renderUiIcon(HUD_ICON_KEYS[label] ?? "route", label)}
+                          <span>${label}</span>
+                        </div>
                         <strong>${typeof value === "number" ? formatNumber(value, 2) : value}</strong>
                         ${sublabel ? `<small>${sublabel}</small>` : ""}
                       </a>
                     `
                   : `
                       <article class="${className}">
-                        <span>${label}</span>
+                        <div class="hud-ribbon__head">
+                          ${renderUiIcon(HUD_ICON_KEYS[label] ?? "route", label)}
+                          <span>${label}</span>
+                        </div>
                         <strong>${typeof value === "number" ? formatNumber(value, 2) : value}</strong>
                         ${sublabel ? `<small>${sublabel}</small>` : ""}
                       </article>
