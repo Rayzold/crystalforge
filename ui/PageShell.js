@@ -17,11 +17,11 @@ const HUD_ICON_KEYS = {
 };
 
 const ROUTE_GLYPHS = {
-  home: "🏠",
-  forge: "💎",
-  city: "🏙️",
-  citizens: "👥",
-  chronicle: "📜"
+  home: "\u{1F3E0}",
+  forge: "\u{1F48E}",
+  city: "\u{1F3D9}\uFE0F",
+  citizens: "\u{1F465}",
+  chronicle: "\u{1F4DC}"
 };
 
 export function renderPageShell(state, pageKey, { title, subtitle, content, aside = "" }, overlays = "") {
@@ -90,7 +90,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
                 class="sidebar-link ${route.key === pageKey ? "is-active" : ""}"
                 href="${route.href}"
                 data-short="${route.label.slice(0, 2).toUpperCase()}"
-                data-glyph="${ROUTE_GLYPHS[route.key] ?? "•"}"
+                data-glyph="${ROUTE_GLYPHS[route.key] ?? "\u2022"}"
               >
                 <span>${route.label}</span>
               </a>
