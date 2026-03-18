@@ -1,6 +1,7 @@
 import { renderCitizenPanel } from "./CitizenPanel.js";
 import { renderDriftEvolutionPanel } from "./DriftEvolutionPanel.js";
 import { renderUiIcon } from "./UiIcons.js";
+import { escapeHtml } from "../engine/Utils.js";
 
 function renderCitizenLore(state) {
   return `

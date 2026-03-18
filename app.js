@@ -72,6 +72,7 @@ function syncDerivedState(state) {
       RARITY_ORDER.find((rarity) => (state.crystals[rarity] ?? 0) > 0) ?? state.selectedRarity;
   }
   state.settings.currentPage = pageKey;
+  state.settings.theme = state.settings.theme ?? "dark";
   const driftUpdate = syncDriftEvolutionState(state);
   for (const stage of driftUpdate.newStages) {
     addHistoryEntry(state, {
@@ -352,7 +353,7 @@ async function handleManifest() {
       getCurrentState()
     );
   }, 900);
-  reportSuccess(`${result.rolledName} manifested at ${result.qualityRoll}% quality.`);
+  reportSuccess(`${result.rolledName} manifested.`);
 }
 
 function adjustCrystal({ mode, rarity, amount }) {
@@ -724,6 +725,12 @@ const actions = {
   },
   adjustCrystal,
   grantCrystalPack,
+  toggleTheme() {
+    commit((draft) => {
+      draft.settings.theme = draft.settings.theme === "silver" ? "dark" : "silver";
+    });
+    reportSuccess(`${getCurrentState().settings.theme === "silver" ? "Silver" : "Dark"} theme enabled.`);
+  },
   toggleLiveSessionView() {
     commit((draft) => {
       draft.settings.liveSessionView = !draft.settings.liveSessionView;
@@ -887,6 +894,7 @@ const adminConsole = new AdminConsole(actions);
 gameState.subscribe((state) => {
   audioEngine.setMuted(state.settings.muted);
   audioEngine.setPage(pageKey);
+  document.body.dataset.theme = state.settings.theme ?? "dark";
   saveGameState(state);
   renderer.render(state);
   adminConsole.render(state);
@@ -975,6 +983,9 @@ root.addEventListener("click", async (event) => {
       break;
     case "toggle-forge-nav":
       renderer.setTransientUi({ forgeNavCollapsed: !renderer.transientUi.forgeNavCollapsed }, getCurrentState());
+      break;
+    case "toggle-theme":
+      actions.toggleTheme();
       break;
     case "toggle-session-view":
       actions.toggleLiveSessionView();
@@ -1178,6 +1189,7 @@ root.addEventListener("change", (event) => {
 });
 
 audioEngine.setMuted(getCurrentState().settings.muted);
+document.body.dataset.theme = getCurrentState().settings.theme ?? "dark";
 
 function applyUrlFocusTargets() {
   const params = new URLSearchParams(window.location.search);

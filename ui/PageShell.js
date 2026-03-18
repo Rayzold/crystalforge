@@ -16,6 +16,14 @@ const HUD_ICON_KEYS = {
   Council: "calendar"
 };
 
+const ROUTE_GLYPHS = {
+  home: "🏠",
+  forge: "💎",
+  city: "🏙️",
+  citizens: "👥",
+  chronicle: "📜"
+};
+
 export function renderPageShell(state, pageKey, { title, subtitle, content, aside = "" }, overlays = "") {
   const townFocusAvailability = getTownFocusAvailability(state);
   const currentFocus = getCurrentTownFocus(state);
@@ -42,7 +50,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
 
   const forgeNavCollapsed = pageKey === "forge" ? Boolean(state.transientUi?.forgeNavCollapsed) : false;
   return `
-    <div class="game-shell game-shell--page-${pageKey} ${forgeNavCollapsed ? "game-shell--forge-collapsed" : ""} ${currentFocus ? `game-shell--focus-${currentFocus.id}` : ""} ${state.settings.liveSessionView ? "game-shell--live-session" : ""}">
+    <div class="game-shell game-shell--page-${pageKey} ${forgeNavCollapsed ? "game-shell--forge-collapsed" : ""} ${currentFocus ? `game-shell--focus-${currentFocus.id}` : ""} ${state.settings.liveSessionView ? "game-shell--live-session" : ""} game-shell--theme-${state.settings.theme ?? "dark"}">
       ${
         MASCOT_MEDIA?.enabled
           ? `
@@ -82,6 +90,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
                 class="sidebar-link ${route.key === pageKey ? "is-active" : ""}"
                 href="${route.href}"
                 data-short="${route.label.slice(0, 2).toUpperCase()}"
+                data-glyph="${ROUTE_GLYPHS[route.key] ?? "•"}"
               >
                 <span>${route.label}</span>
               </a>
@@ -91,6 +100,10 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
         <div class="sidebar-nav__footer">
           <button class="button button--ghost" data-action="open-catalog">Building Catalog</button>
           <button class="button button--ghost" data-action="open-admin">${state.settings.liveSessionView ? "GM Console" : "Admin Console"}</button>
+          <button class="sidebar-nav__build sidebar-nav__build--mode" data-action="toggle-theme">
+            <span>Theme</span>
+            <strong>${state.settings.theme === "silver" ? "Silver" : "Dark"}</strong>
+          </button>
           <button class="sidebar-nav__build sidebar-nav__build--mode" data-action="toggle-session-view">
             <span>View Mode</span>
             <strong>${state.settings.liveSessionView ? "Live Session" : "Deep Review"}</strong>

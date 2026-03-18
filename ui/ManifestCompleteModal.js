@@ -22,6 +22,7 @@ export function renderManifestCompleteModal(state) {
                 class="manifest-complete-modal__fill ${manifestModal.revealPercent ? "is-revealed" : ""}"
                 style="--manifest-quality:${manifestModal.qualityRoll}%; --manifest-duration:${manifestModal.durationMs}ms"
               ></div>
+              <div class="manifest-complete-modal__track"></div>
               <strong class="manifest-complete-modal__value ${manifestModal.revealPercent ? "is-visible" : ""}">
                 ${formatNumber(manifestModal.qualityRoll, 0)}%
               </strong>

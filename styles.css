@@ -14,10 +14,47 @@
   --danger: #ff7c9d;
   --success: #70f1c2;
   --shadow: 0 22px 60px rgba(0, 0, 0, 0.35);
+  --bg-radial-a: rgba(88, 184, 255, 0.16);
+  --bg-radial-b: rgba(229, 140, 255, 0.14);
+  --bg-radial-c: rgba(94, 119, 255, 0.12);
+  --bg-start: #0a0d15;
+  --bg-mid: #06080f;
+  --bg-end: #030408;
+  --overlay-grid: rgba(120, 150, 255, 0.02);
+  --overlay-vignette-a: rgba(0, 0, 0, 0.22);
+  --overlay-vignette-b: rgba(0, 0, 0, 0.62);
   --display-font: "Orbitron", "Trebuchet MS", "Arial Black", sans-serif;
   --label-font: "Rajdhani", "Trebuchet MS", "Segoe UI", sans-serif;
   color-scheme: dark;
   font-family: "Trebuchet MS", "Palatino Linotype", "Book Antiqua", serif;
+}
+
+body[data-theme="silver"] {
+  --bg-0: #eef2f8;
+  --bg-1: #dfe6f1;
+  --bg-2: #cfd7e4;
+  --panel: rgba(239, 243, 250, 0.82);
+  --panel-border: rgba(99, 122, 168, 0.22);
+  --text: #142033;
+  --muted: #596b8d;
+  --accent: #4f7fd8;
+  --accent-soft: rgba(79, 127, 216, 0.16);
+  --accent-pink: #bb67d8;
+  --accent-blue: #4b98d7;
+  --accent-violet: #7a71dd;
+  --danger: #d95d7d;
+  --success: #3ba980;
+  --shadow: 0 22px 60px rgba(56, 73, 103, 0.16);
+  --bg-radial-a: rgba(123, 170, 227, 0.28);
+  --bg-radial-b: rgba(198, 159, 222, 0.22);
+  --bg-radial-c: rgba(145, 164, 212, 0.22);
+  --bg-start: #f5f7fb;
+  --bg-mid: #e7ecf4;
+  --bg-end: #d9e0eb;
+  --overlay-grid: rgba(122, 146, 192, 0.06);
+  --overlay-vignette-a: rgba(160, 176, 206, 0.08);
+  --overlay-vignette-b: rgba(118, 132, 163, 0.18);
+  color-scheme: light;
 }
 
 * {
@@ -29,10 +66,10 @@ body {
   min-height: 100vh;
   color: var(--text);
   background:
-    radial-gradient(circle at top, rgba(88, 184, 255, 0.16), transparent 26%),
-    radial-gradient(circle at 78% 18%, rgba(229, 140, 255, 0.14), transparent 22%),
-    radial-gradient(circle at 50% 120%, rgba(94, 119, 255, 0.12), transparent 30%),
-    linear-gradient(180deg, #0a0d15, #06080f 54%, #030408);
+    radial-gradient(circle at top, var(--bg-radial-a), transparent 26%),
+    radial-gradient(circle at 78% 18%, var(--bg-radial-b), transparent 22%),
+    radial-gradient(circle at 50% 120%, var(--bg-radial-c), transparent 30%),
+    linear-gradient(180deg, var(--bg-start), var(--bg-mid) 54%, var(--bg-end));
 }
 
 body::before {
@@ -46,8 +83,8 @@ body::before {
       135deg,
       transparent 0,
       transparent 18px,
-      rgba(120, 150, 255, 0.02) 18px,
-      rgba(120, 150, 255, 0.02) 36px
+      var(--overlay-grid) 18px,
+      var(--overlay-grid) 36px
     );
 }
 
@@ -56,7 +93,7 @@ body::after {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(circle at 50% -10%, transparent 0 28%, rgba(0, 0, 0, 0.22) 72%, rgba(0, 0, 0, 0.62) 100%);
+  background: radial-gradient(circle at 50% -10%, transparent 0 28%, var(--overlay-vignette-a) 72%, var(--overlay-vignette-b) 100%);
 }
 
 body.is-page-entering .game-shell {
@@ -1532,9 +1569,6 @@ textarea {
 
 .manifest-complete-modal__bar {
   position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 120px;
-  align-items: stretch;
   min-height: 40px;
   overflow: hidden;
   border-radius: 12px;
@@ -1543,7 +1577,9 @@ textarea {
 }
 
 .manifest-complete-modal__fill {
-  width: var(--manifest-quality);
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: min(100%, var(--manifest-quality));
   max-width: 100%;
   height: 100%;
   background: linear-gradient(90deg, rgba(222, 226, 236, 0.9), rgba(176, 184, 201, 0.9));
@@ -1551,17 +1587,27 @@ textarea {
   transform-origin: left center;
 }
 
+.manifest-complete-modal__track {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(9, 14, 25, 0) 0%, rgba(9, 14, 25, 0.08) 65%, rgba(9, 14, 25, 0.2) 100%);
+}
+
 .manifest-complete-modal__fill.is-revealed {
   animation: manifestBarFill var(--manifest-duration) ease-out forwards;
 }
 
 .manifest-complete-modal__value {
-  display: grid;
-  place-items: center;
+  position: absolute;
+  inset: 0 16px 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   color: #eef4ff;
   font-family: var(--display-font);
   font-size: 1.1rem;
   opacity: 0;
+  text-shadow: 0 0 18px rgba(5, 8, 14, 0.45);
 }
 
 .manifest-complete-modal__value.is-visible {
@@ -2755,7 +2801,9 @@ textarea {
 }
 
 .game-shell--page-forge.game-shell--forge-collapsed .sidebar-link::before {
-  content: attr(data-short);
+  content: attr(data-glyph);
+  font-size: 1.15rem;
+  line-height: 1;
 }
 
 .game-shell--page-forge.game-shell--forge-collapsed .sidebar-nav__footer .button {
