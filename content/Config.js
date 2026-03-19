@@ -10,13 +10,13 @@ export const SAVE_VERSION = 7;
 export const STORAGE_KEY = "crystal-forge-save";
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save";
 export const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyDI51M8_ywD944xPSByUujzMdATeoy503I",
+  apiKey: "AIzaSyDl51M8_ywD944xPSByUujzMdATeoy503I",
   authDomain: "crystal-forge-web.firebaseapp.com",
   projectId: "crystal-forge-web",
   storageBucket: "crystal-forge-web.firebasestorage.app",
   messagingSenderId: "17853564289",
   appId: "1:17853564289:web:aacbe34f771431c2085480",
-  measurementId: "G-KZTVKXPSK"
+  measurementId: "G-KZTVKXKPSK"
 };
 export const FIREBASE_REALM_COLLECTION = "realms";
 export const FIREBASE_DEFAULT_REALM_ID = "main";
