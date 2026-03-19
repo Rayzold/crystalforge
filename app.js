@@ -1,11 +1,17 @@
 import { AdminConsole } from "./admin/AdminConsole.js";
 import { createCatalogEntryFromInput, getCatalogKey } from "./content/BuildingCatalog.js";
-import { GM_QUICK_CRYSTAL_PACKS } from "./content/Config.js";
+import { FIREBASE_DEFAULT_REALM_ID, GM_QUICK_CRYSTAL_PACKS } from "./content/Config.js";
 import { EVENT_POOLS } from "./content/EventPools.js";
 import { getNextRarity, RARITY_ORDER } from "./content/Rarities.js";
 import { GameState } from "./engine/GameState.js";
 import { AnimationEngine } from "./fx/AnimationEngine.js";
 import { AudioEngine } from "./fx/AudioEngine.js";
+import {
+  isFirebaseConfigured,
+  loadFirebaseRealmState,
+  saveFirebaseRealmState,
+  subscribeFirebaseRealmState
+} from "./firebase/FirebaseSharedState.js";
 import { manifestIntoBuilding, removeBuilding, setBuildingQuality, setBuildingRuinState } from "./systems/BuildingSystem.js";
 import { addMonthsToOffset, dateFromParts, formatDate, getMonthStartOffset } from "./systems/CalendarSystem.js";
 import {
@@ -46,8 +52,10 @@ import {
   loadGameState,
   resetSave,
   restoreSessionSnapshot,
+  createSerializableState,
   saveManualState,
-  saveGameState
+  saveGameState,
+  validateAndMigrateSave
 } from "./systems/StorageSystem.js";
 import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js";
 import { forceTownFocus, reopenTownFocusSelection, selectTownFocus, updateTownFocusAvailability } from "./systems/TownFocusSystem.js";
@@ -63,10 +71,27 @@ const animationEngine = new AnimationEngine();
 const audioEngine = new AudioEngine();
 audioEngine.setPage(pageKey);
 const gameState = new GameState(loadGameState());
+const firebaseClientId = (() => {
+  try {
+    const key = "crystal-forge-firebase-client-id";
+    const existing = sessionStorage.getItem(key);
+    if (existing) {
+      return existing;
+    }
+    const nextId = `firebase-client-${Math.random().toString(36).slice(2, 10)}`;
+    sessionStorage.setItem(key, nextId);
+    return nextId;
+  } catch (error) {
+    return `firebase-client-${Math.random().toString(36).slice(2, 10)}`;
+  }
+})();
 let adjacencyPulseTimer = null;
 let focusCeremonyTimer = null;
 let manifestCompleteTimer = null;
 let pageEnterTimer = null;
+let firebaseUnsubscribe = null;
+let firebasePublishTimer = null;
+let applyingFirebaseState = false;
 syncDerivedState(gameState.getState());
 
 function syncDerivedState(state) {
@@ -684,6 +709,114 @@ async function fetchSharedStateFromUrl(url) {
   return importSave(text);
 }
 
+function normalizeFirebaseRealmId(realmId) {
+  const normalized = String(realmId ?? "").trim();
+  return normalized || FIREBASE_DEFAULT_REALM_ID;
+}
+
+function preserveLocalSettingsOnSharedState(nextState, currentState = getCurrentState()) {
+  const normalized = validateAndMigrateSave(nextState);
+  normalized.settings = {
+    ...normalized.settings,
+    muted: currentState.settings.muted,
+    audioMode: currentState.settings.audioMode,
+    currentPage: pageKey,
+    onboardingDismissed: currentState.settings.onboardingDismissed,
+    liveSessionView: currentState.settings.liveSessionView,
+    theme: "dark",
+    sharedStateUrl: currentState.settings.sharedStateUrl,
+    autoLoadSharedState: currentState.settings.autoLoadSharedState,
+    firebaseRealmId: currentState.settings.firebaseRealmId,
+    firebaseAutoLoad: currentState.settings.firebaseAutoLoad,
+    firebaseLiveSync: currentState.settings.firebaseLiveSync,
+    firebaseAutoPublish: currentState.settings.firebaseAutoPublish,
+    diceAmount: currentState.settings.diceAmount,
+    diceType: currentState.settings.diceType,
+    diceHistory: currentState.settings.diceHistory,
+    lastDiceRoll: currentState.settings.lastDiceRoll
+  };
+  normalized.ui = {
+    ...normalized.ui,
+    adminUnlocked: currentState.ui.adminUnlocked,
+    adminOpen: false
+  };
+  return normalized;
+}
+
+async function loadSharedStateFromFirebase(realmId) {
+  const payload = await loadFirebaseRealmState(normalizeFirebaseRealmId(realmId));
+  if (!payload?.state) {
+    throw new Error("No shared Firebase realm state found yet.");
+  }
+  return preserveLocalSettingsOnSharedState(payload.state);
+}
+
+async function publishSharedStateToFirebase(state = getCurrentState()) {
+  const realmId = normalizeFirebaseRealmId(state.settings.firebaseRealmId);
+  const serializable = createSerializableState(state);
+  serializable.ui = {
+    ...serializable.ui,
+    adminUnlocked: false,
+    adminOpen: false
+  };
+  await saveFirebaseRealmState(realmId, serializable, firebaseClientId);
+}
+
+async function connectFirebaseLiveSync(showSuccess = false) {
+  const state = getCurrentState();
+  if (!state.settings.firebaseLiveSync) {
+    return;
+  }
+  if (!isFirebaseConfigured()) {
+    throw new Error("Firebase is not configured in this build.");
+  }
+
+  if (firebaseUnsubscribe) {
+    firebaseUnsubscribe();
+    firebaseUnsubscribe = null;
+  }
+
+  firebaseUnsubscribe = await subscribeFirebaseRealmState(
+    normalizeFirebaseRealmId(state.settings.firebaseRealmId),
+    (payload) => {
+      if (!payload?.state) {
+        return;
+      }
+      if (payload.sourceClientId && payload.sourceClientId === firebaseClientId) {
+        return;
+      }
+      applyingFirebaseState = true;
+      gameState.replace(preserveLocalSettingsOnSharedState(payload.state));
+      applyingFirebaseState = false;
+      resetTransientUi();
+    }
+  );
+
+  if (showSuccess) {
+    reportSuccess(`Firebase live sync connected to realm "${normalizeFirebaseRealmId(state.settings.firebaseRealmId)}".`);
+  }
+}
+
+function disconnectFirebaseLiveSync() {
+  if (firebaseUnsubscribe) {
+    firebaseUnsubscribe();
+    firebaseUnsubscribe = null;
+  }
+}
+
+function scheduleFirebaseAutoPublish(state) {
+  if (applyingFirebaseState || !state.settings.firebaseAutoPublish || !state.ui.adminUnlocked) {
+    return;
+  }
+  if (firebasePublishTimer) {
+    clearTimeout(firebasePublishTimer);
+  }
+  firebasePublishTimer = setTimeout(() => {
+    firebasePublishTimer = null;
+    void publishSharedStateToFirebase().catch((error) => reportError(error.message));
+  }, 500);
+}
+
 function moveBuildingOnMap({ buildingId, q, r, source = "Player" }) {
   const result = commit((draft) => {
     const building = draft.buildings.find((entry) => entry.id === buildingId);
@@ -1139,6 +1272,65 @@ const actions = {
     });
     reportSuccess(`Shared auto-load ${getCurrentState().settings.autoLoadSharedState ? "enabled" : "disabled"}.`);
   },
+  async loadFirebaseRealm() {
+    try {
+      const firebaseState = await loadSharedStateFromFirebase(getCurrentState().settings.firebaseRealmId);
+      gameState.replace(firebaseState);
+      resetTransientUi();
+      reportSuccess("Firebase realm loaded.");
+    } catch (error) {
+      reportError(error.message);
+    }
+  },
+  rememberFirebaseRealmId(realmId) {
+    const normalizedRealmId = normalizeFirebaseRealmId(realmId);
+    commit((draft) => {
+      draft.settings.firebaseRealmId = normalizedRealmId;
+    });
+    if (getCurrentState().settings.firebaseLiveSync) {
+      void connectFirebaseLiveSync().catch((error) => reportError(error.message));
+    }
+    reportSuccess(`Firebase realm set to "${normalizedRealmId}".`);
+  },
+  async saveFirebaseRealm() {
+    try {
+      await publishSharedStateToFirebase();
+      reportSuccess("State saved to Firebase.");
+    } catch (error) {
+      reportError(error.message);
+    }
+  },
+  async toggleFirebaseAutoLoad() {
+    commit((draft) => {
+      draft.settings.firebaseAutoLoad = !draft.settings.firebaseAutoLoad;
+    });
+    reportSuccess(`Firebase auto-load ${getCurrentState().settings.firebaseAutoLoad ? "enabled" : "disabled"}.`);
+  },
+  async toggleFirebaseLiveSync() {
+    commit((draft) => {
+      draft.settings.firebaseLiveSync = !draft.settings.firebaseLiveSync;
+    });
+    try {
+      if (getCurrentState().settings.firebaseLiveSync) {
+        await connectFirebaseLiveSync(true);
+      } else {
+        disconnectFirebaseLiveSync();
+        reportSuccess("Firebase live sync disabled.");
+      }
+    } catch (error) {
+      commit((draft) => {
+        draft.settings.firebaseLiveSync = false;
+      });
+      disconnectFirebaseLiveSync();
+      reportError(error.message);
+    }
+  },
+  toggleFirebaseAutoPublish() {
+    commit((draft) => {
+      draft.settings.firebaseAutoPublish = !draft.settings.firebaseAutoPublish;
+    });
+    reportSuccess(`Firebase auto-publish ${getCurrentState().settings.firebaseAutoPublish ? "enabled" : "disabled"}.`);
+  },
   resetSave() {
     gameState.replace(resetSave());
     resetTransientUi();
@@ -1182,6 +1374,7 @@ gameState.subscribe((state) => {
   saveGameState(state);
   renderer.render(state);
   adminConsole.render(state);
+  scheduleFirebaseAutoPublish(state);
 });
 
 document.addEventListener(
@@ -1633,17 +1826,30 @@ function applyUrlFocusTargets() {
 
 async function autoLoadSharedStateIfEnabled() {
   const state = getCurrentState();
-  if (!state.settings.autoLoadSharedState || !state.settings.sharedStateUrl) {
-    return;
+  if (state.settings.firebaseAutoLoad) {
+    try {
+      const firebaseState = await loadSharedStateFromFirebase(state.settings.firebaseRealmId);
+      gameState.replace(firebaseState);
+      resetTransientUi();
+      reportSuccess("Firebase state auto-loaded.");
+    } catch (error) {
+      reportError(error.message);
+    }
+  } else if (state.settings.autoLoadSharedState && state.settings.sharedStateUrl) {
+    try {
+      const sharedState = await fetchSharedStateFromUrl(state.settings.sharedStateUrl);
+      sharedState.settings.sharedStateUrl = state.settings.sharedStateUrl;
+      sharedState.settings.autoLoadSharedState = state.settings.autoLoadSharedState;
+      gameState.replace(sharedState);
+      resetTransientUi();
+      reportSuccess("Shared state auto-loaded.");
+    } catch (error) {
+      reportError(error.message);
+    }
   }
 
   try {
-    const sharedState = await fetchSharedStateFromUrl(state.settings.sharedStateUrl);
-    sharedState.settings.sharedStateUrl = state.settings.sharedStateUrl;
-    sharedState.settings.autoLoadSharedState = state.settings.autoLoadSharedState;
-    gameState.replace(sharedState);
-    resetTransientUi();
-    reportSuccess("Shared state auto-loaded.");
+    await connectFirebaseLiveSync();
   } catch (error) {
     reportError(error.message);
   }

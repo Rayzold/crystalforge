@@ -296,26 +296,24 @@ export function loadGameState() {
   return validateAndMigrateSave(parsed);
 }
 
-export function saveGameState(state) {
-  const serializable = {
+export function createSerializableState(state, extraFields = {}) {
+  return {
     ...state,
+    ...extraFields,
     ui: {
       ...state.ui,
       adminOpen: false
     }
   };
+}
+
+export function saveGameState(state) {
+  const serializable = createSerializableState(state);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(serializable));
 }
 
 export function saveManualState(state) {
-  const serializable = {
-    ...state,
-    manualSavedAt: Date.now(),
-    ui: {
-      ...state.ui,
-      adminOpen: false
-    }
-  };
+  const serializable = createSerializableState(state, { manualSavedAt: Date.now() });
   localStorage.setItem(MANUAL_SAVE_KEY, JSON.stringify(serializable));
   return serializable.manualSavedAt;
 }

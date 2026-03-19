@@ -437,6 +437,24 @@ export class AdminConsole {
         case "toggle-shared-autoload":
           this.actions.toggleSharedStateAutoLoad();
           break;
+        case "load-firebase-realm":
+          this.actions.loadFirebaseRealm();
+          break;
+        case "remember-firebase-realm":
+          this.actions.rememberFirebaseRealmId(this.getValue("firebase-realm-id"));
+          break;
+        case "save-firebase-realm":
+          this.actions.saveFirebaseRealm();
+          break;
+        case "toggle-firebase-autoload":
+          this.actions.toggleFirebaseAutoLoad();
+          break;
+        case "toggle-firebase-live-sync":
+          this.actions.toggleFirebaseLiveSync();
+          break;
+        case "toggle-firebase-auto-publish":
+          this.actions.toggleFirebaseAutoPublish();
+          break;
         case "reset-save":
           this.actions.resetSave();
           break;
@@ -918,6 +936,36 @@ export class AdminConsole {
               <button class="button button--ghost" data-admin-action="session-reset">Reset to Live Session</button>
               <button class="button button--ghost" data-admin-action="testing-reset">Reset to Testing State</button>
               <button class="button button--ghost" data-admin-action="full-reset">Full Reset (1 Common Crystal)</button>
+            </div>
+          </section>
+        `
+      },
+      {
+        tab: "system",
+        title: "Firebase Realm",
+        keywords: "firebase realm shared sync autosave load save",
+        content: `
+          <section class="admin-section">
+            <h3>Firebase Realm</h3>
+            <p>Use this when you want every tester to load the same shared Firestore state instead of local-only saves.</p>
+            <label>Firebase Realm ID<input id="firebase-realm-id" value="${escapeHtml(state.settings.firebaseRealmId ?? "main")}" placeholder="main" /></label>
+            <p>
+              Realm:
+              <strong>${escapeHtml(state.settings.firebaseRealmId || "main")}</strong>
+              · Auto-load:
+              <strong>${state.settings.firebaseAutoLoad ? "Enabled" : "Disabled"}</strong>
+              · Live sync:
+              <strong>${state.settings.firebaseLiveSync ? "Enabled" : "Disabled"}</strong>
+              · Auto-publish:
+              <strong>${state.settings.firebaseAutoPublish ? "Enabled" : "Disabled"}</strong>
+            </p>
+            <div class="admin-actions">
+              <button class="button button--ghost" data-admin-action="load-firebase-realm">Load Firebase Realm</button>
+              <button class="button button--ghost" data-admin-action="remember-firebase-realm">Remember Firebase Realm</button>
+              <button class="button button--ghost" data-admin-action="save-firebase-realm">Save to Firebase</button>
+              <button class="button button--ghost" data-admin-action="toggle-firebase-autoload">${state.settings.firebaseAutoLoad ? "Disable Firebase Auto-Load" : "Enable Firebase Auto-Load"}</button>
+              <button class="button button--ghost" data-admin-action="toggle-firebase-live-sync">${state.settings.firebaseLiveSync ? "Disable Firebase Live Sync" : "Enable Firebase Live Sync"}</button>
+              <button class="button button--ghost" data-admin-action="toggle-firebase-auto-publish">${state.settings.firebaseAutoPublish ? "Disable Firebase Auto-Publish" : "Enable Firebase Auto-Publish"}</button>
             </div>
           </section>
         `
