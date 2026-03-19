@@ -23,7 +23,7 @@ export const DRIFT_EVOLUTION_STAGES = [
   {
     id: "wakeflight",
     name: "Wakeflight Drift",
-    threshold: 5,
+    threshold: 16,
     constructionSlots: 3,
     constructionSpeedPercent: 10,
     mobility: "Slow float",
@@ -37,7 +37,7 @@ export const DRIFT_EVOLUTION_STAGES = [
   {
     id: "skywake",
     name: "Skywake Drift",
-    threshold: 15,
+    threshold: 31,
     constructionSlots: 4,
     constructionSpeedPercent: 20,
     mobility: "Short guided glides",
@@ -51,7 +51,7 @@ export const DRIFT_EVOLUTION_STAGES = [
   {
     id: "waycastle",
     name: "Waycastle Drift",
-    threshold: 25,
+    threshold: 50,
     constructionSlots: 5,
     constructionSpeedPercent: 35,
     mobility: "Stable roaming citadel",
@@ -65,8 +65,8 @@ export const DRIFT_EVOLUTION_STAGES = [
   {
     id: "cloud-bastion",
     name: "Cloud Bastion",
-    threshold: 35,
-    constructionSlots: 6,
+    threshold: 999,
+    constructionSlots: 5,
     constructionSpeedPercent: 50,
     mobility: "Sustained high flight",
     summary: "Outer districts stop feeling temporary and begin acting like permanent aerial wards of the city.",
@@ -79,8 +79,8 @@ export const DRIFT_EVOLUTION_STAGES = [
   {
     id: "ascendant-drift",
     name: "Ascendant Drift",
-    threshold: 45,
-    constructionSlots: 7,
+    threshold: 999,
+    constructionSlots: 5,
     constructionSpeedPercent: 70,
     mobility: "A roaming crystal metropolis",
     summary: "The city becomes a mobile realm in its own right, capable of maintaining many crystal growths in parallel.",

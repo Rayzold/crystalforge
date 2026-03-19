@@ -1,6 +1,6 @@
 import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
-import { getConstructionQueue, getDriftConstructionSlots, isBuildingActivelyConstructed } from "../systems/ConstructionSystem.js";
+import { getActiveConstructionQueue, getConstructionQueue, getDriftConstructionSlots, isBuildingActivelyConstructed } from "../systems/ConstructionSystem.js";
 import { getEmergencyStatus } from "../systems/ResourceSystem.js";
 import { getVisibleBuildings, renderBuildingGrid } from "./BuildingGrid.js";
 import { renderCalendarPanel } from "./CalendarPanel.js";
@@ -67,7 +67,10 @@ function renderBuildingsView(state) {
   const sortKey = state.transientUi?.buildingSort ?? "newest";
   const totalRolls = state.historyLog.filter((entry) => entry.category === "Manifest").length;
   const visibleBuildings = getVisibleBuildings(state);
-  const incubating = getConstructionQueue(state);
+  const incubating = getActiveConstructionQueue(state);
+  const waiting = getConstructionQueue(state).filter(
+    (building) => !incubating.some((activeBuilding) => activeBuilding.id === building.id)
+  );
   const slots = getDriftConstructionSlots(state);
 
   return `
@@ -110,9 +113,9 @@ function renderBuildingsView(state) {
         <div class="city-incubation-strip__head">
           <div>
             <h4>Incubating</h4>
-            <span>${formatNumber(Math.min(slots, incubating.length), 0)} active / ${formatNumber(slots, 0)} slots</span>
+            <span>${formatNumber(incubating.length, 0)} active / ${formatNumber(slots, 0)} slots</span>
           </div>
-          <small>${incubating.length ? "These structures are currently growing toward activation." : "No incomplete buildings are in incubation."}</small>
+          <small>${waiting.length ? `${formatNumber(waiting.length, 0)} additional structures are waiting for a slot.` : "No additional structures are waiting right now."}</small>
         </div>
         ${
           incubating.length
@@ -124,7 +127,7 @@ function renderBuildingsView(state) {
                         <article class="city-incubation-strip__item ${isBuildingActivelyConstructed(state, building.id) ? "is-active" : ""}">
                           <strong>${escapeHtml(building.displayName)}</strong>
                           <span>${formatNumber(building.quality, 1)}%</span>
-                          <em>${index < slots ? `Slot ${index + 1}` : `Queued #${index + 1}`}</em>
+                          <em>Slot ${index + 1}</em>
                         </article>
                       `
                     )

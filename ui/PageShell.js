@@ -1,7 +1,7 @@
 import { APP_VERSION, MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
-import { getConstructionQueue } from "../systems/ConstructionSystem.js";
+import { getActiveConstructionQueue, getConstructionQueue } from "../systems/ConstructionSystem.js";
 import { getManualSaveMeta } from "../systems/StorageSystem.js";
 import { getCurrentTownFocus, getTownFocusAvailability } from "../systems/TownFocusSystem.js";
 import { getCriticalAlerts, renderCrisisBanner } from "./CrisisBanner.js";
@@ -87,7 +87,11 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
   const cityAlertCount = getCriticalAlerts(state).length;
   const availableCrystalCount = Object.values(state.crystals ?? {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
   const manifestedBuildings = state.buildings.filter((building) => building.isComplete);
-  const incubatingBuildings = getConstructionQueue(state);
+  const constructionQueue = getConstructionQueue(state);
+  const incubatingBuildings = getActiveConstructionQueue(state);
+  const availableBuildings = constructionQueue.filter(
+    (building) => !incubatingBuildings.some((activeBuilding) => activeBuilding.id === building.id)
+  );
   const summary = [
     ["Gold", state.resources.gold],
     ["Food", state.resources.food],
@@ -110,12 +114,11 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
     ]
   ];
 
-  const forgeNavCollapsed = pageKey === "forge" ? Boolean(state.transientUi?.forgeNavCollapsed) : false;
   const diceAmount = Math.max(1, Math.min(20, Number(state.settings.diceAmount ?? 1) || 1));
   const diceType = DICE_TYPES.includes(state.settings.diceType) ? state.settings.diceType : "d20";
   const lastDiceRoll = state.settings.lastDiceRoll ?? null;
   return `
-    <div class="game-shell game-shell--page-${pageKey} ${forgeNavCollapsed ? "game-shell--forge-collapsed" : ""} ${currentFocus ? `game-shell--focus-${currentFocus.id}` : ""} ${state.settings.liveSessionView ? "game-shell--live-session" : ""} game-shell--theme-${state.settings.theme ?? "dark"}">
+    <div class="game-shell game-shell--page-${pageKey} ${currentFocus ? `game-shell--focus-${currentFocus.id}` : ""} ${state.settings.liveSessionView ? "game-shell--live-session" : ""} game-shell--theme-${state.settings.theme ?? "dark"}">
       ${
         MASCOT_MEDIA?.enabled
           ? `
@@ -129,21 +132,6 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
           : ""
       }
       <aside class="sidebar-nav">
-        ${
-          pageKey === "forge"
-            ? `
-              <button
-                class="sidebar-nav__toggle button button--ghost"
-                type="button"
-                data-action="toggle-forge-nav"
-                aria-expanded="${forgeNavCollapsed ? "false" : "true"}"
-                title="${forgeNavCollapsed ? "Expand forge navigation" : "Collapse forge navigation"}"
-              >
-                <span>${forgeNavCollapsed ? "Open" : "Hide"}</span>
-              </button>
-            `
-            : ""
-        }
         <div class="sidebar-nav__brand">
           <p>Crystal Forge</p>
           <strong>City of Drift</strong>
@@ -157,7 +145,10 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
                 data-short="${route.label.slice(0, 2).toUpperCase()}"
                 data-glyph="${ROUTE_GLYPHS[route.key] ?? "\u2022"}"
               >
-                <span>${route.label}</span>
+                <span class="sidebar-link__label">
+                  <span class="sidebar-link__emoji">${ROUTE_GLYPHS[route.key] ?? "\u2022"}</span>
+                  <span>${route.label}</span>
+                </span>
                 ${
                   route.key === "city" && cityAlertCount
                     ? `<em class="sidebar-link__badge">${cityAlertCount}</em>`
@@ -172,6 +163,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
         <div class="sidebar-nav__status">
           ${renderSidebarBuildingList("Manifested", manifestedBuildings, "No active buildings yet.")}
           ${renderSidebarBuildingList("Incubating", incubatingBuildings, "No buildings are incubating.")}
+          ${renderSidebarBuildingList("Available", availableBuildings, "No additional buildings are waiting.")}
         </div>
         <div class="sidebar-nav__footer">
           <button class="button button--ghost" data-action="open-catalog">Building Catalog</button>

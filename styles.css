@@ -3080,6 +3080,17 @@ textarea {
   transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
 }
 
+.sidebar-link__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar-link__emoji {
+  font-size: 1rem;
+  line-height: 1;
+}
+
 .sidebar-link__badge {
   position: absolute;
   top: 8px;
