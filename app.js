@@ -405,6 +405,7 @@ async function handleManifest() {
     return;
   }
 
+  await publishManifestIfEnabled();
   await audioEngine.playManifest(result.rarity);
   await animationEngine.playManifestReveal(result);
   if (manifestCompleteTimer) {
@@ -815,6 +816,18 @@ function scheduleFirebaseAutoPublish(state) {
     firebasePublishTimer = null;
     void publishSharedStateToFirebase().catch((error) => reportError(error.message));
   }, 500);
+}
+
+async function publishManifestIfEnabled() {
+  const state = getCurrentState();
+  if (!state.settings.firebaseAutoPublish) {
+    return;
+  }
+  try {
+    await publishSharedStateToFirebase(state);
+  } catch (error) {
+    reportError(error.message);
+  }
 }
 
 function moveBuildingOnMap({ buildingId, q, r, source = "Player" }) {

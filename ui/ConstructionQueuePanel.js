@@ -3,17 +3,15 @@ import { formatDate } from "../systems/CalendarSystem.js";
 import {
   getActiveConstructionQueue,
   getAvailableConstructionQueue,
-  getBuildingDailyRate,
+  getConstructionEtaDetails,
   getConstructionQueue,
   getDriftConstructionSlots
 } from "../systems/ConstructionSystem.js";
 
 function renderQueueItem(state, building, index, activeCount) {
   const isActive = index < activeCount;
-  const rate = isActive ? getBuildingDailyRate(building, state) : 0;
-  const remaining = Math.max(0, 100 - building.quality);
-  const daysRemaining = isActive && rate > 0 ? Math.ceil(remaining / rate) : null;
-  const eta = isActive && daysRemaining !== null ? formatDate(state.calendar.dayOffset + daysRemaining) : "Waiting";
+  const etaDetails = isActive ? getConstructionEtaDetails(building, state) : null;
+  const eta = etaDetails ? formatDate(etaDetails.readyDayOffset) : "Waiting";
 
   return `
     <article class="construction-queue__item ${isActive ? "is-active" : "is-queued"}">
@@ -23,7 +21,11 @@ function renderQueueItem(state, building, index, activeCount) {
           <strong>${escapeHtml(building.displayName)}</strong>
         </div>
         <small>${escapeHtml(building.rarity)} / ${formatNumber(building.quality, 2)}%</small>
-        <small>${isActive ? `${formatNumber(rate, 2)}% per day / ETA ${escapeHtml(eta)}` : "Will begin when a Drift slot opens."}</small>
+        <small>${
+          isActive && etaDetails
+            ? `${formatNumber(etaDetails.rate, 2)}% per day / ${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"} / Ready ${escapeHtml(eta)}`
+            : "Will begin when a Drift slot opens."
+        }</small>
       </div>
       <div class="construction-queue__actions">
         <button class="button button--ghost" data-action="${isActive ? "pause-construction" : "activate-construction"}" data-building-id="${building.id}">${isActive ? "Cancel" : "Activate"}</button>

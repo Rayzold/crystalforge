@@ -1,6 +1,13 @@
 import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
-import { getActiveConstructionQueue, getAvailableConstructionQueue, getDriftConstructionSlots, isBuildingActivelyConstructed } from "../systems/ConstructionSystem.js";
+import { formatDate } from "../systems/CalendarSystem.js";
+import {
+  getActiveConstructionQueue,
+  getAvailableConstructionQueue,
+  getConstructionEtaDetails,
+  getDriftConstructionSlots,
+  isBuildingActivelyConstructed
+} from "../systems/ConstructionSystem.js";
 import { getEmergencyStatus } from "../systems/ResourceSystem.js";
 import { getVisibleBuildings, renderBuildingGrid } from "./BuildingGrid.js";
 import { renderCalendarPanel } from "./CalendarPanel.js";
@@ -121,14 +128,20 @@ function renderBuildingsView(state) {
                 <div class="city-incubation-strip__list">
                   ${incubating
                     .map(
-                      (building, index) => `
+                      (building, index) => {
+                        const etaDetails = getConstructionEtaDetails(building, state);
+                        return `
                         <article class="city-incubation-strip__item ${isBuildingActivelyConstructed(state, building.id) ? "is-active" : ""}">
                           <strong>${escapeHtml(building.displayName)}</strong>
                           <span>${formatNumber(building.quality, 1)}%</span>
                           <em>Slot ${index + 1}</em>
+                          <small>${formatNumber(etaDetails.rate, 2)}% per day</small>
+                          <small>${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"} remaining</small>
+                          <small>Ready ${escapeHtml(formatDate(etaDetails.readyDayOffset))}</small>
                           <button class="button button--ghost" data-action="pause-construction" data-building-id="${building.id}">Cancel Incubation</button>
                         </article>
-                      `
+                      `;
+                      }
                     )
                     .join("")}
                 </div>

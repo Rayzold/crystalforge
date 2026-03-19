@@ -145,6 +145,31 @@ export function getBuildingDailyRate(building, state) {
   );
 }
 
+export function getConstructionEtaDetails(building, state) {
+  const rate = getBuildingDailyRate(building, state);
+  const remainingPercent = Math.max(0, BUILDING_ACTIVE_THRESHOLD - Number(building.quality ?? 0));
+
+  if (remainingPercent <= 0 || rate <= 0) {
+    return {
+      rate,
+      remainingPercent,
+      daysRemaining: 0,
+      readyDayOffset: state.calendar.dayOffset
+    };
+  }
+
+  const rawDaysRemaining = remainingPercent / rate;
+  const daysRemaining = Math.ceil(rawDaysRemaining * 10) / 10;
+  const readyDayOffset = state.calendar.dayOffset + Math.ceil(rawDaysRemaining);
+
+  return {
+    rate,
+    remainingPercent,
+    daysRemaining,
+    readyDayOffset
+  };
+}
+
 export function advanceConstructionOneDay(state, currentDate, currentDayOffset) {
   const completedToday = [];
 
