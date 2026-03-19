@@ -84,6 +84,7 @@ export function createSingleCommonCrystalResetState() {
     gold: 0,
     food: 0,
     materials: 0,
+    salvage: 0,
     mana: 0,
     population: 0,
     prosperity: 0

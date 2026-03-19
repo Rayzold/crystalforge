@@ -14,7 +14,7 @@ const EMPTY_STATS = {
   health: 0
 };
 
-const EMPTY_RESOURCES = { gold: 0, food: 0, materials: 0, mana: 0 };
+const EMPTY_RESOURCES = { gold: 0, food: 0, materials: 0, salvage: 0, mana: 0 };
 const EMPTY_CITIZEN_EFFECTS = { populationSupport: 0, prosperityAffinity: 0, moraleAffinity: 0 };
 
 const TAG_PROFILES = {
@@ -30,7 +30,7 @@ const TAG_PROFILES = {
   },
   industry: {
     stats: { value: 0.8, income: 0.55, upkeep: 0.24, defense: 0.1 },
-    resources: { materials: 1.6, gold: 0.35, food: -0.12 },
+    resources: { materials: 1.6, salvage: 0.18, gold: 0.35, food: -0.12 },
     citizens: { populationSupport: 0.2 }
   },
   military: {
@@ -40,7 +40,7 @@ const TAG_PROFILES = {
   },
   arcane: {
     stats: { prestige: 0.62, prosperity: 0.3, value: 0.32, upkeep: 0.28 },
-    resources: { mana: 1.55, gold: -0.22, materials: -0.1 },
+    resources: { mana: 1.55, salvage: 0.14, gold: -0.22, materials: -0.1 },
     citizens: { prosperityAffinity: 0.2, moraleAffinity: 0.08 }
   },
   religious: {
@@ -60,7 +60,7 @@ const TAG_PROFILES = {
   },
   harbor: {
     stats: { income: 0.7, security: 0.28, value: 0.45, prestige: 0.15 },
-    resources: { gold: 1, materials: 0.8, food: 0.2 },
+    resources: { gold: 1, materials: 0.8, salvage: 0.12, food: 0.2 },
     citizens: { prosperityAffinity: 0.22 }
   },
   culture: {

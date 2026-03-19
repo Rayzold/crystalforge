@@ -37,7 +37,7 @@ export const DRIFT_EVOLUTION_STAGES = [
   {
     id: "skywake",
     name: "Skywake Drift",
-    threshold: 10,
+    threshold: 15,
     constructionSlots: 4,
     constructionSpeedPercent: 20,
     mobility: "Short guided glides",
@@ -51,7 +51,7 @@ export const DRIFT_EVOLUTION_STAGES = [
   {
     id: "waycastle",
     name: "Waycastle Drift",
-    threshold: 18,
+    threshold: 25,
     constructionSlots: 5,
     constructionSpeedPercent: 35,
     mobility: "Stable roaming citadel",
@@ -65,7 +65,7 @@ export const DRIFT_EVOLUTION_STAGES = [
   {
     id: "cloud-bastion",
     name: "Cloud Bastion",
-    threshold: 30,
+    threshold: 35,
     constructionSlots: 6,
     constructionSpeedPercent: 50,
     mobility: "Sustained high flight",

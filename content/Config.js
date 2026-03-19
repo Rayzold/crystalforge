@@ -5,7 +5,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v0.7.52";
+export const APP_VERSION = "v0.7.53";
 export const SAVE_VERSION = 7;
 export const STORAGE_KEY = "crystal-forge-save";
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save";
@@ -31,6 +31,7 @@ export const RESOURCE_MINIMUMS = {
   gold: 0,
   food: 0,
   materials: 0,
+  salvage: 0,
   mana: 0,
   population: 0,
   prosperity: 0
@@ -63,6 +64,7 @@ export const START_STATE_PRESETS = {
       gold: 160,
       food: 120,
       materials: 90,
+      salvage: 18,
       mana: 25,
       population: 60,
       prosperity: 18
@@ -114,6 +116,7 @@ export const START_STATE_PRESETS = {
       gold: 1200,
       food: 900,
       materials: 750,
+      salvage: 180,
       mana: 350,
       population: DRIFT_POPULATION_GOALS.startingPopulation,
       prosperity: 280

@@ -5,7 +5,7 @@ import { getBuildingPlacementBonuses } from "./MapSystem.js";
 import { getCurrentTownFocus } from "./TownFocusSystem.js";
 
 function createDeltaRecord() {
-  return { gold: 0, food: 0, materials: 0, mana: 0, prosperity: 0 };
+  return { gold: 0, food: 0, materials: 0, salvage: 0, mana: 0, prosperity: 0 };
 }
 
 export function getWarningFlags(state) {
@@ -30,6 +30,7 @@ export function calculateDailyResourceDelta(state) {
     deltas.gold += building.resourceRates.gold * building.multiplier * placementMultiplier;
     deltas.food += building.resourceRates.food * building.multiplier * placementMultiplier;
     deltas.materials += building.resourceRates.materials * building.multiplier * placementMultiplier;
+    deltas.salvage += (building.resourceRates.salvage ?? 0) * building.multiplier * placementMultiplier;
     deltas.mana += building.resourceRates.mana * building.multiplier * placementMultiplier;
     deltas.prosperity += building.stats.prosperity * 0.02 * building.multiplier * placementMultiplier;
   }
@@ -59,6 +60,9 @@ export function calculateDailyResourceDelta(state) {
     if (bonuses.materialsProductionPercent) {
       deltas.materials *= 1 + (bonuses.materialsProductionPercent * district.level) / 100;
     }
+    if (bonuses.salvageProductionPercent) {
+      deltas.salvage *= 1 + (bonuses.salvageProductionPercent * district.level) / 100;
+    }
     if (bonuses.manaProductionPercent) {
       deltas.mana *= 1 + (bonuses.manaProductionPercent * district.level) / 100;
     }
@@ -70,6 +74,7 @@ export function calculateDailyResourceDelta(state) {
     deltas.gold += effects.goldFlat ?? 0;
     deltas.food += effects.foodFlat ?? 0;
     deltas.materials += effects.materialsFlat ?? 0;
+    deltas.salvage += effects.salvageFlat ?? 0;
     deltas.mana += effects.manaFlat ?? 0;
     deltas.prosperity += effects.prosperityFlat ?? 0;
     if (effects.goldMultiplier) {
@@ -81,6 +86,9 @@ export function calculateDailyResourceDelta(state) {
     if (effects.materialsMultiplier) {
       deltas.materials *= 1 + effects.materialsMultiplier;
     }
+    if (effects.salvageMultiplier) {
+      deltas.salvage *= 1 + effects.salvageMultiplier;
+    }
     if (effects.manaMultiplier) {
       deltas.mana *= 1 + effects.manaMultiplier;
     }
@@ -91,6 +99,7 @@ export function calculateDailyResourceDelta(state) {
     deltas.gold += focus.resourceDaily.gold ?? 0;
     deltas.food += focus.resourceDaily.food ?? 0;
     deltas.materials += focus.resourceDaily.materials ?? 0;
+    deltas.salvage += focus.resourceDaily.salvage ?? 0;
     deltas.mana += focus.resourceDaily.mana ?? 0;
     deltas.prosperity += focus.resourceDaily.prosperity ?? 0;
   }
@@ -188,6 +197,7 @@ export function applyDailyResources(state) {
   state.resources.gold = clamp(state.resources.gold + deltas.gold, RESOURCE_MINIMUMS.gold, 999999);
   state.resources.food = clamp(state.resources.food + deltas.food, RESOURCE_MINIMUMS.food, 999999);
   state.resources.materials = clamp(state.resources.materials + deltas.materials, RESOURCE_MINIMUMS.materials, 999999);
+  state.resources.salvage = clamp(state.resources.salvage + deltas.salvage, RESOURCE_MINIMUMS.salvage, 999999);
   state.resources.mana = clamp(state.resources.mana + deltas.mana, RESOURCE_MINIMUMS.mana, 999999);
   state.resources.prosperity = clamp(
     state.resources.prosperity + deltas.prosperity,

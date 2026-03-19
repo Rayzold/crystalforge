@@ -8,6 +8,7 @@ const ICONS = {
     <path d="M24 42c4-9 9-18 17-25" />`,
   materials: `<path d="M18 20h28v28H18Z" />
     <path d="M18 30h28M32 20v28" />`,
+  salvage: `<path d="M18 18h12v12H18Z" /><path d="M34 18h12v12H34Z" /><path d="M18 34h12v12H18Z" /><path d="M34 34h12v12H34Z" />`,
   mana: `<path d="m32 8 9 15 15 9-15 9-9 15-9-15-15-9 15-9Z" />
     <circle cx="32" cy="32" r="5" />`,
   population: `<circle cx="24" cy="24" r="7" /><circle cx="40" cy="24" r="7" /><path d="M16 48c0-6 5-11 11-11h10c6 0 11 5 11 11" />`,

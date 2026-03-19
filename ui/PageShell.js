@@ -1,6 +1,7 @@
 import { APP_VERSION, MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
+import { getConstructionQueue } from "../systems/ConstructionSystem.js";
 import { getManualSaveMeta } from "../systems/StorageSystem.js";
 import { getCurrentTownFocus, getTownFocusAvailability } from "../systems/TownFocusSystem.js";
 import { getCriticalAlerts, renderCrisisBanner } from "./CrisisBanner.js";
@@ -11,6 +12,7 @@ const HUD_ICON_KEYS = {
   Gold: "gold",
   Food: "food",
   Materials: "materials",
+  Salvage: "salvage",
   Mana: "mana",
   Population: "population",
   Prosperity: "prosperity",
@@ -49,16 +51,48 @@ function renderDiceHistory(history = []) {
   `;
 }
 
+function renderSidebarBuildingList(title, items, emptyLabel) {
+  return `
+    <section class="sidebar-manifest-list">
+      <div class="sidebar-manifest-list__head">
+        <strong>${escapeHtml(title)}</strong>
+        <span>${formatNumber(items.length, 0)}</span>
+      </div>
+      ${
+        items.length
+          ? `
+              <div class="sidebar-manifest-list__items">
+                ${items
+                  .map(
+                    (building) => `
+                      <div class="sidebar-manifest-list__item">
+                        <span>${escapeHtml(building.displayName)}</span>
+                        <em>${building.isComplete ? `x${building.multiplier}` : `${formatNumber(building.quality, 0)}%`}</em>
+                      </div>
+                    `
+                  )
+                  .join("")}
+              </div>
+            `
+          : `<p class="sidebar-manifest-list__empty">${escapeHtml(emptyLabel)}</p>`
+      }
+    </section>
+  `;
+}
+
 export function renderPageShell(state, pageKey, { title, subtitle, content, aside = "" }, overlays = "") {
   const manualSaveMeta = getManualSaveMeta();
   const townFocusAvailability = getTownFocusAvailability(state);
   const currentFocus = getCurrentTownFocus(state);
   const cityAlertCount = getCriticalAlerts(state).length;
   const availableCrystalCount = Object.values(state.crystals ?? {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
+  const manifestedBuildings = state.buildings.filter((building) => building.isComplete);
+  const incubatingBuildings = getConstructionQueue(state);
   const summary = [
     ["Gold", state.resources.gold],
     ["Food", state.resources.food],
     ["Materials", state.resources.materials],
+    ["Salvage", state.resources.salvage ?? 0],
     ["Mana", state.resources.mana],
     ["Population", state.resources.population],
     ["Prosperity", state.resources.prosperity],
@@ -135,6 +169,10 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
             `
           ).join("")}
         </nav>
+        <div class="sidebar-nav__status">
+          ${renderSidebarBuildingList("Manifested", manifestedBuildings, "No active buildings yet.")}
+          ${renderSidebarBuildingList("Incubating", incubatingBuildings, "No buildings are incubating.")}
+        </div>
         <div class="sidebar-nav__footer">
           <button class="button button--ghost" data-action="open-catalog">Building Catalog</button>
           <button class="button button--ghost" data-action="open-admin">${state.settings.liveSessionView ? "GM Console" : "Admin Console"}</button>

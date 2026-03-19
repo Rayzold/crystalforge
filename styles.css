@@ -383,7 +383,7 @@ textarea {
 }
 
 .resource-panel__grid {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
 }
 
 .resource-chip,
@@ -518,6 +518,106 @@ textarea {
   margin-top: 8px;
   color: var(--muted);
   line-height: 1.35;
+}
+
+.sidebar-nav__status {
+  display: grid;
+  gap: 10px;
+}
+
+.sidebar-manifest-list {
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, rgba(15, 18, 29, 0.94), rgba(8, 10, 16, 0.98));
+}
+
+.sidebar-manifest-list__head,
+.sidebar-manifest-list__item {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.sidebar-manifest-list__head {
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.sidebar-manifest-list__head strong {
+  font-family: var(--display-font);
+  font-size: 0.88rem;
+}
+
+.sidebar-manifest-list__head span,
+.sidebar-manifest-list__item em,
+.sidebar-manifest-list__empty {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.sidebar-manifest-list__items {
+  display: grid;
+  gap: 6px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.sidebar-manifest-list__item {
+  align-items: baseline;
+}
+
+.sidebar-manifest-list__item span {
+  min-width: 0;
+  font-size: 0.84rem;
+}
+
+.city-incubation-strip {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, rgba(15, 18, 29, 0.92), rgba(9, 12, 19, 0.96));
+}
+
+.city-incubation-strip__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.city-incubation-strip__head h4 {
+  margin: 0 0 4px;
+}
+
+.city-incubation-strip__head span,
+.city-incubation-strip__head small,
+.city-incubation-strip__item em {
+  color: var(--muted);
+}
+
+.city-incubation-strip__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.city-incubation-strip__item {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.city-incubation-strip__item.is-active {
+  border-color: rgba(141, 214, 255, 0.28);
+  box-shadow: 0 0 0 1px rgba(141, 214, 255, 0.12);
 }
 
 .citizen-tile .help-bubble {

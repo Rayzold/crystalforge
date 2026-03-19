@@ -11,6 +11,7 @@ export function renderResourcePanel(state) {
     ["Gold", state.resources.gold, "gold"],
     ["Food", state.resources.food, "food"],
     ["Materials", state.resources.materials, "materials"],
+    ["Salvage", state.resources.salvage ?? 0, "salvage"],
     ["Mana", state.resources.mana, "mana"],
     ["Population", state.resources.population, "population"],
     ["Prosperity", state.resources.prosperity, "prosperity"]
