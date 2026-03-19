@@ -248,6 +248,7 @@ export class AdminConsole {
             gold: this.getNumberInput("resource-gold"),
             food: this.getNumberInput("resource-food"),
             materials: this.getNumberInput("resource-materials"),
+            salvage: this.getNumberInput("resource-salvage"),
             mana: this.getNumberInput("resource-mana"),
             prosperity: this.getNumberInput("resource-prosperity"),
             population: this.getNumberInput("resource-population")
@@ -578,7 +579,7 @@ export class AdminConsole {
       {
         tab: "economy",
         title: "Resources",
-        keywords: "resources gold food materials mana prosperity",
+        keywords: "resources gold food materials salvage mana prosperity",
         content: `
           <section class="admin-section">
             <h3>Resources</h3>
@@ -586,6 +587,7 @@ export class AdminConsole {
               <label>Gold<input id="resource-gold" type="number" value="${state.resources.gold}" /></label>
               <label>Food<input id="resource-food" type="number" value="${state.resources.food}" /></label>
               <label>Materials<input id="resource-materials" type="number" value="${state.resources.materials}" /></label>
+              <label>Salvage<input id="resource-salvage" type="number" value="${state.resources.salvage ?? 0}" /></label>
               <label>Mana<input id="resource-mana" type="number" value="${state.resources.mana}" /></label>
               <label>Prosperity<input id="resource-prosperity" type="number" value="${state.resources.prosperity}" /></label>
               <label>Population<input id="resource-population" type="number" value="${state.resources.population}" /></label>

@@ -4,7 +4,7 @@ import { formatDate } from "../systems/CalendarSystem.js";
 import { getActiveConstructionQueue, getAvailableConstructionQueue } from "../systems/ConstructionSystem.js";
 import { getManualSaveMeta } from "../systems/StorageSystem.js";
 import { getCurrentTownFocus, getTownFocusAvailability } from "../systems/TownFocusSystem.js";
-import { getCriticalAlerts, renderCrisisBanner } from "./CrisisBanner.js";
+import { getCriticalAlerts } from "./CrisisBanner.js";
 import { renderTownFocusBadge } from "./TownFocusShared.js";
 import { renderUiIcon } from "./UiIcons.js";
 
@@ -221,7 +221,6 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
       </aside>
 
       <main class="page-stage page-stage--${pageKey}">
-        ${pageKey === "citizens" || pageKey === "chronicle" ? "" : renderCrisisBanner(state, pageKey)}
         <header class="page-hero">
           <div>
             <p class="page-hero__eyebrow">${pageKey}</p>
