@@ -1,5 +1,4 @@
 import { renderCitizenPanel } from "./CitizenPanel.js";
-import { renderDriftEvolutionPanel } from "./DriftEvolutionPanel.js";
 import { renderUiIcon } from "./UiIcons.js";
 import { escapeHtml } from "../engine/Utils.js";
 
@@ -8,7 +7,7 @@ function renderCitizenLore(state) {
     <section class="scene-panel">
       <div class="panel__header">
         <h3>Social Fabric</h3>
-        <span class="panel__subtle">Class balance drives city output</span>
+        <span class="panel__subtle">Roles, duties, and the social shape of the Drift</span>
       </div>
       <div class="lore-grid">
         ${Object.entries(state.citizenDefinitions)
@@ -39,7 +38,7 @@ function renderCitizenCommand(state) {
     <section class="panel citizen-command-panel">
       <div class="panel__header">
         <h3>Population Command</h3>
-        <span class="panel__subtle">Class balance over broad city stats</span>
+        <span class="panel__subtle">Read the population itself, not the rest of the city</span>
       </div>
       <div class="citizen-command-panel__metrics">
         <article>
@@ -73,9 +72,8 @@ function renderCitizenCommand(state) {
 export function renderCitizensPage(state) {
   return {
     title: "Citizens",
-    subtitle: "Class balance, support, and social texture.",
+    subtitle: "Population roles, support, and the living social order.",
     content: `
-      ${renderDriftEvolutionPanel(state, { compact: true })}
       ${renderCitizenPanel(state)}
       ${renderCitizenLore(state)}
     `,

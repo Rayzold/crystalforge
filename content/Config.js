@@ -5,7 +5,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v0.7.24";
+export const APP_VERSION = "v0.7.36";
 export const SAVE_VERSION = 7;
 export const STORAGE_KEY = "crystal-forge-save";
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save";
@@ -68,14 +68,25 @@ export const START_STATE_PRESETS = {
       prosperity: 18
     },
     citizens: {
-      Peasants: 28,
-      Workers: 18,
-      Merchants: 5,
-      Scholars: 3,
-      Clergy: 2,
-      Soldiers: 3,
+      Children: 7,
+      Elderly: 4,
+      Farmers: 12,
+      Hunters: 3,
+      Miners: 4,
+      Laborers: 12,
+      Craftsmen: 5,
+      Merchants: 3,
+      Scavengers: 2,
+      Guards: 2,
+      Soldiers: 2,
+      Administrators: 1,
+      Scholars: 1,
+      Clergy: 1,
+      Healers: 0,
+      Entertainers: 0,
       Nobles: 1,
-      Mages: 0
+      Mages: 0,
+      Heroes: 0
     },
     settings: {
       muted: false,
@@ -83,7 +94,11 @@ export const START_STATE_PRESETS = {
       currentPage: "home",
       onboardingDismissed: false,
       liveSessionView: true,
-      theme: "dark"
+      theme: "dark",
+      diceAmount: 1,
+      diceType: "d20",
+      diceHistory: [],
+      lastDiceRoll: null
     }
   },
   testing: {
@@ -101,14 +116,25 @@ export const START_STATE_PRESETS = {
       prosperity: 280
     },
     citizens: {
-      Peasants: 184,
-      Workers: 113,
-      Merchants: 41,
-      Scholars: 31,
-      Clergy: 20,
-      Soldiers: 20,
-      Nobles: 11,
-      Mages: 0
+      Children: 48,
+      Elderly: 34,
+      Farmers: 82,
+      Hunters: 18,
+      Miners: 34,
+      Laborers: 72,
+      Craftsmen: 40,
+      Merchants: 24,
+      Scavengers: 16,
+      Guards: 18,
+      Soldiers: 14,
+      Administrators: 10,
+      Scholars: 9,
+      Clergy: 9,
+      Healers: 6,
+      Entertainers: 5,
+      Nobles: 4,
+      Mages: 3,
+      Heroes: 1
     },
     settings: {
       muted: false,
@@ -116,7 +142,11 @@ export const START_STATE_PRESETS = {
       currentPage: "home",
       onboardingDismissed: false,
       liveSessionView: false,
-      theme: "dark"
+      theme: "dark",
+      diceAmount: 1,
+      diceType: "d20",
+      diceHistory: [],
+      lastDiceRoll: null
     }
   }
 };

@@ -1,5 +1,6 @@
 import {
   DAYS_PER_MONTH,
+  MONTHS_PER_YEAR,
   DAYS_PER_YEAR,
   HOLIDAYS,
   MONTHS,
@@ -60,6 +61,24 @@ export function formatDate(dayOffset = 0) {
 
 export function addDays(dayOffset, days) {
   return dayOffset + days;
+}
+
+export function getMonthStartOffset(dayOffset = 0) {
+  const date = getStructuredDate(dayOffset);
+  return dayOffset - (date.day - 1);
+}
+
+export function addMonthsToOffset(dayOffset = 0, monthDelta = 0) {
+  const date = getStructuredDate(dayOffset);
+  const totalMonths = date.year * MONTHS_PER_YEAR + date.monthIndex + monthDelta;
+  const nextYear = Math.floor(totalMonths / MONTHS_PER_YEAR);
+  const nextMonthIndex = ((totalMonths % MONTHS_PER_YEAR) + MONTHS_PER_YEAR) % MONTHS_PER_YEAR;
+  return dateFromParts(nextYear, MONTHS[nextMonthIndex], 1);
+}
+
+export function getMonthDayOffsets(dayOffset = 0) {
+  const monthStart = getMonthStartOffset(dayOffset);
+  return Array.from({ length: DAYS_PER_MONTH }, (_, index) => monthStart + index);
 }
 
 export function compareDates(leftOffset, rightOffset) {

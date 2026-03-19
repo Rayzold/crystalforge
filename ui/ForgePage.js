@@ -57,7 +57,7 @@ function renderManifestShrine(state) {
                         <p>${escapeHtml(entry.details)}</p>
                         ${
                           building
-                            ? `<button class="button button--ghost" data-action="inspect-building" data-building-id="${building.id}">Open Dossier</button>`
+                            ? `<button class="button button--ghost" data-action="inspect-building" data-building-id="${building.id}">Open Details</button>`
                             : ""
                         }
                       </div>

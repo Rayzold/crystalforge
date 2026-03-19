@@ -6,14 +6,49 @@ import {
 import { sumObjectValues } from "../engine/Utils.js";
 import { addHistoryEntry } from "./HistoryLogSystem.js";
 
+const LEGACY_CITIZEN_MIGRATION = {
+  Peasants: { Farmers: 0.55, Laborers: 0.25, Children: 0.1, Elderly: 0.1 },
+  Workers: { Laborers: 0.4, Craftsmen: 0.25, Miners: 0.2, Scavengers: 0.15 },
+  Merchants: { Merchants: 0.7, Administrators: 0.15, Entertainers: 0.15 },
+  Scholars: { Scholars: 0.7, Administrators: 0.15, Healers: 0.15 },
+  Clergy: { Clergy: 0.75, Healers: 0.25 },
+  Soldiers: { Guards: 0.45, Soldiers: 0.45, Heroes: 0.1 },
+  Nobles: { Nobles: 0.85, Administrators: 0.15 },
+  Mages: { Mages: 0.85, Scholars: 0.15 }
+};
+
 export function createCitizenDefinitionsSnapshot() {
   return structuredClone(CITIZEN_DEFINITIONS);
 }
 
 export function normalizeCitizens(citizens) {
-  return Object.fromEntries(
+  const normalized = Object.fromEntries(
     CITIZEN_CLASSES.map((citizenClass) => [citizenClass, Math.max(0, Number(citizens?.[citizenClass] ?? 0))])
   );
+
+  if (!citizens || typeof citizens !== "object") {
+    return normalized;
+  }
+
+  for (const [legacyClass, distribution] of Object.entries(LEGACY_CITIZEN_MIGRATION)) {
+    const legacyCount = Math.max(0, Number(citizens[legacyClass] ?? 0));
+    if (!legacyCount) {
+      continue;
+    }
+
+    let assigned = 0;
+    const entries = Object.entries(distribution);
+    entries.forEach(([nextClass, ratio], index) => {
+      const amount =
+        index === entries.length - 1
+          ? legacyCount - assigned
+          : Math.floor(legacyCount * ratio);
+      normalized[nextClass] = (normalized[nextClass] ?? 0) + amount;
+      assigned += amount;
+    });
+  }
+
+  return normalized;
 }
 
 export function getTotalPopulation(state) {

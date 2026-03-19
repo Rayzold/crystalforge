@@ -46,7 +46,8 @@ export function createDefaultDriftEvolutionState() {
   return {
     currentStageId: DRIFT_EVOLUTION_STAGES[0].id,
     unlockedStageIds: [DRIFT_EVOLUTION_STAGES[0].id],
-    manifestedBuildingCount: 0
+    manifestedBuildingCount: 0,
+    stageOverrides: {}
   };
 }
 
@@ -55,36 +56,57 @@ export function getManifestedBuildingCount(state) {
 }
 
 export function getCurrentDriftEvolution(state) {
+  const stages = getDriftEvolutionStages(state);
   const currentId = state.driftEvolution?.currentStageId ?? DRIFT_EVOLUTION_STAGES[0].id;
   return (
-    DRIFT_EVOLUTION_STAGES.find((stage) => stage.id === currentId) ??
-    DRIFT_EVOLUTION_STAGES[0]
+    stages.find((stage) => stage.id === currentId) ??
+    stages[0]
   );
 }
 
 export function getUnlockedDriftStages(state) {
+  const stages = getDriftEvolutionStages(state);
   const unlockedIds = state.driftEvolution?.unlockedStageIds ?? [DRIFT_EVOLUTION_STAGES[0].id];
-  return DRIFT_EVOLUTION_STAGES.filter((stage) => unlockedIds.includes(stage.id));
+  return stages.filter((stage) => unlockedIds.includes(stage.id));
 }
 
 export function getNextDriftEvolutionStage(state) {
+  const stages = getDriftEvolutionStages(state);
   const currentStage = getCurrentDriftEvolution(state);
-  return DRIFT_EVOLUTION_STAGES.find((stage) => stage.threshold > currentStage.threshold) ?? null;
+  return stages.find((stage) => stage.threshold > currentStage.threshold) ?? null;
+}
+
+export function getDriftEvolutionStages(state) {
+  const overrides = state?.driftEvolution?.stageOverrides ?? {};
+  return DRIFT_EVOLUTION_STAGES.map((stage) => {
+    const override = overrides[stage.id];
+    if (!override) {
+      return stage;
+    }
+
+    return {
+      ...stage,
+      ...override,
+      abilities: Array.isArray(override.abilities) ? override.abilities : stage.abilities
+    };
+  });
 }
 
 export function syncDriftEvolutionState(state) {
   const manifestedCount = getManifestedBuildingCount(state);
-  const thresholdUnlockedStages = DRIFT_EVOLUTION_STAGES.filter((stage) => manifestedCount >= stage.threshold);
+  const stages = getDriftEvolutionStages(state);
+  const thresholdUnlockedStages = stages.filter((stage) => manifestedCount >= stage.threshold);
   const previousUnlockedIds = new Set(state.driftEvolution?.unlockedStageIds ?? []);
   const unlockedIds = new Set([...previousUnlockedIds, ...thresholdUnlockedStages.map((stage) => stage.id)]);
-  const unlockedStages = DRIFT_EVOLUTION_STAGES.filter((stage) => unlockedIds.has(stage.id));
-  const currentStage = unlockedStages[unlockedStages.length - 1] ?? DRIFT_EVOLUTION_STAGES[0];
+  const unlockedStages = stages.filter((stage) => unlockedIds.has(stage.id));
+  const currentStage = unlockedStages[unlockedStages.length - 1] ?? stages[0];
   const newStages = thresholdUnlockedStages.filter((stage) => !previousUnlockedIds.has(stage.id));
 
   state.driftEvolution = {
     currentStageId: currentStage.id,
     unlockedStageIds: unlockedStages.map((stage) => stage.id),
-    manifestedBuildingCount: manifestedCount
+    manifestedBuildingCount: manifestedCount,
+    stageOverrides: state.driftEvolution?.stageOverrides ?? {}
   };
 
   return {
@@ -101,7 +123,27 @@ export function normalizeDriftEvolutionState(sourceState, buildingCount = 0) {
     unlockedStageIds: Array.isArray(sourceState?.unlockedStageIds) && sourceState.unlockedStageIds.length
       ? sourceState.unlockedStageIds
       : base.unlockedStageIds,
-    manifestedBuildingCount: Number(sourceState?.manifestedBuildingCount ?? buildingCount)
+    manifestedBuildingCount: Number(sourceState?.manifestedBuildingCount ?? buildingCount),
+    stageOverrides: sourceState?.stageOverrides && typeof sourceState.stageOverrides === "object"
+      ? sourceState.stageOverrides
+      : {}
+  };
+}
+
+export function setDriftEvolutionStageOverride(state, stageId, patch) {
+  const existing = state.driftEvolution?.stageOverrides?.[stageId] ?? {};
+  const nextPatch = {
+    ...existing,
+    ...patch,
+    abilities: Array.isArray(patch?.abilities) ? patch.abilities : existing.abilities
+  };
+
+  state.driftEvolution = {
+    ...(state.driftEvolution ?? createDefaultDriftEvolutionState()),
+    stageOverrides: {
+      ...(state.driftEvolution?.stageOverrides ?? {}),
+      [stageId]: nextPatch
+    }
   };
 }
 

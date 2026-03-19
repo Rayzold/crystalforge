@@ -23,7 +23,7 @@ export function renderOverflowList(state) {
                         <span>${escapeHtml(building.rarity)}</span>
                         <span>${formatNumber(building.quality, 2)}%</span>
                       </button>
-                      <button class="button button--ghost" data-action="inspect-building" data-building-id="${building.id}">Dossier</button>
+                      <button class="button button--ghost" data-action="inspect-building" data-building-id="${building.id}">Open Details</button>
                     </article>
                   `
                 )

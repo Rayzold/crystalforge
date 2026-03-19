@@ -185,7 +185,7 @@ export function renderBuildingCard(building, state) {
         </div>
       </button>
       <div class="building-card__actions">
-        <button class="button button--ghost" data-action="inspect-building" data-building-id="${building.id}">View Dossier</button>
+        <button class="button button--ghost" data-action="inspect-building" data-building-id="${building.id}">Open Details</button>
       </div>
     </article>
   `;

@@ -1,6 +1,7 @@
 import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
+import { getEmergencyStatus } from "../systems/ResourceSystem.js";
 import { getVisibleBuildings, renderBuildingGrid } from "./BuildingGrid.js";
 import { renderCalendarPanel } from "./CalendarPanel.js";
 import { renderDistrictPanel } from "./DistrictPanel.js";
@@ -14,11 +15,14 @@ function renderTownStatistics(state) {
   const dailyNet =
     (state.cityStats.income ?? 0) -
     (state.cityStats.upkeep ?? 0);
+  const emergencyState = getEmergencyStatus(state);
+  const foodRunway = emergencyState.runway.foodDays;
 
   const items = [
     ["Net Daily", `${dailyNet >= 0 ? "+" : ""}${formatNumber(dailyNet, 0)}g`, dailyNet >= 0 ? "positive" : "negative"],
     ["Population", formatNumber(state.resources.population ?? 0, 0), "population"],
-    ["Food", formatNumber(state.resources.food ?? 0, 0), "food"],
+    ["Food Stores", formatNumber(state.resources.food ?? 0, 0), "food"],
+    ["Food Runway", foodRunway === null ? "Stable" : `${formatNumber(foodRunway, 1)}d`, foodRunway !== null && foodRunway <= 5 ? "negative" : "food"],
     ["Defense", formatNumber(state.cityStats.defense ?? 0, 0), "defense"],
     ["Morale", formatNumber(state.cityStats.morale ?? 0, 0), "morale"],
     ["Buildings", formatNumber(buildings.length, 0), "buildings"]
@@ -74,13 +78,13 @@ function renderCityWorkspace(state) {
 
       <div class="city-workspace__toolbar">
         <div class="city-workspace__filters">
-          <button class="button button--ghost city-filter ${state.buildingFilter === "All" ? "is-active" : ""}" data-action="set-building-filter" value="All">All</button>
+          <button class="button button--ghost city-filter ${state.buildingFilter === "All" ? "is-active" : ""}" data-action="set-building-filter" data-filter="All">All</button>
           ${RARITY_ORDER.map(
             (rarity) => `
               <button
                 class="button button--ghost city-filter ${state.buildingFilter === rarity ? "is-active" : ""}"
                 data-action="set-building-filter"
-                value="${rarity}"
+                data-filter="${rarity}"
                 style="--filter-color:${RARITY_COLORS[rarity]}"
               >
                 ${escapeHtml(rarity)}
@@ -118,52 +122,16 @@ function renderCityWorkspace(state) {
 }
 
 function renderCityDrawer(state) {
-  const activeEvents = state.events.active.length;
-  const activeConstruction = state.buildings.filter(
-    (building) =>
-      !building.isComplete &&
-      (state.constructionPriority ?? []).slice(0, state.cityStats.activeConstructionSlots ?? 0).includes(building.id)
-  ).length;
-  const councilDue = state.townFocus?.isSelectionPending;
-
   return `
     <aside class="city-command-drawer">
-      <section class="panel city-command-drawer__panel city-command-drawer__panel--intro">
-        <div class="panel__header">
-          <h3>City Command</h3>
-          <span class="panel__subtle">Live session operations</span>
-        </div>
-        <p class="city-command-drawer__copy">
-          Keep the map central while this drawer handles time, raising order, and the realm pressure a game master actually needs during a session.
-        </p>
-        <div class="city-command-drawer__signals">
-          <article>
-            <span>Today</span>
-            <strong>${escapeHtml(formatDate(state.calendar.dayOffset))}</strong>
-          </article>
-          <article>
-            <span>Raising</span>
-            <strong>${formatNumber(activeConstruction, 0)}</strong>
-          </article>
-          <article>
-            <span>Events</span>
-            <strong>${formatNumber(activeEvents, 0)}</strong>
-          </article>
-          <article>
-            <span>Council</span>
-            <strong>${councilDue ? "Due" : "Waiting"}</strong>
-          </article>
-        </div>
-        <div class="city-command-drawer__quick-actions">
-          <button class="button button--ghost" data-action="advance-time" data-step="day">Advance 1 Day</button>
-          <button class="button button--ghost" data-action="advance-time" data-step="week">Advance 1 Week</button>
-          <button class="button button--ghost" data-action="open-admin">Open GM Console</button>
-        </div>
-      </section>
-      ${renderCalendarPanel(state, { showQueue: true })}
-      ${renderEmergencyPanel(state)}
-      ${renderResourcePanel(state)}
-      ${renderDistrictPanel(state)}
+      <div class="city-command-drawer__grid city-command-drawer__grid--primary">
+        ${renderCalendarPanel(state, { showQueue: true })}
+        ${renderEmergencyPanel(state)}
+      </div>
+      <div class="city-command-drawer__grid city-command-drawer__grid--support">
+        ${renderResourcePanel(state)}
+        ${renderDistrictPanel(state)}
+      </div>
     </aside>
   `;
 }

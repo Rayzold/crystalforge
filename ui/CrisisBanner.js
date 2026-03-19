@@ -106,12 +106,7 @@ function enrichEmergencyAlerts(state, emergencies) {
 }
 
 export function renderCrisisBanner(state, pageKey) {
-  const criticalEmergencies = enrichEmergencyAlerts(
-    state,
-    getEmergencyStatus(state).emergencies.filter((emergency) => emergency.severity === "critical")
-  );
-  const criticalEventAlerts = getCriticalEventAlerts(state);
-  const alerts = [...criticalEmergencies, ...criticalEventAlerts];
+  const alerts = getCriticalAlerts(state);
 
   if (!alerts.length) {
     return "";
@@ -124,7 +119,6 @@ export function renderCrisisBanner(state, pageKey) {
           <p class="crisis-banner__eyebrow">Critical City Alert</p>
           <strong>${alerts.length} urgent alert${alerts.length === 1 ? "" : "s"} demand attention</strong>
         </div>
-        ${pageKey === "city" ? "" : `<a class="button button--ghost" href="./city.html">Open City Command</a>`}
       </div>
       <div class="crisis-banner__stack">
         ${alerts
@@ -142,4 +136,13 @@ export function renderCrisisBanner(state, pageKey) {
       </div>
     </section>
   `;
+}
+
+export function getCriticalAlerts(state) {
+  const criticalEmergencies = enrichEmergencyAlerts(
+    state,
+    getEmergencyStatus(state).emergencies.filter((emergency) => emergency.severity === "critical")
+  );
+  const criticalEventAlerts = getCriticalEventAlerts(state);
+  return [...criticalEmergencies, ...criticalEventAlerts];
 }

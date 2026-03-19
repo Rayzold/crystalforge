@@ -5,8 +5,10 @@ import { EVENT_POOLS } from "../content/EventPools.js";
 import { RARITY_ORDER } from "../content/Rarities.js";
 import { TOWN_FOCUS_DEFINITIONS } from "../content/TownFocusConfig.js";
 import { escapeHtml } from "../engine/Utils.js";
+import { attachHelpBubbles } from "../ui/HelpBubbles.js";
 import { renderModal } from "../ui/Modal.js";
 import { formatDate } from "../systems/CalendarSystem.js";
+import { getDriftEvolutionStages } from "../systems/DriftEvolutionSystem.js";
 import { getManualSaveMeta } from "../systems/StorageSystem.js";
 
 function options(values, selectedValue) {
@@ -107,6 +109,28 @@ function renderQuickEvents() {
   `;
 }
 
+function renderUnmanifestedBuildingOptions(state) {
+  const optionsList = RARITY_ORDER.flatMap((rarity) =>
+    (state.rollTables[rarity] ?? [])
+      .filter((name) => !state.buildings.some((building) => building.name === name && building.rarity === rarity))
+      .map((name) => ({
+        value: `${rarity}::${name}`,
+        label: `${name} (${rarity})`
+      }))
+  );
+
+  if (!optionsList.length) {
+    return `<option value="">All rollable buildings are already manifested</option>`;
+  }
+
+  return optionsList
+    .map(
+      (entry, index) =>
+        `<option value="${escapeHtml(entry.value)}" ${index === 0 ? "selected" : ""}>${escapeHtml(entry.label)}</option>`
+    )
+    .join("");
+}
+
 export class AdminConsole {
   constructor(actions) {
     this.actions = actions;
@@ -115,6 +139,7 @@ export class AdminConsole {
     this.keyBuffer = "";
     this.activeTab = "economy";
     this.searchQuery = "";
+    this.selectedDriftStageId = "";
     this.lastState = null;
     document.body.append(this.root);
 
@@ -160,6 +185,11 @@ export class AdminConsole {
       const target = event.target;
       if (target instanceof HTMLSelectElement && target.id === "edit-building-id") {
         this.actions.selectBuilding(target.value);
+      } else if (target instanceof HTMLSelectElement && target.id === "drift-stage-id") {
+        this.selectedDriftStageId = target.value;
+        if (this.lastState) {
+          this.render(this.lastState);
+        }
       }
     });
 
@@ -268,6 +298,12 @@ export class AdminConsole {
               imagePath: this.getValue("spawn-image"),
               specialEffect: this.getValue("spawn-effect")
             })
+          });
+          break;
+        case "manifest-unmanifested-building":
+          this.actions.manifestUnmanifestedBuilding({
+            selection: this.getValue("manifest-building-select"),
+            quality: this.getNumberInput("manifest-building-quality", 100)
           });
           break;
         case "save-building":
@@ -404,6 +440,24 @@ export class AdminConsole {
         case "toggle-session-view":
           this.actions.toggleLiveSessionView();
           break;
+        case "save-drift-stage":
+          this.actions.saveDriftEvolutionStage({
+            stageId: this.getValue("drift-stage-id"),
+            patch: {
+              name: this.getValue("drift-stage-name"),
+              threshold: this.getNumberInput("drift-stage-threshold"),
+              constructionSlots: this.getNumberInput("drift-stage-slots"),
+              constructionSpeedPercent: this.getNumberInput("drift-stage-speed"),
+              mobility: this.getValue("drift-stage-mobility"),
+              summary: this.getValue("drift-stage-summary"),
+              abilities: this
+                .getValue("drift-stage-abilities")
+                .split(/\r?\n/)
+                .map((entry) => entry.trim())
+                .filter(Boolean)
+            }
+          });
+          break;
         case "save-manual-state":
           this.actions.saveManualState();
           break;
@@ -447,6 +501,11 @@ export class AdminConsole {
     const filteredEvents = EVENT_POOLS.filter((event) =>
       `${event.name} ${event.type} ${event.rarity}`.toLowerCase().includes(searchFilter)
     );
+    const driftStages = getDriftEvolutionStages(state);
+    const selectedDriftStage =
+      driftStages.find((stage) => stage.id === (this.selectedDriftStageId || state.driftEvolution?.currentStageId)) ??
+      driftStages[0];
+    this.selectedDriftStageId = selectedDriftStage?.id ?? "";
 
     const sections = [
       {
@@ -512,18 +571,18 @@ export class AdminConsole {
             <p>Live total population: <strong>${totalPopulation}</strong></p>
             ${citizenControls(state)}
             <div class="admin-grid admin-grid--three">
-              <label>From Class<select id="promote-from">${options(Object.keys(state.citizens), "Peasants")}</select></label>
-              <label>To Class<select id="promote-to">${options(Object.keys(state.citizens), "Workers")}</select></label>
+              <label>From Class<select id="promote-from">${options(Object.keys(state.citizens), "Laborers")}</select></label>
+              <label>To Class<select id="promote-to">${options(Object.keys(state.citizens), "Farmers")}</select></label>
               <label>Amount<input id="promote-amount" type="number" value="1" min="0" /></label>
             </div>
             <button class="button button--ghost" data-admin-action="promote-citizens">Promote</button>
             <div class="admin-grid admin-grid--three">
-              <label>From Class<select id="demote-from">${options(Object.keys(state.citizens), "Workers")}</select></label>
-              <label>To Class<select id="demote-to">${options(Object.keys(state.citizens), "Peasants")}</select></label>
+              <label>From Class<select id="demote-from">${options(Object.keys(state.citizens), "Farmers")}</select></label>
+              <label>To Class<select id="demote-to">${options(Object.keys(state.citizens), "Laborers")}</select></label>
               <label>Amount<input id="demote-amount" type="number" value="1" min="0" /></label>
             </div>
             <button class="button button--ghost" data-admin-action="demote-citizens">Demote</button>
-            <label>Bulk JSON<textarea id="bulk-citizens" rows="4" placeholder='{"Peasants":10,"Clergy":5}'></textarea></label>
+            <label>Bulk JSON<textarea id="bulk-citizens" rows="4" placeholder='{"Farmers":10,"Clergy":5}'></textarea></label>
             <div class="admin-actions">
               <button class="button button--ghost" data-admin-action="bulk-citizens">Apply Bulk</button>
               <button class="button button--ghost" data-admin-action="reset-citizens">Reset Citizens</button>
@@ -556,11 +615,19 @@ export class AdminConsole {
       {
         tab: "world",
         title: "Buildings",
-        keywords: "buildings spawn edit remove placement map art image",
+        keywords: "buildings manifest unmanifested spawn edit remove placement map art image",
         content: `
           <section class="admin-section">
             <h3>Buildings</h3>
             <p>Optional artwork folder: <code>assets/images/buildings/</code></p>
+            <div class="admin-grid">
+              <label>Unmanifested Rollable Building<select id="manifest-building-select">${renderUnmanifestedBuildingOptions(state)}</select></label>
+              <label>Chosen Quality<input id="manifest-building-quality" type="number" value="100" min="1" max="350" /></label>
+            </div>
+            <div class="admin-actions">
+              <button class="button" data-admin-action="manifest-unmanifested-building">Manifest Selected Unmanifested Building</button>
+            </div>
+
             <div class="admin-grid">
               <label>Name<input id="spawn-name" value="Custom Tower" /></label>
               <label>Rarity<select id="spawn-rarity">${options(RARITY_ORDER, "Common")}</select></label>
@@ -676,6 +743,35 @@ export class AdminConsole {
               <button class="button button--ghost" data-admin-action="toggle-session-view">
                 ${state.settings.liveSessionView ? "Disable Live Session View" : "Enable Live Session View"}
               </button>
+            </div>
+          </section>
+        `
+      },
+      {
+        tab: "system",
+        title: "Drift Evolution",
+        keywords: "drift evolution stages abilities thresholds mobility",
+        content: `
+          <section class="admin-section">
+            <h3>Drift Evolution</h3>
+            <p>Edit stage definitions for this save if you need to tune the Drift live.</p>
+            <div class="admin-grid">
+              <label>Stage<select id="drift-stage-id">${driftStages
+                .map(
+                  (stage) =>
+                    `<option value="${stage.id}" ${stage.id === selectedDriftStage?.id ? "selected" : ""}>${escapeHtml(stage.name)}</option>`
+                )
+                .join("")}</select></label>
+              <label>Name<input id="drift-stage-name" value="${escapeHtml(selectedDriftStage?.name ?? "")}" /></label>
+              <label>Threshold<input id="drift-stage-threshold" type="number" value="${selectedDriftStage?.threshold ?? 0}" min="0" /></label>
+              <label>Build Slots<input id="drift-stage-slots" type="number" value="${selectedDriftStage?.constructionSlots ?? 0}" min="1" /></label>
+              <label>Speed %<input id="drift-stage-speed" type="number" value="${selectedDriftStage?.constructionSpeedPercent ?? 0}" min="0" /></label>
+              <label>Mobility<input id="drift-stage-mobility" value="${escapeHtml(selectedDriftStage?.mobility ?? "")}" /></label>
+            </div>
+            <label>Summary<textarea id="drift-stage-summary" rows="3">${escapeHtml(selectedDriftStage?.summary ?? "")}</textarea></label>
+            <label>Abilities<textarea id="drift-stage-abilities" rows="5">${escapeHtml((selectedDriftStage?.abilities ?? []).join("\n"))}</textarea></label>
+            <div class="admin-actions">
+              <button class="button button--ghost" data-admin-action="save-drift-stage">Save Drift Stage</button>
             </div>
           </section>
         `
@@ -829,5 +925,6 @@ export class AdminConsole {
       open: state.ui.adminOpen,
       wide: true
     });
+    attachHelpBubbles(this.root);
   }
 }

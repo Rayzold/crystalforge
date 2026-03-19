@@ -7,7 +7,7 @@ import { GameState } from "./engine/GameState.js";
 import { AnimationEngine } from "./fx/AnimationEngine.js";
 import { AudioEngine } from "./fx/AudioEngine.js";
 import { manifestIntoBuilding, removeBuilding, setBuildingQuality, setBuildingRuinState } from "./systems/BuildingSystem.js";
-import { dateFromParts, formatDate } from "./systems/CalendarSystem.js";
+import { addMonthsToOffset, dateFromParts, formatDate, getMonthStartOffset } from "./systems/CalendarSystem.js";
 import {
   addCitizens,
   applyCitizenBulkSet,
@@ -20,7 +20,7 @@ import { recalculateCityStats } from "./systems/CityStatsSystem.js";
 import { addCrystals, setCrystals, spendCrystal } from "./systems/CrystalSystem.js";
 import { moveConstructionPriority, normalizeConstructionPriority } from "./systems/ConstructionSystem.js";
 import { resetDistrictLevels, setDistrictDefinition, setDistrictLevelOverride, getDistrictSummary } from "./systems/DistrictSystem.js";
-import { syncDriftEvolutionState } from "./systems/DriftEvolutionSystem.js";
+import { setDriftEvolutionStageOverride, syncDriftEvolutionState } from "./systems/DriftEvolutionSystem.js";
 import { clearActiveEvents, triggerEvent } from "./systems/EventSystem.js";
 import { manifestSelectedRarity } from "./systems/GachaSystem.js";
 import { addHistoryEntry } from "./systems/HistoryLogSystem.js";
@@ -75,7 +75,7 @@ function syncDerivedState(state) {
       RARITY_ORDER.find((rarity) => (state.crystals[rarity] ?? 0) > 0) ?? state.selectedRarity;
   }
   state.settings.currentPage = pageKey;
-  state.settings.theme = state.settings.theme ?? "dark";
+  state.settings.theme = "dark";
   const driftUpdate = syncDriftEvolutionState(state);
   for (const stage of driftUpdate.newStages) {
     addHistoryEntry(state, {
@@ -113,6 +113,42 @@ function reportError(message) {
   }
 }
 
+function rollDice() {
+  const sidesByType = {
+    d2: 2,
+    d4: 4,
+    d6: 6,
+    d8: 8,
+    d10: 10,
+    d12: 12,
+    d20: 20,
+    d100: 100
+  };
+  const state = getCurrentState();
+  const amount = Math.max(1, Math.min(20, Number(state.settings.diceAmount ?? 1) || 1));
+  const diceType = String(state.settings.diceType ?? "d20");
+  const sides = sidesByType[diceType] ?? 20;
+  const results = Array.from({ length: amount }, () => Math.floor(Math.random() * sides) + 1);
+  const total = results.reduce((sum, value) => sum + value, 0);
+  const entry = {
+    label: `${amount}${diceType}`,
+    results,
+    total,
+    rolledAt: Date.now()
+  };
+
+  commit((draft) => {
+    const history = Array.isArray(draft.settings.diceHistory) ? draft.settings.diceHistory : [];
+    draft.settings.diceAmount = amount;
+    draft.settings.diceType = diceType;
+    draft.settings.lastDiceRoll = entry;
+    draft.settings.diceHistory = [entry, ...history].slice(0, 5);
+  });
+
+  void audioEngine.playUiAccent("confirm");
+  reportSuccess(`${entry.label}: ${results.join(", ")} (Total ${total})`);
+}
+
 function ensureCatalogEntry(state, catalogEntry) {
   state.buildingCatalog[catalogEntry.key] = {
     ...(state.buildingCatalog[catalogEntry.key] ?? {}),
@@ -125,11 +161,31 @@ function setPopulationByAdjustingClasses(state, targetPopulation) {
   let currentPopulation = Object.values(state.citizens).reduce((sum, value) => sum + value, 0);
   let delta = targetPopulation - currentPopulation;
   if (delta > 0) {
-    state.citizens.Peasants += delta;
+    state.citizens.Laborers += delta;
     return;
   }
 
-  const reductionOrder = ["Peasants", "Workers", "Merchants", "Scholars", "Clergy", "Soldiers", "Nobles", "Mages"];
+  const reductionOrder = [
+    "Laborers",
+    "Farmers",
+    "Hunters",
+    "Scavengers",
+    "Miners",
+    "Craftsmen",
+    "Merchants",
+    "Guards",
+    "Soldiers",
+    "Administrators",
+    "Scholars",
+    "Clergy",
+    "Healers",
+    "Entertainers",
+    "Children",
+    "Elderly",
+    "Nobles",
+    "Mages",
+    "Heroes"
+  ];
   for (const citizenClass of reductionOrder) {
     if (delta === 0) {
       break;
@@ -451,6 +507,34 @@ function spawnBuilding({ name, rarity, quality, catalogEntry }) {
   reportSuccess(`${name} spawned.`);
 }
 
+function manifestUnmanifestedBuilding({ selection, quality }) {
+  const [rarity, ...nameParts] = String(selection ?? "").split("::");
+  const name = nameParts.join("::").trim();
+
+  if (!rarity || !name) {
+    reportError("Choose an unmanifested building first.");
+    return;
+  }
+
+  commit((draft) => {
+    const alreadyExists = draft.buildings.some((building) => building.name === name && building.rarity === rarity);
+    if (alreadyExists) {
+      throw new Error("That building is already manifested.");
+    }
+
+    const catalogEntry = draft.buildingCatalog[getCatalogKey(name, rarity)];
+    if (!catalogEntry) {
+      throw new Error("Building catalog entry not found.");
+    }
+
+    const timestamps = { date: formatDate(draft.calendar.dayOffset), dayOffset: draft.calendar.dayOffset };
+    const result = manifestIntoBuilding(draft, catalogEntry, Math.max(1, Math.min(350, Number(quality) || 100)), timestamps);
+    setSelectedBuildingAndCell(draft, result.building.id);
+  });
+
+  reportSuccess(`${name} manifested at ${Math.max(1, Math.min(350, Number(quality) || 100))}% quality.`);
+}
+
 function editBuilding({ buildingId, quality, district, iconKey, imagePath, tags, specialEffect, stats, resourceRates }) {
   commit((draft) => {
     const building = draft.buildings.find((entry) => entry.id === buildingId);
@@ -728,17 +812,17 @@ const actions = {
   },
   adjustCrystal,
   grantCrystalPack,
-  toggleTheme() {
-    commit((draft) => {
-      draft.settings.theme = draft.settings.theme === "silver" ? "dark" : "silver";
-    });
-    reportSuccess(`${getCurrentState().settings.theme === "silver" ? "Silver" : "Dark"} theme enabled.`);
-  },
   toggleLiveSessionView() {
     commit((draft) => {
       draft.settings.liveSessionView = !draft.settings.liveSessionView;
     });
     reportSuccess(`Live session view ${getCurrentState().settings.liveSessionView ? "enabled" : "disabled"}.`);
+  },
+  saveDriftEvolutionStage({ stageId, patch }) {
+    commit((draft) => {
+      setDriftEvolutionStageOverride(draft, stageId, patch);
+    });
+    reportSuccess("Drift evolution stage updated.");
   },
   createSessionSnapshot(name = "Session Snapshot") {
     commit((draft) => {
@@ -781,6 +865,7 @@ const actions = {
   },
   bulkCitizens,
   spawnBuilding,
+  manifestUnmanifestedBuilding,
   editBuilding(payload) {
     editBuilding(payload);
   },
@@ -1011,14 +1096,29 @@ root.addEventListener("click", async (event) => {
       void audioEngine.playUiAccent("soft");
       renderer.setTransientUi({ cityView: target.dataset.view }, getCurrentState());
       break;
+    case "set-building-filter":
+      commit((draft) => {
+        draft.buildingFilter = target.dataset.filter ?? target.value ?? "All";
+      });
+      break;
     case "toggle-forge-nav":
       renderer.setTransientUi({ forgeNavCollapsed: !renderer.transientUi.forgeNavCollapsed }, getCurrentState());
       break;
-    case "toggle-theme":
-      actions.toggleTheme();
-      break;
     case "toggle-session-view":
       actions.toggleLiveSessionView();
+      break;
+    case "toggle-dice-history":
+      renderer.setTransientUi({ diceHistoryOpen: !renderer.transientUi.diceHistoryOpen }, getCurrentState());
+      break;
+    case "toggle-town-focus-panel":
+      renderer.setTransientUi({ homeTownFocusExpanded: !renderer.transientUi.homeTownFocusExpanded }, getCurrentState());
+      break;
+    case "roll-dice":
+      rollDice();
+      break;
+    case "open-home-help":
+      void audioEngine.playUiAccent("soft");
+      renderer.setTransientUi({ homeHelpOpen: true }, getCurrentState());
       break;
     case "save-manual-state":
       actions.saveManualState();
@@ -1026,6 +1126,53 @@ root.addEventListener("click", async (event) => {
     case "load-manual-state":
       actions.loadManualState();
       break;
+    case "chronicle-prev-month":
+    case "chronicle-next-month": {
+      void audioEngine.playUiAccent("soft");
+      const targetMonthOffset =
+        Number(target.dataset.monthOffset) ||
+        addMonthsToOffset(
+          renderer.transientUi.chronicleMonthOffset ?? getCurrentState().calendar.dayOffset,
+          action === "chronicle-prev-month" ? -1 : 1
+        );
+      renderer.setTransientUi(
+        {
+          chronicleMonthOffset: getMonthStartOffset(targetMonthOffset),
+          chronicleSelectedDayOffset: getMonthStartOffset(targetMonthOffset)
+        },
+        getCurrentState()
+      );
+      break;
+    }
+    case "select-chronicle-day": {
+      void audioEngine.playUiAccent("soft");
+      const selectedDayOffset = Number(target.dataset.dayOffset ?? getCurrentState().calendar.dayOffset);
+      renderer.setTransientUi(
+        {
+          chronicleMonthOffset: getMonthStartOffset(selectedDayOffset),
+          chronicleSelectedDayOffset: selectedDayOffset
+        },
+        getCurrentState()
+      );
+      break;
+    }
+    case "save-chronicle-note": {
+      const panel = target.closest(".chronicle-calendar");
+      const input = panel?.querySelector('[data-role="chronicle-note"]');
+      const dayOffset = Number(target.dataset.dayOffset ?? input?.dataset.dayOffset ?? getCurrentState().calendar.dayOffset);
+      const rawNoteText = String(input?.value ?? "");
+      const noteText = rawNoteText.trim();
+      commit((draft) => {
+        const key = String(dayOffset);
+        if (noteText) {
+          draft.chronicleNotes[key] = rawNoteText;
+        } else {
+          delete draft.chronicleNotes[key];
+        }
+      });
+      reportSuccess(noteText ? "Chronicle note saved." : "Chronicle note cleared.");
+      break;
+    }
     case "preview-town-focus":
       openTownFocusModal(target.dataset.focusId);
       break;
@@ -1039,6 +1186,8 @@ root.addEventListener("click", async (event) => {
         renderer.setTransientUi({ inspectedBuildingId: null }, getCurrentState());
       } else if (target.dataset.modal === "building-catalog-modal") {
         renderer.setTransientUi({ catalogOpen: false }, getCurrentState());
+      } else if (target.dataset.modal === "home-help-modal") {
+        renderer.setTransientUi({ homeHelpOpen: false }, getCurrentState());
       } else if (target.dataset.modal === "town-focus-council-modal") {
         renderer.setTransientUi({ councilModalOpen: false }, getCurrentState());
       }
@@ -1209,7 +1358,7 @@ root.addEventListener("change", (event) => {
 
   if (target.dataset.action === "set-building-filter") {
     commit((draft) => {
-      draft.buildingFilter = target.value;
+      draft.buildingFilter = target.dataset.filter ?? target.value ?? "All";
     });
   }
 
@@ -1222,10 +1371,41 @@ root.addEventListener("change", (event) => {
   if (target.dataset.action === "set-building-sort") {
     renderer.setTransientUi({ buildingSort: target.value }, getCurrentState());
   }
+
+  if (target.dataset.action === "set-catalog-filter") {
+    renderer.setTransientUi(
+      {
+        catalogFilters: {
+          ...(renderer.transientUi.catalogFilters ?? {}),
+          [target.dataset.filterKey]: target.value ?? "All"
+        }
+      },
+      getCurrentState()
+    );
+  }
+
+  if (target.dataset.action === "set-dice-type") {
+    commit((draft) => {
+      draft.settings.diceType = target.value ?? "d20";
+    });
+  }
+});
+
+root.addEventListener("input", (event) => {
+  const target = event.target.closest("[data-action]");
+  if (!target) {
+    return;
+  }
+
+  if (target.dataset.action === "set-dice-amount") {
+    commit((draft) => {
+      draft.settings.diceAmount = Math.max(1, Math.min(20, Number(target.value) || 1));
+    });
+  }
 });
 
 audioEngine.setMuted(getCurrentState().settings.muted);
-document.body.dataset.theme = getCurrentState().settings.theme ?? "dark";
+document.body.dataset.theme = "dark";
 
 function applyUrlFocusTargets() {
   const params = new URLSearchParams(window.location.search);

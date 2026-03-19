@@ -1,3 +1,4 @@
+import { renderChronicleCalendar } from "./ChronicleCalendar.js";
 import { renderEventChainPanel } from "./EventChainPanel.js";
 import { renderEventPanel } from "./EventPanel.js";
 import { renderHistoryPanel } from "./HistoryPanel.js";
@@ -31,9 +32,10 @@ function renderChronicleIntro(state) {
 export function renderChroniclePage(state) {
   return {
     title: "The Chronicle",
-    subtitle: "Events, chapters, and the realm's memory.",
+    subtitle: "Calendar, chapters, and the realm's memory.",
     content: `
       ${renderChronicleIntro(state)}
+      ${renderChronicleCalendar(state)}
       ${renderEventChainPanel(state)}
       ${renderHistoryPanel(state)}
     `,

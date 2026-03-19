@@ -2,14 +2,25 @@ import { formatNumber } from "../engine/Utils.js";
 import { renderUiIcon } from "./UiIcons.js";
 
 const CITIZEN_ICONS = {
-  Peasants: "food",
-  Workers: "materials",
+  Children: "citizens",
+  Elderly: "history",
+  Farmers: "food",
+  Hunters: "defense",
+  Miners: "materials",
+  Laborers: "building",
+  Craftsmen: "materials",
   Merchants: "gold",
+  Scavengers: "materials",
+  Guards: "security",
+  Soldiers: "defense",
+  Administrators: "prosperity",
   Scholars: "history",
   Clergy: "health",
-  Soldiers: "defense",
+  Healers: "health",
+  Entertainers: "morale",
   Nobles: "prestige",
-  Mages: "mana"
+  Mages: "mana",
+  Heroes: "prestige"
 };
 
 export function renderCitizenPanel(state) {

@@ -4,7 +4,9 @@ import { renderBuildingCatalogModal } from "./BuildingCatalogModal.js";
 import { renderCitizensPage } from "./CitizensPage.js";
 import { renderCityPage } from "./CityPage.js";
 import { renderForgePage } from "./ForgePage.js";
+import { attachHelpBubbles } from "./HelpBubbles.js";
 import { renderHomePage } from "./HomePage.js";
+import { renderHomeHelpModal } from "./HomeHelpModal.js";
 import { renderManifestCompleteModal } from "./ManifestCompleteModal.js";
 import { renderPageShell } from "./PageShell.js";
 import { renderTownFocusCouncilModal } from "./TownFocusCouncilModal.js";
@@ -20,10 +22,20 @@ export class UIRenderer {
       hoveredMapCell: null,
       inspectedBuildingId: null,
       catalogOpen: false,
+      diceHistoryOpen: false,
+      catalogFilters: {
+        rarity: "All",
+        district: "All",
+        status: "All"
+      },
       focusEventId: null,
       councilModalOpen: false,
       councilModalCycleKey: null,
       previewTownFocusId: null,
+      homeHelpOpen: false,
+      homeTownFocusExpanded: false,
+      chronicleMonthOffset: null,
+      chronicleSelectedDayOffset: null,
       homeShelfTab: "overview",
       cityView: "stream",
       buildingSort: "newest",
@@ -43,14 +55,11 @@ export class UIRenderer {
     }
 
     const cycleKey = String(state.townFocus.nextSelectionDayOffset);
-    if (this.transientUi.councilModalCycleKey === cycleKey) {
-      return;
+    if (this.transientUi.councilModalCycleKey !== cycleKey) {
+      this.transientUi.councilModalCycleKey = cycleKey;
+      this.transientUi.previewTownFocusId =
+        getMayorSuggestions(state)[0]?.focusId ?? getDefaultTownFocusPreviewId(state);
     }
-
-    this.transientUi.councilModalCycleKey = cycleKey;
-    this.transientUi.councilModalOpen = true;
-    this.transientUi.previewTownFocusId =
-      getMayorSuggestions(state)[0]?.focusId ?? getDefaultTownFocusPreviewId(state);
   }
 
   resolvePage(state) {
@@ -79,11 +88,13 @@ export class UIRenderer {
     const overlays = [
       renderBuildingDetailModal(viewState, this.pageKey),
       renderBuildingCatalogModal(viewState),
+      renderHomeHelpModal(viewState),
       renderManifestCompleteModal(viewState),
       renderTownFocusCouncilModal(viewState),
       renderTownFocusCeremonyOverlay(viewState)
     ].join("");
     this.root.innerHTML = renderPageShell(viewState, this.pageKey, page, overlays);
+    attachHelpBubbles(this.root);
   }
 
   setTransientUi(patch, state) {

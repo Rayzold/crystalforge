@@ -1,9 +1,10 @@
-import { APP_VERSION, PAGE_ROUTES } from "../content/Config.js";
+import { renderUiIcon } from "./UiIcons.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js";
 import { getTownFocusAvailability } from "../systems/TownFocusSystem.js";
 import { getTownFocusHistory } from "../systems/TownFocusSystem.js";
 import { renderDriftEvolutionPanel } from "./DriftEvolutionPanel.js";
+import { getCurrentDriftEvolution } from "../systems/DriftEvolutionSystem.js";
 import { renderTownFocusPanel } from "./TownFocusPanel.js";
 import { renderTownFocusBadge } from "./TownFocusShared.js";
 
@@ -76,11 +77,59 @@ function getRealmGoals(state) {
   }));
 }
 
+function renderCommandCenterBubble(state) {
+  const date = getStructuredDate(state.calendar.dayOffset);
+  const currentStage = getCurrentDriftEvolution(state);
+  const resources = [
+    ["Gold", state.resources.gold, "gold"],
+    ["Food", state.resources.food, "food"],
+    ["Materials", state.resources.materials, "materials"],
+    ["Mana", state.resources.mana, "mana"]
+  ];
+
+  return `
+    <article class="landing-command-center">
+      <div class="panel__header">
+        <h3>Command Center</h3>
+        <button class="button button--ghost" data-action="open-home-help">Help</button>
+      </div>
+      <div class="landing-command-center__facts">
+        <article>
+          <span>Current Date</span>
+          <strong>${escapeHtml(`${date.weekday}, ${date.month} ${date.day}`)}</strong>
+        </article>
+        <article>
+          <span>Population</span>
+          <strong>${formatNumber(state.resources.population, 0)}</strong>
+        </article>
+        <article>
+          <span>Drift Level</span>
+          <strong>${escapeHtml(currentStage.name)}</strong>
+        </article>
+      </div>
+      <div class="landing-command-center__resources">
+        ${resources
+          .map(
+            ([label, value, iconKey]) => `
+              <article>
+                <div class="landing-command-center__resource-head">
+                  ${renderUiIcon(iconKey, label)}
+                  <span>${escapeHtml(label)}</span>
+                </div>
+                <strong>${formatNumber(value, 0)}</strong>
+              </article>
+            `
+          )
+          .join("")}
+      </div>
+    </article>
+  `;
+}
+
 function renderLandingHero(state) {
   const progress = getHomeProgress(state);
   const nextStep = progress.find((step) => !step.complete) ?? progress[progress.length - 1];
   const date = getStructuredDate(state.calendar.dayOffset);
-  const compactDate = `${date.weekday} / ${date.month} ${date.day} / ${date.year} AC`;
   const highlightedBuilding =
     [...state.buildings].sort((left, right) => right.quality - left.quality)[0] ?? null;
 
@@ -100,27 +149,23 @@ function renderLandingHero(state) {
           </p>
           <div class="landing-hero__actions">
             <a class="button" href="${nextStep.href}">${escapeHtml(nextStep.cta)}</a>
-            <a class="button button--ghost" href="./city.html">Open City Command</a>
             ${state.settings.liveSessionView ? `<button class="button button--ghost" data-action="open-admin">Open GM Console</button>` : `<a class="button button--ghost" href="./forge.html">Open Forge</a>`}
-          </div>
-          <div class="landing-hero__facts">
-            <article class="landing-hero__fact landing-hero__fact--date"><span>Current Date</span><strong>${escapeHtml(compactDate)}</strong></article>
-            <article><span>Active Districts</span><strong>${state.districtSummary.filter((district) => district.level > 0).length}</strong></article>
-            <article><span>Population</span><strong>${formatNumber(state.resources.population)}</strong></article>
-            <article><span>Current Build</span><strong>${escapeHtml(APP_VERSION)}</strong></article>
           </div>
         </div>
         <div class="landing-hero__visual">
-          ${
-            highlightedBuilding?.imagePath
-              ? `<img src="${escapeHtml(highlightedBuilding.imagePath)}" alt="${escapeHtml(highlightedBuilding.displayName)} artwork" loading="lazy" />`
-              : `<div class="landing-hero__glyph">${escapeHtml(nextStep.title.slice(0, 1))}</div>`
-          }
-          <div class="landing-hero__badge">
-            <span>Next Objective</span>
-            <strong>${escapeHtml(nextStep.title)}</strong>
-            <p>${escapeHtml(nextStep.details)}</p>
+          <div class="landing-hero__visual-stage">
+            ${
+              highlightedBuilding?.imagePath
+                ? `<img src="${escapeHtml(highlightedBuilding.imagePath)}" alt="${escapeHtml(highlightedBuilding.displayName)} artwork" loading="lazy" />`
+                : `<div class="landing-hero__glyph">${escapeHtml(nextStep.title.slice(0, 1))}</div>`
+            }
+            <div class="landing-hero__badge">
+              <span>Next Objective</span>
+              <strong>${escapeHtml(nextStep.title)}</strong>
+              <p>${escapeHtml(nextStep.details)}</p>
+            </div>
           </div>
+          ${renderCommandCenterBubble(state)}
         </div>
       </div>
     </section>
@@ -258,7 +303,7 @@ function renderFeaturedBuildings(state) {
                         <span>${escapeHtml(building.rarity)} / ${formatNumber(building.quality, 2)}%</span>
                         <p>${escapeHtml(building.specialEffect)}</p>
                         <div class="featured-building__actions">
-                          <button class="button button--ghost" data-action="inspect-building" data-building-id="${building.id}">View Dossier</button>
+                          <button class="button button--ghost" data-action="inspect-building" data-building-id="${building.id}">Open Details</button>
                           <a class="button button--ghost" href="./city.html">Map It</a>
                         </div>
                       </div>
@@ -328,23 +373,26 @@ function renderPolicyHistory(state) {
 }
 
 function renderRollTableReview(state) {
-  const total = Object.values(state.rollTables).reduce((sum, entries) => sum + entries.length, 0);
+  const ownedKeys = new Set(state.buildings.map((building) => `${building.rarity}::${building.name}`));
   return `
     <section class="scene-panel">
       <div class="panel__header">
         <h3>Roll Table Review</h3>
-        <span class="panel__subtle">${total} total rollable entries across all realities</span>
+        <span class="panel__subtle">Buildings still unmanifested in each reality</span>
       </div>
       <div class="rolltable-review">
         ${Object.entries(state.rollTables)
           .map(
-            ([rarity, entries]) => `
+            ([rarity, entries]) => {
+              const remainingCount = entries.filter((entry) => !ownedKeys.has(`${rarity}::${entry}`)).length;
+              return `
               <article class="rolltable-review__card">
                 <span>${escapeHtml(rarity)}</span>
-                <strong>${entries.length}</strong>
-                <small>${entries.length === 1 ? "building can be rolled" : "buildings can be rolled"}</small>
+                <strong>${remainingCount}</strong>
+                <small>${remainingCount === 1 ? "building remains unseen" : "buildings remain unseen"}</small>
               </article>
-            `
+            `;
+            }
           )
           .join("")}
       </div>
@@ -466,38 +514,6 @@ function renderHomeSignals(state) {
   `;
 }
 
-function renderSessionRunbook() {
-  const steps = [
-    "Grant crystals from the GM console.",
-    "Manifest new structures in the Forge.",
-    "Place them onto the town map.",
-    "Advance time from City command.",
-    "Resolve events and warnings.",
-    "Review the Chronicle at month end."
-  ];
-
-  return `
-    <section class="panel home-signals-panel">
-      <div class="panel__header">
-        <h3>Session Runbook</h3>
-        <span class="panel__subtle">One clean loop for table use</span>
-      </div>
-      <div class="policy-history">
-        ${steps
-          .map(
-            (step, index) => `
-              <article class="policy-history__card">
-                <span>Step ${index + 1}</span>
-                <strong>${escapeHtml(step)}</strong>
-              </article>
-            `
-          )
-          .join("")}
-      </div>
-    </section>
-  `;
-}
-
 export function renderHomePage(state) {
   const liveSessionView = state.settings.liveSessionView;
   return {
@@ -507,12 +523,11 @@ export function renderHomePage(state) {
       ${renderLandingHero(state)}
       ${liveSessionView ? "" : renderHomeRouteDeck()}
       ${renderDriftEvolutionPanel(state)}
-      ${renderTownFocusPanel(state)}
+      ${renderTownFocusPanel(state, { expanded: Boolean(state.transientUi?.homeTownFocusExpanded) })}
       ${renderHomeShelves(state)}
     `,
     aside: `
       ${renderHomeSignals(state)}
-      ${state.settings.liveSessionView ? renderSessionRunbook() : ""}
     `
   };
 }

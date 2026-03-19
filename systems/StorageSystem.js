@@ -50,6 +50,7 @@ export function createInitialState(preset = DEFAULT_START_PRESET) {
     cityStats: {},
     constructionPriority: [],
     events: { active: [], recent: [], scheduled: [] },
+    chronicleNotes: {},
     historyLog: [],
     calendar: { dayOffset: 0 },
     driftEvolution: createDefaultDriftEvolutionState(),
@@ -90,6 +91,7 @@ export function createSingleCommonCrystalResetState() {
   state.buildings = [];
   state.constructionPriority = [];
   state.events = { active: [], recent: [], scheduled: [] };
+  state.chronicleNotes = {};
   state.historyLog = [];
   state.calendar = { dayOffset: 0 };
   state.driftEvolution = createDefaultDriftEvolutionState();
@@ -259,6 +261,7 @@ export function validateAndMigrateSave(rawSave) {
       recent: Array.isArray(rawSave.events?.recent) ? rawSave.events.recent : [],
       scheduled: Array.isArray(rawSave.events?.scheduled) ? rawSave.events.scheduled : []
     },
+    chronicleNotes: rawSave.chronicleNotes && typeof rawSave.chronicleNotes === "object" ? rawSave.chronicleNotes : {},
     historyLog: Array.isArray(rawSave.historyLog) ? rawSave.historyLog : [],
     calendar: { dayOffset: Number(rawSave.calendar?.dayOffset ?? 0) },
     driftEvolution: normalizeDriftEvolutionState(rawSave.driftEvolution, Array.isArray(rawSave.buildings) ? rawSave.buildings.length : 0),
