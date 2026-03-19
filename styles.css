@@ -1036,6 +1036,24 @@ textarea {
   padding: 0 16px 16px;
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
+  align-items: center;
+}
+
+.button--danger-icon {
+  min-width: 46px;
+  width: 46px;
+  padding-inline: 0;
+  display: inline-grid;
+  place-items: center;
+  font-size: 1rem;
+  border-color: rgba(255, 106, 137, 0.2);
+}
+
+.button--danger-icon:hover,
+.button--danger-icon:focus-visible {
+  border-color: rgba(255, 106, 137, 0.42);
+  box-shadow: 0 0 18px rgba(255, 106, 137, 0.16);
 }
 
 .town-statistics {
@@ -1051,7 +1069,7 @@ textarea {
 
 .city-command-screen__body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(380px, 460px);
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 392px);
   gap: 16px;
   align-items: start;
 }
@@ -1114,6 +1132,21 @@ textarea {
 
 .town-statistics__grid--compact {
   grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.city-command-drawer__tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.city-command-drawer__tabs .button {
+  min-height: 38px;
+}
+
+.city-command-drawer__tabs .button.is-active {
+  border-color: rgba(150, 111, 255, 0.34);
+  background: linear-gradient(180deg, rgba(150, 111, 255, 0.2), rgba(255, 255, 255, 0.03));
 }
 
 .town-statistics__card {
@@ -1530,6 +1563,12 @@ textarea {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
+}
+
+.overflow-list__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .overflow-list__main {
@@ -3476,10 +3515,6 @@ textarea {
 
 .city-command-drawer__grid--primary {
   grid-template-columns: 1fr;
-}
-
-.city-command-drawer__grid--support {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .city-aside--summary {
@@ -5659,8 +5694,6 @@ textarea {
     position: static;
   }
 
-  .city-command-drawer__signals,
-  .city-command-drawer__quick-actions,
   .admin-quick-grid {
     grid-template-columns: 1fr;
   }
@@ -5734,10 +5767,6 @@ textarea {
   .page-layout__aside .resource-panel__grid,
   .page-layout__aside .stats-panel__grid,
   .page-layout__aside .citizen-panel__grid {
-    grid-template-columns: 1fr;
-  }
-
-  .city-command-drawer__grid--support {
     grid-template-columns: 1fr;
   }
 

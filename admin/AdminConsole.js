@@ -306,6 +306,9 @@ export class AdminConsole {
             quality: this.getNumberInput("manifest-building-quality", 100)
           });
           break;
+        case "apply-bulk-building-images":
+          this.actions.applyBulkBuildingImages(this.getValue("bulk-building-images"));
+          break;
         case "save-building":
           this.actions.editBuilding({
             buildingId: this.getValue("edit-building-id"),
@@ -419,8 +422,20 @@ export class AdminConsole {
         case "export-save":
           this.root.querySelector("#save-json").value = this.actions.exportSave();
           break;
+        case "copy-save-json":
+          this.actions.copySaveJson();
+          break;
         case "import-save":
           this.actions.importSave(this.getValue("save-json"));
+          break;
+        case "load-shared-state-url":
+          this.actions.loadSharedStateUrl(this.getValue("shared-save-url"));
+          break;
+        case "remember-shared-state-url":
+          this.actions.rememberSharedStateUrl(this.getValue("shared-save-url"));
+          break;
+        case "toggle-shared-autoload":
+          this.actions.toggleSharedStateAutoLoad();
           break;
         case "reset-save":
           this.actions.resetSave();
@@ -620,6 +635,17 @@ export class AdminConsole {
           <section class="admin-section">
             <h3>Buildings</h3>
             <p>Optional artwork folder: <code>assets/images/buildings/</code></p>
+            <label>
+              Bulk Image Paths
+              <textarea id="bulk-building-images" rows="8" placeholder="Paste lines like: Blacksmith -> ./assets/images/buildings/Blacksmith.png&#10;or CSV rows like: Blacksmith,./assets/images/buildings/Blacksmith.png"></textarea>
+            </label>
+            <p>
+              You can paste directly from <code>BUILDING_IMAGE_PATHS_FOR_ADMIN.txt</code> or <code>BUILDING_IMAGE_PATHS.csv</code>.
+              Both formats are supported here.
+            </p>
+            <div class="admin-actions">
+              <button class="button button--ghost" data-admin-action="apply-bulk-building-images">Apply Bulk Image Paths</button>
+            </div>
             <div class="admin-grid">
               <label>Unmanifested Rollable Building<select id="manifest-building-select">${renderUnmanifestedBuildingOptions(state)}</select></label>
               <label>Chosen Quality<input id="manifest-building-quality" type="number" value="100" min="1" max="350" /></label>
@@ -870,11 +896,23 @@ export class AdminConsole {
                 : `<p>No manual local save recorded yet.</p>`
             }
             <textarea id="save-json" rows="10"></textarea>
+            <label>Shared Save URL<input id="shared-save-url" value="${escapeHtml(state.settings.sharedStateUrl ?? "")}" placeholder="https://.../save.json" /></label>
+            <p>Best for public raw JSON links. A public direct-download Google Drive link may work if it allows browser fetch access.</p>
+            <p>
+              Shared source:
+              <strong>${escapeHtml(state.settings.sharedStateUrl || "None set")}</strong>
+              · Auto-load:
+              <strong>${state.settings.autoLoadSharedState ? "Enabled" : "Disabled"}</strong>
+            </p>
             <div class="admin-actions">
               <button class="button button--ghost" data-admin-action="save-manual-state">Save Local State</button>
               <button class="button button--ghost" data-admin-action="load-manual-state">Load Local State</button>
               <button class="button button--ghost" data-admin-action="export-save">Export Save JSON</button>
+              <button class="button button--ghost" data-admin-action="copy-save-json">Copy Save JSON</button>
               <button class="button button--ghost" data-admin-action="import-save">Import Save JSON</button>
+              <button class="button button--ghost" data-admin-action="load-shared-state-url">Load Shared URL</button>
+              <button class="button button--ghost" data-admin-action="remember-shared-state-url">Remember Shared URL</button>
+              <button class="button button--ghost" data-admin-action="toggle-shared-autoload">${state.settings.autoLoadSharedState ? "Disable Shared Auto-Load" : "Enable Shared Auto-Load"}</button>
               <button class="button button--ghost" data-admin-action="clear-buildings">Delete All Buildings</button>
               <button class="button button--ghost" data-admin-action="reset-save">Reset Save</button>
               <button class="button button--ghost" data-admin-action="session-reset">Reset to Live Session</button>

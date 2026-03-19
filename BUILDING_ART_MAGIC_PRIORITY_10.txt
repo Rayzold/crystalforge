@@ -1,0 +1,90 @@
+CRYSTAL FORGE MAGICAL BUILDING ART PRIORITY 10
+
+Goal:
+Replace these 10 magical / high-fantasy structures first.
+They will do the most to push Crystal Forge away from "generic medieval" and into its intended arcane identity.
+
+Drop images here:
+c:\Users\mstefanou\Documents\Drift\crystal-forge\assets\images\buildings
+
+Use these filenames:
+
+1. Arcana Tower.png
+Why first:
+- strongest magical landmark in the roster
+- defines the arcane visual language of the city
+
+2. Temple.png
+Why first:
+- one of the clearest sacred/fantasy landmarks
+- appears earlier than some higher-tier magical structures
+
+3. Grand Shrine.png
+Why first:
+- strong spiritual upgrade from Temple
+- helps religious/magical play feel distinct
+
+4. Observatory.png
+Why first:
+- excellent magical/science crossover image
+- very readable as a special building
+
+5. Oracle.png
+Why first:
+- high flavor value
+- supports prophecy / mystical tone
+
+6. Arcane Walls.png
+Why first:
+- makes magical defense feel visually different from normal walls
+
+7. Planar Anchor.png
+Why first:
+- one of the strongest "otherworldly" concepts in the roster
+- highly memorable when represented well
+
+8. Relic Sanctum.png
+Why first:
+- strong arcane/religious hybrid landmark
+- premium late-midgame magical feel
+
+9. Skyharbor.png
+Why first:
+- major fantasy spectacle building
+- gives the city a high-magic civilization vibe
+
+10. Universal Portal.png
+Why first:
+- extremely strong late-game magical identity
+- one of the best Beyond-tier showcase pieces
+
+SECOND WAVE AFTER THESE 10
+- Dreamweaver.png
+- Enchanted Forest.png
+- Fey Crossing.png
+- Mirage Citadel.png
+- Heart of Kosmos.png
+- The First Last Tower of Chronomancy.png
+- The Maker's Creatorium.png
+- Communications Core.png
+- Illusion Field Generator.png
+- Shield Generator.png
+
+FASTEST WIN ORDER
+If you only do 5 magical replacements first:
+1. Arcana Tower
+2. Temple
+3. Observatory
+4. Planar Anchor
+5. Universal Portal
+
+STYLE NOTES
+- Prefer glowing towers, sanctums, shrines, portals, and sky-structures
+- Favor silhouettes with strong verticality and magical light sources
+- Avoid steampunk-only looks unless the building name implies it
+- Keep colors readable against the dark UI: cyan, violet, gold, moonwhite, soft crimson
+
+FALLBACK STRATEGY
+If you do not have full building art yet:
+- use icon-like magical architecture images rather than random character art
+- keep one consistent art family for these first 10 if possible

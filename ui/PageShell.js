@@ -202,7 +202,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
             <p class="page-hero__subtitle">${subtitle}</p>
           </div>
           ${
-            currentFocus
+            currentFocus && pageKey !== "forge"
               ? `
                   <div class="page-hero__focus">
                     <span>Town Focus</span>

@@ -23,7 +23,14 @@ export function renderOverflowList(state) {
                         <span>${escapeHtml(building.rarity)}</span>
                         <span>${formatNumber(building.quality, 2)}%</span>
                       </button>
-                      <button class="button button--ghost" data-action="inspect-building" data-building-id="${building.id}">Open Details</button>
+                      <div class="overflow-list__actions">
+                        <button class="button button--ghost" data-action="inspect-building" data-building-id="${building.id}">Open Details</button>
+                        ${
+                          state.ui.adminUnlocked
+                            ? `<button class="button button--ghost button--danger-icon" data-action="remove-building" data-building-id="${building.id}" aria-label="Delete ${escapeHtml(building.displayName)}" title="Delete building">🗑</button>`
+                            : ""
+                        }
+                      </div>
                     </article>
                   `
                 )

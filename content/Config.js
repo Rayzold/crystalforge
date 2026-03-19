@@ -5,7 +5,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v0.7.36";
+export const APP_VERSION = "v0.7.48";
 export const SAVE_VERSION = 7;
 export const STORAGE_KEY = "crystal-forge-save";
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save";
@@ -95,6 +95,8 @@ export const START_STATE_PRESETS = {
       onboardingDismissed: false,
       liveSessionView: true,
       theme: "dark",
+      sharedStateUrl: "",
+      autoLoadSharedState: false,
       diceAmount: 1,
       diceType: "d20",
       diceHistory: [],
@@ -143,6 +145,8 @@ export const START_STATE_PRESETS = {
       onboardingDismissed: false,
       liveSessionView: false,
       theme: "dark",
+      sharedStateUrl: "",
+      autoLoadSharedState: false,
       diceAmount: 1,
       diceType: "d20",
       diceHistory: [],

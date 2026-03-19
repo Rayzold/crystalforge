@@ -571,6 +571,118 @@ function editBuilding({ buildingId, quality, district, iconKey, imagePath, tags,
   reportSuccess("Building updated.");
 }
 
+function parseBulkBuildingImageLines(rawText) {
+  const lines = String(rawText ?? "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const entries = [];
+
+  for (const line of lines) {
+    if (/^building name\s*,\s*image path$/i.test(line)) {
+      continue;
+    }
+
+    if (line.includes("->")) {
+      const [namePart, pathPart] = line.split(/\s*->\s*/, 2);
+      if (namePart && pathPart) {
+        entries.push({ name: namePart.trim(), imagePath: pathPart.trim() });
+      }
+      continue;
+    }
+
+    if (line.includes(",")) {
+      const [namePart, pathPart] = line.split(/\s*,\s*/, 2);
+      if (namePart && pathPart) {
+        entries.push({ name: namePart.trim(), imagePath: pathPart.trim() });
+      }
+    }
+  }
+
+  return entries;
+}
+
+function normalizeBulkImageBuildingName(name) {
+  return String(name ?? "")
+    .trim()
+    .replace(/\s+\((Common|Uncommon|Rare|Epic|Legendary)\)$/i, "")
+    .replace(/\s+\((Beyond)\)$/i, "")
+    .replace(/^"|"$/g, "");
+}
+
+function normalizeSharedStateUrl(url) {
+  const normalized = String(url ?? "").trim();
+  if (!normalized) {
+    return "";
+  }
+
+  const driveMatch =
+    normalized.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/) ??
+    normalized.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+
+  if (driveMatch?.[1]) {
+    return `https://drive.google.com/uc?export=download&id=${driveMatch[1]}`;
+  }
+
+  return normalized;
+}
+
+function applyBulkBuildingImages(rawText) {
+  const parsed = parseBulkBuildingImageLines(rawText);
+  if (!parsed.length) {
+    throw new Error("No valid image path lines found.");
+  }
+
+  const applied = commit((draft) => {
+    let count = 0;
+
+    for (const entry of parsed) {
+      const normalizedName = normalizeBulkImageBuildingName(entry.name);
+      const imagePath = entry.imagePath;
+      if (!normalizedName || !imagePath) {
+        continue;
+      }
+
+      for (const building of draft.buildings) {
+        if (building.name === normalizedName || building.displayName === normalizedName) {
+          building.imagePath = imagePath;
+          count += 1;
+        }
+      }
+
+      for (const [catalogKey, catalogEntry] of Object.entries(draft.buildingCatalog)) {
+        if (catalogEntry?.name === normalizedName || catalogEntry?.displayName === normalizedName) {
+          draft.buildingCatalog[catalogKey] = {
+            ...catalogEntry,
+            imagePath
+          };
+          count += 1;
+        }
+      }
+    }
+
+    return count;
+  });
+
+  reportSuccess(`Applied image paths to ${applied} building record${applied === 1 ? "" : "s"}.`);
+}
+
+async function fetchSharedStateFromUrl(url) {
+  const normalizedUrl = normalizeSharedStateUrl(url);
+  if (!normalizedUrl) {
+    throw new Error("No shared save URL provided.");
+  }
+
+  const response = await fetch(normalizedUrl, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`Unable to fetch shared save (${response.status}).`);
+  }
+
+  const text = await response.text();
+  return importSave(text);
+}
+
 function moveBuildingOnMap({ buildingId, q, r, source = "Player" }) {
   const result = commit((draft) => {
     const building = draft.buildings.find((entry) => entry.id === buildingId);
@@ -752,6 +864,7 @@ const actions = {
   openAdmin() {
     commit((draft) => {
       draft.ui.adminOpen = true;
+      draft.ui.adminUnlocked = true;
     });
   },
   openCatalog() {
@@ -869,6 +982,9 @@ const actions = {
   editBuilding(payload) {
     editBuilding(payload);
   },
+  applyBulkBuildingImages(rawText) {
+    applyBulkBuildingImages(rawText);
+  },
   setBuildingRuinState(buildingId, isRuined) {
     commit((draft) => {
       const building = draft.buildings.find((entry) => entry.id === buildingId);
@@ -948,6 +1064,20 @@ const actions = {
   exportSave() {
     return exportSave(getCurrentState());
   },
+  async copySaveJson() {
+    const json = exportSave(getCurrentState());
+    if (!navigator.clipboard?.writeText) {
+      reportError("Clipboard copy is not available in this browser.");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(json);
+      reportSuccess("Save JSON copied to clipboard.");
+    } catch (error) {
+      reportError(error.message);
+    }
+  },
   saveManualState() {
     try {
       saveManualState(getCurrentState());
@@ -969,6 +1099,29 @@ const actions = {
     gameState.replace(importSave(text));
     renderer.setTransientUi({ hoveredMapCell: null, inspectedBuildingId: null }, getCurrentState());
     reportSuccess("Save imported.");
+  },
+  async loadSharedStateUrl(url) {
+    try {
+      const sharedState = await fetchSharedStateFromUrl(url);
+      gameState.replace(sharedState);
+      resetTransientUi();
+      reportSuccess("Shared state loaded.");
+    } catch (error) {
+      reportError(error.message);
+    }
+  },
+  rememberSharedStateUrl(url) {
+    const normalizedUrl = normalizeSharedStateUrl(url);
+    commit((draft) => {
+      draft.settings.sharedStateUrl = normalizedUrl;
+    });
+    reportSuccess(normalizedUrl ? "Shared save URL remembered." : "Shared save URL cleared.");
+  },
+  toggleSharedStateAutoLoad() {
+    commit((draft) => {
+      draft.settings.autoLoadSharedState = !draft.settings.autoLoadSharedState;
+    });
+    reportSuccess(`Shared auto-load ${getCurrentState().settings.autoLoadSharedState ? "enabled" : "disabled"}.`);
   },
   resetSave() {
     gameState.replace(resetSave());
@@ -1080,6 +1233,10 @@ root.addEventListener("click", async (event) => {
       void audioEngine.playUiAccent("soft");
       renderer.setTransientUi({ inspectedBuildingId: target.dataset.buildingId }, getCurrentState());
       break;
+    case "remove-building":
+      void audioEngine.playUiAccent("soft");
+      actions.removeBuilding(target.dataset.buildingId);
+      break;
     case "open-catalog":
       void audioEngine.playUiAccent("soft");
       actions.openCatalog();
@@ -1095,6 +1252,10 @@ root.addEventListener("click", async (event) => {
     case "set-city-view":
       void audioEngine.playUiAccent("soft");
       renderer.setTransientUi({ cityView: target.dataset.view }, getCurrentState());
+      break;
+    case "set-city-aside-view":
+      void audioEngine.playUiAccent("soft");
+      renderer.setTransientUi({ cityAsideView: target.dataset.view }, getCurrentState());
       break;
     case "set-building-filter":
       commit((draft) => {
@@ -1436,6 +1597,24 @@ function applyUrlFocusTargets() {
   clearUrlParams();
 }
 
+async function autoLoadSharedStateIfEnabled() {
+  const state = getCurrentState();
+  if (!state.settings.autoLoadSharedState || !state.settings.sharedStateUrl) {
+    return;
+  }
+
+  try {
+    const sharedState = await fetchSharedStateFromUrl(state.settings.sharedStateUrl);
+    sharedState.settings.sharedStateUrl = state.settings.sharedStateUrl;
+    sharedState.settings.autoLoadSharedState = state.settings.autoLoadSharedState;
+    gameState.replace(sharedState);
+    resetTransientUi();
+    reportSuccess("Shared state auto-loaded.");
+  } catch (error) {
+    reportError(error.message);
+  }
+}
+
 if (!localStorage.getItem("crystal-forge-save")) {
   gameState.replace(createInitialState());
 } else {
@@ -1444,4 +1623,5 @@ if (!localStorage.getItem("crystal-forge-save")) {
 }
 
 applyUrlFocusTargets();
+void autoLoadSharedStateIfEnabled();
 startPageEnter();

@@ -1,0 +1,213 @@
+CRYSTAL FORGE BUILDING IMAGE FILENAME MAP
+
+Put building images in:
+c:\Users\mstefanou\Documents\Drift\crystal-forge\assets\images\buildings
+
+Recommended source priority:
+1. OpenGameArt medieval RTS / isometric building art
+2. Unknown Horizons building/resource icons
+3. Game-icons fallback for missing magical/special buildings
+
+Suggested filename format:
+- Use the exact building display name where practical
+- PNG preferred
+- Example: Blacksmith.png
+
+If a building has no perfect art yet, use the recommended fallback below.
+
+COMMON
+Apiary -> Apiary.png
+Bakery -> Bakery.png
+Ballistas -> Ballistas.png
+Barn -> Barn.png
+Basic Shrine -> Basic Shrine.png
+Beast Pens -> Beast Pens.png
+Blacksmith -> Blacksmith.png
+Butcher -> Butcher.png
+Cider Press -> Cider Press.png
+Crystal Upgrade -> Crystal Upgrade.png
+Farmlands -> Farmlands.png
+Fishery -> Fishery.png
+Gardens -> Gardens.png
+General Store -> General Store.png
+Grain Silo -> Grain Silo.png
+Graveyard -> Graveyard.png
+Housing: Commoner -> Housing Commoner.png
+Inn -> Inn.png
+Lumber Mill -> Lumber Mill.png
+Mill -> Mill.png
+Mine -> Mine.png
+Quarry -> Quarry.png
+Smokehouse -> Smokehouse.png
+Stables -> Stables.png
+Tailor -> Tailor.png
+Tavern -> Tavern.png
+Tool Shed -> Tool Shed.png
+Town Guard Post -> Town Guard Post.png
+Vendor -> Vendor.png
+Water Trough -> Water Trough.png
+Well -> Well.png
+Wooden Wall -> Wooden Wall.png
+Woodcutter's Hut -> Woodcutter's Hut.png
+
+UNCOMMON
+Alchemist -> Alchemist.png
+Barracks -> Barracks.png
+Brewery -> Brewery.png
+Carpenter Shop -> Carpenter Shop.png
+Clocktower -> Clocktower.png
+Community Oven -> Community Oven.png
+Crystal Upgrade -> Crystal Upgrade Uncommon.png
+Distillery -> Distillery.png
+Dock -> Dock.png
+Grove -> Grove.png
+Guard Tower -> Guard Tower.png
+Hardwood Walls -> Hardwood Walls.png
+Housing: Comfortable -> Housing Comfortable.png
+Immigration Center -> Immigration Center.png
+Jewelry Shop -> Jewelry Shop.png
+Library -> Library.png
+Market Square -> Market Square.png
+Mason's Workshop -> Mason's Workshop.png
+Pond -> Pond.png
+Post Office -> Post Office.png
+Ropeworks -> Ropeworks.png
+School -> School.png
+Tannery -> Tannery.png
+Town Hall -> Town Hall.png
+Trade Post -> Trade Post.png
+Trebuchets -> Trebuchets.png
+Warehouse -> Warehouse.png
+Weaver's Hall -> Weaver's Hall.png
+
+RARE
+Amphitheater -> Amphitheater.png
+Apothecary -> Apothecary.png
+Aqueduct System -> Aqueduct System.png
+Armory -> Armory.png
+Bank -> Bank.png
+Bathhouse -> Bathhouse.png
+Courthouse -> Courthouse.png
+Crystal Upgrade -> Crystal Upgrade Rare.png
+Distillation House -> Distillation House.png
+Embassy Annex -> Embassy Annex.png
+Engineers' Guild -> Engineers' Guild.png
+Explosive Ballistas -> Explosive Ballistas.png
+Guildhall -> Guildhall.png
+Herbal Greenhouse -> Herbal Greenhouse.png
+Hospital -> Hospital.png
+Housing: Wealthy -> Housing Wealthy.png
+Lighthouse -> Lighthouse.png
+Mint -> Mint.png
+Observatory -> Observatory.png
+Oracle -> Oracle.png
+Printing Press -> Printing Press.png
+Prison -> Prison.png
+Red Light District -> Red Light District.png
+Stone Walls -> Stone Walls.png
+Training Grounds -> Training Grounds.png
+University -> University.png
+
+EPIC
+Adventurers' Guildhall -> Adventurers' Guildhall.png
+Airship Dockyard -> Airship Dockyard.png
+Artifact Vault -> Artifact Vault.png
+Cannons -> Cannons.png
+Caravan Outpost -> Caravan Outpost.png
+Castle -> Castle.png
+Communications Core -> Communications Core.png
+Crystal Upgrade -> Crystal Upgrade Epic.png
+Fey Crossing -> Fey Crossing.png
+Foreign Affairs Ministry -> Foreign Affairs Ministry.png
+Grand Shrine -> Grand Shrine.png
+Housing: Noble -> Housing Noble.png
+Illusion Field Generator -> Illusion Field Generator.png
+Mirage Citadel -> Mirage Citadel.png
+Monster Arena -> Monster Arena.png
+Monster Capture Field -> Monster Capture Field.png
+Planar Beach -> Planar Beach.png
+Reinforced Stone Walls -> Reinforced Stone Walls.png
+Relic Sanctum -> Relic Sanctum.png
+Skyharbor -> Skyharbor.png
+Steam Factory -> Steam Factory.png
+Temple -> Temple.png
+Torture Chambers -> Torture Chambers.png
+Wall/Fortifications -> Wall Fortifications.png
+
+LEGENDARY
+Arcana Tower -> Arcana Tower.png
+Arcane Walls -> Arcane Walls.png
+Captain's Quarters -> Captain's Quarters.png
+Crystal Upgrade -> Crystal Upgrade Legendary.png
+Deathless Grounds -> Deathless Grounds.png
+Doomsday Cannon -> Doomsday Cannon.png
+Dragonforge -> Dragonforge.png
+Dreamweaver -> Dreamweaver.png
+Elemental Cannons -> Elemental Cannons.png
+Elemental Shipmaker -> Elemental Shipmaker.png
+Enchanted Forest -> Enchanted Forest.png
+Housing: Royal -> Housing Royal.png
+Mortality Limiter Remover -> Mortality Limiter Remover.png
+Planar Anchor -> Planar Anchor.png
+Planar Escape Pods -> Planar Escape Pods.png
+Planar Tentacles -> Planar Tentacles.png
+Raestorum Center -> Raestorum Center.png
+School of Driftum -> School of Driftum.png
+Shield Generator -> Shield Generator.png
+Techcrafter -> Techcrafter.png
+The Seeker -> The Seeker.png
+War Academy Supreme -> War Academy Supreme.png
+
+BEYOND
+Heart of Kosmos -> Heart of Kosmos.png
+Universal Portal -> Universal Portal.png
+Lylandra's Residence -> Lylandra's Residence.png
+New Drift Seed -> New Drift Seed.png
+Dungeon of the Endless -> Dungeon of the Endless.png
+The Ark -> The Ark.png
+The Maker's Creatorium -> The Maker's Creatorium.png
+The First Last Tower of Chronomancy -> The First Last Tower of Chronomancy.png
+
+RECOMMENDED REAL-ART PRIORITY FIRST
+These are the highest-value first replacements:
+- Blacksmith.png
+- Barracks.png
+- Stables.png
+- Guard Tower.png
+- Castle.png
+- Well.png
+- Housing Commoner.png
+- Housing Comfortable.png
+- Housing Wealthy.png
+- Housing Noble.png
+- Housing Royal.png
+- Mill.png
+- Bakery.png
+- Dock.png
+- Market Square.png
+- Warehouse.png
+- Mine.png
+- Quarry.png
+- Temple.png
+- Arcana Tower.png
+
+RECOMMENDED SOURCE MATCHES
+- Blacksmith / Dragonforge -> medieval blacksmith art
+- Barracks / Armory / Training Grounds -> barracks / archery range art
+- Stables / Beast Pens -> stable art
+- Guard Tower / Stone Walls / Reinforced Stone Walls / Arcane Walls -> tower / wall art
+- Castle / Mirage Citadel / The Ark -> castle art
+- Well / Pond / Water Trough -> well/water icon art
+- Mill / Bakery / Community Oven / Smokehouse / Butcher -> village production art
+- Dock / Skyharbor / Airship Dockyard -> dock / harbor art
+- Market Square / Vendor / Trade Post / General Store / Warehouse -> market/storage art
+- Temple / Grand Shrine / Basic Shrine / Oracle -> shrine/temple art
+- Arcana Tower / Observatory / School of Driftum / University -> tower/academy art
+
+NOTES
+- For Crystal Upgrade, use separate filenames per rarity so you can style them differently if desired.
+- If a file name causes trouble, replace spaces and punctuation consistently, then update the building image path in admin.
+- Example safe alternative:
+  Housing Commoner.png
+  Town Guard Post.png
+  Wall Fortifications.png

@@ -24,8 +24,7 @@ function renderTownStatistics(state) {
     ["Food Stores", formatNumber(state.resources.food ?? 0, 0), "food"],
     ["Food Runway", foodRunway === null ? "Stable" : `${formatNumber(foodRunway, 1)}d`, foodRunway !== null && foodRunway <= 5 ? "negative" : "food"],
     ["Defense", formatNumber(state.cityStats.defense ?? 0, 0), "defense"],
-    ["Morale", formatNumber(state.cityStats.morale ?? 0, 0), "morale"],
-    ["Buildings", formatNumber(buildings.length, 0), "buildings"]
+    ["Morale", formatNumber(state.cityStats.morale ?? 0, 0), "morale"]
   ];
 
   return `
@@ -122,16 +121,40 @@ function renderCityWorkspace(state) {
 }
 
 function renderCityDrawer(state) {
+  const asideView = state.transientUi?.cityAsideView ?? "operations";
   return `
     <aside class="city-command-drawer">
-      <div class="city-command-drawer__grid city-command-drawer__grid--primary">
-        ${renderCalendarPanel(state, { showQueue: true })}
-        ${renderEmergencyPanel(state)}
+      <div class="city-command-drawer__tabs">
+        <button class="button button--ghost ${asideView === "operations" ? "is-active" : ""}" data-action="set-city-aside-view" data-view="operations">Operations</button>
+        <button class="button button--ghost ${asideView === "readouts" ? "is-active" : ""}" data-action="set-city-aside-view" data-view="readouts">Readouts</button>
       </div>
-      <div class="city-command-drawer__grid city-command-drawer__grid--support">
-        ${renderResourcePanel(state)}
-        ${renderDistrictPanel(state)}
-      </div>
+      ${
+        asideView === "operations"
+          ? `
+              <section class="city-command-drawer__section">
+                <div class="city-command-drawer__section-head">
+                  <span>Operations</span>
+                  <small>Time, raising, and emergencies</small>
+                </div>
+                <div class="city-command-drawer__grid city-command-drawer__grid--primary">
+                  ${renderCalendarPanel(state, { showQueue: true })}
+                  ${renderEmergencyPanel(state)}
+                </div>
+              </section>
+            `
+          : `
+              <section class="city-command-drawer__section city-command-drawer__section--quiet">
+                <div class="city-command-drawer__section-head">
+                  <span>Readouts</span>
+                  <small>Stores and district posture</small>
+                </div>
+                <div class="city-command-drawer__grid city-command-drawer__grid--primary">
+                  ${renderResourcePanel(state)}
+                  ${renderDistrictPanel(state)}
+                </div>
+              </section>
+            `
+      }
     </aside>
   `;
 }

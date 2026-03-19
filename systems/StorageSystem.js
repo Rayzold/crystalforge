@@ -60,6 +60,7 @@ export function createInitialState(preset = DEFAULT_START_PRESET) {
     ui: {
       selectedBuildingId: null,
       selectedMapCell: null,
+      adminUnlocked: false,
       adminOpen: false,
       lastManifestResult: null
     }
@@ -101,6 +102,7 @@ export function createSingleCommonCrystalResetState() {
   state.ui = {
     selectedBuildingId: null,
     selectedMapCell: null,
+    adminUnlocked: false,
     adminOpen: false,
     lastManifestResult: null
   };
