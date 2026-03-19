@@ -9,6 +9,8 @@ import {
 } from "../systems/CalendarSystem.js";
 import { renderUiIcon } from "./UiIcons.js";
 
+const WEEKDAY_ORDER = ["Moonday", "Tidesday", "Glimmerday", "Dreamday", "Soothingday", "Dazzleday", "Sunburstday"];
+
 function getDisplayMonthOffset(state) {
   const fallback = getMonthStartOffset(state.calendar.dayOffset);
   const requested = Number(state.transientUi?.chronicleMonthOffset);
@@ -116,26 +118,32 @@ export function renderChronicleCalendar(state) {
       </div>
 
       <div class="chronicle-calendar__frame">
+        <div class="chronicle-calendar__weekdays">
+          ${WEEKDAY_ORDER.map((weekday) => `<span>${escapeHtml(weekday.slice(0, 3))}</span>`).join("")}
+        </div>
+
         <div class="chronicle-calendar__grid">
           ${monthOffsets.map((dayOffset) => renderDayCell(state, dayOffset, selectedDayOffset, eventsByDay)).join("")}
         </div>
+      </div>
 
-        <div class="chronicle-calendar__detail">
-          <div class="chronicle-calendar__detail-head">
-            <div>
-              <span class="chronicle-calendar__detail-label">Selected Day</span>
-              <h4>${escapeHtml(formatDate(selectedDayOffset))}</h4>
-            </div>
-            <div class="chronicle-calendar__detail-badges">
-              <span>${selectedEvents.length} event${selectedEvents.length === 1 ? "" : "s"}</span>
-              ${
-                selectedDate.holiday
-                  ? `<span class="is-holiday">${escapeHtml(selectedDate.holiday.name)}</span>`
-                  : `<span>${escapeHtml(selectedDate.season)}</span>`
-              }
-            </div>
+      <div class="chronicle-calendar__detail">
+        <div class="chronicle-calendar__detail-head">
+          <div>
+            <span class="chronicle-calendar__detail-label">Selected Day</span>
+            <h4>${escapeHtml(formatDate(selectedDayOffset))}</h4>
           </div>
+          <div class="chronicle-calendar__detail-badges">
+            <span>${selectedEvents.length} event${selectedEvents.length === 1 ? "" : "s"}</span>
+            ${
+              selectedDate.holiday
+                ? `<span class="is-holiday">${escapeHtml(selectedDate.holiday.name)}</span>`
+                : `<span>${escapeHtml(selectedDate.season)}</span>`
+            }
+          </div>
+        </div>
 
+        <div class="chronicle-calendar__detail-grid">
           <div class="chronicle-calendar__events">
             <div class="chronicle-calendar__section-title">
               ${renderUiIcon("event", "Events")}
