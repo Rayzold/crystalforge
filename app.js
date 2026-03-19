@@ -1,6 +1,10 @@
 import { AdminConsole } from "./admin/AdminConsole.js";
 import { createCatalogEntryFromInput, getCatalogKey } from "./content/BuildingCatalog.js";
-import { FIREBASE_DEFAULT_REALM_ID, GM_QUICK_CRYSTAL_PACKS } from "./content/Config.js";
+import {
+  FIREBASE_DEFAULT_REALM_ID,
+  FIREBASE_DEFAULT_WORKING_REALM_ID,
+  GM_QUICK_CRYSTAL_PACKS
+} from "./content/Config.js";
 import { EVENT_POOLS } from "./content/EventPools.js";
 import { getNextRarity, RARITY_ORDER } from "./content/Rarities.js";
 import { GameState } from "./engine/GameState.js";
@@ -101,6 +105,16 @@ function syncDerivedState(state) {
   }
   state.settings.currentPage = pageKey;
   state.settings.theme = "dark";
+  const publishedRealmId = getPublishedFirebaseRealmId(state);
+  state.settings.firebaseRealmId = publishedRealmId;
+  state.settings.firebasePublishedRealmId = publishedRealmId;
+  state.settings.firebaseWorkingRealmId = getWorkingFirebaseRealmId(state);
+  if ((state.settings.firebaseWorkflowVersion ?? 1) < 2) {
+    state.settings.firebaseAutoLoad = true;
+    state.settings.firebaseLiveSync = false;
+    state.settings.firebaseAutoPublish = false;
+    state.settings.firebaseWorkflowVersion = 2;
+  }
   const driftUpdate = syncDriftEvolutionState(state);
   for (const stage of driftUpdate.newStages) {
     addHistoryEntry(state, {
@@ -180,47 +194,6 @@ function ensureCatalogEntry(state, catalogEntry) {
     ...catalogEntry
   };
   return state.buildingCatalog[catalogEntry.key];
-}
-
-function setPopulationByAdjustingClasses(state, targetPopulation) {
-  let currentPopulation = Object.values(state.citizens).reduce((sum, value) => sum + value, 0);
-  let delta = targetPopulation - currentPopulation;
-  if (delta > 0) {
-    state.citizens.Laborers += delta;
-    return;
-  }
-
-  const reductionOrder = [
-    "Laborers",
-    "Farmers",
-    "Hunters",
-    "Scavengers",
-    "Miners",
-    "Craftsmen",
-    "Merchants",
-    "Skycrew",
-    "Guards",
-    "Soldiers",
-    "Administrators",
-    "Scholars",
-    "Clergy",
-    "Healers",
-    "Entertainers",
-    "Children",
-    "Elderly",
-    "Nobles",
-    "Mages",
-    "Heroes"
-  ];
-  for (const citizenClass of reductionOrder) {
-    if (delta === 0) {
-      break;
-    }
-    const available = state.citizens[citizenClass];
-    const removeAmount = Math.min(available, Math.abs(delta));
-    state.citizens[citizenClass] -= removeAmount;
-    delta += removeAmount;
-  }
 }
 
 function getCurrentState() {
@@ -483,9 +456,9 @@ function setResources(nextResources) {
     draft.resources.gold = Math.max(0, Number(nextResources.gold));
     draft.resources.food = Math.max(0, Number(nextResources.food));
     draft.resources.materials = Math.max(0, Number(nextResources.materials));
+    draft.resources.salvage = Math.max(0, Number(nextResources.salvage ?? draft.resources.salvage ?? 0));
     draft.resources.mana = Math.max(0, Number(nextResources.mana));
     draft.resources.prosperity = Math.max(0, Number(nextResources.prosperity));
-    setPopulationByAdjustingClasses(draft, Math.max(0, Number(nextResources.population)));
   });
   reportSuccess("Resources updated.");
 }
@@ -715,6 +688,21 @@ function normalizeFirebaseRealmId(realmId) {
   return normalized || FIREBASE_DEFAULT_REALM_ID;
 }
 
+function normalizeFirebaseWorkingRealmId(realmId) {
+  const normalized = String(realmId ?? "").trim();
+  return normalized || FIREBASE_DEFAULT_WORKING_REALM_ID;
+}
+
+function getPublishedFirebaseRealmId(state = getCurrentState()) {
+  return normalizeFirebaseRealmId(state.settings.firebasePublishedRealmId ?? state.settings.firebaseRealmId);
+}
+
+function getWorkingFirebaseRealmId(state = getCurrentState()) {
+  return normalizeFirebaseWorkingRealmId(
+    state.settings.firebaseWorkingRealmId ?? `${getPublishedFirebaseRealmId(state)}-working`
+  );
+}
+
 function preserveLocalSettingsOnSharedState(nextState, currentState = getCurrentState()) {
   const normalized = validateAndMigrateSave(nextState);
   normalized.settings = {
@@ -728,6 +716,9 @@ function preserveLocalSettingsOnSharedState(nextState, currentState = getCurrent
     sharedStateUrl: currentState.settings.sharedStateUrl,
     autoLoadSharedState: currentState.settings.autoLoadSharedState,
     firebaseRealmId: currentState.settings.firebaseRealmId,
+    firebasePublishedRealmId: currentState.settings.firebasePublishedRealmId,
+    firebaseWorkingRealmId: currentState.settings.firebaseWorkingRealmId,
+    firebaseWorkflowVersion: currentState.settings.firebaseWorkflowVersion,
     firebaseAutoLoad: currentState.settings.firebaseAutoLoad,
     firebaseLiveSync: currentState.settings.firebaseLiveSync,
     firebaseAutoPublish: currentState.settings.firebaseAutoPublish,
@@ -752,8 +743,7 @@ async function loadSharedStateFromFirebase(realmId) {
   return preserveLocalSettingsOnSharedState(payload.state);
 }
 
-async function publishSharedStateToFirebase(state = getCurrentState()) {
-  const realmId = normalizeFirebaseRealmId(state.settings.firebaseRealmId);
+async function publishSharedStateToFirebase(realmId, state = getCurrentState()) {
   const serializable = createSerializableState(state);
   serializable.ui = {
     ...serializable.ui,
@@ -761,6 +751,31 @@ async function publishSharedStateToFirebase(state = getCurrentState()) {
     adminOpen: false
   };
   await saveFirebaseRealmState(realmId, serializable, firebaseClientId);
+}
+
+async function loadPublishedStateFromFirebase() {
+  return loadSharedStateFromFirebase(getPublishedFirebaseRealmId());
+}
+
+async function loadWorkingStateFromFirebase() {
+  return loadSharedStateFromFirebase(getWorkingFirebaseRealmId());
+}
+
+async function saveWorkingStateToFirebase(state = getCurrentState()) {
+  await publishSharedStateToFirebase(getWorkingFirebaseRealmId(state), state);
+}
+
+async function publishCurrentStateToPublished(state = getCurrentState()) {
+  await publishSharedStateToFirebase(getPublishedFirebaseRealmId(state), state);
+}
+
+async function publishWorkingStateToPublished() {
+  const payload = await loadFirebaseRealmState(getWorkingFirebaseRealmId());
+  if (!payload?.state) {
+    throw new Error("No Firebase working state found yet.");
+  }
+  const publishedState = preserveLocalSettingsOnSharedState(payload.state);
+  await publishCurrentStateToPublished(publishedState);
 }
 
 async function connectFirebaseLiveSync(showSuccess = false) {
@@ -778,7 +793,7 @@ async function connectFirebaseLiveSync(showSuccess = false) {
   }
 
   firebaseUnsubscribe = await subscribeFirebaseRealmState(
-    normalizeFirebaseRealmId(state.settings.firebaseRealmId),
+    getPublishedFirebaseRealmId(state),
     (payload) => {
       if (!payload?.state) {
         return;
@@ -794,7 +809,7 @@ async function connectFirebaseLiveSync(showSuccess = false) {
   );
 
   if (showSuccess) {
-    reportSuccess(`Firebase live sync connected to realm "${normalizeFirebaseRealmId(state.settings.firebaseRealmId)}".`);
+    reportSuccess(`Firebase live sync connected to published realm "${getPublishedFirebaseRealmId(state)}".`);
   }
 }
 
@@ -814,7 +829,7 @@ function scheduleFirebaseAutoPublish(state) {
   }
   firebasePublishTimer = setTimeout(() => {
     firebasePublishTimer = null;
-    void publishSharedStateToFirebase().catch((error) => reportError(error.message));
+    void saveWorkingStateToFirebase().catch((error) => reportError(error.message));
   }, 500);
 }
 
@@ -824,7 +839,7 @@ async function publishManifestIfEnabled() {
     return;
   }
   try {
-    await publishSharedStateToFirebase(state);
+    await saveWorkingStateToFirebase(state);
   } catch (error) {
     reportError(error.message);
   }
@@ -1287,28 +1302,60 @@ const actions = {
   },
   async loadFirebaseRealm() {
     try {
-      const firebaseState = await loadSharedStateFromFirebase(getCurrentState().settings.firebaseRealmId);
+      const firebaseState = await loadPublishedStateFromFirebase();
       gameState.replace(firebaseState);
       resetTransientUi();
-      reportSuccess("Firebase realm loaded.");
+      reportSuccess("Published Firebase state loaded.");
     } catch (error) {
       reportError(error.message);
     }
   },
-  rememberFirebaseRealmId(realmId) {
-    const normalizedRealmId = normalizeFirebaseRealmId(realmId);
+  async loadFirebaseWorkingRealm() {
+    try {
+      const firebaseState = await loadWorkingStateFromFirebase();
+      gameState.replace(firebaseState);
+      resetTransientUi();
+      reportSuccess("Working Firebase state loaded.");
+    } catch (error) {
+      reportError(error.message);
+    }
+  },
+  rememberFirebaseRealmIds(publishedRealmId, workingRealmId) {
+    const normalizedPublishedRealmId = normalizeFirebaseRealmId(publishedRealmId);
+    const normalizedWorkingRealmId = normalizeFirebaseWorkingRealmId(workingRealmId);
     commit((draft) => {
-      draft.settings.firebaseRealmId = normalizedRealmId;
+      draft.settings.firebaseRealmId = normalizedPublishedRealmId;
+      draft.settings.firebasePublishedRealmId = normalizedPublishedRealmId;
+      draft.settings.firebaseWorkingRealmId = normalizedWorkingRealmId;
+      draft.settings.firebaseWorkflowVersion = 2;
     });
     if (getCurrentState().settings.firebaseLiveSync) {
       void connectFirebaseLiveSync().catch((error) => reportError(error.message));
     }
-    reportSuccess(`Firebase realm set to "${normalizedRealmId}".`);
+    reportSuccess(
+      `Firebase realms set. Published: "${normalizedPublishedRealmId}" · Working: "${normalizedWorkingRealmId}".`
+    );
   },
   async saveFirebaseRealm() {
     try {
-      await publishSharedStateToFirebase();
-      reportSuccess("State saved to Firebase.");
+      await saveWorkingStateToFirebase();
+      reportSuccess("Current state saved to Firebase working.");
+    } catch (error) {
+      reportError(error.message);
+    }
+  },
+  async publishFirebaseRealm() {
+    try {
+      await publishCurrentStateToPublished();
+      reportSuccess("Current state published to testers.");
+    } catch (error) {
+      reportError(error.message);
+    }
+  },
+  async publishFirebaseWorkingRealm() {
+    try {
+      await publishWorkingStateToPublished();
+      reportSuccess("Firebase working state published to testers.");
     } catch (error) {
       reportError(error.message);
     }
@@ -1841,10 +1888,10 @@ async function autoLoadSharedStateIfEnabled() {
   const state = getCurrentState();
   if (state.settings.firebaseAutoLoad) {
     try {
-      const firebaseState = await loadSharedStateFromFirebase(state.settings.firebaseRealmId);
+      const firebaseState = await loadPublishedStateFromFirebase();
       gameState.replace(firebaseState);
       resetTransientUi();
-      reportSuccess("Firebase state auto-loaded.");
+      reportSuccess("Published Firebase state auto-loaded.");
     } catch (error) {
       reportError(error.message);
     }

@@ -5,7 +5,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v0.8.7";
+export const APP_VERSION = "v0.9.0";
 export const SAVE_VERSION = 7;
 export const STORAGE_KEY = "crystal-forge-save";
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save";
@@ -20,6 +20,7 @@ export const FIREBASE_CONFIG = {
 };
 export const FIREBASE_REALM_COLLECTION = "realms";
 export const FIREBASE_DEFAULT_REALM_ID = "main";
+export const FIREBASE_DEFAULT_WORKING_REALM_ID = "main-working";
 export const MASCOT_MEDIA = {
   enabled: true,
   videoPath: "./assets/video/drift-mascot.mp4",
@@ -112,9 +113,12 @@ export const START_STATE_PRESETS = {
       sharedStateUrl: "",
       autoLoadSharedState: false,
       firebaseRealmId: FIREBASE_DEFAULT_REALM_ID,
+      firebasePublishedRealmId: FIREBASE_DEFAULT_REALM_ID,
+      firebaseWorkingRealmId: FIREBASE_DEFAULT_WORKING_REALM_ID,
+      firebaseWorkflowVersion: 2,
       firebaseAutoLoad: true,
-      firebaseLiveSync: true,
-      firebaseAutoPublish: true,
+      firebaseLiveSync: false,
+      firebaseAutoPublish: false,
       diceAmount: 1,
       diceType: "d20",
       diceHistory: [],
@@ -168,9 +172,12 @@ export const START_STATE_PRESETS = {
       sharedStateUrl: "",
       autoLoadSharedState: false,
       firebaseRealmId: FIREBASE_DEFAULT_REALM_ID,
+      firebasePublishedRealmId: FIREBASE_DEFAULT_REALM_ID,
+      firebaseWorkingRealmId: FIREBASE_DEFAULT_WORKING_REALM_ID,
+      firebaseWorkflowVersion: 2,
       firebaseAutoLoad: true,
-      firebaseLiveSync: true,
-      firebaseAutoPublish: true,
+      firebaseLiveSync: false,
+      firebaseAutoPublish: false,
       diceAmount: 1,
       diceType: "d20",
       diceHistory: [],

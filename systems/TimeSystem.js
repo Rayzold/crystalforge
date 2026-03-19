@@ -2,7 +2,6 @@ import { STEP_DURATIONS } from "../content/Config.js";
 import { formatDate, getStructuredDate } from "./CalendarSystem.js";
 import { recalculateCityStats } from "./CityStatsSystem.js";
 import { advanceConstructionOneDay } from "./ConstructionSystem.js";
-import { runCitizenPromotions } from "./CitizenSystem.js";
 import { expireEvents, maybeTriggerHolidayEvents, maybeTriggerRandomEvents, processScheduledEvents } from "./EventSystem.js";
 import { addHistoryEntry } from "./HistoryLogSystem.js";
 import { addMonthlyChronicleIfNeeded } from "./MonthlyChronicleSystem.js";
@@ -40,7 +39,6 @@ function runTimeAdvance(state, days, stepKey = null) {
     applyDailyResources(state);
     applyTownFocusDailyEffects(state);
     recalculateCityStats(state);
-    runCitizenPromotions(state);
     updateTownFocusAvailability(state);
     triggeredEvents.push(...processScheduledEvents(state));
     triggeredEvents.push(...maybeTriggerHolidayEvents(state));

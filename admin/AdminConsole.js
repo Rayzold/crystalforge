@@ -250,8 +250,7 @@ export class AdminConsole {
             materials: this.getNumberInput("resource-materials"),
             salvage: this.getNumberInput("resource-salvage"),
             mana: this.getNumberInput("resource-mana"),
-            prosperity: this.getNumberInput("resource-prosperity"),
-            population: this.getNumberInput("resource-population")
+            prosperity: this.getNumberInput("resource-prosperity")
           });
           break;
         case "citizen-add":
@@ -441,11 +440,23 @@ export class AdminConsole {
         case "load-firebase-realm":
           this.actions.loadFirebaseRealm();
           break;
+        case "load-firebase-working-realm":
+          this.actions.loadFirebaseWorkingRealm();
+          break;
         case "remember-firebase-realm":
-          this.actions.rememberFirebaseRealmId(this.getValue("firebase-realm-id"));
+          this.actions.rememberFirebaseRealmIds(
+            this.getValue("firebase-published-realm-id"),
+            this.getValue("firebase-working-realm-id")
+          );
           break;
         case "save-firebase-realm":
           this.actions.saveFirebaseRealm();
+          break;
+        case "publish-firebase-realm":
+          this.actions.publishFirebaseRealm();
+          break;
+        case "publish-firebase-working-realm":
+          this.actions.publishFirebaseWorkingRealm();
           break;
         case "toggle-firebase-autoload":
           this.actions.toggleFirebaseAutoLoad();
@@ -590,7 +601,7 @@ export class AdminConsole {
               <label>Salvage<input id="resource-salvage" type="number" value="${state.resources.salvage ?? 0}" /></label>
               <label>Mana<input id="resource-mana" type="number" value="${state.resources.mana}" /></label>
               <label>Prosperity<input id="resource-prosperity" type="number" value="${state.resources.prosperity}" /></label>
-              <label>Population<input id="resource-population" type="number" value="${state.resources.population}" /></label>
+              <label>Population<input id="resource-population" type="number" value="${state.resources.population}" disabled /></label>
             </div>
             <button class="button" data-admin-action="apply-resources">Apply Resources</button>
           </section>
@@ -945,15 +956,18 @@ export class AdminConsole {
       {
         tab: "system",
         title: "Firebase Realm",
-        keywords: "firebase realm shared sync autosave load save",
+        keywords: "firebase realm shared sync autosave load save published working",
         content: `
           <section class="admin-section">
             <h3>Firebase Realm</h3>
-            <p>Use this when you want every tester to load the same shared Firestore state instead of local-only saves.</p>
-            <label>Firebase Realm ID<input id="firebase-realm-id" value="${escapeHtml(state.settings.firebaseRealmId ?? "main")}" placeholder="main" /></label>
+            <p>Use a stable published save for testers and a separate working save for GM edits. Testers only change when you explicitly publish.</p>
+            <label>Published Realm ID<input id="firebase-published-realm-id" value="${escapeHtml(state.settings.firebasePublishedRealmId ?? state.settings.firebaseRealmId ?? "main")}" placeholder="main" /></label>
+            <label>Working Realm ID<input id="firebase-working-realm-id" value="${escapeHtml(state.settings.firebaseWorkingRealmId ?? "main-working")}" placeholder="main-working" /></label>
             <p>
-              Realm:
-              <strong>${escapeHtml(state.settings.firebaseRealmId || "main")}</strong>
+              Published:
+              <strong>${escapeHtml(state.settings.firebasePublishedRealmId ?? state.settings.firebaseRealmId ?? "main")}</strong>
+              Â· Working:
+              <strong>${escapeHtml(state.settings.firebaseWorkingRealmId ?? "main-working")}</strong>
               · Auto-load:
               <strong>${state.settings.firebaseAutoLoad ? "Enabled" : "Disabled"}</strong>
               · Live sync:
@@ -962,12 +976,15 @@ export class AdminConsole {
               <strong>${state.settings.firebaseAutoPublish ? "Enabled" : "Disabled"}</strong>
             </p>
             <div class="admin-actions">
-              <button class="button button--ghost" data-admin-action="load-firebase-realm">Load Firebase Realm</button>
-              <button class="button button--ghost" data-admin-action="remember-firebase-realm">Remember Firebase Realm</button>
-              <button class="button button--ghost" data-admin-action="save-firebase-realm">Save to Firebase</button>
-              <button class="button button--ghost" data-admin-action="toggle-firebase-autoload">${state.settings.firebaseAutoLoad ? "Disable Firebase Auto-Load" : "Enable Firebase Auto-Load"}</button>
-              <button class="button button--ghost" data-admin-action="toggle-firebase-live-sync">${state.settings.firebaseLiveSync ? "Disable Firebase Live Sync" : "Enable Firebase Live Sync"}</button>
-              <button class="button button--ghost" data-admin-action="toggle-firebase-auto-publish">${state.settings.firebaseAutoPublish ? "Disable Firebase Auto-Publish" : "Enable Firebase Auto-Publish"}</button>
+              <button class="button button--ghost" data-admin-action="load-firebase-realm">Load Published</button>
+              <button class="button button--ghost" data-admin-action="load-firebase-working-realm">Load Working</button>
+              <button class="button button--ghost" data-admin-action="remember-firebase-realm">Remember Realm IDs</button>
+              <button class="button button--ghost" data-admin-action="save-firebase-realm">Save Current to Working</button>
+              <button class="button button--ghost" data-admin-action="publish-firebase-realm">Publish Current to Testers</button>
+              <button class="button button--ghost" data-admin-action="publish-firebase-working-realm">Publish Working to Testers</button>
+              <button class="button button--ghost" data-admin-action="toggle-firebase-autoload">${state.settings.firebaseAutoLoad ? "Disable Published Auto-Load" : "Enable Published Auto-Load"}</button>
+              <button class="button button--ghost" data-admin-action="toggle-firebase-live-sync">${state.settings.firebaseLiveSync ? "Disable Published Live Sync" : "Enable Published Live Sync"}</button>
+              <button class="button button--ghost" data-admin-action="toggle-firebase-auto-publish">${state.settings.firebaseAutoPublish ? "Disable Working Auto-Save" : "Enable Working Auto-Save"}</button>
             </div>
           </section>
         `
