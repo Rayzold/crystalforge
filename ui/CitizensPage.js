@@ -2,32 +2,6 @@ import { renderCitizenPanel } from "./CitizenPanel.js";
 import { renderUiIcon } from "./UiIcons.js";
 import { escapeHtml } from "../engine/Utils.js";
 
-function renderCitizenLore(state) {
-  return `
-    <section class="scene-panel">
-      <div class="panel__header">
-        <h3>Social Fabric</h3>
-        <span class="panel__subtle">Roles, duties, and the social shape of the Drift</span>
-      </div>
-      <div class="lore-grid">
-        ${Object.entries(state.citizenDefinitions)
-          .map(
-            ([citizenClass, definition]) => `
-              <article class="lore-card">
-                <div class="lore-card__head">
-                  ${renderUiIcon("citizens", citizenClass)}
-                  <h4>${citizenClass}</h4>
-                </div>
-                <p>${definition.flavor}</p>
-              </article>
-            `
-          )
-          .join("")}
-      </div>
-    </section>
-  `;
-}
-
 function renderCitizenCommand(state) {
   const sorted = Object.entries(state.citizens).sort((left, right) => right[1] - left[1]);
   const topClasses = sorted.slice(0, 3);
@@ -75,7 +49,6 @@ export function renderCitizensPage(state) {
     subtitle: "Population roles, support, and the living social order.",
     content: `
       ${renderCitizenPanel(state)}
-      ${renderCitizenLore(state)}
     `,
     aside: `
       ${renderCitizenCommand(state)}

@@ -5,7 +5,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v0.7.48";
+export const APP_VERSION = "v0.7.52";
 export const SAVE_VERSION = 7;
 export const STORAGE_KEY = "crystal-forge-save";
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save";
@@ -76,6 +76,7 @@ export const START_STATE_PRESETS = {
       Laborers: 12,
       Craftsmen: 5,
       Merchants: 3,
+      Skycrew: 0,
       Scavengers: 2,
       Guards: 2,
       Soldiers: 2,
@@ -126,6 +127,7 @@ export const START_STATE_PRESETS = {
       Laborers: 72,
       Craftsmen: 40,
       Merchants: 24,
+      Skycrew: 4,
       Scavengers: 16,
       Guards: 18,
       Soldiers: 14,

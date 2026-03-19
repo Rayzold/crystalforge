@@ -173,6 +173,7 @@ function setPopulationByAdjustingClasses(state, targetPopulation) {
     "Miners",
     "Craftsmen",
     "Merchants",
+    "Skycrew",
     "Guards",
     "Soldiers",
     "Administrators",
@@ -1252,6 +1253,18 @@ root.addEventListener("click", async (event) => {
     case "set-city-view":
       void audioEngine.playUiAccent("soft");
       renderer.setTransientUi({ cityView: target.dataset.view }, getCurrentState());
+      break;
+    case "set-city-mode":
+      void audioEngine.playUiAccent("soft");
+      renderer.setTransientUi({ cityMode: target.dataset.view }, getCurrentState());
+      break;
+    case "set-city-building-view":
+      void audioEngine.playUiAccent("soft");
+      renderer.setTransientUi({ cityBuildingView: target.dataset.view }, getCurrentState());
+      break;
+    case "set-city-admin-view":
+      void audioEngine.playUiAccent("soft");
+      renderer.setTransientUi({ cityAdminView: target.dataset.view }, getCurrentState());
       break;
     case "set-city-aside-view":
       void audioEngine.playUiAccent("soft");

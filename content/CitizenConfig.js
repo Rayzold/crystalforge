@@ -7,6 +7,7 @@ export const CITIZEN_CLASSES = [
   "Laborers",
   "Craftsmen",
   "Merchants",
+  "Skycrew",
   "Scavengers",
   "Guards",
   "Soldiers",
@@ -68,6 +69,12 @@ export const CITIZEN_DEFINITIONS = {
     consumption: { food: 0.18, gold: 0.04 },
     stats: { prosperity: 0.12, prestige: 0.03 },
     flavor: "Market brokers and caravan dealers who turn movement into wealth and prosperity."
+  },
+  Skycrew: {
+    production: { gold: 0.18, materials: 0.08 },
+    consumption: { food: 0.22, gold: 0.08, mana: 0.02 },
+    stats: { prestige: 0.05, security: 0.04, prosperity: 0.03 },
+    flavor: "Airship sailors, riggers, and navigators who keep the Drift's sky routes open."
   },
   Scavengers: {
     production: { materials: 0.18, gold: 0.06 },
@@ -169,6 +176,14 @@ export const CITIZEN_PROMOTION_PATHS = [
       buildingsAny: ["Market Square", "Trade Post", "Bank", "Guildhall"],
       districtLevel: { district: "Trade District", level: 1 },
       prosperityAtLeast: 30
+    }
+  },
+  {
+    from: "Merchants",
+    to: "Skycrew",
+    requirements: {
+      buildingsAny: ["Dock", "Airship Dockyard", "Skyharbor", "Elemental Shipmaker"],
+      prosperityAtLeast: 42
     }
   },
   {

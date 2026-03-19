@@ -330,14 +330,6 @@ textarea {
   margin-left: auto;
 }
 
-.help-bubble-wrap summary {
-  list-style: none;
-}
-
-.help-bubble-wrap summary::-webkit-details-marker {
-  display: none;
-}
-
 .help-bubble {
   display: inline-grid;
   place-items: center;
@@ -355,7 +347,7 @@ textarea {
 }
 
 .help-bubble:hover,
-.help-bubble-wrap[open] .help-bubble {
+.help-bubble-wrap.is-open .help-bubble {
   transform: translateY(-1px);
   border-color: rgba(217, 99, 255, 0.42);
   box-shadow: 0 10px 24px rgba(11, 16, 31, 0.22);
@@ -378,7 +370,7 @@ textarea {
   z-index: 12;
 }
 
-.help-bubble-wrap:not([open]) .help-bubble__tooltip {
+.help-bubble-wrap:not(.is-open) .help-bubble__tooltip {
   display: none;
 }
 
@@ -450,6 +442,7 @@ textarea {
 .resource-chip__head,
 .stat-tile__head,
 .citizen-tile__head,
+.citizen-tile__title,
 .town-statistics__card-head,
 .history-entry__title-wrap,
 .lore-card__head,
@@ -525,6 +518,12 @@ textarea {
   margin-top: 8px;
   color: var(--muted);
   line-height: 1.35;
+}
+
+.citizen-tile .help-bubble {
+  width: 24px;
+  height: 24px;
+  font-size: 0.74rem;
 }
 
 .app-grid {
@@ -1067,17 +1066,6 @@ textarea {
   gap: 16px;
 }
 
-.city-command-screen__body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 392px);
-  gap: 16px;
-  align-items: start;
-}
-
-.city-command-screen__main {
-  min-width: 0;
-}
-
 .town-statistics--command-strip .panel__header {
   margin-bottom: 8px;
 }
@@ -1138,6 +1126,29 @@ textarea {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+}
+
+.city-modes {
+  display: grid;
+  gap: 14px;
+}
+
+.city-modes__tabs,
+.city-admin-view__tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.city-modes__tabs .button,
+.city-admin-view__tabs .button {
+  min-height: 40px;
+}
+
+.city-modes__tabs .button.is-active,
+.city-admin-view__tabs .button.is-active {
+  border-color: rgba(150, 111, 255, 0.34);
+  background: linear-gradient(180deg, rgba(150, 111, 255, 0.2), rgba(255, 255, 255, 0.03));
 }
 
 .city-command-drawer__tabs .button {
@@ -1213,6 +1224,30 @@ textarea {
   background: rgba(18, 17, 28, 0.94);
   border-color: rgba(150, 111, 255, 0.18);
   min-width: 0;
+}
+
+.city-admin-view {
+  background: rgba(18, 17, 28, 0.94);
+  border-color: rgba(150, 111, 255, 0.18);
+}
+
+.city-admin-view__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.city-admin-view__grid {
+  display: grid;
+  gap: 14px;
+}
+
+.city-admin-view__grid--operations,
+.city-admin-view__grid--readouts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .city-workspace__top,
@@ -5578,7 +5613,6 @@ textarea {
   .forge-stage,
   .landing-hero,
   .chronicle-intro,
-  .city-command-screen__body,
   .building-detail__hero {
     grid-template-columns: 1fr;
   }
@@ -5686,7 +5720,8 @@ textarea {
 
   .city-workspace__top,
   .city-workspace__toolbar,
-  .city-workspace__footer {
+  .city-workspace__footer,
+  .city-admin-view__top {
     display: grid;
   }
 
@@ -5699,7 +5734,9 @@ textarea {
   }
 
   .city-workspace__tabs,
-  .city-workspace__filters {
+  .city-workspace__filters,
+  .city-modes__tabs,
+  .city-admin-view__tabs {
     width: 100%;
   }
 
@@ -5709,6 +5746,11 @@ textarea {
   }
 
   .city-workspace__stream .building-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .city-admin-view__grid--operations,
+  .city-admin-view__grid--readouts {
     grid-template-columns: 1fr;
   }
 

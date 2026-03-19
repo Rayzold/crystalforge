@@ -1,6 +1,5 @@
 import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
-import { formatDate } from "../systems/CalendarSystem.js";
 import { getEmergencyStatus } from "../systems/ResourceSystem.js";
 import { getVisibleBuildings, renderBuildingGrid } from "./BuildingGrid.js";
 import { renderCalendarPanel } from "./CalendarPanel.js";
@@ -11,10 +10,7 @@ import { renderResourcePanel } from "./ResourcePanel.js";
 import { renderUiIcon } from "./UiIcons.js";
 
 function renderTownStatistics(state) {
-  const buildings = state.buildings;
-  const dailyNet =
-    (state.cityStats.income ?? 0) -
-    (state.cityStats.upkeep ?? 0);
+  const dailyNet = (state.cityStats.income ?? 0) - (state.cityStats.upkeep ?? 0);
   const emergencyState = getEmergencyStatus(state);
   const foodRunway = emergencyState.runway.foodDays;
 
@@ -40,11 +36,17 @@ function renderTownStatistics(state) {
               <article class="town-statistics__card town-statistics__card--${accent}">
                 <div class="town-statistics__card-head">
                   ${renderUiIcon(
-                    accent === "negative" ? "upkeep" :
-                    accent === "population" ? "population" :
-                    accent === "food" ? "food" :
-                    accent === "defense" ? "defense" :
-                    accent === "morale" ? "morale" : "building",
+                    accent === "negative"
+                      ? "upkeep"
+                      : accent === "population"
+                        ? "population"
+                        : accent === "food"
+                          ? "food"
+                          : accent === "defense"
+                            ? "defense"
+                            : accent === "morale"
+                              ? "morale"
+                              : "building",
                     label
                   )}
                   <span>${escapeHtml(label)}</span>
@@ -59,8 +61,8 @@ function renderTownStatistics(state) {
   `;
 }
 
-function renderCityWorkspace(state) {
-  const currentView = state.transientUi?.cityView ?? "stream";
+function renderBuildingsView(state) {
+  const currentView = state.transientUi?.cityBuildingView ?? "stream";
   const sortKey = state.transientUi?.buildingSort ?? "newest";
   const totalRolls = state.historyLog.filter((entry) => entry.category === "Manifest").length;
   const visibleBuildings = getVisibleBuildings(state);
@@ -69,8 +71,8 @@ function renderCityWorkspace(state) {
     <section class="panel city-workspace">
       <div class="city-workspace__top">
         <div class="city-workspace__tabs">
-          <button class="button button--ghost ${currentView === "stream" ? "is-active" : ""}" data-action="set-city-view" data-view="stream">The Stream</button>
-          <button class="button button--ghost ${currentView === "map" ? "is-active" : ""}" data-action="set-city-view" data-view="map">Town Map</button>
+          <button class="button button--ghost ${currentView === "stream" ? "is-active" : ""}" data-action="set-city-building-view" data-view="stream">The Stream</button>
+          <button class="button button--ghost ${currentView === "map" ? "is-active" : ""}" data-action="set-city-building-view" data-view="map">Town Map</button>
         </div>
         <span class="city-workspace__total">Total Rolls: ${formatNumber(totalRolls, 0)}</span>
       </div>
@@ -105,10 +107,10 @@ function renderCityWorkspace(state) {
         currentView === "map"
           ? `<div class="city-workspace__map">${renderHexMap(state)}</div>`
           : `
-            <div class="city-workspace__stream">
-              ${renderBuildingGrid(state, { limit: null, showHeader: false, className: "building-grid-panel--stream" })}
-            </div>
-          `
+              <div class="city-workspace__stream">
+                ${renderBuildingGrid(state, { limit: null, showHeader: false, className: "building-grid-panel--stream" })}
+              </div>
+            `
       }
 
       <div class="city-workspace__footer">
@@ -120,58 +122,83 @@ function renderCityWorkspace(state) {
   `;
 }
 
-function renderCityDrawer(state) {
-  const asideView = state.transientUi?.cityAsideView ?? "operations";
+function renderAdministrationView(state) {
+  const adminView = state.transientUi?.cityAdminView ?? "operations";
+
   return `
-    <aside class="city-command-drawer">
-      <div class="city-command-drawer__tabs">
-        <button class="button button--ghost ${asideView === "operations" ? "is-active" : ""}" data-action="set-city-aside-view" data-view="operations">Operations</button>
-        <button class="button button--ghost ${asideView === "readouts" ? "is-active" : ""}" data-action="set-city-aside-view" data-view="readouts">Readouts</button>
+    <section class="panel city-admin-view">
+      <div class="city-admin-view__top">
+        <div class="city-admin-view__tabs">
+          <button class="button button--ghost ${adminView === "operations" ? "is-active" : ""}" data-action="set-city-admin-view" data-view="operations">Operations</button>
+          <button class="button button--ghost ${adminView === "readouts" ? "is-active" : ""}" data-action="set-city-admin-view" data-view="readouts">Readouts</button>
+        </div>
+        <span class="city-workspace__total">${adminView === "operations" ? "Time, raising, and emergencies" : "Stores and district posture"}</span>
       </div>
+
       ${
-        asideView === "operations"
+        adminView === "operations"
           ? `
-              <section class="city-command-drawer__section">
-                <div class="city-command-drawer__section-head">
-                  <span>Operations</span>
-                  <small>Time, raising, and emergencies</small>
-                </div>
-                <div class="city-command-drawer__grid city-command-drawer__grid--primary">
+              <div class="city-admin-view__grid city-admin-view__grid--operations">
+                <section class="city-command-drawer__section">
+                  <div class="city-command-drawer__section-head">
+                    <span>Session Clock</span>
+                    <small>Advance time and raising</small>
+                  </div>
                   ${renderCalendarPanel(state, { showQueue: true })}
+                </section>
+                <section class="city-command-drawer__section">
+                  <div class="city-command-drawer__section-head">
+                    <span>Emergency Watch</span>
+                    <small>Pressure and shortfalls</small>
+                  </div>
                   ${renderEmergencyPanel(state)}
-                </div>
-              </section>
+                </section>
+              </div>
             `
           : `
-              <section class="city-command-drawer__section city-command-drawer__section--quiet">
-                <div class="city-command-drawer__section-head">
-                  <span>Readouts</span>
-                  <small>Stores and district posture</small>
-                </div>
-                <div class="city-command-drawer__grid city-command-drawer__grid--primary">
+              <div class="city-admin-view__grid city-admin-view__grid--readouts">
+                <section class="city-command-drawer__section city-command-drawer__section--quiet">
+                  <div class="city-command-drawer__section-head">
+                    <span>City Stores</span>
+                    <small>Resources and runway</small>
+                  </div>
                   ${renderResourcePanel(state)}
+                </section>
+                <section class="city-command-drawer__section city-command-drawer__section--quiet">
+                  <div class="city-command-drawer__section-head">
+                    <span>Districts</span>
+                    <small>Bonuses and levels</small>
+                  </div>
                   ${renderDistrictPanel(state)}
-                </div>
-              </section>
+                </section>
+              </div>
             `
       }
-    </aside>
+    </section>
+  `;
+}
+
+function renderCityModes(state) {
+  const cityMode = state.transientUi?.cityMode ?? "buildings";
+  return `
+    <section class="city-modes">
+      <div class="city-modes__tabs">
+        <button class="button button--ghost ${cityMode === "buildings" ? "is-active" : ""}" data-action="set-city-mode" data-view="buildings">Buildings</button>
+        <button class="button button--ghost ${cityMode === "administration" ? "is-active" : ""}" data-action="set-city-mode" data-view="administration">Administration</button>
+      </div>
+      ${cityMode === "buildings" ? renderBuildingsView(state) : renderAdministrationView(state)}
+    </section>
   `;
 }
 
 export function renderCityPage(state) {
   return {
     title: "The City",
-    subtitle: "Run the session, place structures, and advance the realm.",
+    subtitle: "Switch between structures and administration.",
     content: `
       <section class="city-command-screen">
         ${renderTownStatistics(state)}
-        <div class="city-command-screen__body">
-          <div class="city-command-screen__main">
-            ${renderCityWorkspace(state)}
-          </div>
-          ${renderCityDrawer(state)}
-        </div>
+        ${renderCityModes(state)}
       </section>
     `
   };

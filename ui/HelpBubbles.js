@@ -6,25 +6,25 @@ const HELP_TEXT = {
   "Realm Goals": "Short session goals that help the table understand what the settlement is trying to achieve next.",
   "First Steps Thread": "A compact early-session guide for getting the first manifestations and placements underway.",
   "Featured Structures": "Highlights notable manifested buildings so the table can quickly revisit important pieces of the city.",
-  "Policy Memory": "Shows the recent Town Focus choices so you can remember the city’s latest strategic direction.",
+  "Policy Memory": "Shows the recent Town Focus choices so you can remember the city's latest strategic direction.",
   "Roll Table Review": "Summarizes how many buildings remain unmanifested in each rarity pool.",
   "Command Shelves": "Organizes Home page information into grouped shelves instead of one long dashboard.",
   "Recent Signals": "A short preview of the latest notable events and archive entries before opening Chronicle.",
   "Command Signals": "High-level session status indicators gathered into one lighter overview block.",
   "Select Your Crystal": "Choose which crystal tier to manifest from. The available count shows how many rolls remain in that tier.",
   "Manifest Shrine": "The ritual chamber where crystal manifestations are revealed and recorded.",
-  "Town Statistics": "The fastest summary of the city’s operational state, including population, food runway, and defense.",
+  "Town Statistics": "The fastest summary of the city's operational state, including population, food runway, and defense.",
   "Session Clock": "Advance time, review the current date, and control how quickly the realm progresses.",
   "Drift Raising Queue": "Shows which incomplete buildings are actively being raised and lets you reorder construction priority.",
   "Emergency Watch": "Warns about food, morale, mana, gold, or support problems before they become citywide crises.",
-  "City Stores": "Tracks the city’s current stockpiles and daily economic flow.",
+  "City Stores": "Tracks the city's current stockpiles and daily economic flow.",
   "Districts": "Summarizes district levels and their current synergy effects on the settlement.",
   "Hex District Map": "Place buildings onto the outer hexes and inspect terrain, district influence, and adjacency opportunities.",
   "Forge Ledger": "The current building stream, filtered and sorted for quick review outside the map view.",
   "Citizens": "Breaks down the current population classes and the benefits or strain they bring to the city.",
   "Social Fabric": "Frames the Citizens page as a population view instead of a general operations screen.",
-  "Population Command": "Shows support usage and where the city’s demographic weight is concentrated right now.",
-  "Drift Evolution": "Tracks the Drift’s current stage, unlocked abilities, and the next evolution threshold.",
+  "Population Command": "Shows support usage and where the city's demographic weight is concentrated right now.",
+  "Drift Evolution": "Tracks the Drift's current stage, unlocked abilities, and the next evolution threshold.",
   "Calendar Ledger": "A month view for session dates, event timing, and player or GM notes on specific days.",
   "Chain Threads": "Shows event chains that are still unfolding and the echoes they leave in later entries.",
   "Archive Ledger": "The persistent history of manifestations, milestones, monthly chronicles, and notable admin actions.",
@@ -38,24 +38,28 @@ const HELP_TEXT = {
   "Session Mode": "Switch between a lighter live-session view and a deeper review-oriented layout.",
   "Save Tools": "Export, import, snapshot, reset, and restore the campaign state.",
   "Crystals": "Grant, remove, or set crystals and shards by rarity.",
-  "Resources": "Directly edit the city’s main stockpiles and population totals.",
+  "Resources": "Directly edit the city's main stockpiles and population totals.",
   "Citizen Management": "Directly control citizen counts, promotions, demotions, and bulk class changes.",
-  "Town Focus Council": "Pick the settlement’s current focus when the council window opens, or review the active policy."
+  "Town Focus Council": "Pick the settlement's current focus when the council window opens, or review the active policy."
 };
 
 function createHelpBubble(text) {
   return `
-    <button
-      class="help-bubble"
-      type="button"
-      aria-label="${escapeHtml(text)}"
-      title="${escapeHtml(text)}"
-      data-help-text="${escapeHtml(text)}"
-    >
-      ?
-    </button>
+    <div class="help-bubble-wrap">
+      <button
+        class="help-bubble"
+        type="button"
+        aria-label="${escapeHtml(text)}"
+        title="${escapeHtml(text)}"
+      >
+        ?
+      </button>
+      <div class="help-bubble__tooltip">${escapeHtml(text)}</div>
+    </div>
   `;
 }
+
+let globalHelpListenerBound = false;
 
 export function attachHelpBubbles(root) {
   const headings = root.querySelectorAll(".panel__header h3, .modal__header h2");
@@ -67,10 +71,41 @@ export function attachHelpBubbles(root) {
     }
 
     const header = heading.closest(".panel__header, .modal__header");
-    if (!header || header.querySelector(".help-bubble")) {
+    if (!header || header.querySelector(".help-bubble-wrap")) {
       continue;
     }
 
     header.insertAdjacentHTML("beforeend", createHelpBubble(HELP_TEXT[title]));
+  }
+
+  root.querySelectorAll(".help-bubble-wrap").forEach((wrap) => {
+    const button = wrap.querySelector(".help-bubble");
+    if (!button || button.dataset.bound === "1") {
+      return;
+    }
+
+    button.dataset.bound = "1";
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      root.querySelectorAll(".help-bubble-wrap.is-open").forEach((entry) => {
+        if (entry !== wrap) {
+          entry.classList.remove("is-open");
+        }
+      });
+
+      wrap.classList.toggle("is-open");
+    });
+  });
+
+  if (!globalHelpListenerBound) {
+    document.addEventListener("click", (event) => {
+      if (event.target.closest(".help-bubble-wrap")) {
+        return;
+      }
+      document.querySelectorAll(".help-bubble-wrap.is-open").forEach((entry) => entry.classList.remove("is-open"));
+    });
+    globalHelpListenerBound = true;
   }
 }
