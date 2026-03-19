@@ -1,7 +1,7 @@
 import { APP_VERSION, MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
-import { getActiveConstructionQueue, getConstructionQueue } from "../systems/ConstructionSystem.js";
+import { getActiveConstructionQueue, getAvailableConstructionQueue } from "../systems/ConstructionSystem.js";
 import { getManualSaveMeta } from "../systems/StorageSystem.js";
 import { getCurrentTownFocus, getTownFocusAvailability } from "../systems/TownFocusSystem.js";
 import { getCriticalAlerts, renderCrisisBanner } from "./CrisisBanner.js";
@@ -87,11 +87,8 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
   const cityAlertCount = getCriticalAlerts(state).length;
   const availableCrystalCount = Object.values(state.crystals ?? {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
   const manifestedBuildings = state.buildings.filter((building) => building.isComplete);
-  const constructionQueue = getConstructionQueue(state);
   const incubatingBuildings = getActiveConstructionQueue(state);
-  const availableBuildings = constructionQueue.filter(
-    (building) => !incubatingBuildings.some((activeBuilding) => activeBuilding.id === building.id)
-  );
+  const availableBuildings = getAvailableConstructionQueue(state);
   const summary = [
     ["Gold", state.resources.gold],
     ["Food", state.resources.food],

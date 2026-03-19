@@ -18,7 +18,7 @@ import {
 } from "./systems/CitizenSystem.js";
 import { recalculateCityStats } from "./systems/CityStatsSystem.js";
 import { addCrystals, setCrystals, spendCrystal } from "./systems/CrystalSystem.js";
-import { moveConstructionPriority, normalizeConstructionPriority } from "./systems/ConstructionSystem.js";
+import { activateConstruction, moveConstructionPriority, normalizeConstructionPriority, pauseConstruction } from "./systems/ConstructionSystem.js";
 import { resetDistrictLevels, setDistrictDefinition, setDistrictLevelOverride, getDistrictSummary } from "./systems/DistrictSystem.js";
 import { setDriftEvolutionStageOverride, syncDriftEvolutionState } from "./systems/DriftEvolutionSystem.js";
 import { clearActiveEvents, triggerEvent } from "./systems/EventSystem.js";
@@ -797,6 +797,21 @@ function reprioritizeConstruction(buildingId, direction) {
   reportSuccess(`${building?.displayName ?? "Building"} priority updated.`);
 }
 
+function setConstructionActiveState(buildingId, shouldActivate) {
+  const result = commit((draft) => (shouldActivate ? activateConstruction(draft, buildingId) : pauseConstruction(draft, buildingId)));
+  if (!result.ok) {
+    reportError(result.reason);
+    return;
+  }
+  if (result.changed === false) {
+    reportSuccess("Incubation state unchanged.");
+    return;
+  }
+
+  const building = getCurrentState().buildings.find((entry) => entry.id === buildingId);
+  reportSuccess(`${building?.displayName ?? "Building"} ${shouldActivate ? "assigned to an incubator" : "removed from active incubation"}.`);
+}
+
 function manageRollTable({ mode, name, rarity, targetRarity, nextName, catalogEntry }) {
   commit((draft) => {
     const sourceKey = getCatalogKey(name, rarity);
@@ -1443,6 +1458,12 @@ root.addEventListener("click", async (event) => {
     }
     case "prioritize-construction":
       reprioritizeConstruction(target.dataset.buildingId, target.dataset.direction);
+      break;
+    case "activate-construction":
+      setConstructionActiveState(target.dataset.buildingId, true);
+      break;
+    case "pause-construction":
+      setConstructionActiveState(target.dataset.buildingId, false);
       break;
     case "upgrade-crystal": {
       const sourceRarity = target.dataset.rarity;

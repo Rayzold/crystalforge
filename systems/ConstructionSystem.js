@@ -48,6 +48,8 @@ export function normalizeConstructionPriority(state) {
   }
 
   state.constructionPriority = deduped;
+  const paused = Array.isArray(state.pausedConstructionIds) ? state.pausedConstructionIds : [];
+  state.pausedConstructionIds = paused.filter((id, index) => validIds.has(id) && paused.indexOf(id) === index);
   return deduped;
 }
 
@@ -59,7 +61,15 @@ export function getConstructionQueue(state) {
 }
 
 export function getActiveConstructionQueue(state) {
-  return getConstructionQueue(state).slice(0, getDriftConstructionSlots(state));
+  const pausedIds = new Set(state.pausedConstructionIds ?? []);
+  return getConstructionQueue(state)
+    .filter((building) => !pausedIds.has(building.id))
+    .slice(0, getDriftConstructionSlots(state));
+}
+
+export function getAvailableConstructionQueue(state) {
+  const activeIds = new Set(getActiveConstructionQueue(state).map((building) => building.id));
+  return getConstructionQueue(state).filter((building) => !activeIds.has(building.id));
 }
 
 export function getConstructionQueuePosition(state, buildingId) {
@@ -94,6 +104,37 @@ export function moveConstructionPriority(state, buildingId, direction) {
 
   [queue[index], queue[targetIndex]] = [queue[targetIndex], queue[index]];
   return { ok: true, moved: true };
+}
+
+export function pauseConstruction(state, buildingId) {
+  const queue = normalizeConstructionPriority(state);
+  const activeIds = new Set(getActiveConstructionQueue(state).map((building) => building.id));
+  if (!queue.includes(buildingId)) {
+    return { ok: false, reason: "Building is not in the construction queue." };
+  }
+  if (!activeIds.has(buildingId)) {
+    return { ok: true, changed: false };
+  }
+
+  const paused = new Set(state.pausedConstructionIds ?? []);
+  paused.add(buildingId);
+  state.pausedConstructionIds = Array.from(paused);
+  return { ok: true, changed: true };
+}
+
+export function activateConstruction(state, buildingId) {
+  const queue = normalizeConstructionPriority(state);
+  const index = queue.indexOf(buildingId);
+  if (index === -1) {
+    return { ok: false, reason: "Building is not in the construction queue." };
+  }
+
+  state.pausedConstructionIds = (state.pausedConstructionIds ?? []).filter((id) => id !== buildingId);
+  if (index > 0) {
+    queue.splice(index, 1);
+    queue.unshift(buildingId);
+  }
+  return { ok: true, changed: true };
 }
 
 export function getBuildingDailyRate(building, state) {

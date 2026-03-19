@@ -49,6 +49,7 @@ export function createInitialState(preset = DEFAULT_START_PRESET) {
     districtSummary: [],
     cityStats: {},
     constructionPriority: [],
+    pausedConstructionIds: [],
     events: { active: [], recent: [], scheduled: [] },
     chronicleNotes: {},
     historyLog: [],
@@ -92,6 +93,7 @@ export function createSingleCommonCrystalResetState() {
   state.citizens = createEmptyCitizenCollection(0);
   state.buildings = [];
   state.constructionPriority = [];
+  state.pausedConstructionIds = [];
   state.events = { active: [], recent: [], scheduled: [] };
   state.chronicleNotes = {};
   state.historyLog = [];
@@ -259,6 +261,7 @@ export function validateAndMigrateSave(rawSave) {
       cells: createMapCells()
     },
     constructionPriority: Array.isArray(rawSave.constructionPriority) ? rawSave.constructionPriority : [],
+    pausedConstructionIds: Array.isArray(rawSave.pausedConstructionIds) ? rawSave.pausedConstructionIds : [],
     events: {
       active: Array.isArray(rawSave.events?.active) ? rawSave.events.active : [],
       recent: Array.isArray(rawSave.events?.recent) ? rawSave.events.recent : [],

@@ -606,6 +606,16 @@ textarea {
   gap: 10px;
 }
 
+.city-incubation-strip__waiting {
+  display: grid;
+  gap: 10px;
+}
+
+.city-incubation-strip__waiting h5 {
+  margin: 2px 0 0;
+  font-family: var(--display-font);
+}
+
 .city-incubation-strip__item {
   display: grid;
   gap: 4px;
@@ -618,6 +628,10 @@ textarea {
 .city-incubation-strip__item.is-active {
   border-color: rgba(141, 214, 255, 0.28);
   box-shadow: 0 0 0 1px rgba(141, 214, 255, 0.12);
+}
+
+.city-incubation-strip__item .button {
+  margin-top: 6px;
 }
 
 .citizen-tile .help-bubble {

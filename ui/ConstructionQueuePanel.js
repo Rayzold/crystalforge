@@ -2,6 +2,7 @@ import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
 import {
   getActiveConstructionQueue,
+  getAvailableConstructionQueue,
   getBuildingDailyRate,
   getConstructionQueue,
   getDriftConstructionSlots
@@ -25,6 +26,7 @@ function renderQueueItem(state, building, index, activeCount) {
         <small>${isActive ? `${formatNumber(rate, 2)}% per day / ETA ${escapeHtml(eta)}` : "Will begin when a Drift slot opens."}</small>
       </div>
       <div class="construction-queue__actions">
+        <button class="button button--ghost" data-action="${isActive ? "pause-construction" : "activate-construction"}" data-building-id="${building.id}">${isActive ? "Cancel" : "Activate"}</button>
         <button class="button button--ghost" data-action="prioritize-construction" data-direction="top" data-building-id="${building.id}">Raise Now</button>
         <button class="button button--ghost" data-action="prioritize-construction" data-direction="up" data-building-id="${building.id}" ${index === 0 ? "disabled" : ""}>Up</button>
         <button class="button button--ghost" data-action="prioritize-construction" data-direction="down" data-building-id="${building.id}" ${index === activeCount - 1 && isActive ? "" : ""} ${index === getConstructionQueue(state).length - 1 ? "disabled" : ""}>Down</button>
@@ -36,13 +38,14 @@ function renderQueueItem(state, building, index, activeCount) {
 export function renderConstructionQueuePanel(state) {
   const queue = getConstructionQueue(state);
   const activeQueue = getActiveConstructionQueue(state);
+  const availableQueue = getAvailableConstructionQueue(state);
   const slots = getDriftConstructionSlots(state);
 
   return `
     <section class="panel construction-queue-panel">
       <div class="panel__header">
         <h3>Drift Raising Queue</h3>
-        <span class="panel__subtle">${activeQueue.length} active / ${slots} slots</span>
+        <span class="panel__subtle">${activeQueue.length} active / ${slots} slots / ${availableQueue.length} waiting</span>
       </div>
       ${
         queue.length

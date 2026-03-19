@@ -1,6 +1,6 @@
 import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
-import { getActiveConstructionQueue, getConstructionQueue, getDriftConstructionSlots, isBuildingActivelyConstructed } from "../systems/ConstructionSystem.js";
+import { getActiveConstructionQueue, getAvailableConstructionQueue, getDriftConstructionSlots, isBuildingActivelyConstructed } from "../systems/ConstructionSystem.js";
 import { getEmergencyStatus } from "../systems/ResourceSystem.js";
 import { getVisibleBuildings, renderBuildingGrid } from "./BuildingGrid.js";
 import { renderCalendarPanel } from "./CalendarPanel.js";
@@ -68,9 +68,7 @@ function renderBuildingsView(state) {
   const totalRolls = state.historyLog.filter((entry) => entry.category === "Manifest").length;
   const visibleBuildings = getVisibleBuildings(state);
   const incubating = getActiveConstructionQueue(state);
-  const waiting = getConstructionQueue(state).filter(
-    (building) => !incubating.some((activeBuilding) => activeBuilding.id === building.id)
-  );
+  const waiting = getAvailableConstructionQueue(state);
   const slots = getDriftConstructionSlots(state);
 
   return `
@@ -128,6 +126,7 @@ function renderBuildingsView(state) {
                           <strong>${escapeHtml(building.displayName)}</strong>
                           <span>${formatNumber(building.quality, 1)}%</span>
                           <em>Slot ${index + 1}</em>
+                          <button class="button button--ghost" data-action="pause-construction" data-building-id="${building.id}">Cancel Incubation</button>
                         </article>
                       `
                     )
@@ -135,6 +134,30 @@ function renderBuildingsView(state) {
                 </div>
               `
             : `<p class="empty-state">Manifest incomplete buildings to let the Drift incubate them over time.</p>`
+        }
+
+        ${
+          waiting.length
+            ? `
+                <div class="city-incubation-strip__waiting">
+                  <h5>Available</h5>
+                  <div class="city-incubation-strip__list">
+                    ${waiting
+                      .map(
+                        (building, index) => `
+                          <article class="city-incubation-strip__item">
+                            <strong>${escapeHtml(building.displayName)}</strong>
+                            <span>${formatNumber(building.quality, 1)}%</span>
+                            <em>Waiting #${index + 1}</em>
+                            <button class="button button--ghost" data-action="activate-construction" data-building-id="${building.id}">Use Incubator</button>
+                          </article>
+                        `
+                      )
+                      .join("")}
+                  </div>
+                </div>
+              `
+            : ""
         }
       </section>
 
