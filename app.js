@@ -1,8 +1,10 @@
 import { AdminConsole } from "./admin/AdminConsole.js";
 import { createCatalogEntryFromInput, getCatalogKey } from "./content/BuildingCatalog.js";
 import {
+  APP_VERSION,
   FIREBASE_DEFAULT_REALM_ID,
   FIREBASE_DEFAULT_WORKING_REALM_ID,
+  STORAGE_KEY,
   SAVE_SLOT_COUNT,
   GM_QUICK_CRYSTAL_PACKS
 } from "./content/Config.js";
@@ -11,6 +13,7 @@ import { getNextRarity, RARITY_ORDER } from "./content/Rarities.js";
 import { GameState } from "./engine/GameState.js";
 import { AnimationEngine } from "./fx/AnimationEngine.js";
 import { AudioEngine } from "./fx/AudioEngine.js";
+import { ensureFirebaseAuth, getFirebaseUserId } from "./firebase/FirebaseConfig.js";
 import {
   isFirebaseConfigured,
   loadFirebaseRealmState,
@@ -96,7 +99,139 @@ let pageEnterTimer = null;
 let firebaseUnsubscribe = null;
 let firebasePublishTimer = null;
 let applyingFirebaseState = false;
+let projectorChromeTimer = null;
+let recentBuildingChangeTimer = null;
 syncDerivedState(gameState.getState());
+
+function updateFirebasePublishedMeta(payload = null, connectionState = "idle") {
+  renderer.transientUi.firebasePublishedMeta = payload
+    ? {
+        updatedAtMs: Number(payload.updatedAtMs ?? 0) || null,
+        updatedBy: payload.updatedBy ?? null
+      }
+    : null;
+  renderer.transientUi.firebaseConnectionState = connectionState;
+}
+
+function clearProjectorChromeTimer() {
+  if (projectorChromeTimer) {
+    clearTimeout(projectorChromeTimer);
+    projectorChromeTimer = null;
+  }
+}
+
+function scheduleProjectorChromeHide() {
+  if (pageKey !== "player") {
+    return;
+  }
+  clearProjectorChromeTimer();
+  if (!renderer.transientUi.projectorMode) {
+    return;
+  }
+  projectorChromeTimer = setTimeout(() => {
+    renderer.setTransientUi({ projectorChromeHidden: true }, getCurrentState());
+  }, 5000);
+}
+
+function revealProjectorChrome() {
+  if (pageKey !== "player" || !renderer.transientUi.projectorMode) {
+    return;
+  }
+  if (renderer.transientUi.projectorChromeHidden) {
+    renderer.setTransientUi({ projectorChromeHidden: false }, getCurrentState());
+  }
+  scheduleProjectorChromeHide();
+}
+
+function getConfiguredFirebasePublisherUid(state = getCurrentState()) {
+  return String(state.settings.firebasePublisherUid ?? "").trim();
+}
+
+function parseAppVersion(version) {
+  const cleaned = String(version ?? "")
+    .trim()
+    .replace(/^v/i, "");
+  const parts = cleaned.split(".").map((part) => Number.parseInt(part, 10));
+  if (!parts.length || parts.some((part) => Number.isNaN(part))) {
+    return null;
+  }
+  return parts;
+}
+
+function compareAppVersions(leftVersion, rightVersion) {
+  const left = parseAppVersion(leftVersion);
+  const right = parseAppVersion(rightVersion);
+  if (!left || !right) {
+    return 0;
+  }
+  const length = Math.max(left.length, right.length);
+  for (let index = 0; index < length; index += 1) {
+    const leftPart = left[index] ?? 0;
+    const rightPart = right[index] ?? 0;
+    if (leftPart > rightPart) {
+      return 1;
+    }
+    if (leftPart < rightPart) {
+      return -1;
+    }
+  }
+  return 0;
+}
+
+function canCurrentSessionPublishToFirebase(state = getCurrentState()) {
+  if (pageKey === "player" || !state.ui.adminUnlocked) {
+    return false;
+  }
+  const configuredUid = getConfiguredFirebasePublisherUid(state);
+  if (!configuredUid) {
+    return false;
+  }
+  const currentUid = getFirebaseUserId();
+  return Boolean(currentUid && currentUid === configuredUid);
+}
+
+async function getCurrentFirebaseUid() {
+  if (!isFirebaseConfigured()) {
+    throw new Error("Firebase is not configured in this build.");
+  }
+  await ensureFirebaseAuth();
+  return getFirebaseUserId();
+}
+
+async function ensureFirebasePublisherAccess(state = getCurrentState()) {
+  const currentUid = await getCurrentFirebaseUid();
+  const configuredUid = getConfiguredFirebasePublisherUid(state);
+  if (!configuredUid) {
+    throw new Error(`No GM publisher UID is set yet. Current browser UID: ${currentUid}`);
+  }
+  if (configuredUid !== currentUid) {
+    throw new Error(`This browser is not the GM publisher. Current UID: ${currentUid}`);
+  }
+  return currentUid;
+}
+
+function markRecentBuildingChanges(buildingIds = []) {
+  const ids = [...new Set(buildingIds.filter(Boolean))];
+  if (!ids.length) {
+    return;
+  }
+  renderer.setTransientUi(
+    {
+      recentBuildingChanges: {
+        ...(renderer.transientUi.recentBuildingChanges ?? {}),
+        ...Object.fromEntries(ids.map((id) => [id, Date.now()]))
+      }
+    },
+    getCurrentState()
+  );
+  if (recentBuildingChangeTimer) {
+    clearTimeout(recentBuildingChangeTimer);
+  }
+  recentBuildingChangeTimer = setTimeout(() => {
+    renderer.setTransientUi({ recentBuildingChanges: {} }, getCurrentState());
+    recentBuildingChangeTimer = null;
+  }, 2600);
+}
 
 function syncDerivedState(state) {
   if ((state.crystals[state.selectedRarity] ?? 0) <= 0) {
@@ -412,6 +547,7 @@ async function handleManifest() {
       getCurrentState()
     );
   }, 900);
+  markRecentBuildingChanges([result.building.id]);
   reportSuccess(`${result.rolledName} manifested.`);
 }
 
@@ -492,18 +628,20 @@ function spawnBuilding({ name, rarity, quality, catalogEntry }) {
     return;
   }
 
-  commit((draft) => {
+  const result = commit((draft) => {
     const nextCatalogEntry = ensureCatalogEntry(
       draft,
       catalogEntry ?? createCatalogEntryFromInput({ name, rarity, district: "", tags: [], iconKey: "", specialEffect: "" })
     );
     if (!draft.rollTables[rarity].includes(name)) {
       draft.rollTables[rarity].push(name);
-    }
-    const timestamps = { date: formatDate(draft.calendar.dayOffset), dayOffset: draft.calendar.dayOffset };
-    const result = manifestIntoBuilding(draft, nextCatalogEntry, Math.max(0, Number(quality)), timestamps);
-    setSelectedBuildingAndCell(draft, result.building.id);
-  });
+      }
+      const timestamps = { date: formatDate(draft.calendar.dayOffset), dayOffset: draft.calendar.dayOffset };
+      const spawnResult = manifestIntoBuilding(draft, nextCatalogEntry, Math.max(0, Number(quality)), timestamps);
+      setSelectedBuildingAndCell(draft, spawnResult.building.id);
+      return spawnResult;
+    });
+  markRecentBuildingChanges([result?.building?.id]);
   reportSuccess(`${name} spawned.`);
 }
 
@@ -516,10 +654,10 @@ function manifestUnmanifestedBuilding({ selection, quality }) {
     return;
   }
 
-  commit((draft) => {
-    const alreadyExists = draft.buildings.some((building) => building.name === name && building.rarity === rarity);
-    if (alreadyExists) {
-      throw new Error("That building is already manifested.");
+  const result = commit((draft) => {
+      const alreadyExists = draft.buildings.some((building) => building.name === name && building.rarity === rarity);
+      if (alreadyExists) {
+        throw new Error("That building is already manifested.");
     }
 
     const catalogEntry = draft.buildingCatalog[getCatalogKey(name, rarity)];
@@ -527,11 +665,12 @@ function manifestUnmanifestedBuilding({ selection, quality }) {
       throw new Error("Building catalog entry not found.");
     }
 
-    const timestamps = { date: formatDate(draft.calendar.dayOffset), dayOffset: draft.calendar.dayOffset };
-    const result = manifestIntoBuilding(draft, catalogEntry, Math.max(1, Math.min(350, Number(quality) || 100)), timestamps);
-    setSelectedBuildingAndCell(draft, result.building.id);
-  });
-
+      const timestamps = { date: formatDate(draft.calendar.dayOffset), dayOffset: draft.calendar.dayOffset };
+      const manifestResult = manifestIntoBuilding(draft, catalogEntry, Math.max(1, Math.min(350, Number(quality) || 100)), timestamps);
+      setSelectedBuildingAndCell(draft, manifestResult.building.id);
+      return manifestResult;
+    });
+  markRecentBuildingChanges([result?.building?.id]);
   reportSuccess(`${name} manifested at ${Math.max(1, Math.min(350, Number(quality) || 100))}% quality.`);
 }
 
@@ -715,12 +854,13 @@ function preserveLocalSettingsOnSharedState(nextState, currentState = getCurrent
     theme: "dark",
     sharedStateUrl: currentState.settings.sharedStateUrl,
     autoLoadSharedState: currentState.settings.autoLoadSharedState,
-    firebaseRealmId: currentState.settings.firebaseRealmId,
-    firebasePublishedRealmId: currentState.settings.firebasePublishedRealmId,
-    firebaseWorkingRealmId: currentState.settings.firebaseWorkingRealmId,
-    firebaseWorkflowVersion: currentState.settings.firebaseWorkflowVersion,
-    firebaseAutoLoad: currentState.settings.firebaseAutoLoad,
-    firebaseLiveSync: currentState.settings.firebaseLiveSync,
+      firebaseRealmId: currentState.settings.firebaseRealmId,
+      firebasePublishedRealmId: currentState.settings.firebasePublishedRealmId,
+      firebaseWorkingRealmId: currentState.settings.firebaseWorkingRealmId,
+      firebasePublisherUid: currentState.settings.firebasePublisherUid,
+      firebaseWorkflowVersion: currentState.settings.firebaseWorkflowVersion,
+      firebaseAutoLoad: currentState.settings.firebaseAutoLoad,
+      firebaseLiveSync: currentState.settings.firebaseLiveSync,
     firebaseAutoPublish: currentState.settings.firebaseAutoPublish,
     diceAmount: currentState.settings.diceAmount,
     diceType: currentState.settings.diceType,
@@ -740,17 +880,40 @@ async function loadSharedStateFromFirebase(realmId) {
   if (!payload?.state) {
     throw new Error("No shared Firebase realm state found yet.");
   }
+  updateFirebasePublishedMeta(payload, "connected");
   return preserveLocalSettingsOnSharedState(payload.state);
 }
 
+async function ensureLatestAppVersionBeforeFirebaseWrite(targetRealmId, state = getCurrentState()) {
+  const normalizedTargetRealmId = normalizeFirebaseRealmId(targetRealmId);
+  const realmIdsToCheck = [...new Set([getPublishedFirebaseRealmId(state), normalizedTargetRealmId])];
+  let newestRemoteVersion = null;
+
+  for (const realmId of realmIdsToCheck) {
+    const payload = await loadFirebaseRealmState(realmId);
+    const remoteVersion = String(payload?.appVersion ?? "").trim();
+    if (!remoteVersion) {
+      continue;
+    }
+    if (!newestRemoteVersion || compareAppVersions(remoteVersion, newestRemoteVersion) > 0) {
+      newestRemoteVersion = remoteVersion;
+    }
+  }
+
+  if (newestRemoteVersion && compareAppVersions(APP_VERSION, newestRemoteVersion) < 0) {
+    throw new Error(`Firebase write blocked. This app build (${APP_VERSION}) is older than the shared Firebase build (${newestRemoteVersion}). Refresh to the latest version before saving or publishing.`);
+  }
+}
+
 async function publishSharedStateToFirebase(realmId, state = getCurrentState()) {
+  await ensureLatestAppVersionBeforeFirebaseWrite(realmId, state);
   const serializable = createSerializableState(state);
   serializable.ui = {
     ...serializable.ui,
     adminUnlocked: false,
     adminOpen: false
   };
-  await saveFirebaseRealmState(realmId, serializable, firebaseClientId);
+  await saveFirebaseRealmState(realmId, serializable, firebaseClientId, APP_VERSION);
 }
 
 async function loadPublishedStateFromFirebase() {
@@ -762,10 +925,12 @@ async function loadWorkingStateFromFirebase() {
 }
 
 async function saveWorkingStateToFirebase(state = getCurrentState()) {
+  await ensureFirebasePublisherAccess(state);
   await publishSharedStateToFirebase(getWorkingFirebaseRealmId(state), state);
 }
 
 async function publishCurrentStateToPublished(state = getCurrentState()) {
+  await ensureFirebasePublisherAccess(state);
   await publishSharedStateToFirebase(getPublishedFirebaseRealmId(state), state);
 }
 
@@ -796,8 +961,10 @@ async function connectFirebaseLiveSync(showSuccess = false) {
     getPublishedFirebaseRealmId(state),
     (payload) => {
       if (!payload?.state) {
+        updateFirebasePublishedMeta(null, "disconnected");
         return;
       }
+      updateFirebasePublishedMeta(payload, "connected");
       if (payload.sourceClientId && payload.sourceClientId === firebaseClientId) {
         return;
       }
@@ -818,10 +985,11 @@ function disconnectFirebaseLiveSync() {
     firebaseUnsubscribe();
     firebaseUnsubscribe = null;
   }
+  updateFirebasePublishedMeta(renderer.transientUi.firebasePublishedMeta, "disconnected");
 }
 
 function scheduleFirebaseAutoPublish(state) {
-  if (applyingFirebaseState || !state.settings.firebaseAutoPublish || !state.ui.adminUnlocked) {
+  if (applyingFirebaseState || !state.settings.firebaseAutoPublish || !canCurrentSessionPublishToFirebase(state)) {
     return;
   }
   if (firebasePublishTimer) {
@@ -835,7 +1003,7 @@ function scheduleFirebaseAutoPublish(state) {
 
 async function publishManifestIfEnabled() {
   const state = getCurrentState();
-  if (!state.settings.firebaseAutoPublish) {
+  if (!state.settings.firebaseAutoPublish || !canCurrentSessionPublishToFirebase(state)) {
     return;
   }
   try {
@@ -969,6 +1137,7 @@ function setConstructionActiveState(buildingId, shouldActivate) {
     return;
   }
 
+  markRecentBuildingChanges([buildingId]);
   const building = getCurrentState().buildings.find((entry) => entry.id === buildingId);
   reportSuccess(`${building?.displayName ?? "Building"} ${shouldActivate ? "assigned to an incubator" : "removed from active incubation"}.`);
 }
@@ -1343,7 +1512,24 @@ const actions = {
       `Firebase realms set. Published: "${normalizedPublishedRealmId}" · Working: "${normalizedWorkingRealmId}".`
     );
   },
-  async saveFirebaseRealm() {
+    async setFirebasePublisherUidToCurrentBrowser() {
+      try {
+        const currentUid = await getCurrentFirebaseUid();
+        commit((draft) => {
+          draft.settings.firebasePublisherUid = currentUid;
+        });
+        reportSuccess(`GM publisher UID set to ${currentUid}.`);
+      } catch (error) {
+        reportError(error.message);
+      }
+    },
+    clearFirebasePublisherUid() {
+      commit((draft) => {
+        draft.settings.firebasePublisherUid = "";
+      });
+      reportSuccess("GM publisher UID cleared.");
+    },
+    async saveFirebaseRealm() {
     try {
       await saveWorkingStateToFirebase();
       reportSuccess("Current state saved to Firebase working.");
@@ -1471,6 +1657,14 @@ document.addEventListener("click", (event) => {
   navigateWithTransition(url.href);
 });
 
+if (pageKey === "player") {
+  ["mousemove", "pointermove", "touchstart", "keydown"].forEach((eventName) => {
+    document.addEventListener(eventName, () => {
+      revealProjectorChrome();
+    });
+  });
+}
+
 root.addEventListener("click", async (event) => {
   const target = event.target.closest("[data-action]");
   if (!target) {
@@ -1549,6 +1743,9 @@ root.addEventListener("click", async (event) => {
       commit((draft) => {
         draft.buildingFilter = target.dataset.filter ?? target.value ?? "All";
       });
+      break;
+    case "set-building-status-filter":
+      renderer.setTransientUi({ buildingStatusFilter: target.dataset.filter ?? target.value ?? "All" }, getCurrentState());
       break;
     case "toggle-forge-nav":
       renderer.setTransientUi({ forgeNavCollapsed: !renderer.transientUi.forgeNavCollapsed }, getCurrentState());
@@ -1761,9 +1958,49 @@ root.addEventListener("click", async (event) => {
         draft.settings.muted = !draft.settings.muted;
       });
       break;
+    case "enter-fullscreen":
+      if (document.fullscreenElement) {
+        await document.exitFullscreen().catch(() => {});
+      } else {
+        await document.documentElement.requestFullscreen?.().catch(() => {});
+      }
+      break;
+    case "toggle-projector-mode": {
+      const nextProjectorMode = !renderer.transientUi.projectorMode;
+      renderer.setTransientUi(
+        {
+          projectorMode: nextProjectorMode,
+          projectorChromeHidden: false
+        },
+        getCurrentState()
+      );
+      if (nextProjectorMode) {
+        scheduleProjectorChromeHide();
+      } else {
+        clearProjectorChromeTimer();
+      }
+      reportSuccess(`Projector mode ${nextProjectorMode ? "enabled" : "disabled"}.`);
+      break;
+    }
     case "open-admin":
+      if (pageKey === "player") {
+        reportError("Admin tools are hidden in Player Mode.");
+        return;
+      }
       void audioEngine.playUiAccent("soft");
       actions.openAdmin();
+      break;
+    case "publish-to-players":
+      if (pageKey === "player") {
+        reportError("Publishing is only available in GM Mode.");
+        return;
+      }
+      if (!getCurrentState().ui.adminUnlocked) {
+        reportError("Unlock GM mode first.");
+        return;
+      }
+      void audioEngine.playUiAccent("confirm");
+      await actions.publishFirebaseRealm();
       break;
     default:
       break;
@@ -1815,6 +2052,10 @@ root.addEventListener("change", (event) => {
     commit((draft) => {
       draft.buildingFilter = target.dataset.filter ?? target.value ?? "All";
     });
+  }
+
+  if (target.dataset.action === "set-building-status-filter") {
+    renderer.setTransientUi({ buildingStatusFilter: target.dataset.filter ?? target.value ?? "All" }, getCurrentState());
   }
 
   if (target.dataset.action === "set-speed-multiplier") {
@@ -1904,6 +2145,7 @@ async function autoLoadSharedStateIfEnabled() {
       resetTransientUi();
       reportSuccess("Published Firebase state auto-loaded.");
     } catch (error) {
+      updateFirebasePublishedMeta(null, "disconnected");
       reportError(error.message);
     }
   } else if (state.settings.autoLoadSharedState && state.settings.sharedStateUrl) {
@@ -1922,11 +2164,12 @@ async function autoLoadSharedStateIfEnabled() {
   try {
     await connectFirebaseLiveSync();
   } catch (error) {
+    updateFirebasePublishedMeta(null, "disconnected");
     reportError(error.message);
   }
 }
 
-if (!localStorage.getItem("crystal-forge-save")) {
+if (!localStorage.getItem(STORAGE_KEY)) {
   gameState.replace(createInitialState());
 } else {
   renderer.render(getCurrentState());

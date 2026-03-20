@@ -4,7 +4,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.0.4";
+export const APP_VERSION = "v1.2.5";
 export const SAVE_VERSION = 9;
 export const STORAGE_KEY = "crystal-forge-save-v2";
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v2";
@@ -27,7 +27,7 @@ export const MASCOT_MEDIA = {
   label: "Drift mascot"
 };
 export const PAGE_ROUTES = [
-  { key: "home", label: "Home", href: "./index.html" },
+  { key: "home", label: "Home", href: "./gm.html" },
   { key: "forge", label: "Forge", href: "./forge.html" },
   { key: "city", label: "City", href: "./city.html" },
   { key: "citizens", label: "Citizens", href: "./citizens.html" },
@@ -115,6 +115,7 @@ export const START_STATE_PRESETS = {
       firebaseRealmId: FIREBASE_DEFAULT_REALM_ID,
       firebasePublishedRealmId: FIREBASE_DEFAULT_REALM_ID,
       firebaseWorkingRealmId: FIREBASE_DEFAULT_WORKING_REALM_ID,
+      firebasePublisherUid: "",
       firebaseWorkflowVersion: 2,
       firebaseAutoLoad: true,
       firebaseLiveSync: false,
@@ -175,6 +176,7 @@ export const START_STATE_PRESETS = {
       firebaseRealmId: FIREBASE_DEFAULT_REALM_ID,
       firebasePublishedRealmId: FIREBASE_DEFAULT_REALM_ID,
       firebaseWorkingRealmId: FIREBASE_DEFAULT_WORKING_REALM_ID,
+      firebasePublisherUid: "",
       firebaseWorkflowVersion: 2,
       firebaseAutoLoad: true,
       firebaseLiveSync: false,

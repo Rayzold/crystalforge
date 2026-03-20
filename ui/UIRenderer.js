@@ -40,10 +40,16 @@ export class UIRenderer {
       homeShelfTab: "overview",
       cityView: "stream",
       buildingSort: "newest",
+      buildingStatusFilter: "All",
       forgeNavCollapsed: true,
       adjacencyPulse: null,
       focusCeremony: null,
-      manifestCompleteModal: null
+      manifestCompleteModal: null,
+      firebasePublishedMeta: null,
+      firebaseConnectionState: "idle",
+      recentBuildingChanges: {},
+      projectorMode: false,
+      projectorChromeHidden: false
     };
   }
 

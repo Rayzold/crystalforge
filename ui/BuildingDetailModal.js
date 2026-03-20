@@ -101,6 +101,11 @@ export function renderBuildingDetailModal(state, pageKey) {
           <div class="building-detail__actions">
             <button class="button" data-action="select-building" data-building-id="${building.id}">Select Building</button>
             <button class="button button--ghost" data-action="close-modal" data-modal="building-detail-modal">Close</button>
+            ${
+              state.ui.adminUnlocked
+                ? `<button class="button button--ghost button--danger" data-action="remove-building" data-building-id="${building.id}">Unmanifest Building</button>`
+                : ""
+            }
             ${pageKey === "city" ? "" : `<a class="button button--ghost" href="./city.html">Open City Map</a>`}
           </div>
         </div>

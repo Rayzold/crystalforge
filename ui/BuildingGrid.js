@@ -1,7 +1,7 @@
 import { BUILDING_GRID_LIMIT } from "../content/Config.js";
 import { RARITY_ORDER } from "../content/Rarities.js";
 import { sortBuildings } from "../engine/Utils.js";
-import { getActiveConstructionQueue, getDriftConstructionSlots } from "../systems/ConstructionSystem.js";
+import { getActiveConstructionQueue, getDriftConstructionSlots, isBuildingActivelyConstructed } from "../systems/ConstructionSystem.js";
 import { renderBuildingCard } from "./BuildingCard.js";
 
 function sortVisibleBuildings(buildings, sortKey) {
@@ -18,10 +18,22 @@ function sortVisibleBuildings(buildings, sortKey) {
 
 export function getVisibleBuildings(state) {
   const sorted = sortVisibleBuildings(state.buildings, state.transientUi?.buildingSort ?? "newest");
-  if (state.buildingFilter === "All") {
-    return sorted;
+  const rarityFiltered =
+    state.buildingFilter === "All"
+      ? sorted
+      : sorted.filter((building) => building.rarity === state.buildingFilter);
+
+  const statusFilter = state.transientUi?.buildingStatusFilter ?? "All";
+  switch (statusFilter) {
+    case "Manifested":
+      return rarityFiltered.filter((building) => building.isComplete);
+    case "Unmanifested":
+      return rarityFiltered.filter((building) => !building.isComplete);
+    case "Available":
+      return rarityFiltered.filter((building) => !building.isComplete && !isBuildingActivelyConstructed(state, building.id));
+    default:
+      return rarityFiltered;
   }
-  return sorted.filter((building) => building.rarity === state.buildingFilter);
 }
 
 export function renderBuildingGrid(state, options = {}) {

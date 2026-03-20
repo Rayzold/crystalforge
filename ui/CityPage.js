@@ -72,6 +72,7 @@ function renderTownStatistics(state) {
 function renderBuildingsView(state) {
   const currentView = state.transientUi?.cityBuildingView ?? "stream";
   const sortKey = state.transientUi?.buildingSort ?? "newest";
+  const statusFilter = state.transientUi?.buildingStatusFilter ?? "All";
   const totalRolls = state.historyLog.filter((entry) => entry.category === "Manifest").length;
   const visibleBuildings = getVisibleBuildings(state);
   const incubating = getActiveConstructionQueue(state);
@@ -103,6 +104,12 @@ function renderBuildingsView(state) {
               </button>
             `
           ).join("")}
+        </div>
+        <div class="city-workspace__filters city-workspace__filters--status">
+          <button class="button button--ghost city-filter ${statusFilter === "All" ? "is-active" : ""}" data-action="set-building-status-filter" data-filter="All">All States</button>
+          <button class="button button--ghost city-filter ${statusFilter === "Manifested" ? "is-active" : ""}" data-action="set-building-status-filter" data-filter="Manifested">Manifested</button>
+          <button class="button button--ghost city-filter ${statusFilter === "Unmanifested" ? "is-active" : ""}" data-action="set-building-status-filter" data-filter="Unmanifested">Unmanifested</button>
+          <button class="button button--ghost city-filter ${statusFilter === "Available" ? "is-active" : ""}" data-action="set-building-status-filter" data-filter="Available">Available</button>
         </div>
         <label class="city-workspace__sort">
           <span>Sort</span>

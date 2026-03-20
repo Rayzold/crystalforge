@@ -1,7 +1,7 @@
 import { APP_VERSION, MASCOT_MEDIA, PAGE_ROUTES, SAVE_SLOT_COUNT } from "../content/Config.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
-import { getActiveConstructionQueue, getAvailableConstructionQueue } from "../systems/ConstructionSystem.js";
+import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js";
 import { getManualSaveMeta } from "../systems/StorageSystem.js";
 import { getCurrentTownFocus, getTownFocusAvailability } from "../systems/TownFocusSystem.js";
 import { getCriticalAlerts, renderCrisisBanner } from "./CrisisBanner.js";
@@ -29,6 +29,14 @@ const ROUTE_GLYPHS = {
 
 const DICE_TYPES = ["d2", "d4", "d6", "d8", "d10", "d12", "d20", "d100"];
 
+function formatSidebarEtaDays(daysRemaining) {
+  if (!Number.isFinite(daysRemaining)) {
+    return "";
+  }
+  const decimals = Math.abs(daysRemaining - Math.round(daysRemaining)) < 0.05 ? 0 : 1;
+  return `${formatNumber(daysRemaining, decimals)}d`;
+}
+
 function renderDiceHistory(history = []) {
   if (!history.length) {
     return `<p class="sidebar-dice__empty">No recent rolls yet.</p>`;
@@ -51,9 +59,9 @@ function renderDiceHistory(history = []) {
   `;
 }
 
-function renderSidebarBuildingList(title, items, emptyLabel) {
+function renderSidebarBuildingList(state, title, items, emptyLabel, variant = "manifested") {
   return `
-    <section class="sidebar-manifest-list">
+    <section class="sidebar-manifest-list sidebar-manifest-list--${variant}">
       <div class="sidebar-manifest-list__head">
         <strong>${escapeHtml(title)}</strong>
         <span>${formatNumber(items.length, 0)}</span>
@@ -64,12 +72,24 @@ function renderSidebarBuildingList(title, items, emptyLabel) {
               <div class="sidebar-manifest-list__items">
                 ${items
                   .map(
-                    (building) => `
-                      <div class="sidebar-manifest-list__item">
+                    (building) => {
+                      const etaDetails = variant === "incubating" ? getConstructionEtaDetails(building, state) : null;
+                      const readyLabel = etaDetails ? `Ready on ${formatDate(etaDetails.readyDayOffset)}` : "";
+                      const isRecentlyChanged = Boolean(state.transientUi?.recentBuildingChanges?.[building.id]);
+                      return `
+                      <div class="sidebar-manifest-list__item ${isRecentlyChanged ? "is-recently-changed" : ""}">
                         <span>${escapeHtml(building.displayName)}</span>
-                        <em>${building.isComplete ? `x${building.multiplier}` : `${formatNumber(building.quality, 0)}%`}</em>
+                        <div class="sidebar-manifest-list__meta">
+                          <em>${building.isComplete ? `x${building.multiplier}` : `${formatNumber(building.quality, 0)}%`}</em>
+                          ${
+                            etaDetails
+                              ? `<small class="sidebar-manifest-list__eta" data-ready-label="${escapeHtml(readyLabel)}" title="${escapeHtml(readyLabel)}" tabindex="0">${formatSidebarEtaDays(etaDetails.daysRemaining)}</small>`
+                              : ""
+                          }
+                        </div>
                       </div>
-                    `
+                    `;
+                    }
                   )
                   .join("")}
               </div>
@@ -83,17 +103,17 @@ function renderSidebarBuildingList(title, items, emptyLabel) {
 export function renderPageShell(state, pageKey, { title, subtitle, content, aside = "" }, overlays = "") {
   if (pageKey === "player") {
     return `
-      <div class="game-shell game-shell--player game-shell--theme-dark">
+      <div class="game-shell game-shell--player game-shell--theme-dark ${state.transientUi?.projectorMode ? "game-shell--projector" : ""} ${state.transientUi?.projectorChromeHidden ? "game-shell--projector-hidden" : ""}">
         <main class="page-stage page-stage--player">
           <header class="player-stage__header">
-            <div>
-              <p class="page-hero__eyebrow">Player View</p>
-              <h1>${title}</h1>
-              <p class="page-hero__subtitle">${subtitle}</p>
-            </div>
             <div class="player-stage__brand">
               <span>Crystal Forge</span>
               <strong>Shared Table Screen</strong>
+            </div>
+            <div class="player-stage__actions">
+              <button class="player-stage__return ${state.transientUi?.projectorMode ? "is-active" : ""}" type="button" data-action="toggle-projector-mode">Projector Mode</button>
+              <button class="player-stage__return" type="button" data-action="enter-fullscreen">Fullscreen</button>
+              <a class="player-stage__return" href="./gm.html">Return to GM Mode</a>
             </div>
           </header>
           ${content}
@@ -181,11 +201,16 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
           ).join("")}
         </nav>
         <div class="sidebar-nav__status">
-          ${renderSidebarBuildingList("Manifested", manifestedBuildings, "No active buildings yet.")}
-          ${renderSidebarBuildingList("Incubating", incubatingBuildings, "No buildings are incubating.")}
-          ${renderSidebarBuildingList("Available", availableBuildings, "No additional buildings are waiting.")}
+          ${renderSidebarBuildingList(state, "Manifested", manifestedBuildings, "No active buildings yet.", "manifested")}
+          ${renderSidebarBuildingList(state, "Incubating", incubatingBuildings, "No buildings are incubating.", "incubating")}
+          ${renderSidebarBuildingList(state, "Available", availableBuildings, "No additional buildings are waiting.", "available")}
         </div>
         <div class="sidebar-nav__footer">
+          <a class="sidebar-mode-link" href="./index.html">
+            <span>Player Mode</span>
+            <strong>Open Shared Player Screen</strong>
+          </a>
+          ${state.ui.adminUnlocked ? `<button class="button sidebar-publish-button" data-action="publish-to-players">Publish To Players</button>` : ""}
           <button class="button button--ghost" data-action="open-catalog">Building Catalog</button>
           <button class="button button--ghost" data-action="open-admin">${state.settings.liveSessionView ? "GM Console" : "Admin Console"}</button>
           <div class="sidebar-nav__save-actions">
@@ -248,7 +273,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
                 : ""
             }
           </div>
-          <p>Type <code>432</code> anywhere to open admin instantly.</p>
+          <p>Type <code>432!</code> anywhere to open admin instantly.</p>
         </div>
       </aside>
 
@@ -283,7 +308,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
                     ([label, value, className = "hud-ribbon__item", sublabel = ""]) =>
                       label === "Council"
                         ? `
-                            <a class="${className} hud-ribbon__item--link" href="./index.html#town-focus-council">
+                            <a class="${className} hud-ribbon__item--link" href="./gm.html#town-focus-council">
                               <div class="hud-ribbon__head">
                                 ${renderUiIcon(HUD_ICON_KEYS[label] ?? "route", label)}
                                 <span>${label}</span>

@@ -101,6 +101,7 @@ function getBuildingSignature(building) {
 
 export function renderBuildingCard(building, state) {
   const selected = state.ui.selectedBuildingId === building.id;
+  const isRecentlyChanged = Boolean(state.transientUi?.recentBuildingChanges?.[building.id]);
   const isIncomplete = !building.isComplete;
   const isRuined = Boolean(building.isRuined);
   const isActiveConstruction = isIncomplete && isBuildingActivelyConstructed(state, building.id);
@@ -120,7 +121,7 @@ export function renderBuildingCard(building, state) {
   const compactStatus = getCompactStatus(building, { isIncomplete, isActiveConstruction, queuePosition, driftSlots, eta });
 
   return `
-    <article class="building-card building-card--stream ${selected ? "is-selected" : ""} ${isIncomplete ? "is-incomplete" : ""} ${isRuined ? "is-ruined" : ""}" style="--rarity-color:${RARITY_COLORS[building.rarity]}">
+    <article class="building-card building-card--stream ${selected ? "is-selected" : ""} ${isIncomplete ? "is-incomplete" : ""} ${isRuined ? "is-ruined" : ""} ${isRecentlyChanged ? "is-recently-changed" : ""}" style="--rarity-color:${RARITY_COLORS[building.rarity]}">
       <button class="building-card__select" data-action="select-building" data-building-id="${building.id}">
         <div class="building-card__visual">
           ${renderMedia(building)}

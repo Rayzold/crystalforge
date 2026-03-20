@@ -27,13 +27,14 @@ export async function loadFirebaseRealmState(realmId) {
   return snapshot.data();
 }
 
-export async function saveFirebaseRealmState(realmId, state, sourceClientId) {
+export async function saveFirebaseRealmState(realmId, state, sourceClientId, appVersion = null) {
   if (!firebaseConfigured) {
     throw new Error("Firebase is not configured.");
   }
   await ensureFirebaseAuth();
   await setDoc(getRealmRef(realmId), {
     state,
+    appVersion,
     sourceClientId: sourceClientId ?? null,
     updatedAtMs: Date.now(),
     updatedBy: getFirebaseUserId()

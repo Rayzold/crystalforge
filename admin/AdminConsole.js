@@ -144,11 +144,11 @@ export class AdminConsole {
     document.body.append(this.root);
 
     document.addEventListener("keydown", (event) => {
-      if (event.key.length !== 1 || !/\d/.test(event.key)) {
+      if (event.key.length !== 1 || !/[0-9!]/.test(event.key)) {
         return;
       }
-      this.keyBuffer = `${this.keyBuffer}${event.key}`.slice(-3);
-      if (this.keyBuffer === "432") {
+      this.keyBuffer = `${this.keyBuffer}${event.key}`.slice(-4);
+      if (this.keyBuffer === "432!") {
         this.actions.openAdmin();
         this.keyBuffer = "";
       }
@@ -448,6 +448,12 @@ export class AdminConsole {
             this.getValue("firebase-published-realm-id"),
             this.getValue("firebase-working-realm-id")
           );
+          break;
+        case "set-firebase-publisher-uid":
+          this.actions.setFirebasePublisherUidToCurrentBrowser();
+          break;
+        case "clear-firebase-publisher-uid":
+          this.actions.clearFirebasePublisherUid();
           break;
         case "save-firebase-realm":
           this.actions.saveFirebaseRealm();
@@ -987,6 +993,10 @@ export class AdminConsole {
             <label>Published Realm ID<input id="firebase-published-realm-id" value="${escapeHtml(state.settings.firebasePublishedRealmId ?? state.settings.firebaseRealmId ?? "main")}" placeholder="main" /></label>
             <label>Working Realm ID<input id="firebase-working-realm-id" value="${escapeHtml(state.settings.firebaseWorkingRealmId ?? "main-working")}" placeholder="main-working" /></label>
             <p>
+              GM publisher UID:
+              <strong>${escapeHtml(state.settings.firebasePublisherUid || "Not set")}</strong>
+            </p>
+            <p>
               Published:
               <strong>${escapeHtml(state.settings.firebasePublishedRealmId ?? state.settings.firebaseRealmId ?? "main")}</strong>
               Â· Working:
@@ -998,8 +1008,10 @@ export class AdminConsole {
               · Auto-publish:
               <strong>${state.settings.firebaseAutoPublish ? "Enabled" : "Disabled"}</strong>
             </p>
-            <div class="admin-actions">
-              <button class="button button--ghost" data-admin-action="load-firebase-realm">Load Published</button>
+              <div class="admin-actions">
+                <button class="button button--ghost" data-admin-action="set-firebase-publisher-uid">Use Current Browser As GM Publisher</button>
+                <button class="button button--ghost" data-admin-action="clear-firebase-publisher-uid">Clear GM Publisher</button>
+                <button class="button button--ghost" data-admin-action="load-firebase-realm">Load Published</button>
               <button class="button button--ghost" data-admin-action="load-firebase-working-realm">Load Working</button>
               <button class="button button--ghost" data-admin-action="remember-firebase-realm">Remember Realm IDs</button>
               <button class="button button--ghost" data-admin-action="save-firebase-realm">Save Current to Working</button>
