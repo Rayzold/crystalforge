@@ -1,257 +1,147 @@
 export const CITIZEN_CLASSES = [
-  "Children",
-  "Elderly",
   "Farmers",
   "Hunters",
-  "Miners",
+  "Fishermen",
+  "Scavengers",
   "Laborers",
-  "Craftsmen",
+  "Crafters",
+  "Techwrights",
   "Merchants",
   "Skycrew",
-  "Scavengers",
-  "Guards",
+  "Scouts",
+  "Defenders",
   "Soldiers",
-  "Administrators",
-  "Scholars",
-  "Clergy",
-  "Healers",
-  "Entertainers",
+  "Arcanists",
+  "Medics",
+  "Scribes",
   "Nobles",
-  "Mages",
-  "Heroes"
+  "Priests",
+  "Entertainers",
+  "Children",
+  "Elderly"
 ];
 
 export const CITIZEN_DEFINITIONS = {
-  Children: {
-    production: {},
-    consumption: { food: 0.14 },
-    stats: { morale: 0.01 },
-    flavor: "Young dependents who shape the future burden and hope of the Drift."
-  },
-  Elderly: {
-    production: {},
-    consumption: { food: 0.16, gold: 0.02 },
-    stats: { morale: 0.02, health: 0.01 },
-    flavor: "Memory-keepers, retirees, and elders whose presence steadies the social fabric."
-  },
   Farmers: {
-    production: { food: 0.72 },
-    consumption: { food: 0.2, gold: 0.02 },
-    stats: { health: 0.02 },
-    flavor: "Field hands, growers, and granary tenders who keep the city fed."
+    production: { food: 0.78 },
+    consumption: { food: 0.18, gold: 0.01 },
+    stats: { health: 0.015 },
+    flavor: "Field workers, growers, and granary keepers who anchor the settlement's daily food supply."
   },
   Hunters: {
-    production: { food: 0.42, materials: 0.06 },
-    consumption: { food: 0.18, gold: 0.03 },
+    production: { food: 0.46, materials: 0.05 },
+    consumption: { food: 0.18, gold: 0.02 },
     stats: { security: 0.02 },
-    flavor: "Trackers and foragers who bring in meat, hides, and frontier awareness."
+    flavor: "Trackers and foragers who turn nearby wilderness into meat, hides, and warning."
   },
-  Miners: {
-    production: { materials: 0.62, gold: 0.08 },
-    consumption: { food: 0.24, gold: 0.04 },
-    stats: { value: 0.04 },
-    flavor: "Extraction crews pulling stone, ore, and crystal-bearing seams from the earth."
-  },
-  Laborers: {
-    production: { materials: 0.34 },
-    consumption: { food: 0.22, gold: 0.03 },
-    stats: { prosperity: 0.01 },
-    flavor: "General workers handling hauling, repairs, and all-purpose civic effort."
-  },
-  Craftsmen: {
-    production: { materials: 0.28, gold: 0.18 },
-    consumption: { food: 0.22, gold: 0.04 },
-    stats: { value: 0.08, prosperity: 0.02 },
-    flavor: "Smiths, masons, tailors, and artisans who turn raw output into useful goods."
-  },
-  Merchants: {
-    production: { gold: 0.44, prosperity: 0.08 },
-    consumption: { food: 0.18, gold: 0.04 },
-    stats: { prosperity: 0.12, prestige: 0.03 },
-    flavor: "Market brokers and caravan dealers who turn movement into wealth and prosperity."
-  },
-  Skycrew: {
-    production: { gold: 0.18, materials: 0.08 },
-    consumption: { food: 0.22, gold: 0.08, mana: 0.02 },
-    stats: { prestige: 0.05, security: 0.04, prosperity: 0.03 },
-    flavor: "Airship sailors, riggers, and navigators who keep the Drift's sky routes open."
+  Fishermen: {
+    production: { food: 0.62 },
+    consumption: { food: 0.16, gold: 0.02 },
+    stats: { health: 0.01 },
+    flavor: "Netcasters and river workers who provide a steady food stream where water routes exist."
   },
   Scavengers: {
-    production: { materials: 0.18, gold: 0.06 },
-    consumption: { food: 0.16, gold: 0.02 },
+    production: { materials: 0.18, salvage: 0.2 },
+    consumption: { food: 0.15, gold: 0.02 },
     stats: { security: 0.01 },
-    flavor: "Salvagers and reclaimers who recover value from ruins, scrap, and battlefield remains."
+    flavor: "Scrap-pullers and ruin walkers recovering usable parts, metal, and forgotten tech."
   },
-  Guards: {
+  Laborers: {
+    production: { materials: 0.28 },
+    consumption: { food: 0.2, gold: 0.02 },
+    stats: { prosperity: 0.01 },
+    flavor: "The general workforce carrying, repairing, hauling, and doing whatever the city needs next."
+  },
+  Crafters: {
+    production: { gold: 0.12, materials: 0.12 },
+    consumption: { food: 0.18, gold: 0.03 },
+    stats: { value: 0.05, prosperity: 0.02 },
+    flavor: "Artisans and makers who turn raw goods into tools, furnishings, and practical wealth."
+  },
+  Techwrights: {
+    production: { salvage: 0.16, mana: 0.03 },
+    consumption: { food: 0.18, gold: 0.05, materials: 0.03 },
+    stats: { value: 0.06, prestige: 0.03 },
+    flavor: "Rare engineers and system-tenders who maintain advanced mechanisms, relics, and salvage systems."
+  },
+  Merchants: {
+    production: { gold: 0.34, prosperity: 0.05 },
+    consumption: { food: 0.16, gold: 0.03 },
+    stats: { prosperity: 0.12 },
+    flavor: "Dealers and brokers whose routes and bargaining turn movement into visible prosperity."
+  },
+  Skycrew: {
+    production: { gold: 0.16, salvage: 0.06 },
+    consumption: { food: 0.18, gold: 0.06, mana: 0.01 },
+    stats: { prestige: 0.05, security: 0.03 },
+    flavor: "Airship hands and riggers who keep future sky routes, cargo lifts, and aerial travel alive."
+  },
+  Scouts: {
     production: {},
-    consumption: { food: 0.24, gold: 0.08 },
-    stats: { security: 0.14, defense: 0.06 },
-    flavor: "Gatekeepers and watch patrols who keep order within the settlement."
+    consumption: { food: 0.16, gold: 0.03 },
+    stats: { security: 0.08, prestige: 0.01 },
+    flavor: "Pathfinders and outriders mapping threats, resources, and safe movement beyond the settlement."
+  },
+  Defenders: {
+    production: {},
+    consumption: { food: 0.2, gold: 0.05 },
+    stats: { security: 0.12, defense: 0.06 },
+    flavor: "Wall crews, watch patrols, and local protectors holding the line against constant pressure."
   },
   Soldiers: {
     production: {},
-    consumption: { food: 0.3, gold: 0.16, materials: 0.03 },
-    stats: { defense: 0.18, security: 0.08, morale: 0.01 },
-    flavor: "Trained military forces who hold lines, walls, and organized defense."
+    consumption: { food: 0.24, gold: 0.12, materials: 0.02 },
+    stats: { defense: 0.18, security: 0.08 },
+    flavor: "Trained fighters who provide disciplined military force when simple defense is not enough."
   },
-  Administrators: {
-    production: { prosperity: 0.05 },
-    consumption: { food: 0.18, gold: 0.08 },
-    stats: { security: 0.04, prosperity: 0.08 },
-    flavor: "Clerks, officials, and planners who convert chaos into civic stability."
+  Arcanists: {
+    production: { mana: 0.46 },
+    consumption: { food: 0.14, gold: 0.09, mana: 0.05 },
+    stats: { prestige: 0.08, defense: 0.03 },
+    flavor: "Arcane specialists who stabilize magical systems and convert knowledge into raw mana output."
   },
-  Scholars: {
-    production: { prosperity: 0.08 },
-    consumption: { food: 0.16, gold: 0.12, mana: 0.03 },
-    stats: { prestige: 0.06, prosperity: 0.08 },
-    flavor: "Researchers and teachers expanding what the city can understand and organize."
-  },
-  Clergy: {
+  Medics: {
     production: {},
-    consumption: { food: 0.16, gold: 0.06 },
-    stats: { morale: 0.14, security: 0.02 },
-    flavor: "Priests and ritual keepers who calm fear and maintain spiritual order."
+    consumption: { food: 0.16, gold: 0.05, materials: 0.01 },
+    stats: { health: 0.18, morale: 0.02 },
+    flavor: "Healers and care workers keeping bodies whole enough for the settlement to function."
   },
-  Healers: {
-    production: {},
-    consumption: { food: 0.18, gold: 0.08, materials: 0.01 },
-    stats: { health: 0.18, morale: 0.03 },
-    flavor: "Physicians, herbalists, and caretakers who keep bodies and minds functioning."
-  },
-  Entertainers: {
-    production: { gold: 0.08 },
-    consumption: { food: 0.16, gold: 0.06 },
-    stats: { morale: 0.16, prestige: 0.04, prosperity: 0.03 },
-    flavor: "Performers and hosts who turn prosperity into joy, ritual, and civic pride."
+  Scribes: {
+    production: { prosperity: 0.03 },
+    consumption: { food: 0.15, gold: 0.04 },
+    stats: { value: 0.03, prestige: 0.04 },
+    flavor: "Record keepers, surveyors, and clerks who turn memory and planning into usable order."
   },
   Nobles: {
-    production: { gold: 0.1, prosperity: 0.06 },
-    consumption: { food: 0.22, gold: 0.24, mana: 0.03 },
-    stats: { prestige: 0.2, prosperity: 0.08 },
-    flavor: "Patrons and high houses whose influence shapes status, favor, and state direction."
+    production: { gold: 0.08, prosperity: 0.04 },
+    consumption: { food: 0.22, gold: 0.16, mana: 0.02 },
+    stats: { prestige: 0.16 },
+    flavor: "Influential patrons whose rank shapes policy, reputation, and access to elite networks."
   },
-  Mages: {
-    production: { mana: 0.58 },
-    consumption: { food: 0.14, gold: 0.14, mana: 0.08 },
-    stats: { prestige: 0.14, defense: 0.04, prosperity: 0.05 },
-    flavor: "Arcane specialists channeling magical output into the Drift's working systems."
-  },
-  Heroes: {
+  Priests: {
     production: {},
-    consumption: { food: 0.28, gold: 0.24, mana: 0.06 },
-    stats: { defense: 0.16, security: 0.08, prestige: 0.2, morale: 0.1 },
-    flavor: "Exceptional figures whose presence inspires the city and hardens it against danger."
+    consumption: { food: 0.14, gold: 0.04 },
+    stats: { morale: 0.12, health: 0.02 },
+    flavor: "Spiritual guides and ritual keepers who steady fear, grief, and public resolve."
+  },
+  Entertainers: {
+    production: { gold: 0.06 },
+    consumption: { food: 0.14, gold: 0.04 },
+    stats: { morale: 0.14, prosperity: 0.03 },
+    flavor: "Performers and hosts transforming stability into joy, ceremony, and shared identity."
+  },
+  Children: {
+    production: {},
+    consumption: { food: 0.12 },
+    stats: { morale: 0.01 },
+    flavor: "Young dependents whose care is a burden today and a promise tomorrow."
+  },
+  Elderly: {
+    production: {},
+    consumption: { food: 0.12, gold: 0.01 },
+    stats: { morale: 0.02, health: 0.01 },
+    flavor: "Older residents who carry memory, caution, and long-view perspective through hard years."
   }
 };
 
-export const CITIZEN_PROMOTION_PATHS = [
-  {
-    from: "Laborers",
-    to: "Farmers",
-    requirements: {
-      buildingsAny: ["Farmlands", "Barn", "Mill", "Grain Silo"],
-      prosperityAtLeast: 12
-    }
-  },
-  {
-    from: "Laborers",
-    to: "Miners",
-    requirements: {
-      buildingsAny: ["Mine", "Quarry"],
-      prosperityAtLeast: 14
-    }
-  },
-  {
-    from: "Laborers",
-    to: "Craftsmen",
-    requirements: {
-      buildingsAny: ["Blacksmith", "Tailor", "Carpenter Shop", "Mason's Workshop"],
-      prosperityAtLeast: 16
-    }
-  },
-  {
-    from: "Craftsmen",
-    to: "Merchants",
-    requirements: {
-      buildingsAny: ["Market Square", "Trade Post", "Bank", "Guildhall"],
-      districtLevel: { district: "Trade District", level: 1 },
-      prosperityAtLeast: 30
-    }
-  },
-  {
-    from: "Merchants",
-    to: "Skycrew",
-    requirements: {
-      buildingsAny: ["Dock", "Airship Dockyard", "Skyharbor", "Elemental Shipmaker"],
-      prosperityAtLeast: 42
-    }
-  },
-  {
-    from: "Laborers",
-    to: "Guards",
-    requirements: {
-      buildingsAny: ["Town Guard Post", "Guard Tower", "Barracks"],
-      districtLevel: { district: "Military District", level: 1 },
-      prosperityAtLeast: 18
-    }
-  },
-  {
-    from: "Guards",
-    to: "Soldiers",
-    requirements: {
-      buildingsAny: ["Barracks", "Training Grounds", "War Academy Supreme"],
-      districtLevel: { district: "Military District", level: 2 },
-      prosperityAtLeast: 32
-    }
-  },
-  {
-    from: "Laborers",
-    to: "Administrators",
-    requirements: {
-      buildingsAny: ["Town Hall", "Post Office", "Courthouse"],
-      prosperityAtLeast: 24
-    }
-  },
-  {
-    from: "Administrators",
-    to: "Scholars",
-    requirements: {
-      buildingsAny: ["Library", "School", "University"],
-      prosperityAtLeast: 34
-    }
-  },
-  {
-    from: "Scholars",
-    to: "Mages",
-    requirements: {
-      buildingsAny: ["Arcana Tower", "Oracle", "Observatory"],
-      districtLevel: { district: "Arcane District", level: 1 },
-      prosperityAtLeast: 60,
-      resourceAtLeast: { mana: 20 }
-    }
-  },
-  {
-    from: "Clergy",
-    to: "Healers",
-    requirements: {
-      buildingsAny: ["Hospital", "Apothecary", "Bathhouse"],
-      prosperityAtLeast: 28
-    }
-  },
-  {
-    from: "Merchants",
-    to: "Nobles",
-    requirements: {
-      buildingsAny: ["Town Hall", "Castle", "Housing: Noble", "Housing: Royal"],
-      prosperityAtLeast: 90
-    }
-  },
-  {
-    from: "Soldiers",
-    to: "Heroes",
-    requirements: {
-      buildingsAny: ["Adventurers' Guildhall", "Castle", "Dragonforge"],
-      prosperityAtLeast: 110
-    }
-  }
-];
+export const CITIZEN_PROMOTION_PATHS = [];

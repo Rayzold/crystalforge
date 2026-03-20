@@ -1,14 +1,14 @@
 import { BUILDING_POOLS } from "./BuildingPools.js";
 import { BASE_DISTRICT_CONFIG } from "./DistrictConfig.js";
-import { DRIFT_POPULATION_GOALS } from "./DriftEvolutionConfig.js";
 import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v0.9.0";
-export const SAVE_VERSION = 7;
+export const APP_VERSION = "v1.0.1";
+export const SAVE_VERSION = 8;
 export const STORAGE_KEY = "crystal-forge-save";
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save";
+export const SAVE_SLOT_COUNT = 3;
 export const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDl51M8_ywD944xPSByUujzMdATeoy503I",
   authDomain: "crystal-forge-web.firebaseapp.com",
@@ -78,30 +78,30 @@ export const START_STATE_PRESETS = {
       materials: 90,
       salvage: 18,
       mana: 25,
-      population: 60,
+      population: 270,
       prosperity: 18
     },
     citizens: {
-      Children: 7,
-      Elderly: 4,
-      Farmers: 12,
-      Hunters: 3,
-      Miners: 4,
-      Laborers: 12,
-      Craftsmen: 5,
-      Merchants: 3,
+      Farmers: 52,
+      Hunters: 18,
+      Fishermen: 26,
+      Scavengers: 8,
+      Laborers: 28,
+      Crafters: 18,
+      Techwrights: 8,
+      Merchants: 10,
       Skycrew: 0,
-      Scavengers: 2,
-      Guards: 2,
-      Soldiers: 2,
-      Administrators: 1,
-      Scholars: 1,
-      Clergy: 1,
-      Healers: 0,
-      Entertainers: 0,
-      Nobles: 1,
-      Mages: 0,
-      Heroes: 0
+      Scouts: 6,
+      Defenders: 18,
+      Soldiers: 12,
+      Arcanists: 4,
+      Medics: 6,
+      Scribes: 8,
+      Nobles: 10,
+      Priests: 12,
+      Entertainers: 8,
+      Children: 28,
+      Elderly: 18
     },
     settings: {
       muted: false,
@@ -122,7 +122,8 @@ export const START_STATE_PRESETS = {
       diceAmount: 1,
       diceType: "d20",
       diceHistory: [],
-      lastDiceRoll: null
+      lastDiceRoll: null,
+      activeSaveSlot: 1
     }
   },
   testing: {
@@ -137,30 +138,30 @@ export const START_STATE_PRESETS = {
       materials: 750,
       salvage: 180,
       mana: 350,
-      population: DRIFT_POPULATION_GOALS.startingPopulation,
+      population: 270,
       prosperity: 280
     },
     citizens: {
-      Children: 48,
-      Elderly: 34,
-      Farmers: 82,
+      Farmers: 52,
       Hunters: 18,
-      Miners: 34,
-      Laborers: 72,
-      Craftsmen: 40,
-      Merchants: 24,
-      Skycrew: 4,
-      Scavengers: 16,
-      Guards: 18,
-      Soldiers: 14,
-      Administrators: 10,
-      Scholars: 9,
-      Clergy: 9,
-      Healers: 6,
-      Entertainers: 5,
-      Nobles: 4,
-      Mages: 3,
-      Heroes: 1
+      Fishermen: 26,
+      Scavengers: 8,
+      Laborers: 28,
+      Crafters: 18,
+      Techwrights: 8,
+      Merchants: 10,
+      Skycrew: 0,
+      Scouts: 6,
+      Defenders: 18,
+      Soldiers: 12,
+      Arcanists: 4,
+      Medics: 6,
+      Scribes: 8,
+      Nobles: 10,
+      Priests: 12,
+      Entertainers: 8,
+      Children: 28,
+      Elderly: 18
     },
     settings: {
       muted: false,
@@ -181,7 +182,8 @@ export const START_STATE_PRESETS = {
       diceAmount: 1,
       diceType: "d20",
       diceHistory: [],
-      lastDiceRoll: null
+      lastDiceRoll: null,
+      activeSaveSlot: 1
     }
   }
 };

@@ -3,6 +3,7 @@ import { createCatalogEntryFromInput, getCatalogKey } from "./content/BuildingCa
 import {
   FIREBASE_DEFAULT_REALM_ID,
   FIREBASE_DEFAULT_WORKING_REALM_ID,
+  SAVE_SLOT_COUNT,
   GM_QUICK_CRYSTAL_PACKS
 } from "./content/Config.js";
 import { EVENT_POOLS } from "./content/EventPools.js";
@@ -50,7 +51,6 @@ import {
   createTestingBalanceResetState,
   createSingleCommonCrystalResetState,
   exportSave,
-  getManualSaveMeta,
   importSave,
   loadManualState,
   loadGameState,
@@ -1258,19 +1258,26 @@ const actions = {
   saveManualState() {
     try {
       saveManualState(getCurrentState());
-      reportSuccess("State saved locally.");
+      reportSuccess(`State saved to slot ${getCurrentState().settings.activeSaveSlot}.`);
     } catch (error) {
       reportError(error.message);
     }
   },
   loadManualState() {
     try {
-      gameState.replace(loadManualState());
+      gameState.replace(loadManualState(getCurrentState().settings.activeSaveSlot));
       resetTransientUi();
-      reportSuccess("Saved state loaded.");
+      reportSuccess(`Save slot ${getCurrentState().settings.activeSaveSlot} loaded.`);
     } catch (error) {
       reportError(error.message);
     }
+  },
+  setActiveSaveSlot(slot) {
+    const normalizedSlot = Math.max(1, Math.min(SAVE_SLOT_COUNT, Number(slot) || 1));
+    commit((draft) => {
+      draft.settings.activeSaveSlot = normalizedSlot;
+    });
+    reportSuccess(`Active save slot set to ${normalizedSlot}.`);
   },
   importSave(text) {
     gameState.replace(importSave(text));
@@ -1836,6 +1843,10 @@ root.addEventListener("change", (event) => {
     commit((draft) => {
       draft.settings.diceType = target.value ?? "d20";
     });
+  }
+
+  if (target.dataset.action === "set-save-slot") {
+    actions.setActiveSaveSlot(target.value);
   }
 });
 

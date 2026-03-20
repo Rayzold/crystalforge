@@ -2,48 +2,58 @@ import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { renderUiIcon } from "./UiIcons.js";
 
 const CITIZEN_ICONS = {
-  Children: "citizens",
-  Elderly: "history",
   Farmers: "food",
   Hunters: "defense",
-  Miners: "materials",
+  Fishermen: "food",
+  Scavengers: "salvage",
   Laborers: "building",
-  Craftsmen: "materials",
+  Crafters: "materials",
+  Techwrights: "salvage",
   Merchants: "gold",
   Skycrew: "route",
-  Scavengers: "materials",
-  Guards: "security",
+  Scouts: "security",
+  Defenders: "security",
   Soldiers: "defense",
-  Administrators: "prosperity",
-  Scholars: "history",
-  Clergy: "health",
-  Healers: "health",
-  Entertainers: "morale",
+  Arcanists: "mana",
+  Medics: "health",
+  Scribes: "history",
   Nobles: "prestige",
-  Mages: "mana",
-  Heroes: "prestige"
+  Priests: "health",
+  Entertainers: "morale",
+  Children: "citizens",
+  Elderly: "history"
 };
 
 const CITIZEN_GROUPS = [
   {
-    title: "Demographic",
-    note: "Dependents and age groups that shape long-term support pressure, continuity, and resilience.",
-    classes: ["Children", "Elderly"]
+    title: "Provision",
+    note: "The food and scrap backbone of the Drift, responsible for keeping the settlement supplied from field, water, hunt, and ruin.",
+    classes: ["Farmers", "Hunters", "Fishermen", "Scavengers"]
   },
   {
-    title: "Labor",
-    note: "Hands-on workers who feed the Drift, extract resources, build goods, and recover value from the frontier.",
-    classes: ["Farmers", "Hunters", "Miners", "Laborers", "Craftsmen", "Scavengers"]
+    title: "Labor & Industry",
+    note: "Core workers and specialist makers who build, repair, craft, and maintain the settlement's material base.",
+    classes: ["Laborers", "Crafters", "Techwrights"]
   },
   {
-    title: "Civic",
-    note: "Operational specialists who move trade, guard routes, run institutions, heal the people, and maintain culture.",
-    classes: ["Merchants", "Skycrew", "Guards", "Soldiers", "Administrators", "Scholars", "Clergy", "Healers", "Entertainers"]
+    title: "Trade & Movement",
+    note: "Route, exchange, and travel specialists connecting the Drift to local trade and its future sky lanes.",
+    classes: ["Merchants", "Skycrew", "Scouts"]
   },
   {
-    title: "Elite",
-    note: "High-impact figures whose influence shapes prestige, magical capability, and exceptional leadership.",
-    classes: ["Nobles", "Mages", "Heroes"]
+    title: "Security",
+    note: "The people who watch, defend, and fight when the settlement is threatened.",
+    classes: ["Defenders", "Soldiers"]
+  },
+  {
+    title: "Knowledge & Specialists",
+    note: "Rare expertise that keeps medicine, records, and arcane systems functioning.",
+    classes: ["Arcanists", "Medics", "Scribes"]
+  },
+  {
+    title: "Civic Life",
+    note: "Social, spiritual, and generational classes shaping morale, continuity, and influence.",
+    classes: ["Nobles", "Priests", "Entertainers", "Children", "Elderly"]
   }
 ];
 
@@ -83,7 +93,7 @@ export function renderCitizenPanel(state) {
     <section class="panel citizen-panel">
       <div class="panel__header">
         <h3>Citizens</h3>
-        <span class="panel__subtle">Population ${formatNumber(state.resources.population)} / Support ${formatNumber(support)} (${formatNumber(supportUsage, 1)}% used)</span>
+        <span class="panel__subtle">Population ${formatNumber(state.resources.population)} · settlement support ${formatNumber(support)} · ${formatNumber(supportUsage, 1)}% used</span>
       </div>
       <div class="citizen-panel__groups">
         ${CITIZEN_GROUPS.map((group) => {

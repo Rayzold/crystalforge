@@ -1,4 +1,4 @@
-import { APP_VERSION, MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js";
+import { APP_VERSION, MASCOT_MEDIA, PAGE_ROUTES, SAVE_SLOT_COUNT } from "../content/Config.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
 import { getActiveConstructionQueue, getAvailableConstructionQueue } from "../systems/ConstructionSystem.js";
@@ -81,7 +81,8 @@ function renderSidebarBuildingList(title, items, emptyLabel) {
 }
 
 export function renderPageShell(state, pageKey, { title, subtitle, content, aside = "" }, overlays = "") {
-  const manualSaveMeta = getManualSaveMeta();
+  const activeSaveSlot = Math.max(1, Math.min(SAVE_SLOT_COUNT, Number(state.settings.activeSaveSlot ?? 1) || 1));
+  const manualSaveMeta = getManualSaveMeta(activeSaveSlot);
   const townFocusAvailability = getTownFocusAvailability(state);
   const currentFocus = getCurrentTownFocus(state);
   const cityAlertCount = getCriticalAlerts(state).length;
@@ -166,6 +167,15 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
           <button class="button button--ghost" data-action="open-catalog">Building Catalog</button>
           <button class="button button--ghost" data-action="open-admin">${state.settings.liveSessionView ? "GM Console" : "Admin Console"}</button>
           <div class="sidebar-nav__save-actions">
+            <label class="sidebar-nav__save-slot">
+              <span>Save Slot</span>
+              <select data-action="set-save-slot">
+                ${Array.from({ length: SAVE_SLOT_COUNT }, (_, index) => {
+                  const slot = index + 1;
+                  return `<option value="${slot}" ${slot === activeSaveSlot ? "selected" : ""}>Slot ${slot}</option>`;
+                }).join("")}
+              </select>
+            </label>
             <button class="button button--ghost" data-action="save-manual-state">Save State</button>
             <button class="button button--ghost" data-action="load-manual-state">Load State</button>
           </div>
@@ -173,7 +183,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
             manualSaveMeta?.manualSavedAt
               ? `
                 <div class="sidebar-nav__build">
-                  <span>Manual Save</span>
+                  <span>Slot ${activeSaveSlot} Save</span>
                   <strong>${new Date(manualSaveMeta.manualSavedAt).toLocaleString()}</strong>
                 </div>
               `

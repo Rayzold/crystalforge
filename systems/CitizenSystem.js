@@ -7,14 +7,20 @@ import { sumObjectValues } from "../engine/Utils.js";
 import { addHistoryEntry } from "./HistoryLogSystem.js";
 
 const LEGACY_CITIZEN_MIGRATION = {
-  Peasants: { Farmers: 0.55, Laborers: 0.25, Children: 0.1, Elderly: 0.1 },
-  Workers: { Laborers: 0.4, Craftsmen: 0.25, Miners: 0.2, Scavengers: 0.15 },
-  Merchants: { Merchants: 0.7, Administrators: 0.15, Entertainers: 0.15 },
-  Scholars: { Scholars: 0.7, Administrators: 0.15, Healers: 0.15 },
-  Clergy: { Clergy: 0.75, Healers: 0.25 },
-  Soldiers: { Guards: 0.45, Soldiers: 0.45, Heroes: 0.1 },
-  Nobles: { Nobles: 0.85, Administrators: 0.15 },
-  Mages: { Mages: 0.85, Scholars: 0.15 }
+  Peasants: { Farmers: 0.5, Laborers: 0.2, Children: 0.15, Elderly: 0.15 },
+  Workers: { Laborers: 0.4, Crafters: 0.25, Fishermen: 0.1, Techwrights: 0.1, Scavengers: 0.15 },
+  Merchants: { Merchants: 0.65, Scribes: 0.15, Entertainers: 0.2 },
+  Scholars: { Scribes: 0.5, Arcanists: 0.2, Techwrights: 0.15, Medics: 0.15 },
+  Clergy: { Priests: 0.7, Medics: 0.3 },
+  Soldiers: { Defenders: 0.45, Soldiers: 0.45, Scouts: 0.1 },
+  Nobles: { Nobles: 0.85, Scribes: 0.15 },
+  Mages: { Arcanists: 0.75, Techwrights: 0.25 },
+  Miners: { Scavengers: 0.4, Laborers: 0.3, Techwrights: 0.3 },
+  Craftsmen: { Crafters: 0.8, Techwrights: 0.2 },
+  Guards: { Defenders: 0.8, Scouts: 0.2 },
+  Administrators: { Scribes: 0.8, Nobles: 0.2 },
+  Healers: { Medics: 1 },
+  Heroes: { Soldiers: 0.5, Nobles: 0.25, Arcanists: 0.25 }
 };
 
 export function createCitizenDefinitionsSnapshot() {

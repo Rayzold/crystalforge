@@ -3,6 +3,7 @@ import {
   DEFAULT_START_STATE,
   MANUAL_SAVE_KEY,
   SAVE_VERSION,
+  SAVE_SLOT_COUNT,
   START_STATE_PRESETS,
   STORAGE_KEY,
   createEmptyCitizenCollection,
@@ -25,6 +26,23 @@ import { createDefaultTownFocusState, normalizeTownFocusState } from "./TownFocu
 
 function getStartPreset(preset = DEFAULT_START_PRESET) {
   return structuredClone(START_STATE_PRESETS[preset] ?? DEFAULT_START_STATE);
+}
+
+function getSaveSlotKey(slot = 1) {
+  const normalizedSlot = Math.max(1, Math.min(SAVE_SLOT_COUNT, Number(slot) || 1));
+  return `${MANUAL_SAVE_KEY}-${normalizedSlot}`;
+}
+
+function getSaveSlotRawText(slot = 1) {
+  const key = getSaveSlotKey(slot);
+  const slotted = localStorage.getItem(key);
+  if (slotted) {
+    return slotted;
+  }
+  if (Number(slot) === 1) {
+    return localStorage.getItem(MANUAL_SAVE_KEY);
+  }
+  return null;
 }
 
 export function createInitialState(preset = DEFAULT_START_PRESET) {
@@ -237,6 +255,14 @@ function normalizeDistrictState(sourceDistricts) {
   };
 }
 
+function normalizeSettings(sourceSettings, baseSettings) {
+  return {
+    ...baseSettings,
+    ...(sourceSettings ?? {}),
+    activeSaveSlot: Math.max(1, Math.min(SAVE_SLOT_COUNT, Number(sourceSettings?.activeSaveSlot ?? baseSettings.activeSaveSlot ?? 1) || 1))
+  };
+}
+
 export function validateAndMigrateSave(rawSave) {
   const base = createInitialState();
   if (!rawSave || typeof rawSave !== "object") {
@@ -273,7 +299,7 @@ export function validateAndMigrateSave(rawSave) {
     driftEvolution: normalizeDriftEvolutionState(rawSave.driftEvolution, Array.isArray(rawSave.buildings) ? rawSave.buildings.length : 0),
     townFocus: normalizeTownFocusState(rawSave.townFocus),
     sessionSnapshots: Array.isArray(rawSave.sessionSnapshots) ? rawSave.sessionSnapshots : [],
-    settings: { ...base.settings, ...(rawSave.settings ?? {}) },
+    settings: normalizeSettings(rawSave.settings, base.settings),
     ui: {
       ...base.ui,
       ...(rawSave.ui ?? {}),
@@ -313,31 +339,48 @@ export function saveGameState(state) {
 }
 
 export function saveManualState(state) {
-  const serializable = createSerializableState(state, { manualSavedAt: Date.now() });
-  localStorage.setItem(MANUAL_SAVE_KEY, JSON.stringify(serializable));
+  const slot = Math.max(1, Math.min(SAVE_SLOT_COUNT, Number(state.settings?.activeSaveSlot ?? 1) || 1));
+  const serializable = createSerializableState(state, {
+    manualSavedAt: Date.now(),
+    manualSaveSlot: slot
+  });
+  localStorage.setItem(getSaveSlotKey(slot), JSON.stringify(serializable));
   return serializable.manualSavedAt;
 }
 
-export function loadManualState() {
-  const rawText = localStorage.getItem(MANUAL_SAVE_KEY);
+export function loadManualState(slot = 1) {
+  const rawText = getSaveSlotRawText(slot);
   const parsed = safeJsonParse(rawText);
   if (!parsed) {
-    throw new Error("No manual save found.");
+    throw new Error(`No save found in slot ${slot}.`);
   }
   return validateAndMigrateSave(parsed);
 }
 
-export function getManualSaveMeta() {
-  const rawText = localStorage.getItem(MANUAL_SAVE_KEY);
+export function getManualSaveMeta(slot = 1) {
+  const rawText = getSaveSlotRawText(slot);
   const parsed = safeJsonParse(rawText);
   if (!parsed) {
     return null;
   }
   return {
+    slot: Math.max(1, Math.min(SAVE_SLOT_COUNT, Number(parsed.manualSaveSlot ?? slot) || slot)),
     manualSavedAt: Number(parsed.manualSavedAt ?? 0) || null,
     buildingCount: Array.isArray(parsed.buildings) ? parsed.buildings.length : 0,
     population: Number(parsed.resources?.population ?? 0) || 0
   };
+}
+
+export function getAllManualSaveMeta() {
+  return Array.from({ length: SAVE_SLOT_COUNT }, (_, index) => {
+    const slot = index + 1;
+    return getManualSaveMeta(slot) ?? {
+      slot,
+      manualSavedAt: null,
+      buildingCount: 0,
+      population: 0
+    };
+  });
 }
 
 export function exportSave(state) {

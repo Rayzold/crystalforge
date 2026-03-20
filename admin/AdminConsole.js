@@ -1,6 +1,6 @@
 import { MONTHS } from "../content/CalendarConfig.js";
 import { createCatalogEntryFromInput } from "../content/BuildingCatalog.js";
-import { GM_QUICK_CRYSTAL_PACKS, GM_QUICK_EVENT_IDS, SPEED_MULTIPLIERS } from "../content/Config.js";
+import { GM_QUICK_CRYSTAL_PACKS, GM_QUICK_EVENT_IDS, SAVE_SLOT_COUNT, SPEED_MULTIPLIERS } from "../content/Config.js";
 import { EVENT_POOLS } from "../content/EventPools.js";
 import { RARITY_ORDER } from "../content/Rarities.js";
 import { TOWN_FOCUS_DEFINITIONS } from "../content/TownFocusConfig.js";
@@ -9,7 +9,7 @@ import { attachHelpBubbles } from "../ui/HelpBubbles.js";
 import { renderModal } from "../ui/Modal.js";
 import { formatDate } from "../systems/CalendarSystem.js";
 import { getDriftEvolutionStages } from "../systems/DriftEvolutionSystem.js";
-import { getManualSaveMeta } from "../systems/StorageSystem.js";
+import { getAllManualSaveMeta, getManualSaveMeta } from "../systems/StorageSystem.js";
 
 function options(values, selectedValue) {
   return values
@@ -509,6 +509,9 @@ export class AdminConsole {
         case "load-manual-state":
           this.actions.loadManualState();
           break;
+        case "set-active-save-slot":
+          this.actions.setActiveSaveSlot(this.getValue("active-save-slot"));
+          break;
         case "save-session-snapshot":
           this.actions.createSessionSnapshot(this.getValue("snapshot-name", "Session Snapshot"));
           break;
@@ -528,7 +531,9 @@ export class AdminConsole {
 
   render(state) {
     this.lastState = state;
-    const manualSaveMeta = getManualSaveMeta();
+    const activeSaveSlot = Math.max(1, Math.min(SAVE_SLOT_COUNT, Number(state.settings.activeSaveSlot ?? 1) || 1));
+    const manualSaveMeta = getManualSaveMeta(activeSaveSlot);
+    const allSaveSlotMeta = getAllManualSaveMeta();
     const searchFilter = this.searchQuery.trim().toLowerCase();
     const matchingBuildings = state.buildings.filter((building) =>
       `${building.displayName} ${building.rarity} ${building.district} ${(building.tags ?? []).join(" ")}`
@@ -610,7 +615,7 @@ export class AdminConsole {
       {
         tab: "population",
         title: "Citizen Management",
-        keywords: "citizens peasants workers merchants scholars clergy soldiers nobles mages population",
+        keywords: "citizens farmers hunters fishermen scavengers laborers crafters techwrights merchants skycrew scouts defenders soldiers arcanists medics scribes nobles priests entertainers children elderly population",
         content: `
           <section class="admin-section">
             <h3>Citizen Management</h3>
@@ -618,7 +623,7 @@ export class AdminConsole {
             ${citizenControls(state)}
             <div class="admin-grid admin-grid--three">
               <label>From Class<select id="promote-from">${options(Object.keys(state.citizens), "Laborers")}</select></label>
-              <label>To Class<select id="promote-to">${options(Object.keys(state.citizens), "Farmers")}</select></label>
+              <label>To Class<select id="promote-to">${options(Object.keys(state.citizens), "Crafters")}</select></label>
               <label>Amount<input id="promote-amount" type="number" value="1" min="0" /></label>
             </div>
             <button class="button button--ghost" data-admin-action="promote-citizens">Promote</button>
@@ -628,7 +633,7 @@ export class AdminConsole {
               <label>Amount<input id="demote-amount" type="number" value="1" min="0" /></label>
             </div>
             <button class="button button--ghost" data-admin-action="demote-citizens">Demote</button>
-            <label>Bulk JSON<textarea id="bulk-citizens" rows="4" placeholder='{"Farmers":10,"Clergy":5}'></textarea></label>
+            <label>Bulk JSON<textarea id="bulk-citizens" rows="4" placeholder='{"Farmers":52,"Soldiers":12,"Children":28}'></textarea></label>
             <div class="admin-actions">
               <button class="button button--ghost" data-admin-action="bulk-citizens">Apply Bulk</button>
               <button class="button button--ghost" data-admin-action="reset-citizens">Reset Citizens</button>
@@ -914,18 +919,35 @@ export class AdminConsole {
           <section class="admin-section">
             <h3>Save Tools</h3>
             <p>Optional sound folder: <code>assets/audio/</code>. Matching rarity and ambient files will override synthesized audio automatically.</p>
+            <label>Active Save Slot<select id="active-save-slot">${Array.from({ length: SAVE_SLOT_COUNT }, (_, index) => {
+              const slot = index + 1;
+              return `<option value="${slot}" ${slot === activeSaveSlot ? "selected" : ""}>Slot ${slot}</option>`;
+            }).join("")}</select></label>
             ${
               manualSaveMeta?.manualSavedAt
                 ? `
                   <p>
-                    Last manual save:
+                    Active slot ${activeSaveSlot}:
                     <strong>${escapeHtml(new Date(manualSaveMeta.manualSavedAt).toLocaleString())}</strong>
                     · ${manualSaveMeta.buildingCount} building${manualSaveMeta.buildingCount === 1 ? "" : "s"}
                     · population ${manualSaveMeta.population}
                   </p>
                 `
-                : `<p>No manual local save recorded yet.</p>`
+                : `<p>No save recorded yet in slot ${activeSaveSlot}.</p>`
             }
+            <div class="admin-slot-summary">
+              ${allSaveSlotMeta
+                .map(
+                  (slotMeta) => `
+                    <article class="admin-slot-summary__item ${slotMeta.slot === activeSaveSlot ? "is-active" : ""}">
+                      <strong>Slot ${slotMeta.slot}</strong>
+                      <span>${slotMeta.manualSavedAt ? escapeHtml(new Date(slotMeta.manualSavedAt).toLocaleString()) : "Empty"}</span>
+                      <em>${slotMeta.buildingCount} building${slotMeta.buildingCount === 1 ? "" : "s"} · population ${slotMeta.population}</em>
+                    </article>
+                  `
+                )
+                .join("")}
+            </div>
             <textarea id="save-json" rows="10"></textarea>
             <label>Shared Save URL<input id="shared-save-url" value="${escapeHtml(state.settings.sharedStateUrl ?? "")}" placeholder="https://.../save.json" /></label>
             <p>Best for public raw JSON links. A public direct-download Google Drive link may work if it allows browser fetch access.</p>
@@ -936,6 +958,7 @@ export class AdminConsole {
               <strong>${state.settings.autoLoadSharedState ? "Enabled" : "Disabled"}</strong>
             </p>
             <div class="admin-actions">
+              <button class="button button--ghost" data-admin-action="set-active-save-slot">Use Slot</button>
               <button class="button button--ghost" data-admin-action="save-manual-state">Save Local State</button>
               <button class="button button--ghost" data-admin-action="load-manual-state">Load Local State</button>
               <button class="button button--ghost" data-admin-action="export-save">Export Save JSON</button>
