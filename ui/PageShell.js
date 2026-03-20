@@ -81,6 +81,28 @@ function renderSidebarBuildingList(title, items, emptyLabel) {
 }
 
 export function renderPageShell(state, pageKey, { title, subtitle, content, aside = "" }, overlays = "") {
+  if (pageKey === "player") {
+    return `
+      <div class="game-shell game-shell--player game-shell--theme-dark">
+        <main class="page-stage page-stage--player">
+          <header class="player-stage__header">
+            <div>
+              <p class="page-hero__eyebrow">Player View</p>
+              <h1>${title}</h1>
+              <p class="page-hero__subtitle">${subtitle}</p>
+            </div>
+            <div class="player-stage__brand">
+              <span>Crystal Forge</span>
+              <strong>Shared Table Screen</strong>
+            </div>
+          </header>
+          ${content}
+        </main>
+        ${overlays}
+      </div>
+    `;
+  }
+
   const activeSaveSlot = Math.max(1, Math.min(SAVE_SLOT_COUNT, Number(state.settings.activeSaveSlot ?? 1) || 1));
   const manualSaveMeta = getManualSaveMeta(activeSaveSlot);
   const townFocusAvailability = getTownFocusAvailability(state);

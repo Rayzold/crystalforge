@@ -14,13 +14,13 @@ const KEYWORD_CLASSIFIERS = [
   { match: ["caravan", "adventurers", "monster", "dungeon", "ark", "new drift", "dragonforge", "seeker", "enchanted forest"], district: "Frontier District", tags: ["frontier"], iconKey: "gate" }
 ];
 
-const ZERO_STATS = { value: 0, income: 0, upkeep: 0, prosperity: 0, defense: 0, security: 0, prestige: 0, morale: 0, health: 0 };
+const ZERO_STATS = { goods: 0, income: 0, upkeep: 0, prosperity: 0, defense: 0, security: 0, prestige: 0, morale: 0, health: 0 };
 const ZERO_RESOURCES = { gold: 0, food: 0, materials: 0, salvage: 0, mana: 0 };
 const ZERO_CITIZENS = { populationSupport: 0, prosperityAffinity: 0, moraleAffinity: 0 };
 
-function gameplay({ value = 0, income = 0, upkeep = 0, prosperity = 0, defense = 0, security = 0, prestige = 0, morale = 0, health = 0, gold = 0, food = 0, materials = 0, salvage = 0, mana = 0, populationSupport = 0, prosperityAffinity = 0, moraleAffinity = 0 } = {}) {
+function gameplay({ goods = 0, income = 0, upkeep = 0, prosperity = 0, defense = 0, security = 0, prestige = 0, morale = 0, health = 0, gold = 0, food = 0, materials = 0, salvage = 0, mana = 0, populationSupport = 0, prosperityAffinity = 0, moraleAffinity = 0 } = {}) {
   return {
-    statOverrides: { ...ZERO_STATS, value, income, upkeep, prosperity, defense, security, prestige, morale, health },
+    statOverrides: { ...ZERO_STATS, goods, income, upkeep, prosperity, defense, security, prestige, morale, health },
     resourceOverrides: { ...ZERO_RESOURCES, gold, food, materials, salvage, mana },
     citizenOverrides: { ...ZERO_CITIZENS, populationSupport, prosperityAffinity, moraleAffinity }
   };

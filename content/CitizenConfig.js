@@ -55,13 +55,13 @@ export const CITIZEN_DEFINITIONS = {
   Crafters: {
     production: { gold: 0.12, materials: 0.12 },
     consumption: { food: 0.18, gold: 0.03 },
-    stats: { value: 0.05, prosperity: 0.02 },
+    stats: { goods: 0.05, prosperity: 0.02 },
     flavor: "Artisans and makers who turn raw goods into tools, furnishings, and practical wealth."
   },
   Techwrights: {
     production: { salvage: 0.16, mana: 0.03 },
     consumption: { food: 0.18, gold: 0.05, materials: 0.03 },
-    stats: { value: 0.06, prestige: 0.03 },
+    stats: { goods: 0.06, prestige: 0.03 },
     flavor: "Rare engineers and system-tenders who maintain advanced mechanisms, relics, and salvage systems."
   },
   Merchants: {
@@ -109,7 +109,7 @@ export const CITIZEN_DEFINITIONS = {
   Scribes: {
     production: { prosperity: 0.03 },
     consumption: { food: 0.15, gold: 0.04 },
-    stats: { value: 0.03, prestige: 0.04 },
+    stats: { goods: 0.03, prestige: 0.04 },
     flavor: "Record keepers, surveyors, and clerks who turn memory and planning into usable order."
   },
   Nobles: {

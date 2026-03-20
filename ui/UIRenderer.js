@@ -9,6 +9,7 @@ import { renderHomePage } from "./HomePage.js";
 import { renderHomeHelpModal } from "./HomeHelpModal.js";
 import { renderManifestCompleteModal } from "./ManifestCompleteModal.js";
 import { renderPageShell } from "./PageShell.js";
+import { renderPlayerPage } from "./PlayerPage.js";
 import { renderTownFocusCouncilModal } from "./TownFocusCouncilModal.js";
 import { getMayorSuggestions } from "../systems/TownFocusSystem.js";
 import { getDefaultTownFocusPreviewId } from "./TownFocusShared.js";
@@ -72,6 +73,8 @@ export class UIRenderer {
         return renderCitizensPage(state);
       case "chronicle":
         return renderChroniclePage(state);
+      case "player":
+        return renderPlayerPage(state);
       case "home":
       default:
         return renderHomePage(state);

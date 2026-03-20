@@ -4,7 +4,7 @@ import { renderUiIcon } from "./UiIcons.js";
 export function renderStatsPanel(state) {
   const stats = state.cityStats;
   const entries = [
-    ["Value", stats.value, "value"],
+    ["Goods", stats.goods, "goods"],
     ["Income", stats.income, "gold"],
     ["Upkeep", stats.upkeep, "upkeep"],
     ["Pop. Support", stats.populationSupport, "population"],

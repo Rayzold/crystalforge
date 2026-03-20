@@ -93,7 +93,7 @@ export function renderCitizenPanel(state) {
     <section class="panel citizen-panel">
       <div class="panel__header">
         <h3>Citizens</h3>
-        <span class="panel__subtle">Population ${formatNumber(state.resources.population)} · settlement support ${formatNumber(support)} · ${formatNumber(supportUsage, 1)}% used</span>
+        <span class="panel__subtle">Population ${formatNumber(state.resources.population)} / settlement support ${formatNumber(support)} / ${formatNumber(supportUsage, 1)}% used</span>
       </div>
       <div class="citizen-panel__groups">
         ${CITIZEN_GROUPS.map((group) => {

@@ -269,7 +269,13 @@ export function validateAndMigrateSave(rawSave) {
     return base;
   }
 
+  const sourceVersion = Number(rawSave.version ?? 0);
+
   const normalizedCatalog = normalizeBuildingCatalog(rawSave.buildingCatalog, rawSave.version);
+  const normalizedCitizens =
+    sourceVersion < 9
+      ? structuredClone(base.citizens)
+      : normalizeCitizens(rawSave.citizens ?? base.citizens);
 
   const nextState = {
     ...base,
@@ -278,7 +284,7 @@ export function validateAndMigrateSave(rawSave) {
     crystals: normalizeCrystalCollection(rawSave.crystals ?? base.crystals),
     shards: normalizeShardCollection(rawSave.shards ?? base.shards),
     resources: { ...base.resources, ...(rawSave.resources ?? {}) },
-    citizens: normalizeCitizens(rawSave.citizens ?? base.citizens),
+    citizens: normalizedCitizens,
     buildings: normalizeBuildings(rawSave.buildings, normalizedCatalog),
     rollTables: normalizeRollTables(rawSave.rollTables, rawSave.version),
     buildingCatalog: normalizedCatalog,

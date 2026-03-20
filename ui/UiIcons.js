@@ -18,7 +18,7 @@ const ICONS = {
   prestige: `<path d="m14 44 5-18 13 8 13-8 5 18Z" /><path d="m18 20 6 7 8-13 8 13 6-7" />`,
   morale: `<path d="M18 24c0-8 6-14 14-14s14 6 14 14-6 22-14 22-14-14-14-22Z" /><path d="M24 26c2 3 4 4 8 4s6-1 8-4" />`,
   health: `<path d="M28 14h8v12h12v8H36v12h-8V34H16v-8h12Z" />`,
-  value: `<path d="M16 44V18h32v26Z" /><path d="M22 28h20M22 35h14" />`,
+  goods: `<path d="M16 44V18h32v26Z" /><path d="M22 28h20M22 35h14" />`,
   upkeep: `<path d="M18 18h28M22 18v-6m20 6v-6M20 24h24l-2 24H22Z" />`,
   building: `<path d="M18 50V18h28v32Z" /><path d="M25 26h6m8 0h6m-20 8h6m8 0h6m-20 8h6m8 0h6" />`,
   completed: `<path d="M16 34 26 44 48 20" />`,

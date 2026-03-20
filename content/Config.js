@@ -4,10 +4,10 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.0.1";
-export const SAVE_VERSION = 8;
-export const STORAGE_KEY = "crystal-forge-save";
-export const MANUAL_SAVE_KEY = "crystal-forge-manual-save";
+export const APP_VERSION = "v1.0.4";
+export const SAVE_VERSION = 9;
+export const STORAGE_KEY = "crystal-forge-save-v2";
+export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v2";
 export const SAVE_SLOT_COUNT = 3;
 export const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDl51M8_ywD944xPSByUujzMdATeoy503I",

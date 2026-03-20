@@ -5,7 +5,7 @@ import { getBuildingPlacementBonuses } from "./MapSystem.js";
 import { getCurrentTownFocus } from "./TownFocusSystem.js";
 
 const EMPTY_CITY_STATS = {
-  value: 0,
+  goods: 0,
   income: 0,
   upkeep: 0,
   prosperity: 0,
@@ -31,7 +31,8 @@ export function recalculateCityStats(state) {
     }
     const placementMultiplier = 1 + getBuildingPlacementBonuses(state, building).totalPercent;
     for (const [key, value] of Object.entries(building.stats)) {
-      nextStats[key] = (nextStats[key] ?? 0) + value * building.multiplier * placementMultiplier;
+      const normalizedKey = key === "value" ? "goods" : key;
+      nextStats[normalizedKey] = (nextStats[normalizedKey] ?? 0) + value * building.multiplier * placementMultiplier;
     }
     rawPopulationSupport += building.citizenEffects.populationSupport * placementMultiplier;
   }
@@ -39,7 +40,8 @@ export function recalculateCityStats(state) {
   for (const [citizenClass, count] of Object.entries(state.citizens)) {
     const citizenDefinition = state.citizenDefinitions[citizenClass];
     for (const [statKey, statValue] of Object.entries(citizenDefinition.stats)) {
-      nextStats[statKey] = (nextStats[statKey] ?? 0) + statValue * count;
+      const normalizedKey = statKey === "value" ? "goods" : statKey;
+      nextStats[normalizedKey] = (nextStats[normalizedKey] ?? 0) + statValue * count;
     }
   }
 
