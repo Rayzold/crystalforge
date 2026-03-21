@@ -1,0 +1,97 @@
+Crystal Forge Replaceable Media Locations
+=========================================
+
+1. Building Artwork Files
+-------------------------
+Main folder:
+- ./assets/images/buildings/
+
+Suggested individual file names:
+- ./assets/images/buildings/Farmlands.png
+- ./assets/images/buildings/Pond.png
+- ./assets/images/buildings/Arcana Tower.png
+- ./assets/images/buildings/Crystal Upgrade__Epic.png
+
+Supported usage:
+- One image per building
+- The same building image is reused on cards, the Forge page, the Home featured panel, and the hex map thumbnail
+
+Code locations that read building image paths:
+- ./content/BuildingCatalog.js
+- ./admin/AdminConsole.js
+- ./ui/BuildingCard.js
+- ./ui/ForgePage.js
+- ./ui/HomePage.js
+- ./ui/HexMap.js
+
+2. Optional Music / Sound Effect Files
+--------------------------------------
+Main folder:
+- ./assets/audio/
+
+Expected rarity-based manifest sound files:
+- ./assets/audio/common-manifest.mp3
+- ./assets/audio/uncommon-manifest.mp3
+- ./assets/audio/rare-manifest.mp3
+- ./assets/audio/epic-manifest.mp3
+- ./assets/audio/legendary-manifest.mp3
+- ./assets/audio/beyond-manifest.mp3
+
+Expected optional ambient loop files:
+- ./assets/audio/home-ambient.mp3
+- ./assets/audio/forge-ambient.mp3
+- ./assets/audio/city-ambient.mp3
+- ./assets/audio/citizens-ambient.mp3
+- ./assets/audio/chronicle-ambient.mp3
+
+Alternative supported extension:
+- .wav
+
+Code locations that resolve and play audio:
+- ./content/Config.js
+- ./fx/AudioEngine.js
+
+Fallback behavior:
+- If a file is missing, Crystal Forge uses synthesized Web Audio tones from ./fx/AudioEngine.js
+
+3. Visual Effect Code Locations
+-------------------------------
+These are not image files yet, but they are the exact files to edit if you want to replace the built-in generated visuals with custom graphics later.
+
+Forge reveal scene:
+- ./fx/AnimationEngine.js
+- ./styles.css
+
+Forge chamber page visuals:
+- ./ui/ForgePage.js
+- ./styles.css
+
+Hex map terrain, roads, and building thumbnails:
+- ./ui/HexMap.js
+- ./styles.css
+
+Full-width building card banners:
+- ./ui/BuildingCard.js
+- ./styles.css
+
+4. Mascot Background Video
+--------------------------
+Main file:
+- ./assets/video/drift-mascot.mp4
+
+Support file:
+- ./assets/video/README.md
+
+Code locations that render or configure it:
+- ./content/Config.js
+- ./ui/PageShell.js
+- ./styles.css
+
+5. Quick Replace Workflow
+-------------------------
+- Put a building image into ./assets/images/buildings/
+- Set that building's imagePath in the admin console
+- Put a sound file into ./assets/audio/ using one of the rarity file names above
+- Put an ambient loop into ./assets/audio/ using one of the page ambient file names above
+- Replace ./assets/video/drift-mascot.mp4 if you want a different mascot background
+- Refresh the page

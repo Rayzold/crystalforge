@@ -1,0 +1,133 @@
+CRYSTAL FORGE BUILDING ART PRIORITY 20
+
+Goal:
+Replace these 20 first. They will give the biggest visible improvement in normal play.
+
+Drop images here:
+c:\Users\mstefanou\Documents\Drift\crystal-forge\assets\images\buildings
+
+Use these filenames:
+
+1. Blacksmith.png
+Why first:
+- iconic common building
+- appears often
+- strong visual identity
+
+2. Farmlands.png
+Why first:
+- core settlement image
+- common and easy to recognize
+
+3. Well.png
+Why first:
+- highly visible support building
+- strong early-game atmosphere
+
+4. Bakery.png
+Why first:
+- readable village-production image
+- common category anchor
+
+5. Mill.png
+Why first:
+- classic settlement image
+- strong food-economy anchor
+
+6. Mine.png
+Why first:
+- economy/industry pillar
+- very visible if players build resource chains
+
+7. Quarry.png
+Why first:
+- complements Mine
+- helps the production side feel complete
+
+8. Stables.png
+Why first:
+- strong silhouette
+- useful for military/frontier feel
+
+9. Town Guard Post.png
+Why first:
+- immediate defense identity
+- common but visually distinct
+
+10. Housing Commoner.png
+Why first:
+- one of the clearest “city growth” visuals
+
+11. Market Square.png
+Why first:
+- major city/trade anchor
+- useful visual centerpiece
+
+12. Barracks.png
+Why first:
+- important uncommon military structure
+- clear strategy-game read
+
+13. Guard Tower.png
+Why first:
+- defense chain support
+- helps walls/towers feel real
+
+14. Warehouse.png
+Why first:
+- very practical town-economy image
+- commonly understandable
+
+15. Town Hall.png
+Why first:
+- major civic identity building
+- useful for settlement center feel
+
+16. Castle.png
+Why first:
+- major visual landmark
+- strong epic payoff
+
+17. Temple.png
+Why first:
+- major religious/fantasy landmark
+
+18. Arcana Tower.png
+Why first:
+- major magical landmark
+- helps the app feel more fantasy, less medieval-only
+
+19. Housing Noble.png
+Why first:
+- sells late-city progression visually
+
+20. Skyharbor.png
+Why first:
+- gives high-tier pages a spectacular fantasy structure
+
+RECOMMENDED SOURCE FIT
+- Blacksmith / Barracks / Stables / Guard Tower / Castle:
+  medieval RTS/isometric art
+- Farmlands / Well / Bakery / Mill / Mine / Quarry / Warehouse:
+  Unknown Horizons + medieval settlement art
+- Market Square / Town Hall / Housing Commoner / Housing Noble:
+  civic/town/isometric house art
+- Temple / Arcana Tower / Skyharbor:
+  fantasy-specific fallback art or carefully chosen icon-art until replaced
+
+FASTEST WIN ORDER
+If you want the fastest visible improvement, do this order:
+1. Blacksmith
+2. Farmlands
+3. Well
+4. Housing Commoner
+5. Market Square
+6. Barracks
+7. Castle
+8. Temple
+9. Arcana Tower
+10. Skyharbor
+
+NOTES
+- If you only replace 5 images, do the first 5 in FASTEST WIN ORDER.
+- If an image is missing, the app will still fall back to icon art.

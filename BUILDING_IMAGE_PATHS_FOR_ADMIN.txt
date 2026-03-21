@@ -1,0 +1,159 @@
+CRYSTAL FORGE ADMIN IMAGE PATHS
+
+Use these values in the admin building editor Image Path field.
+
+Format:
+Building Name -> ./assets/images/buildings/FileName.png
+
+COMMON
+Apiary -> ./assets/images/buildings/Apiary.png
+Bakery -> ./assets/images/buildings/Bakery.png
+Ballistas -> ./assets/images/buildings/Ballistas.png
+Barn -> ./assets/images/buildings/Barn.png
+Basic Shrine -> ./assets/images/buildings/Basic Shrine.png
+Beast Pens -> ./assets/images/buildings/Beast Pens.png
+Blacksmith -> ./assets/images/buildings/Blacksmith.png
+Butcher -> ./assets/images/buildings/Butcher.png
+Cider Press -> ./assets/images/buildings/Cider Press.png
+Crystal Upgrade -> ./assets/images/buildings/Crystal Upgrade.png
+Farmlands -> ./assets/images/buildings/Farmlands.png
+Fishery -> ./assets/images/buildings/Fishery.png
+Gardens -> ./assets/images/buildings/Gardens.png
+General Store -> ./assets/images/buildings/General Store.png
+Grain Silo -> ./assets/images/buildings/Grain Silo.png
+Graveyard -> ./assets/images/buildings/Graveyard.png
+Housing: Commoner -> ./assets/images/buildings/Housing Commoner.png
+Inn -> ./assets/images/buildings/Inn.png
+Lumber Mill -> ./assets/images/buildings/Lumber Mill.png
+Mill -> ./assets/images/buildings/Mill.png
+Mine -> ./assets/images/buildings/Mine.png
+Quarry -> ./assets/images/buildings/Quarry.png
+Smokehouse -> ./assets/images/buildings/Smokehouse.png
+Stables -> ./assets/images/buildings/Stables.png
+Tailor -> ./assets/images/buildings/Tailor.png
+Tavern -> ./assets/images/buildings/Tavern.png
+Tool Shed -> ./assets/images/buildings/Tool Shed.png
+Town Guard Post -> ./assets/images/buildings/Town Guard Post.png
+Vendor -> ./assets/images/buildings/Vendor.png
+Water Trough -> ./assets/images/buildings/Water Trough.png
+Well -> ./assets/images/buildings/Well.png
+Wooden Wall -> ./assets/images/buildings/Wooden Wall.png
+Woodcutter's Hut -> ./assets/images/buildings/Woodcutter's Hut.png
+
+UNCOMMON
+Alchemist -> ./assets/images/buildings/Alchemist.png
+Barracks -> ./assets/images/buildings/Barracks.png
+Brewery -> ./assets/images/buildings/Brewery.png
+Carpenter Shop -> ./assets/images/buildings/Carpenter Shop.png
+Clocktower -> ./assets/images/buildings/Clocktower.png
+Community Oven -> ./assets/images/buildings/Community Oven.png
+Crystal Upgrade -> ./assets/images/buildings/Crystal Upgrade Uncommon.png
+Distillery -> ./assets/images/buildings/Distillery.png
+Dock -> ./assets/images/buildings/Dock.png
+Grove -> ./assets/images/buildings/Grove.png
+Guard Tower -> ./assets/images/buildings/Guard Tower.png
+Hardwood Walls -> ./assets/images/buildings/Hardwood Walls.png
+Housing: Comfortable -> ./assets/images/buildings/Housing Comfortable.png
+Immigration Center -> ./assets/images/buildings/Immigration Center.png
+Jewelry Shop -> ./assets/images/buildings/Jewelry Shop.png
+Library -> ./assets/images/buildings/Library.png
+Market Square -> ./assets/images/buildings/Market Square.png
+Mason's Workshop -> ./assets/images/buildings/Mason's Workshop.png
+Pond -> ./assets/images/buildings/Pond.png
+Post Office -> ./assets/images/buildings/Post Office.png
+Ropeworks -> ./assets/images/buildings/Ropeworks.png
+School -> ./assets/images/buildings/School.png
+Tannery -> ./assets/images/buildings/Tannery.png
+Town Hall -> ./assets/images/buildings/Town Hall.png
+Trade Post -> ./assets/images/buildings/Trade Post.png
+Trebuchets -> ./assets/images/buildings/Trebuchets.png
+Warehouse -> ./assets/images/buildings/Warehouse.png
+Weaver's Hall -> ./assets/images/buildings/Weaver's Hall.png
+
+RARE
+Amphitheater -> ./assets/images/buildings/Amphitheater.png
+Apothecary -> ./assets/images/buildings/Apothecary.png
+Aqueduct System -> ./assets/images/buildings/Aqueduct System.png
+Armory -> ./assets/images/buildings/Armory.png
+Bank -> ./assets/images/buildings/Bank.png
+Bathhouse -> ./assets/images/buildings/Bathhouse.png
+Courthouse -> ./assets/images/buildings/Courthouse.png
+Crystal Upgrade -> ./assets/images/buildings/Crystal Upgrade Rare.png
+Distillation House -> ./assets/images/buildings/Distillation House.png
+Embassy Annex -> ./assets/images/buildings/Embassy Annex.png
+Engineers' Guild -> ./assets/images/buildings/Engineers' Guild.png
+Explosive Ballistas -> ./assets/images/buildings/Explosive Ballistas.png
+Guildhall -> ./assets/images/buildings/Guildhall.png
+Herbal Greenhouse -> ./assets/images/buildings/Herbal Greenhouse.png
+Hospital -> ./assets/images/buildings/Hospital.png
+Housing: Wealthy -> ./assets/images/buildings/Housing Wealthy.png
+Lighthouse -> ./assets/images/buildings/Lighthouse.png
+Mint -> ./assets/images/buildings/Mint.png
+Observatory -> ./assets/images/buildings/Observatory.png
+Oracle -> ./assets/images/buildings/Oracle.png
+Printing Press -> ./assets/images/buildings/Printing Press.png
+Prison -> ./assets/images/buildings/Prison.png
+Red Light District -> ./assets/images/buildings/Red Light District.png
+Stone Walls -> ./assets/images/buildings/Stone Walls.png
+Training Grounds -> ./assets/images/buildings/Training Grounds.png
+University -> ./assets/images/buildings/University.png
+
+EPIC
+Adventurers' Guildhall -> ./assets/images/buildings/Adventurers' Guildhall.png
+Airship Dockyard -> ./assets/images/buildings/Airship Dockyard.png
+Artifact Vault -> ./assets/images/buildings/Artifact Vault.png
+Cannons -> ./assets/images/buildings/Cannons.png
+Caravan Outpost -> ./assets/images/buildings/Caravan Outpost.png
+Castle -> ./assets/images/buildings/Castle.png
+Communications Core -> ./assets/images/buildings/Communications Core.png
+Crystal Upgrade -> ./assets/images/buildings/Crystal Upgrade Epic.png
+Fey Crossing -> ./assets/images/buildings/Fey Crossing.png
+Foreign Affairs Ministry -> ./assets/images/buildings/Foreign Affairs Ministry.png
+Grand Shrine -> ./assets/images/buildings/Grand Shrine.png
+Housing: Noble -> ./assets/images/buildings/Housing Noble.png
+Illusion Field Generator -> ./assets/images/buildings/Illusion Field Generator.png
+Mirage Citadel -> ./assets/images/buildings/Mirage Citadel.png
+Monster Arena -> ./assets/images/buildings/Monster Arena.png
+Monster Capture Field -> ./assets/images/buildings/Monster Capture Field.png
+Planar Beach -> ./assets/images/buildings/Planar Beach.png
+Reinforced Stone Walls -> ./assets/images/buildings/Reinforced Stone Walls.png
+Relic Sanctum -> ./assets/images/buildings/Relic Sanctum.png
+Skyharbor -> ./assets/images/buildings/Skyharbor.png
+Steam Factory -> ./assets/images/buildings/Steam Factory.png
+Temple -> ./assets/images/buildings/Temple.png
+Torture Chambers -> ./assets/images/buildings/Torture Chambers.png
+Wall/Fortifications -> ./assets/images/buildings/Wall Fortifications.png
+
+LEGENDARY
+Arcana Tower -> ./assets/images/buildings/Arcana Tower.png
+Arcane Walls -> ./assets/images/buildings/Arcane Walls.png
+Captain's Quarters -> ./assets/images/buildings/Captain's Quarters.png
+Crystal Upgrade -> ./assets/images/buildings/Crystal Upgrade Legendary.png
+Deathless Grounds -> ./assets/images/buildings/Deathless Grounds.png
+Doomsday Cannon -> ./assets/images/buildings/Doomsday Cannon.png
+Dragonforge -> ./assets/images/buildings/Dragonforge.png
+Dreamweaver -> ./assets/images/buildings/Dreamweaver.png
+Elemental Cannons -> ./assets/images/buildings/Elemental Cannons.png
+Elemental Shipmaker -> ./assets/images/buildings/Elemental Shipmaker.png
+Enchanted Forest -> ./assets/images/buildings/Enchanted Forest.png
+Housing: Royal -> ./assets/images/buildings/Housing Royal.png
+Mortality Limiter Remover -> ./assets/images/buildings/Mortality Limiter Remover.png
+Planar Anchor -> ./assets/images/buildings/Planar Anchor.png
+Planar Escape Pods -> ./assets/images/buildings/Planar Escape Pods.png
+Planar Tentacles -> ./assets/images/buildings/Planar Tentacles.png
+Raestorum Center -> ./assets/images/buildings/Raestorum Center.png
+School of Driftum -> ./assets/images/buildings/School of Driftum.png
+Shield Generator -> ./assets/images/buildings/Shield Generator.png
+Techcrafter -> ./assets/images/buildings/Techcrafter.png
+The Seeker -> ./assets/images/buildings/The Seeker.png
+War Academy Supreme -> ./assets/images/buildings/War Academy Supreme.png
+
+BEYOND
+Heart of Kosmos -> ./assets/images/buildings/Heart of Kosmos.png
+Universal Portal -> ./assets/images/buildings/Universal Portal.png
+Lylandra's Residence -> ./assets/images/buildings/Lylandra's Residence.png
+New Drift Seed -> ./assets/images/buildings/New Drift Seed.png
+Dungeon of the Endless -> ./assets/images/buildings/Dungeon of the Endless.png
+The Ark -> ./assets/images/buildings/The Ark.png
+The Maker's Creatorium -> ./assets/images/buildings/The Maker's Creatorium.png
+The First Last Tower of Chronomancy -> ./assets/images/buildings/The First Last Tower of Chronomancy.png

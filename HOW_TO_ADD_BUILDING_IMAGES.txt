@@ -1,0 +1,59 @@
+HOW TO ADD BUILDING IMAGES
+
+1. Put the image file in this folder:
+   assets/images/buildings/
+
+2. Give the file a simple name.
+   Example:
+   Blacksmith.png
+   Barracks.png
+   Well.png
+
+3. Use this path format in the app:
+   ./assets/images/buildings/FileName.png
+
+   Example:
+   ./assets/images/buildings/Blacksmith.png
+
+4. To add the image path in the app:
+   - Open the Admin Console
+   - Go to World -> Buildings
+   - Use either:
+     - the single building image field
+     - or Bulk Image Paths
+
+5. Bulk Image Paths format:
+   Building Name -> ./assets/images/buildings/FileName.png
+
+   Example:
+   Blacksmith -> ./assets/images/buildings/Blacksmith.png
+   Barracks -> ./assets/images/buildings/Barracks.png
+
+6. You can also use the CSV helper file if you want:
+   BUILDING_IMAGE_PATHS.csv
+
+7. After adding images:
+   - save/apply in admin
+   - refresh the page if needed
+
+8. If an image does not appear:
+   - check the file is really inside assets/images/buildings/
+   - check the filename matches exactly
+   - check the path starts with:
+     ./assets/images/buildings/
+
+9. Best tip:
+   Start with the most visible buildings first, like:
+   - Blacksmith
+   - Barracks
+   - Well
+   - Castle
+   - Market
+   - Houses
+
+10. Helpful files already in this project:
+   - BUILDING_IMAGE_FILENAME_MAP.txt
+   - BUILDING_IMAGE_PATHS_FOR_ADMIN.txt
+   - BUILDING_IMAGE_PATHS.csv
+   - BUILDING_ART_PRIORITY_20.txt
+
