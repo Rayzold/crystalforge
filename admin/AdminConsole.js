@@ -209,7 +209,7 @@ function renderManifestedBuildingAdminList(state) {
               <div class="admin-active-building-card__meta">
                 <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
                 <span>${escapeHtml(building.rarity)} / ${escapeHtml(building.district ?? "Unassigned")}</span>
-                <small>${building.mapPosition ? escapeHtml(`Placed at ${building.mapPosition.q}, ${building.mapPosition.r}`) : "Unplaced"} · ${escapeHtml(`${formatBuildingQualityDisplay(building)} quality`)}</small>
+                <small>${building.mapPosition ? escapeHtml(`Placed at ${building.mapPosition.q}, ${building.mapPosition.r}`) : "Unplaced"} · ${escapeHtml(`Stage ${formatBuildingQualityDisplay(building)}`)}</small>
               </div>
               <button class="button button--ghost" data-admin-action="remove-active-building" data-building-id="${building.id}">
                 Unmanifest
@@ -634,6 +634,9 @@ export class AdminConsole {
     const activeSaveSlot = Math.max(1, Math.min(SAVE_SLOT_COUNT, Number(state.settings.activeSaveSlot ?? 1) || 1));
     const manualSaveMeta = getManualSaveMeta(activeSaveSlot);
     const allSaveSlotMeta = getAllManualSaveMeta();
+    const currentFirebaseUid = String(state.transientUi?.firebaseCurrentUid ?? "").trim();
+    const configuredPublisherUid = String(state.settings.firebasePublisherUid ?? "").trim();
+    const firebaseCanPublish = Boolean(state.transientUi?.firebaseCanPublish);
     const searchFilter = this.searchQuery.trim().toLowerCase();
     const matchingBuildings = state.buildings.filter((building) =>
       `${building.displayName} ${building.rarity} ${building.district} ${(building.tags ?? []).join(" ")}`
@@ -1091,6 +1094,12 @@ export class AdminConsole {
             <p>
               GM publisher UID:
               <strong>${escapeHtml(state.settings.firebasePublisherUid || "Not set")}</strong>
+            </p>
+            <p>
+              Current browser UID:
+              <strong>${escapeHtml(currentFirebaseUid || "Not ready yet")}</strong>
+              · Publish access:
+              <strong>${firebaseCanPublish ? "Granted" : configuredPublisherUid ? "Locked" : "Unset"}</strong>
             </p>
             <p>
               Published:

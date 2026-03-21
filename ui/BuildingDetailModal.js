@@ -2,7 +2,7 @@ import { getBuildingEmoji } from "../content/BuildingCatalog.js";
 import { RARITY_COLORS } from "../content/Rarities.js";
 import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
-import { formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
+import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
 import {
   getBuildingDailyRate,
   getConstructionQueuePosition,
@@ -97,8 +97,8 @@ export function renderBuildingDetailModal(state, pageKey) {
           <p class="building-detail__effect">${escapeHtml(building.specialEffect)}</p>
           <p class="building-detail__flavor">${escapeHtml(building.flavorText ?? "No flavor text has been etched into the city chronicle yet.")}</p>
           <div class="building-detail__chips">
-            <span class="detail-chip">${isRuined ? "Ruined" : building.isComplete ? `Active / ${formatBuildingQualityDisplay(building)}` : "Inactive"}</span>
-            <span class="detail-chip">${escapeHtml(formatBuildingQualityDisplay(building))} quality</span>
+            <span class="detail-chip">${isRuined ? "Ruined" : building.isComplete ? escapeHtml(formatBuildingQualityDisplay(building)) : "Inactive"}</span>
+            <span class="detail-chip">Exact ${escapeHtml(formatBuildingExactQualityDisplay(building))}</span>
             <span class="detail-chip">${building.mapPosition ? `Hex ${building.mapPosition.q}, ${building.mapPosition.r}` : "Unplaced"}</span>
           </div>
           <div class="building-detail__actions">

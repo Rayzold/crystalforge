@@ -135,6 +135,16 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
   const manifestedBuildings = state.buildings.filter((building) => building.isComplete);
   const incubatingBuildings = getActiveConstructionQueue(state);
   const availableBuildings = getAvailableConstructionQueue(state);
+  const firebaseCurrentUid = String(state.transientUi?.firebaseCurrentUid ?? "").trim();
+  const firebasePublisherUid = String(state.settings.firebasePublisherUid ?? "").trim();
+  const firebaseCanPublish = Boolean(state.transientUi?.firebaseCanPublish);
+  const firebasePublishLabel = !firebasePublisherUid
+    ? "No GM publisher UID is set."
+    : firebaseCanPublish
+      ? "This browser is the GM publisher."
+      : firebaseCurrentUid
+        ? "This browser is read-only for Firebase publishing."
+        : "Firebase identity not ready yet.";
   const summary = [
     ["Gold", state.resources.gold],
     ["Food", state.resources.food],
@@ -213,7 +223,18 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
             <span>Player Mode</span>
             <strong>Open Shared Player Screen</strong>
           </a>
-          ${state.ui.adminUnlocked ? `<button class="button sidebar-publish-button" data-action="publish-to-players">Publish To Players</button>` : ""}
+          ${
+            state.ui.adminUnlocked
+              ? `
+                <button class="button sidebar-publish-button ${firebaseCanPublish ? "" : "is-locked"}" data-action="publish-to-players" ${firebaseCanPublish ? "" : "disabled"}>
+                  Publish To Players
+                </button>
+                <div class="sidebar-publish-status ${firebaseCanPublish ? "is-ready" : "is-locked"}">
+                  <span>${escapeHtml(firebasePublishLabel)}</span>
+                </div>
+              `
+              : ""
+          }
           <button class="button button--ghost" data-action="open-catalog">Building Catalog</button>
           <button class="button button--ghost" data-action="open-admin">${state.settings.liveSessionView ? "GM Console" : "Admin Console"}</button>
           <div class="sidebar-nav__save-actions">

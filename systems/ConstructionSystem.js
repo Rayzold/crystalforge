@@ -1,6 +1,7 @@
 import { BUILDING_ACTIVE_THRESHOLD } from "../content/Config.js";
 import { AUTO_CONSTRUCTION_RATES } from "../content/Rarities.js";
 import { getDriftConstructionSlots, getDriftConstructionSpeedMultiplier } from "./DriftEvolutionSystem.js";
+import { getBuildingMultiplier } from "./BuildingSystem.js";
 
 export { getDriftConstructionSlots };
 
@@ -176,7 +177,7 @@ export function advanceConstructionOneDay(state, currentDate, currentDayOffset) 
   for (const building of getActiveConstructionQueue(state)) {
     const rate = getBuildingDailyRate(building, state);
     building.quality = Math.min(BUILDING_ACTIVE_THRESHOLD, building.quality + rate);
-    building.multiplier = Math.floor(building.quality / 100);
+    building.multiplier = getBuildingMultiplier(building.quality);
 
     if (building.quality >= BUILDING_ACTIVE_THRESHOLD && !building.isComplete) {
       building.isComplete = true;

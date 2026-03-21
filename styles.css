@@ -3416,6 +3416,34 @@ textarea {
   box-shadow: 0 18px 38px rgba(5, 12, 17, 0.3);
 }
 
+.sidebar-publish-button.is-locked,
+.sidebar-publish-button:disabled {
+  opacity: 0.6;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.sidebar-publish-status {
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.sidebar-publish-status span {
+  color: rgba(219, 228, 244, 0.76);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.sidebar-publish-status.is-ready {
+  border-color: rgba(112, 241, 194, 0.28);
+}
+
+.sidebar-publish-status.is-locked {
+  border-color: rgba(255, 184, 112, 0.2);
+}
+
 .sidebar-nav__save-actions {
   display: grid;
   gap: 10px;
@@ -3694,6 +3722,57 @@ textarea {
   margin-top: 18px;
 }
 
+.player-session-banner,
+.player-mayor-panel {
+  margin-top: 18px;
+}
+
+.player-session-banner__grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.player-session-banner__grid article,
+.player-mayor-panel__item {
+  display: grid;
+  gap: 5px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.player-session-banner__grid span {
+  color: var(--muted);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.player-session-banner__grid strong {
+  font-size: 0.96rem;
+  color: rgba(246, 248, 255, 0.96);
+}
+
+.player-mayor-panel__list {
+  display: grid;
+  gap: 10px;
+}
+
+.player-mayor-panel__item strong {
+  font-family: var(--display-font);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.player-mayor-panel__item p {
+  margin: 0;
+  color: rgba(219, 228, 244, 0.78);
+  line-height: 1.5;
+}
+
 .player-citizens-summary__meta {
   display: flex;
   align-items: baseline;
@@ -3800,6 +3879,50 @@ textarea {
 .player-published-footer strong {
   color: rgba(244, 247, 255, 0.94);
   font-weight: 600;
+}
+
+.building-roles-panel,
+.build-notes-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.building-roles-panel__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+
+.building-role-chip {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(120, 148, 210, 0.2);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(20, 28, 46, 0.92), rgba(12, 18, 34, 0.96));
+}
+
+.building-role-chip strong {
+  color: var(--text-strong);
+  font-size: 0.94rem;
+}
+
+.building-role-chip span {
+  color: var(--text-soft);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.build-notes-panel__list {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.55rem;
+  color: var(--text-soft);
+}
+
+.build-notes-panel__list li {
+  line-height: 1.5;
 }
 
 .player-list__items {
@@ -3986,6 +4109,10 @@ body:-webkit-full-screen #app {
     grid-template-columns: 1fr;
   }
 
+  .player-session-banner__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .player-citizens-summary__list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -4001,6 +4128,10 @@ body:-webkit-full-screen #app {
 
 @media (max-width: 640px) {
   .player-hero__meta {
+    grid-template-columns: 1fr;
+  }
+
+  .player-session-banner__grid {
     grid-template-columns: 1fr;
   }
 

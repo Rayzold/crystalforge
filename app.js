@@ -108,10 +108,35 @@ function updateFirebasePublishedMeta(payload = null, connectionState = "idle") {
   renderer.transientUi.firebasePublishedMeta = payload
     ? {
         updatedAtMs: Number(payload.updatedAtMs ?? 0) || null,
-        updatedBy: payload.updatedBy ?? null
+        updatedBy: payload.updatedBy ?? null,
+        appVersion: payload.appVersion ?? null
       }
     : null;
   renderer.transientUi.firebaseConnectionState = connectionState;
+}
+
+async function syncFirebaseIdentityUi() {
+  if (!isFirebaseConfigured()) {
+    renderer.transientUi.firebaseCurrentUid = "";
+    renderer.transientUi.firebaseCanPublish = false;
+    return;
+  }
+
+  try {
+    await ensureFirebaseAuth();
+    const currentUid = getFirebaseUserId() ?? "";
+    const state = getCurrentState();
+    renderer.transientUi.firebaseCurrentUid = currentUid;
+    renderer.transientUi.firebaseCanPublish = Boolean(
+      state.ui.adminUnlocked &&
+      state.settings.firebasePublisherUid &&
+      currentUid &&
+      state.settings.firebasePublisherUid === currentUid
+    );
+  } catch (error) {
+    renderer.transientUi.firebaseCurrentUid = "";
+    renderer.transientUi.firebaseCanPublish = false;
+  }
 }
 
 function clearProjectorChromeTimer() {
@@ -1545,6 +1570,7 @@ const actions = {
         commit((draft) => {
           draft.settings.firebasePublisherUid = currentUid;
         });
+        await syncFirebaseIdentityUi();
         reportSuccess(`GM publisher UID set to ${currentUid}.`);
       } catch (error) {
         reportError(error.message);
@@ -1554,6 +1580,7 @@ const actions = {
       commit((draft) => {
         draft.settings.firebasePublisherUid = "";
       });
+      void syncFirebaseIdentityUi();
       reportSuccess("GM publisher UID cleared.");
     },
     async saveFirebaseRealm() {
@@ -2198,6 +2225,7 @@ async function autoLoadSharedStateIfEnabled() {
   }
 
   try {
+    await syncFirebaseIdentityUi();
     await connectFirebaseLiveSync();
   } catch (error) {
     updateFirebasePublishedMeta(null, "disconnected");

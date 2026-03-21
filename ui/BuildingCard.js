@@ -75,12 +75,20 @@ function getCompactStatus(building, { isIncomplete, isActiveConstruction, queueP
     return "Ruined / inactive until repaired";
   }
   if (!isIncomplete) {
-    return `Active / ${formatBuildingQualityDisplay(building)}`;
+    return `Operational / ${formatBuildingQualityDisplay(building)}`;
   }
   if (isActiveConstruction) {
     return `Growing now / ETA ${eta}`;
   }
   return `Queued #${queuePosition + 1} / ${driftSlots} slots`;
+}
+
+function getCompactStageBadge(building) {
+  const label = formatBuildingQualityDisplay(building);
+  if (label === "Active") {
+    return "ACT";
+  }
+  return label.replace("Level ", "L");
 }
 
 function getBuildingSignature(building) {
@@ -147,10 +155,10 @@ export function renderBuildingCard(building, state) {
             <h4>${building.mapPosition ? `Hex ${building.mapPosition.q}, ${building.mapPosition.r}` : "Awaiting placement"}</h4>
             <p>${escapeHtml(compactStatus)}</p>
           </div>
-          <strong class="building-card__multiplier">${building.isComplete ? formatBuildingQualityDisplay(building).replace("Level ", "L") : "--"}</strong>
+          <strong class="building-card__multiplier">${building.isComplete ? getCompactStageBadge(building) : "--"}</strong>
         </div>
         <div class="building-card__quality">
-          <span>Quality ${escapeHtml(formatBuildingQualityDisplay(building))}</span>
+          <span>Stage ${escapeHtml(formatBuildingQualityDisplay(building))}</span>
           <span>${isRuined ? "Ruined" : building.isComplete ? "Complete" : "Incomplete"}</span>
         </div>
         <div class="progress-bar"><span style="width:${progressPercent}%"></span></div>

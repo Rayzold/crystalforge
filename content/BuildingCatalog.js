@@ -292,6 +292,20 @@ export function createCatalogEntryFromInput({ name, rarity, district, tags, icon
   };
 }
 
+export const BUILDING_ROLE_LEGEND = [
+  { key: "agriculture", emoji: "🌿", label: "Harvest", detail: "Food, herbs, and living growth." },
+  { key: "trade", emoji: "💰", label: "Trade", detail: "Gold flow, markets, and exchange." },
+  { key: "industry", emoji: "🛠️", label: "Industry", detail: "Materials, salvage, and crafted output." },
+  { key: "military", emoji: "🛡️", label: "Military", detail: "Defense, readiness, and force." },
+  { key: "arcane", emoji: "✨", label: "Arcane", detail: "Mana, study, and mystical systems." },
+  { key: "religious", emoji: "⛪", label: "Sacred", detail: "Faith, rites, healing, and reverence." },
+  { key: "housing", emoji: "🏠", label: "Housing", detail: "Population support and settlement space." },
+  { key: "civic", emoji: "🏛️", label: "Civic", detail: "Order, law, records, and governance." },
+  { key: "harbor", emoji: "⚓", label: "Harbor", detail: "Routes, docks, and travel access." },
+  { key: "culture", emoji: "📜", label: "Culture", detail: "Prestige, memory, and city identity." },
+  { key: "frontier", emoji: "🧭", label: "Frontier", detail: "Exploration, scouting, and outer reach." }
+];
+
 export function getBuildingEmoji(building) {
   if (!building) {
     return "🏗️";

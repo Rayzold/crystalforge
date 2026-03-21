@@ -4,25 +4,45 @@ import { createId } from "../engine/Utils.js";
 import { createBuildingGameplayProfile } from "./BalanceSystem.js";
 import { addShards } from "./ShardSystem.js";
 
-function getMultiplier(quality) {
-  return Math.min(3, Math.floor(quality / 100));
+export function getBuildingMultiplier(quality) {
+  if (quality >= BUILDING_QUALITY_CAP) {
+    return 3;
+  }
+  if (quality >= 220) {
+    return 2;
+  }
+  if (quality >= BUILDING_ACTIVE_THRESHOLD) {
+    return 1;
+  }
+  return 0;
 }
 
 export function getBuildingLevel(quality) {
-  return Math.max(1, getMultiplier(quality));
+  return Math.max(1, getBuildingMultiplier(quality));
 }
 
 export function formatBuildingQualityDisplay(building) {
   const quality = Number(building?.quality ?? 0);
-  if (quality > BUILDING_ACTIVE_THRESHOLD) {
+  if (quality >= 300) {
     return `Level ${getBuildingLevel(quality)}`;
   }
+  if (quality >= 200) {
+    return "Level 2";
+  }
+  if (quality >= BUILDING_ACTIVE_THRESHOLD) {
+    return "Active";
+  }
+  return `${Math.round(quality)}%`;
+}
+
+export function formatBuildingExactQualityDisplay(building) {
+  const quality = Number(building?.quality ?? 0);
   return `${Math.round(quality)}%`;
 }
 
 function updateCompletionState(building, completedAt, completedDayOffset) {
   const wasComplete = building.isComplete;
-  building.multiplier = getMultiplier(building.quality);
+  building.multiplier = getBuildingMultiplier(building.quality);
   building.isComplete = building.quality >= BUILDING_ACTIVE_THRESHOLD;
   if (!wasComplete && building.isComplete && !building.completedAt) {
     building.completedAt = completedAt;
@@ -104,7 +124,7 @@ export function removeBuilding(state, buildingId) {
 export function setBuildingQuality(building, quality) {
   const wasComplete = building.isComplete;
   building.quality = Math.max(0, Math.min(BUILDING_QUALITY_CAP, Number(quality)));
-  building.multiplier = getMultiplier(building.quality);
+  building.multiplier = getBuildingMultiplier(building.quality);
   building.isComplete = building.quality >= BUILDING_ACTIVE_THRESHOLD;
   if (!wasComplete && building.isComplete && !building.completedAt) {
     building.completedAt = building.lastManifestedAt ?? building.createdAt ?? null;

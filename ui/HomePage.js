@@ -1,4 +1,6 @@
 import { renderUiIcon } from "./UiIcons.js";
+import { BUILDING_ROLE_LEGEND } from "../content/BuildingCatalog.js";
+import { APP_VERSION, BUILD_NOTES } from "../content/Config.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js";
 import { formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
@@ -548,6 +550,39 @@ function renderMayorAdvice(state) {
   `;
 }
 
+function renderBuildingRolesLegend() {
+  return `
+    <section class="panel building-roles-panel">
+      <div class="panel__header">
+        <h3>Building Roles</h3>
+        <span class="panel__subtle">Quick legend for the main building profiles.</span>
+      </div>
+      <div class="building-roles-panel__list">
+        ${BUILDING_ROLE_LEGEND.map((role) => `
+          <article class="building-role-chip">
+            <strong>${escapeHtml(`${role.emoji} ${role.label}`)}</strong>
+            <span>${escapeHtml(role.detail)}</span>
+          </article>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderBuildNotesPanel(buildLabel = APP_VERSION) {
+  return `
+    <section class="panel build-notes-panel">
+      <div class="panel__header">
+        <h3>Build Notes</h3>
+        <span class="panel__subtle">What changed in ${escapeHtml(buildLabel)}.</span>
+      </div>
+      <ul class="build-notes-panel__list">
+        ${BUILD_NOTES.map((note) => `<li>${escapeHtml(note)}</li>`).join("")}
+      </ul>
+    </section>
+  `;
+}
+
 export function renderHomePage(state) {
   const liveSessionView = state.settings.liveSessionView;
   return {
@@ -563,6 +598,8 @@ export function renderHomePage(state) {
     aside: `
       ${renderHomeSignals(state)}
       ${renderMayorAdvice(state)}
+      ${renderBuildingRolesLegend()}
+      ${renderBuildNotesPanel()}
     `
   };
 }

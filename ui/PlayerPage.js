@@ -1,11 +1,12 @@
-import { APP_VERSION, FIREBASE_DEFAULT_REALM_ID } from "../content/Config.js";
-import { getBuildingEmoji } from "../content/BuildingCatalog.js";
+import { APP_VERSION, BUILD_NOTES, FIREBASE_DEFAULT_REALM_ID } from "../content/Config.js";
+import { BUILDING_ROLE_LEGEND, getBuildingEmoji } from "../content/BuildingCatalog.js";
 import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER, getCitizenHelpText } from "../content/CitizenConfig.js";
 import { RARITY_ORDER } from "../content/Rarities.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
-import { formatDate } from "../systems/CalendarSystem.js";
+import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js";
 import { formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
 import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js";
+import { getMayorAdvice } from "../systems/TownFocusSystem.js";
 import { renderCrystalSelector } from "./CrystalSelector.js";
 import { createHelpBubble } from "./HelpBubbles.js";
 import { renderManifestPanel } from "./ManifestPanel.js";
@@ -24,13 +25,14 @@ function renderStatusPill(state) {
   const timestamp = meta?.updatedAtMs
     ? new Date(meta.updatedAtMs).toLocaleString()
     : "No published timestamp yet";
+  const publishedBuild = meta?.appVersion ?? APP_VERSION;
 
   return `
     <div class="player-status ${connectionState === "connected" ? "is-connected" : connectionState === "disconnected" ? "is-disconnected" : ""}">
       <strong>${statusLabel}</strong>
       <span>Published realm: ${escapeHtml(String(publishedRealmId))}</span>
       <span>Last published: ${escapeHtml(timestamp)}</span>
-      <span>Published build: ${escapeHtml(APP_VERSION)}</span>
+      <span>Published build: ${escapeHtml(publishedBuild)}</span>
     </div>
   `;
 }
@@ -41,13 +43,123 @@ function renderPublishedFooter(state) {
   const timestamp = meta?.updatedAtMs
     ? new Date(meta.updatedAtMs).toLocaleString()
     : "No published timestamp yet";
+  const publishedBuild = meta?.appVersion ?? APP_VERSION;
 
   return `
     <footer class="player-published-footer">
       <span>Published realm <strong>${escapeHtml(String(publishedRealmId))}</strong></span>
       <span>Last published <strong>${escapeHtml(timestamp)}</strong></span>
-      <span>Build <strong>${escapeHtml(APP_VERSION)}</strong></span>
+      <span>Build <strong>${escapeHtml(publishedBuild)}</strong></span>
     </footer>
+  `;
+}
+
+function renderPlayerSessionBanner(state) {
+  const date = getStructuredDate(state.calendar.dayOffset);
+  const meta = state.transientUi?.firebasePublishedMeta ?? null;
+  const timestamp = meta?.updatedAtMs ? new Date(meta.updatedAtMs).toLocaleString() : "No published timestamp yet";
+
+  return `
+    <section class="panel player-session-banner">
+      <div class="panel__header">
+        <div>
+          <h3>Session Banner</h3>
+          <span class="panel__subtle">The current shared table state at a glance</span>
+        </div>
+      </div>
+      <div class="player-session-banner__grid">
+        <article>
+          <span>Date</span>
+          <strong>${escapeHtml(`${date.weekday}, ${date.month} ${date.day}`)}</strong>
+        </article>
+        <article>
+          <span>Holiday</span>
+          <strong>${escapeHtml(date.holiday?.name ?? "None today")}</strong>
+        </article>
+        <article>
+          <span>Weather</span>
+          <strong>${escapeHtml(`${date.weather.icon} ${date.weather.name}`)}</strong>
+        </article>
+        <article>
+          <span>Moon</span>
+          <strong>${escapeHtml(`${date.moonPhase.icon} ${date.moonPhase.name}`)}</strong>
+        </article>
+        <article>
+          <span>Published</span>
+          <strong>${escapeHtml(timestamp)}</strong>
+        </article>
+      </div>
+    </section>
+  `;
+}
+
+function renderPlayerMayorPriorities(state) {
+  const advice = getMayorAdvice(state).slice(0, 3);
+  return `
+    <section class="panel player-mayor-panel">
+      <div class="panel__header">
+        <div>
+          <h3>Mayor's Priorities</h3>
+          <span class="panel__subtle">What the city most needs right now</span>
+        </div>
+      </div>
+      <div class="player-mayor-panel__list">
+        ${
+          advice.length
+            ? advice
+                .map(
+                  (entry) => `
+                    <article class="player-mayor-panel__item">
+                      <strong>${escapeHtml(entry.title)}</strong>
+                      <p>${escapeHtml(entry.detail)}</p>
+                    </article>
+                  `
+                )
+                .join("")
+            : `<p class="empty-state">The mayor has no urgent priorities right now.</p>`
+        }
+      </div>
+    </section>
+  `;
+}
+
+function renderBuildingRolesLegend() {
+  return `
+    <section class="panel building-roles-panel">
+      <div class="panel__header">
+        <div>
+          <h3>Building Roles</h3>
+          <span class="panel__subtle">How the main building profiles read at a glance.</span>
+        </div>
+      </div>
+      <div class="building-roles-panel__list">
+        ${BUILDING_ROLE_LEGEND.map((role) => `
+          <article class="building-role-chip">
+            <strong>${escapeHtml(`${role.emoji} ${role.label}`)}</strong>
+            <span>${escapeHtml(role.detail)}</span>
+          </article>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderBuildNotesPanel(state) {
+  const meta = state.transientUi?.firebasePublishedMeta ?? null;
+  const buildLabel = meta?.appVersion ?? APP_VERSION;
+
+  return `
+    <section class="panel build-notes-panel">
+      <div class="panel__header">
+        <div>
+          <h3>Build Notes</h3>
+          <span class="panel__subtle">What changed in ${escapeHtml(buildLabel)}.</span>
+        </div>
+      </div>
+      <ul class="build-notes-panel__list">
+        ${BUILD_NOTES.map((note) => `<li>${escapeHtml(note)}</li>`).join("")}
+      </ul>
+    </section>
   `;
 }
 
@@ -265,15 +377,19 @@ export function renderPlayerPage(state) {
           </article>
         </div>
       </section>
+      ${renderPlayerSessionBanner(state)}
+      ${renderPlayerMayorPriorities(state)}
       ${renderCitizenSummaryToggle(state)}
       ${renderCrystalSelector(state)}
       ${renderManifestPanel(state)}
       ${renderBuildingRarityFilters(state)}
+      ${renderBuildingRolesLegend()}
       <section class="player-lists">
         ${renderManifestedList("Active Buildings", "Manifested and already part of the Drift.", manifested, "No active buildings yet.", state)}
         ${renderIncubationList("Incubating Buildings", "Buildings currently growing inside an incubator slot.", incubating, "Nothing is incubating right now.", "incubating", state)}
       </section>
       ${renderIncubationList("Available Buildings", "Waiting buildings that can be swapped into an incubator.", available, "No waiting buildings are ready to incubate.", "available", state)}
+      ${renderBuildNotesPanel(state)}
       ${renderPublishedFooter(state)}
     `
   };

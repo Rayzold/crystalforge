@@ -4,7 +4,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.2.21";
+export const APP_VERSION = "v1.2.24";
 export const SAVE_VERSION = 9;
 export const STORAGE_KEY = "crystal-forge-save-v2";
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v2";
@@ -32,6 +32,11 @@ export const PAGE_ROUTES = [
   { key: "city", label: "City", href: "./city.html" },
   { key: "citizens", label: "Citizens", href: "./citizens.html" },
   { key: "chronicle", label: "Chronicle", href: "./chronicle.html" }
+];
+export const BUILD_NOTES = [
+  "Building productivity thresholds now match the intended progression: 100% for Active, 220% for Level 2, and 350% for Level 3.",
+  "Any quality rolled beyond the 350% cap still converts into shard dust for that same rarity.",
+  "The new building roles legend and build notes panels remain visible in both GM and player views."
 ];
 export const BUILDING_QUALITY_CAP = 350;
 export const BUILDING_ACTIVE_THRESHOLD = 100;
