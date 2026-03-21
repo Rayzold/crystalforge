@@ -4,7 +4,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.2.14";
+export const APP_VERSION = "v1.2.15";
 export const SAVE_VERSION = 9;
 export const STORAGE_KEY = "crystal-forge-save-v2";
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v2";

@@ -1,5 +1,5 @@
 import { MONTHS } from "../content/CalendarConfig.js";
-import { createCatalogEntryFromInput } from "../content/BuildingCatalog.js";
+import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "../content/BuildingCatalog.js";
 import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER } from "../content/CitizenConfig.js";
 import { GM_QUICK_CRYSTAL_PACKS, GM_QUICK_EVENT_IDS, SAVE_SLOT_COUNT, SPEED_MULTIPLIERS } from "../content/Config.js";
 import { EVENT_POOLS } from "../content/EventPools.js";
@@ -159,10 +159,13 @@ function renderUnmanifestedBuildingOptions(state) {
   const optionsList = RARITY_ORDER.flatMap((rarity) =>
     (state.rollTables[rarity] ?? [])
       .filter((name) => !state.buildings.some((building) => building.name === name && building.rarity === rarity))
-      .map((name) => ({
-        value: `${rarity}::${name}`,
-        label: `${name} (${rarity})`
-      }))
+      .map((name) => {
+        const catalogEntry = state.buildingCatalog[getCatalogKey(name, rarity)] ?? { name, rarity, iconKey: "spire", tags: [] };
+        return {
+          value: `${rarity}::${name}`,
+          label: `${getBuildingEmoji(catalogEntry)} ${name} (${rarity})`
+        };
+      })
   );
 
   if (!optionsList.length) {
@@ -193,7 +196,7 @@ function renderManifestedBuildingAdminList(state) {
           (building) => `
             <article class="admin-active-building-card">
               <div class="admin-active-building-card__meta">
-                <strong>${escapeHtml(building.displayName)}</strong>
+                <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
                 <span>${escapeHtml(building.rarity)} / ${escapeHtml(building.district ?? "Unassigned")}</span>
                 <small>${building.mapPosition ? escapeHtml(`Placed at ${building.mapPosition.q}, ${building.mapPosition.r}`) : "Unplaced"} · ${escapeHtml(`${Math.round(building.quality)}% quality`)}</small>
               </div>
@@ -791,7 +794,7 @@ export class AdminConsole {
             <button class="button" data-admin-action="spawn-building">Spawn Building</button>
 
             <div class="admin-grid">
-              <label>Edit Building<select id="edit-building-id">${buildingOptions.map((building) => `<option value="${building.id}" ${selectedBuilding?.id === building.id ? "selected" : ""}>${escapeHtml(building.displayName)} (${building.rarity})</option>`).join("")}</select></label>
+              <label>Edit Building<select id="edit-building-id">${buildingOptions.map((building) => `<option value="${building.id}" ${selectedBuilding?.id === building.id ? "selected" : ""}>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName} (${building.rarity})`)}</option>`).join("")}</select></label>
               <label>Quality<input id="edit-building-quality" type="number" value="${selectedBuilding?.quality ?? 100}" min="0" max="350" /></label>
               <label>District<input id="edit-building-district" value="${escapeHtml(selectedBuilding?.district ?? "Residential District")}" /></label>
               <label>Icon Key<input id="edit-building-icon" value="${escapeHtml(selectedBuilding?.iconKey ?? "spire")}" /></label>

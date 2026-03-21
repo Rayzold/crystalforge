@@ -1,4 +1,4 @@
-import { getCatalogKey } from "../content/BuildingCatalog.js";
+import { getBuildingEmoji, getCatalogKey } from "../content/BuildingCatalog.js";
 import { RARITY_ORDER } from "../content/Rarities.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { renderModal } from "./Modal.js";
@@ -13,6 +13,8 @@ function getCatalogEntries(state) {
         name,
         rarity,
         district: entry?.district ?? "Unknown District",
+        iconKey: entry?.iconKey ?? null,
+        tags: entry?.tags ?? [],
         manifested,
         status
       };
@@ -47,7 +49,7 @@ function renderRows(entries) {
   return entries
     .map((entry) => `
       <tr>
-        <td>${escapeHtml(entry.name)}</td>
+        <td>${escapeHtml(`${getBuildingEmoji(entry.manifested ?? { name: entry.name, rarity: entry.rarity, iconKey: entry.iconKey, tags: entry.tags })} ${entry.name}`)}</td>
         <td>${escapeHtml(entry.rarity)}</td>
         <td>${escapeHtml(entry.district)}</td>
         <td>${escapeHtml(entry.status)}</td>
