@@ -212,3 +212,52 @@ export const CITIZEN_DEFINITIONS = {
 };
 
 export const CITIZEN_PROMOTION_PATHS = [];
+
+const CITIZEN_EFFECT_LABELS = {
+  food: "food",
+  materials: "materials",
+  salvage: "salvage",
+  mana: "mana",
+  gold: "gold",
+  prosperity: "prosperity",
+  goods: "goods",
+  health: "health",
+  morale: "morale",
+  security: "security",
+  defense: "defense",
+  prestige: "prestige"
+};
+
+function joinLabels(labels) {
+  if (!labels.length) {
+    return "";
+  }
+  if (labels.length === 1) {
+    return labels[0];
+  }
+  if (labels.length === 2) {
+    return `${labels[0]} and ${labels[1]}`;
+  }
+  return `${labels.slice(0, -1).join(", ")}, and ${labels[labels.length - 1]}`;
+}
+
+export function getCitizenHelpText(citizenClass) {
+  const definition = CITIZEN_DEFINITIONS[citizenClass];
+  if (!definition) {
+    return "Citizen role.";
+  }
+
+  const productionKeys = Object.keys(definition.production ?? {}).map((key) => CITIZEN_EFFECT_LABELS[key] ?? key.toLowerCase());
+  const statKeys = Object.keys(definition.stats ?? {}).map((key) => CITIZEN_EFFECT_LABELS[key] ?? key.toLowerCase());
+  const parts = [definition.flavor];
+
+  if (productionKeys.length) {
+    parts.push(`Produces ${joinLabels(productionKeys)}.`);
+  }
+
+  if (statKeys.length) {
+    parts.push(`Supports ${joinLabels(statKeys)}.`);
+  }
+
+  return parts.join(" ");
+}

@@ -8,6 +8,7 @@ import {
   getDriftConstructionSlots,
   isBuildingActivelyConstructed
 } from "../systems/ConstructionSystem.js";
+import { formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
 import { renderUiIcon } from "./UiIcons.js";
 
 function renderIcon(iconKey) {
@@ -74,7 +75,7 @@ function getCompactStatus(building, { isIncomplete, isActiveConstruction, queueP
     return "Ruined / inactive until repaired";
   }
   if (!isIncomplete) {
-    return `Active x${building.multiplier}`;
+    return `Active / ${formatBuildingQualityDisplay(building)}`;
   }
   if (isActiveConstruction) {
     return `Growing now / ETA ${eta}`;
@@ -146,10 +147,10 @@ export function renderBuildingCard(building, state) {
             <h4>${building.mapPosition ? `Hex ${building.mapPosition.q}, ${building.mapPosition.r}` : "Awaiting placement"}</h4>
             <p>${escapeHtml(compactStatus)}</p>
           </div>
-          <strong class="building-card__multiplier">${building.isComplete ? `x${building.multiplier}` : "--"}</strong>
+          <strong class="building-card__multiplier">${building.isComplete ? formatBuildingQualityDisplay(building).replace("Level ", "L") : "--"}</strong>
         </div>
         <div class="building-card__quality">
-          <span>Quality ${formatNumber(building.quality, 2)}%</span>
+          <span>Quality ${escapeHtml(formatBuildingQualityDisplay(building))}</span>
           <span>${isRuined ? "Ruined" : building.isComplete ? "Complete" : "Incomplete"}</span>
         </div>
         <div class="progress-bar"><span style="width:${progressPercent}%"></span></div>

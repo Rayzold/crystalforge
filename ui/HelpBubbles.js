@@ -7,6 +7,7 @@ const HELP_TEXT = {
   "First Steps Thread": "A compact early-session guide for getting the first manifestations and placements underway.",
   "Featured Structures": "Highlights notable manifested buildings so the table can quickly revisit important pieces of the city.",
   "Policy Memory": "Shows the recent Town Focus choices so you can remember the city's latest strategic direction.",
+  "Mayor's Advice": "A short list of the mayor's current recommendations based on shortages, missing city roles, and neglected operations.",
   "Roll Table Review": "Summarizes how many buildings remain unmanifested in each rarity pool.",
   "Command Shelves": "Organizes Home page information into grouped shelves instead of one long dashboard.",
   "Recent Signals": "A short preview of the latest notable events and archive entries before opening Chronicle.",
@@ -43,7 +44,7 @@ const HELP_TEXT = {
   "Town Focus Council": "Pick the settlement's current focus when the council window opens, or review the active policy."
 };
 
-function createHelpBubble(text) {
+export function createHelpBubble(text) {
   return `
     <div class="help-bubble-wrap">
       <button

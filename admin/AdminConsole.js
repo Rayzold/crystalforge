@@ -1,14 +1,15 @@
 import { MONTHS } from "../content/CalendarConfig.js";
 import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "../content/BuildingCatalog.js";
-import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER } from "../content/CitizenConfig.js";
+import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER, getCitizenHelpText } from "../content/CitizenConfig.js";
 import { GM_QUICK_CRYSTAL_PACKS, GM_QUICK_EVENT_IDS, SAVE_SLOT_COUNT, SPEED_MULTIPLIERS } from "../content/Config.js";
 import { EVENT_POOLS } from "../content/EventPools.js";
 import { RARITY_ORDER } from "../content/Rarities.js";
 import { TOWN_FOCUS_DEFINITIONS } from "../content/TownFocusConfig.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
-import { attachHelpBubbles } from "../ui/HelpBubbles.js";
+import { attachHelpBubbles, createHelpBubble } from "../ui/HelpBubbles.js";
 import { renderModal } from "../ui/Modal.js";
 import { formatDate } from "../systems/CalendarSystem.js";
+import { formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
 import { getDriftEvolutionStages } from "../systems/DriftEvolutionSystem.js";
 import { getAllManualSaveMeta, getManualSaveMeta } from "../systems/StorageSystem.js";
 
@@ -61,6 +62,7 @@ function citizenControls(state) {
                     <span class="admin-citizen-label__emoji" aria-hidden="true">${escapeHtml(emoji)}</span>
                     <span>${escapeHtml(citizenClass)}</span>
                   </span>
+                  ${createHelpBubble(getCitizenHelpText(citizenClass))}
                   <input type="number" id="citizen-${citizenClass}" value="1" min="0" />
                   <button class="button button--ghost" data-admin-action="citizen-add" data-citizen-class="${citizenClass}">Add</button>
                   <button class="button button--ghost" data-admin-action="citizen-remove" data-citizen-class="${citizenClass}">Remove</button>
@@ -155,6 +157,15 @@ function renderQuickEvents() {
   `;
 }
 
+function renderHelpActionButton(action, label, helpText) {
+  return `
+    <div class="admin-help-action">
+      <button class="button button--ghost" data-admin-action="${escapeHtml(action)}">${escapeHtml(label)}</button>
+      ${createHelpBubble(helpText)}
+    </div>
+  `;
+}
+
 function renderUnmanifestedBuildingOptions(state) {
   const optionsList = RARITY_ORDER.flatMap((rarity) =>
     (state.rollTables[rarity] ?? [])
@@ -198,7 +209,7 @@ function renderManifestedBuildingAdminList(state) {
               <div class="admin-active-building-card__meta">
                 <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
                 <span>${escapeHtml(building.rarity)} / ${escapeHtml(building.district ?? "Unassigned")}</span>
-                <small>${building.mapPosition ? escapeHtml(`Placed at ${building.mapPosition.q}, ${building.mapPosition.r}`) : "Unplaced"} · ${escapeHtml(`${Math.round(building.quality)}% quality`)}</small>
+                <small>${building.mapPosition ? escapeHtml(`Placed at ${building.mapPosition.q}, ${building.mapPosition.r}`) : "Unplaced"} · ${escapeHtml(`${formatBuildingQualityDisplay(building)} quality`)}</small>
               </div>
               <button class="button button--ghost" data-admin-action="remove-active-building" data-building-id="${building.id}">
                 Unmanifest
@@ -1048,21 +1059,21 @@ export class AdminConsole {
               · Auto-load:
               <strong>${state.settings.autoLoadSharedState ? "Enabled" : "Disabled"}</strong>
             </p>
-            <div class="admin-actions">
-              <button class="button button--ghost" data-admin-action="set-active-save-slot">Use Slot</button>
-              <button class="button button--ghost" data-admin-action="save-manual-state">Save Local State</button>
-              <button class="button button--ghost" data-admin-action="load-manual-state">Load Local State</button>
-              <button class="button button--ghost" data-admin-action="export-save">Export Save JSON</button>
-              <button class="button button--ghost" data-admin-action="copy-save-json">Copy Save JSON</button>
-              <button class="button button--ghost" data-admin-action="import-save">Import Save JSON</button>
-              <button class="button button--ghost" data-admin-action="load-shared-state-url">Load Shared URL</button>
-              <button class="button button--ghost" data-admin-action="remember-shared-state-url">Remember Shared URL</button>
-              <button class="button button--ghost" data-admin-action="toggle-shared-autoload">${state.settings.autoLoadSharedState ? "Disable Shared Auto-Load" : "Enable Shared Auto-Load"}</button>
-              <button class="button button--ghost" data-admin-action="clear-buildings">Delete All Buildings</button>
-              <button class="button button--ghost" data-admin-action="reset-save">Reset Save</button>
-              <button class="button button--ghost" data-admin-action="session-reset">Reset to Live Session</button>
-              <button class="button button--ghost" data-admin-action="testing-reset">Reset to Testing State</button>
-              <button class="button button--ghost" data-admin-action="full-reset">Full Reset (1 Common Crystal)</button>
+            <div class="admin-actions admin-actions--with-help">
+              ${renderHelpActionButton("set-active-save-slot", "Use Slot", "Switches the active manual save slot. Future local saves and loads use this slot until you change it again.")}
+              ${renderHelpActionButton("save-manual-state", "Save Local State", "Stores the full current campaign in the selected local slot on this browser only.")}
+              ${renderHelpActionButton("load-manual-state", "Load Local State", "Loads the selected local slot from this browser and replaces the current session state.")}
+              ${renderHelpActionButton("export-save", "Export Save JSON", "Writes the current campaign state into the JSON box so you can copy or download it manually.")}
+              ${renderHelpActionButton("copy-save-json", "Copy Save JSON", "Copies the current campaign state as raw JSON to your clipboard.")}
+              ${renderHelpActionButton("import-save", "Import Save JSON", "Loads the JSON currently pasted into the big save box and replaces the current session.")}
+              ${renderHelpActionButton("load-shared-state-url", "Load Shared URL", "Fetches a public JSON save from the shared URL field and loads it immediately.")}
+              ${renderHelpActionButton("remember-shared-state-url", "Remember Shared URL", "Stores the shared URL in this browser so it can be reused later.")}
+              ${renderHelpActionButton("toggle-shared-autoload", state.settings.autoLoadSharedState ? "Disable Shared Auto-Load" : "Enable Shared Auto-Load", "When enabled, this browser tries to load the remembered shared URL automatically on startup.")}
+              ${renderHelpActionButton("clear-buildings", "Delete All Buildings", "Removes all buildings from the realm without resetting the rest of the save.")}
+              ${renderHelpActionButton("reset-save", "Reset Save", "Returns the campaign to the standard reset state for this build.")}
+              ${renderHelpActionButton("session-reset", "Reset to Live Session", "Resets the campaign to the lighter table-ready live session preset.")}
+              ${renderHelpActionButton("testing-reset", "Reset to Testing State", "Resets the campaign to the richer testing preset with extra crystals and stockpiles.")}
+              ${renderHelpActionButton("full-reset", "Full Reset (1 Common Crystal)", "Wipes the realm to a bare-minimum start with only one Common crystal.")}
             </div>
           </section>
         `
@@ -1093,18 +1104,18 @@ export class AdminConsole {
               · Auto-publish:
               <strong>${state.settings.firebaseAutoPublish ? "Enabled" : "Disabled"}</strong>
             </p>
-              <div class="admin-actions">
-                <button class="button button--ghost" data-admin-action="set-firebase-publisher-uid">Use Current Browser As GM Publisher</button>
-                <button class="button button--ghost" data-admin-action="clear-firebase-publisher-uid">Clear GM Publisher</button>
-                <button class="button button--ghost" data-admin-action="load-firebase-realm">Load Published</button>
-              <button class="button button--ghost" data-admin-action="load-firebase-working-realm">Load Working</button>
-              <button class="button button--ghost" data-admin-action="remember-firebase-realm">Remember Realm IDs</button>
-              <button class="button button--ghost" data-admin-action="save-firebase-realm">Save Current to Working</button>
-              <button class="button button--ghost" data-admin-action="publish-firebase-realm">Publish Current to Testers</button>
-              <button class="button button--ghost" data-admin-action="publish-firebase-working-realm">Publish Working to Testers</button>
-              <button class="button button--ghost" data-admin-action="toggle-firebase-autoload">${state.settings.firebaseAutoLoad ? "Disable Published Auto-Load" : "Enable Published Auto-Load"}</button>
-              <button class="button button--ghost" data-admin-action="toggle-firebase-live-sync">${state.settings.firebaseLiveSync ? "Disable Published Live Sync" : "Enable Published Live Sync"}</button>
-              <button class="button button--ghost" data-admin-action="toggle-firebase-auto-publish">${state.settings.firebaseAutoPublish ? "Disable Working Auto-Save" : "Enable Working Auto-Save"}</button>
+              <div class="admin-actions admin-actions--with-help">
+                ${renderHelpActionButton("set-firebase-publisher-uid", "Use Current Browser As GM Publisher", "Marks this browser's Firebase identity as the allowed GM publisher for protected write actions.")}
+                ${renderHelpActionButton("clear-firebase-publisher-uid", "Clear GM Publisher", "Removes the stored GM publisher UID so no browser is currently trusted to publish.")}
+                ${renderHelpActionButton("load-firebase-realm", "Load Published", "Loads the stable published realm that players should currently be seeing.")}
+                ${renderHelpActionButton("load-firebase-working-realm", "Load Working", "Loads the GM working draft realm without changing the published player state.")}
+                ${renderHelpActionButton("remember-firebase-realm", "Remember Realm IDs", "Stores the published and working Firebase realm IDs in this browser for future sessions.")}
+                ${renderHelpActionButton("save-firebase-realm", "Save Current to Working", "Saves the current GM state into the working Firebase realm without publishing it to players.")}
+                ${renderHelpActionButton("publish-firebase-realm", "Publish Current to Testers", "Immediately overwrites the published player realm with the state currently loaded in this browser.")}
+                ${renderHelpActionButton("publish-firebase-working-realm", "Publish Working to Testers", "Publishes the saved working Firebase realm to players without first loading it locally.")}
+                ${renderHelpActionButton("toggle-firebase-autoload", state.settings.firebaseAutoLoad ? "Disable Published Auto-Load" : "Enable Published Auto-Load", "When enabled, this browser automatically loads the published Firebase realm on startup.")}
+                ${renderHelpActionButton("toggle-firebase-live-sync", state.settings.firebaseLiveSync ? "Disable Published Live Sync" : "Enable Published Live Sync", "When enabled, this browser listens for published Firebase changes in real time.")}
+                ${renderHelpActionButton("toggle-firebase-auto-publish", state.settings.firebaseAutoPublish ? "Disable Working Auto-Save" : "Enable Working Auto-Save", "When enabled, GM save actions keep the working Firebase realm updated automatically.")}
             </div>
           </section>
         `

@@ -1,4 +1,4 @@
-import { DAYS_PER_MONTH } from "../content/CalendarConfig.js";
+import { DAYS_PER_MONTH, YEARLY_EVENTS } from "../content/CalendarConfig.js";
 import { escapeHtml } from "../engine/Utils.js";
 import {
   addMonthsToOffset,
@@ -10,6 +10,11 @@ import {
 import { renderUiIcon } from "./UiIcons.js";
 
 const WEEKDAY_ORDER = ["Moonday", "Tidesday", "Glimmerday", "Dreamday", "Soothingday", "Dazzleday", "Sunburstday"];
+
+function getHolidayTypeClass(holiday) {
+  const type = holiday?.type ?? "holiday";
+  return `chronicle-calendar__day--${String(type).toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+}
 
 function getDisplayMonthOffset(state) {
   const fallback = getMonthStartOffset(state.calendar.dayOffset);
@@ -75,19 +80,53 @@ function renderDayCell(state, dayOffset, selectedDayOffset, eventsByDay) {
 
   return `
     <button
-      class="chronicle-calendar__day ${isSelected ? "is-selected" : ""} ${isToday ? "is-today" : ""} ${date.holiday ? "is-holiday" : ""}"
+      class="chronicle-calendar__day ${isSelected ? "is-selected" : ""} ${isToday ? "is-today" : ""} ${date.holiday ? `is-holiday ${getHolidayTypeClass(date.holiday)}` : ""}"
       type="button"
       data-action="select-chronicle-day"
       data-day-offset="${dayOffset}"
       aria-pressed="${isSelected ? "true" : "false"}"
     >
-      <span class="chronicle-calendar__day-number">${date.day}</span>
+      <div class="chronicle-calendar__day-topline">
+        <span class="chronicle-calendar__day-number">${date.day}</span>
+        <span class="chronicle-calendar__day-moon" title="${escapeHtml(date.moonPhase.name)}">${date.moonPhase.icon}</span>
+      </div>
       <span class="chronicle-calendar__day-weekday">${escapeHtml(date.weekday.slice(0, 3))}</span>
+      ${date.holiday ? `<span class="chronicle-calendar__day-holiday">${escapeHtml(date.holiday.name)}</span>` : ""}
+      <span class="chronicle-calendar__day-weather chronicle-calendar__day-weather--${escapeHtml(date.weather.tone)}">${date.weather.icon} ${escapeHtml(date.weather.name)}</span>
       <span class="chronicle-calendar__day-meta">
         ${eventCount ? `<em>${eventCount} event${eventCount === 1 ? "" : "s"}</em>` : `<em>Quiet</em>`}
         ${noteText ? `<strong>Note</strong>` : ""}
       </span>
     </button>
+  `;
+}
+
+function renderYearlyEventsStrip(displayDate) {
+  const monthEvents = YEARLY_EVENTS.filter((event) => event.month === displayDate.month);
+  if (!monthEvents.length) {
+    return "";
+  }
+
+  return `
+    <section class="chronicle-calendar__yearly-events">
+      <div class="chronicle-calendar__section-title">
+        ${renderUiIcon("calendar", "Yearly Events")}
+        <span>Yearly Events In ${escapeHtml(displayDate.month)}</span>
+      </div>
+      <div class="chronicle-calendar__yearly-events-list">
+        ${monthEvents
+          .map(
+            (event) => `
+              <article class="chronicle-calendar__yearly-event ${getHolidayTypeClass(event)}">
+                <strong>${escapeHtml(event.name)}</strong>
+                <span>${escapeHtml(`${event.month} ${event.day}`)}</span>
+                <small>${escapeHtml(event.description ?? "A fixed date in the Drift calendar.")}</small>
+              </article>
+            `
+          )
+          .join("")}
+      </div>
+    </section>
   `;
 }
 
@@ -118,6 +157,7 @@ export function renderChronicleCalendar(state) {
       </div>
 
       <div class="chronicle-calendar__frame">
+        ${renderYearlyEventsStrip(displayDate)}
         <div class="chronicle-calendar__weekdays">
           ${WEEKDAY_ORDER.map((weekday) => `<span>${escapeHtml(weekday.slice(0, 3))}</span>`).join("")}
         </div>
@@ -141,6 +181,17 @@ export function renderChronicleCalendar(state) {
                 : `<span>${escapeHtml(selectedDate.season)}</span>`
             }
           </div>
+        </div>
+
+        <div class="chronicle-calendar__detail-conditions">
+          <article class="chronicle-calendar__detail-condition">
+            <span>Moon Phase</span>
+            <strong>${selectedDate.moonPhase.icon} ${escapeHtml(selectedDate.moonPhase.name)}</strong>
+          </article>
+          <article class="chronicle-calendar__detail-condition chronicle-calendar__detail-condition--${escapeHtml(selectedDate.weather.tone)}">
+            <span>Weather</span>
+            <strong>${selectedDate.weather.icon} ${escapeHtml(selectedDate.weather.name)}</strong>
+          </article>
         </div>
 
         <div class="chronicle-calendar__detail-grid">

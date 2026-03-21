@@ -9,6 +9,48 @@ import {
   WEEKDAYS
 } from "../content/CalendarConfig.js";
 
+const MOON_PHASES = [
+  { name: "New Moon", icon: "🌑", from: 0, to: 2 },
+  { name: "Waxing Crescent", icon: "🌒", from: 3, to: 5 },
+  { name: "First Quarter", icon: "🌓", from: 6, to: 9 },
+  { name: "Waxing Gibbous", icon: "🌔", from: 10, to: 12 },
+  { name: "Full Moon", icon: "🌕", from: 13, to: 15 },
+  { name: "Waning Gibbous", icon: "🌖", from: 16, to: 19 },
+  { name: "Last Quarter", icon: "🌗", from: 20, to: 22 },
+  { name: "Waning Crescent", icon: "🌘", from: 23, to: 27 }
+];
+
+const WEATHER_BY_SEASON = {
+  "Season of the Twilight": [
+    { name: "Pale Sun", icon: "🌤", tone: "clear" },
+    { name: "Snowfall", icon: "🌨", tone: "snow" },
+    { name: "Frostwind", icon: "💨", tone: "wind" },
+    { name: "Overcast", icon: "☁️", tone: "cloud" },
+    { name: "Hard Freeze", icon: "❄️", tone: "frost" }
+  ],
+  "Season of the Mists": [
+    { name: "Mistbound", icon: "🌫️", tone: "mist" },
+    { name: "Rainfall", icon: "🌧️", tone: "rain" },
+    { name: "Drizzle", icon: "🌦️", tone: "rain" },
+    { name: "Windlash", icon: "💨", tone: "wind" },
+    { name: "Clear Break", icon: "⛅", tone: "clear" }
+  ],
+  "Season of the Embers": [
+    { name: "Bright Sun", icon: "☀️", tone: "clear" },
+    { name: "Dry Heat", icon: "🌞", tone: "heat" },
+    { name: "Warm Gusts", icon: "🌬️", tone: "wind" },
+    { name: "Stormflash", icon: "⛈️", tone: "storm" },
+    { name: "Golden Skies", icon: "🌅", tone: "clear" }
+  ],
+  "Season of the Gloom": [
+    { name: "Ashen Overcast", icon: "☁️", tone: "cloud" },
+    { name: "Cold Rain", icon: "🌧️", tone: "rain" },
+    { name: "Dim Mist", icon: "🌫️", tone: "mist" },
+    { name: "Amber Wind", icon: "💨", tone: "wind" },
+    { name: "Dusklight", icon: "🌥️", tone: "clear" }
+  ]
+};
+
 const START_ORDINAL =
   START_DATE.year * DAYS_PER_YEAR +
   START_DATE.monthIndex * DAYS_PER_MONTH +
@@ -30,6 +72,17 @@ function ordinalSuffix(day) {
   }
 }
 
+function getMoonPhase(dayOffset = 0) {
+  const cycleDay = ((dayOffset % DAYS_PER_MONTH) + DAYS_PER_MONTH) % DAYS_PER_MONTH;
+  return MOON_PHASES.find((phase) => cycleDay >= phase.from && cycleDay <= phase.to) ?? MOON_PHASES[0];
+}
+
+function getWeatherForDate(year, monthIndex, day, season) {
+  const seasonalWeather = WEATHER_BY_SEASON[season] ?? WEATHER_BY_SEASON["Season of the Mists"];
+  const weatherIndex = Math.abs((year * 7 + monthIndex * 11 + day * 5) % seasonalWeather.length);
+  return seasonalWeather[weatherIndex];
+}
+
 export function getStructuredDate(dayOffset = 0) {
   const worldOrdinal = START_ORDINAL + dayOffset;
   const year = Math.floor(worldOrdinal / DAYS_PER_YEAR);
@@ -40,6 +93,7 @@ export function getStructuredDate(dayOffset = 0) {
   const weekdayIndex = (WEEKDAYS.indexOf(START_DATE.weekday) + dayOffset) % WEEKDAYS.length;
   const weekday = WEEKDAYS[(weekdayIndex + WEEKDAYS.length) % WEEKDAYS.length];
   const holiday = HOLIDAYS.find((entry) => entry.month === month && entry.day === day) ?? null;
+  const season = SEASON_BY_MONTH[month];
 
   return {
     dayOffset,
@@ -49,8 +103,10 @@ export function getStructuredDate(dayOffset = 0) {
     day,
     weekdayIndex,
     weekday,
-    season: SEASON_BY_MONTH[month],
-    holiday
+    season,
+    holiday,
+    moonPhase: getMoonPhase(dayOffset),
+    weather: getWeatherForDate(year, monthIndex, day, season)
   };
 }
 

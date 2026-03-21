@@ -1,6 +1,7 @@
 import { getBuildingEmoji, getCatalogKey } from "../content/BuildingCatalog.js";
 import { RARITY_ORDER } from "../content/Rarities.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
+import { formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
 import { renderModal } from "./Modal.js";
 
 function getCatalogEntries(state) {
@@ -53,7 +54,7 @@ function renderRows(entries) {
         <td>${escapeHtml(entry.rarity)}</td>
         <td>${escapeHtml(entry.district)}</td>
         <td>${escapeHtml(entry.status)}</td>
-        <td>${entry.manifested ? `${formatNumber(entry.manifested.quality, 2)}%` : "0%"}</td>
+        <td>${entry.manifested ? escapeHtml(formatBuildingQualityDisplay(entry.manifested)) : "0%"}</td>
       </tr>
     `)
     .join("");

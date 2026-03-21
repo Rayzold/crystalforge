@@ -1,6 +1,7 @@
 import { TOWN_FOCUS_DEFINITIONS, TOWN_FOCUS_INTERVAL_DAYS } from "../content/TownFocusConfig.js";
 import { addHistoryEntry } from "./HistoryLogSystem.js";
 import { addShards } from "./ShardSystem.js";
+import { getActiveConstructionQueue, getAvailableConstructionQueue, getDriftConstructionSlots } from "./ConstructionSystem.js";
 
 function uniqueFocuses(items) {
   return [...new Set(items.filter(Boolean))];
@@ -115,6 +116,129 @@ export function getMayorSuggestions(state) {
       }
     );
   });
+}
+
+export function getMayorAdvice(state) {
+  const advice = [];
+  const completedBuildings = state.buildings.filter((building) => building.isComplete && !building.isRuined);
+  const placedBuildings = completedBuildings.filter((building) => building.mapPosition);
+  const activeConstruction = getActiveConstructionQueue(state);
+  const availableConstruction = getAvailableConstructionQueue(state);
+  const constructionSlots = getDriftConstructionSlots(state);
+  const supportShortfall = Math.max(0, (state.resources.population ?? 0) - (state.cityStats.populationSupport ?? 0));
+  const runway = state.emergencyState?.runway ?? {};
+
+  const hasTag = (tag) => completedBuildings.some((building) => (building.tags ?? []).includes(tag));
+  const hasDistrict = (districtName) => completedBuildings.some((building) => building.district === districtName);
+
+  if ((runway.foodDays ?? null) !== null && runway.foodDays <= 7) {
+    advice.push({
+      id: "food-runway",
+      title: "Secure provisions",
+      detail: `Only ${runway.foodDays.toFixed(1)} days of food remain at the current pace. The mayor wants fields, fisheries, and ovens reinforced immediately.`,
+      href: "./city.html",
+      cta: "Review City"
+    });
+  } else if (!hasTag("agriculture")) {
+    advice.push({
+      id: "missing-agriculture",
+      title: "Establish food infrastructure",
+      detail: "The city still lacks an active agricultural backbone. The mayor wants a farm, fishery, grove, or granary brought online.",
+      href: "./forge.html",
+      cta: "Open Forge"
+    });
+  }
+
+  if (supportShortfall > 0) {
+    advice.push({
+      id: "housing-strain",
+      title: "Relieve housing strain",
+      detail: `${supportShortfall} citizens are beyond current support capacity. The mayor wants housing and civic comforts expanded before unrest spreads.`,
+      href: "./city.html",
+      cta: "Open City"
+    });
+  } else if (!hasTag("housing")) {
+    advice.push({
+      id: "missing-housing",
+      title: "Anchor the settlement",
+      detail: "No active housing foundation is in place yet. The mayor wants at least one residence, well, or public shelter made dependable.",
+      href: "./forge.html",
+      cta: "Manifest Housing"
+    });
+  }
+
+  if (availableConstruction.length > 0 && activeConstruction.length < constructionSlots) {
+    advice.push({
+      id: "idle-incubator",
+      title: "Fill idle incubators",
+      detail: `${constructionSlots - activeConstruction.length} incubator slot(s) are idle while ${availableConstruction.length} buildings wait for work. The mayor wants the queue tightened.`,
+      href: "./city.html",
+      cta: "Manage Incubators"
+    });
+  }
+
+  if (completedBuildings.length > 0 && placedBuildings.length < completedBuildings.length) {
+    advice.push({
+      id: "unplaced-buildings",
+      title: "Place dormant structures",
+      detail: `${completedBuildings.length - placedBuildings.length} active building(s) are still unplaced. The mayor wants them seated on the ring so their bonuses start mattering.`,
+      href: "./city.html",
+      cta: "Open Map"
+    });
+  }
+
+  if ((state.cityStats.defense ?? 0) <= 35 || (state.cityStats.security ?? 0) <= 25) {
+    advice.push({
+      id: "weak-defense",
+      title: "Raise the watch",
+      detail: "Defense and security are still too soft for the current threats. The mayor wants towers, walls, and drills given more weight.",
+      href: "./city.html",
+      cta: "Review Defenses"
+    });
+  } else if (!hasTag("military") && !hasDistrict("Military District")) {
+    advice.push({
+      id: "missing-military",
+      title: "Show a line of force",
+      detail: "The city has no active military footprint yet. The mayor wants at least one guard, wall, or barracks structure standing.",
+      href: "./forge.html",
+      cta: "Manifest Defense"
+    });
+  }
+
+  if ((runway.goldDays ?? null) !== null && runway.goldDays <= 10) {
+    advice.push({
+      id: "gold-runway",
+      title: "Refill the treasury",
+      detail: `Gold runway is down to ${runway.goldDays.toFixed(1)} days. The mayor wants trade buildings, routes, and commerce brought forward.`,
+      href: "./city.html",
+      cta: "Boost Trade"
+    });
+  } else if (!hasTag("trade")) {
+    advice.push({
+      id: "missing-trade",
+      title: "Open channels of trade",
+      detail: "No active trade presence is shaping the city yet. The mayor wants stalls, stores, or a market square brought into the fold.",
+      href: "./forge.html",
+      cta: "Manifest Trade"
+    });
+  }
+
+  const focusAdvice = getMayorSuggestions(state).map((entry) => ({
+    id: `focus-${entry.focusId}`,
+    title: TOWN_FOCUS_DEFINITIONS[entry.focusId]?.name ?? "Council Priority",
+    detail: entry.reason,
+    href: "./home.html",
+    cta: "Review Focus"
+  }));
+
+  const seen = new Set();
+  return [...advice, ...focusAdvice].filter((entry) => {
+    if (seen.has(entry.id)) {
+      return false;
+    }
+    seen.add(entry.id);
+    return true;
+  }).slice(0, 4);
 }
 
 export function getTownFocusHistory(state, limit = 5) {

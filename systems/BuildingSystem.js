@@ -8,6 +8,18 @@ function getMultiplier(quality) {
   return Math.min(3, Math.floor(quality / 100));
 }
 
+export function getBuildingLevel(quality) {
+  return Math.max(1, getMultiplier(quality));
+}
+
+export function formatBuildingQualityDisplay(building) {
+  const quality = Number(building?.quality ?? 0);
+  if (quality > BUILDING_ACTIVE_THRESHOLD) {
+    return `Level ${getBuildingLevel(quality)}`;
+  }
+  return `${Math.round(quality)}%`;
+}
+
 function updateCompletionState(building, completedAt, completedDayOffset) {
   const wasComplete = building.isComplete;
   building.multiplier = getMultiplier(building.quality);

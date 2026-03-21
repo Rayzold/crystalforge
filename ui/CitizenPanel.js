@@ -1,5 +1,6 @@
-import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER } from "../content/CitizenConfig.js";
+import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER, getCitizenHelpText } from "../content/CitizenConfig.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
+import { createHelpBubble } from "./HelpBubbles.js";
 import { renderUiIcon } from "./UiIcons.js";
 
 const CITIZEN_ICON_KEYS = {
@@ -42,19 +43,10 @@ const CITIZEN_GROUPS = CITIZEN_GROUP_ORDER.map((groupTitle) => ({
   classes: CITIZEN_CLASSES.filter((citizenClass) => CITIZEN_DEFINITIONS[citizenClass]?.group === groupTitle)
 }));
 
-function renderGroupHelp(note) {
-  return `
-    <div class="help-bubble-wrap">
-      <button class="help-bubble" type="button" aria-label="${escapeHtml(note)}" title="${escapeHtml(note)}">?</button>
-      <div class="help-bubble__tooltip">${escapeHtml(note)}</div>
-    </div>
-  `;
-}
-
 function renderCitizenTile(citizenClass, count, definition) {
   const keyEffect = Object.entries(definition?.stats ?? {})[0] ?? Object.entries(definition?.production ?? {})[0] ?? null;
   const summary = keyEffect ? `${keyEffect[0]} +${formatNumber(keyEffect[1], 2)} each` : "Support role";
-  const emoji = definition?.emoji ?? "•";
+  const emoji = definition?.emoji ?? "*";
 
   return `
     <article class="citizen-tile">
@@ -64,7 +56,7 @@ function renderCitizenTile(citizenClass, count, definition) {
           ${renderUiIcon(CITIZEN_ICON_KEYS[citizenClass] ?? "citizens", citizenClass)}
           <span>${escapeHtml(citizenClass)}</span>
         </div>
-        ${renderGroupHelp(definition?.flavor ?? "Citizen role")}
+        ${createHelpBubble(getCitizenHelpText(citizenClass))}
       </div>
       <strong>${formatNumber(count)}</strong>
       <small>${escapeHtml(summary)}</small>
@@ -92,7 +84,7 @@ export function renderCitizenPanel(state) {
                   <h4>${group.title}</h4>
                   <p>${formatNumber(total)} citizens</p>
                 </div>
-                ${renderGroupHelp(group.note)}
+                ${createHelpBubble(group.note)}
               </div>
               <div class="citizen-panel__grid citizen-panel__grid--grouped">
                 ${group.classes

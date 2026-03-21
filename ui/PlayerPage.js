@@ -1,11 +1,13 @@
 import { APP_VERSION, FIREBASE_DEFAULT_REALM_ID } from "../content/Config.js";
 import { getBuildingEmoji } from "../content/BuildingCatalog.js";
-import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER } from "../content/CitizenConfig.js";
+import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER, getCitizenHelpText } from "../content/CitizenConfig.js";
 import { RARITY_ORDER } from "../content/Rarities.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
+import { formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
 import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js";
 import { renderCrystalSelector } from "./CrystalSelector.js";
+import { createHelpBubble } from "./HelpBubbles.js";
 import { renderManifestPanel } from "./ManifestPanel.js";
 
 function renderStatusPill(state) {
@@ -80,7 +82,10 @@ function renderCitizenSummaryToggle(state) {
                   <div class="player-citizens-summary__list">
                     ${group.classes.map((citizenClass) => `
                       <article class="player-citizens-summary__item">
-                        <span>${escapeHtml(`${CITIZEN_DEFINITIONS[citizenClass]?.emoji ?? "*"} ${citizenClass}`)}</span>
+                        <span class="player-citizens-summary__label">
+                          <span>${escapeHtml(`${CITIZEN_DEFINITIONS[citizenClass]?.emoji ?? "*"} ${citizenClass}`)}</span>
+                          ${createHelpBubble(getCitizenHelpText(citizenClass))}
+                        </span>
                         <strong>${formatNumber(state.citizens?.[citizenClass] ?? 0, 0)}</strong>
                       </article>
                     `).join("")}
@@ -154,7 +159,7 @@ function renderManifestedList(title, subtitle, buildings, emptyText, state) {
                         <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
                         <span>${escapeHtml(building.rarity)} / ${escapeHtml(building.district ?? "Unassigned")}</span>
                       </div>
-                      <em>x${formatNumber(building.multiplier, 0)}</em>
+                      <em>${escapeHtml(formatBuildingQualityDisplay(building))}</em>
                     </article>
                   `
                 )

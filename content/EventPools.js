@@ -53,6 +53,94 @@ export const EVENT_POOLS = [
     effects: { moraleFlat: 8, prosperityFlat: 5 }
   },
   {
+    id: "new-dawning-observance",
+    name: "New Dawning Observance",
+    type: "civic",
+    rarity: "Common",
+    description: "The year opens with promises, clean ledgers, and a surge of public resolve.",
+    triggerSource: "calendar dates / holidays",
+    durationDays: 2,
+    effects: { moraleFlat: 5, prosperityFlat: 3 },
+    requirements: { holidaysAny: ["New Dawning"] }
+  },
+  {
+    id: "loves-embrace",
+    name: "Love's Embrace",
+    type: "social",
+    rarity: "Common",
+    description: "Partnerships, reunions, and public warmth soften the city's edge for a brief time.",
+    triggerSource: "calendar dates / holidays",
+    durationDays: 2,
+    effects: { moraleFlat: 6, healthFlat: 2 },
+    requirements: { holidaysAny: ["Love's Embrace"] }
+  },
+  {
+    id: "mists-equinox-watch",
+    name: "Mists' Equinox Watch",
+    type: "world",
+    rarity: "Uncommon",
+    description: "The city keeps careful watch as hidden roads and older moods briefly balance.",
+    triggerSource: "calendar dates / holidays",
+    durationDays: 2,
+    effects: { securityFlat: 4, prestigeFlat: 3 },
+    requirements: { holidaysAny: ["Mists' Equinox"] }
+  },
+  {
+    id: "renewal-census",
+    name: "Renewal Census",
+    type: "civic",
+    rarity: "Common",
+    description: "Public works reopen and the city takes stock of what can be built next.",
+    triggerSource: "calendar dates / holidays",
+    durationDays: 2,
+    effects: { materialsFlat: 10, prosperityFlat: 3 },
+    requirements: { holidaysAny: ["The Renewal"] }
+  },
+  {
+    id: "ascension-day",
+    name: "Ascension Day",
+    type: "civic",
+    rarity: "Uncommon",
+    description: "Ceremonial honors and civic pageantry sharpen the city's sense of destiny.",
+    triggerSource: "calendar dates / holidays",
+    durationDays: 2,
+    effects: { prestigeFlat: 6, moraleFlat: 4 },
+    requirements: { holidaysAny: ["The Ascension"] }
+  },
+  {
+    id: "zephyrs-calling",
+    name: "Zephyr's Calling",
+    type: "travel",
+    rarity: "Uncommon",
+    description: "Road crews, scouts, and harbor minds all move faster beneath favorable winds.",
+    triggerSource: "calendar dates / holidays",
+    durationDays: 3,
+    effects: { goldFlat: 12, securityFlat: 3, prosperityFlat: 3 },
+    requirements: { holidaysAny: ["Zephyr's Calling"] }
+  },
+  {
+    id: "burning-solstice-games",
+    name: "Burning Solstice Games",
+    type: "social",
+    rarity: "Rare",
+    description: "Braziers, contests, and high summer daring lift spirits and court risk.",
+    triggerSource: "calendar dates / holidays",
+    durationDays: 3,
+    effects: { moraleFlat: 9, prestigeFlat: 5, defenseFlat: 2 },
+    requirements: { holidaysAny: ["Burning Solstice"] }
+  },
+  {
+    id: "red-nanite-night",
+    name: "Night of the Red Nanites",
+    type: "magical",
+    rarity: "Legendary",
+    description: "Ancient machine-lights shimmer through the dark, leaving insight and danger behind.",
+    triggerSource: "calendar dates / holidays",
+    durationDays: 2,
+    effects: { manaFlat: 18, salvageFlat: 12, securityFlat: -2 },
+    requirements: { holidaysAny: ["Night of the Red Nanites"] }
+  },
+  {
     id: "religious-pilgrimage",
     name: "Religious Pilgrimage",
     type: "social",
@@ -146,6 +234,39 @@ export const EVENT_POOLS = [
     requirements: { holidaysAny: ["Harvest Moon Festival"] }
   },
   {
+    id: "gloom-equinox-vigil",
+    name: "Gloom Equinox Vigil",
+    type: "religious",
+    rarity: "Uncommon",
+    description: "A solemn turning-day of lanterns and ash that steadies the city against decline.",
+    triggerSource: "calendar dates / holidays",
+    durationDays: 2,
+    effects: { moraleFlat: 4, healthFlat: 3, prestigeFlat: 2 },
+    requirements: { holidaysAny: ["Gloom Equinox"] }
+  },
+  {
+    id: "great-scarring-remembrance",
+    name: "Great Scarring Remembrance",
+    type: "world",
+    rarity: "Rare",
+    description: "The city pauses to remember old devastation and the cost of failing vigilance.",
+    triggerSource: "calendar dates / holidays",
+    durationDays: 2,
+    effects: { prestigeFlat: 5, moraleFlat: -1, defenseFlat: 3 },
+    requirements: { holidaysAny: ["The Great Scarring"] }
+  },
+  {
+    id: "night-of-the-undead",
+    name: "Night of the Undead",
+    type: "world",
+    rarity: "Legendary",
+    description: "Remembrance gives way to fear as the dead are honored and restless things are expected.",
+    triggerSource: "calendar dates / holidays",
+    durationDays: 2,
+    effects: { securityFlat: -6, prestigeFlat: 4, moraleFlat: -4 },
+    requirements: { holidaysAny: ["Day of the Dead / Night of the Undead"] }
+  },
+  {
     id: "planar-surge",
     name: "Planar Surge",
     type: "magical",
@@ -212,5 +333,27 @@ export const EVENT_POOLS = [
     durationDays: 3,
     effects: { manaFlat: 12, prosperityFlat: 5, prestigeFlat: 5 },
     requirements: { holidaysAny: ["Datasphere's Reach"] }
+  },
+  {
+    id: "ends-solstice-vigil",
+    name: "End's Solstice Vigil",
+    type: "religious",
+    rarity: "Rare",
+    description: "The city endures the longest dark with watchfires, oaths, and communal endurance rites.",
+    triggerSource: "calendar dates / holidays",
+    durationDays: 3,
+    effects: { moraleFlat: 5, healthFlat: 3, securityFlat: 4 },
+    requirements: { holidaysAny: ["End's Solstice"] }
+  },
+  {
+    id: "years-turn-feast",
+    name: "Year's Turn Feast",
+    type: "civic",
+    rarity: "Common",
+    description: "Forecasts, toasts, and midnight reckoning carry the city into the next year.",
+    triggerSource: "calendar dates / holidays",
+    durationDays: 2,
+    effects: { moraleFlat: 6, prosperityFlat: 4 },
+    requirements: { holidaysAny: ["New Year's Eve"] }
   }
 ];

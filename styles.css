@@ -567,6 +567,10 @@ textarea {
   line-height: 1.35;
 }
 
+.citizen-tile__head .help-bubble-wrap {
+  margin-left: auto;
+}
+
 .sidebar-nav__status {
   display: grid;
   gap: 10px;
@@ -865,6 +869,16 @@ textarea {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.admin-actions--with-help {
+  align-items: flex-start;
+}
+
+.admin-help-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .manifest-result,
@@ -2639,6 +2653,10 @@ textarea {
   min-width: 0;
 }
 
+.admin-row--citizen .help-bubble-wrap {
+  flex: 0 0 auto;
+}
+
 .admin-citizen-label__emoji {
   font-size: 0.95rem;
   line-height: 1;
@@ -3733,6 +3751,13 @@ textarea {
 
 .player-citizens-summary__item span {
   color: var(--muted);
+}
+
+.player-citizens-summary__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 
 .player-citizens-summary__item strong {
@@ -5005,6 +5030,41 @@ body:-webkit-full-screen #app {
 .home-signals-panel {
   background:
     linear-gradient(180deg, rgba(15, 18, 28, 0.96), rgba(10, 12, 20, 0.96));
+}
+
+.mayor-advice-panel {
+  margin-top: 14px;
+  background:
+    linear-gradient(180deg, rgba(19, 21, 34, 0.96), rgba(11, 13, 22, 0.97));
+}
+
+.mayor-advice-panel__list {
+  display: grid;
+  gap: 10px;
+}
+
+.mayor-advice-card {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.mayor-advice-card strong {
+  font-family: var(--display-font);
+  font-size: 0.98rem;
+}
+
+.mayor-advice-card p {
+  margin: 0;
+  color: rgba(223, 232, 247, 0.78);
+  line-height: 1.5;
+}
+
+.mayor-advice-card .button {
+  justify-self: start;
 }
 
 .home-signals-panel__grid {
@@ -7295,6 +7355,31 @@ body:-webkit-full-screen #app {
   gap: 1rem;
 }
 
+.chronicle-calendar__yearly-events {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.chronicle-calendar__yearly-events-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+
+.chronicle-calendar__yearly-event {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.8rem 0.9rem;
+  border-radius: 16px;
+  border: 1px solid rgba(125, 152, 214, 0.16);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.chronicle-calendar__yearly-event span,
+.chronicle-calendar__yearly-event small {
+  color: var(--muted);
+}
+
 .chronicle-calendar__weekdays {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -7350,9 +7435,72 @@ body:-webkit-full-screen #app {
   background: linear-gradient(180deg, rgba(53, 27, 58, 0.82), rgba(16, 18, 34, 0.88));
 }
 
+.chronicle-calendar__day--renewal,
+.chronicle-calendar__yearly-event.chronicle-calendar__day--renewal {
+  border-color: rgba(112, 241, 194, 0.34);
+  background: linear-gradient(180deg, rgba(17, 42, 36, 0.86), rgba(14, 19, 32, 0.92));
+}
+
+.chronicle-calendar__day--social,
+.chronicle-calendar__day--harvest,
+.chronicle-calendar__yearly-event.chronicle-calendar__day--social,
+.chronicle-calendar__yearly-event.chronicle-calendar__day--harvest {
+  border-color: rgba(240, 196, 130, 0.34);
+  background: linear-gradient(180deg, rgba(56, 35, 22, 0.86), rgba(16, 18, 34, 0.92));
+}
+
+.chronicle-calendar__day--equinox,
+.chronicle-calendar__yearly-event.chronicle-calendar__day--equinox {
+  border-color: rgba(141, 214, 255, 0.36);
+  background: linear-gradient(180deg, rgba(18, 38, 58, 0.86), rgba(16, 18, 34, 0.92));
+}
+
+.chronicle-calendar__day--solstice,
+.chronicle-calendar__yearly-event.chronicle-calendar__day--solstice {
+  border-color: rgba(255, 140, 104, 0.38);
+  background: linear-gradient(180deg, rgba(63, 30, 22, 0.88), rgba(16, 18, 34, 0.92));
+}
+
+.chronicle-calendar__day--astral,
+.chronicle-calendar__day--arcane,
+.chronicle-calendar__yearly-event.chronicle-calendar__day--astral,
+.chronicle-calendar__yearly-event.chronicle-calendar__day--arcane {
+  border-color: rgba(217, 99, 255, 0.38);
+  background: linear-gradient(180deg, rgba(55, 27, 70, 0.86), rgba(16, 18, 34, 0.92));
+}
+
+.chronicle-calendar__day--death,
+.chronicle-calendar__day--remembrance,
+.chronicle-calendar__yearly-event.chronicle-calendar__day--death,
+.chronicle-calendar__yearly-event.chronicle-calendar__day--remembrance {
+  border-color: rgba(196, 174, 255, 0.3);
+  background: linear-gradient(180deg, rgba(40, 30, 58, 0.86), rgba(16, 18, 34, 0.92));
+}
+
+.chronicle-calendar__day--civic,
+.chronicle-calendar__day--travel,
+.chronicle-calendar__yearly-event.chronicle-calendar__day--civic,
+.chronicle-calendar__yearly-event.chronicle-calendar__day--travel {
+  border-color: rgba(120, 180, 255, 0.28);
+  background: linear-gradient(180deg, rgba(24, 33, 56, 0.86), rgba(16, 18, 34, 0.92));
+}
+
 .chronicle-calendar__day-number {
   font-family: var(--display-font);
   font-size: 1.15rem;
+}
+
+.chronicle-calendar__day-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.chronicle-calendar__day-moon {
+  font-size: 1rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 10px rgba(226, 228, 255, 0.16));
 }
 
 .chronicle-calendar__day-weekday {
@@ -7360,6 +7508,59 @@ body:-webkit-full-screen #app {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-muted);
+}
+
+.chronicle-calendar__day-holiday {
+  display: block;
+  min-height: 2.1em;
+  font-size: 0.72rem;
+  line-height: 1.3;
+  color: rgba(242, 232, 255, 0.92);
+}
+
+.chronicle-calendar__day-weather {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  margin-top: 0.18rem;
+  font-size: 0.72rem;
+  color: rgba(214, 222, 246, 0.88);
+}
+
+.chronicle-calendar__day-weather--clear,
+.chronicle-calendar__detail-condition--clear strong {
+  color: rgba(255, 226, 144, 0.96);
+}
+
+.chronicle-calendar__day-weather--rain,
+.chronicle-calendar__day-weather--mist,
+.chronicle-calendar__detail-condition--rain strong,
+.chronicle-calendar__detail-condition--mist strong {
+  color: rgba(151, 213, 255, 0.94);
+}
+
+.chronicle-calendar__day-weather--storm strong,
+.chronicle-calendar__detail-condition--storm strong,
+.chronicle-calendar__day-weather--wind,
+.chronicle-calendar__detail-condition--wind strong {
+  color: rgba(201, 220, 255, 0.96);
+}
+
+.chronicle-calendar__day-weather--heat,
+.chronicle-calendar__detail-condition--heat strong {
+  color: rgba(255, 173, 117, 0.96);
+}
+
+.chronicle-calendar__day-weather--snow,
+.chronicle-calendar__day-weather--frost,
+.chronicle-calendar__detail-condition--snow strong,
+.chronicle-calendar__detail-condition--frost strong {
+  color: rgba(215, 235, 255, 0.98);
+}
+
+.chronicle-calendar__day-weather--cloud,
+.chronicle-calendar__detail-condition--cloud strong {
+  color: rgba(198, 206, 225, 0.94);
 }
 
 .chronicle-calendar__day-meta {
@@ -7433,6 +7634,33 @@ body:-webkit-full-screen #app {
   border-color: rgba(217, 99, 255, 0.42);
 }
 
+.chronicle-calendar__detail-conditions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.chronicle-calendar__detail-condition {
+  padding: 0.75rem 0.9rem;
+  border-radius: 16px;
+  border: 1px solid rgba(125, 152, 214, 0.14);
+  background: rgba(255, 255, 255, 0.035);
+  display: grid;
+  gap: 0.25rem;
+}
+
+.chronicle-calendar__detail-condition span {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.chronicle-calendar__detail-condition strong {
+  font-size: 0.98rem;
+  color: rgba(241, 244, 255, 0.96);
+}
+
 .chronicle-calendar__section-title {
   display: flex;
   align-items: center;
@@ -7503,6 +7731,10 @@ body:-webkit-full-screen #app {
 
 @media (max-width: 1100px) {
   .chronicle-calendar__detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chronicle-calendar__detail-conditions {
     grid-template-columns: 1fr;
   }
 }
