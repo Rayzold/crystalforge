@@ -485,6 +485,11 @@ textarea {
   color: rgba(233, 241, 255, 0.88);
 }
 
+.citizen-tile__emoji {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
 .resource-chip__value,
 .stat-tile strong,
 .citizen-tile strong,
@@ -2589,6 +2594,56 @@ textarea {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.admin-citizen-group {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, rgba(14, 18, 30, 0.9), rgba(9, 11, 18, 0.95));
+}
+
+.admin-citizen-group__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.admin-citizen-group__header h4 {
+  margin: 0;
+  font-family: var(--display-font);
+  font-size: 0.95rem;
+}
+
+.admin-citizen-group__header p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.admin-citizen-group__rows {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-row--citizen {
+  padding: 8px 0;
+}
+
+.admin-citizen-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.admin-citizen-label__emoji {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
 .admin-quick-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3648,6 +3703,23 @@ textarea {
   margin-top: 14px;
 }
 
+.player-citizens-summary__groups {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.player-citizens-summary__group {
+  display: grid;
+  gap: 10px;
+}
+
+.player-citizens-summary__group h4 {
+  margin: 0;
+  font-family: var(--display-font);
+  font-size: 0.96rem;
+}
+
 .player-citizens-summary__item {
   display: flex;
   justify-content: space-between;
@@ -3665,6 +3737,20 @@ textarea {
 
 .player-citizens-summary__item strong {
   font-family: var(--display-font);
+}
+
+.player-building-toolbar {
+  margin-top: 18px;
+}
+
+.player-building-toolbar__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.player-building-toolbar__buttons .button {
+  min-width: 0;
 }
 
 .player-lists {
@@ -3768,6 +3854,12 @@ textarea {
   gap: 10px;
   justify-items: end;
   align-items: start;
+}
+
+.player-list__actions-row {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
 }
 
 .player-list__actions .button {

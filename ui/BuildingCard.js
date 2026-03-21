@@ -1,3 +1,4 @@
+import { getBuildingEmoji } from "../content/BuildingCatalog.js";
 import { RARITY_COLORS } from "../content/Rarities.js";
 import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
@@ -100,6 +101,7 @@ function getBuildingSignature(building) {
 }
 
 export function renderBuildingCard(building, state) {
+  const buildingEmoji = getBuildingEmoji(building);
   const selected = state.ui.selectedBuildingId === building.id;
   const isRecentlyChanged = Boolean(state.transientUi?.recentBuildingChanges?.[building.id]);
   const isIncomplete = !building.isComplete;
@@ -136,7 +138,7 @@ export function renderBuildingCard(building, state) {
           </div>
           <div>
             <span>${escapeHtml(signatureLabel)} Profile</span>
-            <strong>${escapeHtml(building.displayName)}</strong>
+            <strong>${escapeHtml(`${buildingEmoji} ${building.displayName}`)}</strong>
           </div>
         </div>
         <div class="building-card__header">

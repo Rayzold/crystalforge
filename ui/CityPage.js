@@ -1,3 +1,4 @@
+import { getBuildingEmoji } from "../content/BuildingCatalog.js";
 import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
@@ -139,7 +140,7 @@ function renderBuildingsView(state) {
                         const etaDetails = getConstructionEtaDetails(building, state);
                         return `
                         <article class="city-incubation-strip__item ${isBuildingActivelyConstructed(state, building.id) ? "is-active" : ""}">
-                          <strong>${escapeHtml(building.displayName)}</strong>
+                          <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
                           <span>${formatNumber(building.quality, 1)}%</span>
                           <em>Slot ${index + 1}</em>
                           <small>${formatNumber(etaDetails.rate, 2)}% per day</small>
@@ -166,7 +167,7 @@ function renderBuildingsView(state) {
                       .map(
                         (building, index) => `
                           <article class="city-incubation-strip__item">
-                            <strong>${escapeHtml(building.displayName)}</strong>
+                            <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
                             <span>${formatNumber(building.quality, 1)}%</span>
                             <em>Waiting #${index + 1}</em>
                             <button class="button button--ghost" data-action="activate-construction" data-building-id="${building.id}">Use Incubator</button>

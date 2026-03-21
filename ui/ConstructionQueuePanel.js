@@ -1,3 +1,4 @@
+import { getBuildingEmoji } from "../content/BuildingCatalog.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
 import {
@@ -18,7 +19,7 @@ function renderQueueItem(state, building, index, activeCount) {
       <div class="construction-queue__meta">
         <div class="construction-queue__heading">
           <span class="construction-queue__slot">${isActive ? `Raising now / slot ${index + 1}` : `Queued / #${index + 1}`}</span>
-          <strong>${escapeHtml(building.displayName)}</strong>
+          <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
         </div>
         <small>${escapeHtml(building.rarity)} / ${formatNumber(building.quality, 2)}%</small>
         <small>${

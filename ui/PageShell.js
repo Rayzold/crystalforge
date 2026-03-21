@@ -1,4 +1,5 @@
 import { APP_VERSION, MASCOT_MEDIA, PAGE_ROUTES, SAVE_SLOT_COUNT } from "../content/Config.js";
+import { getBuildingEmoji } from "../content/BuildingCatalog.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
 import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js";
@@ -76,9 +77,10 @@ function renderSidebarBuildingList(state, title, items, emptyLabel, variant = "m
                       const etaDetails = variant === "incubating" ? getConstructionEtaDetails(building, state) : null;
                       const readyLabel = etaDetails ? `Ready on ${formatDate(etaDetails.readyDayOffset)}` : "";
                       const isRecentlyChanged = Boolean(state.transientUi?.recentBuildingChanges?.[building.id]);
+                      const emoji = getBuildingEmoji(building);
                       return `
                       <div class="sidebar-manifest-list__item ${isRecentlyChanged ? "is-recently-changed" : ""}">
-                        <span>${escapeHtml(building.displayName)}</span>
+                        <span>${escapeHtml(`${emoji} ${building.displayName}`)}</span>
                         <div class="sidebar-manifest-list__meta">
                           <em>${building.isComplete ? `x${building.multiplier}` : `${formatNumber(building.quality, 0)}%`}</em>
                           ${

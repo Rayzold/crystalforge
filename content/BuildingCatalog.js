@@ -190,6 +190,28 @@ const DISTRICT_FLAVOR_FRAGMENTS = {
   "Frontier District": "It feels like a structure built at the edge of certainty and pushed beyond it."
 };
 
+const BUILDING_EMOJI_BY_ICON_KEY = {
+  leaf: "🌿",
+  coins: "💰",
+  home: "🏠",
+  shield: "🛡️",
+  hammer: "🛠️",
+  star: "✨",
+  spire: "⛪",
+  anchor: "⚓",
+  scroll: "📜",
+  gate: "🚪",
+  crown: "👑",
+  clock: "🕰️",
+  columns: "🏛️",
+  guild: "🤝",
+  castle: "🏰",
+  signal: "📡",
+  crystal: "💎",
+  banner: "🚩",
+  wave: "🌊"
+};
+
 function titleCaseTag(tag) {
   return tag.charAt(0).toUpperCase() + tag.slice(1);
 }
@@ -268,6 +290,29 @@ export function createCatalogEntryFromInput({ name, rarity, district, tags, icon
     resourceOverrides,
     citizenOverrides
   };
+}
+
+export function getBuildingEmoji(building) {
+  if (!building) {
+    return "🏗️";
+  }
+
+  if (building.iconKey && BUILDING_EMOJI_BY_ICON_KEY[building.iconKey]) {
+    return BUILDING_EMOJI_BY_ICON_KEY[building.iconKey];
+  }
+
+  const primaryTag = building.tags?.[0] ?? "";
+  if (primaryTag === "agriculture") return "🌿";
+  if (primaryTag === "trade") return "💰";
+  if (primaryTag === "industry") return "🛠️";
+  if (primaryTag === "military") return "🛡️";
+  if (primaryTag === "arcane") return "✨";
+  if (primaryTag === "religious") return "⛪";
+  if (primaryTag === "housing") return "🏠";
+  if (primaryTag === "harbor") return "⚓";
+  if (primaryTag === "culture") return "📜";
+  if (primaryTag === "frontier") return "🧭";
+  return "🏗️";
 }
 
 export const BASE_BUILDING_CATALOG = createBaseBuildingCatalog();

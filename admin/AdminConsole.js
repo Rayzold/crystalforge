@@ -1,10 +1,11 @@
 import { MONTHS } from "../content/CalendarConfig.js";
 import { createCatalogEntryFromInput } from "../content/BuildingCatalog.js";
+import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER } from "../content/CitizenConfig.js";
 import { GM_QUICK_CRYSTAL_PACKS, GM_QUICK_EVENT_IDS, SAVE_SLOT_COUNT, SPEED_MULTIPLIERS } from "../content/Config.js";
 import { EVENT_POOLS } from "../content/EventPools.js";
 import { RARITY_ORDER } from "../content/Rarities.js";
 import { TOWN_FOCUS_DEFINITIONS } from "../content/TownFocusConfig.js";
-import { escapeHtml } from "../engine/Utils.js";
+import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { attachHelpBubbles } from "../ui/HelpBubbles.js";
 import { renderModal } from "../ui/Modal.js";
 import { formatDate } from "../systems/CalendarSystem.js";
@@ -33,20 +34,65 @@ function rarityControls(state, kind) {
 }
 
 function citizenControls(state) {
-  return Object.entries(state.citizens)
-    .map(
-      ([citizenClass, count]) => `
-        <div class="admin-row">
-          <span>${citizenClass}</span>
-          <input type="number" id="citizen-${citizenClass}" value="1" min="0" />
-          <button class="button button--ghost" data-admin-action="citizen-add" data-citizen-class="${citizenClass}">Add</button>
-          <button class="button button--ghost" data-admin-action="citizen-remove" data-citizen-class="${citizenClass}">Remove</button>
-          <button class="button button--ghost" data-admin-action="citizen-set" data-citizen-class="${citizenClass}">Set</button>
-          <strong>${count}</strong>
+  return CITIZEN_GROUP_ORDER.map((groupTitle) => {
+    const classes = CITIZEN_CLASSES.filter((citizenClass) => CITIZEN_DEFINITIONS[citizenClass]?.group === groupTitle);
+    if (!classes.length) {
+      return "";
+    }
+    const total = classes.reduce((sum, citizenClass) => sum + Number(state.citizens?.[citizenClass] ?? 0), 0);
+
+    return `
+      <section class="admin-citizen-group">
+        <div class="admin-citizen-group__header">
+          <div>
+            <h4>${escapeHtml(groupTitle)}</h4>
+            <p>${formatNumber(total, 0)} citizens</p>
+          </div>
         </div>
-      `
-    )
-    .join("");
+        <div class="admin-citizen-group__rows">
+          ${classes
+            .map((citizenClass) => {
+              const count = Number(state.citizens?.[citizenClass] ?? 0);
+              const definition = CITIZEN_DEFINITIONS[citizenClass] ?? {};
+              const emoji = definition.emoji ?? "*";
+              return `
+                <div class="admin-row admin-row--citizen">
+                  <span class="admin-citizen-label">
+                    <span class="admin-citizen-label__emoji" aria-hidden="true">${escapeHtml(emoji)}</span>
+                    <span>${escapeHtml(citizenClass)}</span>
+                  </span>
+                  <input type="number" id="citizen-${citizenClass}" value="1" min="0" />
+                  <button class="button button--ghost" data-admin-action="citizen-add" data-citizen-class="${citizenClass}">Add</button>
+                  <button class="button button--ghost" data-admin-action="citizen-remove" data-citizen-class="${citizenClass}">Remove</button>
+                  <button class="button button--ghost" data-admin-action="citizen-set" data-citizen-class="${citizenClass}">Set</button>
+                  <strong>${formatNumber(count, 0)}</strong>
+                </div>
+              `;
+            })
+            .join("")}
+        </div>
+      </section>
+    `;
+  }).join("");
+}
+
+function citizenOptions(selectedValue) {
+  return CITIZEN_GROUP_ORDER.map((groupTitle) => {
+    const classes = CITIZEN_CLASSES.filter((citizenClass) => CITIZEN_DEFINITIONS[citizenClass]?.group === groupTitle);
+    if (!classes.length) {
+      return "";
+    }
+    return `
+      <optgroup label="${escapeHtml(groupTitle)}">
+        ${classes
+          .map((citizenClass) => {
+            const emoji = CITIZEN_DEFINITIONS[citizenClass]?.emoji ?? "*";
+            return `<option value="${escapeHtml(citizenClass)}" ${citizenClass === selectedValue ? "selected" : ""}>${escapeHtml(`${emoji} ${citizenClass}`)}</option>`;
+          })
+          .join("")}
+      </optgroup>
+    `;
+  }).join("");
 }
 
 function townFocusOptions(selectedValue) {
@@ -662,14 +708,14 @@ export class AdminConsole {
             <p>Live total population: <strong>${totalPopulation}</strong></p>
             ${citizenControls(state)}
             <div class="admin-grid admin-grid--three">
-              <label>From Class<select id="promote-from">${options(Object.keys(state.citizens), "Laborers")}</select></label>
-              <label>To Class<select id="promote-to">${options(Object.keys(state.citizens), "Crafters")}</select></label>
+              <label>From Class<select id="promote-from">${citizenOptions("Laborers")}</select></label>
+              <label>To Class<select id="promote-to">${citizenOptions("Crafters")}</select></label>
               <label>Amount<input id="promote-amount" type="number" value="1" min="0" /></label>
             </div>
             <button class="button button--ghost" data-admin-action="promote-citizens">Promote</button>
             <div class="admin-grid admin-grid--three">
-              <label>From Class<select id="demote-from">${options(Object.keys(state.citizens), "Farmers")}</select></label>
-              <label>To Class<select id="demote-to">${options(Object.keys(state.citizens), "Laborers")}</select></label>
+              <label>From Class<select id="demote-from">${citizenOptions("Farmers")}</select></label>
+              <label>To Class<select id="demote-to">${citizenOptions("Laborers")}</select></label>
               <label>Amount<input id="demote-amount" type="number" value="1" min="0" /></label>
             </div>
             <button class="button button--ghost" data-admin-action="demote-citizens">Demote</button>

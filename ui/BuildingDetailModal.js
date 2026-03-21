@@ -1,3 +1,4 @@
+import { getBuildingEmoji } from "../content/BuildingCatalog.js";
 import { RARITY_COLORS } from "../content/Rarities.js";
 import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
@@ -62,9 +63,10 @@ export function renderBuildingDetailModal(state, pageKey) {
   const eta = isActiveConstruction ? formatDate(state.calendar.dayOffset + daysRemaining) : null;
   const placementBonus = getBuildingPlacementBonuses(state, building);
   const signatureReadout = getSignatureReadout(building);
+  const buildingEmoji = getBuildingEmoji(building);
   const artMarkup = building.imagePath
     ? `<img src="${escapeHtml(building.imagePath)}" alt="${escapeHtml(building.displayName)} artwork" loading="lazy" />`
-    : `<div class="building-detail__fallback">${escapeHtml(building.displayName.slice(0, 1))}</div>`;
+    : `<div class="building-detail__fallback">${escapeHtml(buildingEmoji)}</div>`;
 
   const content = `
     <article class="building-detail" style="--rarity-color:${RARITY_COLORS[building.rarity]}">
@@ -90,7 +92,7 @@ export function renderBuildingDetailModal(state, pageKey) {
         </div>
         <div class="building-detail__copy">
           <p class="building-detail__eyebrow">${escapeHtml(building.rarity)} Manifest / ${escapeHtml(building.district)}</p>
-          <h3>${escapeHtml(building.displayName)}</h3>
+          <h3>${escapeHtml(`${buildingEmoji} ${building.displayName}`)}</h3>
           <p class="building-detail__effect">${escapeHtml(building.specialEffect)}</p>
           <p class="building-detail__flavor">${escapeHtml(building.flavorText ?? "No flavor text has been etched into the city chronicle yet.")}</p>
           <div class="building-detail__chips">

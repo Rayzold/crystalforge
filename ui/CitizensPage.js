@@ -1,3 +1,4 @@
+import { CITIZEN_DEFINITIONS } from "../content/CitizenConfig.js";
 import { renderCitizenPanel } from "./CitizenPanel.js";
 import { renderUiIcon } from "./UiIcons.js";
 import { escapeHtml } from "../engine/Utils.js";
@@ -37,7 +38,7 @@ function renderCitizenCommand(state) {
             ([citizenClass, count]) => `
               <div class="citizen-command-panel__leader">
                 ${renderUiIcon("citizens", citizenClass)}
-                <span>${escapeHtml(citizenClass)}</span>
+                <span>${escapeHtml(`${CITIZEN_DEFINITIONS[citizenClass]?.emoji ?? "•"} ${citizenClass}`)}</span>
                 <strong>${count}</strong>
               </div>
             `

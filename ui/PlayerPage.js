@@ -1,5 +1,7 @@
 import { APP_VERSION, FIREBASE_DEFAULT_REALM_ID } from "../content/Config.js";
-import { CITIZEN_CLASSES } from "../content/CitizenConfig.js";
+import { getBuildingEmoji } from "../content/BuildingCatalog.js";
+import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER } from "../content/CitizenConfig.js";
+import { RARITY_ORDER } from "../content/Rarities.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
 import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js";
@@ -50,6 +52,10 @@ function renderPublishedFooter(state) {
 function renderCitizenSummaryToggle(state) {
   const isOpen = Boolean(state.transientUi?.playerCitizensOpen);
   const totalCitizens = CITIZEN_CLASSES.reduce((sum, citizenClass) => sum + Number(state.citizens?.[citizenClass] ?? 0), 0);
+  const groupedCitizens = CITIZEN_GROUP_ORDER.map((groupTitle) => ({
+    title: groupTitle,
+    classes: CITIZEN_CLASSES.filter((citizenClass) => CITIZEN_DEFINITIONS[citizenClass]?.group === groupTitle)
+  })).filter((group) => group.classes.length);
 
   return `
     <section class="panel player-citizens-summary">
@@ -67,12 +73,19 @@ function renderCitizenSummaryToggle(state) {
       ${
         isOpen
           ? `
-            <div class="player-citizens-summary__list">
-              ${CITIZEN_CLASSES.map((citizenClass) => `
-                <article class="player-citizens-summary__item">
-                  <span>${escapeHtml(citizenClass)}</span>
-                  <strong>${formatNumber(state.citizens?.[citizenClass] ?? 0, 0)}</strong>
-                </article>
+            <div class="player-citizens-summary__groups">
+              ${groupedCitizens.map((group) => `
+                <section class="player-citizens-summary__group">
+                  <h4>${escapeHtml(group.title)}</h4>
+                  <div class="player-citizens-summary__list">
+                    ${group.classes.map((citizenClass) => `
+                      <article class="player-citizens-summary__item">
+                        <span>${escapeHtml(`${CITIZEN_DEFINITIONS[citizenClass]?.emoji ?? "*"} ${citizenClass}`)}</span>
+                        <strong>${formatNumber(state.citizens?.[citizenClass] ?? 0, 0)}</strong>
+                      </article>
+                    `).join("")}
+                  </div>
+                </section>
               `).join("")}
             </div>
           `
@@ -80,6 +93,44 @@ function renderCitizenSummaryToggle(state) {
       }
     </section>
   `;
+}
+
+function renderBuildingRarityFilters(state) {
+  const activeFilter = state.transientUi?.playerBuildingRarityFilter ?? "All";
+  const options = ["All", ...RARITY_ORDER];
+
+  return `
+    <section class="panel player-building-toolbar">
+      <div class="panel__header">
+        <div>
+          <h3>Building Filter</h3>
+          <span class="panel__subtle">Filter the player roster by rarity across active, incubating, and available structures.</span>
+        </div>
+      </div>
+      <div class="player-building-toolbar__buttons">
+        ${options
+          .map(
+            (rarity) => `
+              <button
+                class="button ${activeFilter === rarity ? "" : "button--ghost"}"
+                data-action="set-player-building-rarity-filter"
+                data-rarity="${escapeHtml(rarity)}"
+              >
+                ${escapeHtml(rarity)}
+              </button>
+            `
+          )
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
+function filterBuildingsByRarity(buildings, rarityFilter) {
+  if (!rarityFilter || rarityFilter === "All") {
+    return buildings;
+  }
+  return buildings.filter((building) => building.rarity === rarityFilter);
 }
 
 function renderManifestedList(title, subtitle, buildings, emptyText, state) {
@@ -100,7 +151,7 @@ function renderManifestedList(title, subtitle, buildings, emptyText, state) {
                   (building) => `
                     <article class="player-list__item ${state.transientUi?.recentBuildingChanges?.[building.id] ? "is-recently-changed" : ""}">
                       <div class="player-list__copy">
-                        <strong>${escapeHtml(building.displayName)}</strong>
+                        <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
                         <span>${escapeHtml(building.rarity)} / ${escapeHtml(building.district ?? "Unassigned")}</span>
                       </div>
                       <em>x${formatNumber(building.multiplier, 0)}</em>
@@ -137,15 +188,26 @@ function renderIncubationList(title, subtitle, buildings, emptyText, variant, st
                   return `
                     <article class="player-list__item ${state.transientUi?.recentBuildingChanges?.[building.id] ? "is-recently-changed" : ""}">
                       <div class="player-list__copy">
-                        <strong>${escapeHtml(building.displayName)}</strong>
+                        <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
                         <span>${escapeHtml(building.rarity)} / ${escapeHtml(building.district ?? "Unassigned")}</span>
-                        <small>${formatNumber(building.quality, 0)}% now · ${formatNumber(etaDetails.daysRemaining, 1)}d if incubated · Ready ${escapeHtml(readyLabel)}</small>
+                        <small>${formatNumber(building.quality, 0)}% now | ${formatNumber(etaDetails.daysRemaining, 1)}d if incubated | Ready ${escapeHtml(readyLabel)}</small>
                       </div>
                       <div class="player-list__actions">
                         <em>${formatNumber(building.quality, 0)}%</em>
-                        <button class="button button--ghost" data-action="${variant === "incubating" ? "pause-construction" : "activate-construction"}" data-building-id="${building.id}">
-                          ${variant === "incubating" ? "Cancel Incubation" : "Use Incubator"}
-                        </button>
+                        <div class="player-list__actions-row">
+                          <button class="button button--ghost" data-action="${variant === "incubating" ? "pause-construction" : "activate-construction"}" data-building-id="${building.id}">
+                            ${variant === "incubating" ? "Cancel Incubation" : "Use Incubator"}
+                          </button>
+                          ${
+                            variant === "incubating" && state.ui.adminUnlocked
+                              ? `
+                                <button class="button" data-action="manifest-building-now" data-building-id="${building.id}">
+                                  Manifest Now
+                                </button>
+                              `
+                              : ""
+                          }
+                        </div>
                       </div>
                     </article>
                   `;
@@ -160,11 +222,13 @@ function renderIncubationList(title, subtitle, buildings, emptyText, variant, st
 }
 
 export function renderPlayerPage(state) {
-  const manifested = state.buildings
-    .filter((building) => building.isComplete)
-    .sort((left, right) => right.quality - left.quality);
-  const incubating = getActiveConstructionQueue(state);
-  const available = getAvailableConstructionQueue(state);
+  const rarityFilter = state.transientUi?.playerBuildingRarityFilter ?? "All";
+  const manifested = filterBuildingsByRarity(
+    state.buildings.filter((building) => building.isComplete).sort((left, right) => right.quality - left.quality),
+    rarityFilter
+  );
+  const incubating = filterBuildingsByRarity(getActiveConstructionQueue(state), rarityFilter);
+  const available = filterBuildingsByRarity(getAvailableConstructionQueue(state), rarityFilter);
   const totalRolls = Object.values(state.crystals ?? {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
 
   return {
@@ -199,11 +263,12 @@ export function renderPlayerPage(state) {
       ${renderCitizenSummaryToggle(state)}
       ${renderCrystalSelector(state)}
       ${renderManifestPanel(state)}
+      ${renderBuildingRarityFilters(state)}
       <section class="player-lists">
         ${renderManifestedList("Active Buildings", "Manifested and already part of the Drift.", manifested, "No active buildings yet.", state)}
         ${renderIncubationList("Incubating Buildings", "Buildings currently growing inside an incubator slot.", incubating, "Nothing is incubating right now.", "incubating", state)}
-        ${renderIncubationList("Available Buildings", "Waiting buildings that can be swapped into an incubator.", available, "No waiting buildings are ready to incubate.", "available", state)}
       </section>
+      ${renderIncubationList("Available Buildings", "Waiting buildings that can be swapped into an incubator.", available, "No waiting buildings are ready to incubate.", "available", state)}
       ${renderPublishedFooter(state)}
     `
   };

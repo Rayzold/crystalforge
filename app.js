@@ -2,6 +2,7 @@ import { AdminConsole } from "./admin/AdminConsole.js";
 import { createCatalogEntryFromInput, getCatalogKey } from "./content/BuildingCatalog.js";
 import {
   APP_VERSION,
+  BUILDING_ACTIVE_THRESHOLD,
   FIREBASE_DEFAULT_REALM_ID,
   FIREBASE_DEFAULT_WORKING_REALM_ID,
   STORAGE_KEY,
@@ -1142,6 +1143,32 @@ function setConstructionActiveState(buildingId, shouldActivate) {
   reportSuccess(`${building?.displayName ?? "Building"} ${shouldActivate ? "assigned to an incubator" : "removed from active incubation"}.`);
 }
 
+function manifestBuildingNow(buildingId) {
+  const result = commit((draft) => {
+    const building = draft.buildings.find((entry) => entry.id === buildingId);
+    if (!building) {
+      return { ok: false, reason: "Building not found." };
+    }
+    if (building.isComplete) {
+      return { ok: false, reason: `${building.displayName} is already manifested.` };
+    }
+
+    building.lastManifestedAt = formatDate(draft.calendar.dayOffset);
+    building.lastManifestedDayOffset = draft.calendar.dayOffset;
+    setBuildingQuality(building, BUILDING_ACTIVE_THRESHOLD);
+
+    return { ok: true, buildingId: building.id, name: building.displayName };
+  });
+
+  if (!result.ok) {
+    reportError(result.reason);
+    return;
+  }
+
+  markRecentBuildingChanges([result.buildingId]);
+  reportSuccess(`${result.name} manifested instantly.`);
+}
+
 function manageRollTable({ mode, name, rarity, targetRarity, nextName, catalogEntry }) {
   commit((draft) => {
     const sourceKey = getCatalogKey(name, rarity);
@@ -1762,6 +1789,9 @@ root.addEventListener("click", async (event) => {
     case "toggle-player-citizens":
       renderer.setTransientUi({ playerCitizensOpen: !renderer.transientUi.playerCitizensOpen }, getCurrentState());
       break;
+    case "set-player-building-rarity-filter":
+      renderer.setTransientUi({ playerBuildingRarityFilter: target.dataset.rarity ?? "All" }, getCurrentState());
+      break;
     case "roll-dice":
       rollDice();
       break;
@@ -1924,6 +1954,9 @@ root.addEventListener("click", async (event) => {
       break;
     case "pause-construction":
       setConstructionActiveState(target.dataset.buildingId, false);
+      break;
+    case "manifest-building-now":
+      manifestBuildingNow(target.dataset.buildingId);
       break;
     case "upgrade-crystal": {
       const sourceRarity = target.dataset.rarity;

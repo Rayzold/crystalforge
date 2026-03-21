@@ -1,11 +1,13 @@
+import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER } from "../content/CitizenConfig.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { renderUiIcon } from "./UiIcons.js";
 
-const CITIZEN_ICONS = {
+const CITIZEN_ICON_KEYS = {
   Farmers: "food",
   Hunters: "defense",
   Fishermen: "food",
   Scavengers: "salvage",
+  Druids: "mana",
   Laborers: "building",
   Crafters: "materials",
   Techwrights: "salvage",
@@ -17,6 +19,7 @@ const CITIZEN_ICONS = {
   Arcanists: "mana",
   Medics: "health",
   Scribes: "history",
+  Scholars: "history",
   Nobles: "prestige",
   Priests: "health",
   Entertainers: "morale",
@@ -24,38 +27,20 @@ const CITIZEN_ICONS = {
   Elderly: "history"
 };
 
-const CITIZEN_GROUPS = [
-  {
-    title: "Provision",
-    note: "The food and scrap backbone of the Drift, responsible for keeping the settlement supplied from field, water, hunt, and ruin.",
-    classes: ["Farmers", "Hunters", "Fishermen", "Scavengers"]
-  },
-  {
-    title: "Labor & Industry",
-    note: "Core workers and specialist makers who build, repair, craft, and maintain the settlement's material base.",
-    classes: ["Laborers", "Crafters", "Techwrights"]
-  },
-  {
-    title: "Trade & Movement",
-    note: "Route, exchange, and travel specialists connecting the Drift to local trade and its future sky lanes.",
-    classes: ["Merchants", "Skycrew", "Scouts"]
-  },
-  {
-    title: "Security",
-    note: "The people who watch, defend, and fight when the settlement is threatened.",
-    classes: ["Defenders", "Soldiers"]
-  },
-  {
-    title: "Knowledge & Specialists",
-    note: "Rare expertise that keeps medicine, records, and arcane systems functioning.",
-    classes: ["Arcanists", "Medics", "Scribes"]
-  },
-  {
-    title: "Civic Life",
-    note: "Social, spiritual, and generational classes shaping morale, continuity, and influence.",
-    classes: ["Nobles", "Priests", "Entertainers", "Children", "Elderly"]
-  }
-];
+const CITIZEN_GROUP_NOTES = {
+  Provision: "The food, foraging, and land-keeping backbone of the Drift, keeping the settlement supplied from field, water, ruin, and living systems.",
+  "Labor & Industry": "Core workers and specialist makers who build, repair, craft, and maintain the settlement's material base.",
+  "Trade & Movement": "Route, exchange, and travel specialists connecting the Drift to local trade and its future sky lanes.",
+  Security: "The people who watch, defend, and fight when the settlement is threatened.",
+  "Knowledge & Specialists": "Rare expertise that keeps medicine, records, scholarship, and arcane systems functioning.",
+  "Civic Life": "Social, spiritual, and generational classes shaping morale, continuity, and influence."
+};
+
+const CITIZEN_GROUPS = CITIZEN_GROUP_ORDER.map((groupTitle) => ({
+  title: groupTitle,
+  note: CITIZEN_GROUP_NOTES[groupTitle] ?? "A core social bloc within the Drift.",
+  classes: CITIZEN_CLASSES.filter((citizenClass) => CITIZEN_DEFINITIONS[citizenClass]?.group === groupTitle)
+}));
 
 function renderGroupHelp(note) {
   return `
@@ -69,12 +54,14 @@ function renderGroupHelp(note) {
 function renderCitizenTile(citizenClass, count, definition) {
   const keyEffect = Object.entries(definition?.stats ?? {})[0] ?? Object.entries(definition?.production ?? {})[0] ?? null;
   const summary = keyEffect ? `${keyEffect[0]} +${formatNumber(keyEffect[1], 2)} each` : "Support role";
+  const emoji = definition?.emoji ?? "•";
 
   return `
     <article class="citizen-tile">
       <div class="citizen-tile__head">
         <div class="citizen-tile__title">
-          ${renderUiIcon(CITIZEN_ICONS[citizenClass] ?? "citizens", citizenClass)}
+          <span class="citizen-tile__emoji" aria-hidden="true">${escapeHtml(emoji)}</span>
+          ${renderUiIcon(CITIZEN_ICON_KEYS[citizenClass] ?? "citizens", citizenClass)}
           <span>${escapeHtml(citizenClass)}</span>
         </div>
         ${renderGroupHelp(definition?.flavor ?? "Citizen role")}
