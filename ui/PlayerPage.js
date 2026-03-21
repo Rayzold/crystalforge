@@ -1,4 +1,5 @@
 import { APP_VERSION, FIREBASE_DEFAULT_REALM_ID } from "../content/Config.js";
+import { CITIZEN_CLASSES } from "../content/CitizenConfig.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
 import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js";
@@ -43,6 +44,41 @@ function renderPublishedFooter(state) {
       <span>Last published <strong>${escapeHtml(timestamp)}</strong></span>
       <span>Build <strong>${escapeHtml(APP_VERSION)}</strong></span>
     </footer>
+  `;
+}
+
+function renderCitizenSummaryToggle(state) {
+  const isOpen = Boolean(state.transientUi?.playerCitizensOpen);
+  const totalCitizens = CITIZEN_CLASSES.reduce((sum, citizenClass) => sum + Number(state.citizens?.[citizenClass] ?? 0), 0);
+
+  return `
+    <section class="panel player-citizens-summary">
+      <div class="panel__header">
+        <div>
+          <h3>Citizen Roster</h3>
+          <span class="panel__subtle">A brief shared look at the current population</span>
+        </div>
+        <button class="button button--ghost" data-action="toggle-player-citizens">${isOpen ? "Hide Citizens" : "Show Citizens"}</button>
+      </div>
+      <div class="player-citizens-summary__meta">
+        <span>Total citizens</span>
+        <strong>${formatNumber(totalCitizens, 0)}</strong>
+      </div>
+      ${
+        isOpen
+          ? `
+            <div class="player-citizens-summary__list">
+              ${CITIZEN_CLASSES.map((citizenClass) => `
+                <article class="player-citizens-summary__item">
+                  <span>${escapeHtml(citizenClass)}</span>
+                  <strong>${formatNumber(state.citizens?.[citizenClass] ?? 0, 0)}</strong>
+                </article>
+              `).join("")}
+            </div>
+          `
+          : ""
+      }
+    </section>
   `;
 }
 
@@ -160,6 +196,7 @@ export function renderPlayerPage(state) {
           </article>
         </div>
       </section>
+      ${renderCitizenSummaryToggle(state)}
       ${renderCrystalSelector(state)}
       ${renderManifestPanel(state)}
       <section class="player-lists">

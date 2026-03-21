@@ -3,6 +3,7 @@ export const CITIZEN_CLASSES = [
   "Hunters",
   "Fishermen",
   "Scavengers",
+  "Druids",
   "Laborers",
   "Crafters",
   "Techwrights",
@@ -14,6 +15,7 @@ export const CITIZEN_CLASSES = [
   "Arcanists",
   "Medics",
   "Scribes",
+  "Scholars",
   "Nobles",
   "Priests",
   "Entertainers",
@@ -45,6 +47,12 @@ export const CITIZEN_DEFINITIONS = {
     consumption: { food: 0.15, gold: 0.02 },
     stats: { security: 0.01 },
     flavor: "Scrap-pullers and ruin walkers recovering usable parts, metal, and forgotten tech."
+  },
+  Druids: {
+    production: { food: 0.12, mana: 0.14 },
+    consumption: { food: 0.14, gold: 0.03 },
+    stats: { health: 0.08, morale: 0.03 },
+    flavor: "Nature-binders and grove-tenders who draw healing, growth, and steady mana from living systems."
   },
   Laborers: {
     production: { materials: 0.28 },
@@ -111,6 +119,12 @@ export const CITIZEN_DEFINITIONS = {
     consumption: { food: 0.15, gold: 0.04 },
     stats: { goods: 0.03, prestige: 0.04 },
     flavor: "Record keepers, surveyors, and clerks who turn memory and planning into usable order."
+  },
+  Scholars: {
+    production: { mana: 0.08 },
+    consumption: { food: 0.15, gold: 0.05 },
+    stats: { goods: 0.04, prestige: 0.06 },
+    flavor: "Researchers and learned minds who turn libraries, schools, and observatories into usable insight."
   },
   Nobles: {
     production: { gold: 0.08, prosperity: 0.04 },

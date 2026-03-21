@@ -1759,6 +1759,9 @@ root.addEventListener("click", async (event) => {
     case "toggle-town-focus-panel":
       renderer.setTransientUi({ homeTownFocusExpanded: !renderer.transientUi.homeTownFocusExpanded }, getCurrentState());
       break;
+    case "toggle-player-citizens":
+      renderer.setTransientUi({ playerCitizensOpen: !renderer.transientUi.playerCitizensOpen }, getCurrentState());
+      break;
     case "roll-dice":
       rollDice();
       break;

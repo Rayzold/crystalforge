@@ -3617,6 +3617,56 @@ textarea {
   background: linear-gradient(135deg, rgba(255, 124, 157, 0.12), rgba(255, 184, 112, 0.06));
 }
 
+.player-citizens-summary {
+  margin-top: 18px;
+}
+
+.player-citizens-summary__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 2px 2px;
+}
+
+.player-citizens-summary__meta span {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.7rem;
+}
+
+.player-citizens-summary__meta strong {
+  font-family: var(--display-font);
+  font-size: 1.2rem;
+}
+
+.player-citizens-summary__list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.player-citizens-summary__item {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.player-citizens-summary__item span {
+  color: var(--muted);
+}
+
+.player-citizens-summary__item strong {
+  font-family: var(--display-font);
+}
+
 .player-lists {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3819,6 +3869,10 @@ body:-webkit-full-screen #app {
     grid-template-columns: 1fr;
   }
 
+  .player-citizens-summary__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .player-hero__meta {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -3830,6 +3884,10 @@ body:-webkit-full-screen #app {
 
 @media (max-width: 640px) {
   .player-hero__meta {
+    grid-template-columns: 1fr;
+  }
+
+  .player-citizens-summary__list {
     grid-template-columns: 1fr;
   }
 }
