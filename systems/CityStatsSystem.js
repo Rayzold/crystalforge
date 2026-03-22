@@ -21,6 +21,13 @@ function applyPercent(value, percent) {
   return value * (1 + percent / 100);
 }
 
+function getTradeGoodsGoldMultiplier(state) {
+  const goods = Math.max(0, Number(state.cityStats?.goods ?? 0) || 0);
+  const excessGoods = Math.max(0, goods - 10);
+  const bonusSteps = Math.floor(excessGoods / 10);
+  return 1 + Math.min(1, bonusSteps * 0.1);
+}
+
 export function recalculateCityStats(state) {
   const nextStats = structuredClone(EMPTY_CITY_STATS);
   let rawPopulationSupport = 0;
@@ -87,7 +94,11 @@ export function recalculateCityStats(state) {
       .reduce(
         (record, building) => {
           const placementMultiplier = 1 + getBuildingPlacementBonuses(state, building).totalPercent;
-          record.gold += Math.max(0, building.resourceRates.gold) * building.multiplier * placementMultiplier;
+          let goldIncome = Math.max(0, building.resourceRates.gold) * building.multiplier * placementMultiplier;
+          if (goldIncome > 0 && building.tags?.includes("trade")) {
+            goldIncome *= getTradeGoodsGoldMultiplier(state);
+          }
+          record.gold += goldIncome;
           record.food += Math.max(0, building.resourceRates.food) * building.multiplier * placementMultiplier;
           record.materials += Math.max(0, building.resourceRates.materials) * building.multiplier * placementMultiplier;
           record.mana += Math.max(0, building.resourceRates.mana) * building.multiplier * placementMultiplier;

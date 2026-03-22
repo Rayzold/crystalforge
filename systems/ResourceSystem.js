@@ -8,6 +8,13 @@ function createDeltaRecord() {
   return { gold: 0, food: 0, materials: 0, salvage: 0, mana: 0, prosperity: 0 };
 }
 
+function getTradeGoodsGoldMultiplier(state) {
+  const goods = Math.max(0, Number(state.cityStats?.goods ?? 0) || 0);
+  const excessGoods = Math.max(0, goods - 10);
+  const bonusSteps = Math.floor(excessGoods / 10);
+  return 1 + Math.min(1, bonusSteps * 0.1);
+}
+
 export function getWarningFlags(state) {
   return {
     lowFood: state.resources.food <= 20,
@@ -18,6 +25,7 @@ export function getWarningFlags(state) {
 
 export function calculateDailyResourceDelta(state) {
   const deltas = createDeltaRecord();
+  const tradeGoodsGoldMultiplier = getTradeGoodsGoldMultiplier(state);
 
   for (const building of state.buildings) {
     if (!building.isComplete || building.isRuined) {
@@ -27,7 +35,12 @@ export function calculateDailyResourceDelta(state) {
     const placementBonus = getBuildingPlacementBonuses(state, building);
     const placementMultiplier = 1 + placementBonus.totalPercent;
 
-    deltas.gold += building.resourceRates.gold * building.multiplier * placementMultiplier;
+    let goldDelta = building.resourceRates.gold * building.multiplier * placementMultiplier;
+    if (goldDelta > 0 && building.tags?.includes("trade")) {
+      goldDelta *= tradeGoodsGoldMultiplier;
+    }
+
+    deltas.gold += goldDelta;
     deltas.food += building.resourceRates.food * building.multiplier * placementMultiplier;
     deltas.materials += building.resourceRates.materials * building.multiplier * placementMultiplier;
     deltas.salvage += (building.resourceRates.salvage ?? 0) * building.multiplier * placementMultiplier;
