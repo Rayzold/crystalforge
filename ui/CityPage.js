@@ -190,7 +190,7 @@ function renderBuildingsView(state) {
                     .join("")}
                 </div>
               `
-            : `<p class="empty-state">Manifest incomplete buildings to let the Drift incubate them over time.</p>`
+            : `<div class="empty-state empty-state--action"><p>Manifest incomplete buildings to let the Drift incubate them over time.</p>${waiting[0] ? `<button class="button button--ghost" data-action="activate-construction" data-building-id="${waiting[0].id}">Start Incubation</button>` : `<a class="button button--ghost" href="./forge.html">Create First Building</a>`}</div>`
         }
 
         ${

@@ -84,11 +84,7 @@ function getCompactStatus(building, { isIncomplete, isActiveConstruction, queueP
 }
 
 function getCompactStageBadge(building) {
-  const label = formatBuildingQualityDisplay(building);
-  if (label === "Active") {
-    return "ACT";
-  }
-  return label.replace("Level ", "L");
+  return `${Math.round(Number(building.quality ?? 0))}%`;
 }
 
 function getInputWarnings(building, state, etaDetails, economySummary) {

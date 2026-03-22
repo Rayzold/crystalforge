@@ -227,6 +227,20 @@ textarea {
   line-height: 1.6;
 }
 
+.empty-state--action {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+}
+
+.empty-state--action p {
+  margin: 0;
+}
+
+.empty-state--action .button {
+  justify-self: start;
+}
+
 .hero h1,
 .panel h3,
 .panel h4,
@@ -1249,6 +1263,7 @@ textarea {
   font-family: var(--display-font);
   color: #07111c;
   background: color-mix(in srgb, var(--rarity-color) 80%, white 20%);
+  font-size: 0.88rem;
 }
 
 .building-card__effect {
@@ -2151,15 +2166,51 @@ textarea {
   background: #131c31;
 }
 
-.manifest-complete-modal__fill {
+.manifest-complete-modal__stack {
+  display: grid;
+  gap: 10px;
+}
+
+.manifest-complete-modal__base-progress {
   position: absolute;
   inset: 0 auto 0 0;
+  width: var(--manifest-base-start, 0%);
+  background: linear-gradient(90deg, rgba(112, 126, 153, 0.7), rgba(145, 162, 189, 0.82));
+}
+
+.manifest-complete-modal__fill {
+  position: absolute;
+  inset: 0 auto 0 var(--manifest-fill-start, 0%);
   width: min(100%, var(--manifest-quality));
   max-width: 100%;
   height: 100%;
   background: linear-gradient(90deg, rgba(222, 226, 236, 0.9), rgba(176, 184, 201, 0.9));
   transform: scaleX(0);
   transform-origin: left center;
+}
+
+.manifest-complete-modal__carry-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: min(100%, var(--manifest-carry));
+  height: 100%;
+  background: linear-gradient(90deg, rgba(236, 104, 255, 0.92), rgba(255, 178, 101, 0.92));
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.manifest-complete-modal__burst {
+  position: absolute;
+  left: calc(100% - 10px);
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  margin-top: -10px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95), rgba(255, 224, 133, 0.6), transparent 72%);
+  opacity: 0;
+  transform: scale(0.4);
+  pointer-events: none;
 }
 
 .manifest-complete-modal__track {
@@ -2169,7 +2220,15 @@ textarea {
 }
 
 .manifest-complete-modal__fill.is-revealed {
-  animation: manifestBarFill var(--manifest-duration) ease-out forwards;
+  animation: manifestBarFill var(--manifest-duration) ease-out var(--manifest-fill-delay, 0ms) forwards;
+}
+
+.manifest-complete-modal__carry-fill.is-revealed {
+  animation: manifestBarFill var(--manifest-duration) ease-out var(--manifest-fill-delay, 0ms) forwards;
+}
+
+.manifest-complete-modal__burst.is-revealed {
+  animation: manifestBurst 460ms ease-out 420ms forwards;
 }
 
 .manifest-complete-modal__value {
@@ -2187,6 +2246,13 @@ textarea {
 
 .manifest-complete-modal__value.is-visible {
   animation: manifestPercentReveal 220ms ease-out forwards;
+}
+
+.manifest-complete-modal__carry-copy {
+  margin: 0;
+  color: rgba(226, 234, 248, 0.82);
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 .manifest-complete-modal__actions {
@@ -3474,6 +3540,20 @@ textarea {
   gap: 14px;
 }
 
+.sidebar-link-group {
+  display: grid;
+  gap: 10px;
+}
+
+.sidebar-link-group__label {
+  color: rgba(223, 232, 247, 0.64);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-family: var(--label-font);
+  padding-left: 2px;
+}
+
 .sidebar-link {
   position: relative;
   display: block;
@@ -3521,16 +3601,23 @@ textarea {
   font-weight: 700;
   line-height: 1;
   box-shadow: 0 10px 22px rgba(255, 70, 70, 0.28);
+  animation: sidebarBadgePulse 1.9s ease-in-out infinite;
 }
 
 .sidebar-link:hover,
 .sidebar-link.is-active {
   transform: translateX(2px);
-  border-color: rgba(229, 140, 255, 0.24);
+  border-color: rgba(141, 214, 255, 0.38);
   background:
-    linear-gradient(135deg, rgba(229, 140, 255, 0.16), rgba(88, 184, 255, 0.11), rgba(240, 196, 130, 0.06)),
+    linear-gradient(135deg, rgba(141, 214, 255, 0.22), rgba(229, 140, 255, 0.16), rgba(240, 196, 130, 0.08)),
     rgba(8, 12, 19, 0.94);
-  box-shadow: 0 12px 28px rgba(3, 7, 14, 0.2);
+  box-shadow: 0 16px 36px rgba(3, 7, 14, 0.28);
+}
+
+.sidebar-link.is-active {
+  box-shadow:
+    0 18px 38px rgba(3, 7, 14, 0.3),
+    inset 0 0 0 1px rgba(141, 214, 255, 0.14);
 }
 
 .page-hero:hover,
@@ -4758,6 +4845,17 @@ body:-webkit-full-screen #app {
   background: linear-gradient(180deg, rgba(15, 24, 40, 0.84), rgba(8, 13, 24, 0.92));
 }
 
+.page-delta-strip__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-delta-strip__head .ui-icon {
+  width: 16px;
+  height: 16px;
+}
+
 .page-delta-strip__item.is-recently-changed {
   border-color: rgba(141, 214, 255, 0.34);
   box-shadow: 0 0 0 1px rgba(141, 214, 255, 0.08), 0 0 18px rgba(141, 214, 255, 0.12);
@@ -4773,15 +4871,28 @@ body:-webkit-full-screen #app {
 
 .page-delta-strip__item strong {
   color: rgba(241, 246, 255, 0.96);
-  font-size: 0.92rem;
+  font-size: 1.1rem;
+}
+
+.page-delta-strip__item small {
+  color: rgba(223, 232, 247, 0.76);
+  font-size: 0.78rem;
 }
 
 .page-delta-strip__item--positive strong {
-  color: #8fdeb0;
+  color: #9bf8c5;
 }
 
 .page-delta-strip__item--negative strong {
-  color: #ff9f9f;
+  color: #ff8d8d;
+}
+
+.page-delta-strip__item--positive small {
+  color: rgba(155, 248, 197, 0.92);
+}
+
+.page-delta-strip__item--negative small {
+  color: rgba(255, 141, 141, 0.92);
 }
 
 .hud-ribbon {
@@ -5438,6 +5549,21 @@ body:-webkit-full-screen #app {
   align-items: center;
 }
 
+.landing-hero__primary-action {
+  min-width: 210px;
+  padding-inline: 18px;
+  font-size: 0.92rem;
+  border-color: rgba(141, 214, 255, 0.4);
+  background:
+    linear-gradient(135deg, rgba(141, 214, 255, 0.28), rgba(229, 140, 255, 0.18), rgba(240, 196, 130, 0.12)),
+    rgba(10, 16, 28, 0.96);
+  box-shadow: 0 18px 38px rgba(7, 13, 24, 0.34);
+}
+
+.landing-hero__secondary-action {
+  opacity: 0.94;
+}
+
 .landing-hero__facts article,
 .onboarding-card,
 .realm-link-card {
@@ -5451,9 +5577,22 @@ body:-webkit-full-screen #app {
   border-color: rgba(124, 144, 255, 0.16);
 }
 
+.home-route-group {
+  display: grid;
+  gap: 10px;
+}
+
+.home-route-group__label {
+  color: rgba(223, 232, 247, 0.68);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-family: var(--label-font);
+}
+
 .home-route-deck {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -5510,7 +5649,7 @@ body:-webkit-full-screen #app {
 }
 
 .recent-signal-card,
-.home-signals-panel__grid article,
+.home-signals-panel__card,
 .citizen-command-panel__metrics article,
 .citizen-command-panel__leader {
   padding: 14px;
@@ -5520,7 +5659,7 @@ body:-webkit-full-screen #app {
 }
 
 .recent-signal-card span,
-.home-signals-panel__grid span,
+.home-signals-panel__card-head span,
 .citizen-command-panel__metrics span {
   display: block;
   color: var(--muted);
@@ -5530,7 +5669,7 @@ body:-webkit-full-screen #app {
 }
 
 .recent-signal-card strong,
-.home-signals-panel__grid strong,
+.home-signals-panel__card strong,
 .citizen-command-panel__metrics strong {
   display: block;
   margin-top: 8px;
@@ -5538,7 +5677,7 @@ body:-webkit-full-screen #app {
 }
 
 .recent-signal-card p,
-.home-signals-panel__grid small,
+.home-signals-panel__card small,
 .citizen-command-panel__metrics small {
   display: block;
   margin: 8px 0 0;
@@ -5553,6 +5692,31 @@ body:-webkit-full-screen #app {
 .home-signals-panel {
   background:
     linear-gradient(180deg, rgba(15, 18, 28, 0.96), rgba(10, 12, 20, 0.96));
+}
+
+.home-signals-panel__card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.home-signals-panel__card {
+  position: relative;
+}
+
+.home-signals-panel__card--stable {
+  border-color: rgba(112, 241, 194, 0.22);
+  background: linear-gradient(180deg, rgba(10, 28, 24, 0.5), rgba(255, 255, 255, 0.03));
+}
+
+.home-signals-panel__card--warning {
+  border-color: rgba(240, 196, 130, 0.24);
+  background: linear-gradient(180deg, rgba(42, 28, 12, 0.42), rgba(255, 255, 255, 0.03));
+}
+
+.home-signals-panel__card--urgent {
+  border-color: rgba(255, 124, 157, 0.26);
+  background: linear-gradient(180deg, rgba(48, 18, 28, 0.5), rgba(255, 255, 255, 0.03));
 }
 
 .mayor-advice-panel {
@@ -5746,6 +5910,14 @@ body:-webkit-full-screen #app {
   background: rgba(255, 255, 255, 0.035);
 }
 
+.landing-command-center__resource-card--positive {
+  border-color: rgba(112, 241, 194, 0.18);
+}
+
+.landing-command-center__resource-card--negative {
+  border-color: rgba(255, 124, 157, 0.22);
+}
+
 .landing-command-center__facts span,
 .landing-command-center__resources span {
   display: block;
@@ -5759,12 +5931,27 @@ body:-webkit-full-screen #app {
 .landing-command-center__resources strong {
   display: block;
   margin-top: 6px;
-  font-size: 1rem;
+  font-size: 1.08rem;
   line-height: 1.25;
 }
 
+.landing-command-center__resources small {
+  display: block;
+  margin-top: 6px;
+  color: rgba(223, 232, 247, 0.76);
+  font-size: 0.78rem;
+}
+
+.landing-command-center__resource-card--positive small {
+  color: rgba(155, 248, 197, 0.92);
+}
+
+.landing-command-center__resource-card--negative small {
+  color: rgba(255, 141, 141, 0.92);
+}
+
 .landing-command-center__resources {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .landing-command-center__resource-head {
@@ -5789,6 +5976,7 @@ body:-webkit-full-screen #app {
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(5, 10, 18, 0.72);
   backdrop-filter: blur(12px);
+  box-shadow: 0 16px 34px rgba(4, 9, 18, 0.32);
 }
 
 .landing-hero__badge span {
@@ -5802,12 +5990,36 @@ body:-webkit-full-screen #app {
 .landing-hero__badge strong {
   display: block;
   margin: 8px 0 4px;
-  font-size: 1rem;
+  font-size: 1.18rem;
 }
 
 .landing-hero__badge p {
   margin: 0;
   color: rgba(241, 247, 255, 0.8);
+}
+
+.landing-hero__badge-action {
+  margin-top: 12px;
+  justify-self: start;
+}
+
+.landing-hero__visual-stage {
+  animation: heroObjectivePulse 3.4s ease-in-out infinite;
+}
+
+@keyframes manifestBurst {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.5);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.2);
+  }
 }
 
 .town-focus-panel__footer-actions {
@@ -5819,6 +6031,30 @@ body:-webkit-full-screen #app {
 .home-help-modal {
   display: grid;
   gap: 12px;
+}
+
+@keyframes sidebarBadgePulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 10px 22px rgba(255, 70, 70, 0.28);
+  }
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 14px 28px rgba(255, 70, 70, 0.36);
+  }
+}
+
+@keyframes heroObjectivePulse {
+  0%,
+  100% {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 0 1px rgba(141, 214, 255, 0.12),
+      0 0 34px rgba(141, 214, 255, 0.08);
+  }
 }
 
 @media (max-width: 900px) {

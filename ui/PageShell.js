@@ -30,6 +30,14 @@ const ROUTE_GLYPHS = {
   chronicle: "\u{1F4DC}"
 };
 
+const ROUTE_SHORTCUTS = {
+  home: "1",
+  forge: "2",
+  city: "3",
+  citizens: "4",
+  chronicle: "5"
+};
+
 const DICE_TYPES = ["d2", "d4", "d6", "d8", "d10", "d12", "d20", "d100"];
 
 function formatSidebarEtaDays(daysRemaining) {
@@ -120,20 +128,59 @@ function renderSidebarBuildingList(state, title, items, emptyLabel, variant = "a
 
 function renderResourceDeltaStrip(state) {
   const deltas = getCityTrendSummary(state).filter((entry) => ["gold", "food", "materials", "salvage", "mana"].includes(entry.key));
+  const resourceValues = {
+    gold: state.resources.gold ?? 0,
+    food: state.resources.food ?? 0,
+    materials: state.resources.materials ?? 0,
+    salvage: state.resources.salvage ?? 0,
+    mana: state.resources.mana ?? 0
+  };
   return `
     <section class="page-delta-strip" aria-label="Daily resource deltas">
       ${deltas
         .map(
           (entry) => `
             <article class="page-delta-strip__item page-delta-strip__item--${entry.delta > 0 ? "positive" : entry.delta < 0 ? "negative" : "neutral"} ${state.transientUi?.recentResourceChanges?.[entry.key] ? "is-recently-changed" : ""}">
-              <span>${escapeHtml(entry.label)}</span>
-              <strong>${entry.delta >= 0 ? "+" : ""}${formatNumber(entry.delta, 2)} / day</strong>
+              <div class="page-delta-strip__head">
+                ${renderUiIcon(entry.key, entry.label)}
+                <span>${escapeHtml(entry.label)}</span>
+              </div>
+              <strong>${formatNumber(resourceValues[entry.key] ?? 0, 0)}</strong>
+              <small>${entry.delta >= 0 ? "+" : ""}${formatNumber(entry.delta, 2)} / day</small>
             </article>
           `
         )
         .join("")}
     </section>
   `;
+}
+
+function renderSidebarRouteGroup(routes, pageKey, cityAlertCount, availableCrystalCount) {
+  return routes
+    .map(
+      (route) => `
+        <a
+          class="sidebar-link ${route.key === pageKey ? "is-active" : ""}"
+          href="${route.href}"
+          data-short="${route.label.slice(0, 2).toUpperCase()}"
+          data-glyph="${ROUTE_GLYPHS[route.key] ?? "\u2022"}"
+          title="${escapeHtml(`${route.label} (${ROUTE_SHORTCUTS[route.key] ?? ""})`)}"
+        >
+          <span class="sidebar-link__label">
+            <span class="sidebar-link__emoji">${ROUTE_GLYPHS[route.key] ?? "\u2022"}</span>
+            <span>${route.label}</span>
+          </span>
+          ${
+            route.key === "city" && cityAlertCount
+              ? `<em class="sidebar-link__badge">${cityAlertCount}</em>`
+              : route.key === "forge" && availableCrystalCount > 0
+                ? `<em class="sidebar-link__badge">${availableCrystalCount}</em>`
+                : ""
+          }
+        </a>
+      `
+    )
+    .join("");
 }
 
 export function renderPageShell(state, pageKey, { title, subtitle, content, aside = "" }, overlays = "") {
@@ -164,6 +211,8 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
   const currentFocus = getCurrentTownFocus(state);
   const cityAlertCount = getCriticalAlerts(state).length;
   const availableCrystalCount = Object.values(state.crystals ?? {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
+  const coreRoutes = PAGE_ROUTES.filter((route) => ["home", "forge", "city"].includes(route.key));
+  const managementRoutes = PAGE_ROUTES.filter((route) => ["citizens", "chronicle"].includes(route.key));
   const manifestedBuildings = orderSidebarBuildings(state, state.buildings.filter((building) => building.isComplete));
   const incubatingBuildings = orderSidebarBuildings(state, getActiveConstructionQueue(state));
   const availableBuildings = orderSidebarBuildings(state, getAvailableConstructionQueue(state));
@@ -213,28 +262,14 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
           <strong>City of Drift</strong>
         </div>
         <nav class="sidebar-nav__links">
-          ${PAGE_ROUTES.map(
-            (route) => `
-              <a
-                class="sidebar-link ${route.key === pageKey ? "is-active" : ""}"
-                href="${route.href}"
-                data-short="${route.label.slice(0, 2).toUpperCase()}"
-                data-glyph="${ROUTE_GLYPHS[route.key] ?? "\u2022"}"
-              >
-                <span class="sidebar-link__label">
-                  <span class="sidebar-link__emoji">${ROUTE_GLYPHS[route.key] ?? "\u2022"}</span>
-                  <span>${route.label}</span>
-                </span>
-                ${
-                  route.key === "city" && cityAlertCount
-                    ? `<em class="sidebar-link__badge">${cityAlertCount}</em>`
-                    : route.key === "forge" && availableCrystalCount > 0
-                      ? `<em class="sidebar-link__badge">${availableCrystalCount}</em>`
-                      : ""
-                }
-              </a>
-            `
-          ).join("")}
+          <div class="sidebar-link-group">
+            <span class="sidebar-link-group__label">Core</span>
+            ${renderSidebarRouteGroup(coreRoutes, pageKey, cityAlertCount, availableCrystalCount)}
+          </div>
+          <div class="sidebar-link-group">
+            <span class="sidebar-link-group__label">Management</span>
+            ${renderSidebarRouteGroup(managementRoutes, pageKey, cityAlertCount, availableCrystalCount)}
+          </div>
         </nav>
         <div class="sidebar-nav__status">
           ${renderSidebarBuildingList(state, "Active", manifestedBuildings, "No active buildings yet.", "active")}

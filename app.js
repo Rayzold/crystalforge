@@ -786,6 +786,10 @@ async function handleManifest() {
           sourceRarity: result.sourceRarity ?? result.rarity,
           targetRarity: result.targetRarity ?? null,
           qualityRoll: result.qualityRoll,
+          wasNew: Boolean(result.wasNew),
+          previousQuality: result.previousQuality ?? 0,
+          finalQuality: result.finalQuality ?? result.building?.quality ?? null,
+          crossedActivation: Boolean(result.crossedActivation),
           durationMs: 900,
           revealPercent: true
         }
@@ -1593,6 +1597,7 @@ const actions = {
   pauseAllConstruction() {
     const affectedIds = getCurrentState().buildings.filter((building) => !building.isComplete).map((building) => building.id);
     commit((draft) => {
+      draft.activeConstructionIds = [];
       draft.pausedConstructionIds = draft.buildings.filter((building) => !building.isComplete).map((building) => building.id);
       normalizeConstructionPriority(draft);
     });
@@ -1602,6 +1607,7 @@ const actions = {
   resumeAllConstruction() {
     const affectedIds = getCurrentState().buildings.filter((building) => !building.isComplete).map((building) => building.id);
     commit((draft) => {
+      draft.activeConstructionIds = draft.constructionPriority.slice(0, getDriftConstructionSlots(draft));
       draft.pausedConstructionIds = [];
       normalizeConstructionPriority(draft);
     });
@@ -1767,6 +1773,35 @@ if (pageKey === "player") {
     });
   });
 }
+
+function isTypingTarget(target) {
+  return target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || target?.isContentEditable;
+}
+
+document.addEventListener("keydown", (event) => {
+  if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) {
+    return;
+  }
+  if (isTypingTarget(event.target)) {
+    return;
+  }
+
+  const key = event.key;
+  const shortcuts = {
+    "1": "./gm.html",
+    "2": "./forge.html",
+    "3": "./city.html",
+    "4": "./citizens.html",
+    "5": "./chronicle.html"
+  };
+
+  if (!shortcuts[key]) {
+    return;
+  }
+
+  event.preventDefault();
+  navigateWithTransition(shortcuts[key]);
+});
 
 root.addEventListener("click", async (event) => {
   const target = event.target.closest("[data-action]");

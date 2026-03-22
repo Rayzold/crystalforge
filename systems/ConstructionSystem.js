@@ -277,6 +277,8 @@ export function normalizeConstructionPriority(state) {
   }
 
   state.constructionPriority = deduped;
+  const active = Array.isArray(state.activeConstructionIds) ? state.activeConstructionIds : [];
+  state.activeConstructionIds = active.filter((id, index) => validIds.has(id) && active.indexOf(id) === index);
   const paused = Array.isArray(state.pausedConstructionIds) ? state.pausedConstructionIds : [];
   state.pausedConstructionIds = paused.filter((id, index) => validIds.has(id) && paused.indexOf(id) === index);
   return deduped;
@@ -290,9 +292,9 @@ export function getConstructionQueue(state) {
 }
 
 export function getActiveConstructionQueue(state) {
-  const pausedIds = new Set(state.pausedConstructionIds ?? []);
+  const activeIds = new Set(state.activeConstructionIds ?? []);
   return getConstructionQueue(state)
-    .filter((building) => !pausedIds.has(building.id))
+    .filter((building) => activeIds.has(building.id))
     .slice(0, getDriftConstructionSlots(state));
 }
 
@@ -345,9 +347,7 @@ export function pauseConstruction(state, buildingId) {
     return { ok: true, changed: false };
   }
 
-  const paused = new Set(state.pausedConstructionIds ?? []);
-  paused.add(buildingId);
-  state.pausedConstructionIds = Array.from(paused);
+  state.activeConstructionIds = (state.activeConstructionIds ?? []).filter((id) => id !== buildingId);
   return { ok: true, changed: true };
 }
 
@@ -358,11 +358,16 @@ export function activateConstruction(state, buildingId) {
     return { ok: false, reason: "Building is not in the construction queue." };
   }
 
-  state.pausedConstructionIds = (state.pausedConstructionIds ?? []).filter((id) => id !== buildingId);
-  if (index > 0) {
-    queue.splice(index, 1);
-    queue.unshift(buildingId);
+  const currentActiveIds = [...(state.activeConstructionIds ?? [])];
+  if (currentActiveIds.includes(buildingId)) {
+    return { ok: true, changed: false };
   }
+  if (currentActiveIds.length >= getDriftConstructionSlots(state)) {
+    return { ok: false, reason: "All incubator slots are already occupied." };
+  }
+
+  currentActiveIds.push(buildingId);
+  state.activeConstructionIds = currentActiveIds;
   return { ok: true, changed: true };
 }
 

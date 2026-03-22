@@ -23,7 +23,7 @@ import { getDistrictSummary } from "./DistrictSystem.js";
 import { normalizeShardCollection } from "./ShardSystem.js";
 import { createMapCells } from "./MapSystem.js";
 import { createDefaultDriftEvolutionState, normalizeDriftEvolutionState, syncDriftEvolutionState } from "./DriftEvolutionSystem.js";
-import { normalizeConstructionPriority } from "./ConstructionSystem.js";
+import { getDriftConstructionSlots, normalizeConstructionPriority } from "./ConstructionSystem.js";
 import { createDefaultTownFocusState, normalizeTownFocusState } from "./TownFocusSystem.js";
 import { captureDailyCitySnapshot } from "./CitySnapshotSystem.js";
 
@@ -67,6 +67,7 @@ export function createInitialState(preset = DEFAULT_START_PRESET) {
     districtSummary: [],
     cityStats: {},
     constructionPriority: [],
+    activeConstructionIds: [],
     pausedConstructionIds: [],
     events: { active: [], recent: [], scheduled: [] },
     chronicleNotes: {},
@@ -113,6 +114,7 @@ export function createSingleCommonCrystalResetState() {
   state.citizens = createEmptyCitizenCollection(0);
   state.buildings = [];
   state.constructionPriority = [];
+  state.activeConstructionIds = [];
   state.pausedConstructionIds = [];
   state.events = { active: [], recent: [], scheduled: [] };
   state.chronicleNotes = {};
@@ -342,6 +344,7 @@ export function validateAndMigrateSave(rawSave) {
       cells: createMapCells()
     },
     constructionPriority: Array.isArray(rawSave.constructionPriority) ? rawSave.constructionPriority : [],
+    activeConstructionIds: Array.isArray(rawSave.activeConstructionIds) ? rawSave.activeConstructionIds : [],
     pausedConstructionIds: Array.isArray(rawSave.pausedConstructionIds) ? rawSave.pausedConstructionIds : [],
     events: {
       active: Array.isArray(rawSave.events?.active) ? rawSave.events.active : [],
@@ -366,6 +369,13 @@ export function validateAndMigrateSave(rawSave) {
     },
     citizenDefinitions: createCitizenDefinitionsSnapshot()
   };
+
+  if (!Array.isArray(rawSave?.activeConstructionIds)) {
+    const seededActiveIds = nextState.constructionPriority
+      .filter((buildingId) => !(nextState.pausedConstructionIds ?? []).includes(buildingId))
+      .slice(0, getDriftConstructionSlots(nextState));
+    nextState.activeConstructionIds = seededActiveIds;
+  }
 
   nextState.resources.population = Object.values(nextState.citizens).reduce((sum, value) => sum + value, 0);
   // Old saves may still contain Crystal Upgrade as a building, so normalize them into crystals on load.

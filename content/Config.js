@@ -7,7 +7,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.2.54";
+export const APP_VERSION = "v1.2.57";
 export const SAVE_VERSION = 10;
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3";
 export const FIREBASE_CONFIG = {
@@ -34,6 +34,9 @@ export const PAGE_ROUTES = [
   { key: "chronicle", label: "Chronicle", href: "./chronicle.html" }
 ];
 export const BUILD_NOTES = [
+  "Incubator slots are now explicit assignments: canceling a building leaves that slot empty until you choose another one, while older saves seed their currently active incubators once during migration.",
+  "Repeat manifestations on existing buildings now show a carry-over quality animation in the completion modal, and active building cards show exact current quality like 100% or 125% instead of a generic active badge.",
+  "Home and shell readability are stronger: the main call-to-action is clearer, resource deltas now show current stock plus daily movement, sidebar navigation has more hierarchy, and empty states now offer direct next-step actions.",
   "Player-facing wording is now more consistent across the app: completed buildings read as Active, raw percentages read as quality, and bpd labels expand more clearly into build points/day where space allows.",
   "GM admin now includes an economy debug table for stock, building output, citizen production and consumption, event/focus modifiers, and net daily flow, while wording around roll quality versus building stage has been tightened.",
   "A final readability pass slightly sharpened panel surfaces and lifted muted labels, making windows feel crisper while keeping supporting text easier to read.",

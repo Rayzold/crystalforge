@@ -61,7 +61,7 @@ export function renderConstructionQueuePanel(state) {
                 ${queue.map((building, index) => renderQueueItem(state, building, index, activeQueue.length)).join("")}
               </div>
             `
-          : `<p class="empty-state">All buildings are already active at 100%+ quality. The Drift is not raising any new structures right now.</p>`
+          : `<div class="empty-state empty-state--action"><p>All buildings are already active at 100%+ quality. The Drift is not raising any new structures right now.</p><a class="button button--ghost" href="./forge.html">Open Forge</a></div>`
       }
     </section>
   `;

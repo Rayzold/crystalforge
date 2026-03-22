@@ -89,6 +89,7 @@ function getRealmGoals(state) {
 function renderCommandCenterBubble(state) {
   const date = getStructuredDate(state.calendar.dayOffset);
   const currentStage = getCurrentDriftEvolution(state);
+  const trends = Object.fromEntries(getCityTrendSummary(state).map((entry) => [entry.key, entry]));
   const resources = [
     ["Gold", state.resources.gold, "gold"],
     ["Food", state.resources.food, "food"],
@@ -121,12 +122,13 @@ function renderCommandCenterBubble(state) {
         ${resources
           .map(
             ([label, value, iconKey]) => `
-              <article>
+              <article class="landing-command-center__resource-card landing-command-center__resource-card--${(trends[iconKey]?.delta ?? 0) > 0 ? "positive" : (trends[iconKey]?.delta ?? 0) < 0 ? "negative" : "neutral"}">
                 <div class="landing-command-center__resource-head">
                   ${renderUiIcon(iconKey, label)}
                   <span>${escapeHtml(label)}</span>
                 </div>
                 <strong>${formatNumber(value, 0)}</strong>
+                <small>${(trends[iconKey]?.delta ?? 0) >= 0 ? "+" : ""}${formatNumber(trends[iconKey]?.delta ?? 0, 2)} / day</small>
               </article>
             `
           )
@@ -139,6 +141,7 @@ function renderCommandCenterBubble(state) {
 function renderLandingHero(state) {
   const progress = getHomeProgress(state);
   const nextStep = progress.find((step) => !step.complete) ?? progress[progress.length - 1];
+  const nextStepIndex = progress.findIndex((step) => !step.complete);
   const date = getStructuredDate(state.calendar.dayOffset);
   const highlightedBuilding =
     [...state.buildings].sort((left, right) => right.quality - left.quality)[0] ?? null;
@@ -158,9 +161,9 @@ function renderLandingHero(state) {
             ${date.holiday ? ` Today is ${escapeHtml(date.holiday.name)}.` : ""}
           </p>
           <div class="landing-hero__actions">
-            <a class="button" href="${nextStep.href}">${escapeHtml(nextStep.cta)}</a>
-            ${state.settings.liveSessionView ? `<button class="button button--ghost" data-action="open-admin">Open GM Console</button>` : `<a class="button button--ghost" href="./forge.html">Open Forge</a>`}
-            <a class="button button--ghost" href="./index.html">Open Player Page</a>
+            <a class="button landing-hero__primary-action" href="${nextStep.href}" title="${escapeHtml(`Primary next step: ${nextStep.cta}`)}">${escapeHtml(nextStep.cta)}</a>
+            ${state.settings.liveSessionView ? `<button class="button button--ghost landing-hero__secondary-action" data-action="open-admin" title="Open the GM control layer">Open GM Console</button>` : `<a class="button button--ghost landing-hero__secondary-action" href="./forge.html" title="Open the Forge">Open Forge</a>`}
+            <a class="button button--ghost landing-hero__secondary-action" href="./index.html" title="Open the shared player screen">Open Player Page</a>
           </div>
         </div>
         <div class="landing-hero__visual">
@@ -171,9 +174,10 @@ function renderLandingHero(state) {
                 : `<div class="landing-hero__glyph">${escapeHtml(nextStep.title.slice(0, 1))}</div>`
             }
             <div class="landing-hero__badge">
-              <span>Next Objective</span>
+              <span>Step ${formatNumber((nextStepIndex === -1 ? progress.length : nextStepIndex + 1), 0)} / ${formatNumber(progress.length, 0)}</span>
               <strong>${escapeHtml(nextStep.title)}</strong>
               <p>${escapeHtml(nextStep.details)}</p>
+              <a class="button landing-hero__badge-action" href="${nextStep.href}">${escapeHtml(nextStep.cta)}</a>
             </div>
           </div>
           ${renderCommandCenterBubble(state)}
@@ -185,31 +189,42 @@ function renderLandingHero(state) {
 
 function renderHomeRouteDeck() {
   const routes = [
-    { title: "Manifest", label: "Forge", href: "./forge.html", details: "Choose a crystal, manifest a structure, and watch the roll resolve." },
-    { title: "Shape", label: "City", href: "./city.html", details: "Place buildings on the map, tune districts, and direct construction." },
-    { title: "Remember", label: "Chronicle", href: "./chronicle.html", details: "Track events, monthly stories, and the realm's living history." },
-    { title: "Present", label: "Player Page", href: "./index.html", details: "Open the cleaner shared player view for testers, tables, and screens." }
+    { group: "Core", title: "Manifest", label: "Forge", href: "./forge.html", details: "Choose a crystal, manifest a structure, and watch the roll resolve." },
+    { group: "Core", title: "Shape", label: "City", href: "./city.html", details: "Place buildings on the map, tune districts, and direct construction." },
+    { group: "Management", title: "Remember", label: "Chronicle", href: "./chronicle.html", details: "Track events, monthly stories, and the realm's living history." },
+    { group: "Management", title: "Present", label: "Player Page", href: "./index.html", details: "Open the cleaner shared player view for testers, tables, and screens." }
   ];
+  const groups = ["Core", "Management"];
 
   return `
     <section class="scene-panel scene-panel--home-route-deck">
       <div class="panel__header">
         <h3>Realm Routes</h3>
-        <span class="panel__subtle">The companion app's three main working areas</span>
+        <span class="panel__subtle">The companion app's core and management routes</span>
       </div>
-      <div class="home-route-deck">
-        ${routes
-          .map(
-            (route) => `
-              <a class="home-route-card" href="${route.href}">
-                <span>${escapeHtml(route.label)}</span>
-                <strong>${escapeHtml(route.title)}</strong>
-                <p>${escapeHtml(route.details)}</p>
-              </a>
-            `
-          )
-          .join("")}
-      </div>
+      ${groups
+        .map(
+          (group) => `
+            <div class="home-route-group">
+              <span class="home-route-group__label">${escapeHtml(group)}</span>
+              <div class="home-route-deck">
+                ${routes
+                  .filter((route) => route.group === group)
+                  .map(
+                    (route) => `
+                      <a class="home-route-card" href="${route.href}">
+                        <span>${escapeHtml(route.label)}</span>
+                        <strong>${escapeHtml(route.title)}</strong>
+                        <p>${escapeHtml(route.details)}</p>
+                      </a>
+                    `
+                  )
+                  .join("")}
+              </div>
+            </div>
+          `
+        )
+        .join("")}
     </section>
   `;
 }
@@ -329,7 +344,7 @@ function renderFeaturedBuildings(state) {
                   `
                 )
                 .join("")
-            : `<p class="empty-state">Manifest your first buildings to turn the skyline into something worth remembering.</p>`
+            : `<div class="empty-state empty-state--action"><p>Manifest your first buildings to turn the skyline into something worth remembering.</p><a class="button button--ghost" href="./forge.html">Create First Building</a></div>`
         }
       </div>
     </section>
@@ -493,7 +508,7 @@ function renderRecentSignals(state) {
                   `
                 )
                 .join("")
-            : `<p class="empty-state">No recent signals have been recorded yet.</p>`
+            : `<div class="empty-state empty-state--action"><p>No recent signals have been recorded yet.</p><a class="button button--ghost" href="./chronicle.html">Open Chronicle</a></div>`
         }
       </div>
       <div class="recent-signals__actions">
@@ -505,6 +520,11 @@ function renderRecentSignals(state) {
 
 function renderHomeSignals(state) {
   const townFocusAvailability = getTownFocusAvailability(state);
+  const activeEventCount = state.events.active.length;
+  const activeBuildingCount = state.buildings.filter((building) => building.isComplete).length;
+  const eventState = activeEventCount === 0 ? "stable" : activeEventCount <= 2 ? "warning" : "urgent";
+  const councilState = townFocusAvailability.isSelectionPending ? "warning" : "stable";
+  const buildingState = activeBuildingCount === 0 ? "urgent" : activeBuildingCount < 3 ? "warning" : "stable";
   return `
     <section class="panel home-signals-panel">
       <div class="panel__header">
@@ -512,20 +532,20 @@ function renderHomeSignals(state) {
         <span class="panel__subtle">Only the overview that matters here</span>
       </div>
       <div class="home-signals-panel__grid">
-        <article>
-          <span>Active Events</span>
-          <strong>${formatNumber(state.events.active.length, 0)}</strong>
-          <small>${state.events.active.length ? "Chronicle has live disturbances" : "No urgent disruptions"}</small>
+        <article class="home-signals-panel__card home-signals-panel__card--${eventState}">
+          <div class="home-signals-panel__card-head">${renderUiIcon("calendar", "Signals")}<span>Active Events</span></div>
+          <strong>${activeEventCount === 0 ? "Stable" : formatNumber(activeEventCount, 0)}</strong>
+          <small>${activeEventCount ? "Chronicle has live disturbances" : "All systems stable"}</small>
         </article>
-        <article>
-          <span>Next Council</span>
+        <article class="home-signals-panel__card home-signals-panel__card--${councilState}">
+          <div class="home-signals-panel__card-head">${renderUiIcon("calendar", "Council")}<span>Next Council</span></div>
           <strong>${townFocusAvailability.isSelectionPending ? "Due" : `${townFocusAvailability.daysUntilCouncil}d`}</strong>
           <small>${townFocusAvailability.isSelectionPending ? "A new focus can be chosen now" : formatDate(townFocusAvailability.nextSelectionDayOffset)}</small>
         </article>
-        <article>
-          <span>Active Buildings</span>
-          <strong>${formatNumber(state.buildings.length, 0)}</strong>
-          <small>${formatNumber(state.buildings.filter((building) => building.isComplete).length, 0)} complete</small>
+        <article class="home-signals-panel__card home-signals-panel__card--${buildingState}">
+          <div class="home-signals-panel__card-head">${renderUiIcon("building", "Buildings")}<span>Active Buildings</span></div>
+          <strong>${activeBuildingCount === 0 ? "None" : formatNumber(activeBuildingCount, 0)}</strong>
+          <small>${activeBuildingCount === 0 ? "The Drift still needs its first finished structure" : `${formatNumber(state.buildings.length, 0)} total structures tracked`}</small>
         </article>
       </div>
       <div class="home-signals-panel__actions">
@@ -559,7 +579,7 @@ function renderMayorAdvice(state) {
                   `
                 )
                 .join("")
-            : `<p class="empty-state">The mayor has no urgent guidance right now. The city appears steady.</p>`
+            : `<div class="empty-state empty-state--action"><p>The mayor has no urgent guidance right now. The city appears steady.</p><a class="button button--ghost" href="./city.html">Review City</a></div>`
         }
       </div>
     </section>

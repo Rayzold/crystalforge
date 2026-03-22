@@ -7,6 +7,15 @@ export function renderManifestCompleteModal(state) {
   }
 
   const isCrystalUpgrade = Boolean(manifestModal.isCrystalUpgrade);
+  const previousQuality = Number(manifestModal.previousQuality ?? 0);
+  const finalQuality = Number(manifestModal.finalQuality ?? manifestModal.qualityRoll ?? 0);
+  const firstThreshold = previousQuality < 100 ? 100 : Math.ceil(previousQuality / 100) * 100;
+  const stageStart = previousQuality < 100 ? 0 : Math.floor(previousQuality / 100) * 100;
+  const stageProgressStart = Math.max(0, Math.min(100, previousQuality - stageStart));
+  const filledWithinStage = Math.max(0, Math.min(firstThreshold, finalQuality) - previousQuality);
+  const firstFillPercent = Math.max(0, Math.min(100 - stageProgressStart, filledWithinStage));
+  const overflowIntoNext = Math.max(0, finalQuality - firstThreshold);
+  const carryPercent = Math.max(0, Math.min(100, overflowIntoNext));
   const manifestSentence = isCrystalUpgrade
     ? `The ${escapeHtml(manifestModal.sourceRarity)} crystal resonated as a crystal upgrade and became <strong>${escapeHtml(manifestModal.targetRarity)}</strong>.`
     : `The ${escapeHtml(manifestModal.rarity)} crystal manifested the <strong>${escapeHtml(manifestModal.rolledName)}</strong>.`;
@@ -33,7 +42,8 @@ export function renderManifestCompleteModal(state) {
                   </div>
                 </div>
               `
-              : `
+              : manifestModal.wasNew
+                ? `
                 <div class="manifest-complete-modal__quality">
                   <span>Quality</span>
                   <div class="manifest-complete-modal__bar">
@@ -45,6 +55,40 @@ export function renderManifestCompleteModal(state) {
                     <strong class="manifest-complete-modal__value ${manifestModal.revealPercent ? "is-visible" : ""}">
                       ${formatNumber(manifestModal.qualityRoll, 0)}%
                     </strong>
+                  </div>
+                </div>
+              `
+                : `
+                <div class="manifest-complete-modal__quality">
+                  <span>Quality Added</span>
+                  <div class="manifest-complete-modal__stack">
+                    <div class="manifest-complete-modal__bar manifest-complete-modal__bar--carry">
+                      <div class="manifest-complete-modal__track"></div>
+                      <div class="manifest-complete-modal__base-progress" style="--manifest-base-start:${stageProgressStart}%"></div>
+                      <div
+                        class="manifest-complete-modal__fill ${manifestModal.revealPercent ? "is-revealed" : ""}"
+                        style="--manifest-quality:${firstFillPercent}%; --manifest-duration:${manifestModal.durationMs}ms; --manifest-fill-delay:0ms; --manifest-fill-start:${stageProgressStart}%"
+                      ></div>
+                      ${manifestModal.crossedActivation ? `<div class="manifest-complete-modal__burst ${manifestModal.revealPercent ? "is-revealed" : ""}"></div>` : ""}
+                      ${
+                        carryPercent > 0
+                          ? `<div
+                              class="manifest-complete-modal__carry-fill ${manifestModal.revealPercent ? "is-revealed" : ""}"
+                              style="--manifest-carry:${carryPercent}%; --manifest-duration:${manifestModal.durationMs}ms; --manifest-fill-delay:520ms"
+                            ></div>`
+                          : ""
+                      }
+                      <strong class="manifest-complete-modal__value ${manifestModal.revealPercent ? "is-visible" : ""}">
+                        ${formatNumber(previousQuality, 0)}% -> ${formatNumber(finalQuality, 0)}%
+                      </strong>
+                    </div>
+                    <p class="manifest-complete-modal__carry-copy">
+                      ${
+                        carryPercent > 0
+                          ? `${formatNumber(previousQuality, 0)}% rose to ${formatNumber(firstThreshold, 0)}%, then carried ${formatNumber(carryPercent, 0)}% into the next quality band.`
+                          : `${formatNumber(previousQuality, 0)}% rose to ${formatNumber(finalQuality, 0)}%.`
+                      }
+                    </p>
                   </div>
                 </div>
               `

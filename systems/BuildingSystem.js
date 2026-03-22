@@ -99,9 +99,17 @@ export function manifestIntoBuilding(state, catalogEntry, qualityRoll, timestamp
   const existing = state.buildings.find((building) => building.key === key);
 
   if (!existing) {
-    return createBuildingInstance(state, catalogEntry, qualityRoll, timestamps);
+    const created = createBuildingInstance(state, catalogEntry, qualityRoll, timestamps);
+    return {
+      ...created,
+      previousQuality: 0,
+      appliedQuality: qualityRoll,
+      finalQuality: created.building.quality,
+      crossedActivation: created.building.quality >= BUILDING_ACTIVE_THRESHOLD
+    };
   }
 
+  const previousQuality = existing.quality;
   existing.lastManifestedAt = timestamps.date;
   existing.lastManifestedDayOffset = timestamps.dayOffset;
   existing.history.push({
@@ -117,7 +125,15 @@ export function manifestIntoBuilding(state, catalogEntry, qualityRoll, timestamp
   if (overflow > 0) {
     addShards(state, catalogEntry.rarity, overflow);
   }
-  return { building: existing, overflow, wasNew: false };
+  return {
+    building: existing,
+    overflow,
+    wasNew: false,
+    previousQuality,
+    appliedQuality: qualityRoll,
+    finalQuality: existing.quality,
+    crossedActivation: previousQuality < BUILDING_ACTIVE_THRESHOLD && existing.quality >= BUILDING_ACTIVE_THRESHOLD
+  };
 }
 
 export function removeBuilding(state, buildingId) {

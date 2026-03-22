@@ -78,6 +78,10 @@ export function manifestSelectedRarity(state, rarity) {
     rolledName,
     overflow: result.overflow,
     building: result.building,
-    wasNew: result.wasNew
+    wasNew: result.wasNew,
+    previousQuality: result.previousQuality,
+    appliedQuality: result.appliedQuality,
+    finalQuality: result.finalQuality,
+    crossedActivation: result.crossedActivation
   };
 }
