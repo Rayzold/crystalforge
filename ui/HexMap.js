@@ -378,6 +378,9 @@ function renderDistrictInfluenceField(state, cells, size) {
           class="hex-map__district-field"
           points="${hexPoints(center.x, center.y, size * 0.94)}"
           fill="${influence.color}"
+          stroke="${influence.color}"
+          stroke-opacity="${Math.min(0.34, opacity + 0.08)}"
+          stroke-width="1.1"
           opacity="${opacity}"
         ></polygon>
       `;
@@ -398,7 +401,7 @@ function renderPlacementPreview(selectedBuilding, cell, center, size, previewVal
         opacity="${previewValid ? "0.32" : "0.18"}"
       ></polygon>
       <text x="${center.x}" y="${center.y + 5}" text-anchor="middle" class="hex-map__preview-label">
-        ${escapeHtml(selectedBuilding.displayName.slice(0, 2).toUpperCase())}
+        ${escapeHtml(getBuildingEmoji(selectedBuilding))}
       </text>
     </g>
   `;
@@ -426,6 +429,7 @@ function renderCellInspector(state, cell, selectedBuilding) {
       : selectedBuilding);
   const placementBonus = previewTarget ? getBuildingPlacementBonuses(state, previewTarget) : null;
   const terrain = occupant ? getBuildingTerrain(state, occupant) : cell.terrain;
+  const isPinned = occupant ? Boolean(state.settings?.pinnedBuildingIds?.includes(occupant.id)) : false;
 
   return `
     <div class="hex-map-tooltip">
@@ -466,6 +470,21 @@ function renderCellInspector(state, cell, selectedBuilding) {
             : "No adjacency or terrain bonus from this view."
         }</small>
       </article>
+      ${
+        occupant
+          ? `
+              <article class="hex-map-tooltip__actions-card">
+                <span>Quick Actions</span>
+                <div class="hex-map-tooltip__actions">
+                  <button class="button button--ghost" data-action="inspect-building" data-building-id="${occupant.id}">Open Dossier</button>
+                  <button class="button button--ghost" data-action="move-map-building" data-building-id="${occupant.id}">Move</button>
+                  <button class="button button--ghost" data-action="clear-map-building-placement" data-building-id="${occupant.id}">Unplace</button>
+                  <button class="button button--ghost" data-action="toggle-building-pin" data-building-id="${occupant.id}">${isPinned ? "Unpin" : "Pin"}</button>
+                </div>
+              </article>
+            `
+          : ""
+      }
     </div>
   `;
 }
@@ -473,6 +492,10 @@ function renderCellInspector(state, cell, selectedBuilding) {
 function formatTerrainLabel(terrain) {
   const value = String(terrain ?? "neutral");
   return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function getDistrictDisplayName(district) {
+  return String(district ?? "District").replace(/\s+District$/i, "");
 }
 
 function getPlacementCandidates(state, cell) {
@@ -501,6 +524,82 @@ function getPlacementCandidates(state, cell) {
     });
 }
 
+function getPlacementRecommendation(state, building, cell) {
+  const validation = canPlaceBuildingAt(state, building.id, cell.q, cell.r);
+  if (!validation.ok) {
+    return {
+      score: -1,
+      label: "Blocked",
+      className: "is-blocked",
+      detail: validation.reason
+    };
+  }
+
+  const previewTarget = { ...building, mapPosition: { q: cell.q, r: cell.r } };
+  const bonus = getBuildingPlacementBonuses(state, previewTarget);
+  const districtInfluence = getDistrictInfluence(state, cell);
+  let score = bonus.totalPercent;
+  if (districtInfluence?.district === building.district) {
+    score += 0.08;
+  }
+  if (bonus.sameDistrictNeighbors > 0) {
+    score += 0.03;
+  }
+  if (bonus.relatedTagNeighbors > 0) {
+    score += 0.02;
+  }
+  if (cell.isFortificationRing && isFortificationBuilding(building)) {
+    score += 0.12;
+  }
+
+  if (score >= 0.2) {
+    return {
+      score,
+      label: "Best",
+      className: "is-best",
+      detail: `+${formatNumber(bonus.totalPercent * 100, 1)}% resonance`
+    };
+  }
+  if (score >= 0.08) {
+    return {
+      score,
+      label: "Good",
+      className: "is-good",
+      detail: `+${formatNumber(bonus.totalPercent * 100, 1)}% resonance`
+    };
+  }
+  return {
+    score,
+    label: "Poor",
+    className: "is-poor",
+    detail: bonus.totalPercent > 0 ? `+${formatNumber(bonus.totalPercent * 100, 1)}% resonance` : "Low placement synergy"
+  };
+}
+
+function sortPlacementCandidates(candidates, state, cell) {
+  return [...candidates].sort((left, right) => {
+    const leftSelected = left.id === state.ui.selectedBuildingId ? -1 : 0;
+    const rightSelected = right.id === state.ui.selectedBuildingId ? -1 : 0;
+    if (leftSelected !== rightSelected) {
+      return leftSelected - rightSelected;
+    }
+    const leftPinned = state.settings?.pinnedBuildingIds?.includes(left.id) ? -1 : 0;
+    const rightPinned = state.settings?.pinnedBuildingIds?.includes(right.id) ? -1 : 0;
+    if (leftPinned !== rightPinned) {
+      return leftPinned - rightPinned;
+    }
+    const recommendationDiff =
+      getPlacementRecommendation(state, right, cell).score - getPlacementRecommendation(state, left, cell).score;
+    if (recommendationDiff !== 0) {
+      return recommendationDiff;
+    }
+    if (left.rarity !== right.rarity) {
+      return RARITY_ORDER.indexOf(left.rarity) - RARITY_ORDER.indexOf(right.rarity);
+    }
+    return left.displayName.localeCompare(right.displayName);
+  });
+}
+
 function filterPlacementCandidates(candidates, state, filterKey) {
   switch (filterKey) {
     case "Defense":
@@ -514,6 +613,31 @@ function filterPlacementCandidates(candidates, state, filterKey) {
     case "All":
     default:
       return candidates;
+  }
+}
+
+function getOverlayCellClass(state, mapOverlay, cell, building, selectedBuilding) {
+  switch (mapOverlay) {
+    case "Defense":
+      return cell.isFortificationRing || (building && isFortificationBuilding(building)) ? "is-overlay-focus" : "is-overlay-dim";
+    case "Trade":
+      return cell.terrain === "river" ||
+        cell.terrain === "sea" ||
+        (building && ((building.tags ?? []).includes("trade") || building.district === "Trade District" || building.district === "Harbor District"))
+        ? "is-overlay-focus"
+        : "is-overlay-dim";
+    case "Water":
+      return cell.terrain === "river" || cell.terrain === "sea" ? "is-overlay-focus" : "is-overlay-dim";
+    case "Bastion":
+      return cell.isFortificationRing || (building && isFortificationBuilding(building)) ? "is-overlay-focus" : "is-overlay-dim";
+    case "Resonance":
+      if (!selectedBuilding) {
+        return building ? "is-overlay-focus" : "is-overlay-dim";
+      }
+      return !cell.isReserved && canPlaceBuildingAt(state, selectedBuilding.id, cell.q, cell.r).ok ? "is-overlay-focus" : "is-overlay-dim";
+    case "District":
+    default:
+      return getDistrictInfluence(state, cell) ? "is-overlay-focus" : "is-overlay-dim";
   }
 }
 
@@ -638,6 +762,143 @@ function renderHoverReadout(state, cell, selectedBuilding, size) {
   `;
 }
 
+function renderDistrictLabels(state, size) {
+  const districtMap = new Map();
+  for (const building of state.buildings) {
+    if (!building.mapPosition) {
+      continue;
+    }
+    const center = axialToPixel(building.mapPosition.q, building.mapPosition.r, size);
+    const entry = districtMap.get(building.district) ?? {
+      district: building.district,
+      color: state.districts.definitions?.[building.district]?.color ?? "#aac6ff",
+      x: 0,
+      y: 0,
+      count: 0
+    };
+    entry.x += center.x;
+    entry.y += center.y;
+    entry.count += 1;
+    districtMap.set(building.district, entry);
+  }
+
+  return [...districtMap.values()]
+    .filter((entry) => entry.count > 0)
+    .map((entry) => {
+      const centerX = entry.x / entry.count;
+      const centerY = entry.y / entry.count;
+      const label = getDistrictDisplayName(entry.district);
+      const width = Math.max(56, label.length * 7 + 20);
+      return `
+        <g class="hex-map__district-label" transform="translate(${centerX - width / 2} ${centerY - 12})">
+          <rect width="${width}" height="18" rx="9" style="--district-label-color:${entry.color}"></rect>
+          <text x="${width / 2}" y="12" text-anchor="middle">${escapeHtml(label)}</text>
+        </g>
+      `;
+    })
+    .join("");
+}
+
+function renderResonanceOverlay(state, cells, size, selectedBuilding, mapOverlay) {
+  if (mapOverlay !== "Resonance" || !selectedBuilding) {
+    return "";
+  }
+
+  return cells
+    .filter((cell) => !cell.isReserved && !getBuildingAtCell(state, cell.q, cell.r))
+    .map((cell) => {
+      const validation = canPlaceBuildingAt(state, selectedBuilding.id, cell.q, cell.r);
+      if (!validation.ok) {
+        return "";
+      }
+      const previewTarget = { ...selectedBuilding, mapPosition: { q: cell.q, r: cell.r } };
+      const bonus = getBuildingPlacementBonuses(state, previewTarget);
+      const center = axialToPixel(cell.q, cell.r, size);
+      return `
+        <g class="hex-map__resonance-tag">
+          <rect x="${center.x - 16}" y="${center.y - 28}" width="32" height="12" rx="6"></rect>
+          <text x="${center.x}" y="${center.y - 19}" text-anchor="middle">+${formatNumber(bonus.totalPercent * 100, 0)}%</text>
+        </g>
+      `;
+    })
+    .join("");
+}
+
+function renderMapPresets(state) {
+  const presets = state.settings?.mapPresets ?? [];
+  return `
+    <section class="hex-map-panel__presets panel panel--subtle">
+      <div class="hex-map-panel__presets-head">
+        <div>
+          <h4>Map Presets</h4>
+          <span class="panel__subtle">Save a layout, test a different one, then restore it.</span>
+        </div>
+        <button class="button button--ghost" data-action="save-map-preset">Save Current Layout</button>
+      </div>
+      ${
+        presets.length
+          ? `
+              <div class="hex-map-panel__preset-list">
+                ${presets
+                  .map(
+                    (preset) => `
+                      <article class="hex-map-panel__preset-item">
+                        <div class="hex-map-panel__preset-copy">
+                          <strong>${escapeHtml(preset.name)}</strong>
+                          <span>${escapeHtml(new Date(preset.savedAt ?? Date.now()).toLocaleString())}</span>
+                        </div>
+                        <div class="hex-map-panel__preset-actions">
+                          <button class="button button--ghost" data-action="restore-map-preset" data-preset-id="${preset.id}">Restore</button>
+                          <button class="button button--ghost" data-action="delete-map-preset" data-preset-id="${preset.id}">Delete</button>
+                        </div>
+                      </article>
+                    `
+                  )
+                  .join("")}
+              </div>
+            `
+          : `<div class="empty-state">No saved Town Map layouts yet.</div>`
+      }
+    </section>
+  `;
+}
+
+function getBastionDefenseSummary(state, cells) {
+  const bastionBuildings = state.buildings.filter((building) => {
+    if (!building.mapPosition) {
+      return false;
+    }
+    const cell = cells.find((entry) => entry.q === building.mapPosition.q && entry.r === building.mapPosition.r);
+    return Boolean(cell?.isFortificationRing);
+  });
+  const wallStrength = bastionBuildings.reduce((sum, building) => sum + Number(building.stats?.defense ?? 0), 0);
+
+  const edgeCityCells = cells.filter((cell) => {
+    if (cell.isReserved || cell.isFortificationRing) {
+      return false;
+    }
+    return getNeighborCoords(cell.q, cell.r).some((neighbor) => findCellInList(cells, neighbor.q, neighbor.r)?.isFortificationRing);
+  });
+
+  const coveredEdgeCells = edgeCityCells.filter((cell) =>
+    getNeighborCoords(cell.q, cell.r).some((neighbor) => {
+      const ringCell = findCellInList(cells, neighbor.q, neighbor.r);
+      return ringCell?.isFortificationRing && getBuildingAtCell(state, neighbor.q, neighbor.r);
+    })
+  ).length;
+
+  return {
+    wallStrength,
+    edgeCells: edgeCityCells.length,
+    coveredEdgeCells,
+    siegeCoveragePercent: edgeCityCells.length ? (coveredEdgeCells / edgeCityCells.length) * 100 : 0
+  };
+}
+
+function findCellInList(cells, q, r) {
+  return cells.find((cell) => cell.q === q && cell.r === r) ?? null;
+}
+
 function renderPlacementPicker(state, cell) {
   if (!cell || cell.isReserved) {
     return "";
@@ -649,11 +910,13 @@ function renderPlacementPicker(state, cell) {
   }
 
   const filterKey = state.transientUi?.mapPlacementFilter ?? "All";
-  const candidates = filterPlacementCandidates(getPlacementCandidates(state, cell), state, filterKey);
+  const candidates = sortPlacementCandidates(filterPlacementCandidates(getPlacementCandidates(state, cell), state, filterKey), state, cell);
   const zoneLabel = cell.isFortificationRing ? "Bastion Ring" : "City Plot";
   const zoneDetail = cell.isFortificationRing
     ? "Only walls, towers, and defensive structures can be placed here."
     : "Any unplaced city structure that passes placement rules can be assigned here.";
+  const plannerBuilding =
+    state.buildings.find((building) => building.id === state.transientUi?.mapPlannerBuildingId) ?? null;
 
   return `
     <section class="panel hex-map-panel__picker" role="dialog" aria-label="Map placement drawer">
@@ -680,20 +943,43 @@ function renderPlacementPicker(state, cell) {
           .join("")}
       </div>
       ${
+        plannerBuilding
+          ? `
+              <div class="hex-map-panel__planner-banner">
+                <strong>${escapeHtml(`${getBuildingEmoji(plannerBuilding)} ${plannerBuilding.displayName}`)}</strong>
+                <span>${state.transientUi?.mapPlannerMode === "move" ? "Move mode armed" : "Planning queue armed"}</span>
+              </div>
+            `
+          : ""
+      }
+      ${
         candidates.length
           ? `
               <div class="hex-map-panel__picker-list">
                 ${candidates
                   .map((building) => {
                     const isSelected = building.id === state.ui.selectedBuildingId;
+                    const recommendation = getPlacementRecommendation(state, building, cell);
+                    const isPlannerArmed = building.id === state.transientUi?.mapPlannerBuildingId;
                     return `
                       <article class="hex-map-panel__picker-item ${isSelected ? "is-selected" : ""}">
                         <div class="hex-map-panel__picker-copy">
-                          <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
+                          <div class="hex-map-panel__picker-line">
+                            <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
+                            <span class="hex-map-panel__fit ${recommendation.className}">${escapeHtml(recommendation.label)}</span>
+                          </div>
                           <span>${escapeHtml(building.rarity)} / ${escapeHtml(building.district)}</span>
+                          <small>${escapeHtml(recommendation.detail)}</small>
                         </div>
                         <div class="hex-map-panel__picker-actions">
-                          ${isSelected ? `<span class="hex-map-panel__picker-flag">Selected</span>` : ""}
+                          ${isPlannerArmed ? `<span class="hex-map-panel__picker-flag">Armed</span>` : isSelected ? `<span class="hex-map-panel__picker-flag">Selected</span>` : ""}
+                          <button
+                            class="button button--ghost"
+                            data-action="arm-map-building"
+                            data-building-id="${building.id}"
+                          >
+                            Arm
+                          </button>
                           <button
                             class="button button--ghost"
                             data-action="place-building-on-cell"
@@ -720,8 +1006,15 @@ export function renderHexMap(state) {
   const cells = state.map.cells;
   const size = MAP_CONFIG.hexSize;
   const bounds = getMapBounds(cells, size);
+  const mapOverlay = state.transientUi?.mapOverlay ?? "District";
+  const mapLegendOpen = state.transientUi?.mapLegendOpen ?? true;
+  const mapZoom = Number(state.transientUi?.mapZoom ?? 1);
+  const mapPanX = Number(state.transientUi?.mapPanX ?? 0);
+  const mapPanY = Number(state.transientUi?.mapPanY ?? 0);
   const selectedBuilding =
     state.buildings.find((building) => building.id === state.ui.selectedBuildingId) ?? null;
+  const plannerBuilding =
+    state.buildings.find((building) => building.id === state.transientUi?.mapPlannerBuildingId) ?? null;
   const selectedPosition = selectedBuilding?.mapPosition ?? null;
   const hoveredMapCell = state.transientUi?.hoveredMapCell ?? null;
   const unplacedCount = state.buildings.filter((building) => !building.mapPosition).length;
@@ -755,6 +1048,7 @@ export function renderHexMap(state) {
   const defensiveBacklogCount = state.buildings.filter(
     (building) => !building.mapPosition && isFortificationBuilding(building)
   ).length;
+  const defenseSummary = getBastionDefenseSummary(state, cells);
   const adjacentKeys = new Set(
     focalCell ? getNeighborCoords(focalCell.q, focalCell.r).map((cell) => getCellKey(cell.q, cell.r)) : []
   );
@@ -775,12 +1069,51 @@ export function renderHexMap(state) {
       ? "Can be placed in the city ring or on the bastion."
       : "Can be placed only in the city ring."
     : "Pick a building to see where it belongs.";
+  const overlaySlug = mapOverlay.toLowerCase();
 
   return `
     <section class="panel hex-map-panel">
       <div class="panel__header">
         <h3>City Ring Map</h3>
         <span class="panel__subtle">Forge core at the center, civic plots through the middle, and a fortified outer bastion reserved for walls, towers, and war engines.</span>
+      </div>
+      <div class="hex-map-panel__toolbar">
+        <div class="hex-map-panel__toolbar-group">
+          <span class="hex-map-panel__toolbar-label">Overlay</span>
+          ${["District", "Defense", "Trade", "Resonance", "Water", "Bastion"]
+            .map(
+              (overlay) => `
+                <button class="button button--ghost city-filter ${mapOverlay === overlay ? "is-active" : ""}" data-action="set-map-overlay" data-overlay="${overlay}">
+                  ${escapeHtml(overlay)}
+                </button>
+              `
+            )
+            .join("")}
+        </div>
+        <div class="hex-map-panel__toolbar-group">
+          <span class="hex-map-panel__toolbar-label">View</span>
+          <button class="button button--ghost" data-action="adjust-map-zoom" data-delta="-0.1">-</button>
+          <span class="hex-map-panel__zoom-readout">${formatNumber(mapZoom * 100, 0)}%</span>
+          <button class="button button--ghost" data-action="adjust-map-zoom" data-delta="0.1">+</button>
+          <button class="button button--ghost" data-action="reset-map-view">Reset View</button>
+          <button class="button button--ghost" data-action="toggle-map-legend">${mapLegendOpen ? "Hide Legend" : "Show Legend"}</button>
+        </div>
+        <div class="hex-map-panel__toolbar-group hex-map-panel__toolbar-group--planner">
+          <span class="hex-map-panel__toolbar-label">Planner</span>
+          <strong>${plannerBuilding ? escapeHtml(`${getBuildingEmoji(plannerBuilding)} ${plannerBuilding.displayName}`) : "Idle"}</strong>
+          <small>${
+            plannerBuilding
+              ? state.transientUi?.mapPlannerMode === "move"
+                ? "Move mode: click a new hex"
+                : "Queue mode: place several without reopening the drawer"
+              : "Arm a building from the drawer to chain placements"
+          }</small>
+          ${
+            plannerBuilding
+              ? `<button class="button button--ghost" data-action="clear-map-planner">Clear Planner</button>`
+              : ""
+          }
+        </div>
       </div>
       <div class="hex-map-panel__status">
         <div class="hex-map-panel__status-card hex-map-panel__status-card--selected">
@@ -817,10 +1150,16 @@ export function renderHexMap(state) {
           <span>Unplaced defensive structures</span>
           <span>${defensiveBacklogCount ? "Ready to claim bastion hexes." : "No defenses are waiting for the ring."}</span>
         </div>
+        <div class="hex-map-panel__status-card hex-map-panel__status-card--defense">
+          <strong>${formatNumber(defenseSummary.wallStrength, 0)} wall strength</strong>
+          <span>${occupiedBastionCount} / ${bastionPlotCount} bastion hexes filled</span>
+          <span>${formatNumber(defenseSummary.siegeCoveragePercent, 0)}% siege coverage of the inner edge</span>
+        </div>
       </div>
       <div class="hex-map-wrap">
         <svg
-          class="hex-map ${placementModeActive ? "is-placement-mode" : ""}"
+          class="hex-map ${placementModeActive ? "is-placement-mode" : ""} is-overlay-${overlaySlug}"
+          style="transform: translate(${mapPanX}px, ${mapPanY}px) scale(${mapZoom}); transform-origin: 50% 50%;"
           viewBox="${bounds.minX} ${bounds.minY} ${bounds.width} ${bounds.height}"
           role="img"
           aria-label="City hex map"
@@ -835,8 +1174,14 @@ export function renderHexMap(state) {
           <g class="hex-map__district-fields">
             ${renderDistrictInfluenceField(state, cells, size)}
           </g>
+          <g class="hex-map__district-labels">
+            ${renderDistrictLabels(state, size)}
+          </g>
           <g class="hex-map__roads">
             ${renderRoads(state, size)}
+          </g>
+          <g class="hex-map__overlay-tags">
+            ${renderResonanceOverlay(state, cells, size, selectedBuilding, mapOverlay)}
           </g>
           ${cells
             .map((cell) => {
@@ -872,10 +1217,14 @@ export function renderHexMap(state) {
                     ? "is-placement-valid"
                     : "is-placement-dim"
                   : "";
+              const overlayState = getOverlayCellClass(state, mapOverlay, cell, building, selectedBuilding);
+              const isPlacementFlash =
+                state.transientUi?.mapPlacementPulseCell?.q === cell.q &&
+                state.transientUi?.mapPlacementPulseCell?.r === cell.r;
 
               return `
                 <g
-                  class="hex-map__cell ${cell.isReserved ? "is-reserved" : ""} ${cell.isFortificationRing ? "is-fortification-ring" : "is-city-plot"} ${building ? "is-occupied" : ""} ${isSelected ? "is-selected" : ""} ${isFocusedCell ? "is-focused" : ""} ${hoveredMapCell && hoveredMapCell.q === cell.q && hoveredMapCell.r === cell.r ? "is-hovered" : ""} ${adjacentKeys.has(cell.key) ? "is-adjacent" : ""} ${isPulseCell ? "is-resonance-pulse" : ""} ${selectedBuilding && hoveredMapCell && hoveredMapCell.q === cell.q && hoveredMapCell.r === cell.r && !building && !cell.isReserved ? (previewValidation?.ok ? "is-preview-valid" : "is-preview-invalid") : ""} ${placementState}"
+                  class="hex-map__cell ${cell.isReserved ? "is-reserved" : ""} ${cell.isFortificationRing ? "is-fortification-ring" : "is-city-plot"} ${building ? "is-occupied" : ""} ${isSelected ? "is-selected" : ""} ${isFocusedCell ? "is-focused" : ""} ${hoveredMapCell && hoveredMapCell.q === cell.q && hoveredMapCell.r === cell.r ? "is-hovered" : ""} ${adjacentKeys.has(cell.key) ? "is-adjacent" : ""} ${isPulseCell ? "is-resonance-pulse" : ""} ${selectedBuilding && hoveredMapCell && hoveredMapCell.q === cell.q && hoveredMapCell.r === cell.r && !building && !cell.isReserved ? (previewValidation?.ok ? "is-preview-valid" : "is-preview-invalid") : ""} ${placementState} ${overlayState} ${isPlacementFlash ? "is-placement-flash" : ""}"
                   data-action="select-map-cell"
                   data-q="${cell.q}"
                   data-r="${cell.r}"
@@ -947,17 +1296,24 @@ export function renderHexMap(state) {
         </svg>
         ${renderPlacementPicker(state, selectedMapCell)}
       </div>
-      <div class="hex-map-panel__legend">
-        <span><i class="legend-swatch legend-swatch--core"></i> Reserved forge core</span>
-        <span><i class="legend-swatch legend-swatch--open"></i> City plot</span>
-        <span><i class="legend-swatch legend-swatch--bastion"></i> Bastion ring (defense-only)</span>
-        <span><i class="legend-swatch legend-swatch--occupied"></i> Occupied building hex</span>
-        <span><i class="legend-swatch legend-swatch--adjacent"></i> Adjacency preview</span>
-        <span><i class="legend-swatch legend-swatch--district"></i> District influence field</span>
-      </div>
+      ${
+        mapLegendOpen
+          ? `
+              <div class="hex-map-panel__legend">
+                <span><i class="legend-swatch legend-swatch--core"></i> Reserved forge core</span>
+                <span><i class="legend-swatch legend-swatch--open"></i> City plot</span>
+                <span><i class="legend-swatch legend-swatch--bastion"></i> Bastion ring (defense-only)</span>
+                <span><i class="legend-swatch legend-swatch--occupied"></i> Occupied building hex</span>
+                <span><i class="legend-swatch legend-swatch--adjacent"></i> Adjacency preview</span>
+                <span><i class="legend-swatch legend-swatch--district"></i> District influence field</span>
+              </div>
+            `
+          : ""
+      }
       <div class="hex-map-panel__tooltip">
         ${renderCellInspector(state, focalMapCell, selectedBuilding)}
       </div>
+      ${renderMapPresets(state)}
       <div class="hex-map-panel__actions">
         <button class="button button--ghost" data-action="clear-building-placement">Clear Selected Placement</button>
         <button class="button button--ghost" data-action="undo-last-placement">Undo Last Placement</button>

@@ -112,7 +112,10 @@ let applyingFirebaseState = false;
 let projectorChromeTimer = null;
 let recentBuildingChangeTimer = null;
 let recentStateChangeTimer = null;
+let mapPlacementFxTimer = null;
 let manifestInProgress = false;
+let mapDragState = null;
+let suppressNextMapClick = false;
 syncDerivedState(gameState.getState());
 // Rewrite the loaded session immediately so migration fixes are not lost while
 // moving between pages in an already-open browser session.
@@ -677,6 +680,131 @@ function clearHoveredMapCell() {
   }
 }
 
+function getMapViewState() {
+  return {
+    mapZoom: Number(renderer.transientUi.mapZoom ?? 1),
+    mapPanX: Number(renderer.transientUi.mapPanX ?? 0),
+    mapPanY: Number(renderer.transientUi.mapPanY ?? 0)
+  };
+}
+
+function applyMapViewPreview(view = getMapViewState()) {
+  const svg = root.querySelector(".hex-map");
+  if (!svg) {
+    return;
+  }
+  svg.style.transform = `translate(${Number(view.mapPanX ?? 0)}px, ${Number(view.mapPanY ?? 0)}px) scale(${Number(view.mapZoom ?? 1)})`;
+  svg.style.transformOrigin = "50% 50%";
+}
+
+function getFilteredUnplacedMapCandidates(state, filterKey = renderer.transientUi.mapPlacementFilter ?? "All") {
+  const buildings = state.buildings.filter((building) => !building.mapPosition);
+  const filtered = (() => {
+    switch (filterKey) {
+    case "Defense":
+      return buildings.filter((building) => isFortificationBuilding(building));
+    case "Trade":
+      return buildings.filter((building) => (building.tags ?? []).includes("trade"));
+    case "Housing":
+      return buildings.filter((building) => (building.tags ?? []).includes("housing"));
+    case "Pinned":
+      return buildings.filter((building) => state.settings?.pinnedBuildingIds?.includes(building.id));
+    case "All":
+    default:
+      return buildings;
+    }
+  })();
+
+  return filtered.sort((left, right) => {
+    if (left.rarity !== right.rarity) {
+      return RARITY_ORDER.indexOf(left.rarity) - RARITY_ORDER.indexOf(right.rarity);
+    }
+    return left.displayName.localeCompare(right.displayName);
+  });
+}
+
+function setMapPlannerBuilding(buildingId, mode = "chain", successMessage = null) {
+  const state = getCurrentState();
+  const building = state.buildings.find((entry) => entry.id === buildingId);
+  if (!building) {
+    reportError("That building is no longer available.");
+    return false;
+  }
+
+  commit((draft) => {
+    setSelectedBuildingAndCell(draft, building.id);
+    draft.ui.selectedMapCell = null;
+  });
+  renderer.setTransientUi(
+    {
+      mapPlannerBuildingId: building.id,
+      mapPlannerMode: mode,
+      validPlacementMode: true
+    },
+    getCurrentState()
+  );
+  if (successMessage) {
+    reportSuccess(successMessage);
+  }
+  return true;
+}
+
+function clearMapPlanner() {
+  renderer.setTransientUi(
+    {
+      mapPlannerBuildingId: null,
+      mapPlannerMode: null
+    },
+    getCurrentState()
+  );
+}
+
+function advanceMapPlannerAfterPlacement(placedBuildingId) {
+  if (renderer.transientUi.mapPlannerBuildingId !== placedBuildingId) {
+    return;
+  }
+
+  if (renderer.transientUi.mapPlannerMode === "move") {
+    clearMapPlanner();
+    return;
+  }
+
+  const state = getCurrentState();
+  const nextCandidate = getFilteredUnplacedMapCandidates(state).find((building) => building.id !== placedBuildingId);
+  if (!nextCandidate) {
+    clearMapPlanner();
+    reportSuccess("Placement planning queue completed.");
+    return;
+  }
+
+  setMapPlannerBuilding(nextCandidate.id, "chain", `${nextCandidate.displayName} armed for the next placement.`);
+}
+
+function showMapPlacementPulse(q, r) {
+  if (mapPlacementFxTimer) {
+    clearTimeout(mapPlacementFxTimer);
+  }
+  renderer.setTransientUi({ mapPlacementPulseCell: { q: Number(q), r: Number(r) } }, getCurrentState());
+  mapPlacementFxTimer = setTimeout(() => {
+    renderer.setTransientUi({ mapPlacementPulseCell: null }, getCurrentState());
+    mapPlacementFxTimer = null;
+  }, 1200);
+}
+
+function createMapPresetRecord(state, name) {
+  return {
+    id: `map-preset-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    name,
+    savedAt: Date.now(),
+    placements: Object.fromEntries(
+      state.buildings.map((building) => [
+        building.id,
+        building.mapPosition ? { q: Number(building.mapPosition.q), r: Number(building.mapPosition.r) } : null
+      ])
+    )
+  };
+}
+
 function resetTransientUi() {
   renderer.setTransientUi(
     {
@@ -685,8 +813,16 @@ function resetTransientUi() {
       catalogOpen: false,
       manifestCompleteModal: null,
       turnSummaryModal: null,
+      mapOverlay: "District",
+      mapLegendOpen: true,
+      mapPlannerBuildingId: null,
+      mapPlannerMode: null,
       validPlacementMode: false,
-      lastPlacement: null
+      lastPlacement: null,
+      mapZoom: 1,
+      mapPanX: 0,
+      mapPanY: 0,
+      mapPlacementPulseCell: null
     },
     getCurrentState()
   );
@@ -1179,6 +1315,8 @@ function moveBuildingOnMap({ buildingId, q, r, source = "Player" }) {
     from: result.previousPosition ?? null,
     to: { q: Number(q), r: Number(r) }
   });
+  showMapPlacementPulse(q, r);
+  advanceMapPlannerAfterPlacement(result.building.id);
   if ((result.resonanceGain ?? 0) > 0) {
     showAdjacencyPulse({
       buildingId: result.building.id,
@@ -1221,6 +1359,8 @@ function forceMoveBuildingOnMap({ buildingId, q, r, source = "Admin" }) {
       from: result.previousPosition ?? null,
       to: { q: Number(q), r: Number(r) }
     });
+    showMapPlacementPulse(q, r);
+    advanceMapPlannerAfterPlacement(result.building.id);
     if ((result.resonanceGain ?? 0) > 0) {
       showAdjacencyPulse({
         buildingId: result.building.id,
@@ -1239,6 +1379,8 @@ function forceMoveBuildingOnMap({ buildingId, q, r, source = "Admin" }) {
     from: result.previousPosition ?? null,
     to: { q: Number(q), r: Number(r) }
   });
+  showMapPlacementPulse(q, r);
+  advanceMapPlannerAfterPlacement(result.building.id);
   if ((result.resonanceGain ?? 0) > 0) {
     showAdjacencyPulse({
       buildingId: result.building.id,
@@ -1252,6 +1394,8 @@ function forceMoveBuildingOnMap({ buildingId, q, r, source = "Admin" }) {
 }
 
 function clearPlacement(buildingId, source = "Player") {
+  const currentBuilding = getCurrentState().buildings.find((entry) => entry.id === buildingId);
+  const previousPosition = currentBuilding?.mapPosition ? { ...currentBuilding.mapPosition } : null;
   const result = commit((draft) => {
     const clearResult = clearBuildingPlacement(draft, buildingId, source);
     if (clearResult.ok) {
@@ -1266,6 +1410,16 @@ function clearPlacement(buildingId, source = "Player") {
   }
 
   reportSuccess(`${result.building.displayName} cleared from the map.`);
+  if (previousPosition) {
+    recordLastPlacement({
+      buildingId: result.building.id,
+      from: previousPosition,
+      to: null
+    });
+  }
+  if (renderer.transientUi.mapPlannerBuildingId === result.building.id) {
+    clearMapPlanner();
+  }
   return result;
 }
 
@@ -1554,6 +1708,52 @@ const actions = {
     });
     reportSuccess("Session snapshot deleted.");
   },
+  saveMapPreset() {
+    const state = getCurrentState();
+    const nextIndex = (state.settings.mapPresets?.length ?? 0) + 1;
+    const name = `Layout ${nextIndex}`;
+    commit((draft) => {
+      const preset = createMapPresetRecord(draft, name);
+      draft.settings.mapPresets = [preset, ...(draft.settings.mapPresets ?? [])].slice(0, 8);
+      addHistoryEntry(draft, {
+        category: "Placement",
+        title: name,
+        details: "A Town Map layout preset was saved."
+      });
+    });
+    reportSuccess(`Saved ${name}.`);
+  },
+  restoreMapPreset(presetId) {
+    const state = getCurrentState();
+    const preset = (state.settings.mapPresets ?? []).find((entry) => entry.id === presetId);
+    if (!preset) {
+      reportError("Map preset not found.");
+      return;
+    }
+
+    commit((draft) => {
+      for (const building of draft.buildings) {
+        const nextPosition = preset.placements?.[building.id];
+        building.mapPosition = nextPosition ? { q: Number(nextPosition.q), r: Number(nextPosition.r) } : null;
+      }
+      draft.ui.selectedMapCell = null;
+      addHistoryEntry(draft, {
+        category: "Placement",
+        title: `${preset.name} restored`,
+        details: "A saved Town Map layout preset was restored."
+      });
+    });
+    clearMapPlanner();
+    renderer.setTransientUi({ validPlacementMode: false }, getCurrentState());
+    reportSuccess(`Restored ${preset.name}.`);
+  },
+  deleteMapPreset(presetId) {
+    const preset = (getCurrentState().settings.mapPresets ?? []).find((entry) => entry.id === presetId);
+    commit((draft) => {
+      draft.settings.mapPresets = (draft.settings.mapPresets ?? []).filter((entry) => entry.id !== presetId);
+    });
+    reportSuccess(`${preset?.name ?? "Map preset"} deleted.`);
+  },
   adjustShard,
   setResources,
   citizenCommand,
@@ -1814,6 +2014,7 @@ gameState.subscribe((state) => {
   audioEngine.setPage(pageKey);
   document.body.dataset.theme = state.settings.theme ?? "dark";
   renderer.render(state);
+  applyMapViewPreview();
   adminConsole.render(state);
 });
 
@@ -1886,6 +2087,11 @@ document.addEventListener("keydown", (event) => {
 });
 
 root.addEventListener("click", async (event) => {
+  if (suppressNextMapClick && event.target.closest(".hex-map__cell")) {
+    suppressNextMapClick = false;
+    return;
+  }
+
   const target = event.target.closest("[data-action]");
   if (!target) {
     return;
@@ -1961,9 +2167,53 @@ root.addEventListener("click", async (event) => {
       void audioEngine.playUiAccent("soft");
       renderer.setTransientUi({ mapPlacementFilter: target.dataset.filter ?? "All" }, getCurrentState());
       break;
+    case "set-map-overlay":
+      void audioEngine.playUiAccent("soft");
+      renderer.setTransientUi({ mapOverlay: target.dataset.overlay ?? "District" }, getCurrentState());
+      break;
+    case "toggle-map-legend":
+      void audioEngine.playUiAccent("soft");
+      renderer.setTransientUi({ mapLegendOpen: !renderer.transientUi.mapLegendOpen }, getCurrentState());
+      break;
     case "toggle-valid-placement-mode":
       void audioEngine.playUiAccent("soft");
       renderer.setTransientUi({ validPlacementMode: !renderer.transientUi.validPlacementMode }, getCurrentState());
+      break;
+    case "arm-map-building":
+      void audioEngine.playUiAccent("soft");
+      setMapPlannerBuilding(target.dataset.buildingId, "chain", "Placement planner armed.");
+      break;
+    case "clear-map-planner":
+      void audioEngine.playUiAccent("soft");
+      clearMapPlanner();
+      reportSuccess("Placement planner cleared.");
+      break;
+    case "move-map-building":
+      void audioEngine.playUiAccent("soft");
+      setMapPlannerBuilding(target.dataset.buildingId, "move", "Move mode armed. Click a new hex to reposition it.");
+      break;
+    case "save-map-preset":
+      void audioEngine.playUiAccent("soft");
+      actions.saveMapPreset();
+      break;
+    case "restore-map-preset":
+      void audioEngine.playUiAccent("soft");
+      actions.restoreMapPreset(target.dataset.presetId);
+      break;
+    case "delete-map-preset":
+      void audioEngine.playUiAccent("soft");
+      actions.deleteMapPreset(target.dataset.presetId);
+      break;
+    case "adjust-map-zoom": {
+      void audioEngine.playUiAccent("soft");
+      const delta = Number(target.dataset.delta ?? 0);
+      const nextZoom = Math.min(1.85, Math.max(0.75, Number(renderer.transientUi.mapZoom ?? 1) + delta));
+      renderer.setTransientUi({ mapZoom: nextZoom }, getCurrentState());
+      break;
+    }
+    case "reset-map-view":
+      void audioEngine.playUiAccent("soft");
+      renderer.setTransientUi({ mapZoom: 1, mapPanX: 0, mapPanY: 0 }, getCurrentState());
       break;
     case "set-city-admin-view":
       void audioEngine.playUiAccent("soft");
@@ -2141,6 +2391,25 @@ root.addEventListener("click", async (event) => {
         reportError("The central forge core cannot be assigned.");
         return;
       }
+      const plannerBuildingId = renderer.transientUi.mapPlannerBuildingId;
+      if (plannerBuildingId) {
+        const plannerBuilding = currentState.buildings.find((entry) => entry.id === plannerBuildingId);
+        if (!plannerBuilding) {
+          clearMapPlanner();
+        } else {
+          const validation = canPlaceBuildingAt(currentState, plannerBuildingId, q, r);
+          if (validation.ok) {
+            moveBuildingOnMap({
+              buildingId: plannerBuildingId,
+              q,
+              r,
+              source: renderer.transientUi.mapPlannerMode === "move" ? "Move" : "Planner"
+            });
+            return;
+          }
+          reportError(validation.reason);
+        }
+      }
       commit((draft) => {
         draft.ui.selectedMapCell = { q, r };
       });
@@ -2162,6 +2431,9 @@ root.addEventListener("click", async (event) => {
       moveBuildingOnMap({ buildingId, q, r, source: "Player" });
       break;
     }
+    case "clear-map-building-placement":
+      clearPlacement(target.dataset.buildingId, "Player");
+      break;
     case "undo-last-placement":
       undoLastPlacement();
       break;
@@ -2256,6 +2528,9 @@ root.addEventListener("click", async (event) => {
 });
 
 root.addEventListener("mouseover", (event) => {
+  if (mapDragState) {
+    return;
+  }
   const cell = event.target.closest(".hex-map__cell");
   if (!cell) {
     return;
@@ -2272,6 +2547,9 @@ root.addEventListener("mouseover", (event) => {
 });
 
 root.addEventListener("mouseout", (event) => {
+  if (mapDragState) {
+    return;
+  }
   const cell = event.target.closest(".hex-map__cell");
   if (!cell) {
     return;
@@ -2288,6 +2566,89 @@ root.addEventListener("mouseout", (event) => {
     }
     clearHoveredMapCell();
   }, 0);
+});
+
+root.addEventListener(
+  "wheel",
+  (event) => {
+    const svg = event.target.closest(".hex-map");
+    if (!svg) {
+      return;
+    }
+    event.preventDefault();
+    const currentZoom = Number(renderer.transientUi.mapZoom ?? 1);
+    const delta = event.deltaY < 0 ? 0.08 : -0.08;
+    const nextZoom = Math.min(1.85, Math.max(0.75, currentZoom + delta));
+    renderer.setTransientUi({ mapZoom: nextZoom }, getCurrentState());
+  },
+  { passive: false }
+);
+
+document.addEventListener("pointerdown", (event) => {
+  const svg = event.target.closest(".hex-map");
+  if (!svg || event.button !== 0) {
+    return;
+  }
+  if (renderer.transientUi.hoveredMapCell) {
+    renderer.setTransientUi({ hoveredMapCell: null }, getCurrentState());
+  }
+  const liveSvg = root.querySelector(".hex-map");
+  mapDragState = {
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    originX: Number(renderer.transientUi.mapPanX ?? 0),
+    originY: Number(renderer.transientUi.mapPanY ?? 0),
+    zoom: Number(renderer.transientUi.mapZoom ?? 1),
+    moved: false
+  };
+  liveSvg?.classList.add("is-dragging");
+});
+
+document.addEventListener("pointermove", (event) => {
+  if (!mapDragState || event.pointerId !== mapDragState.pointerId) {
+    return;
+  }
+
+  const dx = event.clientX - mapDragState.startX;
+  const dy = event.clientY - mapDragState.startY;
+  if (!mapDragState.moved && Math.hypot(dx, dy) > 6) {
+    mapDragState.moved = true;
+  }
+  if (!mapDragState.moved) {
+    return;
+  }
+
+  applyMapViewPreview({
+    mapZoom: mapDragState.zoom,
+    mapPanX: mapDragState.originX + dx,
+    mapPanY: mapDragState.originY + dy
+  });
+});
+
+document.addEventListener("pointerup", (event) => {
+  if (!mapDragState || event.pointerId !== mapDragState.pointerId) {
+    return;
+  }
+
+  const dx = event.clientX - mapDragState.startX;
+  const dy = event.clientY - mapDragState.startY;
+  const nextPanX = mapDragState.originX + dx;
+  const nextPanY = mapDragState.originY + dy;
+  const moved = mapDragState.moved;
+  root.querySelector(".hex-map")?.classList.remove("is-dragging");
+  mapDragState = null;
+
+  if (moved) {
+    suppressNextMapClick = true;
+    renderer.setTransientUi({ mapPanX: nextPanX, mapPanY: nextPanY }, getCurrentState());
+  }
+});
+
+document.addEventListener("pointercancel", () => {
+  root.querySelector(".hex-map")?.classList.remove("is-dragging");
+  mapDragState = null;
+  applyMapViewPreview(getMapViewState());
 });
 
 root.addEventListener("change", (event) => {
@@ -2392,6 +2753,7 @@ function applyUrlFocusTargets() {
 
 
 renderer.render(getCurrentState());
+applyMapViewPreview();
 adminConsole.render(getCurrentState());
 
 applyUrlFocusTargets();
