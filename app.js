@@ -114,6 +114,9 @@ let recentBuildingChangeTimer = null;
 let recentStateChangeTimer = null;
 let manifestInProgress = false;
 syncDerivedState(gameState.getState());
+// Rewrite the loaded session immediately so migration fixes are not lost while
+// moving between pages in an already-open browser session.
+saveGameState(gameState.getState());
 
 function updateFirebasePublishedMeta(payload = null, connectionState = "idle") {
   renderer.transientUi.firebasePublishedMeta = payload

@@ -7,7 +7,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.2.59";
+export const APP_VERSION = "v1.2.60";
 export const SAVE_VERSION = 11;
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3";
 export const FIREBASE_CONFIG = {
@@ -34,6 +34,7 @@ export const PAGE_ROUTES = [
   { key: "chronicle", label: "Chronicle", href: "./chronicle.html" }
 ];
 export const BUILD_NOTES = [
+  "Loaded session state now gets rewritten into the current format immediately on startup, so migration fixes like the citizen-growth repair stick across page navigation without waiting for another action or page-exit save.",
   "Citizen counts no longer re-inflate on load: overlapping class names like Merchants, Nobles, and Soldiers are no longer treated as legacy migration keys, and obviously corrupted pre-fix saves without admin citizen edits are repaired back to the baseline roster once.",
   "Exact building quality now reads more consistently across the app: stream cards, player lists, featured structures, and dossiers all show values like 125% or 272% · 2x instead of relying only on stage labels.",
   "Incubator slots are now explicit assignments: canceling a building leaves that slot empty until you choose another one, while older saves seed their currently active incubators once during migration.",
