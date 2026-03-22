@@ -194,9 +194,11 @@ function calculateConstructionDayDetails(building, state, resourcePool) {
   }
 
   const baseTargetPercent = baseBpd / profile.pointsPerPercent;
+  const basePercent = Math.min(remainingPercent, baseTargetPercent);
+
   const baseAffordablePercent = getMaxAffordablePercent(resourcePool, profile, false);
-  const basePercent = Math.min(remainingPercent, baseTargetPercent, baseAffordablePercent);
-  const baseCosts = calculatePercentCost(profile, basePercent);
+  const basePaidPercent = Math.min(basePercent, baseAffordablePercent);
+  const baseCosts = calculatePercentCost(profile, basePaidPercent);
 
   const afterBasePool = { ...resourcePool };
   spendFromResourcePool(afterBasePool, baseCosts);
