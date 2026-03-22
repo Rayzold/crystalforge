@@ -7,6 +7,7 @@ import {
   getMonthStartOffset,
   getStructuredDate
 } from "../systems/CalendarSystem.js";
+import { getDailyCitySnapshot } from "../systems/CitySnapshotSystem.js";
 import { renderUiIcon } from "./UiIcons.js";
 
 const WEEKDAY_ORDER = ["Moonday", "Tidesday", "Glimmerday", "Dreamday", "Soothingday", "Dazzleday", "Sunburstday"];
@@ -136,6 +137,7 @@ export function renderChronicleCalendar(state) {
   const displayDate = getStructuredDate(displayMonthOffset);
   const selectedDayOffset = getSelectedDayOffset(state, displayMonthOffset);
   const selectedDate = getStructuredDate(selectedDayOffset);
+  const selectedSnapshot = getDailyCitySnapshot(state, selectedDayOffset);
   const eventsByDay = collectEventsForMonth(state, monthOffsets);
   const selectedEvents = eventsByDay[selectedDayOffset] ?? [];
   const selectedNote = state.chronicleNotes?.[String(selectedDayOffset)] ?? "";
@@ -174,6 +176,7 @@ export function renderChronicleCalendar(state) {
             <h4>${escapeHtml(formatDate(selectedDayOffset))}</h4>
           </div>
           <div class="chronicle-calendar__detail-badges">
+            <button class="button button--ghost" type="button" data-action="copy-chronicle-day-summary" data-day-offset="${selectedDayOffset}">Copy Day Summary</button>
             <span>${selectedEvents.length} event${selectedEvents.length === 1 ? "" : "s"}</span>
             ${
               selectedDate.holiday
@@ -192,7 +195,45 @@ export function renderChronicleCalendar(state) {
             <span>Weather</span>
             <strong>${selectedDate.weather.icon} ${escapeHtml(selectedDate.weather.name)}</strong>
           </article>
+          <article class="chronicle-calendar__detail-condition">
+            <span>City Condition</span>
+            <strong>${escapeHtml(selectedSnapshot?.conditions?.join(" / ") ?? "No snapshot recorded")}</strong>
+          </article>
+          <article class="chronicle-calendar__detail-condition">
+            <span>Resource Trend</span>
+            <strong>${
+              selectedSnapshot
+                ? escapeHtml(`G ${selectedSnapshot.deltas.gold >= 0 ? "+" : ""}${selectedSnapshot.deltas.gold.toFixed(1)} / F ${selectedSnapshot.deltas.food >= 0 ? "+" : ""}${selectedSnapshot.deltas.food.toFixed(1)}`)
+                : "Unavailable"
+            }</strong>
+          </article>
         </div>
+
+        ${
+          selectedSnapshot
+            ? `
+              <div class="chronicle-calendar__city-snapshot">
+                <div class="chronicle-calendar__section-title">
+                  ${renderUiIcon("route", "City Snapshot")}
+                  <span>City Snapshot</span>
+                </div>
+                <div class="chronicle-calendar__city-snapshot-grid">
+                  <article><span>Morale</span><strong>${escapeHtml(String(Math.round(selectedSnapshot.cityStats.morale)))}</strong></article>
+                  <article><span>Health</span><strong>${escapeHtml(String(Math.round(selectedSnapshot.cityStats.health)))}</strong></article>
+                  <article><span>Defense</span><strong>${escapeHtml(String(Math.round(selectedSnapshot.cityStats.defense)))}</strong></article>
+                  <article><span>Security</span><strong>${escapeHtml(String(Math.round(selectedSnapshot.cityStats.security)))}</strong></article>
+                  <article><span>Population</span><strong>${escapeHtml(String(Math.round(selectedSnapshot.resources.population)))}</strong></article>
+                  <article><span>Support</span><strong>${escapeHtml(String(Math.round(selectedSnapshot.cityStats.populationSupport)))}</strong></article>
+                </div>
+                ${
+                  selectedSnapshot.emergencies?.length
+                    ? `<p class="chronicle-calendar__snapshot-alerts">Warnings: ${escapeHtml(selectedSnapshot.emergencies.join(", "))}</p>`
+                    : `<p class="chronicle-calendar__snapshot-alerts">No emergency warnings were recorded for this day.</p>`
+                }
+              </div>
+            `
+            : ""
+        }
 
         <div class="chronicle-calendar__detail-grid">
           <div class="chronicle-calendar__events">

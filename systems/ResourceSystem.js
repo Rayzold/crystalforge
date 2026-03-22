@@ -13,7 +13,7 @@ function createDeltaRecord() {
   return { gold: 0, food: 0, materials: 0, salvage: 0, mana: 0, prosperity: 0 };
 }
 
-function getTradeGoodsGoldMultiplier(state) {
+export function getTradeGoodsGoldMultiplier(state) {
   const goods = Math.max(0, Number(state.cityStats?.goods ?? 0) || 0);
   const excessGoods = Math.max(0, goods - 10);
   const bonusSteps = Math.floor(excessGoods / 10);
@@ -231,6 +231,105 @@ export function getDynamicCityModifiers(state) {
     foodOutputMultiplier: getFoodOutputMultiplier(state),
     eventRollModifier: getEventRollModifier(state)
   };
+}
+
+function formatTrendLabel(value) {
+  if (Math.abs(value) < 0.005) {
+    return "Flat";
+  }
+  return value > 0 ? "Rising" : "Falling";
+}
+
+export function getCityTrendSummary(state) {
+  const deltas = calculateDailyResourceDelta(state);
+  const modifiers = getDynamicCityModifiers(state);
+  return [
+    {
+      key: "gold",
+      label: "Gold",
+      delta: deltas.gold,
+      stock: state.resources.gold,
+      trend: formatTrendLabel(deltas.gold),
+      detail: `Trade output x${modifiers.goldOutputMultiplier.toFixed(2)}`
+    },
+    {
+      key: "food",
+      label: "Food",
+      delta: deltas.food,
+      stock: state.resources.food,
+      trend: formatTrendLabel(deltas.food),
+      detail: `Food output x${modifiers.foodOutputMultiplier.toFixed(2)}`
+    },
+    {
+      key: "materials",
+      label: "Materials",
+      delta: deltas.materials,
+      stock: state.resources.materials,
+      trend: formatTrendLabel(deltas.materials),
+      detail: "Construction and workshop stock"
+    },
+    {
+      key: "salvage",
+      label: "Salvage",
+      delta: deltas.salvage,
+      stock: state.resources.salvage ?? 0,
+      trend: formatTrendLabel(deltas.salvage),
+      detail: "Advanced mechanical parts"
+    },
+    {
+      key: "mana",
+      label: "Mana",
+      delta: deltas.mana,
+      stock: state.resources.mana,
+      trend: formatTrendLabel(deltas.mana),
+      detail: `Event pressure ${modifiers.eventRollModifier >= 0 ? "+" : ""}${modifiers.eventRollModifier.toFixed(2)}`
+    },
+    {
+      key: "prosperity",
+      label: "Prosperity",
+      delta: deltas.prosperity,
+      stock: state.resources.prosperity,
+      trend: formatTrendLabel(deltas.prosperity),
+      detail: "Economic confidence"
+    }
+  ];
+}
+
+export function getResourceChainSummary(state) {
+  const completedBuildings = state.buildings.filter((building) => building.isComplete && !building.isRuined);
+  const producers = completedBuildings.filter((building) =>
+    (building.resourceRates.food ?? 0) > 0 ||
+    (building.resourceRates.materials ?? 0) > 0 ||
+    (building.resourceRates.salvage ?? 0) > 0 ||
+    (building.resourceRates.mana ?? 0) > 0
+  );
+  const refiners = completedBuildings.filter((building) =>
+    (building.resourceRates.goods ?? 0) > 0 || Object.values(building.resourceRates ?? {}).some((value) => Number(value) < 0)
+  );
+  const traders = completedBuildings.filter((building) =>
+    (building.resourceRates.gold ?? 0) > 0 || building.tags?.includes("trade")
+  );
+
+  return [
+    {
+      key: "producers",
+      title: "Producers",
+      detail: "Raw food, materials, mana, and salvage.",
+      buildings: producers
+    },
+    {
+      key: "refiners",
+      title: "Refiners",
+      detail: "Goods makers and buildings that consume stock to shape better output.",
+      buildings: refiners
+    },
+    {
+      key: "traders",
+      title: "Traders",
+      detail: "Markets and exchange buildings that turn the city's output into gold.",
+      buildings: traders
+    }
+  ];
 }
 
 export function applyDailyResources(state) {

@@ -4,7 +4,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.2.40";
+export const APP_VERSION = "v1.2.46";
 export const SAVE_VERSION = 10;
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3";
 export const FIREBASE_CONFIG = {
@@ -31,6 +31,20 @@ export const PAGE_ROUTES = [
   { key: "chronicle", label: "Chronicle", href: "./chronicle.html" }
 ];
 export const BUILD_NOTES = [
+  "The city stream now supports pinned buildings, quick troubleshooting filters, and impact-based sorting so high-priority structures stay easier to find.",
+  "Emergency warnings can now jump straight to the relevant city view, Home can copy city or building summaries, and Chronicle can copy a selected day summary for table notes.",
+  "Incubation now supports pause-all and resume-all controls, Player Mode can hide completed buildings, and advancing time now opens a turn summary card showing stock changes and new outcomes.",
+  "The GM shell now has an always-visible daily resource delta strip, so food, gold, materials, salvage, and mana momentum stay readable across pages.",
+  "Building cards now warn when consumed inputs are low or missing, and stalled incubation explains itself before you need to open the full dossier.",
+  "Home now includes a lightweight release checklist so GM prep can quickly confirm shared save presence, local backup, map placement, Chronicle snapshots, and player-screen readiness.",
+  "GM Home and Player Mode now include a rules glossary, a city-trends panel, and a resource-chain view so the economy is easier to read at a glance.",
+  "Building dossiers and stream cards now explain a structure's role, what it directly produces or consumes, and why incubation is stalled when support cuts out.",
+  "Chronicle day details now include a recorded city snapshot with morale, health, defense, security, population support, and the day's emergency state when a snapshot exists.",
+  "Recent-change highlighting now extends beyond buildings: resource trends and citizen roster entries can visibly pulse after the city state changes.",
+  "Previously light Beyond-tier landmarks now have explicit mechanics, and helper image-reference files have been cleaned to match current names like Trade Center and Workshop Quarter.",
+  "All Rare buildings now have custom flavor text as well, giving the third tier clearer identity instead of relying on the generic district phrasing.",
+  "All Uncommon buildings now have custom flavor text too, so the second tier no longer falls back to the repetitive district-generated copy.",
+  "All Common buildings now have custom flavor text, replacing the old district-generated lines with shorter, more specific descriptions that better fit each structure's role.",
   "Planar Tentacles now pulls in a much richer gold stream on top of its harvested food, materials, and salvage, making it feel like a true legendary planar siphon.",
   "Planar Tentacles now acts like a true legendary land-harvester, dragging in food, materials, salvage, and some gold from the surrounding world while still consuming mana to sustain the breach.",
   "Morale, health, prosperity, defense, security, and housing strain now matter more directly: strong values boost output and safety, while weak values suppress production and make military or social trouble more likely.",
@@ -126,6 +140,7 @@ export const START_STATE_PRESETS = {
       liveSessionView: true,
       theme: "dark",
       firebaseRealmId: FIREBASE_DEFAULT_REALM_ID,
+      pinnedBuildingIds: [],
       diceAmount: 1,
       diceType: "d20",
       diceHistory: [],
@@ -179,6 +194,7 @@ export const START_STATE_PRESETS = {
       liveSessionView: false,
       theme: "dark",
       firebaseRealmId: FIREBASE_DEFAULT_REALM_ID,
+      pinnedBuildingIds: [],
       diceAmount: 1,
       diceType: "d20",
       diceHistory: [],

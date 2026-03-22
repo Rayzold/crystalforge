@@ -30,10 +30,19 @@ import {
 } from "./systems/CitizenSystem.js";
 import { recalculateCityStats } from "./systems/CityStatsSystem.js";
 import { addCrystals, setCrystals, spendCrystal } from "./systems/CrystalSystem.js";
-import { activateConstruction, moveConstructionPriority, normalizeConstructionPriority, pauseConstruction } from "./systems/ConstructionSystem.js";
+import {
+  activateConstruction,
+  getActiveConstructionQueue,
+  getAvailableConstructionQueue,
+  getConstructionEtaDetails,
+  moveConstructionPriority,
+  normalizeConstructionPriority,
+  pauseConstruction
+} from "./systems/ConstructionSystem.js";
 import { resetDistrictLevels, setDistrictDefinition, setDistrictLevelOverride, getDistrictSummary } from "./systems/DistrictSystem.js";
 import { setDriftEvolutionStageOverride, syncDriftEvolutionState } from "./systems/DriftEvolutionSystem.js";
 import { clearActiveEvents, triggerEvent } from "./systems/EventSystem.js";
+import { getDailyCitySnapshot } from "./systems/CitySnapshotSystem.js";
 import { manifestSelectedRarity } from "./systems/GachaSystem.js";
 import { addHistoryEntry } from "./systems/HistoryLogSystem.js";
 import {
@@ -62,6 +71,7 @@ import {
 } from "./systems/StorageSystem.js";
 import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js";
 import { forceTownFocus, reopenTownFocusSelection, selectTownFocus, updateTownFocusAvailability } from "./systems/TownFocusSystem.js";
+import { getEmergencyStatus, getCityTrendSummary } from "./systems/ResourceSystem.js";
 import { Toasts } from "./ui/Toasts.js";
 import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js";
 import { UIRenderer } from "./ui/UIRenderer.js";
@@ -96,6 +106,7 @@ let firebasePublishTimer = null;
 let applyingFirebaseState = false;
 let projectorChromeTimer = null;
 let recentBuildingChangeTimer = null;
+let recentStateChangeTimer = null;
 let manifestInProgress = false;
 syncDerivedState(gameState.getState());
 
@@ -254,6 +265,50 @@ function markRecentBuildingChanges(buildingIds = []) {
   }, 2600);
 }
 
+function scheduleRecentStateChangeClear() {
+  if (recentStateChangeTimer) {
+    clearTimeout(recentStateChangeTimer);
+  }
+  recentStateChangeTimer = setTimeout(() => {
+    renderer.setTransientUi({ recentResourceChanges: {}, recentCitizenChanges: {} }, getCurrentState());
+    recentStateChangeTimer = null;
+  }, 2600);
+}
+
+function markRecentResourceChanges(resourceKeys = []) {
+  const keys = [...new Set(resourceKeys.filter(Boolean))];
+  if (!keys.length) {
+    return;
+  }
+  renderer.setTransientUi(
+    {
+      recentResourceChanges: {
+        ...(renderer.transientUi.recentResourceChanges ?? {}),
+        ...Object.fromEntries(keys.map((key) => [key, Date.now()]))
+      }
+    },
+    getCurrentState()
+  );
+  scheduleRecentStateChangeClear();
+}
+
+function markRecentCitizenChanges(citizenKeys = []) {
+  const keys = [...new Set(citizenKeys.filter(Boolean))];
+  if (!keys.length) {
+    return;
+  }
+  renderer.setTransientUi(
+    {
+      recentCitizenChanges: {
+        ...(renderer.transientUi.recentCitizenChanges ?? {}),
+        ...Object.fromEntries(keys.map((key) => [key, Date.now()]))
+      }
+    },
+    getCurrentState()
+  );
+  scheduleRecentStateChangeClear();
+}
+
 function syncDerivedState(state) {
   if ((state.crystals[state.selectedRarity] ?? 0) <= 0) {
     state.selectedRarity =
@@ -297,6 +352,163 @@ function reportError(message) {
   if (message) {
     toasts.show(message, "error");
   }
+}
+
+async function copyTextToClipboard(text, successMessage) {
+  if (!navigator.clipboard?.writeText) {
+    reportError("Clipboard copy is not available in this browser.");
+    return false;
+  }
+
+  try {
+    await navigator.clipboard.writeText(text);
+    reportSuccess(successMessage);
+    return true;
+  } catch (error) {
+    reportError(error.message);
+    return false;
+  }
+}
+
+function describeActiveBuildings(state) {
+  const active = state.buildings.filter((building) => building.isComplete);
+  const incubating = getActiveConstructionQueue(state);
+  const waiting = getAvailableConstructionQueue(state);
+
+  return [
+    `Active Buildings (${active.length})`,
+    ...(active.length ? active.map((building) => `- ${building.displayName} (${building.rarity}, ${building.quality}%)`) : ["- None"]),
+    "",
+    `Incubating (${incubating.length})`,
+    ...(incubating.length
+      ? incubating.map((building) => {
+          const etaDetails = getConstructionEtaDetails(building, state);
+          return `- ${building.displayName} (${building.rarity}, ${building.quality}%, ${etaDetails.isStalled ? `stalled: ${etaDetails.stallReasons.join(", ")}` : `${etaDetails.daysRemaining?.toFixed?.(1) ?? "?"}d remaining`})`;
+        })
+      : ["- None"]),
+    "",
+    `Available (${waiting.length})`,
+    ...(waiting.length ? waiting.map((building) => `- ${building.displayName} (${building.rarity}, ${building.quality}%)`) : ["- None"])
+  ].join("\n");
+}
+
+function describeCityStatus(state) {
+  const trends = getCityTrendSummary(state);
+  const emergencyState = getEmergencyStatus(state);
+  return [
+    `Crystal Forge City Status`,
+    `Date: ${formatDate(state.calendar.dayOffset)}`,
+    `Population: ${state.resources.population}`,
+    `Gold: ${state.resources.gold} (${trends.find((entry) => entry.key === "gold")?.delta?.toFixed?.(1) ?? "0"}/day)`,
+    `Food: ${state.resources.food} (${trends.find((entry) => entry.key === "food")?.delta?.toFixed?.(1) ?? "0"}/day)`,
+    `Materials: ${state.resources.materials} (${trends.find((entry) => entry.key === "materials")?.delta?.toFixed?.(1) ?? "0"}/day)`,
+    `Salvage: ${state.resources.salvage ?? 0} (${trends.find((entry) => entry.key === "salvage")?.delta?.toFixed?.(1) ?? "0"}/day)`,
+    `Mana: ${state.resources.mana} (${trends.find((entry) => entry.key === "mana")?.delta?.toFixed?.(1) ?? "0"}/day)`,
+    `Morale: ${Math.round(state.cityStats.morale ?? 0)}`,
+    `Health: ${Math.round(state.cityStats.health ?? 0)}`,
+    `Defense: ${Math.round(state.cityStats.defense ?? 0)}`,
+    `Security: ${Math.round(state.cityStats.security ?? 0)}`,
+    `Warnings: ${emergencyState.emergencies.length ? emergencyState.emergencies.map((entry) => entry.label).join(", ") : "None"}`
+  ].join("\n");
+}
+
+function describeChronicleDay(state, dayOffset) {
+  const snapshot = getDailyCitySnapshot(state, dayOffset);
+  const date = getStructuredDate(dayOffset);
+  const events = [...(state.events.active ?? []), ...(state.events.recent ?? []), ...(state.events.scheduled ?? [])].filter((event) => {
+    const start = Number(event.startedDayOffset);
+    const end = Number(event.endsDayOffset ?? event.startedDayOffset);
+    return Number.isFinite(start) && dayOffset >= start && dayOffset <= end;
+  });
+  const note = String(state.chronicleNotes?.[String(dayOffset)] ?? "").trim();
+
+  return [
+    `${formatDate(dayOffset)}`,
+    `Holiday: ${date.holiday?.name ?? "None"}`,
+    `Weather: ${date.weather.icon} ${date.weather.name}`,
+    `Moon: ${date.moonPhase.icon} ${date.moonPhase.name}`,
+    `Events: ${events.length ? events.map((event) => event.name).join(", ") : "None"}`,
+    `City Conditions: ${snapshot?.conditions?.join(", ") ?? "No snapshot recorded"}`,
+    note ? `Note: ${note}` : "Note: None"
+  ].join("\n");
+}
+
+function createTurnSummary(previousState, nextState, days) {
+  const resourceKeys = [
+    ["gold", "Gold"],
+    ["food", "Food"],
+    ["materials", "Materials"],
+    ["salvage", "Salvage"],
+    ["mana", "Mana"]
+  ];
+  const completedBuildings = nextState.buildings
+    .filter((building) => building.isComplete && !previousState.buildings.find((entry) => entry.id === building.id)?.isComplete)
+    .map((building) => building.displayName)
+    .slice(0, 6);
+  const previousEmergencyCount = getEmergencyStatus(previousState).emergencies.length;
+  const nextEmergencyCount = getEmergencyStatus(nextState).emergencies.length;
+  const previousRecentKeys = new Set((previousState.events.recent ?? []).map((event) => `${event.id ?? event.name}-${event.startedDayOffset ?? ""}`));
+  const newEventTitles = (nextState.events.recent ?? [])
+    .filter((event) => !previousRecentKeys.has(`${event.id ?? event.name}-${event.startedDayOffset ?? ""}`))
+    .map((event) => event.name)
+    .slice(0, 6);
+
+  return {
+    days,
+    dateLabel: formatDate(nextState.calendar.dayOffset),
+    resourceDeltas: resourceKeys.map(([key, label]) => {
+      const before = Number(previousState.resources?.[key] ?? 0);
+      const after = Number(nextState.resources?.[key] ?? 0);
+      return {
+        key,
+        label,
+        before,
+        after,
+        delta: after - before
+      };
+    }),
+    completedBuildings,
+    emergencyCount: {
+      before: previousEmergencyCount,
+      after: nextEmergencyCount
+    },
+    newEventTitles
+  };
+}
+
+function applyProblemFocus(problemKey) {
+  const currentState = getCurrentState();
+  const patch = {};
+
+  switch (problemKey) {
+    case "food":
+    case "gold":
+    case "mana":
+    case "housing":
+      patch.cityMode = "administration";
+      patch.cityAdminView = "readouts";
+      break;
+    case "morale":
+      patch.cityMode = "administration";
+      patch.cityAdminView = "operations";
+      break;
+    case "stalled":
+      patch.cityMode = "buildings";
+      patch.cityBuildingView = "stream";
+      patch.buildingQuickFilter = "Stalled";
+      break;
+    case "inputs":
+      patch.cityMode = "buildings";
+      patch.cityBuildingView = "stream";
+      patch.buildingQuickFilter = "Consuming Input";
+      break;
+    default:
+      patch.cityMode = "buildings";
+      patch.cityBuildingView = "stream";
+      break;
+  }
+
+  renderer.setTransientUi(patch, currentState);
 }
 
 function rollDice() {
@@ -463,7 +675,8 @@ function resetTransientUi() {
       hoveredMapCell: null,
       inspectedBuildingId: null,
       catalogOpen: false,
-      manifestCompleteModal: null
+      manifestCompleteModal: null,
+      turnSummaryModal: null
     },
     getCurrentState()
   );
@@ -637,6 +850,7 @@ function setResources(nextResources) {
     draft.resources.mana = Math.max(0, Number(nextResources.mana));
     draft.resources.prosperity = Math.max(0, Number(nextResources.prosperity));
   });
+  markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
   reportSuccess("Resources updated.");
 }
 
@@ -650,16 +864,19 @@ function citizenCommand({ mode, citizenClass, amount }) {
   if (mode === "set") {
     commit((draft) => setCitizens(draft, citizenClass, amount));
   }
+  markRecentCitizenChanges([citizenClass]);
   reportSuccess(`Citizen change applied to ${citizenClass}.`);
 }
 
 function moveCitizens({ mode, fromClass, toClass, amount }) {
   commit((draft) => promoteCitizens(draft, fromClass, toClass, amount, "Admin", mode === "promote" ? "promoted" : "demoted"));
+  markRecentCitizenChanges([fromClass, toClass]);
   reportSuccess(`${mode === "promote" ? "Promotion" : "Demotion"} applied.`);
 }
 
 function bulkCitizens(nextBulk) {
   commit((draft) => applyCitizenBulkSet(draft, nextBulk));
+  markRecentCitizenChanges(Object.keys(nextBulk ?? {}));
   reportSuccess("Bulk citizen update applied.");
 }
 
@@ -1240,6 +1457,8 @@ const actions = {
     restored.settings.currentPage = pageKey;
     gameState.replace(restored);
     resetTransientUi();
+    markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
+    markRecentCitizenChanges(Object.keys(getCurrentState().citizens ?? {}));
     reportSuccess(`Restored snapshot "${snapshot.name}".`);
   },
   deleteSessionSnapshot(snapshotId) {
@@ -1254,6 +1473,7 @@ const actions = {
   moveCitizens,
   resetCitizens() {
     commit((draft) => resetCitizens(draft));
+    markRecentCitizenChanges(Object.keys(getCurrentState().citizens ?? {}));
     reportSuccess("Citizens reset.");
   },
   bulkCitizens,
@@ -1346,17 +1566,56 @@ const actions = {
   },
   async copySaveJson() {
     const json = exportSave(getCurrentState());
-    if (!navigator.clipboard?.writeText) {
-      reportError("Clipboard copy is not available in this browser.");
+    await copyTextToClipboard(json, "Save JSON copied to clipboard.");
+  },
+  async copyCityStatus() {
+    await copyTextToClipboard(describeCityStatus(getCurrentState()), "City status copied.");
+  },
+  async copyActiveBuildings() {
+    await copyTextToClipboard(describeActiveBuildings(getCurrentState()), "Active buildings copied.");
+  },
+  async copyChronicleDaySummary(dayOffset) {
+    await copyTextToClipboard(describeChronicleDay(getCurrentState(), dayOffset), "Day summary copied.");
+  },
+  toggleBuildingPin(buildingId) {
+    commit((draft) => {
+      const current = new Set(draft.settings.pinnedBuildingIds ?? []);
+      if (current.has(buildingId)) {
+        current.delete(buildingId);
+      } else {
+        current.add(buildingId);
+      }
+      draft.settings.pinnedBuildingIds = [...current];
+    });
+    reportSuccess((getCurrentState().settings.pinnedBuildingIds ?? []).includes(buildingId) ? "Building pinned." : "Building unpinned.");
+  },
+  pauseAllConstruction() {
+    const affectedIds = getCurrentState().buildings.filter((building) => !building.isComplete).map((building) => building.id);
+    commit((draft) => {
+      draft.pausedConstructionIds = draft.buildings.filter((building) => !building.isComplete).map((building) => building.id);
+      normalizeConstructionPriority(draft);
+    });
+    markRecentBuildingChanges(affectedIds);
+    reportSuccess("All incubation paused.");
+  },
+  resumeAllConstruction() {
+    const affectedIds = getCurrentState().buildings.filter((building) => !building.isComplete).map((building) => building.id);
+    commit((draft) => {
+      draft.pausedConstructionIds = [];
+      normalizeConstructionPriority(draft);
+    });
+    markRecentBuildingChanges(affectedIds);
+    reportSuccess("All incubation resumed.");
+  },
+  closeTurnSummary() {
+    renderer.setTransientUi({ turnSummaryModal: null }, getCurrentState());
+  },
+  goToProblem(problemKey) {
+    if (pageKey !== "city") {
+      navigateWithTransition(`./city.html?problem=${encodeURIComponent(problemKey)}`);
       return;
     }
-
-    try {
-      await navigator.clipboard.writeText(json);
-      reportSuccess("Save JSON copied to clipboard.");
-    } catch (error) {
-      reportError(error.message);
-    }
+    applyProblemFocus(problemKey);
   },
   saveManualState() {
     try {
@@ -1370,7 +1629,21 @@ const actions = {
     try {
       gameState.replace(loadManualState());
       resetTransientUi();
+      markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
+      markRecentCitizenChanges(Object.keys(getCurrentState().citizens ?? {}));
       reportSuccess("Local save loaded.");
+    } catch (error) {
+      reportError(error.message);
+    }
+  },
+  async loadFirebaseRealm() {
+    try {
+      const nextState = await fetchPublishedFirebaseState();
+      gameState.replace(validateAndMigrateSave(nextState));
+      resetTransientUi();
+      markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
+      markRecentCitizenChanges(Object.keys(getCurrentState().citizens ?? {}));
+      reportSuccess("Firebase save loaded.");
     } catch (error) {
       reportError(error.message);
     }
@@ -1405,16 +1678,22 @@ const actions = {
   resetSave() {
     gameState.replace(resetSave());
     resetTransientUi();
+    markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
+    markRecentCitizenChanges(Object.keys(getCurrentState().citizens ?? {}));
     reportSuccess("Save reset.");
   },
   sessionReset() {
     gameState.replace(createLiveSessionResetState());
     resetTransientUi();
+    markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
+    markRecentCitizenChanges(Object.keys(getCurrentState().citizens ?? {}));
     reportSuccess("Realm reset to the live session preset.");
   },
   testingReset() {
     gameState.replace(createTestingBalanceResetState());
     resetTransientUi();
+    markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
+    markRecentCitizenChanges(Object.keys(getCurrentState().citizens ?? {}));
     reportSuccess("Realm reset to the testing balance preset.");
   },
   clearBuildings() {
@@ -1431,6 +1710,8 @@ const actions = {
   fullReset() {
     gameState.replace(createSingleCommonCrystalResetState());
     resetTransientUi();
+    markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
+    markRecentCitizenChanges(Object.keys(getCurrentState().citizens ?? {}));
     reportSuccess("Realm fully reset. You now begin with 1 Common crystal.");
   },
   reportError
@@ -1498,7 +1779,10 @@ root.addEventListener("click", async (event) => {
       await handleManifest();
       break;
     case "advance-time": {
+      const previousState = structuredClone(getCurrentState());
       const result = commit((draft) => advanceTime(draft, target.dataset.step));
+      markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
+      renderer.setTransientUi({ turnSummaryModal: createTurnSummary(previousState, getCurrentState(), result.days) }, getCurrentState());
       reportSuccess(`Advanced ${result.days} days.`);
       break;
     }
@@ -1506,7 +1790,10 @@ root.addEventListener("click", async (event) => {
       const panel = target.closest(".calendar-panel");
       const input = panel?.querySelector('[data-role="custom-days"]');
       const days = Math.max(1, Math.floor(Number(input?.value) || 0));
+      const previousState = structuredClone(getCurrentState());
       const result = commit((draft) => advanceTimeByDays(draft, days));
+      markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
+      renderer.setTransientUi({ turnSummaryModal: createTurnSummary(previousState, getCurrentState(), result.days) }, getCurrentState());
       reportSuccess(`Advanced ${result.days} days.`);
       break;
     }
@@ -1563,6 +1850,9 @@ root.addEventListener("click", async (event) => {
     case "set-building-status-filter":
       renderer.setTransientUi({ buildingStatusFilter: target.dataset.filter ?? target.value ?? "All" }, getCurrentState());
       break;
+    case "set-building-quick-filter":
+      renderer.setTransientUi({ buildingQuickFilter: target.dataset.filter ?? target.value ?? "All" }, getCurrentState());
+      break;
     case "toggle-forge-nav":
       renderer.setTransientUi({ forgeNavCollapsed: !renderer.transientUi.forgeNavCollapsed }, getCurrentState());
       break;
@@ -1578,8 +1868,23 @@ root.addEventListener("click", async (event) => {
     case "toggle-player-citizens":
       renderer.setTransientUi({ playerCitizensOpen: !renderer.transientUi.playerCitizensOpen }, getCurrentState());
       break;
+    case "toggle-player-hide-completed":
+      renderer.setTransientUi({ playerHideCompleted: !renderer.transientUi.playerHideCompleted }, getCurrentState());
+      break;
     case "set-player-building-rarity-filter":
       renderer.setTransientUi({ playerBuildingRarityFilter: target.dataset.rarity ?? "All" }, getCurrentState());
+      break;
+    case "copy-city-status":
+      await actions.copyCityStatus();
+      break;
+    case "copy-active-buildings":
+      await actions.copyActiveBuildings();
+      break;
+    case "copy-chronicle-day-summary":
+      await actions.copyChronicleDaySummary(Number(target.dataset.dayOffset ?? getCurrentState().calendar.dayOffset));
+      break;
+    case "go-to-problem":
+      actions.goToProblem(target.dataset.problem ?? "overview");
       break;
     case "roll-dice":
       rollDice();
@@ -1750,8 +2055,20 @@ root.addEventListener("click", async (event) => {
     case "pause-construction":
       setConstructionActiveState(target.dataset.buildingId, false);
       break;
+    case "pause-all-construction":
+      actions.pauseAllConstruction();
+      break;
+    case "resume-all-construction":
+      actions.resumeAllConstruction();
+      break;
+    case "toggle-building-pin":
+      actions.toggleBuildingPin(target.dataset.buildingId);
+      break;
     case "manifest-building-now":
       manifestBuildingNow(target.dataset.buildingId);
+      break;
+    case "close-turn-summary":
+      actions.closeTurnSummary();
       break;
     case "upgrade-crystal": {
       const sourceRarity = target.dataset.rarity;
@@ -1877,6 +2194,10 @@ root.addEventListener("change", (event) => {
     renderer.setTransientUi({ buildingStatusFilter: target.dataset.filter ?? target.value ?? "All" }, getCurrentState());
   }
 
+  if (target.dataset.action === "set-building-quick-filter") {
+    renderer.setTransientUi({ buildingQuickFilter: target.dataset.filter ?? target.value ?? "All" }, getCurrentState());
+  }
+
   if (target.dataset.action === "set-speed-multiplier") {
     commit((draft) => {
       draft.constructionSpeedMultiplier = Number(target.value);
@@ -1927,8 +2248,9 @@ function applyUrlFocusTargets() {
   const focusBuildingId = params.get("focusBuilding");
   const openDossier = params.get("openDossier") === "1";
   const focusEventId = params.get("focusEvent");
+  const focusProblem = params.get("problem");
 
-  if (!focusBuildingId && !focusEventId) {
+  if (!focusBuildingId && !focusEventId && !focusProblem) {
     return;
   }
 
@@ -1946,6 +2268,10 @@ function applyUrlFocusTargets() {
 
   if (focusEventId) {
     renderer.setTransientUi({ focusEventId }, getCurrentState());
+  }
+
+  if (focusProblem) {
+    applyProblemFocus(focusProblem);
   }
 
   clearUrlParams();

@@ -29,7 +29,7 @@ Crystal Upgrade -> Crystal Upgrade.png
 Farmlands -> Farmlands.png
 Fishery -> Fishery.png
 Gardens -> Gardens.png
-General Store -> General Store.png
+Trade Center -> General Store.png
 Grain Silo -> Grain Silo.png
 Graveyard -> Graveyard.png
 Housing: Commoner -> Housing Commoner.png
@@ -89,7 +89,7 @@ Bank -> Bank.png
 Bathhouse -> Bathhouse.png
 Courthouse -> Courthouse.png
 Crystal Upgrade -> Crystal Upgrade Rare.png
-Distillation House -> Distillation House.png
+Workshop Quarter -> Distillation House.png
 Embassy Annex -> Embassy Annex.png
 Engineers' Guild -> Engineers' Guild.png
 Explosive Ballistas -> Explosive Ballistas.png
@@ -200,7 +200,7 @@ RECOMMENDED SOURCE MATCHES
 - Well / Pond / Water Trough -> well/water icon art
 - Mill / Bakery / Community Oven / Smokehouse / Butcher -> village production art
 - Dock / Skyharbor / Airship Dockyard -> dock / harbor art
-- Market Square / Vendor / Trade Post / General Store / Warehouse -> market/storage art
+- Market Square / Vendor / Trade Post / Trade Center / Warehouse -> market/storage art
 - Temple / Grand Shrine / Basic Shrine / Oracle -> shrine/temple art
 - Arcana Tower / Observatory / School of Driftum / University -> tower/academy art
 

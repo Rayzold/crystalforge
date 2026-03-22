@@ -21,6 +21,7 @@ import { createMapCells } from "./MapSystem.js";
 import { createDefaultDriftEvolutionState, normalizeDriftEvolutionState, syncDriftEvolutionState } from "./DriftEvolutionSystem.js";
 import { normalizeConstructionPriority } from "./ConstructionSystem.js";
 import { createDefaultTownFocusState, normalizeTownFocusState } from "./TownFocusSystem.js";
+import { captureDailyCitySnapshot } from "./CitySnapshotSystem.js";
 
 function getStartPreset(preset = DEFAULT_START_PRESET) {
   return structuredClone(START_STATE_PRESETS[preset] ?? DEFAULT_START_STATE);
@@ -57,6 +58,7 @@ export function createInitialState(preset = DEFAULT_START_PRESET) {
     chronicleNotes: {},
     historyLog: [],
     calendar: { dayOffset: 0 },
+    dailyCitySnapshots: {},
     driftEvolution: createDefaultDriftEvolutionState(),
     townFocus: createDefaultTownFocusState(),
     sessionSnapshots: [],
@@ -75,6 +77,7 @@ export function createInitialState(preset = DEFAULT_START_PRESET) {
   normalizeConstructionPriority(state);
   state.districtSummary = getDistrictSummary(state);
   recalculateCityStats(state);
+  captureDailyCitySnapshot(state);
   return state;
 }
 
@@ -101,6 +104,7 @@ export function createSingleCommonCrystalResetState() {
   state.chronicleNotes = {};
   state.historyLog = [];
   state.calendar = { dayOffset: 0 };
+  state.dailyCitySnapshots = {};
   state.driftEvolution = createDefaultDriftEvolutionState();
   state.townFocus = createDefaultTownFocusState();
   state.sessionSnapshots = [];
@@ -234,6 +238,9 @@ function normalizeSettings(sourceSettings, baseSettings) {
     ...baseSettings,
     ...(sourceSettings ?? {})
   };
+  normalized.pinnedBuildingIds = Array.isArray(normalized.pinnedBuildingIds)
+    ? [...new Set(normalized.pinnedBuildingIds.filter((id) => typeof id === "string" && id.trim()))]
+    : [];
   delete normalized.activeSaveSlot;
   delete normalized.sharedStateUrl;
   delete normalized.autoLoadSharedState;
@@ -281,6 +288,10 @@ export function validateAndMigrateSave(rawSave) {
     chronicleNotes: rawSave.chronicleNotes && typeof rawSave.chronicleNotes === "object" ? rawSave.chronicleNotes : {},
     historyLog: Array.isArray(rawSave.historyLog) ? rawSave.historyLog : [],
     calendar: { dayOffset: Number(rawSave.calendar?.dayOffset ?? 0) },
+    dailyCitySnapshots:
+      rawSave.dailyCitySnapshots && typeof rawSave.dailyCitySnapshots === "object"
+        ? structuredClone(rawSave.dailyCitySnapshots)
+        : {},
     driftEvolution: normalizeDriftEvolutionState(rawSave.driftEvolution, Array.isArray(rawSave.buildings) ? rawSave.buildings.length : 0),
     townFocus: normalizeTownFocusState(rawSave.townFocus),
     sessionSnapshots: Array.isArray(rawSave.sessionSnapshots) ? rawSave.sessionSnapshots : [],
@@ -298,6 +309,7 @@ export function validateAndMigrateSave(rawSave) {
   normalizeConstructionPriority(nextState);
   nextState.districtSummary = getDistrictSummary(nextState);
   recalculateCityStats(nextState);
+  captureDailyCitySnapshot(nextState);
   return nextState;
 }
 

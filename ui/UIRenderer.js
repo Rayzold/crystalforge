@@ -11,6 +11,7 @@ import { renderManifestCompleteModal } from "./ManifestCompleteModal.js";
 import { renderPageShell } from "./PageShell.js";
 import { renderPlayerPage } from "./PlayerPage.js";
 import { renderTownFocusCouncilModal } from "./TownFocusCouncilModal.js";
+import { renderTurnSummaryModal } from "./TurnSummaryModal.js";
 import { getMayorSuggestions } from "../systems/TownFocusSystem.js";
 import { getDefaultTownFocusPreviewId } from "./TownFocusShared.js";
 import { renderTownFocusCeremonyOverlay } from "./TownFocusCeremonyOverlay.js";
@@ -49,6 +50,9 @@ export class UIRenderer {
       firebasePublishedMeta: null,
       firebaseConnectionState: "idle",
       recentBuildingChanges: {},
+      buildingQuickFilter: "All",
+      playerHideCompleted: false,
+      turnSummaryModal: null,
       projectorMode: false,
       projectorChromeHidden: false
     };
@@ -101,7 +105,8 @@ export class UIRenderer {
       renderHomeHelpModal(viewState),
       renderManifestCompleteModal(viewState),
       renderTownFocusCouncilModal(viewState),
-      renderTownFocusCeremonyOverlay(viewState)
+      renderTownFocusCeremonyOverlay(viewState),
+      renderTurnSummaryModal(viewState)
     ].join("");
     this.root.innerHTML = renderPageShell(viewState, this.pageKey, page, overlays);
     attachHelpBubbles(this.root);

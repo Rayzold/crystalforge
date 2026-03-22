@@ -1,11 +1,14 @@
 import { renderUiIcon } from "./UiIcons.js";
 import { BUILDING_ROLE_LEGEND } from "../content/BuildingCatalog.js";
 import { APP_VERSION, BUILD_NOTES } from "../content/Config.js";
+import { GLOSSARY_TERMS } from "../content/GlossaryConfig.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js";
 import { formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
 import { getMayorAdvice, getTownFocusAvailability } from "../systems/TownFocusSystem.js";
 import { getTownFocusHistory } from "../systems/TownFocusSystem.js";
+import { getCityTrendSummary, getResourceChainSummary } from "../systems/ResourceSystem.js";
+import { getManualSaveMeta } from "../systems/StorageSystem.js";
 import { renderDriftEvolutionPanel } from "./DriftEvolutionPanel.js";
 import { getCurrentDriftEvolution } from "../systems/DriftEvolutionSystem.js";
 import { renderTownFocusPanel } from "./TownFocusPanel.js";
@@ -281,7 +284,13 @@ function renderOnboardingPanel(state) {
 
 function renderFeaturedBuildings(state) {
   const featured = [...state.buildings]
-    .sort((left, right) => right.quality - left.quality)
+    .sort((left, right) => {
+      const pinDelta = Number((state.settings?.pinnedBuildingIds ?? []).includes(right.id)) - Number((state.settings?.pinnedBuildingIds ?? []).includes(left.id));
+      if (pinDelta !== 0) {
+        return pinDelta;
+      }
+      return right.quality - left.quality;
+    })
     .slice(0, 3);
 
   return `
@@ -516,6 +525,10 @@ function renderHomeSignals(state) {
           <small>${formatNumber(state.buildings.filter((building) => building.isComplete).length, 0)} complete</small>
         </article>
       </div>
+      <div class="home-signals-panel__actions">
+        <button class="button button--ghost" type="button" data-action="copy-city-status">Copy City Status</button>
+        <button class="button button--ghost" type="button" data-action="copy-active-buildings">Copy Active Buildings</button>
+      </div>
     </section>
   `;
 }
@@ -583,6 +596,132 @@ function renderBuildNotesPanel(buildLabel = APP_VERSION) {
   `;
 }
 
+function renderCityTrendPanel(state) {
+  const trends = getCityTrendSummary(state);
+  return `
+    <section class="panel city-trend-panel">
+      <div class="panel__header">
+        <h3>City Trends</h3>
+        <span class="panel__subtle">Daily momentum for the core economy.</span>
+      </div>
+      <div class="city-trend-panel__grid">
+        ${trends
+          .map(
+            (entry) => `
+              <article class="city-trend-panel__item city-trend-panel__item--${entry.delta > 0 ? "positive" : entry.delta < 0 ? "negative" : "neutral"} ${state.transientUi?.recentResourceChanges?.[entry.key] ? "is-recently-changed" : ""}">
+                <span>${escapeHtml(entry.label)}</span>
+                <strong>${entry.delta >= 0 ? "+" : ""}${formatNumber(entry.delta, 2)} / day</strong>
+                <small>${escapeHtml(`Stock ${formatNumber(entry.stock, 0)} / ${entry.detail}`)}</small>
+              </article>
+            `
+          )
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderResourceChainPanel(state) {
+  const chains = getResourceChainSummary(state);
+  return `
+    <section class="panel resource-chain-panel">
+      <div class="panel__header">
+        <h3>Resource Chain</h3>
+        <span class="panel__subtle">How the current city turns output into value.</span>
+      </div>
+      <div class="resource-chain-panel__grid">
+        ${chains
+          .map(
+            (chain) => `
+              <article class="resource-chain-panel__item">
+                <strong>${escapeHtml(chain.title)}</strong>
+                <small>${escapeHtml(chain.detail)}</small>
+                <p>${escapeHtml(chain.buildings.length ? chain.buildings.map((building) => building.displayName).slice(0, 6).join(", ") : "No buildings are filling this role yet.")}</p>
+              </article>
+            `
+          )
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderGlossaryPanel() {
+  return `
+    <section class="panel glossary-panel">
+      <div class="panel__header">
+        <h3>Rules Glossary</h3>
+        <span class="panel__subtle">Short explanations of the terms the city uses most.</span>
+      </div>
+      <div class="glossary-panel__list">
+        ${GLOSSARY_TERMS.map((entry) => `
+          <article class="glossary-panel__item">
+            <strong>${escapeHtml(entry.term)}</strong>
+            <p>${escapeHtml(entry.detail)}</p>
+          </article>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderReleaseChecklistPanel(state) {
+  const hasLocalSave = Boolean(getManualSaveMeta()?.manualSavedAt);
+  const hasSharedSave = Boolean(state.transientUi?.firebasePublishedMeta?.updatedAtMs);
+  const hasPlacedBuilding = state.buildings.some((building) => building.mapPosition);
+  const hasCalendarSnapshot = Object.keys(state.dailyCitySnapshots ?? {}).length > 0;
+  const hasPlayerScreenReady = true;
+
+  const items = [
+    {
+      label: "Shared Save",
+      done: hasSharedSave,
+      detail: hasSharedSave ? "Firebase save is present." : "No shared Firebase save detected yet."
+    },
+    {
+      label: "Local Save",
+      done: hasLocalSave,
+      detail: hasLocalSave ? "Local backup exists." : "Create a local fallback save."
+    },
+    {
+      label: "Player Page",
+      done: hasPlayerScreenReady,
+      detail: "Open index.html and verify the public table view."
+    },
+    {
+      label: "Calendar",
+      done: hasCalendarSnapshot,
+      detail: hasCalendarSnapshot ? "Chronicle snapshots exist." : "Advance time once and review Chronicle."
+    },
+    {
+      label: "Map",
+      done: hasPlacedBuilding,
+      detail: hasPlacedBuilding ? "At least one building is placed." : "Place at least one building on the town map."
+    }
+  ];
+
+  return `
+    <section class="panel release-checklist-panel">
+      <div class="panel__header">
+        <h3>Release Checklist</h3>
+        <span class="panel__subtle">A quick GM pass before a session or push.</span>
+      </div>
+      <div class="release-checklist-panel__list">
+        ${items
+          .map(
+            (item) => `
+              <article class="release-checklist-panel__item ${item.done ? "is-complete" : ""}">
+                <strong>${item.done ? "Done" : "Check"} / ${escapeHtml(item.label)}</strong>
+                <p>${escapeHtml(item.detail)}</p>
+              </article>
+            `
+          )
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
 export function renderHomePage(state) {
   const liveSessionView = state.settings.liveSessionView;
   return {
@@ -597,8 +736,12 @@ export function renderHomePage(state) {
     `,
     aside: `
       ${renderHomeSignals(state)}
+      ${renderCityTrendPanel(state)}
       ${renderMayorAdvice(state)}
+      ${renderResourceChainPanel(state)}
       ${renderBuildingRolesLegend()}
+      ${renderGlossaryPanel()}
+      ${renderReleaseChecklistPanel(state)}
       ${renderBuildNotesPanel()}
     `
   };

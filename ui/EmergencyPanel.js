@@ -55,6 +55,9 @@ export function renderEmergencyPanel(state) {
                           ? `<small>Recommended response: ${getSuggestedFocusForAlert(state, emergency.key).name}</small>`
                           : ""
                       }
+                      <div class="emergency-card__actions">
+                        <button class="button button--ghost" type="button" data-action="go-to-problem" data-problem="${emergency.key}">Go To Problem</button>
+                      </div>
                     </article>
                   `
                 )

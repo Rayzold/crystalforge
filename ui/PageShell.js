@@ -4,6 +4,7 @@ import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
 import { formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
 import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js";
+import { getCityTrendSummary } from "../systems/ResourceSystem.js";
 import { getManualSaveMeta } from "../systems/StorageSystem.js";
 import { getCurrentTownFocus, getTownFocusAvailability } from "../systems/TownFocusSystem.js";
 import { getCriticalAlerts, renderCrisisBanner } from "./CrisisBanner.js";
@@ -37,6 +38,17 @@ function formatSidebarEtaDays(daysRemaining) {
   }
   const decimals = Math.abs(daysRemaining - Math.round(daysRemaining)) < 0.05 ? 0 : 1;
   return `${formatNumber(daysRemaining, decimals)}d`;
+}
+
+function orderSidebarBuildings(state, buildings = []) {
+  const pinnedIds = new Set(state.settings?.pinnedBuildingIds ?? []);
+  return [...buildings].sort((left, right) => {
+    const pinDelta = Number(pinnedIds.has(right.id)) - Number(pinnedIds.has(left.id));
+    if (pinDelta !== 0) {
+      return pinDelta;
+    }
+    return right.quality - left.quality;
+  });
 }
 
 function renderDiceHistory(history = []) {
@@ -84,7 +96,7 @@ function renderSidebarBuildingList(state, title, items, emptyLabel, variant = "m
                       const emoji = getBuildingEmoji(building);
                       return `
                       <div class="sidebar-manifest-list__item ${isRecentlyChanged ? "is-recently-changed" : ""}" title="${escapeHtml(`${emoji} ${building.displayName}`)}">
-                        <span>${escapeHtml(`${emoji} ${building.displayName}`)}</span>
+                        <span>${escapeHtml(`${state.settings?.pinnedBuildingIds?.includes(building.id) ? "📌 " : ""}${emoji} ${building.displayName}`)}</span>
                         <div class="sidebar-manifest-list__meta">
                           <em>${escapeHtml(formatBuildingQualityDisplay(building))}</em>
                           ${
@@ -102,6 +114,24 @@ function renderSidebarBuildingList(state, title, items, emptyLabel, variant = "m
             `
           : `<p class="sidebar-manifest-list__empty">${escapeHtml(emptyLabel)}</p>`
       }
+    </section>
+  `;
+}
+
+function renderResourceDeltaStrip(state) {
+  const deltas = getCityTrendSummary(state).filter((entry) => ["gold", "food", "materials", "salvage", "mana"].includes(entry.key));
+  return `
+    <section class="page-delta-strip" aria-label="Daily resource deltas">
+      ${deltas
+        .map(
+          (entry) => `
+            <article class="page-delta-strip__item page-delta-strip__item--${entry.delta > 0 ? "positive" : entry.delta < 0 ? "negative" : "neutral"} ${state.transientUi?.recentResourceChanges?.[entry.key] ? "is-recently-changed" : ""}">
+              <span>${escapeHtml(entry.label)}</span>
+              <strong>${entry.delta >= 0 ? "+" : ""}${formatNumber(entry.delta, 2)} / day</strong>
+            </article>
+          `
+        )
+        .join("")}
     </section>
   `;
 }
@@ -134,9 +164,9 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
   const currentFocus = getCurrentTownFocus(state);
   const cityAlertCount = getCriticalAlerts(state).length;
   const availableCrystalCount = Object.values(state.crystals ?? {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
-  const manifestedBuildings = state.buildings.filter((building) => building.isComplete);
-  const incubatingBuildings = getActiveConstructionQueue(state);
-  const availableBuildings = getAvailableConstructionQueue(state);
+  const manifestedBuildings = orderSidebarBuildings(state, state.buildings.filter((building) => building.isComplete));
+  const incubatingBuildings = orderSidebarBuildings(state, getActiveConstructionQueue(state));
+  const availableBuildings = orderSidebarBuildings(state, getAvailableConstructionQueue(state));
   const firebaseMeta = state.transientUi?.firebasePublishedMeta ?? null;
   const summary = [
     ["Gold", state.resources.gold],
@@ -305,6 +335,8 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
               : ""
           }
         </header>
+
+        ${renderResourceDeltaStrip(state)}
 
         ${
           pageKey === "home" || pageKey === "forge" || pageKey === "citizens" || pageKey === "chronicle"

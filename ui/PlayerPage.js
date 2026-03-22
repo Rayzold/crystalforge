@@ -1,11 +1,13 @@
 import { APP_VERSION, BUILD_NOTES, FIREBASE_DEFAULT_REALM_ID } from "../content/Config.js";
 import { BUILDING_ROLE_LEGEND, getBuildingEmoji } from "../content/BuildingCatalog.js";
 import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER, getCitizenHelpText } from "../content/CitizenConfig.js";
+import { GLOSSARY_TERMS } from "../content/GlossaryConfig.js";
 import { RARITY_ORDER } from "../content/Rarities.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js";
 import { formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
 import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js";
+import { getCityTrendSummary, getResourceChainSummary } from "../systems/ResourceSystem.js";
 import { getMayorAdvice } from "../systems/TownFocusSystem.js";
 import { renderCrystalSelector } from "./CrystalSelector.js";
 import { createHelpBubble } from "./HelpBubbles.js";
@@ -194,11 +196,13 @@ function renderCitizenSummaryToggle(state) {
                   <div class="player-citizens-summary__list">
                     ${group.classes.map((citizenClass) => `
                       <article class="player-citizens-summary__item">
+                        <span class="player-citizens-summary__change ${state.transientUi?.recentCitizenChanges?.[citizenClass] ? "is-recently-changed" : ""}">
                         <span class="player-citizens-summary__label">
                           <span>${escapeHtml(`${CITIZEN_DEFINITIONS[citizenClass]?.emoji ?? "*"} ${citizenClass}`)}</span>
                           ${createHelpBubble(getCitizenHelpText(citizenClass))}
                         </span>
                         <strong>${formatNumber(state.citizens?.[citizenClass] ?? 0, 0)}</strong>
+                        </span>
                       </article>
                     `).join("")}
                   </div>
@@ -212,8 +216,80 @@ function renderCitizenSummaryToggle(state) {
   `;
 }
 
+function renderCityTrendPanel(state) {
+  const trends = getCityTrendSummary(state);
+  return `
+    <section class="panel city-trend-panel">
+      <div class="panel__header">
+        <div>
+          <h3>City Trends</h3>
+          <span class="panel__subtle">Daily movement of the shared economy.</span>
+        </div>
+      </div>
+      <div class="city-trend-panel__grid">
+        ${trends
+          .map(
+            (entry) => `
+              <article class="city-trend-panel__item city-trend-panel__item--${entry.delta > 0 ? "positive" : entry.delta < 0 ? "negative" : "neutral"} ${state.transientUi?.recentResourceChanges?.[entry.key] ? "is-recently-changed" : ""}">
+                <span>${escapeHtml(entry.label)}</span>
+                <strong>${entry.delta >= 0 ? "+" : ""}${formatNumber(entry.delta, 2)} / day</strong>
+                <small>${escapeHtml(`${entry.trend} / Stock ${formatNumber(entry.stock, 0)} / ${entry.detail}`)}</small>
+              </article>
+            `
+          )
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderResourceChainPanel(state) {
+  const chains = getResourceChainSummary(state);
+  return `
+    <section class="panel resource-chain-panel">
+      <div class="panel__header">
+        <div>
+          <h3>Resource Chain</h3>
+          <span class="panel__subtle">Who gathers, who refines, and who turns it into gold.</span>
+        </div>
+      </div>
+      <div class="resource-chain-panel__grid">
+        ${chains.map((chain) => `
+          <article class="resource-chain-panel__item">
+            <strong>${escapeHtml(chain.title)}</strong>
+            <small>${escapeHtml(chain.detail)}</small>
+            <p>${escapeHtml(chain.buildings.length ? chain.buildings.map((building) => building.displayName).slice(0, 6).join(", ") : "No current buildings fill this role.")}</p>
+          </article>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderGlossaryPanel() {
+  return `
+    <section class="panel glossary-panel">
+      <div class="panel__header">
+        <div>
+          <h3>Rules Glossary</h3>
+          <span class="panel__subtle">Short explanations of the most important city terms.</span>
+        </div>
+      </div>
+      <div class="glossary-panel__list">
+        ${GLOSSARY_TERMS.map((entry) => `
+          <article class="glossary-panel__item">
+            <strong>${escapeHtml(entry.term)}</strong>
+            <p>${escapeHtml(entry.detail)}</p>
+          </article>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
 function renderBuildingRarityFilters(state) {
   const activeFilter = state.transientUi?.playerBuildingRarityFilter ?? "All";
+  const hideCompleted = Boolean(state.transientUi?.playerHideCompleted);
   const options = ["All", ...RARITY_ORDER];
 
   return `
@@ -238,6 +314,11 @@ function renderBuildingRarityFilters(state) {
             `
           )
           .join("")}
+      </div>
+      <div class="player-building-toolbar__buttons player-building-toolbar__buttons--secondary">
+        <button class="button ${hideCompleted ? "" : "button--ghost"}" data-action="toggle-player-hide-completed">
+          ${hideCompleted ? "Showing Incubation Only" : "Hide Completed Buildings"}
+        </button>
       </div>
     </section>
   `;
@@ -309,7 +390,7 @@ function renderIncubationList(title, subtitle, buildings, emptyText, variant, st
                         <span>${escapeHtml(building.rarity)} / ${escapeHtml(building.district ?? "Unassigned")}</span>
                         <small>${
                           etaDetails.isStalled
-                            ? `${formatNumber(building.quality, 0)}% now | Stalled | ${escapeHtml(etaDetails.stallReasons.join(", ") || "insufficient resources")}`
+                            ? `${formatNumber(building.quality, 0)}% now | Stalled | Why: ${escapeHtml(etaDetails.stallReasons.join(", ") || "insufficient resources")}`
                             : `${formatNumber(building.quality, 0)}% now | ${formatNumber(etaDetails.totalBpd, 1)} bpd | ${formatNumber(etaDetails.dailyPercent, 2)}% per day | ${formatNumber(etaDetails.daysRemaining, 1)}d | Ready ${escapeHtml(readyLabel)}`
                         }</small>
                       </div>
@@ -344,6 +425,7 @@ function renderIncubationList(title, subtitle, buildings, emptyText, variant, st
 
 export function renderPlayerPage(state) {
   const rarityFilter = state.transientUi?.playerBuildingRarityFilter ?? "All";
+  const hideCompleted = Boolean(state.transientUi?.playerHideCompleted);
   const manifested = filterBuildingsByRarity(
     state.buildings.filter((building) => building.isComplete).sort((left, right) => right.quality - left.quality),
     rarityFilter
@@ -373,7 +455,7 @@ export function renderPlayerPage(state) {
           </article>
           <article>
             <span>Manifested</span>
-            <strong>${formatNumber(manifested.length, 0)}</strong>
+            <strong>${hideCompleted ? "Hidden" : formatNumber(manifested.length, 0)}</strong>
           </article>
           <article>
             <span>Incubating</span>
@@ -382,18 +464,21 @@ export function renderPlayerPage(state) {
         </div>
       </section>
       ${renderPlayerSessionBanner(state)}
+      ${renderCityTrendPanel(state)}
       ${renderPlayerMayorPriorities(state)}
       ${renderCitizenSummaryToggle(state)}
       ${renderCrystalSelector(state)}
       ${renderManifestPanel(state)}
       ${renderBuildingRarityFilters(state)}
+      ${renderResourceChainPanel(state)}
       ${renderBuildingRolesLegend()}
       <section class="player-lists">
-        ${renderManifestedList("Active Buildings", "Manifested and already part of the Drift.", manifested, "No active buildings yet.", state)}
+        ${hideCompleted ? "" : renderManifestedList("Active Buildings", "Manifested and already part of the Drift.", manifested, "No active buildings yet.", state)}
         ${renderIncubationList("Incubating Buildings", "Buildings currently growing inside an incubator slot.", incubating, "Nothing is incubating right now.", "incubating", state)}
       </section>
       ${renderIncubationList("Available Buildings", "Waiting buildings that can be swapped into an incubator.", available, "No waiting buildings are ready to incubate.", "available", state)}
       ${renderBuildNotesPanel(state)}
+      ${renderGlossaryPanel()}
       ${renderPublishedFooter(state)}
     `
   };

@@ -6,6 +6,7 @@ import { expireEvents, maybeTriggerHolidayEvents, maybeTriggerRandomEvents, proc
 import { addHistoryEntry } from "./HistoryLogSystem.js";
 import { addMonthlyChronicleIfNeeded } from "./MonthlyChronicleSystem.js";
 import { applyDailyResources } from "./ResourceSystem.js";
+import { captureDailyCitySnapshot } from "./CitySnapshotSystem.js";
 import { applyTownFocusDailyEffects, updateTownFocusAvailability } from "./TownFocusSystem.js";
 
 function runTimeAdvance(state, days, stepKey = null) {
@@ -40,6 +41,7 @@ function runTimeAdvance(state, days, stepKey = null) {
     applyTownFocusDailyEffects(state);
     recalculateCityStats(state);
     updateTownFocusAvailability(state);
+    captureDailyCitySnapshot(state);
     triggeredEvents.push(...processScheduledEvents(state));
     triggeredEvents.push(...maybeTriggerHolidayEvents(state));
   }

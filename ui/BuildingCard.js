@@ -1,4 +1,4 @@
-import { getBuildingEmoji } from "../content/BuildingCatalog.js";
+import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js";
 import { RARITY_COLORS } from "../content/Rarities.js";
 import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
@@ -91,6 +91,28 @@ function getCompactStageBadge(building) {
   return label.replace("Level ", "L");
 }
 
+function getInputWarnings(building, state, etaDetails, economySummary) {
+  const warnings = [];
+  if (etaDetails?.isStalled) {
+    warnings.push(`Stalled: ${etaDetails.stallReasons?.join(", ") || "insufficient stock"}`);
+  }
+
+  for (const entry of economySummary.consumes) {
+    if (entry.key === "upkeep") {
+      continue;
+    }
+    const stock = Number(state.resources?.[entry.key] ?? 0);
+    const lowThreshold = Math.max(5, Number(entry.value ?? 0) * 2);
+    if (stock <= 0) {
+      warnings.push(`No ${entry.key} available`);
+    } else if (stock <= lowThreshold) {
+      warnings.push(`Low ${entry.key}`);
+    }
+  }
+
+  return [...new Set(warnings)];
+}
+
 function getBuildingSignature(building) {
   const primaryTag = building.tags?.[0] ?? "";
   const signatures = {
@@ -113,6 +135,7 @@ export function renderBuildingCard(building, state) {
   const buildingEmoji = getBuildingEmoji(building);
   const selected = state.ui.selectedBuildingId === building.id;
   const isRecentlyChanged = Boolean(state.transientUi?.recentBuildingChanges?.[building.id]);
+  const isPinned = Boolean(state.settings?.pinnedBuildingIds?.includes(building.id));
   const isIncomplete = !building.isComplete;
   const isRuined = Boolean(building.isRuined);
   const isActiveConstruction = isIncomplete && isBuildingActivelyConstructed(state, building.id);
@@ -122,6 +145,7 @@ export function renderBuildingCard(building, state) {
   const eta = isActiveConstruction && etaDetails?.readyDayOffset !== null ? formatDate(etaDetails.readyDayOffset) : null;
   const progressPercent = Math.min(100, building.quality);
   const [signatureIcon, signatureLabel] = getBuildingSignature(building);
+  const economySummary = getBuildingEconomySummary(building);
   const topStats = Object.entries(building.stats ?? {})
     .sort((left, right) => Math.abs(right[1]) - Math.abs(left[1]))
     .slice(0, 3);
@@ -129,9 +153,10 @@ export function renderBuildingCard(building, state) {
     .sort((left, right) => Math.abs(right[1]) - Math.abs(left[1]))
     .slice(0, 2);
   const compactStatus = getCompactStatus(building, { isIncomplete, isActiveConstruction, queuePosition, driftSlots, eta });
+  const inputWarnings = getInputWarnings(building, state, etaDetails, economySummary);
 
   return `
-    <article class="building-card building-card--stream ${selected ? "is-selected" : ""} ${isIncomplete ? "is-incomplete" : ""} ${isRuined ? "is-ruined" : ""} ${isRecentlyChanged ? "is-recently-changed" : ""}" style="--rarity-color:${RARITY_COLORS[building.rarity]}">
+    <article class="building-card building-card--stream ${selected ? "is-selected" : ""} ${isIncomplete ? "is-incomplete" : ""} ${isRuined ? "is-ruined" : ""} ${isRecentlyChanged ? "is-recently-changed" : ""} ${isPinned ? "is-pinned" : ""}" style="--rarity-color:${RARITY_COLORS[building.rarity]}">
       <button class="building-card__select" data-action="select-building" data-building-id="${building.id}" title="${escapeHtml(`${buildingEmoji} ${building.displayName}`)}" aria-label="${escapeHtml(`${buildingEmoji} ${building.displayName}`)}">
         <div class="building-card__visual">
           ${renderMedia(building)}
@@ -147,6 +172,7 @@ export function renderBuildingCard(building, state) {
           <div>
             <span>${escapeHtml(signatureLabel)} Profile</span>
             <strong>${escapeHtml(`${buildingEmoji} ${building.displayName}`)}</strong>
+            <small>${escapeHtml(`${economySummary.role.label} / ${economySummary.produces.length ? "Produces" : economySummary.consumes.length ? "Consumes" : "Support"}`)}</small>
           </div>
         </div>
         <div class="building-card__header">
@@ -187,6 +213,13 @@ export function renderBuildingCard(building, state) {
         </div>
         <p class="building-card__effect">${escapeHtml(building.specialEffect)}</p>
         <p class="building-card__flavor">${escapeHtml(building.flavorText ?? "A newly etched structure waits to define its place in Drift.")}</p>
+        ${
+          inputWarnings.length
+            ? `<div class="building-card__warning-strip">${inputWarnings
+                .map((warning) => `<span>${escapeHtml(warning)}</span>`)
+                .join("")}</div>`
+            : ""
+        }
         <div class="building-card__resource-strip">
           ${
             summaryRate.length
@@ -201,10 +234,16 @@ export function renderBuildingCard(building, state) {
                   .join("")
               : `<span class="is-muted">No major daily rates</span>`
           }
+          ${
+            economySummary.consumes.length
+              ? `<span class="is-muted">Consumes ${escapeHtml(economySummary.consumes.map((entry) => entry.key).join(", "))}</span>`
+              : ""
+          }
         </div>
       </button>
       <div class="building-card__actions">
         <button class="button button--ghost" data-action="inspect-building" data-building-id="${building.id}">Open Details</button>
+        <button class="button button--ghost building-card__pin-button ${isPinned ? "is-active" : ""}" data-action="toggle-building-pin" data-building-id="${building.id}">${isPinned ? "Unpin" : "Pin"}</button>
         ${
           state.ui.adminUnlocked
             ? `<button class="button button--ghost button--danger-icon" data-action="remove-building" data-building-id="${building.id}" aria-label="Delete ${escapeHtml(building.displayName)}" title="Delete building">🗑</button>`

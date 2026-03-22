@@ -74,6 +74,7 @@ function renderBuildingsView(state) {
   const currentView = state.transientUi?.cityBuildingView ?? "stream";
   const sortKey = state.transientUi?.buildingSort ?? "newest";
   const statusFilter = state.transientUi?.buildingStatusFilter ?? "All";
+  const quickFilter = state.transientUi?.buildingQuickFilter ?? "All";
   const totalRolls = state.historyLog.filter((entry) => entry.category === "Manifest").length;
   const visibleBuildings = getVisibleBuildings(state);
   const incubating = getActiveConstructionQueue(state);
@@ -115,12 +116,27 @@ function renderBuildingsView(state) {
           <button class="button button--ghost city-filter ${statusFilter === "Unmanifested" ? "is-active" : ""}" data-action="set-building-status-filter" data-filter="Unmanifested">Unmanifested</button>
           <button class="button button--ghost city-filter ${statusFilter === "Available" ? "is-active" : ""}" data-action="set-building-status-filter" data-filter="Available">Available</button>
         </div>
+        <div class="city-workspace__filters city-workspace__filters--quick">
+          <button class="button button--ghost city-filter ${quickFilter === "All" ? "is-active" : ""}" data-action="set-building-quick-filter" data-filter="All">All</button>
+          <button class="button button--ghost city-filter ${quickFilter === "Pinned" ? "is-active" : ""}" data-action="set-building-quick-filter" data-filter="Pinned">Pinned</button>
+          <button class="button button--ghost city-filter ${quickFilter === "Stalled" ? "is-active" : ""}" data-action="set-building-quick-filter" data-filter="Stalled">Stalled</button>
+          <button class="button button--ghost city-filter ${quickFilter === "Consuming Input" ? "is-active" : ""}" data-action="set-building-quick-filter" data-filter="Consuming Input">Needs Input</button>
+          <button class="button button--ghost city-filter ${quickFilter === "Produces Gold" ? "is-active" : ""}" data-action="set-building-quick-filter" data-filter="Produces Gold">Gold</button>
+          <button class="button button--ghost city-filter ${quickFilter === "Produces Food" ? "is-active" : ""}" data-action="set-building-quick-filter" data-filter="Produces Food">Food</button>
+          <button class="button button--ghost city-filter ${quickFilter === "Produces Materials" ? "is-active" : ""}" data-action="set-building-quick-filter" data-filter="Produces Materials">Materials</button>
+        </div>
         <label class="city-workspace__sort">
           <span>Sort</span>
           <select data-action="set-building-sort">
             <option value="newest" ${sortKey === "newest" ? "selected" : ""}>Newest First</option>
             <option value="quality" ${sortKey === "quality" ? "selected" : ""}>Highest Quality</option>
             <option value="rarity" ${sortKey === "rarity" ? "selected" : ""}>Highest Rarity</option>
+            <option value="impact-gold" ${sortKey === "impact-gold" ? "selected" : ""}>Gold Impact</option>
+            <option value="impact-food" ${sortKey === "impact-food" ? "selected" : ""}>Food Impact</option>
+            <option value="impact-materials" ${sortKey === "impact-materials" ? "selected" : ""}>Materials Impact</option>
+            <option value="impact-mana" ${sortKey === "impact-mana" ? "selected" : ""}>Mana Impact</option>
+            <option value="impact-defense" ${sortKey === "impact-defense" ? "selected" : ""}>Defense Impact</option>
+            <option value="impact-security" ${sortKey === "impact-security" ? "selected" : ""}>Security Impact</option>
           </select>
         </label>
       </div>
@@ -131,7 +147,13 @@ function renderBuildingsView(state) {
             <h4>Incubating</h4>
             <span>${formatNumber(incubating.length, 0)} active / ${formatNumber(slots, 0)} slots</span>
           </div>
-          <small>${waiting.length ? `${formatNumber(waiting.length, 0)} additional structures are waiting for a slot.` : "No additional structures are waiting right now."}</small>
+          <div class="city-incubation-strip__head-actions">
+            <small>${waiting.length ? `${formatNumber(waiting.length, 0)} additional structures are waiting for a slot.` : "No additional structures are waiting right now."}</small>
+            <div class="city-incubation-strip__buttons">
+              <button class="button button--ghost" data-action="pause-all-construction">Pause All</button>
+              <button class="button button--ghost" data-action="resume-all-construction">Resume All</button>
+            </div>
+          </div>
         </div>
         ${
           incubating.length

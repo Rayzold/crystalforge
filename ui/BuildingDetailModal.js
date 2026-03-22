@@ -1,4 +1,4 @@
-import { getBuildingEmoji } from "../content/BuildingCatalog.js";
+import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js";
 import { RARITY_COLORS } from "../content/Rarities.js";
 import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
@@ -33,6 +33,27 @@ function renderTagRow(tags) {
   return tags.map((tag) => `<span class="detail-chip">${escapeHtml(tag)}</span>`).join("");
 }
 
+function formatFlowList(entries, emptyLabel) {
+  if (!entries.length) {
+    return `<p class="empty-state">${emptyLabel}</p>`;
+  }
+
+  return `
+    <ul class="building-detail__list">
+      ${entries
+        .map(
+          (entry) => `
+            <li>
+              <span>${escapeHtml(entry.key)}</span>
+              <strong>${formatSigned(entry.value)}</strong>
+            </li>
+          `
+        )
+        .join("")}
+    </ul>
+  `;
+}
+
 function getSignatureReadout(building) {
   return [
     ...Object.entries(building.stats).map(([label, value]) => ({ label, value })),
@@ -63,6 +84,7 @@ export function renderBuildingDetailModal(state, pageKey) {
   const eta = isActiveConstruction && etaDetails?.readyDayOffset !== null ? formatDate(etaDetails.readyDayOffset) : null;
   const placementBonus = getBuildingPlacementBonuses(state, building);
   const signatureReadout = getSignatureReadout(building);
+  const economySummary = getBuildingEconomySummary(building);
   const buildingEmoji = getBuildingEmoji(building);
   const artMarkup = building.imagePath
     ? `<img src="${escapeHtml(building.imagePath)}" alt="${escapeHtml(building.displayName)} artwork" loading="lazy" />`
@@ -115,7 +137,8 @@ export function renderBuildingDetailModal(state, pageKey) {
 
       <div class="building-detail__grid">
         <section class="building-detail__panel">
-          <h4>Role Sigils</h4>
+          <h4>Building Role</h4>
+          <p class="building-detail__role-line">${escapeHtml(`${economySummary.role.emoji} ${economySummary.role.label} - ${economySummary.role.detail}`)}</p>
           <div class="building-detail__chips">${renderTagRow(building.tags)}</div>
         </section>
 
@@ -153,6 +176,19 @@ export function renderBuildingDetailModal(state, pageKey) {
                 : "No active drain"
             }</strong></li>
           </ul>
+          ${
+            isIncomplete
+              ? `<p class="building-detail__status-note">${escapeHtml(
+                  etaDetails?.isStalled
+                    ? `Why stalled: ${etaDetails?.stallReasons?.join(", ") || "insufficient stock to support incubation."}`
+                    : etaDetails?.supportReserved
+                      ? "Support bpd is partially throttled because reserve thresholds are being protected."
+                      : "Incubation is healthy and receiving its current daily support."
+                )}</p>`
+              : economySummary.supportBpd
+                ? `<p class="building-detail__status-note">This completed building contributes ${formatNumber(economySummary.supportBpd * (building.multiplier || 1), 0)} support bpd to all incubators at its current stage.</p>`
+                : ""
+          }
         </section>
 
         <section class="building-detail__panel">
@@ -163,6 +199,25 @@ export function renderBuildingDetailModal(state, pageKey) {
         <section class="building-detail__panel">
           <h4>Resource Rhythm</h4>
           <ul class="building-detail__list">${renderList(building.resourceRates, isIncomplete)}</ul>
+        </section>
+
+        <section class="building-detail__panel">
+          <h4>Consumes / Produces</h4>
+          <div class="building-detail__flow-grid">
+            <div>
+              <h5>Produces</h5>
+              ${formatFlowList(economySummary.produces, "No direct resource production.")}
+            </div>
+            <div>
+              <h5>Consumes</h5>
+              ${formatFlowList(economySummary.consumes, "No direct operating cost beyond passive presence.")}
+            </div>
+          </div>
+          ${
+            economySummary.supportBpd
+              ? `<p class="building-detail__status-note">Construction support: ${formatNumber(economySummary.supportBpd, 0)} base bpd before stage scaling.</p>`
+              : ""
+          }
         </section>
 
         <section class="building-detail__panel">
