@@ -7,7 +7,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.2.63";
+export const APP_VERSION = "v1.2.64";
 export const SAVE_VERSION = 11;
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3";
 export const FIREBASE_CONFIG = {
@@ -34,6 +34,7 @@ export const PAGE_ROUTES = [
   { key: "chronicle", label: "Chronicle", href: "./chronicle.html" }
 ];
 export const BUILD_NOTES = [
+  "Town Map now supports a fuller planning flow: empty hexes open a placement drawer with filters, hovered hexes show resonance scoring, valid-placement mode can highlight legal targets, undo placement is available, the bastion ring reads more architecturally, and map hexes now carry mini state badges like 2x, !, and +.",
   "Town Map placement is now hex-first: clicking an empty hex opens a placement window with the buildings that can legally go there, while placed structures use real icons or art on the map instead of two-letter initials.",
   "The Town Map has been polished again: the command readout is clearer, the forge core and inner city plots read more cleanly, and the outer bastion ring now feels more like a dedicated defensive perimeter instead of just extra hexes.",
   "The Town Map now has a larger city ring layout with a dedicated outer bastion band for walls and defensive structures only, plus a cleaner visual split between forge core, civic plots, and perimeter defenses.",

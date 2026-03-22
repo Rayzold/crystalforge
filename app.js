@@ -684,7 +684,9 @@ function resetTransientUi() {
       inspectedBuildingId: null,
       catalogOpen: false,
       manifestCompleteModal: null,
-      turnSummaryModal: null
+      turnSummaryModal: null,
+      validPlacementMode: false,
+      lastPlacement: null
     },
     getCurrentState()
   );
@@ -720,6 +722,10 @@ function showFocusCeremony(focusId) {
   focusCeremonyTimer = window.setTimeout(() => {
     renderer.setTransientUi({ focusCeremony: null }, getCurrentState());
   }, 1800);
+}
+
+function recordLastPlacement(payload) {
+  renderer.setTransientUi({ lastPlacement: payload }, getCurrentState());
 }
 
 function setSelectedBuildingAndCell(state, buildingId) {
@@ -1149,11 +1155,13 @@ async function publishManifestIfEnabled() {
 function moveBuildingOnMap({ buildingId, q, r, source = "Player" }) {
   const result = commit((draft) => {
     const building = draft.buildings.find((entry) => entry.id === buildingId);
+    const previousPosition = building?.mapPosition ? { ...building.mapPosition } : null;
     const beforeBonus = building ? getBuildingPlacementBonuses(draft, building).totalPercent : 0;
     const placementResult = setBuildingPlacement(draft, buildingId, Number(q), Number(r), source);
     if (placementResult.ok) {
       draft.ui.selectedBuildingId = buildingId;
       draft.ui.selectedMapCell = { q: Number(q), r: Number(r) };
+      placementResult.previousPosition = previousPosition;
       placementResult.resonanceGain =
         getBuildingPlacementBonuses(draft, placementResult.building).totalPercent - beforeBonus;
     }
@@ -1166,6 +1174,11 @@ function moveBuildingOnMap({ buildingId, q, r, source = "Player" }) {
   }
 
   reportSuccess(`${result.building.displayName} placed at hex ${q}, ${r}.`);
+  recordLastPlacement({
+    buildingId: result.building.id,
+    from: result.previousPosition ?? null,
+    to: { q: Number(q), r: Number(r) }
+  });
   if ((result.resonanceGain ?? 0) > 0) {
     showAdjacencyPulse({
       buildingId: result.building.id,
@@ -1181,11 +1194,13 @@ function moveBuildingOnMap({ buildingId, q, r, source = "Player" }) {
 function forceMoveBuildingOnMap({ buildingId, q, r, source = "Admin" }) {
   const result = commit((draft) => {
     const building = draft.buildings.find((entry) => entry.id === buildingId);
+    const previousPosition = building?.mapPosition ? { ...building.mapPosition } : null;
     const beforeBonus = building ? getBuildingPlacementBonuses(draft, building).totalPercent : 0;
     const placementResult = forceSetBuildingPlacement(draft, buildingId, Number(q), Number(r), source);
     if (placementResult.ok) {
       draft.ui.selectedBuildingId = buildingId;
       draft.ui.selectedMapCell = { q: Number(q), r: Number(r) };
+      placementResult.previousPosition = previousPosition;
       placementResult.resonanceGain =
         getBuildingPlacementBonuses(draft, placementResult.building).totalPercent - beforeBonus;
     }
@@ -1201,6 +1216,11 @@ function forceMoveBuildingOnMap({ buildingId, q, r, source = "Admin" }) {
     reportSuccess(
       `${result.building.displayName} force-placed at ${q}, ${r}. ${result.displacedBuilding.displayName} was cleared.`
     );
+    recordLastPlacement({
+      buildingId: result.building.id,
+      from: result.previousPosition ?? null,
+      to: { q: Number(q), r: Number(r) }
+    });
     if ((result.resonanceGain ?? 0) > 0) {
       showAdjacencyPulse({
         buildingId: result.building.id,
@@ -1214,6 +1234,11 @@ function forceMoveBuildingOnMap({ buildingId, q, r, source = "Admin" }) {
   }
 
   reportSuccess(`${result.building.displayName} force-placed at hex ${q}, ${r}.`);
+  recordLastPlacement({
+    buildingId: result.building.id,
+    from: result.previousPosition ?? null,
+    to: { q: Number(q), r: Number(r) }
+  });
   if ((result.resonanceGain ?? 0) > 0) {
     showAdjacencyPulse({
       buildingId: result.building.id,
@@ -1242,6 +1267,60 @@ function clearPlacement(buildingId, source = "Player") {
 
   reportSuccess(`${result.building.displayName} cleared from the map.`);
   return result;
+}
+
+function undoLastPlacement() {
+  const lastPlacement = renderer.transientUi.lastPlacement;
+  if (!lastPlacement?.buildingId) {
+    reportError("No recent placement is available to undo.");
+    return;
+  }
+
+  const state = getCurrentState();
+  const building = state.buildings.find((entry) => entry.id === lastPlacement.buildingId);
+  if (!building) {
+    renderer.setTransientUi({ lastPlacement: null }, state);
+    reportError("That building no longer exists.");
+    return;
+  }
+
+  if (lastPlacement.from) {
+    const occupant = getBuildingAtCell(state, lastPlacement.from.q, lastPlacement.from.r);
+    if (occupant && occupant.id !== building.id) {
+      reportError("Cannot undo that move because the previous hex is now occupied.");
+      return;
+    }
+
+    const result = commit((draft) => {
+      const placementResult = setBuildingPlacement(
+        draft,
+        building.id,
+        Number(lastPlacement.from.q),
+        Number(lastPlacement.from.r),
+        "Undo"
+      );
+      if (placementResult.ok) {
+        draft.ui.selectedBuildingId = building.id;
+        draft.ui.selectedMapCell = { q: Number(lastPlacement.from.q), r: Number(lastPlacement.from.r) };
+      }
+      return placementResult;
+    });
+
+    if (!result.ok) {
+      reportError(result.reason);
+      return;
+    }
+
+    renderer.setTransientUi({ lastPlacement: null }, getCurrentState());
+    reportSuccess(`${result.building.displayName} returned to hex ${lastPlacement.from.q}, ${lastPlacement.from.r}.`);
+    return;
+  }
+
+  const result = clearPlacement(building.id, "Undo");
+  if (!result?.ok) {
+    return;
+  }
+  renderer.setTransientUi({ lastPlacement: null }, getCurrentState());
 }
 
 function reprioritizeConstruction(buildingId, direction) {
@@ -1878,6 +1957,14 @@ root.addEventListener("click", async (event) => {
       void audioEngine.playUiAccent("soft");
       renderer.setTransientUi({ cityBuildingView: target.dataset.view }, getCurrentState());
       break;
+    case "set-map-placement-filter":
+      void audioEngine.playUiAccent("soft");
+      renderer.setTransientUi({ mapPlacementFilter: target.dataset.filter ?? "All" }, getCurrentState());
+      break;
+    case "toggle-valid-placement-mode":
+      void audioEngine.playUiAccent("soft");
+      renderer.setTransientUi({ validPlacementMode: !renderer.transientUi.validPlacementMode }, getCurrentState());
+      break;
     case "set-city-admin-view":
       void audioEngine.playUiAccent("soft");
       renderer.setTransientUi({ cityAdminView: target.dataset.view }, getCurrentState());
@@ -2059,6 +2146,11 @@ root.addEventListener("click", async (event) => {
       });
       break;
     }
+    case "clear-map-cell-selection":
+      commit((draft) => {
+        draft.ui.selectedMapCell = null;
+      });
+      break;
     case "place-building-on-cell": {
       const buildingId = target.dataset.buildingId;
       const q = Number(target.dataset.q);
@@ -2070,6 +2162,9 @@ root.addEventListener("click", async (event) => {
       moveBuildingOnMap({ buildingId, q, r, source: "Player" });
       break;
     }
+    case "undo-last-placement":
+      undoLastPlacement();
+      break;
     case "dismiss-onboarding":
       actions.dismissOnboarding();
       break;

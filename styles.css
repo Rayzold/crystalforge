@@ -6780,7 +6780,37 @@ body:-webkit-full-screen #app {
 }
 
 .hex-map-panel__picker {
-  margin-top: 14px;
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  width: min(360px, calc(100% - 28px));
+  max-height: calc(100% - 28px);
+  overflow: hidden;
+  border-color: rgba(170, 202, 255, 0.14);
+  background: linear-gradient(180deg, rgba(8, 13, 22, 0.97), rgba(13, 19, 31, 0.94));
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.34),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+}
+
+.hex-map-panel__picker-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hex-map-panel__picker-close {
+  flex: 0 0 auto;
+}
+
+.hex-map-panel__picker-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
 }
 
 .hex-map-panel__picker-list {
@@ -6788,6 +6818,7 @@ body:-webkit-full-screen #app {
   gap: 10px;
   max-height: 360px;
   overflow: auto;
+  padding-right: 2px;
 }
 
 .hex-map-panel__picker-item {
@@ -6918,9 +6949,43 @@ body:-webkit-full-screen #app {
   animation: bastionFieldPulse 4.6s ease-in-out infinite;
 }
 
+.hex-map__bastion-link {
+  pointer-events: none;
+  stroke-linecap: round;
+}
+
+.hex-map__bastion-link--glow {
+  stroke: rgba(170, 202, 255, 0.14);
+  stroke-width: 10;
+}
+
+.hex-map__bastion-link--main {
+  stroke: rgba(222, 236, 255, 0.36);
+  stroke-width: 4;
+  stroke-dasharray: 10 6;
+}
+
 .hex-map__district-field {
   pointer-events: none;
   animation: districtFieldDrift 6.8s ease-in-out infinite;
+}
+
+.hex-map__hover-readout {
+  pointer-events: none;
+}
+
+.hex-map__hover-readout rect {
+  fill: rgba(5, 10, 18, 0.9);
+  stroke: rgba(170, 202, 255, 0.24);
+  stroke-width: 1.2;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.28));
+}
+
+.hex-map__hover-readout text {
+  fill: rgba(241, 247, 255, 0.92);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .hex-map__water {
@@ -7050,6 +7115,16 @@ body:-webkit-full-screen #app {
   filter: drop-shadow(0 0 8px rgba(141, 214, 255, 0.42));
 }
 
+.hex-map.is-placement-mode .hex-map__cell.is-placement-dim {
+  opacity: 0.36;
+}
+
+.hex-map.is-placement-mode .hex-map__cell.is-placement-valid .hex-map__cell-face {
+  stroke: rgba(154, 244, 207, 0.92);
+  stroke-width: 2.2;
+  filter: drop-shadow(0 0 12px rgba(125, 230, 192, 0.26));
+}
+
 .hex-map__cell-face {
   transition: filter 180ms ease, stroke 180ms ease, opacity 180ms ease;
 }
@@ -7125,6 +7200,36 @@ body:-webkit-full-screen #app {
   font-size: 0.42rem;
   font-weight: 700;
   letter-spacing: 0.04em;
+}
+
+.hex-map__building-badge {
+  pointer-events: none;
+}
+
+.hex-map__building-badge rect {
+  stroke-width: 1;
+}
+
+.hex-map__building-badge text {
+  fill: #061019;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.hex-map__building-badge.is-stage rect {
+  fill: rgba(167, 227, 255, 0.96);
+  stroke: rgba(228, 243, 255, 0.82);
+}
+
+.hex-map__building-badge.is-warning rect {
+  fill: rgba(255, 160, 124, 0.96);
+  stroke: rgba(255, 224, 206, 0.82);
+}
+
+.hex-map__building-badge.is-recent rect {
+  fill: rgba(125, 230, 192, 0.96);
+  stroke: rgba(218, 255, 241, 0.82);
 }
 
 .hex-map__label,
@@ -7956,6 +8061,13 @@ body:-webkit-full-screen #app {
 
   .hex-map-panel__picker-actions {
     justify-content: flex-start;
+  }
+
+  .hex-map-panel__picker {
+    position: static;
+    width: 100%;
+    max-height: none;
+    margin-top: 12px;
   }
 
   .hex-map {

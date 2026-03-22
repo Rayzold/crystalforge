@@ -1,7 +1,9 @@
-import { getBuildingEmoji } from "../content/BuildingCatalog.js";
+import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js";
 import { MAP_CONFIG, MAP_TERRAIN_THEMES } from "../content/MapConfig.js";
 import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
+import { getConstructionEtaDetails } from "../systems/ConstructionSystem.js";
+import { getBuildingMultiplier } from "../systems/BuildingSystem.js";
 import {
   canPlaceBuildingAt,
   getBuildingAtCell,
@@ -215,6 +217,37 @@ function renderZoneField(cells, size, className, predicate, scale = 1.02) {
     .map((cell) => {
       const center = axialToPixel(cell.q, cell.r, size);
       return `<polygon class="${className}" points="${hexPoints(center.x, center.y, size * scale)}"></polygon>`;
+    })
+    .join("");
+}
+
+function renderBastionLinks(cells, size) {
+  const bastionCells = new Map(
+    cells
+      .filter((cell) => cell.isFortificationRing)
+      .map((cell) => [getCellKey(cell.q, cell.r), cell])
+  );
+  const renderedPairs = new Set();
+
+  return [...bastionCells.values()]
+    .flatMap((cell) => {
+      const from = axialToPixel(cell.q, cell.r, size);
+      return HEX_NEIGHBORS.map(([dq, dr]) => {
+        const neighbor = bastionCells.get(getCellKey(cell.q + dq, cell.r + dr));
+        if (!neighbor) {
+          return "";
+        }
+        const pairKey = [cell.key, neighbor.key].sort().join(":");
+        if (renderedPairs.has(pairKey)) {
+          return "";
+        }
+        renderedPairs.add(pairKey);
+        const to = axialToPixel(neighbor.q, neighbor.r, size);
+        return `
+          <line class="hex-map__bastion-link hex-map__bastion-link--glow" x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}"></line>
+          <line class="hex-map__bastion-link hex-map__bastion-link--main" x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}"></line>
+        `;
+      });
     })
     .join("");
 }
@@ -437,6 +470,11 @@ function renderCellInspector(state, cell, selectedBuilding) {
   `;
 }
 
+function formatTerrainLabel(terrain) {
+  const value = String(terrain ?? "neutral");
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
 function getPlacementCandidates(state, cell) {
   if (!cell || cell.isReserved || getBuildingAtCell(state, cell.q, cell.r)) {
     return [];
@@ -451,11 +489,153 @@ function getPlacementCandidates(state, cell) {
       if (leftSelected !== rightSelected) {
         return leftSelected - rightSelected;
       }
+      const leftPinned = state.settings?.pinnedBuildingIds?.includes(left.id) ? -1 : 0;
+      const rightPinned = state.settings?.pinnedBuildingIds?.includes(right.id) ? -1 : 0;
+      if (leftPinned !== rightPinned) {
+        return leftPinned - rightPinned;
+      }
       if (left.rarity !== right.rarity) {
         return RARITY_ORDER.indexOf(left.rarity) - RARITY_ORDER.indexOf(right.rarity);
       }
       return left.displayName.localeCompare(right.displayName);
     });
+}
+
+function filterPlacementCandidates(candidates, state, filterKey) {
+  switch (filterKey) {
+    case "Defense":
+      return candidates.filter((building) => isFortificationBuilding(building));
+    case "Trade":
+      return candidates.filter((building) => (building.tags ?? []).includes("trade"));
+    case "Housing":
+      return candidates.filter((building) => (building.tags ?? []).includes("housing"));
+    case "Pinned":
+      return candidates.filter((building) => state.settings?.pinnedBuildingIds?.includes(building.id));
+    case "All":
+    default:
+      return candidates;
+  }
+}
+
+function getMapBuildingWarnings(building, state) {
+  const warnings = [];
+  if (!building) {
+    return warnings;
+  }
+
+  if (!building.isComplete) {
+    const etaDetails = getConstructionEtaDetails(building, state);
+    if (etaDetails?.isStalled) {
+      warnings.push("stalled");
+    }
+  }
+
+  const economySummary = getBuildingEconomySummary(building);
+  for (const entry of economySummary.consumes) {
+    if (entry.key === "upkeep") {
+      continue;
+    }
+    const stock = Number(state.resources?.[entry.key] ?? 0);
+    const lowThreshold = Math.max(5, Number(entry.value ?? 0) * 2);
+    if (stock <= 0 || stock <= lowThreshold) {
+      warnings.push(entry.key);
+      break;
+    }
+  }
+
+  return warnings;
+}
+
+function renderBuildingMapBadges(building, state, cx, cy, size) {
+  if (!building) {
+    return "";
+  }
+
+  const badges = [];
+  const multiplier = getBuildingMultiplier(building.quality);
+  if (multiplier > 1) {
+    badges.push({ label: `${multiplier}x`, className: "is-stage" });
+  }
+  if (getMapBuildingWarnings(building, state).length) {
+    badges.push({ label: "!", className: "is-warning" });
+  }
+  if (state.transientUi?.recentBuildingChanges?.[building.id]) {
+    badges.push({ label: "+", className: "is-recent" });
+  }
+
+  if (!badges.length) {
+    return "";
+  }
+
+  return badges
+    .slice(0, 3)
+    .map((badge, index) => {
+      const width = Math.max(18, 10 + badge.label.length * 7);
+      const x = cx - size * 0.68;
+      const y = cy - size * 0.78 + index * 15;
+      return `
+        <g class="hex-map__building-badge ${badge.className}">
+          <rect x="${x}" y="${y}" width="${width}" height="13" rx="6.5"></rect>
+          <text x="${x + width / 2}" y="${y + 9}" text-anchor="middle">${escapeHtml(badge.label)}</text>
+        </g>
+      `;
+    })
+    .join("");
+}
+
+function renderHoverReadout(state, cell, selectedBuilding, size) {
+  if (!cell) {
+    return "";
+  }
+
+  const occupant = getBuildingAtCell(state, cell.q, cell.r);
+  if (occupant) {
+    return "";
+  }
+
+  const center = axialToPixel(cell.q, cell.r, size);
+  const candidates = getPlacementCandidates(state, cell);
+  const zoneLabel = cell.isReserved ? "Core" : cell.isFortificationRing ? "Bastion" : "City";
+  const terrainLabel = formatTerrainLabel(cell.terrain);
+  const lines = [`${zoneLabel} / ${terrainLabel}`];
+
+  if (selectedBuilding) {
+    const validation = canPlaceBuildingAt(state, selectedBuilding.id, cell.q, cell.r);
+    if (validation.ok) {
+      const previewTarget = { ...selectedBuilding, mapPosition: { q: cell.q, r: cell.r } };
+      const bonus = getBuildingPlacementBonuses(state, previewTarget);
+      lines.push(`+${formatNumber(bonus.totalPercent * 100, 1)}% resonance`);
+      if (bonus.sameDistrictNeighbors || bonus.relatedTagNeighbors) {
+        lines.push(`${bonus.sameDistrictNeighbors} district / ${bonus.relatedTagNeighbors} linked`);
+      } else if (bonus.terrainPercent > 0) {
+        lines.push("Terrain affinity only");
+      } else {
+        lines.push("No nearby resonance");
+      }
+    } else {
+      lines.push(cell.isFortificationRing ? "Defense only" : "Placement blocked");
+    }
+  } else {
+    lines.push(`${candidates.length} option${candidates.length === 1 ? "" : "s"} ready`);
+  }
+
+  const width = Math.max(122, ...lines.map((line) => 34 + line.length * 5.4));
+  const height = 18 + lines.length * 13;
+  const x = center.x - width / 2;
+  const y = center.y - size * 1.82 - height / 2;
+
+  return `
+    <g class="hex-map__hover-readout" aria-hidden="true">
+      <rect x="${x}" y="${y}" width="${width}" height="${height}" rx="10"></rect>
+      ${lines
+        .map(
+          (line, index) => `
+            <text x="${center.x}" y="${y + 16 + index * 13}" text-anchor="middle">${escapeHtml(line)}</text>
+          `
+        )
+        .join("")}
+    </g>
+  `;
 }
 
 function renderPlacementPicker(state, cell) {
@@ -468,17 +648,36 @@ function renderPlacementPicker(state, cell) {
     return "";
   }
 
-  const candidates = getPlacementCandidates(state, cell);
+  const filterKey = state.transientUi?.mapPlacementFilter ?? "All";
+  const candidates = filterPlacementCandidates(getPlacementCandidates(state, cell), state, filterKey);
   const zoneLabel = cell.isFortificationRing ? "Bastion Ring" : "City Plot";
   const zoneDetail = cell.isFortificationRing
     ? "Only walls, towers, and defensive structures can be placed here."
     : "Any unplaced city structure that passes placement rules can be assigned here.";
 
   return `
-    <section class="panel hex-map-panel__picker">
-      <div class="panel__header">
-        <h4>Place On ${escapeHtml(zoneLabel)}</h4>
-        <span class="panel__subtle">Hex ${cell.q}, ${cell.r}. ${escapeHtml(zoneDetail)}</span>
+    <section class="panel hex-map-panel__picker" role="dialog" aria-label="Map placement drawer">
+      <div class="panel__header hex-map-panel__picker-head">
+        <div>
+          <h4>Place On ${escapeHtml(zoneLabel)}</h4>
+          <span class="panel__subtle">Hex ${cell.q}, ${cell.r}. ${escapeHtml(zoneDetail)}</span>
+        </div>
+        <button class="button button--ghost hex-map-panel__picker-close" data-action="clear-map-cell-selection" aria-label="Close placement drawer">Close</button>
+      </div>
+      <div class="hex-map-panel__picker-filters">
+        ${["All", "Defense", "Trade", "Housing", "Pinned"]
+          .map(
+            (filter) => `
+              <button
+                class="button button--ghost city-filter ${filterKey === filter ? "is-active" : ""}"
+                data-action="set-map-placement-filter"
+                data-filter="${filter}"
+              >
+                ${escapeHtml(filter)}
+              </button>
+            `
+          )
+          .join("")}
       </div>
       ${
         candidates.length
@@ -561,6 +760,7 @@ export function renderHexMap(state) {
   );
   const previewValidation =
     hoveredMapCell && selectedBuilding ? canPlaceBuildingAt(state, selectedBuilding.id, hoveredMapCell.q, hoveredMapCell.r) : null;
+  const placementModeActive = Boolean(selectedBuilding && state.transientUi?.validPlacementMode);
   const previewMessage = hoveredMapCell
     ? previewValidation?.ok
       ? `Previewing ${selectedBuilding?.displayName ?? "placement"} at hex ${hoveredMapCell.q}, ${hoveredMapCell.r}`
@@ -620,7 +820,7 @@ export function renderHexMap(state) {
       </div>
       <div class="hex-map-wrap">
         <svg
-          class="hex-map"
+          class="hex-map ${placementModeActive ? "is-placement-mode" : ""}"
           viewBox="${bounds.minX} ${bounds.minY} ${bounds.width} ${bounds.height}"
           role="img"
           aria-label="City hex map"
@@ -628,6 +828,9 @@ export function renderHexMap(state) {
           <g class="hex-map__zone-fields">
             ${renderZoneField(cells, size, "hex-map__zone-field hex-map__zone-field--city", (cell) => !cell.isReserved && !cell.isFortificationRing)}
             ${renderZoneField(cells, size, "hex-map__zone-field hex-map__zone-field--bastion", (cell) => cell.isFortificationRing, 1.06)}
+          </g>
+          <g class="hex-map__bastion-links">
+            ${renderBastionLinks(cells, size)}
           </g>
           <g class="hex-map__district-fields">
             ${renderDistrictInfluenceField(state, cells, size)}
@@ -663,10 +866,16 @@ export function renderHexMap(state) {
                 adjacencyPulse.q === cell.q &&
                 adjacencyPulse.r === cell.r &&
                 adjacencyPulse.buildingId === building?.id;
+              const placementState =
+                placementModeActive && !cell.isReserved
+                  ? canPlaceBuildingAt(state, selectedBuilding.id, cell.q, cell.r).ok
+                    ? "is-placement-valid"
+                    : "is-placement-dim"
+                  : "";
 
               return `
                 <g
-                  class="hex-map__cell ${cell.isReserved ? "is-reserved" : ""} ${cell.isFortificationRing ? "is-fortification-ring" : "is-city-plot"} ${building ? "is-occupied" : ""} ${isSelected ? "is-selected" : ""} ${isFocusedCell ? "is-focused" : ""} ${hoveredMapCell && hoveredMapCell.q === cell.q && hoveredMapCell.r === cell.r ? "is-hovered" : ""} ${adjacentKeys.has(cell.key) ? "is-adjacent" : ""} ${isPulseCell ? "is-resonance-pulse" : ""} ${selectedBuilding && hoveredMapCell && hoveredMapCell.q === cell.q && hoveredMapCell.r === cell.r && !building && !cell.isReserved ? (previewValidation?.ok ? "is-preview-valid" : "is-preview-invalid") : ""}"
+                  class="hex-map__cell ${cell.isReserved ? "is-reserved" : ""} ${cell.isFortificationRing ? "is-fortification-ring" : "is-city-plot"} ${building ? "is-occupied" : ""} ${isSelected ? "is-selected" : ""} ${isFocusedCell ? "is-focused" : ""} ${hoveredMapCell && hoveredMapCell.q === cell.q && hoveredMapCell.r === cell.r ? "is-hovered" : ""} ${adjacentKeys.has(cell.key) ? "is-adjacent" : ""} ${isPulseCell ? "is-resonance-pulse" : ""} ${selectedBuilding && hoveredMapCell && hoveredMapCell.q === cell.q && hoveredMapCell.r === cell.r && !building && !cell.isReserved ? (previewValidation?.ok ? "is-preview-valid" : "is-preview-invalid") : ""} ${placementState}"
                   data-action="select-map-cell"
                   data-q="${cell.q}"
                   data-r="${cell.r}"
@@ -716,6 +925,7 @@ export function renderHexMap(state) {
                       `
                       : renderTerrainGlyph(cell, center.x, center.y)
                   }
+                  ${renderBuildingMapBadges(building, state, center.x, center.y, size)}
                   ${
                     cell.isReserved
                       ? `<text x="${center.x}" y="${center.y + 5}" text-anchor="middle" class="hex-map__core-text">${cell.q === 0 && cell.r === 0 ? "FORGE" : ""}</text>`
@@ -733,7 +943,9 @@ export function renderHexMap(state) {
               `;
             })
             .join("")}
+          ${renderHoverReadout(state, hoveredMapCell, selectedBuilding, size)}
         </svg>
+        ${renderPlacementPicker(state, selectedMapCell)}
       </div>
       <div class="hex-map-panel__legend">
         <span><i class="legend-swatch legend-swatch--core"></i> Reserved forge core</span>
@@ -746,9 +958,14 @@ export function renderHexMap(state) {
       <div class="hex-map-panel__tooltip">
         ${renderCellInspector(state, focalMapCell, selectedBuilding)}
       </div>
-      ${renderPlacementPicker(state, selectedMapCell)}
       <div class="hex-map-panel__actions">
         <button class="button button--ghost" data-action="clear-building-placement">Clear Selected Placement</button>
+        <button class="button button--ghost" data-action="undo-last-placement">Undo Last Placement</button>
+        ${
+          selectedBuilding
+            ? `<button class="button button--ghost" data-action="toggle-valid-placement-mode">${placementModeActive ? "Show Full Map" : "Show Valid Hexes"}</button>`
+            : ""
+        }
       </div>
     </section>
   `;
