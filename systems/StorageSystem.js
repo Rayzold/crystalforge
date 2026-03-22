@@ -23,12 +23,22 @@ import { normalizeConstructionPriority } from "./ConstructionSystem.js";
 import { createDefaultTownFocusState, normalizeTownFocusState } from "./TownFocusSystem.js";
 import { captureDailyCitySnapshot } from "./CitySnapshotSystem.js";
 
+const SESSION_STATE_KEY = "crystal-forge-session-state-v1";
+
 function getStartPreset(preset = DEFAULT_START_PRESET) {
   return structuredClone(START_STATE_PRESETS[preset] ?? DEFAULT_START_STATE);
 }
 
 function getManualSaveRawText() {
   return localStorage.getItem(MANUAL_SAVE_KEY);
+}
+
+function getSessionSaveRawText() {
+  try {
+    return sessionStorage.getItem(SESSION_STATE_KEY);
+  } catch (error) {
+    return null;
+  }
 }
 
 export function createInitialState(preset = DEFAULT_START_PRESET) {
@@ -314,7 +324,12 @@ export function validateAndMigrateSave(rawSave) {
 }
 
 export function loadGameState() {
-  return createInitialState();
+  const rawText = getSessionSaveRawText();
+  const parsed = safeJsonParse(rawText);
+  if (!parsed) {
+    return createInitialState();
+  }
+  return validateAndMigrateSave(parsed);
 }
 
 export function createSerializableState(state, extraFields = {}) {
@@ -329,7 +344,23 @@ export function createSerializableState(state, extraFields = {}) {
 }
 
 export function saveGameState(state) {
+  try {
+    const serializable = createSerializableState(state, {
+      sessionSavedAt: Date.now()
+    });
+    sessionStorage.setItem(SESSION_STATE_KEY, JSON.stringify(serializable));
+  } catch (error) {
+    // Ignore session storage failures and keep the in-memory game running.
+  }
   return state;
+}
+
+export function clearSessionState() {
+  try {
+    sessionStorage.removeItem(SESSION_STATE_KEY);
+  } catch (error) {
+    // Ignore session storage failures.
+  }
 }
 
 export function saveManualState(state) {

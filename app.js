@@ -55,17 +55,18 @@ import {
 } from "./systems/MapSystem.js";
 import { addShards, setShards } from "./systems/ShardSystem.js";
 import {
-  createInitialState,
   createLiveSessionResetState,
   createSessionSnapshot as createSessionSnapshotRecord,
   createTestingBalanceResetState,
   createSingleCommonCrystalResetState,
   exportSave,
   importSave,
+  loadGameState,
   loadManualState,
   resetSave,
   restoreSessionSnapshot,
   createSerializableState,
+  saveGameState,
   saveManualState,
   validateAndMigrateSave
 } from "./systems/StorageSystem.js";
@@ -83,7 +84,7 @@ const toasts = new Toasts();
 const animationEngine = new AnimationEngine();
 const audioEngine = new AudioEngine();
 audioEngine.setPage(pageKey);
-const gameState = new GameState(createInitialState());
+const gameState = new GameState(loadGameState());
 const firebaseClientId = (() => {
   try {
     const key = "crystal-forge-firebase-client-id";
@@ -773,28 +774,11 @@ async function handleManifest() {
           buildingId: result.building.id,
           qualityRoll: result.qualityRoll,
           durationMs: 900,
-          revealPercent: false
+          revealPercent: true
         }
       },
       getCurrentState()
     );
-    manifestCompleteTimer = window.setTimeout(() => {
-      renderer.setTransientUi(
-        {
-          manifestInProgress: false,
-          manifestCompleteModal: {
-            rolledName: result.rolledName,
-            rarity: result.rarity,
-            buildingId: result.building.id,
-            qualityRoll: result.qualityRoll,
-            durationMs: 900,
-            revealPercent: true
-          }
-        },
-        getCurrentState()
-      );
-      manifestCompleteTimer = null;
-    }, 900);
     markRecentBuildingChanges([result.building.id]);
     reportSuccess(`${result.rolledName} manifested.`);
   } finally {
@@ -1720,11 +1704,16 @@ const actions = {
 const adminConsole = new AdminConsole(actions);
 
 gameState.subscribe((state) => {
+  saveGameState(state);
   audioEngine.setMuted(state.settings.muted);
   audioEngine.setPage(pageKey);
   document.body.dataset.theme = state.settings.theme ?? "dark";
   renderer.render(state);
   adminConsole.render(state);
+});
+
+window.addEventListener("pagehide", () => {
+  saveGameState(getCurrentState());
 });
 
 document.addEventListener(
