@@ -190,6 +190,19 @@ const DISTRICT_FLAVOR_FRAGMENTS = {
   "Frontier District": "It feels like a structure built at the edge of certainty and pushed beyond it."
 };
 
+export const BUILDING_CONSTRUCTION_SUPPORT_BPD = {
+  "Carpenter Shop": 2,
+  "Tool Shed": 3,
+  Clocktower: 1,
+  "Mason's Workshop": 2,
+  Ropeworks: 1,
+  "Weaver's Hall": 1,
+  "Steam Factory": 5,
+  Dragonforge: 8,
+  Techcrafter: 12,
+  "The Maker's Creatorium": 30
+};
+
 const BUILDING_EMOJI_BY_ICON_KEY = {
   leaf: "🌿",
   coins: "💰",
@@ -327,6 +340,11 @@ export function getBuildingEmoji(building) {
   if (primaryTag === "culture") return "📜";
   if (primaryTag === "frontier") return "🧭";
   return "🏗️";
+}
+
+export function getBuildingConstructionSupportBpd(building) {
+  const buildingName = building?.displayName ?? building?.name ?? "";
+  return BUILDING_CONSTRUCTION_SUPPORT_BPD[buildingName] ?? 0;
 }
 
 export const BASE_BUILDING_CATALOG = createBaseBuildingCatalog();

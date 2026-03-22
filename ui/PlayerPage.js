@@ -14,13 +14,13 @@ import { renderManifestPanel } from "./ManifestPanel.js";
 function renderStatusPill(state) {
   const connectionState = state.transientUi?.firebaseConnectionState ?? "idle";
   const meta = state.transientUi?.firebasePublishedMeta ?? null;
-  const publishedRealmId = state.settings?.firebasePublishedRealmId ?? state.settings?.firebaseRealmId ?? FIREBASE_DEFAULT_REALM_ID;
+  const publishedRealmId = state.settings?.firebaseRealmId ?? FIREBASE_DEFAULT_REALM_ID;
   const statusLabel =
     connectionState === "connected"
-      ? "Published realm loaded"
+      ? "Latest Firebase save loaded"
       : connectionState === "disconnected"
         ? "Disconnected"
-        : "Shared state pending";
+        : "No Firebase save loaded";
 
   const timestamp = meta?.updatedAtMs
     ? new Date(meta.updatedAtMs).toLocaleString()
@@ -30,16 +30,16 @@ function renderStatusPill(state) {
   return `
     <div class="player-status ${connectionState === "connected" ? "is-connected" : connectionState === "disconnected" ? "is-disconnected" : ""}">
       <strong>${statusLabel}</strong>
-      <span>Published realm: ${escapeHtml(String(publishedRealmId))}</span>
-      <span>Last published: ${escapeHtml(timestamp)}</span>
-      <span>Published build: ${escapeHtml(publishedBuild)}</span>
+      <span>Firebase save: ${escapeHtml(String(publishedRealmId))}</span>
+      <span>Last saved: ${escapeHtml(timestamp)}</span>
+      <span>Save build: ${escapeHtml(publishedBuild)}</span>
     </div>
   `;
 }
 
 function renderPublishedFooter(state) {
   const meta = state.transientUi?.firebasePublishedMeta ?? null;
-  const publishedRealmId = state.settings?.firebasePublishedRealmId ?? state.settings?.firebaseRealmId ?? FIREBASE_DEFAULT_REALM_ID;
+  const publishedRealmId = state.settings?.firebaseRealmId ?? FIREBASE_DEFAULT_REALM_ID;
   const timestamp = meta?.updatedAtMs
     ? new Date(meta.updatedAtMs).toLocaleString()
     : "No published timestamp yet";
@@ -47,8 +47,8 @@ function renderPublishedFooter(state) {
 
   return `
     <footer class="player-published-footer">
-      <span>Published realm <strong>${escapeHtml(String(publishedRealmId))}</strong></span>
-      <span>Last published <strong>${escapeHtml(timestamp)}</strong></span>
+      <span>Firebase save <strong>${escapeHtml(String(publishedRealmId))}</strong></span>
+      <span>Last saved <strong>${escapeHtml(timestamp)}</strong></span>
       <span>Build <strong>${escapeHtml(publishedBuild)}</strong></span>
     </footer>
   `;
@@ -300,14 +300,18 @@ function renderIncubationList(title, subtitle, buildings, emptyText, variant, st
               ${buildings
                 .map((building) => {
                   const etaDetails = getConstructionEtaDetails(building, state);
-                  const readyLabel = formatDate(etaDetails.readyDayOffset);
+                  const readyLabel = etaDetails.readyDayOffset === null ? "Unavailable" : formatDate(etaDetails.readyDayOffset);
 
                   return `
                     <article class="player-list__item ${state.transientUi?.recentBuildingChanges?.[building.id] ? "is-recently-changed" : ""}">
                       <div class="player-list__copy">
                         <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
                         <span>${escapeHtml(building.rarity)} / ${escapeHtml(building.district ?? "Unassigned")}</span>
-                        <small>${formatNumber(building.quality, 0)}% now | ${formatNumber(etaDetails.daysRemaining, 1)}d if incubated | Ready ${escapeHtml(readyLabel)}</small>
+                        <small>${
+                          etaDetails.isStalled
+                            ? `${formatNumber(building.quality, 0)}% now | Stalled | ${escapeHtml(etaDetails.stallReasons.join(", ") || "insufficient resources")}`
+                            : `${formatNumber(building.quality, 0)}% now | ${formatNumber(etaDetails.totalBpd, 1)} bpd | ${formatNumber(etaDetails.dailyPercent, 2)}% per day | ${formatNumber(etaDetails.daysRemaining, 1)}d | Ready ${escapeHtml(readyLabel)}`
+                        }</small>
                       </div>
                       <div class="player-list__actions">
                         <em>${formatNumber(building.quality, 0)}%</em>

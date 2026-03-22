@@ -41,7 +41,7 @@ const HELP_TEXT = {
   "GM Quick Events": "One-click event triggers for common table-side moments during a live session.",
   "Events": "Trigger any specific event manually or clear the currently active event list.",
   "Session Mode": "Switch between a lighter live-session view and a deeper review-oriented layout.",
-  "Save Tools": "Export, import, snapshot, reset, and restore the campaign state.",
+  "Save Tools": "Use only the four manual save actions: Save and Load for Firebase, plus Local Save and Local Load for this browser.",
   "Crystals": "Grant, remove, or set crystals and shards by rarity.",
   "Resources": "Directly edit the city's main stockpiles and population totals.",
   "Citizen Management": "Directly control citizen counts, promotions, demotions, and bulk class changes.",

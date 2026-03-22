@@ -1,7 +1,7 @@
 import { MONTHS } from "../content/CalendarConfig.js";
 import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "../content/BuildingCatalog.js";
 import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER, getCitizenHelpText } from "../content/CitizenConfig.js";
-import { GM_QUICK_CRYSTAL_PACKS, GM_QUICK_EVENT_IDS, SAVE_SLOT_COUNT, SPEED_MULTIPLIERS } from "../content/Config.js";
+import { GM_QUICK_CRYSTAL_PACKS, GM_QUICK_EVENT_IDS, SPEED_MULTIPLIERS } from "../content/Config.js";
 import { EVENT_POOLS } from "../content/EventPools.js";
 import { RARITY_ORDER } from "../content/Rarities.js";
 import { TOWN_FOCUS_DEFINITIONS } from "../content/TownFocusConfig.js";
@@ -11,7 +11,7 @@ import { renderModal } from "../ui/Modal.js";
 import { formatDate } from "../systems/CalendarSystem.js";
 import { formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
 import { getDriftEvolutionStages } from "../systems/DriftEvolutionSystem.js";
-import { getAllManualSaveMeta, getManualSaveMeta } from "../systems/StorageSystem.js";
+import { getManualSaveMeta } from "../systems/StorageSystem.js";
 
 function options(values, selectedValue) {
   return values
@@ -513,59 +513,11 @@ export class AdminConsole {
         case "clear-events":
           this.actions.clearEvents();
           break;
-        case "export-save":
-          this.root.querySelector("#save-json").value = this.actions.exportSave();
-          break;
-        case "copy-save-json":
-          this.actions.copySaveJson();
-          break;
-        case "import-save":
-          this.actions.importSave(this.getValue("save-json"));
-          break;
-        case "load-shared-state-url":
-          this.actions.loadSharedStateUrl(this.getValue("shared-save-url"));
-          break;
-        case "remember-shared-state-url":
-          this.actions.rememberSharedStateUrl(this.getValue("shared-save-url"));
-          break;
-        case "toggle-shared-autoload":
-          this.actions.toggleSharedStateAutoLoad();
-          break;
         case "load-firebase-realm":
           this.actions.loadFirebaseRealm();
           break;
-        case "load-firebase-working-realm":
-          this.actions.loadFirebaseWorkingRealm();
-          break;
-        case "remember-firebase-realm":
-          this.actions.rememberFirebaseRealmIds(
-            this.getValue("firebase-published-realm-id"),
-            this.getValue("firebase-working-realm-id")
-          );
-          break;
-        case "set-firebase-publisher-uid":
-          this.actions.setFirebasePublisherUidToCurrentBrowser();
-          break;
-        case "clear-firebase-publisher-uid":
-          this.actions.clearFirebasePublisherUid();
-          break;
         case "save-firebase-realm":
           this.actions.saveFirebaseRealm();
-          break;
-        case "publish-firebase-realm":
-          this.actions.publishFirebaseRealm();
-          break;
-        case "publish-firebase-working-realm":
-          this.actions.publishFirebaseWorkingRealm();
-          break;
-        case "toggle-firebase-autoload":
-          this.actions.toggleFirebaseAutoLoad();
-          break;
-        case "toggle-firebase-live-sync":
-          this.actions.toggleFirebaseLiveSync();
-          break;
-        case "toggle-firebase-auto-publish":
-          this.actions.toggleFirebaseAutoPublish();
           break;
         case "reset-save":
           this.actions.resetSave();
@@ -609,18 +561,6 @@ export class AdminConsole {
         case "load-manual-state":
           this.actions.loadManualState();
           break;
-        case "set-active-save-slot":
-          this.actions.setActiveSaveSlot(this.getValue("active-save-slot"));
-          break;
-        case "save-session-snapshot":
-          this.actions.createSessionSnapshot(this.getValue("snapshot-name", "Session Snapshot"));
-          break;
-        case "restore-session-snapshot":
-          this.actions.restoreSessionSnapshot(target.dataset.snapshotId);
-          break;
-        case "delete-session-snapshot":
-          this.actions.deleteSessionSnapshot(target.dataset.snapshotId);
-          break;
         default:
           break;
       }
@@ -631,12 +571,13 @@ export class AdminConsole {
 
   render(state) {
     this.lastState = state;
-    const activeSaveSlot = Math.max(1, Math.min(SAVE_SLOT_COUNT, Number(state.settings.activeSaveSlot ?? 1) || 1));
-    const manualSaveMeta = getManualSaveMeta(activeSaveSlot);
-    const allSaveSlotMeta = getAllManualSaveMeta();
-    const currentFirebaseUid = String(state.transientUi?.firebaseCurrentUid ?? "").trim();
-    const configuredPublisherUid = String(state.settings.firebasePublisherUid ?? "").trim();
-    const firebaseCanPublish = Boolean(state.transientUi?.firebaseCanPublish);
+    const manualSaveMeta = getManualSaveMeta();
+    const firebaseMeta = state.transientUi?.firebasePublishedMeta ?? null;
+    const activeSaveSlot = 1;
+    const allSaveSlotMeta = [];
+    const currentFirebaseUid = "";
+    const configuredPublisherUid = "";
+    const firebaseCanPublish = false;
     const searchFilter = this.searchQuery.trim().toLowerCase();
     const matchingBuildings = state.buildings.filter((building) =>
       `${building.displayName} ${building.rarity} ${building.district} ${(building.tags ?? []).join(" ")}`
@@ -981,59 +922,50 @@ export class AdminConsole {
       },
       {
         tab: "system",
-        title: "Session Snapshots",
-        keywords: "session snapshots save restore gm checkpoints",
+        title: "Save Tools",
+        keywords: "save load firebase local reset",
         content: `
           <section class="admin-section">
-            <h3>Session Snapshots</h3>
-            <div class="admin-grid">
-              <label>Snapshot Name<input id="snapshot-name" value="Session Snapshot" /></label>
-            </div>
-            <div class="admin-actions">
-              <button class="button button--ghost" data-admin-action="save-session-snapshot">Save Snapshot</button>
-            </div>
-            <div class="admin-quick-grid">
-              ${
-                (state.sessionSnapshots ?? []).length
-                  ? state.sessionSnapshots
-                      .map(
-                        (snapshot) => `
-                          <article class="admin-snapshot-card">
-                            <strong>${escapeHtml(snapshot.name)}</strong>
-                            <span>${escapeHtml(snapshot.dateLabel ?? "Unknown date")}</span>
-                            <small>${snapshot.buildingCount ?? 0} building${snapshot.buildingCount === 1 ? "" : "s"}</small>
-                            <div class="admin-actions">
-                              <button class="button button--ghost" data-admin-action="restore-session-snapshot" data-snapshot-id="${snapshot.id}">Restore</button>
-                              <button class="button button--ghost" data-admin-action="delete-session-snapshot" data-snapshot-id="${snapshot.id}">Delete</button>
-                            </div>
-                          </article>
-                        `
-                      )
-                      .join("")
-                  : `<p class="empty-state">No session snapshots saved yet.</p>`
-              }
+            <h3>Save Tools</h3>
+            <p>Only four manual save actions remain. Nothing auto-loads, auto-saves, or syncs in the background anymore.</p>
+            ${
+              firebaseMeta?.updatedAtMs
+                ? `<p>Latest Firebase save: <strong>${escapeHtml(new Date(firebaseMeta.updatedAtMs).toLocaleString())}</strong>${firebaseMeta.appVersion ? ` | build <strong>${escapeHtml(firebaseMeta.appVersion)}</strong>` : ""}</p>`
+                : `<p>No Firebase save has been loaded in this browser yet.</p>`
+            }
+            ${
+              manualSaveMeta?.manualSavedAt
+                ? `<p>Latest local save: <strong>${escapeHtml(new Date(manualSaveMeta.manualSavedAt).toLocaleString())}</strong> | ${manualSaveMeta.buildingCount} building${manualSaveMeta.buildingCount === 1 ? "" : "s"} | population ${manualSaveMeta.population}</p>`
+                : `<p>No local save recorded yet in this browser.</p>`
+            }
+            <div class="admin-actions admin-actions--with-help">
+              ${renderHelpActionButton("save-firebase-realm", "Save", "Manually overwrites the single Firebase save with the current session, but only if this app build is not older than the latest Firebase save.")}
+              ${renderHelpActionButton("load-firebase-realm", "Load", "Loads the single latest Firebase save into the current session.")}
+              ${renderHelpActionButton("save-manual-state", "Local Save", "Stores the current session in this browser only as one local backup.")}
+              ${renderHelpActionButton("load-manual-state", "Local Load", "Loads the one local browser save and replaces the current session.")}
+              ${renderHelpActionButton("clear-buildings", "Delete All Buildings", "Removes all buildings from the realm without resetting the rest of the save.")}
+              ${renderHelpActionButton("reset-save", "Reset Save", "Returns the campaign to the standard reset state for this build.")}
+              ${renderHelpActionButton("session-reset", "Reset to Live Session", "Resets the campaign to the lighter table-ready live session preset.")}
+              ${renderHelpActionButton("testing-reset", "Reset to Testing State", "Resets the campaign to the richer testing preset with extra crystals and stockpiles.")}
+              ${renderHelpActionButton("full-reset", "Full Reset (1 Common Crystal)", "Wipes the realm to a bare-minimum start with only one Common crystal.")}
             </div>
           </section>
         `
       },
       {
-        tab: "system",
-        title: "Save Tools",
-        keywords: "save import export reset audio",
+        tab: "legacy",
+        title: "Legacy Save Tools",
+        keywords: "save load firebase local reset",
         content: `
           <section class="admin-section">
             <h3>Save Tools</h3>
-            <p>Optional sound folder: <code>assets/audio/</code>. Matching rarity and ambient files will override synthesized audio automatically.</p>
-            <label>Active Save Slot<select id="active-save-slot">${Array.from({ length: SAVE_SLOT_COUNT }, (_, index) => {
-              const slot = index + 1;
-              return `<option value="${slot}" ${slot === activeSaveSlot ? "selected" : ""}>Slot ${slot}</option>`;
-            }).join("")}</select></label>
+            <p>Only four manual save actions remain. Nothing auto-loads, auto-saves, or syncs in the background anymore.</p>
             ${
-              manualSaveMeta?.manualSavedAt
+              firebaseMeta?.updatedAtMs
                 ? `
                   <p>
-                    Active slot ${activeSaveSlot}:
-                    <strong>${escapeHtml(new Date(manualSaveMeta.manualSavedAt).toLocaleString())}</strong>
+                    Latest Firebase save:
+                    <strong>${escapeHtml(new Date(firebaseMeta.updatedAtMs).toLocaleString())}</strong>
                     · ${manualSaveMeta.buildingCount} building${manualSaveMeta.buildingCount === 1 ? "" : "s"}
                     · population ${manualSaveMeta.population}
                   </p>
@@ -1082,8 +1014,8 @@ export class AdminConsole {
         `
       },
       {
-        tab: "system",
-        title: "Firebase Realm",
+        tab: "legacy",
+        title: "Legacy Firebase Realm",
         keywords: "firebase realm shared sync autosave load save published working",
         content: `
           <section class="admin-section">
