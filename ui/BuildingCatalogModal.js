@@ -84,7 +84,7 @@ export function renderBuildingCatalogModal(state) {
       <div class="catalog-modal">
         <div class="catalog-modal__toolbar">
           <p class="catalog-modal__intro">
-            This table lists the current rollable building entries, their district placement, manifestation state, and manifested quality percentage.
+            This table lists the current rollable building entries, their district placement, manifestation state, and current manifested stage.
           </p>
           <button class="button button--ghost" data-action="export-building-catalog">Export Manifest Status</button>
         </div>
@@ -119,7 +119,7 @@ export function renderBuildingCatalogModal(state) {
                 <th>Rarity</th>
                 <th>District</th>
                 <th>Status</th>
-                <th>Manifested %</th>
+                <th>Manifested Stage</th>
               </tr>
             </thead>
             <tbody>

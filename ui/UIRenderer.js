@@ -45,6 +45,7 @@ export class UIRenderer {
       adjacencyPulse: null,
       focusCeremony: null,
       manifestCompleteModal: null,
+      manifestInProgress: false,
       firebasePublishedMeta: null,
       firebaseConnectionState: "idle",
       recentBuildingChanges: {},

@@ -40,7 +40,7 @@ export function renderDriftEvolutionPanel(state, { compact = false } = {}) {
         <article>
           <span>Growth Speed</span>
           <strong>+${formatNumber(currentStage.constructionSpeedPercent, 0)}%</strong>
-          <small>Applied to auto-construction</small>
+          <small>Applied to incubation bpd</small>
         </article>
         <article>
           <span>Optimal Pop.</span>

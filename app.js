@@ -4,9 +4,6 @@ import {
   APP_VERSION,
   BUILDING_ACTIVE_THRESHOLD,
   FIREBASE_DEFAULT_REALM_ID,
-  FIREBASE_DEFAULT_WORKING_REALM_ID,
-  STORAGE_KEY,
-  SAVE_SLOT_COUNT,
   GM_QUICK_CRYSTAL_PACKS
 } from "./content/Config.js";
 import { EVENT_POOLS } from "./content/EventPools.js";
@@ -57,12 +54,10 @@ import {
   exportSave,
   importSave,
   loadManualState,
-  loadGameState,
   resetSave,
   restoreSessionSnapshot,
   createSerializableState,
   saveManualState,
-  saveGameState,
   validateAndMigrateSave
 } from "./systems/StorageSystem.js";
 import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js";
@@ -78,7 +73,7 @@ const toasts = new Toasts();
 const animationEngine = new AnimationEngine();
 const audioEngine = new AudioEngine();
 audioEngine.setPage(pageKey);
-const gameState = new GameState(loadGameState());
+const gameState = new GameState(createInitialState());
 const firebaseClientId = (() => {
   try {
     const key = "crystal-forge-firebase-client-id";
@@ -102,16 +97,42 @@ let firebasePublishTimer = null;
 let applyingFirebaseState = false;
 let projectorChromeTimer = null;
 let recentBuildingChangeTimer = null;
+let manifestInProgress = false;
 syncDerivedState(gameState.getState());
 
 function updateFirebasePublishedMeta(payload = null, connectionState = "idle") {
   renderer.transientUi.firebasePublishedMeta = payload
     ? {
         updatedAtMs: Number(payload.updatedAtMs ?? 0) || null,
-        updatedBy: payload.updatedBy ?? null
+        updatedBy: payload.updatedBy ?? null,
+        appVersion: payload.appVersion ?? null
       }
     : null;
   renderer.transientUi.firebaseConnectionState = connectionState;
+}
+
+async function syncFirebaseIdentityUi() {
+  if (!isFirebaseConfigured()) {
+    renderer.transientUi.firebaseCurrentUid = "";
+    renderer.transientUi.firebaseCanPublish = false;
+    return;
+  }
+
+  try {
+    await ensureFirebaseAuth();
+    const currentUid = getFirebaseUserId() ?? "";
+    const state = getCurrentState();
+    renderer.transientUi.firebaseCurrentUid = currentUid;
+    renderer.transientUi.firebaseCanPublish = Boolean(
+      state.ui.adminUnlocked &&
+      state.settings.firebasePublisherUid &&
+      currentUid &&
+      state.settings.firebasePublisherUid === currentUid
+    );
+  } catch (error) {
+    renderer.transientUi.firebaseCurrentUid = "";
+    renderer.transientUi.firebaseCanPublish = false;
+  }
 }
 
 function clearProjectorChromeTimer() {
@@ -241,16 +262,7 @@ function syncDerivedState(state) {
   }
   state.settings.currentPage = pageKey;
   state.settings.theme = "dark";
-  const publishedRealmId = getPublishedFirebaseRealmId(state);
-  state.settings.firebaseRealmId = publishedRealmId;
-  state.settings.firebasePublishedRealmId = publishedRealmId;
-  state.settings.firebaseWorkingRealmId = getWorkingFirebaseRealmId(state);
-  if ((state.settings.firebaseWorkflowVersion ?? 1) < 2) {
-    state.settings.firebaseAutoLoad = true;
-    state.settings.firebaseLiveSync = false;
-    state.settings.firebaseAutoPublish = false;
-    state.settings.firebaseWorkflowVersion = 2;
-  }
+  state.settings.firebaseRealmId = getPublishedFirebaseRealmId(state);
   const driftUpdate = syncDriftEvolutionState(state);
   for (const stage of driftUpdate.newStages) {
     addHistoryEntry(state, {
@@ -499,57 +511,86 @@ function setSelectedBuildingAndCell(state, buildingId) {
 }
 
 async function handleManifest() {
-  const state = getCurrentState();
-  const result = commit((draft) => {
-    const manifestResult = manifestSelectedRarity(draft, draft.selectedRarity);
-    if (manifestResult.ok) {
-      draft.ui.lastManifestResult = manifestResult;
-      setSelectedBuildingAndCell(draft, manifestResult.building.id);
-    }
-    return manifestResult;
-  });
-
-  if (!result.ok) {
-    reportError(result.reason);
+  if (manifestInProgress) {
     return;
   }
-
-  await publishManifestIfEnabled();
-  await audioEngine.playManifest(result.rarity);
-  await animationEngine.playManifestReveal(result);
+  manifestInProgress = true;
   if (manifestCompleteTimer) {
     window.clearTimeout(manifestCompleteTimer);
+    manifestCompleteTimer = null;
   }
   renderer.setTransientUi(
     {
-      manifestCompleteModal: {
-        rolledName: result.rolledName,
-        rarity: result.rarity,
-        buildingId: result.building.id,
-        qualityRoll: result.qualityRoll,
-        durationMs: 900,
-        revealPercent: false
-      }
+      manifestInProgress: true,
+      manifestCompleteModal: null
     },
     getCurrentState()
   );
-  manifestCompleteTimer = window.setTimeout(() => {
+
+  const state = getCurrentState();
+  try {
+    const result = commit((draft) => {
+      const manifestResult = manifestSelectedRarity(draft, draft.selectedRarity);
+      if (manifestResult.ok) {
+        draft.ui.lastManifestResult = manifestResult;
+        setSelectedBuildingAndCell(draft, manifestResult.building.id);
+      }
+      return manifestResult;
+    });
+
+    if (!result.ok) {
+      reportError(result.reason);
+      return;
+    }
+
     renderer.setTransientUi(
       {
+        manifestInProgress: true,
+        manifestCompleteModal: null
+      },
+      getCurrentState()
+    );
+    await audioEngine.playManifest(result.rarity);
+    await animationEngine.playManifestReveal(result);
+    renderer.setTransientUi(
+      {
+        manifestInProgress: false,
         manifestCompleteModal: {
           rolledName: result.rolledName,
           rarity: result.rarity,
           buildingId: result.building.id,
           qualityRoll: result.qualityRoll,
           durationMs: 900,
-          revealPercent: true
+          revealPercent: false
         }
       },
       getCurrentState()
     );
-  }, 900);
-  markRecentBuildingChanges([result.building.id]);
-  reportSuccess(`${result.rolledName} manifested.`);
+    manifestCompleteTimer = window.setTimeout(() => {
+      renderer.setTransientUi(
+        {
+          manifestInProgress: false,
+          manifestCompleteModal: {
+            rolledName: result.rolledName,
+            rarity: result.rarity,
+            buildingId: result.building.id,
+            qualityRoll: result.qualityRoll,
+            durationMs: 900,
+            revealPercent: true
+          }
+        },
+        getCurrentState()
+      );
+      manifestCompleteTimer = null;
+    }, 900);
+    markRecentBuildingChanges([result.building.id]);
+    reportSuccess(`${result.rolledName} manifested.`);
+  } finally {
+    manifestInProgress = false;
+    if (!renderer.transientUi.manifestCompleteModal) {
+      renderer.setTransientUi({ manifestInProgress: false }, getCurrentState());
+    }
+  }
 }
 
 function adjustCrystal({ mode, rarity, amount }) {
@@ -830,17 +871,15 @@ function normalizeFirebaseRealmId(realmId) {
 
 function normalizeFirebaseWorkingRealmId(realmId) {
   const normalized = String(realmId ?? "").trim();
-  return normalized || FIREBASE_DEFAULT_WORKING_REALM_ID;
+  return normalized || FIREBASE_DEFAULT_REALM_ID;
 }
 
 function getPublishedFirebaseRealmId(state = getCurrentState()) {
-  return normalizeFirebaseRealmId(state.settings.firebasePublishedRealmId ?? state.settings.firebaseRealmId);
+  return normalizeFirebaseRealmId(state.settings.firebaseRealmId);
 }
 
 function getWorkingFirebaseRealmId(state = getCurrentState()) {
-  return normalizeFirebaseWorkingRealmId(
-    state.settings.firebaseWorkingRealmId ?? `${getPublishedFirebaseRealmId(state)}-working`
-  );
+  return normalizeFirebaseWorkingRealmId(state.settings.firebaseRealmId);
 }
 
 function preserveLocalSettingsOnSharedState(nextState, currentState = getCurrentState()) {
@@ -853,16 +892,7 @@ function preserveLocalSettingsOnSharedState(nextState, currentState = getCurrent
     onboardingDismissed: currentState.settings.onboardingDismissed,
     liveSessionView: currentState.settings.liveSessionView,
     theme: "dark",
-    sharedStateUrl: currentState.settings.sharedStateUrl,
-    autoLoadSharedState: currentState.settings.autoLoadSharedState,
-      firebaseRealmId: currentState.settings.firebaseRealmId,
-      firebasePublishedRealmId: currentState.settings.firebasePublishedRealmId,
-      firebaseWorkingRealmId: currentState.settings.firebaseWorkingRealmId,
-      firebasePublisherUid: currentState.settings.firebasePublisherUid,
-      firebaseWorkflowVersion: currentState.settings.firebaseWorkflowVersion,
-      firebaseAutoLoad: currentState.settings.firebaseAutoLoad,
-      firebaseLiveSync: currentState.settings.firebaseLiveSync,
-    firebaseAutoPublish: currentState.settings.firebaseAutoPublish,
+    firebaseRealmId: currentState.settings.firebaseRealmId,
     diceAmount: currentState.settings.diceAmount,
     diceType: currentState.settings.diceType,
     diceHistory: currentState.settings.diceHistory,
@@ -915,6 +945,14 @@ async function publishSharedStateToFirebase(realmId, state = getCurrentState()) 
     adminOpen: false
   };
   await saveFirebaseRealmState(realmId, serializable, firebaseClientId, APP_VERSION);
+  updateFirebasePublishedMeta(
+    {
+      updatedAtMs: Date.now(),
+      updatedBy: getFirebaseUserId(),
+      appVersion: APP_VERSION
+    },
+    "connected"
+  );
 }
 
 async function loadPublishedStateFromFirebase() {
@@ -926,12 +964,10 @@ async function loadWorkingStateFromFirebase() {
 }
 
 async function saveWorkingStateToFirebase(state = getCurrentState()) {
-  await ensureFirebasePublisherAccess(state);
-  await publishSharedStateToFirebase(getWorkingFirebaseRealmId(state), state);
+  await publishSharedStateToFirebase(getPublishedFirebaseRealmId(state), state);
 }
 
 async function publishCurrentStateToPublished(state = getCurrentState()) {
-  await ensureFirebasePublisherAccess(state);
   await publishSharedStateToFirebase(getPublishedFirebaseRealmId(state), state);
 }
 
@@ -945,40 +981,7 @@ async function publishWorkingStateToPublished() {
 }
 
 async function connectFirebaseLiveSync(showSuccess = false) {
-  const state = getCurrentState();
-  if (!state.settings.firebaseLiveSync) {
-    return;
-  }
-  if (!isFirebaseConfigured()) {
-    throw new Error("Firebase is not configured in this build.");
-  }
-
-  if (firebaseUnsubscribe) {
-    firebaseUnsubscribe();
-    firebaseUnsubscribe = null;
-  }
-
-  firebaseUnsubscribe = await subscribeFirebaseRealmState(
-    getPublishedFirebaseRealmId(state),
-    (payload) => {
-      if (!payload?.state) {
-        updateFirebasePublishedMeta(null, "disconnected");
-        return;
-      }
-      updateFirebasePublishedMeta(payload, "connected");
-      if (payload.sourceClientId && payload.sourceClientId === firebaseClientId) {
-        return;
-      }
-      applyingFirebaseState = true;
-      gameState.replace(preserveLocalSettingsOnSharedState(payload.state));
-      applyingFirebaseState = false;
-      resetTransientUi();
-    }
-  );
-
-  if (showSuccess) {
-    reportSuccess(`Firebase live sync connected to published realm "${getPublishedFirebaseRealmId(state)}".`);
-  }
+  return showSuccess;
 }
 
 function disconnectFirebaseLiveSync() {
@@ -986,32 +989,14 @@ function disconnectFirebaseLiveSync() {
     firebaseUnsubscribe();
     firebaseUnsubscribe = null;
   }
-  updateFirebasePublishedMeta(renderer.transientUi.firebasePublishedMeta, "disconnected");
 }
 
 function scheduleFirebaseAutoPublish(state) {
-  if (applyingFirebaseState || !state.settings.firebaseAutoPublish || !canCurrentSessionPublishToFirebase(state)) {
-    return;
-  }
-  if (firebasePublishTimer) {
-    clearTimeout(firebasePublishTimer);
-  }
-  firebasePublishTimer = setTimeout(() => {
-    firebasePublishTimer = null;
-    void saveWorkingStateToFirebase().catch((error) => reportError(error.message));
-  }, 500);
+  return state;
 }
 
 async function publishManifestIfEnabled() {
-  const state = getCurrentState();
-  if (!state.settings.firebaseAutoPublish || !canCurrentSessionPublishToFirebase(state)) {
-    return;
-  }
-  try {
-    await saveWorkingStateToFirebase(state);
-  } catch (error) {
-    reportError(error.message);
-  }
+  return null;
 }
 
 function moveBuildingOnMap({ buildingId, q, r, source = "Player" }) {
@@ -1454,22 +1439,22 @@ const actions = {
   saveManualState() {
     try {
       saveManualState(getCurrentState());
-      reportSuccess(`State saved to slot ${getCurrentState().settings.activeSaveSlot}.`);
+      reportSuccess("Local save updated.");
     } catch (error) {
       reportError(error.message);
     }
   },
   loadManualState() {
     try {
-      gameState.replace(loadManualState(getCurrentState().settings.activeSaveSlot));
+      gameState.replace(loadManualState());
       resetTransientUi();
-      reportSuccess(`Save slot ${getCurrentState().settings.activeSaveSlot} loaded.`);
+      reportSuccess("Local save loaded.");
     } catch (error) {
       reportError(error.message);
     }
   },
   setActiveSaveSlot(slot) {
-    const normalizedSlot = Math.max(1, Math.min(SAVE_SLOT_COUNT, Number(slot) || 1));
+    const normalizedSlot = 1;
     commit((draft) => {
       draft.settings.activeSaveSlot = normalizedSlot;
     });
@@ -1505,10 +1490,10 @@ const actions = {
   },
   async loadFirebaseRealm() {
     try {
-      const firebaseState = await loadPublishedStateFromFirebase();
+      const firebaseState = await loadSharedStateFromFirebase(getPublishedFirebaseRealmId());
       gameState.replace(firebaseState);
       resetTransientUi();
-      reportSuccess("Published Firebase state loaded.");
+      reportSuccess("Firebase save loaded.");
     } catch (error) {
       reportError(error.message);
     }
@@ -1545,6 +1530,7 @@ const actions = {
         commit((draft) => {
           draft.settings.firebasePublisherUid = currentUid;
         });
+        await syncFirebaseIdentityUi();
         reportSuccess(`GM publisher UID set to ${currentUid}.`);
       } catch (error) {
         reportError(error.message);
@@ -1554,12 +1540,13 @@ const actions = {
       commit((draft) => {
         draft.settings.firebasePublisherUid = "";
       });
+      void syncFirebaseIdentityUi();
       reportSuccess("GM publisher UID cleared.");
     },
     async saveFirebaseRealm() {
     try {
-      await saveWorkingStateToFirebase();
-      reportSuccess("Current state saved to Firebase working.");
+      await publishSharedStateToFirebase(getPublishedFirebaseRealmId());
+      reportSuccess("Firebase save updated.");
     } catch (error) {
       reportError(error.message);
     }
@@ -1651,10 +1638,8 @@ gameState.subscribe((state) => {
   audioEngine.setMuted(state.settings.muted);
   audioEngine.setPage(pageKey);
   document.body.dataset.theme = state.settings.theme ?? "dark";
-  saveGameState(state);
   renderer.render(state);
   adminConsole.render(state);
-  scheduleFirebaseAutoPublish(state);
 });
 
 document.addEventListener(
@@ -1804,6 +1789,12 @@ root.addEventListener("click", async (event) => {
       break;
     case "load-manual-state":
       actions.loadManualState();
+      break;
+    case "save-firebase-realm":
+      await actions.saveFirebaseRealm();
+      break;
+    case "load-firebase-realm":
+      await actions.loadFirebaseRealm();
       break;
     case "chronicle-prev-month":
     case "chronicle-next-month": {
@@ -2026,18 +2017,6 @@ root.addEventListener("click", async (event) => {
       void audioEngine.playUiAccent("soft");
       actions.openAdmin();
       break;
-    case "publish-to-players":
-      if (pageKey === "player") {
-        reportError("Publishing is only available in GM Mode.");
-        return;
-      }
-      if (!getCurrentState().ui.adminUnlocked) {
-        reportError("Unlock GM mode first.");
-        return;
-      }
-      void audioEngine.playUiAccent("confirm");
-      await actions.publishFirebaseRealm();
-      break;
     default:
       break;
   }
@@ -2198,6 +2177,7 @@ async function autoLoadSharedStateIfEnabled() {
   }
 
   try {
+    await syncFirebaseIdentityUi();
     await connectFirebaseLiveSync();
   } catch (error) {
     updateFirebasePublishedMeta(null, "disconnected");
@@ -2205,13 +2185,8 @@ async function autoLoadSharedStateIfEnabled() {
   }
 }
 
-if (!localStorage.getItem(STORAGE_KEY)) {
-  gameState.replace(createInitialState());
-} else {
-  renderer.render(getCurrentState());
-  adminConsole.render(getCurrentState());
-}
+renderer.render(getCurrentState());
+adminConsole.render(getCurrentState());
 
 applyUrlFocusTargets();
-void autoLoadSharedStateIfEnabled();
 startPageEnter();

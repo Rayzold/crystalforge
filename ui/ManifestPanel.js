@@ -4,6 +4,9 @@ import { escapeHtml, formatNumber } from "../engine/Utils.js";
 export function renderManifestPanel(state) {
   const last = state.ui.lastManifestResult;
   const selectedBuilding = state.buildings.find((building) => building.id === state.ui.selectedBuildingId) ?? null;
+  const manifestInProgress = Boolean(state.transientUi?.manifestInProgress);
+  const selectedCrystals = Number(state.crystals?.[state.selectedRarity] ?? 0);
+  const canManifest = !manifestInProgress && selectedCrystals > 0;
   const canUpgradeCrystals =
     selectedBuilding &&
     selectedBuilding.name === "Crystal Upgrade" &&
@@ -17,7 +20,9 @@ export function renderManifestPanel(state) {
         <p class="manifest-panel__text">Each invocation consumes 1 crystal from the selected reality level.</p>
       </div>
       <div class="manifest-panel__controls manifest-panel__controls--centered">
-        <button class="button manifest-panel__button" data-action="manifest">Manifest</button>
+        <button class="button manifest-panel__button" data-action="manifest" ${canManifest ? "" : "disabled"}>
+          ${manifestInProgress ? "Manifesting..." : "Manifest"}
+        </button>
         <button class="button button--ghost manifest-panel__audio" data-action="toggle-mute">${state.settings.muted ? "Audio Off" : "Audio On"}</button>
       </div>
       ${

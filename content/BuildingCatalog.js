@@ -100,7 +100,7 @@ const BUILDING_DEFINITIONS = {
   Bank: defineBuilding({ district: "Trade District", tags: ["trade", "security"], iconKey: "coins", profile: gameplay({ gold: 30, upkeep: 10, prosperity: 15, security: 8 }) }),
   Bathhouse: defineBuilding({ district: "Residential District", tags: ["housing"], iconKey: "home", profile: gameplay({ upkeep: 7, health: 20, morale: 12 }) }),
   Courthouse: defineBuilding({ district: "Residential District", tags: ["civic", "security"], iconKey: "columns", profile: gameplay({ upkeep: 8, security: 16, prosperity: 12 }) }),
-  "Distillation House": defineBuilding({ district: "Industrial District", tags: ["industry", "trade"], iconKey: "hammer", profile: gameplay({ gold: 20, upkeep: 8, morale: 10, prosperity: 8, materials: 10 }) }),
+  "Workshop Quarter": defineBuilding({ district: "Industrial District", tags: ["industry", "trade", "culture"], iconKey: "guild", profile: gameplay({ upkeep: 8, prosperity: 10, goods: 4, morale: 4 }) }),
   "Embassy Annex": defineBuilding({ district: "Trade District", tags: ["trade", "civic"], iconKey: "banner", profile: gameplay({ gold: 15, upkeep: 8, prestige: 16, prosperity: 6 }) }),
   "Engineers' Guild": defineBuilding({ district: "Industrial District", tags: ["industry", "military"], iconKey: "guild", profile: gameplay({ upkeep: 10, defense: 20, prosperity: 15, materials: 16 }) }),
   "Explosive Ballistas": defineBuilding({ district: "Military District", tags: ["military"], iconKey: "shield", profile: gameplay({ upkeep: 12, defense: 22, security: 16 }) }),
@@ -188,6 +188,19 @@ const DISTRICT_FLAVOR_FRAGMENTS = {
   "Harbor District": "Movement, exchange, and the promise of distance gather at its edges.",
   "Cultural District": "Memory, learning, and performance seem to settle in the air around it.",
   "Frontier District": "It feels like a structure built at the edge of certainty and pushed beyond it."
+};
+
+export const BUILDING_CONSTRUCTION_SUPPORT_BPD = {
+  "Carpenter Shop": 2,
+  "Tool Shed": 3,
+  Clocktower: 1,
+  "Mason's Workshop": 2,
+  Ropeworks: 1,
+  "Weaver's Hall": 1,
+  "Steam Factory": 5,
+  Dragonforge: 8,
+  Techcrafter: 12,
+  "The Maker's Creatorium": 30
 };
 
 const BUILDING_EMOJI_BY_ICON_KEY = {
@@ -292,6 +305,20 @@ export function createCatalogEntryFromInput({ name, rarity, district, tags, icon
   };
 }
 
+export const BUILDING_ROLE_LEGEND = [
+  { key: "agriculture", emoji: "🌿", label: "Harvest", detail: "Food, herbs, and living growth." },
+  { key: "trade", emoji: "💰", label: "Trade", detail: "Gold flow, markets, and exchange." },
+  { key: "industry", emoji: "🛠️", label: "Industry", detail: "Materials, salvage, and crafted output." },
+  { key: "military", emoji: "🛡️", label: "Military", detail: "Defense, readiness, and force." },
+  { key: "arcane", emoji: "✨", label: "Arcane", detail: "Mana, study, and mystical systems." },
+  { key: "religious", emoji: "⛪", label: "Sacred", detail: "Faith, rites, healing, and reverence." },
+  { key: "housing", emoji: "🏠", label: "Housing", detail: "Population support and settlement space." },
+  { key: "civic", emoji: "🏛️", label: "Civic", detail: "Order, law, records, and governance." },
+  { key: "harbor", emoji: "⚓", label: "Harbor", detail: "Routes, docks, and travel access." },
+  { key: "culture", emoji: "📜", label: "Culture", detail: "Prestige, memory, and city identity." },
+  { key: "frontier", emoji: "🧭", label: "Frontier", detail: "Exploration, scouting, and outer reach." }
+];
+
 export function getBuildingEmoji(building) {
   if (!building) {
     return "🏗️";
@@ -313,6 +340,11 @@ export function getBuildingEmoji(building) {
   if (primaryTag === "culture") return "📜";
   if (primaryTag === "frontier") return "🧭";
   return "🏗️";
+}
+
+export function getBuildingConstructionSupportBpd(building) {
+  const buildingName = building?.displayName ?? building?.name ?? "";
+  return BUILDING_CONSTRUCTION_SUPPORT_BPD[buildingName] ?? 0;
 }
 
 export const BASE_BUILDING_CATALOG = createBaseBuildingCatalog();

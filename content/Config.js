@@ -4,11 +4,10 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.2.21";
+export const APP_VERSION = "v1.2.31";
 export const SAVE_VERSION = 9;
 export const STORAGE_KEY = "crystal-forge-save-v2";
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v2";
-export const SAVE_SLOT_COUNT = 3;
 export const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDl51M8_ywD944xPSByUujzMdATeoy503I",
   authDomain: "crystal-forge-web.firebaseapp.com",
@@ -20,7 +19,6 @@ export const FIREBASE_CONFIG = {
 };
 export const FIREBASE_REALM_COLLECTION = "realms";
 export const FIREBASE_DEFAULT_REALM_ID = "main";
-export const FIREBASE_DEFAULT_WORKING_REALM_ID = "main-working";
 export const MASCOT_MEDIA = {
   enabled: true,
   videoPath: "./assets/video/drift-mascot.mp4",
@@ -32,6 +30,13 @@ export const PAGE_ROUTES = [
   { key: "city", label: "City", href: "./city.html" },
   { key: "citizens", label: "Citizens", href: "./citizens.html" },
   { key: "chronicle", label: "Chronicle", href: "./chronicle.html" }
+];
+export const BUILD_NOTES = [
+  "Crystal Upgrade manifestations now read as upgrade manifestations in the completion popup instead of showing a rarity label.",
+  "The Open Map button in City now carries a map icon and a brighter accent, so the Town Map reads like a primary destination instead of another small toggle.",
+  "Distillation House has been replaced by Workshop Quarter, a clearer rare-tier goods producer for the city economy.",
+  "Building surfaces now expose the full building name on mouseover, including compact sidebar, player, queue, and incubation entries.",
+  "The new construction model and the City map flow now read together more cleanly during active session management."
 ];
 export const BUILDING_QUALITY_CAP = 350;
 export const BUILDING_ACTIVE_THRESHOLD = 100;
@@ -112,21 +117,11 @@ export const START_STATE_PRESETS = {
       onboardingDismissed: false,
       liveSessionView: true,
       theme: "dark",
-      sharedStateUrl: "",
-      autoLoadSharedState: false,
       firebaseRealmId: FIREBASE_DEFAULT_REALM_ID,
-      firebasePublishedRealmId: FIREBASE_DEFAULT_REALM_ID,
-      firebaseWorkingRealmId: FIREBASE_DEFAULT_WORKING_REALM_ID,
-      firebasePublisherUid: "",
-      firebaseWorkflowVersion: 2,
-      firebaseAutoLoad: true,
-      firebaseLiveSync: false,
-      firebaseAutoPublish: false,
       diceAmount: 1,
       diceType: "d20",
       diceHistory: [],
-      lastDiceRoll: null,
-      activeSaveSlot: 1
+      lastDiceRoll: null
     }
   },
   testing: {
@@ -175,21 +170,11 @@ export const START_STATE_PRESETS = {
       onboardingDismissed: false,
       liveSessionView: false,
       theme: "dark",
-      sharedStateUrl: "",
-      autoLoadSharedState: false,
       firebaseRealmId: FIREBASE_DEFAULT_REALM_ID,
-      firebasePublishedRealmId: FIREBASE_DEFAULT_REALM_ID,
-      firebaseWorkingRealmId: FIREBASE_DEFAULT_WORKING_REALM_ID,
-      firebasePublisherUid: "",
-      firebaseWorkflowVersion: 2,
-      firebaseAutoLoad: true,
-      firebaseLiveSync: false,
-      firebaseAutoPublish: false,
       diceAmount: 1,
       diceType: "d20",
       diceHistory: [],
-      lastDiceRoll: null,
-      activeSaveSlot: 1
+      lastDiceRoll: null
     }
   }
 };

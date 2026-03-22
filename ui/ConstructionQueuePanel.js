@@ -11,11 +11,11 @@ import {
 
 function renderQueueItem(state, building, index, activeCount) {
   const isActive = index < activeCount;
-  const etaDetails = isActive ? getConstructionEtaDetails(building, state) : null;
-  const eta = etaDetails ? formatDate(etaDetails.readyDayOffset) : "Waiting";
+  const etaDetails = getConstructionEtaDetails(building, state);
+  const eta = etaDetails?.readyDayOffset !== null ? formatDate(etaDetails.readyDayOffset) : "Stalled";
 
   return `
-    <article class="construction-queue__item ${isActive ? "is-active" : "is-queued"}">
+    <article class="construction-queue__item ${isActive ? "is-active" : "is-queued"}" title="${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}">
       <div class="construction-queue__meta">
         <div class="construction-queue__heading">
           <span class="construction-queue__slot">${isActive ? `Raising now / slot ${index + 1}` : `Queued / #${index + 1}`}</span>
@@ -23,9 +23,13 @@ function renderQueueItem(state, building, index, activeCount) {
         </div>
         <small>${escapeHtml(building.rarity)} / ${formatNumber(building.quality, 2)}%</small>
         <small>${
-          isActive && etaDetails
-            ? `${formatNumber(etaDetails.rate, 2)}% per day / ${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"} / Ready ${escapeHtml(eta)}`
-            : "Will begin when a Drift slot opens."
+          isActive
+            ? etaDetails.isStalled
+              ? `Stalled / ${escapeHtml(etaDetails.stallReasons.join(", ") || "insufficient resources")} / Support bpd pauses at reserves`
+              : `${formatNumber(etaDetails.totalBpd, 1)} bpd / ${formatNumber(etaDetails.dailyPercent, 2)}% per day / ${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"} / Ready ${escapeHtml(eta)}`
+            : etaDetails.isStalled
+              ? `If activated: stalled / ${escapeHtml(etaDetails.stallReasons.join(", ") || "insufficient resources")}`
+              : `If activated: ${formatNumber(etaDetails.totalBpd, 1)} bpd / ${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"} / Ready ${escapeHtml(eta)}`
         }</small>
       </div>
       <div class="construction-queue__actions">

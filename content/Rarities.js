@@ -27,13 +27,22 @@ export const RARITY_GLOWS = {
   Beyond: "rgba(77, 121, 255, 0.7)"
 };
 
-export const AUTO_CONSTRUCTION_RATES = {
+export const RARITY_RANKS = {
   Common: 1,
-  Uncommon: 0.5,
-  Rare: 1 / 3,
-  Epic: 1 / 7,
-  Legendary: 1 / 14,
-  Beyond: 1 / 28
+  Uncommon: 2,
+  Rare: 3,
+  Epic: 4,
+  Legendary: 5,
+  Beyond: 6
+};
+
+export const RARITY_BUILD_POINTS_PER_PERCENT = {
+  Common: 10,
+  Uncommon: 20,
+  Rare: 30,
+  Epic: 70,
+  Legendary: 140,
+  Beyond: 300
 };
 
 export const CRYSTAL_UPGRADE_CHAIN = {

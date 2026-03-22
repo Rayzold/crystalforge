@@ -87,7 +87,10 @@ function renderBuildingsView(state) {
           <button class="button button--ghost ${currentView === "stream" ? "is-active" : ""}" data-action="set-city-building-view" data-view="stream">The Stream</button>
           <button class="button button--ghost ${currentView === "map" ? "is-active" : ""}" data-action="set-city-building-view" data-view="map">Town Map</button>
         </div>
-        <span class="city-workspace__total">Total Rolls: ${formatNumber(totalRolls, 0)}</span>
+        <div class="city-workspace__top-actions">
+          <button class="button city-workspace__map-shortcut ${currentView === "map" ? "is-active" : ""}" data-action="set-city-building-view" data-view="map">🗺️ Open Map</button>
+          <span class="city-workspace__total">Total Rolls: ${formatNumber(totalRolls, 0)}</span>
+        </div>
       </div>
 
       <div class="city-workspace__toolbar">
@@ -139,13 +142,21 @@ function renderBuildingsView(state) {
                       (building, index) => {
                         const etaDetails = getConstructionEtaDetails(building, state);
                         return `
-                        <article class="city-incubation-strip__item ${isBuildingActivelyConstructed(state, building.id) ? "is-active" : ""}">
+                        <article class="city-incubation-strip__item ${isBuildingActivelyConstructed(state, building.id) ? "is-active" : ""}" title="${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}">
                           <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
                           <span>${formatNumber(building.quality, 1)}%</span>
                           <em>Slot ${index + 1}</em>
-                          <small>${formatNumber(etaDetails.rate, 2)}% per day</small>
-                          <small>${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"} remaining</small>
-                          <small>Ready ${escapeHtml(formatDate(etaDetails.readyDayOffset))}</small>
+                          <small>${etaDetails.isStalled ? "Incubation stalled" : `${formatNumber(etaDetails.totalBpd, 1)} bpd / ${formatNumber(etaDetails.dailyPercent, 2)}% per day`}</small>
+                          <small>${
+                            etaDetails.daysRemaining === null
+                              ? escapeHtml(etaDetails.stallReasons.join(", ") || "insufficient resources")
+                              : `${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"} remaining`
+                          }</small>
+                          <small>${
+                            etaDetails.readyDayOffset === null
+                              ? "Ready date unavailable"
+                              : `Ready ${escapeHtml(formatDate(etaDetails.readyDayOffset))}`
+                          }</small>
                           <button class="button button--ghost" data-action="pause-construction" data-building-id="${building.id}">Cancel Incubation</button>
                         </article>
                       `;
@@ -164,16 +175,27 @@ function renderBuildingsView(state) {
                   <h5>Available</h5>
                   <div class="city-incubation-strip__list">
                     ${waiting
-                      .map(
-                        (building, index) => `
-                          <article class="city-incubation-strip__item">
+                      .map((building, index) => {
+                        const etaDetails = getConstructionEtaDetails(building, state);
+                        return `
+                          <article class="city-incubation-strip__item" title="${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}">
                             <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
                             <span>${formatNumber(building.quality, 1)}%</span>
                             <em>Waiting #${index + 1}</em>
+                            <small>${
+                              etaDetails.isStalled
+                                ? "Cannot progress with current reserves"
+                                : `If incubated: ${formatNumber(etaDetails.totalBpd, 1)} bpd / ${formatNumber(etaDetails.dailyPercent, 2)}% per day / ${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"}`
+                            }</small>
+                            <small>${
+                              etaDetails.readyDayOffset === null
+                                ? "Ready date unavailable"
+                                : `Ready ${escapeHtml(formatDate(etaDetails.readyDayOffset))}`
+                            }</small>
                             <button class="button button--ghost" data-action="activate-construction" data-building-id="${building.id}">Use Incubator</button>
                           </article>
-                        `
-                      )
+                        `;
+                      })
                       .join("")}
                   </div>
                 </div>

@@ -2,9 +2,9 @@ import { getBuildingEmoji } from "../content/BuildingCatalog.js";
 import { RARITY_COLORS } from "../content/Rarities.js";
 import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
-import { formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
+import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
 import {
-  getBuildingDailyRate,
+  getConstructionEtaDetails,
   getConstructionQueuePosition,
   getDriftConstructionSlots,
   isBuildingActivelyConstructed
@@ -57,11 +57,10 @@ export function renderBuildingDetailModal(state, pageKey) {
   const isIncomplete = !building.isComplete;
   const isRuined = Boolean(building.isRuined);
   const isActiveConstruction = isIncomplete && isBuildingActivelyConstructed(state, building.id);
-  const rate = isActiveConstruction ? getBuildingDailyRate(building, state) : 0;
+  const etaDetails = isIncomplete ? getConstructionEtaDetails(building, state) : null;
   const queuePosition = isIncomplete ? getConstructionQueuePosition(state, building.id) : -1;
   const driftSlots = getDriftConstructionSlots(state);
-  const daysRemaining = rate > 0 && isIncomplete ? Math.ceil((100 - building.quality) / rate) : 0;
-  const eta = isActiveConstruction ? formatDate(state.calendar.dayOffset + daysRemaining) : null;
+  const eta = isActiveConstruction && etaDetails?.readyDayOffset !== null ? formatDate(etaDetails.readyDayOffset) : null;
   const placementBonus = getBuildingPlacementBonuses(state, building);
   const signatureReadout = getSignatureReadout(building);
   const buildingEmoji = getBuildingEmoji(building);
@@ -97,8 +96,8 @@ export function renderBuildingDetailModal(state, pageKey) {
           <p class="building-detail__effect">${escapeHtml(building.specialEffect)}</p>
           <p class="building-detail__flavor">${escapeHtml(building.flavorText ?? "No flavor text has been etched into the city chronicle yet.")}</p>
           <div class="building-detail__chips">
-            <span class="detail-chip">${isRuined ? "Ruined" : building.isComplete ? `Active / ${formatBuildingQualityDisplay(building)}` : "Inactive"}</span>
-            <span class="detail-chip">${escapeHtml(formatBuildingQualityDisplay(building))} quality</span>
+            <span class="detail-chip">${isRuined ? "Ruined" : building.isComplete ? escapeHtml(formatBuildingQualityDisplay(building)) : "Inactive"}</span>
+            <span class="detail-chip">Exact ${escapeHtml(formatBuildingExactQualityDisplay(building))}</span>
             <span class="detail-chip">${building.mapPosition ? `Hex ${building.mapPosition.q}, ${building.mapPosition.r}` : "Unplaced"}</span>
           </div>
           <div class="building-detail__actions">
@@ -143,10 +142,16 @@ export function renderBuildingDetailModal(state, pageKey) {
         <section class="building-detail__panel">
           <h4>Construction</h4>
           <ul class="building-detail__facts">
-            <li><span>Status</span><strong>${isRuined ? "Ruined / Offline" : building.isComplete ? "Completed" : isActiveConstruction ? "Auto-constructing" : "Queued"}</strong></li>
-            <li><span>Rate</span><strong>${formatNumber(rate, 2)}% / day</strong></li>
+            <li><span>Status</span><strong>${isRuined ? "Ruined / Offline" : building.isComplete ? "Completed" : isActiveConstruction ? "Incubating" : "Queued"}</strong></li>
+            <li><span>Incubation</span><strong>${isIncomplete ? etaDetails?.isStalled ? "Stalled" : `${formatNumber(etaDetails?.totalBpd ?? 0, 1)} bpd` : "Complete"}</strong></li>
+            <li><span>Progress</span><strong>${isIncomplete ? `${formatNumber(etaDetails?.dailyPercent ?? 0, 2)}% / day` : "Finished"}</strong></li>
             <li><span>Forecast</span><strong>${building.isComplete ? escapeHtml(building.completedAt ?? "Completed") : escapeHtml(eta ?? "Waiting for a slot")}</strong></li>
             <li><span>Drift Queue</span><strong>${building.isComplete ? "Finished" : isActiveConstruction ? `Active within ${driftSlots} slots` : `Queued #${queuePosition + 1}`}</strong></li>
+            <li><span>Daily Drain</span><strong>${
+              isIncomplete
+                ? `M ${formatNumber(etaDetails?.dailyCosts?.materials ?? 0, 1)} / S ${formatNumber(etaDetails?.dailyCosts?.salvage ?? 0, 1)} / Mn ${formatNumber(etaDetails?.dailyCosts?.mana ?? 0, 1)}`
+                : "No active drain"
+            }</strong></li>
           </ul>
         </section>
 

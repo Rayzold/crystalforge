@@ -3,7 +3,7 @@ import { RARITY_COLORS } from "../content/Rarities.js";
 import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
 import {
-  getBuildingDailyRate,
+  getConstructionEtaDetails,
   getConstructionQueuePosition,
   getDriftConstructionSlots,
   isBuildingActivelyConstructed
@@ -75,12 +75,20 @@ function getCompactStatus(building, { isIncomplete, isActiveConstruction, queueP
     return "Ruined / inactive until repaired";
   }
   if (!isIncomplete) {
-    return `Active / ${formatBuildingQualityDisplay(building)}`;
+    return `Operational / ${formatBuildingQualityDisplay(building)}`;
   }
   if (isActiveConstruction) {
-    return `Growing now / ETA ${eta}`;
+    return eta ? `Growing now / ETA ${eta}` : "Growing now / stalled";
   }
   return `Queued #${queuePosition + 1} / ${driftSlots} slots`;
+}
+
+function getCompactStageBadge(building) {
+  const label = formatBuildingQualityDisplay(building);
+  if (label === "Active") {
+    return "ACT";
+  }
+  return label.replace("Level ", "L");
 }
 
 function getBuildingSignature(building) {
@@ -108,11 +116,10 @@ export function renderBuildingCard(building, state) {
   const isIncomplete = !building.isComplete;
   const isRuined = Boolean(building.isRuined);
   const isActiveConstruction = isIncomplete && isBuildingActivelyConstructed(state, building.id);
-  const rate = isActiveConstruction ? getBuildingDailyRate(building, state) : 0;
+  const etaDetails = isIncomplete ? getConstructionEtaDetails(building, state) : null;
   const queuePosition = isIncomplete ? getConstructionQueuePosition(state, building.id) : -1;
   const driftSlots = getDriftConstructionSlots(state);
-  const daysRemaining = rate > 0 && isIncomplete ? Math.ceil((100 - building.quality) / rate) : 0;
-  const eta = isActiveConstruction ? formatDate(state.calendar.dayOffset + daysRemaining) : null;
+  const eta = isActiveConstruction && etaDetails?.readyDayOffset !== null ? formatDate(etaDetails.readyDayOffset) : null;
   const progressPercent = Math.min(100, building.quality);
   const [signatureIcon, signatureLabel] = getBuildingSignature(building);
   const topStats = Object.entries(building.stats ?? {})
@@ -125,7 +132,7 @@ export function renderBuildingCard(building, state) {
 
   return `
     <article class="building-card building-card--stream ${selected ? "is-selected" : ""} ${isIncomplete ? "is-incomplete" : ""} ${isRuined ? "is-ruined" : ""} ${isRecentlyChanged ? "is-recently-changed" : ""}" style="--rarity-color:${RARITY_COLORS[building.rarity]}">
-      <button class="building-card__select" data-action="select-building" data-building-id="${building.id}">
+      <button class="building-card__select" data-action="select-building" data-building-id="${building.id}" title="${escapeHtml(`${buildingEmoji} ${building.displayName}`)}" aria-label="${escapeHtml(`${buildingEmoji} ${building.displayName}`)}">
         <div class="building-card__visual">
           ${renderMedia(building)}
           <div class="building-card__overlay">
@@ -147,15 +154,23 @@ export function renderBuildingCard(building, state) {
             <h4>${building.mapPosition ? `Hex ${building.mapPosition.q}, ${building.mapPosition.r}` : "Awaiting placement"}</h4>
             <p>${escapeHtml(compactStatus)}</p>
           </div>
-          <strong class="building-card__multiplier">${building.isComplete ? formatBuildingQualityDisplay(building).replace("Level ", "L") : "--"}</strong>
+          <strong class="building-card__multiplier">${building.isComplete ? getCompactStageBadge(building) : "--"}</strong>
         </div>
         <div class="building-card__quality">
-          <span>Quality ${escapeHtml(formatBuildingQualityDisplay(building))}</span>
+          <span>Stage ${escapeHtml(formatBuildingQualityDisplay(building))}</span>
           <span>${isRuined ? "Ruined" : building.isComplete ? "Complete" : "Incomplete"}</span>
         </div>
         <div class="progress-bar"><span style="width:${progressPercent}%"></span></div>
         <div class="building-card__meta building-card__meta--compact">
-          <span>${isRuined ? "Bonuses offline" : isIncomplete ? `Auto ${formatNumber(rate, 2)}% / day` : `Completed ${escapeHtml(building.completedAt ?? "today")}`}</span>
+          <span>${
+            isRuined
+              ? "Bonuses offline"
+              : isIncomplete
+                ? etaDetails?.isStalled
+                  ? "Incubation stalled"
+                  : `${formatNumber(etaDetails?.totalBpd ?? 0, 1)} bpd / ${formatNumber(etaDetails?.dailyPercent ?? 0, 2)}% per day`
+                : `Completed ${escapeHtml(building.completedAt ?? "today")}`
+          }</span>
           <span>${escapeHtml(building.district)}</span>
         </div>
         <div class="building-card__spotlights">

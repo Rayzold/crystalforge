@@ -1,4 +1,4 @@
-import { APP_VERSION, MASCOT_MEDIA, PAGE_ROUTES, SAVE_SLOT_COUNT } from "../content/Config.js";
+import { APP_VERSION, MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js";
 import { getBuildingEmoji } from "../content/BuildingCatalog.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
@@ -76,11 +76,14 @@ function renderSidebarBuildingList(state, title, items, emptyLabel, variant = "m
                   .map(
                     (building) => {
                       const etaDetails = variant === "incubating" ? getConstructionEtaDetails(building, state) : null;
-                      const readyLabel = etaDetails ? `Ready on ${formatDate(etaDetails.readyDayOffset)}` : "";
+                      const readyLabel =
+                        etaDetails && etaDetails.readyDayOffset !== null
+                          ? `Ready on ${formatDate(etaDetails.readyDayOffset)}`
+                          : "Ready date unavailable";
                       const isRecentlyChanged = Boolean(state.transientUi?.recentBuildingChanges?.[building.id]);
                       const emoji = getBuildingEmoji(building);
                       return `
-                      <div class="sidebar-manifest-list__item ${isRecentlyChanged ? "is-recently-changed" : ""}">
+                      <div class="sidebar-manifest-list__item ${isRecentlyChanged ? "is-recently-changed" : ""}" title="${escapeHtml(`${emoji} ${building.displayName}`)}">
                         <span>${escapeHtml(`${emoji} ${building.displayName}`)}</span>
                         <div class="sidebar-manifest-list__meta">
                           <em>${escapeHtml(formatBuildingQualityDisplay(building))}</em>
@@ -126,8 +129,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
     `;
   }
 
-  const activeSaveSlot = Math.max(1, Math.min(SAVE_SLOT_COUNT, Number(state.settings.activeSaveSlot ?? 1) || 1));
-  const manualSaveMeta = getManualSaveMeta(activeSaveSlot);
+  const manualSaveMeta = getManualSaveMeta();
   const townFocusAvailability = getTownFocusAvailability(state);
   const currentFocus = getCurrentTownFocus(state);
   const cityAlertCount = getCriticalAlerts(state).length;
@@ -135,6 +137,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
   const manifestedBuildings = state.buildings.filter((building) => building.isComplete);
   const incubatingBuildings = getActiveConstructionQueue(state);
   const availableBuildings = getAvailableConstructionQueue(state);
+  const firebaseMeta = state.transientUi?.firebasePublishedMeta ?? null;
   const summary = [
     ["Gold", state.resources.gold],
     ["Food", state.resources.food],
@@ -213,27 +216,29 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
             <span>Player Mode</span>
             <strong>Open Shared Player Screen</strong>
           </a>
-          ${state.ui.adminUnlocked ? `<button class="button sidebar-publish-button" data-action="publish-to-players">Publish To Players</button>` : ""}
           <button class="button button--ghost" data-action="open-catalog">Building Catalog</button>
           <button class="button button--ghost" data-action="open-admin">${state.settings.liveSessionView ? "GM Console" : "Admin Console"}</button>
           <div class="sidebar-nav__save-actions">
-            <label class="sidebar-nav__save-slot">
-              <span>Save Slot</span>
-              <select data-action="set-save-slot">
-                ${Array.from({ length: SAVE_SLOT_COUNT }, (_, index) => {
-                  const slot = index + 1;
-                  return `<option value="${slot}" ${slot === activeSaveSlot ? "selected" : ""}>Slot ${slot}</option>`;
-                }).join("")}
-              </select>
-            </label>
-            <button class="button button--ghost" data-action="save-manual-state">Save State</button>
-            <button class="button button--ghost" data-action="load-manual-state">Load State</button>
+            <button class="button button--ghost" data-action="save-firebase-realm">Save</button>
+            <button class="button button--ghost" data-action="load-firebase-realm">Load</button>
+            <button class="button button--ghost" data-action="save-manual-state">Local Save</button>
+            <button class="button button--ghost" data-action="load-manual-state">Local Load</button>
           </div>
+          ${
+            firebaseMeta?.updatedAtMs
+              ? `
+                <div class="sidebar-nav__build">
+                  <span>Firebase Save</span>
+                  <strong>${new Date(firebaseMeta.updatedAtMs).toLocaleString()}</strong>
+                </div>
+              `
+              : ""
+          }
           ${
             manualSaveMeta?.manualSavedAt
               ? `
                 <div class="sidebar-nav__build">
-                  <span>Slot ${activeSaveSlot} Save</span>
+                  <span>Local Save</span>
                   <strong>${new Date(manualSaveMeta.manualSavedAt).toLocaleString()}</strong>
                 </div>
               `
