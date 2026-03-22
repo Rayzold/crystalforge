@@ -8,7 +8,7 @@ import {
   getDriftConstructionSlots,
   isBuildingActivelyConstructed
 } from "../systems/ConstructionSystem.js";
-import { formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
+import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js";
 import { renderUiIcon } from "./UiIcons.js";
 
 function renderIcon(iconKey) {
@@ -85,6 +85,11 @@ function getCompactStatus(building, { isIncomplete, isActiveConstruction, queueP
 
 function getCompactStageBadge(building) {
   return `${Math.round(Number(building.quality ?? 0))}%`;
+}
+
+function getQualityMultiplierReadout(building) {
+  const multiplier = getBuildingMultiplier(building?.quality ?? 0);
+  return `${formatBuildingExactQualityDisplay(building)}${multiplier > 1 ? ` · ${multiplier}x` : ""}`;
 }
 
 function getInputWarnings(building, state, etaDetails, economySummary) {
@@ -176,10 +181,10 @@ export function renderBuildingCard(building, state) {
             <h4>${building.mapPosition ? `Hex ${building.mapPosition.q}, ${building.mapPosition.r}` : "Awaiting placement"}</h4>
             <p>${escapeHtml(compactStatus)}</p>
           </div>
-          <strong class="building-card__multiplier">${building.isComplete ? getCompactStageBadge(building) : "--"}</strong>
+          <strong class="building-card__multiplier">${building.isComplete ? getQualityMultiplierReadout(building) : "--"}</strong>
         </div>
         <div class="building-card__quality">
-          <span>Stage ${escapeHtml(formatBuildingQualityDisplay(building))}</span>
+          <span>${building.isComplete ? escapeHtml(getQualityMultiplierReadout(building)) : `Stage ${escapeHtml(formatBuildingQualityDisplay(building))}`}</span>
           <span>${isRuined ? "Ruined" : building.isComplete ? "Complete" : "Incomplete"}</span>
         </div>
         <div class="progress-bar"><span style="width:${progressPercent}%"></span></div>

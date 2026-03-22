@@ -7,7 +7,7 @@ import { APP_VERSION, BUILD_NOTES } from "../content/Config.js";
 import { GLOSSARY_TERMS } from "../content/GlossaryConfig.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js";
-import { formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
+import { formatBuildingExactQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js";
 import { getMayorAdvice, getTownFocusAvailability } from "../systems/TownFocusSystem.js";
 import { getTownFocusHistory } from "../systems/TownFocusSystem.js";
 import { getCityTrendSummary, getResourceChainSummary } from "../systems/ResourceSystem.js";
@@ -229,6 +229,11 @@ function renderHomeRouteDeck() {
   `;
 }
 
+function getQualityMultiplierReadout(building) {
+  const multiplier = getBuildingMultiplier(building?.quality ?? 0);
+  return `${formatBuildingExactQualityDisplay(building)}${multiplier > 1 ? ` · ${multiplier}x` : ""}`;
+}
+
 function renderRealmGoals(state) {
   const goals = getRealmGoals(state);
   return `
@@ -333,7 +338,7 @@ function renderFeaturedBuildings(state) {
                       </div>
                       <div class="featured-building__meta">
                         <h4>${escapeHtml(building.displayName)}</h4>
-                        <span>${escapeHtml(building.rarity)} / ${escapeHtml(formatBuildingQualityDisplay(building))}</span>
+                        <span>${escapeHtml(building.rarity)} / ${escapeHtml(getQualityMultiplierReadout(building))}</span>
                         <p>${escapeHtml(building.specialEffect)}</p>
                         <div class="featured-building__actions">
                           <button class="button button--ghost" data-action="inspect-building" data-building-id="${building.id}">Open Details</button>

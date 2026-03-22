@@ -8,7 +8,7 @@ import { GLOSSARY_TERMS } from "../content/GlossaryConfig.js";
 import { RARITY_ORDER } from "../content/Rarities.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js";
-import { formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
+import { formatBuildingExactQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js";
 import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js";
 import { getCityTrendSummary, getResourceChainSummary } from "../systems/ResourceSystem.js";
 import { getMayorAdvice } from "../systems/TownFocusSystem.js";
@@ -334,6 +334,11 @@ function filterBuildingsByRarity(buildings, rarityFilter) {
   return buildings.filter((building) => building.rarity === rarityFilter);
 }
 
+function getQualityMultiplierReadout(building) {
+  const multiplier = getBuildingMultiplier(building?.quality ?? 0);
+  return `${formatBuildingExactQualityDisplay(building)}${multiplier > 1 ? ` · ${multiplier}x` : ""}`;
+}
+
 function renderManifestedList(title, subtitle, buildings, emptyText, state) {
   return `
     <section class="panel player-list player-list--manifested">
@@ -355,7 +360,7 @@ function renderManifestedList(title, subtitle, buildings, emptyText, state) {
                         <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
                         <span>${escapeHtml(building.rarity)} / ${escapeHtml(building.district ?? "Unassigned")}</span>
                       </div>
-                      <em>${escapeHtml(formatBuildingQualityDisplay(building))}</em>
+                      <em>${escapeHtml(getQualityMultiplierReadout(building))}</em>
                     </article>
                   `
                 )

@@ -2,7 +2,7 @@ import { APP_VERSION, MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js";
 import { getBuildingEmoji } from "../content/BuildingCatalog.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
-import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
+import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js";
 import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js";
 import { getCityTrendSummary } from "../systems/ResourceSystem.js";
 import { getManualSaveMeta } from "../systems/StorageSystem.js";
@@ -108,8 +108,8 @@ function renderSidebarBuildingList(state, title, items, emptyLabel, variant = "a
                         <div class="sidebar-manifest-list__meta">
                           <em>${escapeHtml(
                             variant === "active"
-                              ? formatBuildingExactQualityDisplay(building)
-                              : `${formatBuildingExactQualityDisplay(building)} quality`
+                              ? `${formatBuildingExactQualityDisplay(building)}${getBuildingMultiplier(building.quality) > 1 ? ` · ${getBuildingMultiplier(building.quality)}x` : ""}`
+                              : formatBuildingExactQualityDisplay(building)
                           )}</em>
                           ${
                             etaDetails

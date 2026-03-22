@@ -2,7 +2,7 @@ import { getBuildingEconomySummary, getBuildingEmoji } from "../content/Building
 import { RARITY_COLORS } from "../content/Rarities.js";
 import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
-import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
+import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js";
 import {
   getConstructionEtaDetails,
   getConstructionQueuePosition,
@@ -64,6 +64,11 @@ function getSignatureReadout(building) {
     .slice(0, 5);
 }
 
+function getQualityMultiplierReadout(building) {
+  const multiplier = getBuildingMultiplier(building?.quality ?? 0);
+  return `${formatBuildingExactQualityDisplay(building)}${multiplier > 1 ? ` · ${multiplier}x` : ""}`;
+}
+
 export function renderBuildingDetailModal(state, pageKey) {
   const buildingId = state.transientUi?.inspectedBuildingId;
   if (!buildingId) {
@@ -119,7 +124,7 @@ export function renderBuildingDetailModal(state, pageKey) {
           <p class="building-detail__flavor">${escapeHtml(building.flavorText ?? "No flavor text has been etched into the city chronicle yet.")}</p>
           <div class="building-detail__chips">
             <span class="detail-chip">${isRuined ? "Ruined" : building.isComplete ? escapeHtml(formatBuildingQualityDisplay(building)) : "Inactive"}</span>
-            <span class="detail-chip">Exact ${escapeHtml(formatBuildingExactQualityDisplay(building))}</span>
+            <span class="detail-chip">${escapeHtml(getQualityMultiplierReadout(building))}</span>
             <span class="detail-chip">${building.mapPosition ? `Hex ${building.mapPosition.q}, ${building.mapPosition.r}` : "Unplaced"}</span>
           </div>
           <div class="building-detail__actions">

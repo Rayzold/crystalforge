@@ -7,7 +7,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.2.57";
+export const APP_VERSION = "v1.2.58";
 export const SAVE_VERSION = 10;
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3";
 export const FIREBASE_CONFIG = {
@@ -34,6 +34,7 @@ export const PAGE_ROUTES = [
   { key: "chronicle", label: "Chronicle", href: "./chronicle.html" }
 ];
 export const BUILD_NOTES = [
+  "Exact building quality now reads more consistently across the app: stream cards, player lists, featured structures, and dossiers all show values like 125% or 272% · 2x instead of relying only on stage labels.",
   "Incubator slots are now explicit assignments: canceling a building leaves that slot empty until you choose another one, while older saves seed their currently active incubators once during migration.",
   "Repeat manifestations on existing buildings now show a carry-over quality animation in the completion modal, and active building cards show exact current quality like 100% or 125% instead of a generic active badge.",
   "Home and shell readability are stronger: the main call-to-action is clearer, resource deltas now show current stock plus daily movement, sidebar navigation has more hierarchy, and empty states now offer direct next-step actions.",
