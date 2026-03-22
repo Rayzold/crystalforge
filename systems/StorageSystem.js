@@ -319,6 +319,43 @@ function migrateLegacyCrystalUpgradeBuildings(state) {
   }
 }
 
+function hasAdminCitizenHistory(rawSave) {
+  return Array.isArray(rawSave?.historyLog) &&
+    rawSave.historyLog.some((entry) => {
+      const title = String(entry?.title ?? "");
+      const details = String(entry?.details ?? "");
+      return entry?.category === "Citizens" && /admin/i.test(`${title} ${details}`);
+    });
+}
+
+function hasLikelyCitizenInflation(nextState, rawSave) {
+  const totalPopulation = Object.values(nextState.citizens ?? {}).reduce((sum, value) => sum + Number(value || 0), 0);
+  const suspiciousClasses = ["Merchants", "Nobles", "Scribes", "Soldiers"];
+  return (
+    Number(rawSave?.version ?? 0) < 11 &&
+    totalPopulation > 100000 &&
+    suspiciousClasses.some((citizenClass) => Number(nextState.citizens?.[citizenClass] ?? 0) > 1000)
+  );
+}
+
+function repairLikelyCitizenInflation(rawSave, nextState, base) {
+  if (!hasLikelyCitizenInflation(nextState, rawSave) || hasAdminCitizenHistory(rawSave)) {
+    return;
+  }
+
+  nextState.citizens = structuredClone(base.citizens);
+  nextState.resources.population = Object.values(nextState.citizens).reduce((sum, value) => sum + Number(value || 0), 0);
+  nextState.historyLog = [
+    {
+      category: "Citizens",
+      title: "Citizen inflation repaired",
+      details: "A pre-v1.2.59 save had runaway citizen growth from legacy migration and was restored to the current baseline roster.",
+      date: formatDate(nextState.calendar?.dayOffset ?? 0)
+    },
+    ...(Array.isArray(nextState.historyLog) ? nextState.historyLog : [])
+  ];
+}
+
 export function validateAndMigrateSave(rawSave) {
   const base = createInitialState();
   if (!rawSave || typeof rawSave !== "object") {
@@ -378,6 +415,7 @@ export function validateAndMigrateSave(rawSave) {
   }
 
   nextState.resources.population = Object.values(nextState.citizens).reduce((sum, value) => sum + value, 0);
+  repairLikelyCitizenInflation(rawSave, nextState, base);
   // Old saves may still contain Crystal Upgrade as a building, so normalize them into crystals on load.
   migrateLegacyCrystalUpgradeBuildings(nextState);
   syncDriftEvolutionState(nextState);

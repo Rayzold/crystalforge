@@ -6,14 +6,13 @@ import {
 import { sumObjectValues } from "../engine/Utils.js";
 import { addHistoryEntry } from "./HistoryLogSystem.js";
 
+// Legacy-only class names from pre-rework saves.
+// Do not include names that are also valid current classes, or load-time
+// normalization will re-inflate those citizens every time a save is read.
 const LEGACY_CITIZEN_MIGRATION = {
   Peasants: { Farmers: 0.5, Laborers: 0.2, Children: 0.15, Elderly: 0.15 },
   Workers: { Laborers: 0.4, Crafters: 0.25, Fishermen: 0.1, Techwrights: 0.1, Scavengers: 0.15 },
-  Merchants: { Merchants: 0.65, Scribes: 0.15, Entertainers: 0.2 },
-  Scholars: { Scribes: 0.5, Arcanists: 0.2, Techwrights: 0.15, Medics: 0.15 },
   Clergy: { Priests: 0.7, Medics: 0.3 },
-  Soldiers: { Defenders: 0.45, Soldiers: 0.45, Scouts: 0.1 },
-  Nobles: { Nobles: 0.85, Scribes: 0.15 },
   Mages: { Arcanists: 0.75, Techwrights: 0.25 },
   Miners: { Scavengers: 0.4, Laborers: 0.3, Techwrights: 0.3 },
   Craftsmen: { Crafters: 0.8, Techwrights: 0.2 },
