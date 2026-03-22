@@ -92,6 +92,20 @@ function renderBuildingsView(state) {
           <button class="button button--ghost ${currentView === "map" ? "is-active" : ""}" data-action="set-city-building-view" data-view="map">Town Map</button>
         </div>
         <div class="city-workspace__top-actions">
+          <div class="city-workspace__time-controls">
+            <button class="button button--ghost" data-action="advance-time" data-step="day">+1 Day</button>
+            <button class="button button--ghost" data-action="advance-time" data-step="3days">+3 Days</button>
+            <button class="button button--ghost" data-action="advance-time" data-step="week">+1 Week</button>
+            <button class="button button--ghost" data-action="advance-time" data-step="month">+1 Month</button>
+            <button class="button button--ghost" data-action="advance-time" data-step="year">+1 Year</button>
+          </div>
+          <div class="city-workspace__custom-time">
+            <label class="calendar-panel__custom-days">
+              Advance by Days
+              <input type="number" min="1" step="1" value="14" data-role="custom-days" />
+            </label>
+            <button class="button button--ghost" data-action="advance-custom-time">Advance Custom Span</button>
+          </div>
           <button class="button city-workspace__map-shortcut ${currentView === "map" ? "is-active" : ""}" data-action="set-city-building-view" data-view="map">Open Map</button>
           <span class="city-workspace__total">Total Rolls: ${formatNumber(totalRolls, 0)}</span>
         </div>
