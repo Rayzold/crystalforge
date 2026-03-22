@@ -1,6 +1,8 @@
 export const MAP_CONFIG = {
-  radius: 6,
-  hexSize: 28,
+  radius: 7,
+  cityRadius: 6,
+  fortificationRingRadius: 7,
+  hexSize: 26,
   coreRingRadius: 1,
   blockedTerrainColor: "#151515",
   selectableTerrainColor: "#f7eb98",
@@ -16,7 +18,7 @@ export const MAP_ADJACENCY_CONFIG = {
     agriculture: { forest: 0.1, neutral: 0.03, river: 0.05 },
     trade: { river: 0.1, sea: 0.08, neutral: 0.04 },
     housing: { neutral: 0.05, forest: 0.03 },
-    military: { frontier: 0.12, mountain: 0.08 },
+    military: { frontier: 0.12, mountain: 0.08, bastion: 0.14 },
     industry: { mountain: 0.12, scar: 0.08, river: 0.04 },
     arcane: { scar: 0.12, frontier: 0.08, sea: 0.05 },
     religious: { forest: 0.08, scar: 0.04, neutral: 0.03 },
@@ -24,7 +26,7 @@ export const MAP_ADJACENCY_CONFIG = {
     culture: { neutral: 0.05, river: 0.04 },
     frontier: { frontier: 0.14, scar: 0.08, mountain: 0.05 },
     civic: { neutral: 0.04, river: 0.03 },
-    security: { frontier: 0.08, mountain: 0.05 }
+    security: { frontier: 0.08, mountain: 0.05, bastion: 0.1 }
   }
 };
 
@@ -37,5 +39,6 @@ export const MAP_TERRAIN_THEMES = {
   sea: { fill: "#003e58", stroke: "#0b2333" },
   frontier: { fill: "#a19b5a", stroke: "#5f5a2d" },
   scar: { fill: "#ff774b", stroke: "#7a301e" },
+  bastion: { fill: "#78849f", stroke: "#334057" },
   reserve: { fill: "#0b0d12", stroke: "#2b2f3c" }
 };

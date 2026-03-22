@@ -6644,6 +6644,7 @@ body:-webkit-full-screen #app {
 
 .hex-map-panel {
   overflow: hidden;
+  position: relative;
 }
 
 .hex-map-panel__status,
@@ -6730,6 +6731,36 @@ body:-webkit-full-screen #app {
   margin-bottom: 14px;
 }
 
+.hex-map-panel__status-card {
+  flex: 1 1 210px;
+  min-width: 0;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(11, 16, 26, 0.94), rgba(18, 24, 37, 0.88));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.hex-map-panel__status-card--selected {
+  border-color: rgba(255, 228, 143, 0.16);
+  background: linear-gradient(180deg, rgba(24, 18, 14, 0.96), rgba(17, 22, 33, 0.9));
+}
+
+.hex-map-panel__status-card--city {
+  border-color: rgba(255, 228, 143, 0.12);
+  background: linear-gradient(180deg, rgba(22, 19, 10, 0.96), rgba(20, 24, 33, 0.9));
+}
+
+.hex-map-panel__status-card--bastion {
+  border-color: rgba(170, 202, 255, 0.18);
+  background: linear-gradient(180deg, rgba(16, 26, 44, 0.98), rgba(26, 34, 53, 0.92));
+}
+
+.hex-map-panel__status-card--ready {
+  border-color: rgba(185, 216, 255, 0.12);
+  background: linear-gradient(180deg, rgba(14, 20, 31, 0.98), rgba(17, 23, 34, 0.92));
+}
+
 .hex-map-panel__status strong,
 .hex-map-panel__status span {
   display: block;
@@ -6756,22 +6787,72 @@ body:-webkit-full-screen #app {
 }
 
 .hex-map-wrap {
-  padding: 12px;
+  position: relative;
+  overflow: hidden;
+  padding: 18px 20px 22px;
   margin-bottom: 14px;
-  border-radius: 24px;
+  border-radius: 28px;
   background:
-    radial-gradient(circle at center, rgba(255, 255, 255, 0.04), transparent 40%),
-    radial-gradient(circle at 18% 22%, rgba(88, 184, 255, 0.06), transparent 18%),
-    radial-gradient(circle at 82% 18%, rgba(229, 140, 255, 0.05), transparent 16%),
-    linear-gradient(180deg, rgba(5, 8, 13, 0.98), rgba(10, 14, 22, 0.98));
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+    radial-gradient(circle at 50% 44%, rgba(255, 227, 140, 0.07), transparent 24%),
+    radial-gradient(circle at 50% 50%, rgba(150, 188, 255, 0.12), transparent 45%),
+    radial-gradient(circle at 18% 22%, rgba(88, 184, 255, 0.07), transparent 18%),
+    radial-gradient(circle at 82% 18%, rgba(229, 140, 255, 0.04), transparent 16%),
+    linear-gradient(180deg, rgba(4, 8, 14, 0.99), rgba(10, 16, 25, 0.98));
+  border: 1px solid rgba(170, 202, 255, 0.12);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+    inset 0 24px 40px rgba(255, 244, 195, 0.02),
+    0 18px 42px rgba(0, 0, 0, 0.28);
+}
+
+.hex-map-wrap::before,
+.hex-map-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.hex-map-wrap::before {
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 233, 157, 0.08), transparent 22%),
+    radial-gradient(circle at 50% 50%, rgba(134, 186, 255, 0.09), transparent 46%);
+  opacity: 0.95;
+}
+
+.hex-map-wrap::after {
+  inset: 10px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow:
+    inset 0 0 0 1px rgba(150, 188, 255, 0.04),
+    0 0 0 1px rgba(255, 228, 143, 0.03);
 }
 
 .hex-map {
+  position: relative;
   width: 100%;
   height: auto;
   display: block;
+}
+
+.hex-map__zone-field {
+  pointer-events: none;
+  stroke-width: 1.1;
+}
+
+.hex-map__zone-field--city {
+  fill: rgba(255, 228, 143, 0.1);
+  stroke: rgba(255, 228, 143, 0.14);
+  filter: drop-shadow(0 0 10px rgba(255, 228, 143, 0.08));
+}
+
+.hex-map__zone-field--bastion {
+  fill: rgba(150, 188, 255, 0.12);
+  stroke: rgba(196, 218, 255, 0.26);
+  filter: drop-shadow(0 0 14px rgba(150, 188, 255, 0.14));
+  animation: bastionFieldPulse 4.6s ease-in-out infinite;
 }
 
 .hex-map__district-field {
@@ -6906,6 +6987,42 @@ body:-webkit-full-screen #app {
   filter: drop-shadow(0 0 8px rgba(141, 214, 255, 0.42));
 }
 
+.hex-map__cell-face {
+  transition: filter 180ms ease, stroke 180ms ease, opacity 180ms ease;
+}
+
+.hex-map__cell-bevel {
+  pointer-events: none;
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-width: 1;
+  opacity: 0.42;
+}
+
+.hex-map__cell.is-reserved .hex-map__cell-face {
+  stroke: rgba(174, 194, 226, 0.16);
+  filter: drop-shadow(0 0 10px rgba(120, 151, 212, 0.12));
+}
+
+.hex-map__cell.is-city-plot .hex-map__cell-face {
+  filter: drop-shadow(0 0 6px rgba(255, 228, 143, 0.06));
+}
+
+.hex-map__cell.is-fortification-ring .hex-map__cell-face {
+  stroke: rgba(214, 228, 255, 0.42);
+  filter: drop-shadow(0 0 10px rgba(150, 188, 255, 0.18));
+}
+
+.hex-map__cell.is-fortification-ring .hex-map__cell-bevel {
+  stroke: rgba(231, 240, 255, 0.3);
+  opacity: 0.56;
+}
+
+.hex-map__cell.is-fortification-ring.is-hovered .hex-map__cell-face,
+.hex-map__cell.is-fortification-ring.is-focused .hex-map__cell-face,
+.hex-map__cell.is-fortification-ring.is-selected .hex-map__cell-face {
+  filter: drop-shadow(0 0 16px rgba(176, 213, 255, 0.28));
+}
+
 .hex-map__cell.is-adjacent polygon:first-of-type {
   stroke-width: 2.5;
 }
@@ -7029,6 +7146,11 @@ body:-webkit-full-screen #app {
   background: radial-gradient(circle at 35% 35%, rgba(255, 240, 194, 0.92), rgba(159, 101, 255, 0.72));
   border: 1px solid rgba(241, 247, 255, 0.82);
   border-radius: 999px;
+}
+
+.legend-swatch--bastion {
+  background: linear-gradient(135deg, rgba(141, 170, 220, 0.95), rgba(81, 97, 137, 0.92));
+  border: 1px solid rgba(214, 228, 255, 0.42);
 }
 
 @keyframes districtPulse {
@@ -8541,6 +8663,18 @@ body:-webkit-full-screen #app {
 
   .chronicle-calendar__detail-conditions {
     grid-template-columns: 1fr;
+  }
+}
+
+@keyframes bastionFieldPulse {
+  0% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.92;
+  }
+  100% {
+    opacity: 0.55;
   }
 }
 

@@ -7,7 +7,8 @@ import {
   getBuildingPlacementBonuses,
   getBuildingTerrain,
   getCellKey,
-  getNeighborCoords
+  getNeighborCoords,
+  isFortificationBuilding
 } from "../systems/MapSystem.js";
 
 const HEX_NEIGHBORS = [
@@ -122,6 +123,13 @@ function renderDistrictCrest(building, districtColor, cx, cy, size) {
 
 function renderTerrainGlyph(cell, cx, cy) {
   switch (cell.terrain) {
+    case "bastion":
+      return `
+        <g class="hex-map__glyph">
+          <path d="M${cx - 12} ${cy + 8}v-10h6v4h6v-4h6v4h6v-4h6v10"></path>
+          <path d="M${cx - 12} ${cy + 8}h24"></path>
+        </g>
+      `;
     case "forest":
       return `
         <g class="hex-map__glyph">
@@ -197,6 +205,16 @@ function renderWaterOverlay(cell, cx, cy) {
   }
 
   return "";
+}
+
+function renderZoneField(cells, size, className, predicate, scale = 1.02) {
+  return cells
+    .filter(predicate)
+    .map((cell) => {
+      const center = axialToPixel(cell.q, cell.r, size);
+      return `<polygon class="${className}" points="${hexPoints(center.x, center.y, size * scale)}"></polygon>`;
+    })
+    .join("");
 }
 
 function renderRoads(state, size) {
@@ -358,6 +376,14 @@ function renderCellInspector(state, cell, selectedBuilding) {
 
   const occupant = getBuildingAtCell(state, cell.q, cell.r);
   const influence = getDistrictInfluence(state, cell);
+  const zoneLabel = cell.isReserved ? "Forge Core" : cell.isFortificationRing ? "Bastion Ring" : "City Plot";
+  const zoneDetail = cell.isReserved
+    ? "The central forge remains reserved for the core."
+    : cell.isFortificationRing
+      ? "Defense-only rampart hex for walls, towers, and war engines."
+      : "Standard city placement hex for civic, trade, housing, and utility structures.";
+  const placementValidation =
+    selectedBuilding && !occupant ? canPlaceBuildingAt(state, selectedBuilding.id, cell.q, cell.r) : null;
   const previewTarget =
     occupant ??
     (selectedBuilding && !cell.isReserved
@@ -369,9 +395,14 @@ function renderCellInspector(state, cell, selectedBuilding) {
   return `
     <div class="hex-map-tooltip">
       <article>
+        <span>Zone</span>
+        <strong>${escapeHtml(zoneLabel)}</strong>
+        <small>${escapeHtml(zoneDetail)}</small>
+      </article>
+      <article>
         <span>Hex</span>
         <strong>${cell.q}, ${cell.r}</strong>
-        <small>${cell.isReserved ? "Reserved forge core" : escapeHtml(terrain ?? "neutral")} terrain</small>
+        <small>${escapeHtml(terrain ?? "neutral")} terrain</small>
       </article>
       <article>
         <span>District Influence</span>
@@ -393,7 +424,9 @@ function renderCellInspector(state, cell, selectedBuilding) {
         <span>Placement Bonus</span>
         <strong>${placementBonus ? `${formatNumber(placementBonus.totalPercent * 100, 1)}%` : "0%"}</strong>
         <small>${
-          placementBonus?.reasons.length
+          placementValidation && !placementValidation.ok
+            ? escapeHtml(placementValidation.reason)
+            : placementBonus?.reasons.length
             ? escapeHtml(placementBonus.reasons.join(" / "))
             : "No adjacency or terrain bonus from this view."
         }</small>
@@ -415,9 +448,29 @@ export function renderHexMap(state) {
     selectedBuilding && state.districts.definitions[selectedBuilding.district]
       ? state.districts.definitions[selectedBuilding.district].color
       : null;
+  const selectedBuildingCanUseBastion = selectedBuilding ? isFortificationBuilding(selectedBuilding) : false;
   const focalCell = hoveredMapCell ?? state.ui.selectedMapCell ?? selectedPosition ?? null;
   const focalMapCell = focalCell ? state.map.cells.find((cell) => cell.q === focalCell.q && cell.r === focalCell.r) ?? null : null;
   const adjacencyPulse = state.transientUi?.adjacencyPulse ?? null;
+  const bastionPlotCount = cells.filter((cell) => cell.isFortificationRing).length;
+  const cityPlotCount = cells.filter((cell) => !cell.isReserved && !cell.isFortificationRing).length;
+  const placedCityPlotCount = state.buildings.filter((building) => {
+    if (!building.mapPosition) {
+      return false;
+    }
+    const cell = state.map.cells.find((entry) => entry.q === building.mapPosition.q && entry.r === building.mapPosition.r);
+    return Boolean(cell && !cell.isReserved && !cell.isFortificationRing);
+  }).length;
+  const occupiedBastionCount = state.buildings.filter((building) => {
+    if (!building.mapPosition) {
+      return false;
+    }
+    const cell = state.map.cells.find((entry) => entry.q === building.mapPosition.q && entry.r === building.mapPosition.r);
+    return Boolean(cell?.isFortificationRing);
+  }).length;
+  const defensiveBacklogCount = state.buildings.filter(
+    (building) => !building.mapPosition && isFortificationBuilding(building)
+  ).length;
   const adjacentKeys = new Set(
     focalCell ? getNeighborCoords(focalCell.q, focalCell.r).map((cell) => getCellKey(cell.q, cell.r)) : []
   );
@@ -428,35 +481,56 @@ export function renderHexMap(state) {
       ? `Previewing ${selectedBuilding?.displayName ?? "placement"} at hex ${hoveredMapCell.q}, ${hoveredMapCell.r}`
       : previewValidation?.reason ?? `Hex ${hoveredMapCell.q}, ${hoveredMapCell.r}`
     : selectedBuilding
-      ? "Hover an outer hex to preview adjacency and placement."
-      : "Select a building card or occupied hex";
+      ? selectedBuildingCanUseBastion
+        ? "Hover a city plot or bastion hex to preview placement."
+        : "Hover a city plot to preview placement. The bastion ring is defense-only."
+      : "Select a building from the stream or click an occupied hex to inspect it.";
+  const selectionStrength = selectedBuilding
+    ? selectedBuildingCanUseBastion
+      ? "Can be placed in the city ring or on the bastion."
+      : "Can be placed only in the city ring."
+    : "Pick a building to see where it belongs.";
 
   return `
     <section class="panel hex-map-panel">
       <div class="panel__header">
-        <h3>Hex District Map</h3>
-        <span class="panel__subtle">Core 7 hexes are reserved for the forge and starting works</span>
+        <h3>City Ring Map</h3>
+        <span class="panel__subtle">Forge core at the center, civic plots through the middle, and a fortified outer bastion reserved for walls, towers, and war engines.</span>
       </div>
       <div class="hex-map-panel__status">
-        <div>
+        <div class="hex-map-panel__status-card hex-map-panel__status-card--selected">
           <strong>${selectedBuilding ? escapeHtml(selectedBuilding.displayName) : "No building selected"}</strong>
           <span>${
             selectedPosition
               ? `Currently at hex ${selectedPosition.q}, ${selectedPosition.r}`
               : selectedBuilding
-                ? "Click an outer hex to place it"
+                ? selectedBuildingCanUseBastion
+                  ? "Click a city plot or bastion hex to place it"
+                  : "Click a city plot to place it"
                 : "Select a building card or occupied hex"
           }</span>
           <span>${escapeHtml(previewMessage)}</span>
+          <span>${escapeHtml(selectionStrength)}</span>
           ${
             selectedBuilding
               ? `<span class="hex-map-panel__district"><i class="legend-swatch" style="background:${selectedDistrictColor}; border-color:${selectedDistrictColor};"></i>${escapeHtml(selectedBuilding.district)}</span>`
               : ""
           }
         </div>
-        <div>
-          <strong>${unplacedCount}</strong>
-          <span>Buildings still unplaced</span>
+        <div class="hex-map-panel__status-card hex-map-panel__status-card--city">
+          <strong>${placedCityPlotCount} / ${cityPlotCount}</strong>
+          <span>Inner city plots occupied</span>
+          <span>${unplacedCount} buildings still waiting for placement</span>
+        </div>
+        <div class="hex-map-panel__status-card hex-map-panel__status-card--bastion">
+          <strong>${occupiedBastionCount} / ${bastionPlotCount}</strong>
+          <span>Bastion ring occupied</span>
+          <span>Walls, towers, and war engines only</span>
+        </div>
+        <div class="hex-map-panel__status-card hex-map-panel__status-card--ready">
+          <strong>${defensiveBacklogCount}</strong>
+          <span>Unplaced defensive structures</span>
+          <span>${defensiveBacklogCount ? "Ready to claim bastion hexes." : "No defenses are waiting for the ring."}</span>
         </div>
       </div>
       <div class="hex-map-wrap">
@@ -466,6 +540,10 @@ export function renderHexMap(state) {
           role="img"
           aria-label="City hex map"
         >
+          <g class="hex-map__zone-fields">
+            ${renderZoneField(cells, size, "hex-map__zone-field hex-map__zone-field--city", (cell) => !cell.isReserved && !cell.isFortificationRing)}
+            ${renderZoneField(cells, size, "hex-map__zone-field hex-map__zone-field--bastion", (cell) => cell.isFortificationRing, 1.06)}
+          </g>
           <g class="hex-map__district-fields">
             ${renderDistrictInfluenceField(state, cells, size)}
           </g>
@@ -488,7 +566,9 @@ export function renderHexMap(state) {
                 ? "Forge core"
                 : building
                   ? `${building.displayName} (${building.rarity} / ${building.district})`
-                  : `Open hex ${cell.q}, ${cell.r}`;
+                  : cell.isFortificationRing
+                    ? `Bastion hex ${cell.q}, ${cell.r}`
+                    : `City plot ${cell.q}, ${cell.r}`;
               const districtColor =
                 building && state.districts.definitions[building.district]
                   ? state.districts.definitions[building.district].color
@@ -501,18 +581,24 @@ export function renderHexMap(state) {
 
               return `
                 <g
-                  class="hex-map__cell ${cell.isReserved ? "is-reserved" : ""} ${building ? "is-occupied" : ""} ${isSelected ? "is-selected" : ""} ${isFocusedCell ? "is-focused" : ""} ${hoveredMapCell && hoveredMapCell.q === cell.q && hoveredMapCell.r === cell.r ? "is-hovered" : ""} ${adjacentKeys.has(cell.key) ? "is-adjacent" : ""} ${isPulseCell ? "is-resonance-pulse" : ""} ${selectedBuilding && hoveredMapCell && hoveredMapCell.q === cell.q && hoveredMapCell.r === cell.r && !building && !cell.isReserved ? (previewValidation?.ok ? "is-preview-valid" : "is-preview-invalid") : ""}"
+                  class="hex-map__cell ${cell.isReserved ? "is-reserved" : ""} ${cell.isFortificationRing ? "is-fortification-ring" : "is-city-plot"} ${building ? "is-occupied" : ""} ${isSelected ? "is-selected" : ""} ${isFocusedCell ? "is-focused" : ""} ${hoveredMapCell && hoveredMapCell.q === cell.q && hoveredMapCell.r === cell.r ? "is-hovered" : ""} ${adjacentKeys.has(cell.key) ? "is-adjacent" : ""} ${isPulseCell ? "is-resonance-pulse" : ""} ${selectedBuilding && hoveredMapCell && hoveredMapCell.q === cell.q && hoveredMapCell.r === cell.r && !building && !cell.isReserved ? (previewValidation?.ok ? "is-preview-valid" : "is-preview-invalid") : ""}"
                   data-action="select-map-cell"
                   data-q="${cell.q}"
                   data-r="${cell.r}"
                 >
                   <title>${escapeHtml(title)}</title>
                   <polygon
+                    class="hex-map__cell-face"
                     points="${hexPoints(center.x, center.y, size)}"
                     fill="${fill}"
                     stroke="${building ? MAP_CONFIG.occupiedOutlineColor : theme.stroke}"
                     stroke-width="${isSelected || isFocusedCell ? 3 : 1.5}"
                     aria-label="${escapeHtml(title)}"
+                  ></polygon>
+                  <polygon
+                    class="hex-map__cell-bevel"
+                    points="${hexPoints(center.x, center.y, size * 0.86)}"
+                    fill="none"
                   ></polygon>
                   ${renderWaterOverlay(cell, center.x, center.y)}
                   ${
@@ -566,11 +652,11 @@ export function renderHexMap(state) {
       </div>
       <div class="hex-map-panel__legend">
         <span><i class="legend-swatch legend-swatch--core"></i> Reserved forge core</span>
-        <span><i class="legend-swatch legend-swatch--open"></i> Selectable outer hex</span>
+        <span><i class="legend-swatch legend-swatch--open"></i> City plot</span>
+        <span><i class="legend-swatch legend-swatch--bastion"></i> Bastion ring (defense-only)</span>
         <span><i class="legend-swatch legend-swatch--occupied"></i> Occupied building hex</span>
         <span><i class="legend-swatch legend-swatch--adjacent"></i> Adjacency preview</span>
         <span><i class="legend-swatch legend-swatch--district"></i> District influence field</span>
-        <span><i class="legend-swatch legend-swatch--crest"></i> District crest marker</span>
       </div>
       <div class="hex-map-panel__tooltip">
         ${renderCellInspector(state, focalMapCell, selectedBuilding)}

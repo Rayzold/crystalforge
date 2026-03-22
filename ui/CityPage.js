@@ -92,7 +92,7 @@ function renderBuildingsView(state) {
           <button class="button button--ghost ${currentView === "map" ? "is-active" : ""}" data-action="set-city-building-view" data-view="map">Town Map</button>
         </div>
         <div class="city-workspace__top-actions">
-          <button class="button city-workspace__map-shortcut ${currentView === "map" ? "is-active" : ""}" data-action="set-city-building-view" data-view="map">🗺️ Open Map</button>
+          <button class="button city-workspace__map-shortcut ${currentView === "map" ? "is-active" : ""}" data-action="set-city-building-view" data-view="map">Open Map</button>
           <span class="city-workspace__total">Total Rolls: ${formatNumber(totalRolls, 0)}</span>
         </div>
       </div>

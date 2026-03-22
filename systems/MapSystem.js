@@ -10,6 +10,9 @@ function createTerrainForCell(q, r, distance) {
   if (distance <= MAP_CONFIG.coreRingRadius) {
     return "reserve";
   }
+  if (distance === MAP_CONFIG.fortificationRingRadius) {
+    return "bastion";
+  }
   if (q <= -3 && r >= -1 && r <= 3) {
     return "forest";
   }
@@ -38,6 +41,13 @@ export function getCellKey(q, r) {
   return `${q},${r}`;
 }
 
+export function isFortificationBuilding(building) {
+  if (!building) {
+    return false;
+  }
+  return Number(building?.stats?.defense ?? 0) > 0 || (building.tags ?? []).includes("military");
+}
+
 export function getNeighborCoords(q, r) {
   return [
     { q: q + 1, r },
@@ -62,6 +72,7 @@ export function createMapCells(radius = MAP_CONFIG.radius) {
         r,
         distance,
         isReserved: distance <= MAP_CONFIG.coreRingRadius,
+        isFortificationRing: distance === MAP_CONFIG.fortificationRingRadius,
         terrain: createTerrainForCell(q, r, distance)
       });
     }
@@ -157,6 +168,11 @@ export function canPlaceBuildingAt(state, buildingId, q, r) {
   }
   if (cell.isReserved) {
     return { ok: false, reason: "That hex belongs to the forge core." };
+  }
+
+  const building = state.buildings.find((entry) => entry.id === buildingId) ?? null;
+  if (cell.isFortificationRing && !isFortificationBuilding(building)) {
+    return { ok: false, reason: "The outer bastion ring is reserved for walls and defensive structures." };
   }
 
   const occupant = getBuildingAtCell(state, q, r);
