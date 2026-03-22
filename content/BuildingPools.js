@@ -13,7 +13,7 @@ export const BUILDING_POOLS = {
     "Farmlands",
     "Fishery",
     "Gardens",
-    "General Store",
+    "Trade Center",
     "Grain Silo",
     "Graveyard",
     "Housing: Commoner",
