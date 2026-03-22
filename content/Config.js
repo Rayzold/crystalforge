@@ -4,7 +4,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.2.37";
+export const APP_VERSION = "v1.2.40";
 export const SAVE_VERSION = 10;
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3";
 export const FIREBASE_CONFIG = {
@@ -31,6 +31,9 @@ export const PAGE_ROUTES = [
   { key: "chronicle", label: "Chronicle", href: "./chronicle.html" }
 ];
 export const BUILD_NOTES = [
+  "Planar Tentacles now pulls in a much richer gold stream on top of its harvested food, materials, and salvage, making it feel like a true legendary planar siphon.",
+  "Planar Tentacles now acts like a true legendary land-harvester, dragging in food, materials, salvage, and some gold from the surrounding world while still consuming mana to sustain the breach.",
+  "Morale, health, prosperity, defense, security, and housing strain now matter more directly: strong values boost output and safety, while weak values suppress production and make military or social trouble more likely.",
   "Building catalog values now sync directly to the reviewed BUILDING_OUTPUTS.csv sheet, with the retired General Store row removed and a new BUILDING_OUTPUTS_WITH_BPD.csv export added for construction support review.",
   "Release cleanup removed the unused General Store compatibility alias, cut old save-workflow remnants, and moved manual local saves onto a fresh v3 key.",
   "General Store has been renamed to Trade Center, Grain Silo now protects stored supply instead of generating food, and the common trade/support balance has been tightened around Inn and Stables.",

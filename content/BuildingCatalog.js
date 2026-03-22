@@ -106,7 +106,7 @@ const BUILDING_DEFINITIONS = {
   "Mortality Limiter Remover": defineBuilding({ district: "Arcane District", tags: ["arcane", "housing"], iconKey: "star", profile: gameplay({ mana: -2, upkeep: 30, health: 150, populationSupport: 10 }) }),
   "Planar Anchor": defineBuilding({ district: "Arcane District", tags: ["arcane", "security"], iconKey: "star", profile: gameplay({ mana: -1, upkeep: 30, defense: 30, security: 20, prestige: 40 }) }),
   "Planar Escape Pods": defineBuilding({ district: "Military District", tags: ["military", "arcane"], iconKey: "shield", profile: gameplay({ upkeep: 25 }) }),
-  "Planar Tentacles": defineBuilding({ district: "Arcane District", tags: ["arcane", "military"], iconKey: "star", profile: gameplay({ gold: 20, mana: -3, upkeep: 35, defense: 60, populationSupport: 30 }) }),
+  "Planar Tentacles": defineBuilding({ district: "Arcane District", tags: ["arcane", "military"], iconKey: "star", profile: gameplay({ gold: 40, food: 16, materials: 12, salvage: 8, mana: -3, upkeep: 35, defense: 60, security: 12, populationSupport: 30 }) }),
   "Raestorum Center": defineBuilding({ district: "Cultural District", tags: ["culture", "civic"], iconKey: "spire", profile: gameplay({ gold: 50, mana: -1, goods: 8, upkeep: 40, prosperity: 100, health: 300, populationSupport: 50 }) }),
   "School of Driftum": defineBuilding({ district: "Cultural District", tags: ["culture", "arcane"], iconKey: "scroll", profile: gameplay({ mana: -1, goods: 6, upkeep: 30, prosperity: 80, morale: 60, populationSupport: 250 }) }),
   "Shield Generator": defineBuilding({ district: "Arcane District", tags: ["arcane", "military"], iconKey: "signal", profile: gameplay({ mana: -6, upkeep: 40, defense: 120, security: 20, populationSupport: 50 }) }),

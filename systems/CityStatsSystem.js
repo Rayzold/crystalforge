@@ -3,6 +3,7 @@ import { getDistrictSummary } from "./DistrictSystem.js";
 import { scalePopulationSupport } from "./DriftEvolutionSystem.js";
 import { getBuildingPlacementBonuses } from "./MapSystem.js";
 import { getCurrentTownFocus } from "./TownFocusSystem.js";
+import { getGoodsOutputMultiplier, getHousingStrainPenalty } from "./CityConditionSystem.js";
 
 const EMPTY_CITY_STATS = {
   goods: 0,
@@ -31,6 +32,7 @@ function getTradeGoodsGoldMultiplier(state) {
 export function recalculateCityStats(state) {
   const nextStats = structuredClone(EMPTY_CITY_STATS);
   let rawPopulationSupport = 0;
+  const goodsOutputMultiplier = getGoodsOutputMultiplier(state);
 
   for (const building of state.buildings) {
     if (!building.isComplete || building.isRuined) {
@@ -39,7 +41,10 @@ export function recalculateCityStats(state) {
     const placementMultiplier = 1 + getBuildingPlacementBonuses(state, building).totalPercent;
     for (const [key, value] of Object.entries(building.stats)) {
       const normalizedKey = key === "value" ? "goods" : key;
-      nextStats[normalizedKey] = (nextStats[normalizedKey] ?? 0) + value * building.multiplier * placementMultiplier;
+      const statContribution = value * building.multiplier * placementMultiplier;
+      nextStats[normalizedKey] =
+        (nextStats[normalizedKey] ?? 0) +
+        (normalizedKey === "goods" && statContribution > 0 ? statContribution * goodsOutputMultiplier : statContribution);
     }
     rawPopulationSupport += building.citizenEffects.populationSupport * placementMultiplier;
   }
@@ -48,7 +53,10 @@ export function recalculateCityStats(state) {
     const citizenDefinition = state.citizenDefinitions[citizenClass];
     for (const [statKey, statValue] of Object.entries(citizenDefinition.stats)) {
       const normalizedKey = statKey === "value" ? "goods" : statKey;
-      nextStats[normalizedKey] = (nextStats[normalizedKey] ?? 0) + statValue * count;
+      const statContribution = statValue * count;
+      nextStats[normalizedKey] =
+        (nextStats[normalizedKey] ?? 0) +
+        (normalizedKey === "goods" && statContribution > 0 ? statContribution * goodsOutputMultiplier : statContribution);
     }
   }
 
@@ -128,6 +136,10 @@ export function recalculateCityStats(state) {
 
   nextStats.prosperity += state.resources.prosperity;
   nextStats.populationSupport = scalePopulationSupport(rawPopulationSupport);
+  const housingPenalty = getHousingStrainPenalty({ ...state, cityStats: { ...state.cityStats, populationSupport: nextStats.populationSupport } });
+  nextStats.morale = Math.max(0, nextStats.morale - housingPenalty.morale);
+  nextStats.health = Math.max(0, nextStats.health - housingPenalty.health);
+  nextStats.prosperity = Math.max(0, nextStats.prosperity - housingPenalty.prosperity);
   state.cityStats = nextStats;
   return nextStats;
 }

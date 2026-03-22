@@ -3,6 +3,11 @@ import { clamp } from "../engine/Utils.js";
 import { getDistrictSummary } from "./DistrictSystem.js";
 import { getBuildingPlacementBonuses } from "./MapSystem.js";
 import { getCurrentTownFocus } from "./TownFocusSystem.js";
+import {
+  getEventRollModifier,
+  getFoodOutputMultiplier,
+  getGoldOutputMultiplier
+} from "./CityConditionSystem.js";
 
 function createDeltaRecord() {
   return { gold: 0, food: 0, materials: 0, salvage: 0, mana: 0, prosperity: 0 };
@@ -26,6 +31,8 @@ export function getWarningFlags(state) {
 export function calculateDailyResourceDelta(state) {
   const deltas = createDeltaRecord();
   const tradeGoodsGoldMultiplier = getTradeGoodsGoldMultiplier(state);
+  const goldOutputMultiplier = getGoldOutputMultiplier(state);
+  const foodOutputMultiplier = getFoodOutputMultiplier(state);
 
   for (const building of state.buildings) {
     if (!building.isComplete || building.isRuined) {
@@ -39,9 +46,16 @@ export function calculateDailyResourceDelta(state) {
     if (goldDelta > 0 && building.tags?.includes("trade")) {
       goldDelta *= tradeGoodsGoldMultiplier;
     }
+    if (goldDelta > 0) {
+      goldDelta *= goldOutputMultiplier;
+    }
 
     deltas.gold += goldDelta;
-    deltas.food += building.resourceRates.food * building.multiplier * placementMultiplier;
+    let foodDelta = building.resourceRates.food * building.multiplier * placementMultiplier;
+    if (foodDelta > 0) {
+      foodDelta *= foodOutputMultiplier;
+    }
+    deltas.food += foodDelta;
     deltas.materials += building.resourceRates.materials * building.multiplier * placementMultiplier;
     deltas.salvage += (building.resourceRates.salvage ?? 0) * building.multiplier * placementMultiplier;
     deltas.mana += building.resourceRates.mana * building.multiplier * placementMultiplier;
@@ -51,7 +65,14 @@ export function calculateDailyResourceDelta(state) {
   for (const [citizenClass, count] of Object.entries(state.citizens)) {
     const citizenDefinition = state.citizenDefinitions[citizenClass];
     for (const [resource, amount] of Object.entries(citizenDefinition.production)) {
-      deltas[resource] = (deltas[resource] ?? 0) + amount * count;
+      let nextAmount = amount * count;
+      if (resource === "gold" && nextAmount > 0) {
+        nextAmount *= goldOutputMultiplier;
+      }
+      if (resource === "food" && nextAmount > 0) {
+        nextAmount *= foodOutputMultiplier;
+      }
+      deltas[resource] = (deltas[resource] ?? 0) + nextAmount;
     }
     for (const [resource, amount] of Object.entries(citizenDefinition.consumption)) {
       deltas[resource] = (deltas[resource] ?? 0) - amount * count;
@@ -201,6 +222,14 @@ export function getEmergencyStatus(state) {
       goldDays: goldRunwayDays,
       manaDays: manaRunwayDays
     }
+  };
+}
+
+export function getDynamicCityModifiers(state) {
+  return {
+    goldOutputMultiplier: getGoldOutputMultiplier(state),
+    foodOutputMultiplier: getFoodOutputMultiplier(state),
+    eventRollModifier: getEventRollModifier(state)
   };
 }
 

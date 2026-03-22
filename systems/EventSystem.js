@@ -5,6 +5,7 @@ import { addHistoryEntry } from "./HistoryLogSystem.js";
 import { formatDate, getHolidayName } from "./CalendarSystem.js";
 import { getDistrictSummary } from "./DistrictSystem.js";
 import { getWarningFlags } from "./ResourceSystem.js";
+import { getEventRollModifier, getEventTypeWeight } from "./CityConditionSystem.js";
 
 function hasActiveBuilding(state, names) {
   return state.buildings.some((building) => building.isComplete && names.includes(building.name));
@@ -49,6 +50,31 @@ function isDuplicateActive(state, eventId) {
 
 function getEventDefinition(eventId) {
   return EVENT_POOLS.find((eventDefinition) => eventDefinition.id === eventId) ?? null;
+}
+
+function pickWeightedEvent(candidates, state) {
+  if (!candidates.length) {
+    return null;
+  }
+
+  const weighted = candidates.map((candidate) => ({
+    candidate,
+    weight: getEventTypeWeight(state, candidate)
+  }));
+  const totalWeight = weighted.reduce((sum, entry) => sum + entry.weight, 0);
+  if (totalWeight <= 0) {
+    return pickRandom(candidates);
+  }
+
+  let roll = Math.random() * totalWeight;
+  for (const entry of weighted) {
+    roll -= entry.weight;
+    if (roll <= 0) {
+      return entry.candidate;
+    }
+  }
+
+  return weighted[weighted.length - 1].candidate;
 }
 
 function scheduleFollowUps(state, eventDefinition, event) {
@@ -169,12 +195,14 @@ export function maybeTriggerRandomEvents(state, stepKey) {
   const warningFlags = getWarningFlags(state);
   const attempts = stepKey === "year" ? randomInt(2, 4) : stepKey === "month" ? randomInt(1, 2) : 1;
   const triggered = [];
+  const cityEventRollModifier = getEventRollModifier(state);
 
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     const rollModifier =
       (warningFlags.lowFood ? 0.03 : 0) +
       (warningFlags.lowGold ? 0.03 : 0) +
-      (warningFlags.lowMana ? 0.02 : 0);
+      (warningFlags.lowMana ? 0.02 : 0) +
+      cityEventRollModifier;
     if (Math.random() > chance + rollModifier) {
       continue;
     }
@@ -182,7 +210,7 @@ export function maybeTriggerRandomEvents(state, stepKey) {
     if (!candidates.length) {
       continue;
     }
-    const event = triggerEvent(state, pickRandom(candidates));
+    const event = triggerEvent(state, pickWeightedEvent(candidates, state));
     if (event) {
       triggered.push(event);
     }
