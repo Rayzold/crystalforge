@@ -573,11 +573,6 @@ export class AdminConsole {
     this.lastState = state;
     const manualSaveMeta = getManualSaveMeta();
     const firebaseMeta = state.transientUi?.firebasePublishedMeta ?? null;
-    const activeSaveSlot = 1;
-    const allSaveSlotMeta = [];
-    const currentFirebaseUid = "";
-    const configuredPublisherUid = "";
-    const firebaseCanPublish = false;
     const searchFilter = this.searchQuery.trim().toLowerCase();
     const matchingBuildings = state.buildings.filter((building) =>
       `${building.displayName} ${building.rarity} ${building.district} ${(building.tags ?? []).join(" ")}`
@@ -951,115 +946,6 @@ export class AdminConsole {
             </div>
           </section>
         `
-      },
-      {
-        tab: "legacy",
-        title: "Legacy Save Tools",
-        keywords: "save load firebase local reset",
-        content: `
-          <section class="admin-section">
-            <h3>Save Tools</h3>
-            <p>Only four manual save actions remain. Nothing auto-loads, auto-saves, or syncs in the background anymore.</p>
-            ${
-              firebaseMeta?.updatedAtMs
-                ? `
-                  <p>
-                    Latest Firebase save:
-                    <strong>${escapeHtml(new Date(firebaseMeta.updatedAtMs).toLocaleString())}</strong>
-                    · ${manualSaveMeta.buildingCount} building${manualSaveMeta.buildingCount === 1 ? "" : "s"}
-                    · population ${manualSaveMeta.population}
-                  </p>
-                `
-                : `<p>No save recorded yet in slot ${activeSaveSlot}.</p>`
-            }
-            <div class="admin-slot-summary">
-              ${allSaveSlotMeta
-                .map(
-                  (slotMeta) => `
-                    <article class="admin-slot-summary__item ${slotMeta.slot === activeSaveSlot ? "is-active" : ""}">
-                      <strong>Slot ${slotMeta.slot}</strong>
-                      <span>${slotMeta.manualSavedAt ? escapeHtml(new Date(slotMeta.manualSavedAt).toLocaleString()) : "Empty"}</span>
-                      <em>${slotMeta.buildingCount} building${slotMeta.buildingCount === 1 ? "" : "s"} · population ${slotMeta.population}</em>
-                    </article>
-                  `
-                )
-                .join("")}
-            </div>
-            <textarea id="save-json" rows="10"></textarea>
-            <label>Shared Save URL<input id="shared-save-url" value="${escapeHtml(state.settings.sharedStateUrl ?? "")}" placeholder="https://.../save.json" /></label>
-            <p>Best for public raw JSON links. A public direct-download Google Drive link may work if it allows browser fetch access.</p>
-            <p>
-              Shared source:
-              <strong>${escapeHtml(state.settings.sharedStateUrl || "None set")}</strong>
-              · Auto-load:
-              <strong>${state.settings.autoLoadSharedState ? "Enabled" : "Disabled"}</strong>
-            </p>
-            <div class="admin-actions admin-actions--with-help">
-              ${renderHelpActionButton("set-active-save-slot", "Use Slot", "Switches the active manual save slot. Future local saves and loads use this slot until you change it again.")}
-              ${renderHelpActionButton("save-manual-state", "Save Local State", "Stores the full current campaign in the selected local slot on this browser only.")}
-              ${renderHelpActionButton("load-manual-state", "Load Local State", "Loads the selected local slot from this browser and replaces the current session state.")}
-              ${renderHelpActionButton("export-save", "Export Save JSON", "Writes the current campaign state into the JSON box so you can copy or download it manually.")}
-              ${renderHelpActionButton("copy-save-json", "Copy Save JSON", "Copies the current campaign state as raw JSON to your clipboard.")}
-              ${renderHelpActionButton("import-save", "Import Save JSON", "Loads the JSON currently pasted into the big save box and replaces the current session.")}
-              ${renderHelpActionButton("load-shared-state-url", "Load Shared URL", "Fetches a public JSON save from the shared URL field and loads it immediately.")}
-              ${renderHelpActionButton("remember-shared-state-url", "Remember Shared URL", "Stores the shared URL in this browser so it can be reused later.")}
-              ${renderHelpActionButton("toggle-shared-autoload", state.settings.autoLoadSharedState ? "Disable Shared Auto-Load" : "Enable Shared Auto-Load", "When enabled, this browser tries to load the remembered shared URL automatically on startup.")}
-              ${renderHelpActionButton("clear-buildings", "Delete All Buildings", "Removes all buildings from the realm without resetting the rest of the save.")}
-              ${renderHelpActionButton("reset-save", "Reset Save", "Returns the campaign to the standard reset state for this build.")}
-              ${renderHelpActionButton("session-reset", "Reset to Live Session", "Resets the campaign to the lighter table-ready live session preset.")}
-              ${renderHelpActionButton("testing-reset", "Reset to Testing State", "Resets the campaign to the richer testing preset with extra crystals and stockpiles.")}
-              ${renderHelpActionButton("full-reset", "Full Reset (1 Common Crystal)", "Wipes the realm to a bare-minimum start with only one Common crystal.")}
-            </div>
-          </section>
-        `
-      },
-      {
-        tab: "legacy",
-        title: "Legacy Firebase Realm",
-        keywords: "firebase realm shared sync autosave load save published working",
-        content: `
-          <section class="admin-section">
-            <h3>Firebase Realm</h3>
-            <p>Use a stable published save for testers and a separate working save for GM edits. Testers only change when you explicitly publish.</p>
-            <label>Published Realm ID<input id="firebase-published-realm-id" value="${escapeHtml(state.settings.firebasePublishedRealmId ?? state.settings.firebaseRealmId ?? "main")}" placeholder="main" /></label>
-            <label>Working Realm ID<input id="firebase-working-realm-id" value="${escapeHtml(state.settings.firebaseWorkingRealmId ?? "main-working")}" placeholder="main-working" /></label>
-            <p>
-              GM publisher UID:
-              <strong>${escapeHtml(state.settings.firebasePublisherUid || "Not set")}</strong>
-            </p>
-            <p>
-              Current browser UID:
-              <strong>${escapeHtml(currentFirebaseUid || "Not ready yet")}</strong>
-              · Publish access:
-              <strong>${firebaseCanPublish ? "Granted" : configuredPublisherUid ? "Locked" : "Unset"}</strong>
-            </p>
-            <p>
-              Published:
-              <strong>${escapeHtml(state.settings.firebasePublishedRealmId ?? state.settings.firebaseRealmId ?? "main")}</strong>
-              Â· Working:
-              <strong>${escapeHtml(state.settings.firebaseWorkingRealmId ?? "main-working")}</strong>
-              · Auto-load:
-              <strong>${state.settings.firebaseAutoLoad ? "Enabled" : "Disabled"}</strong>
-              · Live sync:
-              <strong>${state.settings.firebaseLiveSync ? "Enabled" : "Disabled"}</strong>
-              · Auto-publish:
-              <strong>${state.settings.firebaseAutoPublish ? "Enabled" : "Disabled"}</strong>
-            </p>
-              <div class="admin-actions admin-actions--with-help">
-                ${renderHelpActionButton("set-firebase-publisher-uid", "Use Current Browser As GM Publisher", "Marks this browser's Firebase identity as the allowed GM publisher for protected write actions.")}
-                ${renderHelpActionButton("clear-firebase-publisher-uid", "Clear GM Publisher", "Removes the stored GM publisher UID so no browser is currently trusted to publish.")}
-                ${renderHelpActionButton("load-firebase-realm", "Load Published", "Loads the stable published realm that players should currently be seeing.")}
-                ${renderHelpActionButton("load-firebase-working-realm", "Load Working", "Loads the GM working draft realm without changing the published player state.")}
-                ${renderHelpActionButton("remember-firebase-realm", "Remember Realm IDs", "Stores the published and working Firebase realm IDs in this browser for future sessions.")}
-                ${renderHelpActionButton("save-firebase-realm", "Save Current to Working", "Saves the current GM state into the working Firebase realm without publishing it to players.")}
-                ${renderHelpActionButton("publish-firebase-realm", "Publish Current to Testers", "Immediately overwrites the published player realm with the state currently loaded in this browser.")}
-                ${renderHelpActionButton("publish-firebase-working-realm", "Publish Working to Testers", "Publishes the saved working Firebase realm to players without first loading it locally.")}
-                ${renderHelpActionButton("toggle-firebase-autoload", state.settings.firebaseAutoLoad ? "Disable Published Auto-Load" : "Enable Published Auto-Load", "When enabled, this browser automatically loads the published Firebase realm on startup.")}
-                ${renderHelpActionButton("toggle-firebase-live-sync", state.settings.firebaseLiveSync ? "Disable Published Live Sync" : "Enable Published Live Sync", "When enabled, this browser listens for published Firebase changes in real time.")}
-                ${renderHelpActionButton("toggle-firebase-auto-publish", state.settings.firebaseAutoPublish ? "Disable Working Auto-Save" : "Enable Working Auto-Save", "When enabled, GM save actions keep the working Firebase realm updated automatically.")}
-            </div>
-          </section>
-        `
       }
     ];
 
@@ -1105,3 +991,4 @@ export class AdminConsole {
     attachHelpBubbles(this.root);
   }
 }
+

@@ -4,10 +4,9 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.2.35";
-export const SAVE_VERSION = 9;
-export const STORAGE_KEY = "crystal-forge-save-v2";
-export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v2";
+export const APP_VERSION = "v1.2.37";
+export const SAVE_VERSION = 10;
+export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3";
 export const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDl51M8_ywD944xPSByUujzMdATeoy503I",
   authDomain: "crystal-forge-web.firebaseapp.com",
@@ -32,6 +31,8 @@ export const PAGE_ROUTES = [
   { key: "chronicle", label: "Chronicle", href: "./chronicle.html" }
 ];
 export const BUILD_NOTES = [
+  "Building catalog values now sync directly to the reviewed BUILDING_OUTPUTS.csv sheet, with the retired General Store row removed and a new BUILDING_OUTPUTS_WITH_BPD.csv export added for construction support review.",
+  "Release cleanup removed the unused General Store compatibility alias, cut old save-workflow remnants, and moved manual local saves onto a fresh v3 key.",
   "General Store has been renamed to Trade Center, Grain Silo now protects stored supply instead of generating food, and the common trade/support balance has been tightened around Inn and Stables.",
   "Ranks 4 through 6 now follow the same economy structure: advanced industry and arcane infrastructure produce goods, salvage, mana, and materials, while true trade and exchange buildings stay gold-focused.",
   "Rank 2 and Rank 3 buildings now follow the same economy logic as Rank 1: workshops and refiners lean into goods, materials, mana, and salvage, while trade-facing buildings focus on gold.",

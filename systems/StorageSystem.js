@@ -4,7 +4,6 @@ import {
   MANUAL_SAVE_KEY,
   SAVE_VERSION,
   START_STATE_PRESETS,
-  STORAGE_KEY,
   createEmptyCitizenCollection,
   createEmptyCollection,
   createDefaultDistrictState,
@@ -155,17 +154,9 @@ export function restoreSessionSnapshot(snapshot) {
   return validateAndMigrateSave(snapshot?.payload ?? null);
 }
 
-function normalizeBuildingCatalog(sourceCatalog, sourceVersion = SAVE_VERSION) {
+function normalizeBuildingCatalog(sourceCatalog) {
   const baseCatalog = structuredClone(BASE_BUILDING_CATALOG);
-  const mergedCatalog =
-    Number(sourceVersion ?? 0) < 7
-      ? {
-          ...baseCatalog,
-          ...Object.fromEntries(
-            Object.entries(sourceCatalog ?? {}).filter(([key]) => !baseCatalog[key])
-          )
-        }
-      : { ...baseCatalog, ...(sourceCatalog ?? {}) };
+  const mergedCatalog = { ...baseCatalog, ...(sourceCatalog ?? {}) };
   return Object.fromEntries(
     Object.entries(mergedCatalog).map(([key, entry]) => [
       key,
@@ -209,12 +200,9 @@ function normalizeSelectedMapCell(selectedMapCell) {
   return null;
 }
 
-function normalizeRollTables(sourceTables, sourceVersion = SAVE_VERSION) {
+function normalizeRollTables(sourceTables) {
   const baseTables = createDefaultRollTables();
   if (!sourceTables || typeof sourceTables !== "object") {
-    return baseTables;
-  }
-  if (Number(sourceVersion ?? 0) < 7) {
     return baseTables;
   }
   return Object.fromEntries(
@@ -265,13 +253,8 @@ export function validateAndMigrateSave(rawSave) {
     return base;
   }
 
-  const sourceVersion = Number(rawSave.version ?? 0);
-
-  const normalizedCatalog = normalizeBuildingCatalog(rawSave.buildingCatalog, rawSave.version);
-  const normalizedCitizens =
-    sourceVersion < 9
-      ? structuredClone(base.citizens)
-      : normalizeCitizens(rawSave.citizens ?? base.citizens);
+  const normalizedCatalog = normalizeBuildingCatalog(rawSave.buildingCatalog);
+  const normalizedCitizens = normalizeCitizens(rawSave.citizens ?? base.citizens);
 
   const nextState = {
     ...base,
@@ -282,7 +265,7 @@ export function validateAndMigrateSave(rawSave) {
     resources: { ...base.resources, ...(rawSave.resources ?? {}) },
     citizens: normalizedCitizens,
     buildings: normalizeBuildings(rawSave.buildings, normalizedCatalog),
-    rollTables: normalizeRollTables(rawSave.rollTables, rawSave.version),
+    rollTables: normalizeRollTables(rawSave.rollTables),
     buildingCatalog: normalizedCatalog,
     districts: normalizeDistrictState(rawSave.districts),
     map: {
@@ -390,7 +373,6 @@ export function importSave(saveText) {
 }
 
 export function resetSave() {
-  localStorage.removeItem(STORAGE_KEY);
   localStorage.removeItem(MANUAL_SAVE_KEY);
   return createInitialState();
 }

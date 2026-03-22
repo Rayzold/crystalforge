@@ -92,7 +92,6 @@ let adjacencyPulseTimer = null;
 let focusCeremonyTimer = null;
 let manifestCompleteTimer = null;
 let pageEnterTimer = null;
-let firebaseUnsubscribe = null;
 let firebasePublishTimer = null;
 let applyingFirebaseState = false;
 let projectorChromeTimer = null;
@@ -792,23 +791,6 @@ function normalizeBulkImageBuildingName(name) {
     .replace(/^"|"$/g, "");
 }
 
-function normalizeSharedStateUrl(url) {
-  const normalized = String(url ?? "").trim();
-  if (!normalized) {
-    return "";
-  }
-
-  const driveMatch =
-    normalized.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/) ??
-    normalized.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-
-  if (driveMatch?.[1]) {
-    return `https://drive.google.com/uc?export=download&id=${driveMatch[1]}`;
-  }
-
-  return normalized;
-}
-
 function applyBulkBuildingImages(rawText) {
   const parsed = parseBulkBuildingImageLines(rawText);
   if (!parsed.length) {
@@ -849,37 +831,13 @@ function applyBulkBuildingImages(rawText) {
   reportSuccess(`Applied image paths to ${applied} building record${applied === 1 ? "" : "s"}.`);
 }
 
-async function fetchSharedStateFromUrl(url) {
-  const normalizedUrl = normalizeSharedStateUrl(url);
-  if (!normalizedUrl) {
-    throw new Error("No shared save URL provided.");
-  }
-
-  const response = await fetch(normalizedUrl, { cache: "no-store" });
-  if (!response.ok) {
-    throw new Error(`Unable to fetch shared save (${response.status}).`);
-  }
-
-  const text = await response.text();
-  return importSave(text);
-}
-
 function normalizeFirebaseRealmId(realmId) {
-  const normalized = String(realmId ?? "").trim();
-  return normalized || FIREBASE_DEFAULT_REALM_ID;
-}
-
-function normalizeFirebaseWorkingRealmId(realmId) {
   const normalized = String(realmId ?? "").trim();
   return normalized || FIREBASE_DEFAULT_REALM_ID;
 }
 
 function getPublishedFirebaseRealmId(state = getCurrentState()) {
   return normalizeFirebaseRealmId(state.settings.firebaseRealmId);
-}
-
-function getWorkingFirebaseRealmId(state = getCurrentState()) {
-  return normalizeFirebaseWorkingRealmId(state.settings.firebaseRealmId);
 }
 
 function preserveLocalSettingsOnSharedState(nextState, currentState = getCurrentState()) {
@@ -953,42 +911,6 @@ async function publishSharedStateToFirebase(realmId, state = getCurrentState()) 
     },
     "connected"
   );
-}
-
-async function loadPublishedStateFromFirebase() {
-  return loadSharedStateFromFirebase(getPublishedFirebaseRealmId());
-}
-
-async function loadWorkingStateFromFirebase() {
-  return loadSharedStateFromFirebase(getWorkingFirebaseRealmId());
-}
-
-async function saveWorkingStateToFirebase(state = getCurrentState()) {
-  await publishSharedStateToFirebase(getPublishedFirebaseRealmId(state), state);
-}
-
-async function publishCurrentStateToPublished(state = getCurrentState()) {
-  await publishSharedStateToFirebase(getPublishedFirebaseRealmId(state), state);
-}
-
-async function publishWorkingStateToPublished() {
-  const payload = await loadFirebaseRealmState(getWorkingFirebaseRealmId());
-  if (!payload?.state) {
-    throw new Error("No Firebase working state found yet.");
-  }
-  const publishedState = preserveLocalSettingsOnSharedState(payload.state);
-  await publishCurrentStateToPublished(publishedState);
-}
-
-async function connectFirebaseLiveSync(showSuccess = false) {
-  return showSuccess;
-}
-
-function disconnectFirebaseLiveSync() {
-  if (firebaseUnsubscribe) {
-    firebaseUnsubscribe();
-    firebaseUnsubscribe = null;
-  }
 }
 
 function scheduleFirebaseAutoPublish(state) {
@@ -1453,77 +1375,6 @@ const actions = {
       reportError(error.message);
     }
   },
-  setActiveSaveSlot(slot) {
-    const normalizedSlot = 1;
-    commit((draft) => {
-      draft.settings.activeSaveSlot = normalizedSlot;
-    });
-    reportSuccess(`Active save slot set to ${normalizedSlot}.`);
-  },
-  importSave(text) {
-    gameState.replace(importSave(text));
-    renderer.setTransientUi({ hoveredMapCell: null, inspectedBuildingId: null }, getCurrentState());
-    reportSuccess("Save imported.");
-  },
-  async loadSharedStateUrl(url) {
-    try {
-      const sharedState = await fetchSharedStateFromUrl(url);
-      gameState.replace(sharedState);
-      resetTransientUi();
-      reportSuccess("Shared state loaded.");
-    } catch (error) {
-      reportError(error.message);
-    }
-  },
-  rememberSharedStateUrl(url) {
-    const normalizedUrl = normalizeSharedStateUrl(url);
-    commit((draft) => {
-      draft.settings.sharedStateUrl = normalizedUrl;
-    });
-    reportSuccess(normalizedUrl ? "Shared save URL remembered." : "Shared save URL cleared.");
-  },
-  toggleSharedStateAutoLoad() {
-    commit((draft) => {
-      draft.settings.autoLoadSharedState = !draft.settings.autoLoadSharedState;
-    });
-    reportSuccess(`Shared auto-load ${getCurrentState().settings.autoLoadSharedState ? "enabled" : "disabled"}.`);
-  },
-  async loadFirebaseRealm() {
-    try {
-      const firebaseState = await loadSharedStateFromFirebase(getPublishedFirebaseRealmId());
-      gameState.replace(firebaseState);
-      resetTransientUi();
-      reportSuccess("Firebase save loaded.");
-    } catch (error) {
-      reportError(error.message);
-    }
-  },
-  async loadFirebaseWorkingRealm() {
-    try {
-      const firebaseState = await loadWorkingStateFromFirebase();
-      gameState.replace(firebaseState);
-      resetTransientUi();
-      reportSuccess("Working Firebase state loaded.");
-    } catch (error) {
-      reportError(error.message);
-    }
-  },
-  rememberFirebaseRealmIds(publishedRealmId, workingRealmId) {
-    const normalizedPublishedRealmId = normalizeFirebaseRealmId(publishedRealmId);
-    const normalizedWorkingRealmId = normalizeFirebaseWorkingRealmId(workingRealmId);
-    commit((draft) => {
-      draft.settings.firebaseRealmId = normalizedPublishedRealmId;
-      draft.settings.firebasePublishedRealmId = normalizedPublishedRealmId;
-      draft.settings.firebaseWorkingRealmId = normalizedWorkingRealmId;
-      draft.settings.firebaseWorkflowVersion = 2;
-    });
-    if (getCurrentState().settings.firebaseLiveSync) {
-      void connectFirebaseLiveSync().catch((error) => reportError(error.message));
-    }
-    reportSuccess(
-      `Firebase realms set. Published: "${normalizedPublishedRealmId}" · Working: "${normalizedWorkingRealmId}".`
-    );
-  },
     async setFirebasePublisherUidToCurrentBrowser() {
       try {
         const currentUid = await getCurrentFirebaseUid();
@@ -1550,53 +1401,6 @@ const actions = {
     } catch (error) {
       reportError(error.message);
     }
-  },
-  async publishFirebaseRealm() {
-    try {
-      await publishCurrentStateToPublished();
-      reportSuccess("Current state published to testers.");
-    } catch (error) {
-      reportError(error.message);
-    }
-  },
-  async publishFirebaseWorkingRealm() {
-    try {
-      await publishWorkingStateToPublished();
-      reportSuccess("Firebase working state published to testers.");
-    } catch (error) {
-      reportError(error.message);
-    }
-  },
-  async toggleFirebaseAutoLoad() {
-    commit((draft) => {
-      draft.settings.firebaseAutoLoad = !draft.settings.firebaseAutoLoad;
-    });
-    reportSuccess(`Firebase auto-load ${getCurrentState().settings.firebaseAutoLoad ? "enabled" : "disabled"}.`);
-  },
-  async toggleFirebaseLiveSync() {
-    commit((draft) => {
-      draft.settings.firebaseLiveSync = !draft.settings.firebaseLiveSync;
-    });
-    try {
-      if (getCurrentState().settings.firebaseLiveSync) {
-        await connectFirebaseLiveSync(true);
-      } else {
-        disconnectFirebaseLiveSync();
-        reportSuccess("Firebase live sync disabled.");
-      }
-    } catch (error) {
-      commit((draft) => {
-        draft.settings.firebaseLiveSync = false;
-      });
-      disconnectFirebaseLiveSync();
-      reportError(error.message);
-    }
-  },
-  toggleFirebaseAutoPublish() {
-    commit((draft) => {
-      draft.settings.firebaseAutoPublish = !draft.settings.firebaseAutoPublish;
-    });
-    reportSuccess(`Firebase auto-publish ${getCurrentState().settings.firebaseAutoPublish ? "enabled" : "disabled"}.`);
   },
   resetSave() {
     gameState.replace(resetSave());
@@ -2100,10 +1904,6 @@ root.addEventListener("change", (event) => {
       draft.settings.diceType = target.value ?? "d20";
     });
   }
-
-  if (target.dataset.action === "set-save-slot") {
-    actions.setActiveSaveSlot(target.value);
-  }
 });
 
 root.addEventListener("input", (event) => {
@@ -2151,42 +1951,11 @@ function applyUrlFocusTargets() {
   clearUrlParams();
 }
 
-async function autoLoadSharedStateIfEnabled() {
-  const state = getCurrentState();
-  if (state.settings.firebaseAutoLoad) {
-    try {
-      const firebaseState = await loadPublishedStateFromFirebase();
-      gameState.replace(firebaseState);
-      resetTransientUi();
-      reportSuccess("Published Firebase state auto-loaded.");
-    } catch (error) {
-      updateFirebasePublishedMeta(null, "disconnected");
-      reportError(error.message);
-    }
-  } else if (state.settings.autoLoadSharedState && state.settings.sharedStateUrl) {
-    try {
-      const sharedState = await fetchSharedStateFromUrl(state.settings.sharedStateUrl);
-      sharedState.settings.sharedStateUrl = state.settings.sharedStateUrl;
-      sharedState.settings.autoLoadSharedState = state.settings.autoLoadSharedState;
-      gameState.replace(sharedState);
-      resetTransientUi();
-      reportSuccess("Shared state auto-loaded.");
-    } catch (error) {
-      reportError(error.message);
-    }
-  }
 
-  try {
-    await syncFirebaseIdentityUi();
-    await connectFirebaseLiveSync();
-  } catch (error) {
-    updateFirebasePublishedMeta(null, "disconnected");
-    reportError(error.message);
-  }
-}
 
 renderer.render(getCurrentState());
 adminConsole.render(getCurrentState());
 
 applyUrlFocusTargets();
 startPageEnter();
+
