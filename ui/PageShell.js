@@ -2,7 +2,7 @@ import { APP_VERSION, MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js";
 import { getBuildingEmoji } from "../content/BuildingCatalog.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
-import { formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
+import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
 import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js";
 import { getCityTrendSummary } from "../systems/ResourceSystem.js";
 import { getManualSaveMeta } from "../systems/StorageSystem.js";
@@ -106,7 +106,11 @@ function renderSidebarBuildingList(state, title, items, emptyLabel, variant = "a
                       <div class="sidebar-manifest-list__item ${isRecentlyChanged ? "is-recently-changed" : ""}" title="${escapeHtml(`${emoji} ${building.displayName}`)}">
                         <span>${escapeHtml(`${state.settings?.pinnedBuildingIds?.includes(building.id) ? "📌 " : ""}${emoji} ${building.displayName}`)}</span>
                         <div class="sidebar-manifest-list__meta">
-                          <em>${escapeHtml(formatBuildingQualityDisplay(building))}</em>
+                          <em>${escapeHtml(
+                            variant === "active"
+                              ? formatBuildingExactQualityDisplay(building)
+                              : `${formatBuildingExactQualityDisplay(building)} quality`
+                          )}</em>
                           ${
                             etaDetails
                               ? `<small class="sidebar-manifest-list__eta" data-ready-label="${escapeHtml(readyLabel)}" title="${escapeHtml(readyLabel)}" tabindex="0">${formatSidebarEtaDays(etaDetails.daysRemaining)}</small>`
