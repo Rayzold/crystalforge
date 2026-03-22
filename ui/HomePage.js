@@ -399,7 +399,7 @@ function renderRollTableReview(state) {
         ${Object.entries(state.rollTables)
           .map(
             ([rarity, entries]) => {
-              const remainingCount = entries.filter((entry) => !ownedKeys.has(`${rarity}::${entry}`)).length;
+              const remainingCount = entries.filter((entry) => entry !== "Crystal Upgrade" && !ownedKeys.has(`${rarity}::${entry}`)).length;
               return `
               <article class="rolltable-review__card">
                 <span>${escapeHtml(rarity)}</span>

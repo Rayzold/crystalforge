@@ -4,7 +4,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.2.47";
+export const APP_VERSION = "v1.2.49";
 export const SAVE_VERSION = 10;
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3";
 export const FIREBASE_CONFIG = {
@@ -31,6 +31,7 @@ export const PAGE_ROUTES = [
   { key: "chronicle", label: "Chronicle", href: "./chronicle.html" }
 ];
 export const BUILD_NOTES = [
+  "Crystal Upgrade no longer creates a placeable building: when rolled, it immediately elevates the manifested crystal into the next rarity and older saved Crystal Upgrade buildings are consolidated back into crystal gains.",
   "Moving between Forge, City, Chronicle, and Home now keeps the live realm in session storage, so manifested buildings and spent crystals no longer disappear just because you changed pages.",
   "The manifestation completion popup now resolves in a single reveal path instead of re-triggering itself after the first animation.",
   "The city stream now supports pinned buildings, quick troubleshooting filters, and impact-based sorting so high-priority structures stay easier to find.",

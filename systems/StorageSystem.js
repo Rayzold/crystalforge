@@ -10,6 +10,7 @@ import {
   createDefaultRollTables
 } from "../content/Config.js";
 import { BASE_BUILDING_CATALOG, buildFlavorText } from "../content/BuildingCatalog.js";
+import { getNextRarity } from "../content/Rarities.js";
 import { createId, safeJsonParse } from "../engine/Utils.js";
 import { formatDate } from "./CalendarSystem.js";
 import { createCitizenDefinitionsSnapshot, normalizeCitizens } from "./CitizenSystem.js";
@@ -264,6 +265,54 @@ function normalizeSettings(sourceSettings, baseSettings) {
   return normalized;
 }
 
+function migrateLegacyCrystalUpgradeBuildings(state) {
+  const legacyUpgradeBuildings = state.buildings.filter((building) => building.name === "Crystal Upgrade");
+  if (!legacyUpgradeBuildings.length) {
+    return;
+  }
+
+  const removedIds = new Set(legacyUpgradeBuildings.map((building) => building.id));
+  const grantedCrystals = {};
+
+  for (const building of legacyUpgradeBuildings) {
+    const targetRarity = getNextRarity(building.rarity);
+    if (!targetRarity) {
+      continue;
+    }
+
+    const manifestCount = Math.max(
+      1,
+      Array.isArray(building.history)
+        ? building.history.filter((entry) => entry?.type === "manifest").length
+        : Math.round(Math.max(1, Number(building.quality ?? 100)) / 100)
+    );
+
+    grantedCrystals[targetRarity] = (grantedCrystals[targetRarity] ?? 0) + manifestCount;
+  }
+
+  state.buildings = state.buildings.filter((building) => !removedIds.has(building.id));
+  state.constructionPriority = state.constructionPriority.filter((buildingId) => !removedIds.has(buildingId));
+  state.pausedConstructionIds = state.pausedConstructionIds.filter((buildingId) => !removedIds.has(buildingId));
+
+  if (removedIds.has(state.ui?.selectedBuildingId)) {
+    state.ui.selectedBuildingId = null;
+  }
+
+  for (const [rarity, amount] of Object.entries(grantedCrystals)) {
+    state.crystals[rarity] = (state.crystals[rarity] ?? 0) + amount;
+  }
+
+  const summary = Object.entries(grantedCrystals).map(([rarity, amount]) => `${amount} ${rarity}`).join(", ");
+  if (summary) {
+    state.historyLog.unshift({
+      category: "Crystal Upgrade",
+      title: "Legacy crystal upgrades consolidated",
+      details: `Old Crystal Upgrade buildings were removed and converted into crystal gains: ${summary}.`,
+      date: formatDate(state.calendar.dayOffset)
+    });
+  }
+}
+
 export function validateAndMigrateSave(rawSave) {
   const base = createInitialState();
   if (!rawSave || typeof rawSave !== "object") {
@@ -315,6 +364,7 @@ export function validateAndMigrateSave(rawSave) {
   };
 
   nextState.resources.population = Object.values(nextState.citizens).reduce((sum, value) => sum + value, 0);
+  migrateLegacyCrystalUpgradeBuildings(nextState);
   syncDriftEvolutionState(nextState);
   normalizeConstructionPriority(nextState);
   nextState.districtSummary = getDistrictSummary(nextState);

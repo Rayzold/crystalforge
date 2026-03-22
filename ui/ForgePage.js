@@ -98,7 +98,7 @@ function renderForgeStage(state) {
           <div class="forge-stage__ritual-notes">
             <article><span>Reality Level</span><strong>${escapeHtml(state.selectedRarity)}</strong></article>
             <article><span>Available</span><strong>${formatNumber(state.crystals[state.selectedRarity] ?? 0)}</strong></article>
-            <article><span>Last Roll</span><strong>${state.ui.lastManifestResult ? `${formatNumber(state.ui.lastManifestResult.qualityRoll)}%` : "None"}</strong></article>
+            <article><span>Last Roll</span><strong>${state.ui.lastManifestResult ? (state.ui.lastManifestResult.isCrystalUpgrade ? "Upgrade" : `${formatNumber(state.ui.lastManifestResult.qualityRoll)}%`) : "None"}</strong></article>
           </div>
         </div>
       </div>

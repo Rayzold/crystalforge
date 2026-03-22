@@ -7,7 +7,7 @@ import {
   GM_QUICK_CRYSTAL_PACKS
 } from "./content/Config.js";
 import { EVENT_POOLS } from "./content/EventPools.js";
-import { getNextRarity, RARITY_ORDER } from "./content/Rarities.js";
+import { RARITY_ORDER } from "./content/Rarities.js";
 import { GameState } from "./engine/GameState.js";
 import { AnimationEngine } from "./fx/AnimationEngine.js";
 import { AudioEngine } from "./fx/AudioEngine.js";
@@ -29,7 +29,7 @@ import {
   setCitizens
 } from "./systems/CitizenSystem.js";
 import { recalculateCityStats } from "./systems/CityStatsSystem.js";
-import { addCrystals, setCrystals, spendCrystal } from "./systems/CrystalSystem.js";
+import { addCrystals, setCrystals } from "./systems/CrystalSystem.js";
 import {
   activateConstruction,
   getActiveConstructionQueue,
@@ -746,7 +746,12 @@ async function handleManifest() {
       const manifestResult = manifestSelectedRarity(draft, draft.selectedRarity);
       if (manifestResult.ok) {
         draft.ui.lastManifestResult = manifestResult;
-        setSelectedBuildingAndCell(draft, manifestResult.building.id);
+        if (manifestResult.building?.id) {
+          setSelectedBuildingAndCell(draft, manifestResult.building.id);
+        } else {
+          draft.ui.selectedBuildingId = null;
+          draft.ui.selectedMapCell = null;
+        }
       }
       return manifestResult;
     });
@@ -769,9 +774,12 @@ async function handleManifest() {
       {
         manifestInProgress: false,
         manifestCompleteModal: {
-          rolledName: result.rolledName,
+          rolledName: result.isCrystalUpgrade ? `${result.targetRarity} Crystal` : result.rolledName,
           rarity: result.rarity,
-          buildingId: result.building.id,
+          buildingId: result.building?.id ?? null,
+          isCrystalUpgrade: Boolean(result.isCrystalUpgrade),
+          sourceRarity: result.sourceRarity ?? result.rarity,
+          targetRarity: result.targetRarity ?? null,
           qualityRoll: result.qualityRoll,
           durationMs: 900,
           revealPercent: true
@@ -779,8 +787,12 @@ async function handleManifest() {
       },
       getCurrentState()
     );
-    markRecentBuildingChanges([result.building.id]);
-    reportSuccess(`${result.rolledName} manifested.`);
+    if (result.building?.id) {
+      markRecentBuildingChanges([result.building.id]);
+      reportSuccess(`${result.rolledName} manifested.`);
+    } else if (result.isCrystalUpgrade) {
+      reportSuccess(`${result.sourceRarity} crystal upgraded to ${result.targetRarity}.`);
+    }
   } finally {
     manifestInProgress = false;
     if (!renderer.transientUi.manifestCompleteModal) {
@@ -2060,34 +2072,7 @@ root.addEventListener("click", async (event) => {
       actions.closeTurnSummary();
       break;
     case "upgrade-crystal": {
-      const sourceRarity = target.dataset.rarity;
-      const nextRarity = getNextRarity(sourceRarity);
-      if (!nextRarity) {
-        reportError("Beyond crystals cannot be upgraded.");
-        return;
-      }
-      const selectedBuilding = getCurrentState().buildings.find((building) => building.id === getCurrentState().ui.selectedBuildingId);
-      if (!selectedBuilding || selectedBuilding.name !== "Crystal Upgrade" || !selectedBuilding.isComplete) {
-        reportError("Select a completed Crystal Upgrade building first.");
-        return;
-      }
-      const result = commit((draft) => {
-        if (!spendCrystal(draft, sourceRarity, 1)) {
-          return { ok: false };
-        }
-        addCrystals(draft, nextRarity, 1);
-        addHistoryEntry(draft, {
-          category: "Crystal Upgrade",
-          title: `${sourceRarity} upgraded`,
-          details: `${sourceRarity} crystal converted into ${nextRarity}.`
-        });
-        return { ok: true };
-      });
-      if (!result.ok) {
-        reportError(`No ${sourceRarity} crystals available.`);
-        return;
-      }
-      reportSuccess(`${sourceRarity} crystal upgraded to ${nextRarity}.`);
+      reportError("Crystal upgrades now happen automatically when rolled. Manifest again to seek a higher rarity.");
       break;
     }
     case "toggle-mute":

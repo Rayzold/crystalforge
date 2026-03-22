@@ -1,7 +1,8 @@
 import { pickRandom, randomInt } from "../engine/Random.js";
 import { getCatalogKey } from "../content/BuildingCatalog.js";
+import { getNextRarity } from "../content/Rarities.js";
 import { formatDate } from "./CalendarSystem.js";
-import { hasCrystalAvailable, spendCrystal } from "./CrystalSystem.js";
+import { addCrystals, hasCrystalAvailable, spendCrystal } from "./CrystalSystem.js";
 import { addHistoryEntry } from "./HistoryLogSystem.js";
 import { manifestIntoBuilding } from "./BuildingSystem.js";
 
@@ -18,6 +19,36 @@ export function manifestSelectedRarity(state, rarity) {
   spendCrystal(state, rarity, 1);
 
   const rolledName = pickRandom(pool);
+  if (rolledName === "Crystal Upgrade") {
+    const nextRarity = getNextRarity(rarity);
+    if (!nextRarity) {
+      addCrystals(state, rarity, 1);
+      return { ok: false, reason: "That crystal cannot be upgraded further." };
+    }
+
+    addCrystals(state, nextRarity, 1);
+    state.selectedRarity = nextRarity;
+
+    addHistoryEntry(state, {
+      category: "Crystal Upgrade",
+      title: `${rarity} crystal elevated`,
+      details: `${rarity} crystal manifested a crystal upgrade and became ${nextRarity}.`
+    });
+
+    return {
+      ok: true,
+      rarity: nextRarity,
+      rolledName: `${nextRarity} Crystal`,
+      sourceRarity: rarity,
+      targetRarity: nextRarity,
+      isCrystalUpgrade: true,
+      qualityRoll: null,
+      overflow: 0,
+      building: null,
+      wasNew: false
+    };
+  }
+
   const catalogKey = getCatalogKey(rolledName, rarity);
   const catalogEntry = state.buildingCatalog[catalogKey];
   const qualityRoll = randomInt(1, 100);

@@ -108,11 +108,13 @@ function townFocusOptions(selectedValue) {
 
 function renderRollTableListEditor(state) {
   return RARITY_ORDER.map(
-    (rarity) => `
+    (rarity) => {
+      const visibleEntries = (state.rollTables[rarity] ?? []).filter((name) => name !== "Crystal Upgrade");
+      return `
       <article class="rolltable-editor">
         <div class="rolltable-editor__header">
           <strong>${escapeHtml(rarity)}</strong>
-          <span>${state.rollTables[rarity]?.length ?? 0} rollable building${(state.rollTables[rarity]?.length ?? 0) === 1 ? "" : "s"}</span>
+          <span>${visibleEntries.length} rollable building${visibleEntries.length === 1 ? "" : "s"}</span>
         </div>
         <label>
           <span>${escapeHtml(rarity)} Pool</span>
@@ -122,7 +124,8 @@ function renderRollTableListEditor(state) {
           Apply ${escapeHtml(rarity)} List
         </button>
       </article>
-    `
+    `;
+    }
   ).join("");
 }
 
@@ -169,6 +172,7 @@ function renderHelpActionButton(action, label, helpText) {
 function renderUnmanifestedBuildingOptions(state) {
   const optionsList = RARITY_ORDER.flatMap((rarity) =>
     (state.rollTables[rarity] ?? [])
+      .filter((name) => name !== "Crystal Upgrade")
       .filter((name) => !state.buildings.some((building) => building.name === name && building.rarity === rarity))
       .map((name) => {
         const catalogEntry = state.buildingCatalog[getCatalogKey(name, rarity)] ?? { name, rarity, iconKey: "spire", tags: [] };

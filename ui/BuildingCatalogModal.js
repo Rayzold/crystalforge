@@ -7,6 +7,9 @@ import { renderModal } from "./Modal.js";
 function getCatalogEntries(state) {
   return RARITY_ORDER.flatMap((rarity) =>
     (state.rollTables[rarity] ?? []).map((name) => {
+      if (name === "Crystal Upgrade") {
+        return null;
+      }
       const entry = state.buildingCatalog[getCatalogKey(name, rarity)];
       const manifested = state.buildings.find((building) => building.name === name && building.rarity === rarity) ?? null;
       const status = manifested ? (manifested.isRuined ? "Ruined" : "Manifested") : "Not Manifested";
@@ -19,7 +22,7 @@ function getCatalogEntries(state) {
         manifested,
         status
       };
-    })
+    }).filter(Boolean)
   );
 }
 

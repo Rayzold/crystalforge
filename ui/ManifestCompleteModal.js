@@ -6,10 +6,10 @@ export function renderManifestCompleteModal(state) {
     return "";
   }
 
-  const manifestSentence =
-    manifestModal.rolledName === "Crystal Upgrade"
-      ? `The <strong>${escapeHtml(manifestModal.rolledName)}</strong> manifested.`
-      : `The ${escapeHtml(manifestModal.rarity)} crystal manifested the <strong>${escapeHtml(manifestModal.rolledName)}</strong>.`;
+  const isCrystalUpgrade = Boolean(manifestModal.isCrystalUpgrade);
+  const manifestSentence = isCrystalUpgrade
+    ? `The ${escapeHtml(manifestModal.sourceRarity)} crystal resonated as a crystal upgrade and became <strong>${escapeHtml(manifestModal.targetRarity)}</strong>.`
+    : `The ${escapeHtml(manifestModal.rarity)} crystal manifested the <strong>${escapeHtml(manifestModal.rolledName)}</strong>.`;
 
   return `
     <div class="modal manifest-complete-modal is-open" id="manifest-complete-modal">
@@ -17,24 +17,44 @@ export function renderManifestCompleteModal(state) {
       <div class="modal__dialog manifest-complete-modal__dialog">
         <button class="icon-button manifest-complete-modal__close" data-action="close-manifest-complete" aria-label="Close manifest completion modal">x</button>
         <div class="manifest-complete-modal__body">
-          <span class="manifest-complete-modal__eyebrow">Manifestation Complete</span>
+          <span class="manifest-complete-modal__eyebrow">${isCrystalUpgrade ? "Rarity Elevated" : "Manifestation Complete"}</span>
           <h2>${escapeHtml(manifestModal.rolledName)}</h2>
           <p>${manifestSentence}</p>
-          <div class="manifest-complete-modal__quality">
-            <span>Quality</span>
-            <div class="manifest-complete-modal__bar">
-              <div
-                class="manifest-complete-modal__fill ${manifestModal.revealPercent ? "is-revealed" : ""}"
-                style="--manifest-quality:${manifestModal.qualityRoll}%; --manifest-duration:${manifestModal.durationMs}ms"
-              ></div>
-              <div class="manifest-complete-modal__track"></div>
-              <strong class="manifest-complete-modal__value ${manifestModal.revealPercent ? "is-visible" : ""}">
-                ${formatNumber(manifestModal.qualityRoll, 0)}%
-              </strong>
-            </div>
-          </div>
+          ${
+            isCrystalUpgrade
+              ? `
+                <div class="manifest-complete-modal__quality">
+                  <span>Upgrade Result</span>
+                  <div class="manifest-complete-modal__bar">
+                    <div class="manifest-complete-modal__track"></div>
+                    <strong class="manifest-complete-modal__value is-visible">
+                      ${escapeHtml(`${manifestModal.sourceRarity} -> ${manifestModal.targetRarity}`)}
+                    </strong>
+                  </div>
+                </div>
+              `
+              : `
+                <div class="manifest-complete-modal__quality">
+                  <span>Quality</span>
+                  <div class="manifest-complete-modal__bar">
+                    <div
+                      class="manifest-complete-modal__fill ${manifestModal.revealPercent ? "is-revealed" : ""}"
+                      style="--manifest-quality:${manifestModal.qualityRoll}%; --manifest-duration:${manifestModal.durationMs}ms"
+                    ></div>
+                    <div class="manifest-complete-modal__track"></div>
+                    <strong class="manifest-complete-modal__value ${manifestModal.revealPercent ? "is-visible" : ""}">
+                      ${formatNumber(manifestModal.qualityRoll, 0)}%
+                    </strong>
+                  </div>
+                </div>
+              `
+          }
           <div class="manifest-complete-modal__actions">
-            <button class="button" data-action="manifest-place-building" data-building-id="${escapeHtml(manifestModal.buildingId)}">Place on Map</button>
+            ${
+              isCrystalUpgrade
+                ? ""
+                : `<button class="button" data-action="manifest-place-building" data-building-id="${escapeHtml(manifestModal.buildingId)}">Place on Map</button>`
+            }
             <button class="button button--ghost manifest-complete-modal__continue" data-action="close-manifest-complete">Continue</button>
           </div>
         </div>
