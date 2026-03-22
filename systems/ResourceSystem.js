@@ -1,3 +1,6 @@
+// Daily economy engine.
+// This system totals resource production/consumption, applies district, focus,
+// placement, and city-condition modifiers, and produces warning/delta summaries.
 import { RESOURCE_MINIMUMS } from "../content/Config.js";
 import { clamp } from "../engine/Utils.js";
 import { getDistrictSummary } from "./DistrictSystem.js";

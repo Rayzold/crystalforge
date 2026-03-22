@@ -1,3 +1,6 @@
+// Aggregated city stat calculation.
+// This file turns citizens, buildings, districts, and condition modifiers into
+// the shared city-stat block used across the UI and downstream systems.
 import { sumObjectValues } from "../engine/Utils.js";
 import { getDistrictSummary } from "./DistrictSystem.js";
 import { scalePopulationSupport } from "./DriftEvolutionSystem.js";

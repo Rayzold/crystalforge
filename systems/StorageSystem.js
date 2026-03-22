@@ -1,3 +1,6 @@
+// Save, load, and migration layer.
+// This file creates fresh game states, normalizes imported data, keeps manual
+// and session saves stable, and upgrades old save shapes into the current model.
 import {
   DEFAULT_START_PRESET,
   DEFAULT_START_STATE,
@@ -280,6 +283,7 @@ function migrateLegacyCrystalUpgradeBuildings(state) {
       continue;
     }
 
+    // Approximate how many upgrades this old building represented so we can refund value as crystals.
     const manifestCount = Math.max(
       1,
       Array.isArray(building.history)
@@ -364,6 +368,7 @@ export function validateAndMigrateSave(rawSave) {
   };
 
   nextState.resources.population = Object.values(nextState.citizens).reduce((sum, value) => sum + value, 0);
+  // Old saves may still contain Crystal Upgrade as a building, so normalize them into crystals on load.
   migrateLegacyCrystalUpgradeBuildings(nextState);
   syncDriftEvolutionState(nextState);
   normalizeConstructionPriority(nextState);

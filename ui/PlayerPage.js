@@ -1,3 +1,6 @@
+// Public/player-facing presentation page.
+// It exposes the shared session state in a simplified read-mostly format with
+// manifest choices, incubator controls, active buildings, and table-safe info.
 import { APP_VERSION, BUILD_NOTES, FIREBASE_DEFAULT_REALM_ID } from "../content/Config.js";
 import { BUILDING_ROLE_LEGEND, getBuildingEmoji } from "../content/BuildingCatalog.js";
 import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER, getCitizenHelpText } from "../content/CitizenConfig.js";

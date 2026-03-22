@@ -1,3 +1,6 @@
+// Building instance lifecycle helpers.
+// This file handles quality thresholds, building stages, manifestation merges,
+// overflow into shards, and metadata updates for individual structures.
 import { BUILDING_ACTIVE_THRESHOLD, BUILDING_QUALITY_CAP } from "../content/Config.js";
 import { getCatalogKey } from "../content/BuildingCatalog.js";
 import { createId } from "../engine/Utils.js";

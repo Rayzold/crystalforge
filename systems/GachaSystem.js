@@ -1,3 +1,6 @@
+// Manifestation roll logic.
+// This system spends crystals, chooses a result from the current rarity pool,
+// and either manifests a building or resolves a direct crystal-upgrade outcome.
 import { pickRandom, randomInt } from "../engine/Random.js";
 import { getCatalogKey } from "../content/BuildingCatalog.js";
 import { getNextRarity } from "../content/Rarities.js";
@@ -20,13 +23,16 @@ export function manifestSelectedRarity(state, rarity) {
 
   const rolledName = pickRandom(pool);
   if (rolledName === "Crystal Upgrade") {
+    // Crystal Upgrade is a direct rarity conversion now, not a placeable building.
     const nextRarity = getNextRarity(rarity);
     if (!nextRarity) {
+      // Give the spent crystal back if the roll hit an upgrade at the top of the chain.
       addCrystals(state, rarity, 1);
       return { ok: false, reason: "That crystal cannot be upgraded further." };
     }
 
     addCrystals(state, nextRarity, 1);
+    // Move the forge forward immediately so the next manifest uses the elevated crystal.
     state.selectedRarity = nextRarity;
 
     addHistoryEntry(state, {

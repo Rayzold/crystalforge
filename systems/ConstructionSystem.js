@@ -1,3 +1,6 @@
+// Incubation and build-progress rules.
+// This system converts building points per day into quality gain, applies
+// support-bpd from completed structures, and computes ETA/stall information.
 import { BUILDING_ACTIVE_THRESHOLD } from "../content/Config.js";
 import { getBuildingConstructionSupportBpd } from "../content/BuildingCatalog.js";
 import { RARITY_BUILD_POINTS_PER_PERCENT, RARITY_RANKS } from "../content/Rarities.js";

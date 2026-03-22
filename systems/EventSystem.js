@@ -1,3 +1,6 @@
+// Random event orchestration.
+// This system evaluates city pressure, holiday timing, and event weights to
+// trigger appropriate incidents while keeping a bounded recent-event history.
 import { EVENT_POOLS } from "../content/EventPools.js";
 import { EVENT_STEP_CHANCES, MAX_RECENT_EVENTS } from "../content/Config.js";
 import { pickRandom, randomInt } from "../engine/Random.js";

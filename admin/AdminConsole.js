@@ -1,3 +1,6 @@
+// GM/admin console renderer and input handler.
+// This file builds the hidden administration UI, unlock flow, and the direct
+// controls that modify crystals, buildings, citizens, events, and save tools.
 import { MONTHS } from "../content/CalendarConfig.js";
 import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "../content/BuildingCatalog.js";
 import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER, getCitizenHelpText } from "../content/CitizenConfig.js";

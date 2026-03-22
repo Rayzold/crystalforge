@@ -1,3 +1,6 @@
+// GM home dashboard.
+// This page surfaces the current city summary, trends, advice, release checks,
+// and quick-reference panels so the settlement can be read at a glance.
 import { renderUiIcon } from "./UiIcons.js";
 import { BUILDING_ROLE_LEGEND } from "../content/BuildingCatalog.js";
 import { APP_VERSION, BUILD_NOTES } from "../content/Config.js";

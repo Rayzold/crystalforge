@@ -1,3 +1,6 @@
+// Chronicle calendar and day detail view.
+// This page renders the in-world calendar, yearly events, weather, moon phases,
+// notes, and stored city snapshots for each recorded date.
 import { DAYS_PER_MONTH, YEARLY_EVENTS } from "../content/CalendarConfig.js";
 import { escapeHtml } from "../engine/Utils.js";
 import {

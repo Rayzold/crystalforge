@@ -1,3 +1,7 @@
+// Main application controller.
+// This file wires together state, actions, routing, save/load, manifestation,
+// admin commands, and top-level UI events. Most game-wide behavior eventually
+// passes through here, while lower-level systems keep the domain rules isolated.
 import { AdminConsole } from "./admin/AdminConsole.js";
 import { createCatalogEntryFromInput, getCatalogKey } from "./content/BuildingCatalog.js";
 import {
@@ -749,6 +753,7 @@ async function handleManifest() {
         if (manifestResult.building?.id) {
           setSelectedBuildingAndCell(draft, manifestResult.building.id);
         } else {
+          // Upgrade rolls no longer create a building, so clear any stale forge/map selection.
           draft.ui.selectedBuildingId = null;
           draft.ui.selectedMapCell = null;
         }

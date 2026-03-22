@@ -1,3 +1,6 @@
+// City management page.
+// This page combines the building stream, map access, incubation controls,
+// filters, and city-side summaries used during active management play.
 import { getBuildingEmoji } from "../content/BuildingCatalog.js";
 import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";

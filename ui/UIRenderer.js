@@ -1,3 +1,6 @@
+// Top-level page renderer.
+// It selects the correct page shell/content for the current route and injects
+// transient overlays like modals, help bubbles, and reveal states.
 import { renderChroniclePage } from "./ChroniclePage.js";
 import { renderBuildingDetailModal } from "./BuildingDetailModal.js";
 import { renderBuildingCatalogModal } from "./BuildingCatalogModal.js";

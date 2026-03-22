@@ -1,10 +1,13 @@
+// Central configuration and boot-time defaults.
+// This file defines versioning, starting presets, high-level tuning constants,
+// route metadata, and user-facing build notes that explain what changed.
 import { BUILDING_POOLS } from "./BuildingPools.js";
 import { BASE_DISTRICT_CONFIG } from "./DistrictConfig.js";
 import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.2.49";
+export const APP_VERSION = "v1.2.50";
 export const SAVE_VERSION = 10;
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3";
 export const FIREBASE_CONFIG = {
@@ -31,6 +34,7 @@ export const PAGE_ROUTES = [
   { key: "chronicle", label: "Chronicle", href: "./chronicle.html" }
 ];
 export const BUILD_NOTES = [
+  "Panel and window contrast has been tightened slightly so the major surfaces separate more clearly from the background and feel easier on the eyes during longer sessions.",
   "Crystal Upgrade no longer creates a placeable building: when rolled, it immediately elevates the manifested crystal into the next rarity and older saved Crystal Upgrade buildings are consolidated back into crystal gains.",
   "Moving between Forge, City, Chronicle, and Home now keeps the live realm in session storage, so manifested buildings and spent crystals no longer disappear just because you changed pages.",
   "The manifestation completion popup now resolves in a single reveal path instead of re-triggering itself after the first animation.",

@@ -1,3 +1,6 @@
+// Building catalog source of truth.
+// This file classifies buildings, assigns flavor/district/tags/icons, and
+// creates the rarity-aware catalog entries used by manifestations and UI.
 import { BUILDING_POOLS } from "./BuildingPools.js";
 import { RARITY_ORDER } from "./Rarities.js";
 
