@@ -6779,6 +6779,69 @@ body:-webkit-full-screen #app {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.hex-map-panel__picker {
+  margin-top: 14px;
+}
+
+.hex-map-panel__picker-list {
+  display: grid;
+  gap: 10px;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.hex-map-panel__picker-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, rgba(11, 16, 26, 0.94), rgba(18, 24, 37, 0.88));
+}
+
+.hex-map-panel__picker-item.is-selected {
+  border-color: rgba(255, 228, 143, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(255, 228, 143, 0.05);
+}
+
+.hex-map-panel__picker-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.hex-map-panel__picker-copy strong,
+.hex-map-panel__picker-copy span {
+  display: block;
+}
+
+.hex-map-panel__picker-copy span {
+  color: var(--muted);
+}
+
+.hex-map-panel__picker-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.hex-map-panel__picker-flag {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 228, 143, 0.16);
+  background: rgba(255, 228, 143, 0.08);
+  color: var(--text);
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .hex-map-panel__district {
   display: inline-flex !important;
   align-items: center;
@@ -7067,14 +7130,18 @@ body:-webkit-full-screen #app {
 .hex-map__label,
 .hex-map__core-text {
   fill: #041018;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
   pointer-events: none;
+}
+
+.hex-map__label {
+  font-size: 18px;
 }
 
 .hex-map__core-text {
   fill: #ecf4ff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
 }
 
 .hex-map__preview {
@@ -7881,6 +7948,14 @@ body:-webkit-full-screen #app {
 
   .hex-map-panel__tooltip {
     margin-top: 10px;
+  }
+
+  .hex-map-panel__picker-item {
+    grid-template-columns: 1fr;
+  }
+
+  .hex-map-panel__picker-actions {
+    justify-content: flex-start;
   }
 
   .hex-map {

@@ -2054,20 +2054,20 @@ root.addEventListener("click", async (event) => {
         reportError("The central forge core cannot be assigned.");
         return;
       }
-
-      const selectedBuilding = currentState.buildings.find(
-        (building) => building.id === currentState.ui.selectedBuildingId
-      );
-
-      if (!selectedBuilding) {
-        commit((draft) => {
-          draft.ui.selectedMapCell = { q, r };
-        });
-        reportError("Select a building first, then choose an outer hex.");
+      commit((draft) => {
+        draft.ui.selectedMapCell = { q, r };
+      });
+      break;
+    }
+    case "place-building-on-cell": {
+      const buildingId = target.dataset.buildingId;
+      const q = Number(target.dataset.q);
+      const r = Number(target.dataset.r);
+      if (!buildingId || Number.isNaN(q) || Number.isNaN(r)) {
+        reportError("That placement request is incomplete.");
         return;
       }
-
-      moveBuildingOnMap({ buildingId: selectedBuilding.id, q, r, source: "Player" });
+      moveBuildingOnMap({ buildingId, q, r, source: "Player" });
       break;
     }
     case "dismiss-onboarding":
