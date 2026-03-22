@@ -1371,6 +1371,7 @@ export function renderHexMap(state) {
       </div>
       ${renderMapPresets(state)}
       <div class="hex-map-panel__actions">
+        <button class="button" data-action="auto-place-buildings">Auto Place Unplaced</button>
         <button class="button button--ghost" data-action="clear-building-placement">Clear Selected Placement</button>
         <button class="button button--ghost" data-action="undo-last-placement">Undo Last Placement</button>
         ${

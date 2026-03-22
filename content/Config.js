@@ -7,7 +7,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.2.68";
+export const APP_VERSION = "v1.2.70";
 export const SAVE_VERSION = 11;
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3";
 export const FIREBASE_CONFIG = {
@@ -34,6 +34,8 @@ export const PAGE_ROUTES = [
   { key: "chronicle", label: "Chronicle", href: "./chronicle.html" }
 ];
 export const BUILD_NOTES = [
+  "Town Map planning is much smarter: Auto Place now supports preview/confirm, defense-only or civilian-only passes, district targeting, compact mode, re-roll placement, and lockable structures.",
+  "Town Map now includes Auto Place, which greedily assigns unplaced buildings to strong legal hexes while still respecting bastion-only defense rules.",
   "Town Map now feels more playful: placement toasts are punchier, the drawer language is friendlier, and new hex placements burst with a quick celebratory effect.",
   "Town Map is now the main city-planning view: click empty hexes to open a placement drawer, use overlays and recommendations, arm chained placements, and save or restore layout presets.",
   "The map now reads more clearly: buildings use real art or icons, the outer bastion ring is defense-only, occupied hexes have quick actions, and placement can be undone.",
@@ -128,6 +130,7 @@ export const START_STATE_PRESETS = {
       theme: "dark",
       firebaseRealmId: FIREBASE_DEFAULT_REALM_ID,
       pinnedBuildingIds: [],
+      lockedMapBuildingIds: [],
       diceAmount: 1,
       diceType: "d20",
       diceHistory: [],
@@ -182,6 +185,7 @@ export const START_STATE_PRESETS = {
       theme: "dark",
       firebaseRealmId: FIREBASE_DEFAULT_REALM_ID,
       pinnedBuildingIds: [],
+      lockedMapBuildingIds: [],
       diceAmount: 1,
       diceType: "d20",
       diceHistory: [],

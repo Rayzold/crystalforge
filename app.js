@@ -50,11 +50,13 @@ import { getDailyCitySnapshot } from "./systems/CitySnapshotSystem.js";
 import { manifestSelectedRarity } from "./systems/GachaSystem.js";
 import { addHistoryEntry } from "./systems/HistoryLogSystem.js";
 import {
+  canPlaceBuildingAt,
   clearBuildingPlacement,
   findMapCell,
   forceSetBuildingPlacement,
   getBuildingPlacementBonuses,
   getBuildingAtCell,
+  isFortificationBuilding,
   setBuildingPlacement
 } from "./systems/MapSystem.js";
 import { addShards, setShards } from "./systems/ShardSystem.js";
@@ -723,6 +725,230 @@ function getFilteredUnplacedMapCandidates(state, filterKey = renderer.transientU
     }
     return left.displayName.localeCompare(right.displayName);
   });
+}
+
+function getHexDistance(leftQ, leftR, rightQ, rightR) {
+  const leftS = -leftQ - leftR;
+  const rightS = -rightQ - rightR;
+  return Math.max(Math.abs(leftQ - rightQ), Math.abs(leftR - rightR), Math.abs(leftS - rightS));
+}
+
+function getPlacementDistrictInfluence(state, cell) {
+  const weights = new Map();
+  for (const building of state.buildings) {
+    if (!building.mapPosition) {
+      continue;
+    }
+
+    const distance = getHexDistance(cell.q, cell.r, building.mapPosition.q, building.mapPosition.r);
+    if (distance > 2) {
+      continue;
+    }
+
+    const nextWeight = (weights.get(building.district) ?? 0) + (distance === 0 ? 4 : distance === 1 ? 2 : 1);
+    weights.set(building.district, nextWeight);
+  }
+
+  const strongest = [...weights.entries()].sort((left, right) => right[1] - left[1])[0];
+  if (!strongest) {
+    return null;
+  }
+
+  return {
+    district: strongest[0],
+    weight: strongest[1]
+  };
+}
+
+function getAutoPlacementPriority(state, building) {
+  let priority = 0;
+  if (state.settings?.pinnedBuildingIds?.includes(building.id)) {
+    priority += 0.45;
+  }
+  if (isFortificationBuilding(building)) {
+    priority += 0.3;
+  }
+  const rarityIndex = RARITY_ORDER.indexOf(building.rarity);
+  if (rarityIndex >= 0) {
+    priority += rarityIndex * 0.04;
+  }
+  return priority;
+}
+
+function getAutoPlacementScore(state, building, cell) {
+  const validation = canPlaceBuildingAt(state, building.id, cell.q, cell.r);
+  if (!validation.ok) {
+    return Number.NEGATIVE_INFINITY;
+  }
+
+  const previewTarget = { ...building, mapPosition: { q: cell.q, r: cell.r } };
+  const bonus = getBuildingPlacementBonuses(state, previewTarget);
+  const districtInfluence = getPlacementDistrictInfluence(state, cell);
+  let score = bonus.totalPercent;
+
+  if (districtInfluence?.district === building.district) {
+    score += 0.08;
+  }
+  if (bonus.sameDistrictNeighbors > 0) {
+    score += 0.03;
+  }
+  if (bonus.relatedTagNeighbors > 0) {
+    score += 0.02;
+  }
+  if (cell.isFortificationRing && isFortificationBuilding(building)) {
+    score += 0.12;
+  }
+
+  return score;
+}
+
+function isBetterAutoPlacement(candidate, currentBest) {
+  if (!candidate) {
+    return false;
+  }
+  if (!currentBest) {
+    return true;
+  }
+
+  const totalDiff = candidate.totalScore - currentBest.totalScore;
+  if (Math.abs(totalDiff) > 0.0001) {
+    return totalDiff > 0;
+  }
+
+  const priorityDiff = candidate.priority - currentBest.priority;
+  if (Math.abs(priorityDiff) > 0.0001) {
+    return priorityDiff > 0;
+  }
+
+  const scoreDiff = candidate.score - currentBest.score;
+  if (Math.abs(scoreDiff) > 0.0001) {
+    return scoreDiff > 0;
+  }
+
+  const candidateRarity = RARITY_ORDER.indexOf(candidate.building.rarity);
+  const currentRarity = RARITY_ORDER.indexOf(currentBest.building.rarity);
+  if (candidateRarity !== currentRarity) {
+    return candidateRarity > currentRarity;
+  }
+
+  return candidate.building.displayName.localeCompare(currentBest.building.displayName) < 0;
+}
+
+function findBestAutoPlacement(state) {
+  let bestPlacement = null;
+  const openCells = state.map.cells.filter((cell) => !cell.isReserved && !getBuildingAtCell(state, cell.q, cell.r));
+  const unplacedBuildings = state.buildings.filter((building) => !building.mapPosition);
+
+  for (const building of unplacedBuildings) {
+    const priority = getAutoPlacementPriority(state, building);
+    for (const cell of openCells) {
+      const score = getAutoPlacementScore(state, building, cell);
+      if (!Number.isFinite(score)) {
+        continue;
+      }
+
+      const candidate = {
+        building,
+        q: cell.q,
+        r: cell.r,
+        score,
+        priority,
+        totalScore: score + priority
+      };
+
+      if (isBetterAutoPlacement(candidate, bestPlacement)) {
+        bestPlacement = candidate;
+      }
+    }
+  }
+
+  return bestPlacement;
+}
+
+function runAutoPlaceBuildings() {
+  const state = getCurrentState();
+  const startingUnplacedCount = state.buildings.filter((building) => !building.mapPosition).length;
+  if (!startingUnplacedCount) {
+    reportError("No unplaced buildings are waiting for the Town Map.");
+    return;
+  }
+
+  const result = commit((draft) => {
+    const placements = [];
+    let nextPlacement = findBestAutoPlacement(draft);
+
+    // Auto Place works as a greedy planner: it takes the strongest legal move,
+    // commits it, then re-scores the next move against the updated city layout.
+    while (nextPlacement) {
+      const placementResult = setBuildingPlacement(
+        draft,
+        nextPlacement.building.id,
+        Number(nextPlacement.q),
+        Number(nextPlacement.r),
+        "Auto Place"
+      );
+      if (!placementResult.ok) {
+        break;
+      }
+
+      placements.push({
+        buildingId: nextPlacement.building.id,
+        q: Number(nextPlacement.q),
+        r: Number(nextPlacement.r)
+      });
+      nextPlacement = findBestAutoPlacement(draft);
+    }
+
+    const lastPlacement = placements[placements.length - 1] ?? null;
+    if (lastPlacement) {
+      setSelectedBuildingAndCell(draft, lastPlacement.buildingId);
+      draft.ui.selectedMapCell = { q: lastPlacement.q, r: lastPlacement.r };
+    } else {
+      draft.ui.selectedMapCell = null;
+    }
+
+    addHistoryEntry(draft, {
+      category: "Placement",
+      title: "Auto Place completed",
+      details: placements.length
+        ? `Auto Place assigned ${placements.length} building${placements.length === 1 ? "" : "s"} to legal hexes.`
+        : "Auto Place could not find any legal hexes for the current unplaced buildings."
+    });
+
+    return {
+      placements,
+      remainingCount: draft.buildings.filter((building) => !building.mapPosition).length,
+      lastPlacement
+    };
+  });
+
+  renderer.setTransientUi(
+    {
+      mapPlannerBuildingId: null,
+      mapPlannerMode: null,
+      validPlacementMode: false,
+      lastPlacement: null
+    },
+    getCurrentState()
+  );
+
+  if (!result.placements.length) {
+    reportError("Auto Place could not find any legal hexes for the current unplaced buildings.");
+    return;
+  }
+
+  markRecentBuildingChanges(result.placements.map((placement) => placement.buildingId));
+
+  if (result.lastPlacement) {
+    const placedBuilding = getCurrentState().buildings.find((building) => building.id === result.lastPlacement.buildingId) ?? null;
+    showMapPlacementPulse(result.lastPlacement.q, result.lastPlacement.r, placedBuilding);
+  }
+
+  reportSuccess(
+    result.remainingCount > 0
+      ? `Auto-placed ${result.placements.length} buildings. ${result.remainingCount} still need legal hexes.`
+      : `Auto-placed ${result.placements.length} buildings. The map found a home for everything.`
+  );
 }
 
 function setMapPlannerBuilding(buildingId, mode = "chain", successMessage = null) {
@@ -1785,6 +2011,9 @@ const actions = {
     });
     reportSuccess(`${preset?.name ?? "Map preset"} deleted.`);
   },
+  autoPlaceBuildings() {
+    runAutoPlaceBuildings();
+  },
   adjustShard,
   setResources,
   citizenCommand,
@@ -2279,6 +2508,10 @@ root.addEventListener("click", async (event) => {
     case "save-map-preset":
       void audioEngine.playUiAccent("soft");
       actions.saveMapPreset();
+      break;
+    case "auto-place-buildings":
+      void audioEngine.playUiAccent("confirm");
+      actions.autoPlaceBuildings();
       break;
     case "restore-map-preset":
       void audioEngine.playUiAccent("soft");

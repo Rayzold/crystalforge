@@ -257,6 +257,9 @@ function normalizeSettings(sourceSettings, baseSettings) {
   normalized.pinnedBuildingIds = Array.isArray(normalized.pinnedBuildingIds)
     ? [...new Set(normalized.pinnedBuildingIds.filter((id) => typeof id === "string" && id.trim()))]
     : [];
+  normalized.lockedMapBuildingIds = Array.isArray(normalized.lockedMapBuildingIds)
+    ? [...new Set(normalized.lockedMapBuildingIds.filter((id) => typeof id === "string" && id.trim()))]
+    : [];
   delete normalized.activeSaveSlot;
   delete normalized.sharedStateUrl;
   delete normalized.autoLoadSharedState;
