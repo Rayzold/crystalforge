@@ -6,6 +6,11 @@ export function renderManifestCompleteModal(state) {
     return "";
   }
 
+  const manifestSentence =
+    manifestModal.rolledName === "Crystal Upgrade"
+      ? `The <strong>${escapeHtml(manifestModal.rolledName)}</strong> manifested.`
+      : `The ${escapeHtml(manifestModal.rarity)} crystal manifested the <strong>${escapeHtml(manifestModal.rolledName)}</strong>.`;
+
   return `
     <div class="modal manifest-complete-modal is-open" id="manifest-complete-modal">
       <div class="modal__backdrop" data-action="close-manifest-complete"></div>
@@ -14,7 +19,7 @@ export function renderManifestCompleteModal(state) {
         <div class="manifest-complete-modal__body">
           <span class="manifest-complete-modal__eyebrow">Manifestation Complete</span>
           <h2>${escapeHtml(manifestModal.rolledName)}</h2>
-          <p>The ${escapeHtml(manifestModal.rarity)} crystal manifested the <strong>${escapeHtml(manifestModal.rolledName)}</strong>.</p>
+          <p>${manifestSentence}</p>
           <div class="manifest-complete-modal__quality">
             <span>Quality</span>
             <div class="manifest-complete-modal__bar">

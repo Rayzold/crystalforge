@@ -4,7 +4,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.2.27";
+export const APP_VERSION = "v1.2.31";
 export const SAVE_VERSION = 9;
 export const STORAGE_KEY = "crystal-forge-save-v2";
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v2";
@@ -32,9 +32,11 @@ export const PAGE_ROUTES = [
   { key: "chronicle", label: "Chronicle", href: "./chronicle.html" }
 ];
 export const BUILD_NOTES = [
-  "Incubation now uses building points per day instead of fixed percent-per-day rarity rates.",
-  "Every incubating building gets 10 base bpd, while specific support buildings add shared extra bpd to all active incubators.",
-  "Construction now drains materials, salvage, and mana by the missing quality being raised, and support bpd pauses once reserve thresholds are reached."
+  "Crystal Upgrade manifestations now read as upgrade manifestations in the completion popup instead of showing a rarity label.",
+  "The Open Map button in City now carries a map icon and a brighter accent, so the Town Map reads like a primary destination instead of another small toggle.",
+  "Distillation House has been replaced by Workshop Quarter, a clearer rare-tier goods producer for the city economy.",
+  "Building surfaces now expose the full building name on mouseover, including compact sidebar, player, queue, and incubation entries.",
+  "The new construction model and the City map flow now read together more cleanly during active session management."
 ];
 export const BUILDING_QUALITY_CAP = 350;
 export const BUILDING_ACTIVE_THRESHOLD = 100;

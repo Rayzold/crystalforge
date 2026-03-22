@@ -15,7 +15,7 @@ function renderQueueItem(state, building, index, activeCount) {
   const eta = etaDetails?.readyDayOffset !== null ? formatDate(etaDetails.readyDayOffset) : "Stalled";
 
   return `
-    <article class="construction-queue__item ${isActive ? "is-active" : "is-queued"}">
+    <article class="construction-queue__item ${isActive ? "is-active" : "is-queued"}" title="${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}">
       <div class="construction-queue__meta">
         <div class="construction-queue__heading">
           <span class="construction-queue__slot">${isActive ? `Raising now / slot ${index + 1}` : `Queued / #${index + 1}`}</span>

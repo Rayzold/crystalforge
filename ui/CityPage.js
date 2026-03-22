@@ -87,7 +87,10 @@ function renderBuildingsView(state) {
           <button class="button button--ghost ${currentView === "stream" ? "is-active" : ""}" data-action="set-city-building-view" data-view="stream">The Stream</button>
           <button class="button button--ghost ${currentView === "map" ? "is-active" : ""}" data-action="set-city-building-view" data-view="map">Town Map</button>
         </div>
-        <span class="city-workspace__total">Total Rolls: ${formatNumber(totalRolls, 0)}</span>
+        <div class="city-workspace__top-actions">
+          <button class="button city-workspace__map-shortcut ${currentView === "map" ? "is-active" : ""}" data-action="set-city-building-view" data-view="map">🗺️ Open Map</button>
+          <span class="city-workspace__total">Total Rolls: ${formatNumber(totalRolls, 0)}</span>
+        </div>
       </div>
 
       <div class="city-workspace__toolbar">
@@ -139,7 +142,7 @@ function renderBuildingsView(state) {
                       (building, index) => {
                         const etaDetails = getConstructionEtaDetails(building, state);
                         return `
-                        <article class="city-incubation-strip__item ${isBuildingActivelyConstructed(state, building.id) ? "is-active" : ""}">
+                        <article class="city-incubation-strip__item ${isBuildingActivelyConstructed(state, building.id) ? "is-active" : ""}" title="${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}">
                           <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
                           <span>${formatNumber(building.quality, 1)}%</span>
                           <em>Slot ${index + 1}</em>
@@ -175,7 +178,7 @@ function renderBuildingsView(state) {
                       .map((building, index) => {
                         const etaDetails = getConstructionEtaDetails(building, state);
                         return `
-                          <article class="city-incubation-strip__item">
+                          <article class="city-incubation-strip__item" title="${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}">
                             <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
                             <span>${formatNumber(building.quality, 1)}%</span>
                             <em>Waiting #${index + 1}</em>

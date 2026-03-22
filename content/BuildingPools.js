@@ -75,7 +75,7 @@ export const BUILDING_POOLS = {
     "Bathhouse",
     "Courthouse",
     "Crystal Upgrade",
-    "Distillation House",
+    "Workshop Quarter",
     "Embassy Annex",
     "Engineers' Guild",
     "Explosive Ballistas",

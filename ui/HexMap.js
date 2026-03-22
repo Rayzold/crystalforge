@@ -512,6 +512,7 @@ export function renderHexMap(state) {
                     fill="${fill}"
                     stroke="${building ? MAP_CONFIG.occupiedOutlineColor : theme.stroke}"
                     stroke-width="${isSelected || isFocusedCell ? 3 : 1.5}"
+                    aria-label="${escapeHtml(title)}"
                   ></polygon>
                   ${renderWaterOverlay(cell, center.x, center.y)}
                   ${

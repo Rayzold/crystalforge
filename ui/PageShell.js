@@ -83,7 +83,7 @@ function renderSidebarBuildingList(state, title, items, emptyLabel, variant = "m
                       const isRecentlyChanged = Boolean(state.transientUi?.recentBuildingChanges?.[building.id]);
                       const emoji = getBuildingEmoji(building);
                       return `
-                      <div class="sidebar-manifest-list__item ${isRecentlyChanged ? "is-recently-changed" : ""}">
+                      <div class="sidebar-manifest-list__item ${isRecentlyChanged ? "is-recently-changed" : ""}" title="${escapeHtml(`${emoji} ${building.displayName}`)}">
                         <span>${escapeHtml(`${emoji} ${building.displayName}`)}</span>
                         <div class="sidebar-manifest-list__meta">
                           <em>${escapeHtml(formatBuildingQualityDisplay(building))}</em>

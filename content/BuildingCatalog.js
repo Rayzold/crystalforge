@@ -100,7 +100,7 @@ const BUILDING_DEFINITIONS = {
   Bank: defineBuilding({ district: "Trade District", tags: ["trade", "security"], iconKey: "coins", profile: gameplay({ gold: 30, upkeep: 10, prosperity: 15, security: 8 }) }),
   Bathhouse: defineBuilding({ district: "Residential District", tags: ["housing"], iconKey: "home", profile: gameplay({ upkeep: 7, health: 20, morale: 12 }) }),
   Courthouse: defineBuilding({ district: "Residential District", tags: ["civic", "security"], iconKey: "columns", profile: gameplay({ upkeep: 8, security: 16, prosperity: 12 }) }),
-  "Distillation House": defineBuilding({ district: "Industrial District", tags: ["industry", "trade"], iconKey: "hammer", profile: gameplay({ gold: 20, upkeep: 8, morale: 10, prosperity: 8, materials: 10 }) }),
+  "Workshop Quarter": defineBuilding({ district: "Industrial District", tags: ["industry", "trade", "culture"], iconKey: "guild", profile: gameplay({ upkeep: 8, prosperity: 10, goods: 4, morale: 4 }) }),
   "Embassy Annex": defineBuilding({ district: "Trade District", tags: ["trade", "civic"], iconKey: "banner", profile: gameplay({ gold: 15, upkeep: 8, prestige: 16, prosperity: 6 }) }),
   "Engineers' Guild": defineBuilding({ district: "Industrial District", tags: ["industry", "military"], iconKey: "guild", profile: gameplay({ upkeep: 10, defense: 20, prosperity: 15, materials: 16 }) }),
   "Explosive Ballistas": defineBuilding({ district: "Military District", tags: ["military"], iconKey: "shield", profile: gameplay({ upkeep: 12, defense: 22, security: 16 }) }),

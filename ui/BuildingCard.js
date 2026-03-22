@@ -132,7 +132,7 @@ export function renderBuildingCard(building, state) {
 
   return `
     <article class="building-card building-card--stream ${selected ? "is-selected" : ""} ${isIncomplete ? "is-incomplete" : ""} ${isRuined ? "is-ruined" : ""} ${isRecentlyChanged ? "is-recently-changed" : ""}" style="--rarity-color:${RARITY_COLORS[building.rarity]}">
-      <button class="building-card__select" data-action="select-building" data-building-id="${building.id}">
+      <button class="building-card__select" data-action="select-building" data-building-id="${building.id}" title="${escapeHtml(`${buildingEmoji} ${building.displayName}`)}" aria-label="${escapeHtml(`${buildingEmoji} ${building.displayName}`)}">
         <div class="building-card__visual">
           ${renderMedia(building)}
           <div class="building-card__overlay">
