@@ -12,7 +12,7 @@ function getCatalogEntries(state) {
       }
       const entry = state.buildingCatalog[getCatalogKey(name, rarity)];
       const manifested = state.buildings.find((building) => building.name === name && building.rarity === rarity) ?? null;
-      const status = manifested ? (manifested.isRuined ? "Ruined" : "Manifested") : "Not Manifested";
+      const status = manifested ? (manifested.isRuined ? "Ruined" : "Active") : "Not Yet Active";
       return {
         name,
         rarity,
@@ -76,7 +76,7 @@ export function renderBuildingCatalogModal(state) {
   const entries = getCatalogEntries(state);
   const filteredEntries = filterEntries(entries, filters);
   const districts = [...new Set(entries.map((entry) => entry.district))].sort((left, right) => left.localeCompare(right));
-  const statuses = ["Manifested", "Not Manifested", "Ruined"];
+  const statuses = ["Active", "Not Yet Active", "Ruined"];
 
   return renderModal({
     id: "building-catalog-modal",
@@ -87,9 +87,9 @@ export function renderBuildingCatalogModal(state) {
       <div class="catalog-modal">
         <div class="catalog-modal__toolbar">
           <p class="catalog-modal__intro">
-            This table lists the current rollable building entries, their district placement, manifestation state, and current manifested stage.
+            This table lists the current rollable building entries, their district placement, activation state, and current stage.
           </p>
-          <button class="button button--ghost" data-action="export-building-catalog">Export Manifest Status</button>
+          <button class="button button--ghost" data-action="export-building-catalog">Export Building Status</button>
         </div>
         <div class="catalog-modal__filters">
           <label>
@@ -122,7 +122,7 @@ export function renderBuildingCatalogModal(state) {
                 <th>Rarity</th>
                 <th>District</th>
                 <th>Status</th>
-                <th>Manifested Stage</th>
+                <th>Current Stage</th>
               </tr>
             </thead>
             <tbody>

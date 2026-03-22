@@ -113,7 +113,7 @@ export function renderBuildingDetailModal(state, pageKey) {
           </div>
         </div>
         <div class="building-detail__copy">
-          <p class="building-detail__eyebrow">${escapeHtml(building.rarity)} Manifest / ${escapeHtml(building.district)}</p>
+          <p class="building-detail__eyebrow">${escapeHtml(building.rarity)} Structure / ${escapeHtml(building.district)}</p>
           <h3>${escapeHtml(`${buildingEmoji} ${building.displayName}`)}</h3>
           <p class="building-detail__effect">${escapeHtml(building.specialEffect)}</p>
           <p class="building-detail__flavor">${escapeHtml(building.flavorText ?? "No flavor text has been etched into the city chronicle yet.")}</p>
@@ -165,9 +165,9 @@ export function renderBuildingDetailModal(state, pageKey) {
         <section class="building-detail__panel">
           <h4>Construction</h4>
           <ul class="building-detail__facts">
-            <li><span>Status</span><strong>${isRuined ? "Ruined / Offline" : building.isComplete ? "Completed" : isActiveConstruction ? "Incubating" : "Queued"}</strong></li>
-            <li><span>Incubation</span><strong>${isIncomplete ? etaDetails?.isStalled ? "Stalled" : `${formatNumber(etaDetails?.totalBpd ?? 0, 1)} bpd` : "Complete"}</strong></li>
-            <li><span>Progress</span><strong>${isIncomplete ? `${formatNumber(etaDetails?.dailyPercent ?? 0, 2)}% / day` : "Finished"}</strong></li>
+            <li><span>Status</span><strong>${isRuined ? "Ruined / Offline" : building.isComplete ? "Active" : isActiveConstruction ? "Incubating" : "Queued"}</strong></li>
+            <li><span>Incubation</span><strong>${isIncomplete ? etaDetails?.isStalled ? "Stalled" : `${formatNumber(etaDetails?.totalBpd ?? 0, 1)} build points/day` : "Already active"}</strong></li>
+            <li><span>Progress</span><strong>${isIncomplete ? `${formatNumber(etaDetails?.dailyPercent ?? 0, 2)}% quality / day` : "Finished"}</strong></li>
             <li><span>Forecast</span><strong>${building.isComplete ? escapeHtml(building.completedAt ?? "Completed") : escapeHtml(eta ?? "Waiting for a slot")}</strong></li>
             <li><span>Drift Queue</span><strong>${building.isComplete ? "Finished" : isActiveConstruction ? `Active within ${driftSlots} slots` : `Queued #${queuePosition + 1}`}</strong></li>
             <li><span>Daily Drain</span><strong>${
@@ -182,11 +182,11 @@ export function renderBuildingDetailModal(state, pageKey) {
                   etaDetails?.isStalled
                     ? `Why stalled: ${etaDetails?.stallReasons?.join(", ") || "insufficient stock to support incubation."}`
                     : etaDetails?.supportReserved
-                      ? "Support bpd is partially throttled because reserve thresholds are being protected."
+                      ? "Support build points are partially throttled because reserve thresholds are being protected."
                       : "Incubation is healthy and receiving its current daily support."
                 )}</p>`
               : economySummary.supportBpd
-                ? `<p class="building-detail__status-note">This completed building contributes ${formatNumber(economySummary.supportBpd * (building.multiplier || 1), 0)} support bpd to all incubators at its current stage.</p>`
+                ? `<p class="building-detail__status-note">This active building contributes ${formatNumber(economySummary.supportBpd * (building.multiplier || 1), 0)} support build points/day to all incubators at its current stage.</p>`
                 : ""
           }
         </section>
@@ -215,7 +215,7 @@ export function renderBuildingDetailModal(state, pageKey) {
           </div>
           ${
             economySummary.supportBpd
-              ? `<p class="building-detail__status-note">Construction support: ${formatNumber(economySummary.supportBpd, 0)} base bpd before stage scaling.</p>`
+              ? `<p class="building-detail__status-note">Construction support: ${formatNumber(economySummary.supportBpd, 0)} base build points/day before stage scaling.</p>`
               : ""
           }
         </section>
@@ -234,7 +234,7 @@ export function renderBuildingDetailModal(state, pageKey) {
           <h4>Chronicle Marks</h4>
           <ul class="building-detail__facts">
             <li><span>Created</span><strong>${escapeHtml(building.createdAt)}</strong></li>
-            <li><span>Last Manifested</span><strong>${escapeHtml(building.lastManifestedAt)}</strong></li>
+            <li><span>Last Raised</span><strong>${escapeHtml(building.lastManifestedAt)}</strong></li>
             <li><span>Completed</span><strong>${escapeHtml(building.completedAt ?? "Not yet")}</strong></li>
           </ul>
         </section>

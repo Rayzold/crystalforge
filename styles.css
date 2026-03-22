@@ -210,6 +210,13 @@ textarea {
   color: var(--muted);
 }
 
+.panel__subtle,
+.hero__eyebrow,
+.hero__subhead {
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
 .empty-state {
   margin: 0;
   padding: 14px 16px;
@@ -1132,6 +1139,7 @@ textarea {
 .event-line {
   font-size: 0.82rem;
   color: var(--muted);
+  line-height: 1.45;
 }
 
 .building-card__spotlights {
@@ -1246,6 +1254,7 @@ textarea {
 .building-card__effect {
   margin: 0;
   line-height: 1.55;
+  font-weight: 600;
 }
 
 .building-card__flavor {
@@ -1253,8 +1262,76 @@ textarea {
   padding-inline: 12px;
   color: rgba(236, 244, 255, 0.68);
   font-style: italic;
-  line-height: 1.45;
+  line-height: 1.58;
   font-size: 0.84rem;
+}
+
+.building-card__header p,
+.building-card__meta span,
+.building-card__warning-strip span {
+  line-height: 1.45;
+}
+
+.admin-debug-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.admin-debug-table-wrap {
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.admin-debug-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+}
+
+.admin-debug-table th,
+.admin-debug-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: left;
+}
+
+.admin-debug-table th {
+  color: var(--muted);
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-debug-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.admin-debug-table td.is-positive {
+  color: var(--success);
+  font-weight: 700;
+}
+
+.admin-debug-table td.is-negative {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.admin-debug-table td.is-neutral {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.admin-debug-note {
+  margin: 10px 0 0;
+  color: var(--muted);
+  line-height: 1.5;
 }
 
 .building-card__resource-strip {

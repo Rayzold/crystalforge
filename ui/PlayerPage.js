@@ -393,8 +393,8 @@ function renderIncubationList(title, subtitle, buildings, emptyText, variant, st
                         <span>${escapeHtml(building.rarity)} / ${escapeHtml(building.district ?? "Unassigned")}</span>
                         <small>${
                           etaDetails.isStalled
-                            ? `${formatNumber(building.quality, 0)}% now | Stalled | Why: ${escapeHtml(etaDetails.stallReasons.join(", ") || "insufficient resources")}`
-                            : `${formatNumber(building.quality, 0)}% now | ${formatNumber(etaDetails.totalBpd, 1)} bpd | ${formatNumber(etaDetails.dailyPercent, 2)}% per day | ${formatNumber(etaDetails.daysRemaining, 1)}d | Ready ${escapeHtml(readyLabel)}`
+                            ? `${formatNumber(building.quality, 0)}% quality now | Stalled | Why: ${escapeHtml(etaDetails.stallReasons.join(", ") || "insufficient resources")}`
+                            : `${formatNumber(building.quality, 0)}% quality now | ${formatNumber(etaDetails.totalBpd, 1)} build points/day | ${formatNumber(etaDetails.dailyPercent, 2)}% quality per day | ${formatNumber(etaDetails.daysRemaining, 1)}d | Ready ${escapeHtml(readyLabel)}`
                         }</small>
                       </div>
                       <div class="player-list__actions">
@@ -457,7 +457,7 @@ export function renderPlayerPage(state) {
             <strong>${formatNumber(totalRolls, 0)}</strong>
           </article>
           <article>
-            <span>Manifested</span>
+            <span>Active</span>
             <strong>${hideCompleted ? "Hidden" : formatNumber(manifested.length, 0)}</strong>
           </article>
           <article>
@@ -476,7 +476,7 @@ export function renderPlayerPage(state) {
       ${renderResourceChainPanel(state)}
       ${renderBuildingRolesLegend()}
       <section class="player-lists">
-        ${hideCompleted ? "" : renderManifestedList("Active Buildings", "Manifested and already part of the Drift.", manifested, "No active buildings yet.", state)}
+        ${hideCompleted ? "" : renderManifestedList("Active Buildings", "Completed and already part of the Drift.", manifested, "No active buildings yet.", state)}
         ${renderIncubationList("Incubating Buildings", "Buildings currently growing inside an incubator slot.", incubating, "Nothing is incubating right now.", "incubating", state)}
       </section>
       ${renderIncubationList("Available Buildings", "Waiting buildings that can be swapped into an incubator.", available, "No waiting buildings are ready to incubate.", "available", state)}

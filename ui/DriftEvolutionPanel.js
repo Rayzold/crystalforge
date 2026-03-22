@@ -18,7 +18,7 @@ export function renderDriftEvolutionPanel(state, { compact = false } = {}) {
     <section class="panel drift-evolution-panel ${compact ? "drift-evolution-panel--compact" : ""}">
       <div class="panel__header">
         <h3>Drift Evolution</h3>
-        <span class="panel__subtle">${manifestedCount} manifested building${manifestedCount === 1 ? "" : "s"}</span>
+        <span class="panel__subtle">${manifestedCount} active building${manifestedCount === 1 ? "" : "s"}</span>
       </div>
       <div class="drift-evolution-panel__hero">
         <div>
@@ -40,7 +40,7 @@ export function renderDriftEvolutionPanel(state, { compact = false } = {}) {
         <article>
           <span>Growth Speed</span>
           <strong>+${formatNumber(currentStage.constructionSpeedPercent, 0)}%</strong>
-          <small>Applied to incubation bpd</small>
+          <small>Applied to incubation build points/day</small>
         </article>
         <article>
           <span>Optimal Pop.</span>
@@ -59,7 +59,7 @@ export function renderDriftEvolutionPanel(state, { compact = false } = {}) {
             ? `
                 <span>Next evolution</span>
                 <strong>${escapeHtml(nextStage.name)}</strong>
-                <small>${Math.max(0, nextStage.threshold - manifestedCount)} more manifested buildings needed (${nextStage.threshold} total).</small>
+                <small>${Math.max(0, nextStage.threshold - manifestedCount)} more active buildings needed (${nextStage.threshold} total).</small>
               `
             : `
                 <span>Evolution Status</span>

@@ -16,6 +16,12 @@ function createDeltaRecord() {
   return { gold: 0, food: 0, materials: 0, salvage: 0, mana: 0, prosperity: 0 };
 }
 
+function addDeltaInto(target, source) {
+  for (const key of Object.keys(target)) {
+    target[key] += Number(source?.[key] ?? 0);
+  }
+}
+
 export function getTradeGoodsGoldMultiplier(state) {
   const goods = Math.max(0, Number(state.cityStats?.goods ?? 0) || 0);
   const excessGoods = Math.max(0, goods - 10);
@@ -142,6 +148,122 @@ export function calculateDailyResourceDelta(state) {
   }
 
   return deltas;
+}
+
+export function getEconomyDebugSummary(state) {
+  const resources = ["gold", "food", "materials", "salvage", "mana", "prosperity"];
+  const buildingProduction = createDeltaRecord();
+  const citizenProduction = createDeltaRecord();
+  const citizenConsumption = createDeltaRecord();
+  const eventAndFocus = createDeltaRecord();
+  const net = calculateDailyResourceDelta(state);
+  const tradeGoodsGoldMultiplier = getTradeGoodsGoldMultiplier(state);
+  const goldOutputMultiplier = getGoldOutputMultiplier(state);
+  const foodOutputMultiplier = getFoodOutputMultiplier(state);
+
+  for (const building of state.buildings) {
+    if (!building.isComplete || building.isRuined) {
+      continue;
+    }
+
+    const placementBonus = getBuildingPlacementBonuses(state, building);
+    const placementMultiplier = 1 + placementBonus.totalPercent;
+    const nextDelta = createDeltaRecord();
+
+    let goldDelta = building.resourceRates.gold * building.multiplier * placementMultiplier;
+    if (goldDelta > 0 && building.tags?.includes("trade")) {
+      goldDelta *= tradeGoodsGoldMultiplier;
+    }
+    if (goldDelta > 0) {
+      goldDelta *= goldOutputMultiplier;
+    }
+    nextDelta.gold += goldDelta;
+
+    let foodDelta = building.resourceRates.food * building.multiplier * placementMultiplier;
+    if (foodDelta > 0) {
+      foodDelta *= foodOutputMultiplier;
+    }
+    nextDelta.food += foodDelta;
+    nextDelta.materials += building.resourceRates.materials * building.multiplier * placementMultiplier;
+    nextDelta.salvage += (building.resourceRates.salvage ?? 0) * building.multiplier * placementMultiplier;
+    nextDelta.mana += building.resourceRates.mana * building.multiplier * placementMultiplier;
+    nextDelta.prosperity += building.stats.prosperity * 0.02 * building.multiplier * placementMultiplier;
+    addDeltaInto(buildingProduction, nextDelta);
+  }
+
+  for (const [citizenClass, count] of Object.entries(state.citizens)) {
+    const citizenDefinition = state.citizenDefinitions[citizenClass];
+    for (const [resource, amount] of Object.entries(citizenDefinition.production)) {
+      let nextAmount = amount * count;
+      if (resource === "gold" && nextAmount > 0) {
+        nextAmount *= goldOutputMultiplier;
+      }
+      if (resource === "food" && nextAmount > 0) {
+        nextAmount *= foodOutputMultiplier;
+      }
+      citizenProduction[resource] = (citizenProduction[resource] ?? 0) + nextAmount;
+    }
+    for (const [resource, amount] of Object.entries(citizenDefinition.consumption)) {
+      citizenConsumption[resource] = (citizenConsumption[resource] ?? 0) - amount * count;
+    }
+  }
+
+  const districtSummary = getDistrictSummary(state);
+  const districtModifiers = [];
+  for (const district of districtSummary) {
+    if (district.level <= 0) {
+      continue;
+    }
+    const bonuses = district.definition.bonuses;
+    const applied = [];
+    if (bonuses.goldProductionPercent) applied.push(`gold x${(1 + (bonuses.goldProductionPercent * district.level) / 100).toFixed(2)}`);
+    if (bonuses.foodProductionPercent) applied.push(`food x${(1 + (bonuses.foodProductionPercent * district.level) / 100).toFixed(2)}`);
+    if (bonuses.materialsProductionPercent) applied.push(`materials x${(1 + (bonuses.materialsProductionPercent * district.level) / 100).toFixed(2)}`);
+    if (bonuses.salvageProductionPercent) applied.push(`salvage x${(1 + (bonuses.salvageProductionPercent * district.level) / 100).toFixed(2)}`);
+    if (bonuses.manaProductionPercent) applied.push(`mana x${(1 + (bonuses.manaProductionPercent * district.level) / 100).toFixed(2)}`);
+    if (bonuses.prosperityFlat) applied.push(`prosperity +${(bonuses.prosperityFlat * district.level * 0.05).toFixed(2)}`);
+    if (applied.length) {
+      districtModifiers.push(`${district.name}: ${applied.join(", ")}`);
+    }
+  }
+
+  for (const event of state.events.active) {
+    const effects = event.effects;
+    eventAndFocus.gold += effects.goldFlat ?? 0;
+    eventAndFocus.food += effects.foodFlat ?? 0;
+    eventAndFocus.materials += effects.materialsFlat ?? 0;
+    eventAndFocus.salvage += effects.salvageFlat ?? 0;
+    eventAndFocus.mana += effects.manaFlat ?? 0;
+    eventAndFocus.prosperity += effects.prosperityFlat ?? 0;
+  }
+
+  const focus = getCurrentTownFocus(state);
+  if (focus?.resourceDaily) {
+    eventAndFocus.gold += focus.resourceDaily.gold ?? 0;
+    eventAndFocus.food += focus.resourceDaily.food ?? 0;
+    eventAndFocus.materials += focus.resourceDaily.materials ?? 0;
+    eventAndFocus.salvage += focus.resourceDaily.salvage ?? 0;
+    eventAndFocus.mana += focus.resourceDaily.mana ?? 0;
+    eventAndFocus.prosperity += focus.resourceDaily.prosperity ?? 0;
+  }
+
+  return {
+    rows: resources.map((resource) => ({
+      resource,
+      stock: Number(state.resources?.[resource] ?? 0),
+      buildingProduction: Number(buildingProduction[resource] ?? 0),
+      citizenProduction: Number(citizenProduction[resource] ?? 0),
+      citizenConsumption: Number(citizenConsumption[resource] ?? 0),
+      eventAndFocus: Number(eventAndFocus[resource] ?? 0),
+      net: Number(net[resource] ?? 0)
+    })),
+    modifiers: {
+      tradeGoodsGoldMultiplier,
+      goldOutputMultiplier,
+      foodOutputMultiplier
+    },
+    districtModifiers
+  };
 }
 
 function getRunwayDays(stockpile, dailyDelta) {

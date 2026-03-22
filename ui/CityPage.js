@@ -115,8 +115,8 @@ function renderBuildingsView(state) {
         </div>
         <div class="city-workspace__filters city-workspace__filters--status">
           <button class="button button--ghost city-filter ${statusFilter === "All" ? "is-active" : ""}" data-action="set-building-status-filter" data-filter="All">All States</button>
-          <button class="button button--ghost city-filter ${statusFilter === "Manifested" ? "is-active" : ""}" data-action="set-building-status-filter" data-filter="Manifested">Manifested</button>
-          <button class="button button--ghost city-filter ${statusFilter === "Unmanifested" ? "is-active" : ""}" data-action="set-building-status-filter" data-filter="Unmanifested">Unmanifested</button>
+          <button class="button button--ghost city-filter ${statusFilter === "Active" ? "is-active" : ""}" data-action="set-building-status-filter" data-filter="Active">Active</button>
+          <button class="button button--ghost city-filter ${statusFilter === "Incomplete" ? "is-active" : ""}" data-action="set-building-status-filter" data-filter="Incomplete">Incomplete</button>
           <button class="button button--ghost city-filter ${statusFilter === "Available" ? "is-active" : ""}" data-action="set-building-status-filter" data-filter="Available">Available</button>
         </div>
         <div class="city-workspace__filters city-workspace__filters--quick">
@@ -132,7 +132,7 @@ function renderBuildingsView(state) {
           <span>Sort</span>
           <select data-action="set-building-sort">
             <option value="newest" ${sortKey === "newest" ? "selected" : ""}>Newest First</option>
-            <option value="quality" ${sortKey === "quality" ? "selected" : ""}>Highest Quality</option>
+            <option value="quality" ${sortKey === "quality" ? "selected" : ""}>Highest Stage / Quality</option>
             <option value="rarity" ${sortKey === "rarity" ? "selected" : ""}>Highest Rarity</option>
             <option value="impact-gold" ${sortKey === "impact-gold" ? "selected" : ""}>Gold Impact</option>
             <option value="impact-food" ${sortKey === "impact-food" ? "selected" : ""}>Food Impact</option>
@@ -169,9 +169,9 @@ function renderBuildingsView(state) {
                         return `
                         <article class="city-incubation-strip__item ${isBuildingActivelyConstructed(state, building.id) ? "is-active" : ""}" title="${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}">
                           <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
-                          <span>${formatNumber(building.quality, 1)}%</span>
+                          <span>${escapeHtml(formatNumber(building.quality, 1))}% quality</span>
                           <em>Slot ${index + 1}</em>
-                          <small>${etaDetails.isStalled ? "Incubation stalled" : `${formatNumber(etaDetails.totalBpd, 1)} bpd / ${formatNumber(etaDetails.dailyPercent, 2)}% per day`}</small>
+                          <small>${etaDetails.isStalled ? "Incubation stalled" : `${formatNumber(etaDetails.totalBpd, 1)} build points/day / ${formatNumber(etaDetails.dailyPercent, 2)}% quality per day`}</small>
                           <small>${
                             etaDetails.daysRemaining === null
                               ? escapeHtml(etaDetails.stallReasons.join(", ") || "insufficient resources")
@@ -205,12 +205,12 @@ function renderBuildingsView(state) {
                         return `
                           <article class="city-incubation-strip__item" title="${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}">
                             <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
-                            <span>${formatNumber(building.quality, 1)}%</span>
+                            <span>${escapeHtml(formatNumber(building.quality, 1))}% quality</span>
                             <em>Waiting #${index + 1}</em>
                             <small>${
                               etaDetails.isStalled
                                 ? "Cannot progress with current reserves"
-                                : `If incubated: ${formatNumber(etaDetails.totalBpd, 1)} bpd / ${formatNumber(etaDetails.dailyPercent, 2)}% per day / ${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"}`
+                                : `If incubated: ${formatNumber(etaDetails.totalBpd, 1)} build points/day / ${formatNumber(etaDetails.dailyPercent, 2)}% quality per day / ${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"}`
                             }</small>
                             <small>${
                               etaDetails.readyDayOffset === null
@@ -242,7 +242,7 @@ function renderBuildingsView(state) {
       <div class="city-workspace__footer">
         <article><strong>${formatNumber(visibleBuildings.length, 0)}</strong><span>Visible</span></article>
         <article><strong>${formatNumber(state.buildings.filter((building) => building.quality >= 100).length, 0)}</strong><span>Completed</span></article>
-        <article><strong>${formatNumber(state.buildings.length ? state.buildings.reduce((sum, building) => sum + building.quality, 0) / state.buildings.length : 0, 0)}%</strong><span>Average Quality</span></article>
+        <article><strong>${formatNumber(state.buildings.length ? state.buildings.reduce((sum, building) => sum + building.quality, 0) / state.buildings.length : 0, 0)}%</strong><span>Average Roll Quality</span></article>
       </div>
     </section>
   `;

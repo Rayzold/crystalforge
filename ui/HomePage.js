@@ -59,7 +59,7 @@ function getRealmGoals(state) {
   const goals = [
     {
       title: "Establish the Drift",
-      details: "Reach 5 manifested buildings to unlock the first evolution point.",
+      details: "Reach 5 active buildings to unlock the first evolution point.",
       progress: state.buildings.length,
       target: 5,
       href: "./forge.html"
@@ -396,7 +396,7 @@ function renderRollTableReview(state) {
     <section class="scene-panel">
       <div class="panel__header">
         <h3>Roll Table Review</h3>
-        <span class="panel__subtle">Buildings still unmanifested in each reality</span>
+        <span class="panel__subtle">Buildings still inactive in each reality</span>
       </div>
       <div class="rolltable-review">
         ${Object.entries(state.rollTables)
@@ -523,7 +523,7 @@ function renderHomeSignals(state) {
           <small>${townFocusAvailability.isSelectionPending ? "A new focus can be chosen now" : formatDate(townFocusAvailability.nextSelectionDayOffset)}</small>
         </article>
         <article>
-          <span>Manifested Buildings</span>
+          <span>Active Buildings</span>
           <strong>${formatNumber(state.buildings.length, 0)}</strong>
           <small>${formatNumber(state.buildings.filter((building) => building.isComplete).length, 0)} complete</small>
         </article>

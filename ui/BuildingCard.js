@@ -75,7 +75,7 @@ function getCompactStatus(building, { isIncomplete, isActiveConstruction, queueP
     return "Ruined / inactive until repaired";
   }
   if (!isIncomplete) {
-    return `Operational / ${formatBuildingQualityDisplay(building)}`;
+    return `Operational / Stage ${formatBuildingQualityDisplay(building)}`;
   }
   if (isActiveConstruction) {
     return eta ? `Growing now / ETA ${eta}` : "Growing now / stalled";
@@ -194,7 +194,7 @@ export function renderBuildingCard(building, state) {
               : isIncomplete
                 ? etaDetails?.isStalled
                   ? "Incubation stalled"
-                  : `${formatNumber(etaDetails?.totalBpd ?? 0, 1)} bpd / ${formatNumber(etaDetails?.dailyPercent ?? 0, 2)}% per day`
+                  : `${formatNumber(etaDetails?.totalBpd ?? 0, 1)} build points/day / ${formatNumber(etaDetails?.dailyPercent ?? 0, 2)}% quality per day`
                 : `Completed ${escapeHtml(building.completedAt ?? "today")}`
           }</span>
           <span>${escapeHtml(building.district)}</span>

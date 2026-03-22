@@ -21,15 +21,15 @@ function renderQueueItem(state, building, index, activeCount) {
           <span class="construction-queue__slot">${isActive ? `Raising now / slot ${index + 1}` : `Queued / #${index + 1}`}</span>
           <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
         </div>
-        <small>${escapeHtml(building.rarity)} / ${formatNumber(building.quality, 2)}%</small>
+        <small>${escapeHtml(building.rarity)} / ${formatNumber(building.quality, 2)}% quality</small>
         <small>${
           isActive
             ? etaDetails.isStalled
-              ? `Stalled / ${escapeHtml(etaDetails.stallReasons.join(", ") || "insufficient resources")} / Support bpd pauses at reserves`
-              : `${formatNumber(etaDetails.totalBpd, 1)} bpd / ${formatNumber(etaDetails.dailyPercent, 2)}% per day / ${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"} / Ready ${escapeHtml(eta)}`
+              ? `Stalled / ${escapeHtml(etaDetails.stallReasons.join(", ") || "insufficient resources")} / Support build points pause at reserve thresholds`
+              : `${formatNumber(etaDetails.totalBpd, 1)} build points/day / ${formatNumber(etaDetails.dailyPercent, 2)}% quality per day / ${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"} / Ready ${escapeHtml(eta)}`
             : etaDetails.isStalled
               ? `If activated: stalled / ${escapeHtml(etaDetails.stallReasons.join(", ") || "insufficient resources")}`
-              : `If activated: ${formatNumber(etaDetails.totalBpd, 1)} bpd / ${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"} / Ready ${escapeHtml(eta)}`
+              : `If activated: ${formatNumber(etaDetails.totalBpd, 1)} build points/day / ${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"} / Ready ${escapeHtml(eta)}`
         }</small>
       </div>
       <div class="construction-queue__actions">
@@ -61,7 +61,7 @@ export function renderConstructionQueuePanel(state) {
                 ${queue.map((building, index) => renderQueueItem(state, building, index, activeQueue.length)).join("")}
               </div>
             `
-          : `<p class="empty-state">All manifested buildings at or above 100%. The Drift is not raising any new structures right now.</p>`
+          : `<p class="empty-state">All buildings are already active at 100%+ quality. The Drift is not raising any new structures right now.</p>`
       }
     </section>
   `;

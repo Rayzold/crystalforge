@@ -101,9 +101,9 @@ export function getVisibleBuildings(state) {
 
   const statusFilter = state.transientUi?.buildingStatusFilter ?? "All";
   switch (statusFilter) {
-    case "Manifested":
+    case "Active":
       return quickFiltered.filter((building) => building.isComplete);
-    case "Unmanifested":
+    case "Incomplete":
       return quickFiltered.filter((building) => !building.isComplete);
     case "Available":
       return quickFiltered.filter((building) => !building.isComplete && !isBuildingActivelyConstructed(state, building.id));

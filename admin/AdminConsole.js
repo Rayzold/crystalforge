@@ -14,6 +14,7 @@ import { renderModal } from "../ui/Modal.js";
 import { formatDate } from "../systems/CalendarSystem.js";
 import { formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
 import { getDriftEvolutionStages } from "../systems/DriftEvolutionSystem.js";
+import { getEconomyDebugSummary } from "../systems/ResourceSystem.js";
 import { getManualSaveMeta } from "../systems/StorageSystem.js";
 
 function options(values, selectedValue) {
@@ -204,7 +205,7 @@ function renderManifestedBuildingAdminList(state) {
     .sort((left, right) => right.quality - left.quality);
 
   if (!manifestedBuildings.length) {
-    return `<p class="empty-state">No manifested buildings are active right now.</p>`;
+    return `<p class="empty-state">No active buildings exist right now.</p>`;
   }
 
   return `
@@ -226,6 +227,58 @@ function renderManifestedBuildingAdminList(state) {
         )
         .join("")}
     </div>
+  `;
+}
+
+function renderEconomyDebugTable(state) {
+  const debug = getEconomyDebugSummary(state);
+  return `
+    <section class="admin-section">
+      <h3>Economy Debug</h3>
+      <p>Use this to compare current stock against daily inflow, citizen drain, and event/focus modifiers.</p>
+      <div class="admin-debug-meta">
+        <span>Trade from goods: x${debug.modifiers.tradeGoodsGoldMultiplier.toFixed(2)}</span>
+        <span>Gold output: x${debug.modifiers.goldOutputMultiplier.toFixed(2)}</span>
+        <span>Food output: x${debug.modifiers.foodOutputMultiplier.toFixed(2)}</span>
+      </div>
+      <div class="admin-debug-table-wrap">
+        <table class="admin-debug-table">
+          <thead>
+            <tr>
+              <th>Resource</th>
+              <th>Stock</th>
+              <th>Buildings</th>
+              <th>Citizens +</th>
+              <th>Citizens -</th>
+              <th>Events/Focus</th>
+              <th>Net / Day</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${debug.rows
+              .map(
+                (row) => `
+                  <tr>
+                    <td>${escapeHtml(row.resource)}</td>
+                    <td>${formatNumber(row.stock, 2)}</td>
+                    <td>${formatNumber(row.buildingProduction, 2)}</td>
+                    <td>${formatNumber(row.citizenProduction, 2)}</td>
+                    <td>${formatNumber(row.citizenConsumption, 2)}</td>
+                    <td>${formatNumber(row.eventAndFocus, 2)}</td>
+                    <td class="${row.net > 0.005 ? "is-positive" : row.net < -0.005 ? "is-negative" : "is-neutral"}">${formatNumber(row.net, 2)}</td>
+                  </tr>
+                `
+              )
+              .join("")}
+          </tbody>
+        </table>
+      </div>
+      ${
+        debug.districtModifiers.length
+          ? `<p class="admin-debug-note">District modifiers: ${escapeHtml(debug.districtModifiers.join(" | "))}</p>`
+          : `<p class="admin-debug-note">District modifiers: none active.</p>`
+      }
+    </section>
   `;
 }
 
@@ -656,6 +709,7 @@ export class AdminConsole {
             </div>
             <button class="button" data-admin-action="apply-resources">Apply Resources</button>
           </section>
+          ${renderEconomyDebugTable(state)}
         `
       },
       {
@@ -717,7 +771,7 @@ export class AdminConsole {
           <section class="admin-section">
             <h3>Buildings</h3>
             <p>Optional artwork folder: <code>assets/images/buildings/</code></p>
-            <p>Active manifested buildings can be unmanifested directly from this list.</p>
+            <p>Active buildings can be removed directly from this list.</p>
             ${renderManifestedBuildingAdminList(state)}
             <label>
               Bulk Image Paths

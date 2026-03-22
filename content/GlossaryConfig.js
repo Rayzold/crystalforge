@@ -1,6 +1,6 @@
 export const GLOSSARY_TERMS = [
   {
-    term: "Manifested",
+    term: "Active Building",
     detail: "A building at 100%+ quality. It is active and contributes to the Drift."
   },
   {
@@ -9,7 +9,7 @@ export const GLOSSARY_TERMS = [
   },
   {
     term: "BPD",
-    detail: "Building points per day. Incubators always provide 10 bpd, and support buildings can add more."
+    detail: "Build points per day. Incubators always provide 10 build points/day, and support buildings can add more."
   },
   {
     term: "Goods",
@@ -37,6 +37,6 @@ export const GLOSSARY_TERMS = [
   },
   {
     term: "Support BPD",
-    detail: "Extra building points per day provided by completed construction-support buildings like Tool Shed or Techcrafter."
+    detail: "Extra build points/day provided by active construction-support buildings like Tool Shed or Techcrafter."
   }
 ];

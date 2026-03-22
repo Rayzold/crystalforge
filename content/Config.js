@@ -7,7 +7,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.2.52";
+export const APP_VERSION = "v1.2.54";
 export const SAVE_VERSION = 10;
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3";
 export const FIREBASE_CONFIG = {
@@ -34,11 +34,13 @@ export const PAGE_ROUTES = [
   { key: "chronicle", label: "Chronicle", href: "./chronicle.html" }
 ];
 export const BUILD_NOTES = [
+  "Player-facing wording is now more consistent across the app: completed buildings read as Active, raw percentages read as quality, and bpd labels expand more clearly into build points/day where space allows.",
+  "GM admin now includes an economy debug table for stock, building output, citizen production and consumption, event/focus modifiers, and net daily flow, while wording around roll quality versus building stage has been tightened.",
   "A final readability pass slightly sharpened panel surfaces and lifted muted labels, making windows feel crisper while keeping supporting text easier to read.",
   "A second eye-comfort pass made windows a bit more distinct while also softening the background glow and texture, so content panels feel clearer without making the UI harsher.",
   "Panel and window contrast has been tightened slightly so the major surfaces separate more clearly from the background and feel easier on the eyes during longer sessions.",
   "Crystal Upgrade no longer creates a placeable building: when rolled, it immediately elevates the manifested crystal into the next rarity and older saved Crystal Upgrade buildings are consolidated back into crystal gains.",
-  "Moving between Forge, City, Chronicle, and Home now keeps the live realm in session storage, so manifested buildings and spent crystals no longer disappear just because you changed pages.",
+  "Moving between Forge, City, Chronicle, and Home now keeps the live realm in session storage, so active buildings and spent crystals no longer disappear just because you changed pages.",
   "The manifestation completion popup now resolves in a single reveal path instead of re-triggering itself after the first animation.",
   "The city stream now supports pinned buildings, quick troubleshooting filters, and impact-based sorting so high-priority structures stay easier to find.",
   "Emergency warnings can now jump straight to the relevant city view, Home can copy city or building summaries, and Chronicle can copy a selected day summary for table notes.",

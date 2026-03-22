@@ -73,7 +73,7 @@ function renderDiceHistory(history = []) {
   `;
 }
 
-function renderSidebarBuildingList(state, title, items, emptyLabel, variant = "manifested") {
+function renderSidebarBuildingList(state, title, items, emptyLabel, variant = "active") {
   return `
     <section class="sidebar-manifest-list sidebar-manifest-list--${variant}">
       <div class="sidebar-manifest-list__head">
@@ -237,7 +237,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
           ).join("")}
         </nav>
         <div class="sidebar-nav__status">
-          ${renderSidebarBuildingList(state, "Manifested", manifestedBuildings, "No active buildings yet.", "manifested")}
+          ${renderSidebarBuildingList(state, "Active", manifestedBuildings, "No active buildings yet.", "active")}
           ${renderSidebarBuildingList(state, "Incubating", incubatingBuildings, "No buildings are incubating.", "incubating")}
           ${renderSidebarBuildingList(state, "Available", availableBuildings, "No additional buildings are waiting.", "available")}
         </div>

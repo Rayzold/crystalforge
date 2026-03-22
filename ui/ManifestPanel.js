@@ -31,8 +31,8 @@ export function renderManifestPanel(state) {
                     <span>No structure was created. Your next manifest will use the upgraded rarity.</span>
                   `
                   : `
-                    <span>${escapeHtml(last.rarity)} reality / quality ${formatNumber(last.qualityRoll)}%</span>
-                    <span>${last.overflow ? `${formatNumber(last.overflow)} overflow into shards` : last.wasNew ? "New structure manifested" : "Merged into an existing structure"}</span>
+                    <span>${escapeHtml(last.rarity)} reality / roll ${formatNumber(last.qualityRoll)}% quality</span>
+                    <span>${last.overflow ? `${formatNumber(last.overflow)} overflow into shards` : last.wasNew ? "New structure added to the Drift" : "Added quality to an existing structure"}</span>
                   `
               }
             </div>
