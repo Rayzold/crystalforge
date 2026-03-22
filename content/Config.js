@@ -7,7 +7,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.2.66";
+export const APP_VERSION = "v1.2.68";
 export const SAVE_VERSION = 11;
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3";
 export const FIREBASE_CONFIG = {
@@ -34,6 +34,7 @@ export const PAGE_ROUTES = [
   { key: "chronicle", label: "Chronicle", href: "./chronicle.html" }
 ];
 export const BUILD_NOTES = [
+  "Town Map now feels more playful: placement toasts are punchier, the drawer language is friendlier, and new hex placements burst with a quick celebratory effect.",
   "Town Map is now the main city-planning view: click empty hexes to open a placement drawer, use overlays and recommendations, arm chained placements, and save or restore layout presets.",
   "The map now reads more clearly: buildings use real art or icons, the outer bastion ring is defense-only, occupied hexes have quick actions, and placement can be undone.",
   "Manifestation flow is more reliable: repeated manifests animate quality carry-over cleanly, and Crystal Upgrade now becomes the next-rarity crystal instead of a placeable building.",

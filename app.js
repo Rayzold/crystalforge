@@ -3,7 +3,7 @@
 // admin commands, and top-level UI events. Most game-wide behavior eventually
 // passes through here, while lower-level systems keep the domain rules isolated.
 import { AdminConsole } from "./admin/AdminConsole.js";
-import { createCatalogEntryFromInput, getCatalogKey } from "./content/BuildingCatalog.js";
+import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js";
 import {
   APP_VERSION,
   BUILDING_ACTIVE_THRESHOLD,
@@ -116,6 +116,8 @@ let mapPlacementFxTimer = null;
 let manifestInProgress = false;
 let mapDragState = null;
 let suppressNextMapClick = false;
+let navigationShortcutTimer = null;
+let navigationShortcutBuffer = "";
 syncDerivedState(gameState.getState());
 // Rewrite the loaded session immediately so migration fixes are not lost while
 // moving between pages in an already-open browser session.
@@ -773,22 +775,51 @@ function advanceMapPlannerAfterPlacement(placedBuildingId) {
   const nextCandidate = getFilteredUnplacedMapCandidates(state).find((building) => building.id !== placedBuildingId);
   if (!nextCandidate) {
     clearMapPlanner();
-    reportSuccess("Placement planning queue completed.");
+    reportSuccess("Placement queue completed. The city hums with new shape.");
     return;
   }
 
-  setMapPlannerBuilding(nextCandidate.id, "chain", `${nextCandidate.displayName} armed for the next placement.`);
+  setMapPlannerBuilding(nextCandidate.id, "chain", `${nextCandidate.displayName} is queued for the next hex.`);
 }
 
-function showMapPlacementPulse(q, r) {
+function showMapPlacementPulse(q, r, building = null) {
   if (mapPlacementFxTimer) {
     clearTimeout(mapPlacementFxTimer);
   }
-  renderer.setTransientUi({ mapPlacementPulseCell: { q: Number(q), r: Number(r) } }, getCurrentState());
+  renderer.setTransientUi(
+    {
+      mapPlacementPulseCell: {
+        q: Number(q),
+        r: Number(r),
+        emoji: building ? getBuildingEmoji(building) : null,
+        rarity: building?.rarity ?? null
+      }
+    },
+    getCurrentState()
+  );
   mapPlacementFxTimer = setTimeout(() => {
     renderer.setTransientUi({ mapPlacementPulseCell: null }, getCurrentState());
     mapPlacementFxTimer = null;
   }, 1200);
+}
+
+function getPlacementZoneLabel(cell) {
+  if (!cell) {
+    return "Town Map";
+  }
+  return cell.isFortificationRing ? "Bastion Ring" : "City Ring";
+}
+
+function getPlacementSuccessMessage(building, q, r, resonanceGain = 0) {
+  const cell = findMapCell(getCurrentState(), Number(q), Number(r));
+  const emoji = getBuildingEmoji(building);
+  const zoneLabel = getPlacementZoneLabel(cell);
+  if (resonanceGain > 0) {
+    return `${emoji} ${building.displayName} locked into the ${zoneLabel} at hex ${q}, ${r}. +${Math.round(
+      resonanceGain * 1000
+    ) / 10}% resonance.`;
+  }
+  return `${emoji} ${building.displayName} locked into the ${zoneLabel} at hex ${q}, ${r}.`;
 }
 
 function createMapPresetRecord(state, name) {
@@ -1309,13 +1340,13 @@ function moveBuildingOnMap({ buildingId, q, r, source = "Player" }) {
     return result;
   }
 
-  reportSuccess(`${result.building.displayName} placed at hex ${q}, ${r}.`);
+  reportSuccess(getPlacementSuccessMessage(result.building, q, r, result.resonanceGain ?? 0));
   recordLastPlacement({
     buildingId: result.building.id,
     from: result.previousPosition ?? null,
     to: { q: Number(q), r: Number(r) }
   });
-  showMapPlacementPulse(q, r);
+  showMapPlacementPulse(q, r, result.building);
   advanceMapPlannerAfterPlacement(result.building.id);
   if ((result.resonanceGain ?? 0) > 0) {
     showAdjacencyPulse({
@@ -1352,14 +1383,14 @@ function forceMoveBuildingOnMap({ buildingId, q, r, source = "Admin" }) {
 
   if (result.displacedBuilding) {
     reportSuccess(
-      `${result.building.displayName} force-placed at ${q}, ${r}. ${result.displacedBuilding.displayName} was cleared.`
+      `${getBuildingEmoji(result.building)} ${result.building.displayName} seized hex ${q}, ${r}. ${result.displacedBuilding.displayName} was cleared.`
     );
     recordLastPlacement({
       buildingId: result.building.id,
       from: result.previousPosition ?? null,
       to: { q: Number(q), r: Number(r) }
     });
-    showMapPlacementPulse(q, r);
+    showMapPlacementPulse(q, r, result.building);
     advanceMapPlannerAfterPlacement(result.building.id);
     if ((result.resonanceGain ?? 0) > 0) {
       showAdjacencyPulse({
@@ -1373,13 +1404,13 @@ function forceMoveBuildingOnMap({ buildingId, q, r, source = "Admin" }) {
     return result;
   }
 
-  reportSuccess(`${result.building.displayName} force-placed at hex ${q}, ${r}.`);
+  reportSuccess(getPlacementSuccessMessage(result.building, q, r, result.resonanceGain ?? 0));
   recordLastPlacement({
     buildingId: result.building.id,
     from: result.previousPosition ?? null,
     to: { q: Number(q), r: Number(r) }
   });
-  showMapPlacementPulse(q, r);
+  showMapPlacementPulse(q, r, result.building);
   advanceMapPlannerAfterPlacement(result.building.id);
   if ((result.resonanceGain ?? 0) > 0) {
     showAdjacencyPulse({
@@ -2061,6 +2092,26 @@ function isTypingTarget(target) {
   return target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || target?.isContentEditable;
 }
 
+function clearNavigationShortcutTimer() {
+  if (navigationShortcutTimer) {
+    window.clearTimeout(navigationShortcutTimer);
+    navigationShortcutTimer = null;
+  }
+}
+
+// The hidden admin code uses the same number keys as page shortcuts, so let
+// possible 432! prefixes wait briefly before navigating away.
+function getAdminUnlockPrefix(buffer) {
+  const code = "432!";
+  for (let length = Math.min(buffer.length, code.length); length > 0; length -= 1) {
+    const suffix = buffer.slice(-length);
+    if (code.startsWith(suffix)) {
+      return suffix;
+    }
+  }
+  return "";
+}
+
 document.addEventListener("keydown", (event) => {
   if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) {
     return;
@@ -2077,12 +2128,45 @@ document.addEventListener("keydown", (event) => {
     "4": "./citizens.html",
     "5": "./chronicle.html"
   };
+  const isAdminCodeKey = key.length === 1 && /[0-9!]/.test(key);
+
+  if (isAdminCodeKey) {
+    navigationShortcutBuffer = `${navigationShortcutBuffer}${key}`.slice(-4);
+  } else {
+    navigationShortcutBuffer = "";
+    clearNavigationShortcutTimer();
+  }
+
+  const adminUnlockPrefix = getAdminUnlockPrefix(navigationShortcutBuffer);
 
   if (!shortcuts[key]) {
+    if (navigationShortcutBuffer === "432!") {
+      clearNavigationShortcutTimer();
+      navigationShortcutBuffer = "";
+    } else if (!adminUnlockPrefix) {
+      clearNavigationShortcutTimer();
+    }
+    return;
+  }
+
+  if (["2", "3", "4"].includes(key) && adminUnlockPrefix) {
+    event.preventDefault();
+    clearNavigationShortcutTimer();
+    const pendingKey = key;
+    const pendingPrefix = adminUnlockPrefix;
+    navigationShortcutTimer = window.setTimeout(() => {
+      if (navigationShortcutBuffer === pendingPrefix) {
+        navigationShortcutBuffer = "";
+        navigateWithTransition(shortcuts[pendingKey]);
+      }
+      clearNavigationShortcutTimer();
+    }, 360);
     return;
   }
 
   event.preventDefault();
+  clearNavigationShortcutTimer();
+  navigationShortcutBuffer = "";
   navigateWithTransition(shortcuts[key]);
 });
 

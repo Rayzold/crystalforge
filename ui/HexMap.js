@@ -409,7 +409,7 @@ function renderPlacementPreview(selectedBuilding, cell, center, size, previewVal
 
 function renderCellInspector(state, cell, selectedBuilding) {
   if (!cell) {
-    return `<p class="empty-state">Hover a hex to inspect its terrain, district influence, and placement resonance.</p>`;
+    return `<p class="empty-state">Hover a hex to scout its terrain, district pull, and resonance before you claim it.</p>`;
   }
 
   const occupant = getBuildingAtCell(state, cell.q, cell.r);
@@ -555,24 +555,29 @@ function getPlacementRecommendation(state, building, cell) {
   if (score >= 0.2) {
     return {
       score,
-      label: "Best",
+      label: "Perfect",
       className: "is-best",
-      detail: `+${formatNumber(bonus.totalPercent * 100, 1)}% resonance`
+      detail: cell.isFortificationRing
+        ? `Rampart-ready at +${formatNumber(bonus.totalPercent * 100, 1)}% resonance`
+        : `Sings at +${formatNumber(bonus.totalPercent * 100, 1)}% resonance`
     };
   }
   if (score >= 0.08) {
     return {
       score,
-      label: "Good",
+      label: "Strong",
       className: "is-good",
-      detail: `+${formatNumber(bonus.totalPercent * 100, 1)}% resonance`
+      detail: `Solid fit at +${formatNumber(bonus.totalPercent * 100, 1)}% resonance`
     };
   }
   return {
     score,
-    label: "Poor",
+    label: "Wild",
     className: "is-poor",
-    detail: bonus.totalPercent > 0 ? `+${formatNumber(bonus.totalPercent * 100, 1)}% resonance` : "Low placement synergy"
+    detail:
+      bonus.totalPercent > 0
+        ? `A scrappy +${formatNumber(bonus.totalPercent * 100, 1)}% resonance`
+        : "Playable, but the hex is quiet"
   };
 }
 
@@ -734,13 +739,13 @@ function renderHoverReadout(state, cell, selectedBuilding, size) {
       } else if (bonus.terrainPercent > 0) {
         lines.push("Terrain affinity only");
       } else {
-        lines.push("No nearby resonance");
+        lines.push("No nearby resonance yet");
       }
     } else {
       lines.push(cell.isFortificationRing ? "Defense only" : "Placement blocked");
     }
   } else {
-    lines.push(`${candidates.length} option${candidates.length === 1 ? "" : "s"} ready`);
+    lines.push(`${candidates.length} option${candidates.length === 1 ? "" : "s"} ready to claim`);
   }
 
   const width = Math.max(122, ...lines.map((line) => 34 + line.length * 5.4));
@@ -757,6 +762,54 @@ function renderHoverReadout(state, cell, selectedBuilding, size) {
             <text x="${center.x}" y="${y + 16 + index * 13}" text-anchor="middle">${escapeHtml(line)}</text>
           `
         )
+        .join("")}
+    </g>
+  `;
+}
+
+function renderPlacementCelebration(pulseCell, center, size) {
+  if (!pulseCell) {
+    return "";
+  }
+  const emoji = pulseCell.emoji ?? "✨";
+  return `
+    <g class="hex-map__placement-burst" aria-hidden="true">
+      <circle class="hex-map__placement-ring hex-map__placement-ring--outer" cx="${center.x}" cy="${center.y}" r="${size * 0.5}"></circle>
+      <circle class="hex-map__placement-ring hex-map__placement-ring--inner" cx="${center.x}" cy="${center.y}" r="${size * 0.24}"></circle>
+      <text x="${center.x}" y="${center.y - size * 0.94}" text-anchor="middle" class="hex-map__placement-emoji">${escapeHtml(emoji)}</text>
+      ${[0, 1, 2, 3, 4, 5]
+        .map((index) => {
+          const angle = (-90 + index * 60) * (Math.PI / 180);
+          const x1 = center.x + Math.cos(angle) * size * 0.18;
+          const y1 = center.y + Math.sin(angle) * size * 0.18;
+          const x2 = center.x + Math.cos(angle) * size * 0.68;
+          const y2 = center.y + Math.sin(angle) * size * 0.68;
+          return `<line class="hex-map__placement-ray hex-map__placement-ray--${index}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"></line>`;
+        })
+        .join("")}
+    </g>
+  `;
+}
+
+function renderPlacementCelebrationBurst(pulseCell, center, size) {
+  if (!pulseCell) {
+    return "";
+  }
+  const celebrationEmoji = pulseCell.emoji ?? "*";
+  return `
+    <g class="hex-map__placement-burst" aria-hidden="true">
+      <circle class="hex-map__placement-ring hex-map__placement-ring--outer" cx="${center.x}" cy="${center.y}" r="${size * 0.5}"></circle>
+      <circle class="hex-map__placement-ring hex-map__placement-ring--inner" cx="${center.x}" cy="${center.y}" r="${size * 0.24}"></circle>
+      <text x="${center.x}" y="${center.y - size * 0.94}" text-anchor="middle" class="hex-map__placement-emoji">${escapeHtml(celebrationEmoji)}</text>
+      ${[0, 1, 2, 3, 4, 5]
+        .map((index) => {
+          const angle = (-90 + index * 60) * (Math.PI / 180);
+          const x1 = center.x + Math.cos(angle) * size * 0.18;
+          const y1 = center.y + Math.sin(angle) * size * 0.18;
+          const x2 = center.x + Math.cos(angle) * size * 0.68;
+          const y2 = center.y + Math.sin(angle) * size * 0.68;
+          return `<line class="hex-map__placement-ray hex-map__placement-ray--${index}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"></line>`;
+        })
         .join("")}
     </g>
   `;
@@ -912,9 +965,11 @@ function renderPlacementPicker(state, cell) {
   const filterKey = state.transientUi?.mapPlacementFilter ?? "All";
   const candidates = sortPlacementCandidates(filterPlacementCandidates(getPlacementCandidates(state, cell), state, filterKey), state, cell);
   const zoneLabel = cell.isFortificationRing ? "Bastion Ring" : "City Plot";
+  const zoneEmoji = cell.isFortificationRing ? "🛡️" : "✨";
   const zoneDetail = cell.isFortificationRing
     ? "Only walls, towers, and defensive structures can be placed here."
     : "Any unplaced city structure that passes placement rules can be assigned here.";
+  const pickerTitle = cell.isFortificationRing ? `Hold This ${zoneLabel}` : `Claim This ${zoneLabel}`;
   const plannerBuilding =
     state.buildings.find((building) => building.id === state.transientUi?.mapPlannerBuildingId) ?? null;
 
@@ -922,7 +977,7 @@ function renderPlacementPicker(state, cell) {
     <section class="panel hex-map-panel__picker" role="dialog" aria-label="Map placement drawer">
       <div class="panel__header hex-map-panel__picker-head">
         <div>
-          <h4>Place On ${escapeHtml(zoneLabel)}</h4>
+          <h4>${escapeHtml(pickerTitle)}</h4>
           <span class="panel__subtle">Hex ${cell.q}, ${cell.r}. ${escapeHtml(zoneDetail)}</span>
         </div>
         <button class="button button--ghost hex-map-panel__picker-close" data-action="clear-map-cell-selection" aria-label="Close placement drawer">Close</button>
@@ -947,7 +1002,7 @@ function renderPlacementPicker(state, cell) {
           ? `
               <div class="hex-map-panel__planner-banner">
                 <strong>${escapeHtml(`${getBuildingEmoji(plannerBuilding)} ${plannerBuilding.displayName}`)}</strong>
-                <span>${state.transientUi?.mapPlannerMode === "move" ? "Move mode armed" : "Planning queue armed"}</span>
+                <span>${state.transientUi?.mapPlannerMode === "move" ? "Move mode armed. Pick a new home." : "Planning queue armed. Keep the momentum going."}</span>
               </div>
             `
           : ""
@@ -978,16 +1033,16 @@ function renderPlacementPicker(state, cell) {
                             data-action="arm-map-building"
                             data-building-id="${building.id}"
                           >
-                            Arm
+                            Queue
                           </button>
                           <button
-                            class="button button--ghost"
+                            class="button button--ghost hex-map-panel__place-now"
                             data-action="place-building-on-cell"
                             data-building-id="${building.id}"
                             data-q="${cell.q}"
                             data-r="${cell.r}"
                           >
-                            Place Here
+                            Place Now
                           </button>
                         </div>
                       </article>
@@ -996,7 +1051,7 @@ function renderPlacementPicker(state, cell) {
                   .join("")}
               </div>
             `
-          : `<div class="empty-state">No unplaced buildings can be assigned to this hex right now.</div>`
+          : `<div class="empty-state">No unplaced buildings feel right for this hex just yet.</div>`
       }
     </section>
   `;
@@ -1280,14 +1335,15 @@ export function renderHexMap(state) {
                       ? `<text x="${center.x}" y="${center.y + 5}" text-anchor="middle" class="hex-map__core-text">${cell.q === 0 && cell.r === 0 ? "FORGE" : ""}</text>`
                       : renderCellLabel(building, center.x, center.y)
                   }
-                  ${
-                    isPulseCell
-                      ? `<g class="hex-map__pulse-tag">
-                          <circle cx="${center.x}" cy="${center.y - size * 0.48}" r="${size * 0.3}"></circle>
-                          <text x="${center.x}" y="${center.y - size * 0.42}" text-anchor="middle">+${formatNumber((adjacencyPulse.gain ?? 0) * 100, 1)}%</text>
-                        </g>`
-                      : ""
-                  }
+                   ${
+                     isPulseCell
+                       ? `<g class="hex-map__pulse-tag">
+                           <circle cx="${center.x}" cy="${center.y - size * 0.48}" r="${size * 0.3}"></circle>
+                           <text x="${center.x}" y="${center.y - size * 0.42}" text-anchor="middle">+${formatNumber((adjacencyPulse.gain ?? 0) * 100, 1)}%</text>
+                         </g>`
+                       : ""
+                   }
+                   ${isPlacementFlash ? renderPlacementCelebrationBurst(state.transientUi?.mapPlacementPulseCell, center, size) : ""}
                 </g>
               `;
             })
