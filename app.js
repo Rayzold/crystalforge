@@ -2261,8 +2261,8 @@ const actions = {
   },
   async loadFirebaseRealm() {
     try {
-      const nextState = await fetchPublishedFirebaseState();
-      gameState.replace(validateAndMigrateSave(nextState));
+      const nextState = await loadSharedStateFromFirebase(getPublishedFirebaseRealmId());
+      gameState.replace(nextState);
       resetTransientUi();
       markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
       markRecentCitizenChanges(Object.keys(getCurrentState().citizens ?? {}));
