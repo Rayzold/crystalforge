@@ -2274,6 +2274,55 @@ textarea {
   text-align: center;
 }
 
+.manifest-complete-modal__visual {
+  width: min(100%, 320px);
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  border-radius: 28px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.14), transparent 52%),
+    linear-gradient(180deg, rgba(12, 18, 31, 0.96), rgba(7, 10, 18, 0.98));
+  box-shadow:
+    0 20px 48px rgba(4, 8, 16, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.manifest-complete-modal__visual .building-art,
+.manifest-complete-modal__visual .building-art__frame,
+.manifest-complete-modal__visual .building-art__image,
+.manifest-complete-modal__visual .building-art__fallback {
+  width: 100%;
+  height: 100%;
+}
+
+.manifest-complete-modal__visual .building-art__frame {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.manifest-complete-modal__visual--upgrade {
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at top, rgba(143, 92, 255, 0.34), transparent 50%),
+    linear-gradient(180deg, rgba(28, 20, 54, 0.98), rgba(10, 11, 24, 0.98));
+}
+
+.manifest-complete-modal__fallback {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  font-family: var(--display-font);
+  font-size: clamp(3rem, 10vw, 5rem);
+  letter-spacing: 0.14em;
+  color: rgba(255, 244, 253, 0.92);
+  text-transform: uppercase;
+}
+
 .manifest-complete-modal__eyebrow {
   color: rgba(222, 229, 246, 0.9);
   font-size: 0.92rem;
@@ -2372,12 +2421,22 @@ textarea {
   animation: manifestBarFill var(--manifest-duration) ease-out var(--manifest-fill-delay, 0ms) forwards;
 }
 
+.manifest-complete-modal__fill.is-static {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
 .manifest-complete-modal__carry-fill.is-revealed {
   animation: manifestBarFill var(--manifest-duration) ease-out var(--manifest-fill-delay, 0ms) forwards;
 }
 
+.manifest-complete-modal__carry-fill.is-static {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
 .manifest-complete-modal__burst.is-revealed {
-  animation: manifestBurst 460ms ease-out 420ms forwards;
+  animation: manifestBurst 900ms ease-out 420ms forwards;
 }
 
 .manifest-complete-modal__value {
@@ -2394,7 +2453,7 @@ textarea {
 }
 
 .manifest-complete-modal__value.is-visible {
-  animation: manifestPercentReveal 220ms ease-out forwards;
+  animation: manifestPercentReveal 420ms ease-out forwards;
 }
 
 .manifest-complete-modal__carry-copy {
@@ -5571,6 +5630,78 @@ body:-webkit-full-screen #app {
   text-align: center;
 }
 
+.manifest-panel__switch {
+  width: min(100%, 720px);
+  margin: 16px auto 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(17, 23, 39, 0.84), rgba(10, 13, 22, 0.92));
+  color: #eef4ff;
+  cursor: pointer;
+  transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.manifest-panel__switch:hover,
+.manifest-panel__switch:focus-visible {
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(2, 6, 13, 0.28);
+}
+
+.manifest-panel__switch.is-active {
+  border-color: rgba(118, 246, 201, 0.34);
+  box-shadow: 0 14px 28px rgba(29, 118, 94, 0.24);
+}
+
+.manifest-panel__switch-track {
+  width: 58px;
+  height: 32px;
+  border-radius: 999px;
+  position: relative;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.22);
+  transition: background 160ms ease;
+}
+
+.manifest-panel__switch.is-active .manifest-panel__switch-track {
+  background: linear-gradient(90deg, rgba(80, 219, 172, 0.85), rgba(83, 197, 255, 0.85));
+}
+
+.manifest-panel__switch-thumb {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(3, 8, 17, 0.32);
+  transition: transform 160ms ease;
+}
+
+.manifest-panel__switch.is-active .manifest-panel__switch-thumb {
+  transform: translateX(26px);
+}
+
+.manifest-panel__switch-copy {
+  display: grid;
+  gap: 4px;
+  text-align: left;
+}
+
+.manifest-panel__switch-copy strong {
+  font-size: 0.98rem;
+}
+
+.manifest-panel__switch-copy small {
+  color: rgba(225, 232, 244, 0.72);
+}
+
 .manifest-panel__eyebrow {
   color: rgba(195, 201, 220, 0.78);
   text-transform: uppercase;
@@ -5619,7 +5750,65 @@ body:-webkit-full-screen #app {
 .manifest-result--forge {
   max-width: 720px;
   margin: 0 auto;
-  text-align: center;
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+  text-align: left;
+}
+
+.manifest-result__art {
+  width: 128px;
+  aspect-ratio: 1 / 1;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.14), transparent 50%),
+    linear-gradient(180deg, rgba(15, 20, 34, 0.94), rgba(9, 12, 21, 0.98));
+}
+
+.manifest-result__art .building-art,
+.manifest-result__art .building-art__frame,
+.manifest-result__art .building-art__image,
+.manifest-result__art .building-art__fallback {
+  width: 100%;
+  height: 100%;
+}
+
+.manifest-result__art .building-art__frame {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.manifest-result__art--upgrade {
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at top, rgba(166, 112, 255, 0.34), transparent 52%),
+    linear-gradient(180deg, rgba(34, 20, 62, 0.98), rgba(10, 11, 24, 0.98));
+}
+
+.manifest-result__fallback {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  font-family: var(--display-font);
+  font-size: 2.4rem;
+  letter-spacing: 0.12em;
+  color: rgba(253, 245, 255, 0.9);
+  text-transform: uppercase;
+}
+
+.manifest-result__copy {
+  display: grid;
+  gap: 8px;
+}
+
+.manifest-result__copy strong {
+  font-size: 1.08rem;
 }
 
 .manifest-shrine {

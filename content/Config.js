@@ -7,7 +7,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.2.84";
+export const APP_VERSION = "v1.2.87";
 export const SAVE_VERSION = 11;
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3";
 export const FIREBASE_CONFIG = {
@@ -35,6 +35,9 @@ export const PAGE_ROUTES = [
   { key: "help", label: "Help", href: "./help.html" }
 ];
 export const BUILD_NOTES = [
+  "A large building-art drop landed in assets/images/buildings, lifting coverage from 88 catalog matches to 114 and cutting the remaining missing-image checklist down to 27 exact filenames.",
+  "Manifest results now show building art immediately, full manifestation reveals are much slower by default, and a new default-off Quick Manifestations switch can skip straight to the result.",
+  "Building art coverage was cleaned up again: the stray Something.png asset was removed, Adventurers' Guildhall now matches the catalog name, and a fresh missing-image checklist was generated from the current catalog.",
   "Chronicle's next-holiday jump now adopts each holiday's own accent, City and Player callouts show compact countdown pills, and Chronicle jump targets scroll into view automatically.",
   "Chronicle now includes a direct next-holiday jump in the calendar header, the City command strip shows a compact holiday countdown badge, and jump highlights fade on their own after a short pulse.",
   "Player Mode now links upcoming holidays into Chronicle, yearly events show countdown badges, and jump-targeted holiday days pulse with a subtle highlight ring.",
@@ -137,6 +140,7 @@ export const START_STATE_PRESETS = {
     settings: {
       muted: false,
       audioMode: "hybrid",
+      quickManifestations: false,
       currentPage: "home",
       onboardingDismissed: false,
       liveSessionView: true,
@@ -192,6 +196,7 @@ export const START_STATE_PRESETS = {
     settings: {
       muted: false,
       audioMode: "hybrid",
+      quickManifestations: false,
       currentPage: "home",
       onboardingDismissed: false,
       liveSessionView: false,

@@ -1,0 +1,42 @@
+Missing Building Images Checklist
+
+Generated after the latest building art drop, including the Adventurers' Guildhall rename cleanup and newly added building images now present in assets/images/buildings.
+
+Summary
+- Total catalog image entries checked: 141
+- Images present: 114
+- Images missing: 27
+
+Missing exact filenames
+- [ ] Cider Press.png
+- [ ] Farmlands.png
+- [ ] Grain Silo.png
+- [ ] Graveyard.png
+- [ ] Inn.png
+- [ ] Lumber Mill.png
+- [ ] Mine.png
+- [ ] Quarry.png
+- [ ] Stables.png
+- [ ] Tailor.png
+- [ ] Tavern.png
+- [ ] Tool Shed.png
+- [ ] Town Guard Post.png
+- [ ] Trade Center.png
+- [ ] Dragonforge.png
+- [ ] Elemental Cannons.png
+- [ ] Planar Tentacles.png
+- [ ] Aqueduct System.png
+- [ ] Engineers' Guild.png
+- [ ] Red Light District.png
+- [ ] Brewery.png
+- [ ] Hardwood Walls.png
+- [ ] Housing Comfortable.png
+- [ ] School.png
+- [ ] Tannery.png
+- [ ] Crystal Upgrade__Common.png
+- [ ] Crystal Upgrade__Epic.png
+
+Notes
+- Crystal Upgrade is rarity-specific and currently has committed art for Uncommon, Rare, and Legendary only.
+- Housing filenames drop the colon to match the app's image lookup, for example Housing: Royal -> Housing Royal.png.
+- Review note: all newly added image filenames currently match normalized catalog keys; no obvious naming mismatches were found in the latest drop.

@@ -1181,6 +1181,7 @@ async function handleManifest() {
   );
 
   const state = getCurrentState();
+  const quickManifestationsEnabled = Boolean(state.settings?.quickManifestations);
   try {
     const result = commit((draft) => {
       const manifestResult = manifestSelectedRarity(draft, draft.selectedRarity);
@@ -1209,8 +1210,10 @@ async function handleManifest() {
       },
       getCurrentState()
     );
-    await audioEngine.playManifest(result.rarity);
-    await animationEngine.playManifestReveal(result);
+    if (!quickManifestationsEnabled) {
+      await audioEngine.playManifest(result.rarity);
+      await animationEngine.playManifestReveal(result);
+    }
     renderer.setTransientUi(
       {
         manifestInProgress: false,
@@ -1226,8 +1229,9 @@ async function handleManifest() {
           previousQuality: result.previousQuality ?? 0,
           finalQuality: result.finalQuality ?? result.building?.quality ?? null,
           crossedActivation: Boolean(result.crossedActivation),
-          durationMs: 900,
-          revealPercent: true
+          durationMs: quickManifestationsEnabled ? 0 : 1800,
+          revealPercent: !quickManifestationsEnabled,
+          showPercentImmediately: quickManifestationsEnabled
         }
       },
       getCurrentState()
@@ -2453,6 +2457,11 @@ root.addEventListener("click", async (event) => {
       break;
     case "manifest":
       await handleManifest();
+      break;
+    case "toggle-quick-manifest":
+      commit((draft) => {
+        draft.settings.quickManifestations = !draft.settings.quickManifestations;
+      });
       break;
     case "advance-time": {
       const previousState = structuredClone(getCurrentState());

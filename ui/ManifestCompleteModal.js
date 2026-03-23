@@ -1,4 +1,5 @@
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
+import { renderBuildingArt } from "./BuildingArt.js";
 
 export function renderManifestCompleteModal(state) {
   const manifestModal = state.transientUi?.manifestCompleteModal;
@@ -6,7 +7,12 @@ export function renderManifestCompleteModal(state) {
     return "";
   }
 
+  const building = manifestModal.buildingId
+    ? state.buildings.find((entry) => entry.id === manifestModal.buildingId) ?? null
+    : null;
   const isCrystalUpgrade = Boolean(manifestModal.isCrystalUpgrade);
+  const shouldAnimate = Boolean(manifestModal.revealPercent);
+  const shouldShowImmediately = Boolean(manifestModal.showPercentImmediately);
   const previousQuality = Number(manifestModal.previousQuality ?? 0);
   const finalQuality = Number(manifestModal.finalQuality ?? manifestModal.qualityRoll ?? 0);
   const firstThreshold = previousQuality < 100 ? 100 : Math.ceil(previousQuality / 100) * 100;
@@ -26,6 +32,13 @@ export function renderManifestCompleteModal(state) {
       <div class="modal__dialog manifest-complete-modal__dialog">
         <button class="icon-button manifest-complete-modal__close" data-action="close-manifest-complete" aria-label="Close manifest completion modal">x</button>
         <div class="manifest-complete-modal__body">
+          <div class="manifest-complete-modal__visual ${isCrystalUpgrade ? "manifest-complete-modal__visual--upgrade" : ""}">
+            ${
+              isCrystalUpgrade
+                ? `<div class="manifest-complete-modal__fallback">${escapeHtml(manifestModal.targetRarity?.slice(0, 1) ?? "U")}</div>`
+                : renderBuildingArt(building?.imagePath, `${manifestModal.rolledName} artwork`, `<div class="manifest-complete-modal__fallback">${escapeHtml(manifestModal.rolledName.slice(0, 1))}</div>`, "grid")
+            }
+          </div>
           <span class="manifest-complete-modal__eyebrow">${isCrystalUpgrade ? "Rarity Elevated" : "Manifestation Complete"}</span>
           <h2>${escapeHtml(manifestModal.rolledName)}</h2>
           <p>${manifestSentence}</p>
@@ -48,11 +61,11 @@ export function renderManifestCompleteModal(state) {
                   <span>Quality</span>
                   <div class="manifest-complete-modal__bar">
                     <div
-                      class="manifest-complete-modal__fill ${manifestModal.revealPercent ? "is-revealed" : ""}"
+                      class="manifest-complete-modal__fill ${shouldAnimate ? "is-revealed" : shouldShowImmediately ? "is-static" : ""}"
                       style="--manifest-quality:${manifestModal.qualityRoll}%; --manifest-duration:${manifestModal.durationMs}ms"
                     ></div>
                     <div class="manifest-complete-modal__track"></div>
-                    <strong class="manifest-complete-modal__value ${manifestModal.revealPercent ? "is-visible" : ""}">
+                    <strong class="manifest-complete-modal__value ${shouldAnimate || shouldShowImmediately ? "is-visible" : ""}">
                       ${formatNumber(manifestModal.qualityRoll, 0)}%
                     </strong>
                   </div>
@@ -66,19 +79,19 @@ export function renderManifestCompleteModal(state) {
                       <div class="manifest-complete-modal__track"></div>
                       <div class="manifest-complete-modal__base-progress" style="--manifest-base-start:${stageProgressStart}%"></div>
                       <div
-                        class="manifest-complete-modal__fill ${manifestModal.revealPercent ? "is-revealed" : ""}"
+                        class="manifest-complete-modal__fill ${shouldAnimate ? "is-revealed" : shouldShowImmediately ? "is-static" : ""}"
                         style="--manifest-quality:${firstFillPercent}%; --manifest-duration:${manifestModal.durationMs}ms; --manifest-fill-delay:0ms; --manifest-fill-start:${stageProgressStart}%"
                       ></div>
-                      ${manifestModal.crossedActivation ? `<div class="manifest-complete-modal__burst ${manifestModal.revealPercent ? "is-revealed" : ""}"></div>` : ""}
+                      ${manifestModal.crossedActivation ? `<div class="manifest-complete-modal__burst ${shouldAnimate ? "is-revealed" : ""}"></div>` : ""}
                       ${
                         carryPercent > 0
                           ? `<div
-                              class="manifest-complete-modal__carry-fill ${manifestModal.revealPercent ? "is-revealed" : ""}"
-                              style="--manifest-carry:${carryPercent}%; --manifest-duration:${manifestModal.durationMs}ms; --manifest-fill-delay:520ms"
+                              class="manifest-complete-modal__carry-fill ${shouldAnimate ? "is-revealed" : shouldShowImmediately ? "is-static" : ""}"
+                              style="--manifest-carry:${carryPercent}%; --manifest-duration:${manifestModal.durationMs}ms; --manifest-fill-delay:900ms"
                             ></div>`
                           : ""
                       }
-                      <strong class="manifest-complete-modal__value ${manifestModal.revealPercent ? "is-visible" : ""}">
+                      <strong class="manifest-complete-modal__value ${shouldAnimate || shouldShowImmediately ? "is-visible" : ""}">
                         ${formatNumber(previousQuality, 0)}% -> ${formatNumber(finalQuality, 0)}%
                       </strong>
                     </div>
