@@ -7,7 +7,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.2.87";
+export const APP_VERSION = "v1.2.90";
 export const SAVE_VERSION = 11;
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3";
 export const FIREBASE_CONFIG = {
@@ -35,6 +35,9 @@ export const PAGE_ROUTES = [
   { key: "help", label: "Help", href: "./help.html" }
 ];
 export const BUILD_NOTES = [
+  "Ambient page loops now use the same cached direct-play path as manifest and effect audio, so asset-backed background tracks start more reliably after the first user gesture.",
+  "Asset-backed effect hooks now cover placement, move, error, construction completion, events, holidays, emergencies, and save/load/publish feedback, with exact drop-in paths documented under assets/audio.",
+  "Manifest music now preloads and starts more reliably from the manifest click itself, and the current build version is pinned in the top-right page chrome.",
   "A large building-art drop landed in assets/images/buildings, lifting coverage from 88 catalog matches to 114 and cutting the remaining missing-image checklist down to 27 exact filenames.",
   "Manifest results now show building art immediately, full manifestation reveals are much slower by default, and a new default-off Quick Manifestations switch can skip straight to the result.",
   "Building art coverage was cleaned up again: the stray Something.png asset was removed, Adventurers' Guildhall now matches the catalog name, and a fresh missing-image checklist was generated from the current catalog.",
@@ -283,6 +286,21 @@ export const AUDIO_FILE_CANDIDATES = {
   Epic: ["./assets/audio/epic-manifest.mp3", "./assets/audio/epic-manifest.wav"],
   Legendary: ["./assets/audio/legendary-manifest.mp3", "./assets/audio/legendary-manifest.wav"],
   Beyond: ["./assets/audio/beyond-manifest.mp3", "./assets/audio/beyond-manifest.wav"]
+};
+
+export const EFFECT_AUDIO_FILE_CANDIDATES = {
+  soft: ["./assets/audio/ui-soft.mp3", "./assets/audio/ui-soft.wav"],
+  confirm: ["./assets/audio/ui-confirm.mp3", "./assets/audio/ui-confirm.wav"],
+  error: ["./assets/audio/ui-error.mp3", "./assets/audio/ui-error.wav"],
+  placement: ["./assets/audio/building-placement.mp3", "./assets/audio/building-placement.wav"],
+  move: ["./assets/audio/building-move.mp3", "./assets/audio/building-move.wav"],
+  "construction-complete": ["./assets/audio/construction-complete.mp3", "./assets/audio/construction-complete.wav"],
+  event: ["./assets/audio/event-stinger.mp3", "./assets/audio/event-stinger.wav"],
+  emergency: ["./assets/audio/emergency-alert.mp3", "./assets/audio/emergency-alert.wav"],
+  holiday: ["./assets/audio/holiday-stinger.mp3", "./assets/audio/holiday-stinger.wav"],
+  save: ["./assets/audio/save-success.mp3", "./assets/audio/save-success.wav"],
+  load: ["./assets/audio/load-success.mp3", "./assets/audio/load-success.wav"],
+  publish: ["./assets/audio/publish-success.mp3", "./assets/audio/publish-success.wav"]
 };
 
 export const AMBIENT_AUDIO_FILE_CANDIDATES = {

@@ -1,4 +1,4 @@
-import { AMBIENT_AUDIO_FILE_CANDIDATES, AUDIO_FILE_CANDIDATES } from "../content/Config.js";
+import { AMBIENT_AUDIO_FILE_CANDIDATES, AUDIO_FILE_CANDIDATES, EFFECT_AUDIO_FILE_CANDIDATES } from "../content/Config.js";
 
 const RARITY_AUDIO = {
   Common: { base: 220, duration: 0.14, detune: 0 },
@@ -17,11 +17,28 @@ const AMBIENT_PROFILES = {
   chronicle: { frequencies: [98, 146.83, 220], type: "sine", gain: 0.012, filter: 620, lfo: 0.07 }
 };
 
+const EFFECT_SYNTH_PATTERNS = {
+  error: { notes: [246.94, 196, 164.81], type: "sawtooth", gain: 0.04, step: 0.075, noteDuration: 0.14 },
+  placement: { notes: [329.63, 493.88], type: "triangle", gain: 0.03, step: 0.06, noteDuration: 0.14 },
+  move: { notes: [293.66, 440], type: "triangle", gain: 0.028, step: 0.055, noteDuration: 0.12 },
+  "construction-complete": { notes: [392, 523.25, 659.25], type: "triangle", gain: 0.032, step: 0.075, noteDuration: 0.16 },
+  event: { notes: [349.23, 440, 587.33], type: "sine", gain: 0.03, step: 0.07, noteDuration: 0.15 },
+  emergency: { notes: [220, 174.61, 220], type: "square", gain: 0.038, step: 0.08, noteDuration: 0.16 },
+  holiday: { notes: [392, 523.25, 783.99], type: "triangle", gain: 0.032, step: 0.08, noteDuration: 0.18 },
+  save: { notes: [392, 587.33], type: "sine", gain: 0.026, step: 0.07, noteDuration: 0.14 },
+  load: { notes: [349.23, 523.25], type: "sine", gain: 0.026, step: 0.07, noteDuration: 0.14 },
+  publish: { notes: [392, 523.25, 698.46], type: "triangle", gain: 0.03, step: 0.07, noteDuration: 0.16 }
+};
+
 export class AudioEngine {
   constructor() {
     this.context = null;
     this.muted = false;
     this.resolvedAudioPaths = {};
+    this.manifestAudioElements = {};
+    this.resolvedEffectPaths = {};
+    this.effectAudioElements = {};
+    this.ambientAudioElements = {};
     this.pageKey = "home";
     this.ambientSynthPage = null;
     this.ambientNodes = [];
@@ -57,6 +74,9 @@ export class AudioEngine {
       return;
     }
     await this.ensureContext();
+    this.preloadManifestAudio();
+    this.preloadEffectAudio();
+    this.preloadAmbientAudio();
     await this.syncAmbient();
   }
 
@@ -103,7 +123,36 @@ export class AudioEngine {
       return;
     }
 
+    const playedFile = await this.tryPlayEffectFile(kind);
+    if (playedFile) {
+      return;
+    }
+
+    await this.playSynthUiAccent(kind);
+  }
+
+  async playEffect(effectName) {
+    if (this.muted || !effectName) {
+      return;
+    }
+
+    const playedFile = await this.tryPlayEffectFile(effectName);
+    if (playedFile) {
+      return;
+    }
+
+    if (effectName === "soft" || effectName === "confirm") {
+      await this.playSynthUiAccent(effectName);
+      return;
+    }
+
     await this.ensureContext();
+    this.playSynthPattern(EFFECT_SYNTH_PATTERNS[effectName] ?? EFFECT_SYNTH_PATTERNS.placement);
+  }
+
+  async playSynthUiAccent(kind = "soft") {
+    await this.ensureContext();
+
     const now = this.context.currentTime;
     const profile =
       kind === "confirm"
@@ -131,6 +180,30 @@ export class AudioEngine {
     overtone.stop(now + profile.duration);
   }
 
+  playSynthPattern(pattern) {
+    if (!this.context || !pattern?.notes?.length) {
+      return;
+    }
+
+    const now = this.context.currentTime;
+    for (const [index, note] of pattern.notes.entries()) {
+      const start = now + index * (pattern.step ?? 0.07);
+      const stop = start + (pattern.noteDuration ?? 0.14);
+      const gain = this.context.createGain();
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(pattern.gain ?? 0.028, start + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, stop);
+      gain.connect(this.context.destination);
+
+      const oscillator = this.context.createOscillator();
+      oscillator.type = pattern.type ?? "triangle";
+      oscillator.frequency.setValueAtTime(note, start);
+      oscillator.connect(gain);
+      oscillator.start(start);
+      oscillator.stop(stop);
+    }
+  }
+
   async tryPlayAudioFile(rarity) {
     const candidates = this.resolvedAudioPaths[rarity]
       ? [this.resolvedAudioPaths[rarity]]
@@ -138,25 +211,35 @@ export class AudioEngine {
 
     for (const path of candidates) {
       const success = await new Promise((resolve) => {
-        const audio = new Audio(path);
-        audio.volume = 0.9;
-        const timer = window.setTimeout(() => resolve(false), 350);
-        audio.addEventListener("canplaythrough", async () => {
-          try {
-            window.clearTimeout(timer);
-            await audio.play();
-            this.resolvedAudioPaths[rarity] = path;
-            resolve(true);
-          } catch (error) {
-            window.clearTimeout(timer);
-            resolve(false);
+        const audio = this.getManifestAudioElement(rarity, path);
+        let settled = false;
+        const finalize = (result) => {
+          if (settled) {
+            return;
           }
-        }, { once: true });
-        audio.addEventListener("error", () => {
+          settled = true;
           window.clearTimeout(timer);
-          resolve(false);
-        }, { once: true });
-        audio.load();
+          audio.removeEventListener("error", handleError);
+          resolve(result);
+        };
+        const handleError = () => finalize(false);
+        const timer = window.setTimeout(() => finalize(false), 2500);
+
+        audio.addEventListener("error", handleError, { once: true });
+
+        try {
+          audio.pause();
+          audio.currentTime = 0;
+        } catch (error) {
+          // Ignore media reset failures and fall through to play attempt.
+        }
+
+        Promise.resolve(audio.play())
+          .then(() => {
+            this.resolvedAudioPaths[rarity] = path;
+            finalize(true);
+          })
+          .catch(() => finalize(false));
       });
 
       if (success) {
@@ -167,10 +250,151 @@ export class AudioEngine {
     return false;
   }
 
+  preloadManifestAudio() {
+    for (const [rarity, candidates] of Object.entries(AUDIO_FILE_CANDIDATES)) {
+      if (!candidates?.length || this.manifestAudioElements[rarity]) {
+        continue;
+      }
+
+      const audio = new Audio(candidates[0]);
+      audio.preload = "auto";
+      audio.volume = 0.9;
+      audio.dataset.candidatePath = candidates[0];
+      audio.load();
+      this.manifestAudioElements[rarity] = audio;
+    }
+  }
+
+  preloadEffectAudio() {
+    for (const [effectName, candidates] of Object.entries(EFFECT_AUDIO_FILE_CANDIDATES)) {
+      if (!candidates?.length || this.effectAudioElements[effectName]) {
+        continue;
+      }
+
+      const audio = new Audio(candidates[0]);
+      audio.preload = "auto";
+      audio.volume = 0.9;
+      audio.dataset.candidatePath = candidates[0];
+      audio.load();
+      this.effectAudioElements[effectName] = audio;
+    }
+  }
+
+  preloadAmbientAudio() {
+    for (const [pageKey, candidates] of Object.entries(AMBIENT_AUDIO_FILE_CANDIDATES)) {
+      if (!candidates?.length || this.ambientAudioElements[pageKey]) {
+        continue;
+      }
+
+      const audio = new Audio(candidates[0]);
+      audio.preload = "auto";
+      audio.loop = true;
+      audio.volume = 0.24;
+      audio.dataset.candidatePath = candidates[0];
+      audio.load();
+      this.ambientAudioElements[pageKey] = audio;
+    }
+  }
+
+  getManifestAudioElement(rarity, path) {
+    const existing = this.manifestAudioElements[rarity];
+    if (existing?.dataset?.candidatePath === path) {
+      return existing;
+    }
+
+    const audio = new Audio(path);
+    audio.preload = "auto";
+    audio.volume = 0.9;
+    audio.dataset.candidatePath = path;
+    this.manifestAudioElements[rarity] = audio;
+    return audio;
+  }
+
+  async tryPlayEffectFile(effectName) {
+    const candidates = this.resolvedEffectPaths[effectName]
+      ? [this.resolvedEffectPaths[effectName]]
+      : EFFECT_AUDIO_FILE_CANDIDATES[effectName] ?? [];
+
+    for (const path of candidates) {
+      const success = await new Promise((resolve) => {
+        const audio = this.getEffectAudioElement(effectName, path);
+        let settled = false;
+        const finalize = (result) => {
+          if (settled) {
+            return;
+          }
+          settled = true;
+          window.clearTimeout(timer);
+          audio.removeEventListener("error", handleError);
+          resolve(result);
+        };
+        const handleError = () => finalize(false);
+        const timer = window.setTimeout(() => finalize(false), 2500);
+
+        audio.addEventListener("error", handleError, { once: true });
+
+        try {
+          audio.pause();
+          audio.currentTime = 0;
+        } catch (error) {
+          // Ignore media reset failures and fall through to play attempt.
+        }
+
+        Promise.resolve(audio.play())
+          .then(() => {
+            this.resolvedEffectPaths[effectName] = path;
+            finalize(true);
+          })
+          .catch(() => finalize(false));
+      });
+
+      if (success) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  getEffectAudioElement(effectName, path) {
+    const existing = this.effectAudioElements[effectName];
+    if (existing?.dataset?.candidatePath === path) {
+      return existing;
+    }
+
+    const audio = new Audio(path);
+    audio.preload = "auto";
+    audio.volume = 0.9;
+    audio.dataset.candidatePath = path;
+    this.effectAudioElements[effectName] = audio;
+    return audio;
+  }
+
+  getAmbientAudioElement(pageKey, path) {
+    const existing = this.ambientAudioElements[pageKey];
+    if (existing?.dataset?.candidatePath === path) {
+      existing.loop = true;
+      existing.volume = 0.24;
+      return existing;
+    }
+
+    const audio = new Audio(path);
+    audio.preload = "auto";
+    audio.loop = true;
+    audio.volume = 0.24;
+    audio.dataset.candidatePath = path;
+    this.ambientAudioElements[pageKey] = audio;
+    return audio;
+  }
+
   stopAmbient() {
     if (this.ambientElement) {
       this.ambientElement.pause();
-      this.ambientElement.src = "";
+      try {
+        this.ambientElement.currentTime = 0;
+      } catch (error) {
+        // Ignore media rewind failures during cleanup.
+      }
       this.ambientElement = null;
     }
 
@@ -213,39 +437,40 @@ export class AudioEngine {
 
     for (const path of candidates) {
       const success = await new Promise((resolve) => {
-        const audio = new Audio(path);
-        audio.loop = true;
-        audio.volume = 0.24;
-        const timer = window.setTimeout(() => resolve(false), 450);
+        const audio = this.getAmbientAudioElement(pageKey, path);
+        let settled = false;
+        const finalize = (result) => {
+          if (settled) {
+            return;
+          }
+          settled = true;
+          window.clearTimeout(timer);
+          audio.removeEventListener("error", handleError);
+          resolve(result);
+        };
+        const handleError = () => finalize(false);
+        const timer = window.setTimeout(() => finalize(false), 2500);
 
-        audio.addEventListener(
-          "canplaythrough",
-          async () => {
-            try {
-              window.clearTimeout(timer);
-              if (this.ambientElement && this.ambientElement !== audio) {
-                this.ambientElement.pause();
-              }
-              await audio.play();
-              this.ambientElement = audio;
-              this.resolvedAmbientPaths[pageKey] = path;
-              resolve(true);
-            } catch (error) {
-              window.clearTimeout(timer);
-              resolve(false);
-            }
-          },
-          { once: true }
-        );
-        audio.addEventListener(
-          "error",
-          () => {
-            window.clearTimeout(timer);
-            resolve(false);
-          },
-          { once: true }
-        );
-        audio.load();
+        audio.addEventListener("error", handleError, { once: true });
+
+        try {
+          audio.pause();
+          audio.currentTime = 0;
+        } catch (error) {
+          // Ignore media reset failures and fall through to play attempt.
+        }
+
+        if (this.ambientElement && this.ambientElement !== audio) {
+          this.ambientElement.pause();
+        }
+
+        Promise.resolve(audio.play())
+          .then(() => {
+            this.ambientElement = audio;
+            this.resolvedAmbientPaths[pageKey] = path;
+            finalize(true);
+          })
+          .catch(() => finalize(false));
       });
 
       if (success) {

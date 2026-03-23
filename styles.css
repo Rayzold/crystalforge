@@ -3723,14 +3723,24 @@ textarea {
 }
 
 .page-build-tag {
-  justify-self: end;
-  margin: 0 4px -4px 0;
-  color: rgba(207, 216, 236, 0.46);
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(182, 212, 255, 0.2);
+  background: linear-gradient(180deg, rgba(11, 17, 29, 0.9), rgba(18, 28, 45, 0.82));
+  box-shadow: 0 14px 28px rgba(4, 9, 18, 0.28);
+  color: rgba(232, 240, 255, 0.74);
   font-family: var(--label-font);
-  font-size: 0.64rem;
-  letter-spacing: 0.16em;
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   user-select: none;
+  pointer-events: none;
 }
 
 .sidebar-nav__brand p,

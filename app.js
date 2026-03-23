@@ -23,7 +23,7 @@ import {
   subscribeFirebaseRealmState
 } from "./firebase/FirebaseSharedState.js";
 import { manifestIntoBuilding, removeBuilding, setBuildingQuality, setBuildingRuinState } from "./systems/BuildingSystem.js";
-import { addMonthsToOffset, dateFromParts, formatDate, getMonthStartOffset } from "./systems/CalendarSystem.js";
+import { addMonthsToOffset, dateFromParts, formatDate, getMonthStartOffset, getStructuredDate } from "./systems/CalendarSystem.js";
 import {
   addCitizens,
   applyCitizenBulkSet,
@@ -391,15 +391,25 @@ function commit(mutator) {
   return result;
 }
 
-function reportSuccess(message) {
+function playEffect(effectName) {
+  void audioEngine.playEffect(effectName);
+}
+
+function reportSuccess(message, effectName = null) {
   if (message) {
     toasts.show(message, "success");
   }
+  if (effectName) {
+    playEffect(effectName);
+  }
 }
 
-function reportError(message) {
+function reportError(message, effectName = "error") {
   if (message) {
     toasts.show(message, "error");
+  }
+  if (effectName) {
+    playEffect(effectName);
   }
 }
 
@@ -523,6 +533,29 @@ function createTurnSummary(previousState, nextState, days) {
     },
     newEventTitles
   };
+}
+
+function playTurnAdvanceEffect(previousState, nextState, summary) {
+  if ((summary.emergencyCount.after ?? 0) > (summary.emergencyCount.before ?? 0)) {
+    playEffect("emergency");
+    return;
+  }
+
+  const previousHoliday = getStructuredDate(previousState.calendar.dayOffset).holiday?.name ?? null;
+  const nextHoliday = getStructuredDate(nextState.calendar.dayOffset).holiday?.name ?? null;
+  if (nextHoliday && nextHoliday !== previousHoliday) {
+    playEffect("holiday");
+    return;
+  }
+
+  if (summary.newEventTitles.length) {
+    playEffect("event");
+    return;
+  }
+
+  if (summary.completedBuildings.length) {
+    playEffect("construction-complete");
+  }
 }
 
 function applyProblemFocus(problemKey) {
@@ -1604,6 +1637,7 @@ function moveBuildingOnMap({ buildingId, q, r, source = "Player" }) {
     return result;
   }
 
+  playEffect(result.previousPosition ? "move" : "placement");
   reportSuccess(getPlacementSuccessMessage(result.building, q, r, result.resonanceGain ?? 0));
   recordLastPlacement({
     buildingId: result.building.id,
@@ -1645,6 +1679,7 @@ function forceMoveBuildingOnMap({ buildingId, q, r, source = "Admin" }) {
     return result;
   }
 
+  playEffect(result.previousPosition ? "move" : "placement");
   if (result.displacedBuilding) {
     reportSuccess(
       `${getBuildingEmoji(result.building)} ${result.building.displayName} seized hex ${q}, ${r}. ${result.displacedBuilding.displayName} was cleared.`
@@ -1704,6 +1739,7 @@ function clearPlacement(buildingId, source = "Player") {
     return result;
   }
 
+  playEffect("move");
   reportSuccess(`${result.building.displayName} cleared from the map.`);
   if (previousPosition) {
     recordLastPlacement({
@@ -2140,7 +2176,7 @@ const actions = {
       return;
     }
     commit((draft) => triggerEvent(draft, eventDefinition, "admin"));
-    reportSuccess(`Triggered ${eventDefinition.name}.`);
+    reportSuccess(`Triggered ${eventDefinition.name}.`, "event");
   },
   clearEvents() {
     commit((draft) => clearActiveEvents(draft));
@@ -2207,7 +2243,7 @@ const actions = {
   saveManualState() {
     try {
       saveManualState(getCurrentState());
-      reportSuccess("Local save updated.");
+      reportSuccess("Local save updated.", "save");
     } catch (error) {
       reportError(error.message);
     }
@@ -2218,7 +2254,7 @@ const actions = {
       resetTransientUi();
       markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
       markRecentCitizenChanges(Object.keys(getCurrentState().citizens ?? {}));
-      reportSuccess("Local save loaded.");
+      reportSuccess("Local save loaded.", "load");
     } catch (error) {
       reportError(error.message);
     }
@@ -2230,7 +2266,7 @@ const actions = {
       resetTransientUi();
       markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
       markRecentCitizenChanges(Object.keys(getCurrentState().citizens ?? {}));
-      reportSuccess("Firebase save loaded.");
+      reportSuccess("Firebase save loaded.", "load");
     } catch (error) {
       reportError(error.message);
     }
@@ -2257,7 +2293,7 @@ const actions = {
     async saveFirebaseRealm() {
     try {
       await publishSharedStateToFirebase(getPublishedFirebaseRealmId());
-      reportSuccess("Firebase save updated.");
+      reportSuccess("Firebase save updated.", "publish");
     } catch (error) {
       reportError(error.message);
     }
@@ -2466,8 +2502,11 @@ root.addEventListener("click", async (event) => {
     case "advance-time": {
       const previousState = structuredClone(getCurrentState());
       const result = commit((draft) => advanceTime(draft, target.dataset.step));
+      const nextState = getCurrentState();
+      const turnSummary = createTurnSummary(previousState, nextState, result.days);
       markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
-      renderer.setTransientUi({ turnSummaryModal: createTurnSummary(previousState, getCurrentState(), result.days) }, getCurrentState());
+      renderer.setTransientUi({ turnSummaryModal: turnSummary }, nextState);
+      playTurnAdvanceEffect(previousState, nextState, turnSummary);
       reportSuccess(`Advanced ${result.days} days.`);
       break;
     }
@@ -2477,8 +2516,11 @@ root.addEventListener("click", async (event) => {
       const days = Math.max(1, Math.floor(Number(input?.value) || 0));
       const previousState = structuredClone(getCurrentState());
       const result = commit((draft) => advanceTimeByDays(draft, days));
+      const nextState = getCurrentState();
+      const turnSummary = createTurnSummary(previousState, nextState, result.days);
       markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
-      renderer.setTransientUi({ turnSummaryModal: createTurnSummary(previousState, getCurrentState(), result.days) }, getCurrentState());
+      renderer.setTransientUi({ turnSummaryModal: turnSummary }, nextState);
+      playTurnAdvanceEffect(previousState, nextState, turnSummary);
       reportSuccess(`Advanced ${result.days} days.`);
       break;
     }
