@@ -4,7 +4,7 @@
 import { getBuildingEmoji } from "../content/BuildingCatalog.js";
 import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
-import { formatDate } from "../systems/CalendarSystem.js";
+import { formatDate, getNextHoliday } from "../systems/CalendarSystem.js";
 import {
   getActiveConstructionQueue,
   getAvailableConstructionQueue,
@@ -18,6 +18,7 @@ import { renderCalendarPanel } from "./CalendarPanel.js";
 import { renderDistrictPanel } from "./DistrictPanel.js";
 import { renderEmergencyPanel } from "./EmergencyPanel.js";
 import { renderHexMap } from "./HexMap.js";
+import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js";
 import { renderResourcePanel } from "./ResourcePanel.js";
 import { renderUiIcon } from "./UiIcons.js";
 
@@ -25,6 +26,9 @@ function renderTownStatistics(state) {
   const dailyNet = (state.cityStats.income ?? 0) - (state.cityStats.upkeep ?? 0);
   const emergencyState = getEmergencyStatus(state);
   const foodRunway = emergencyState.runway.foodDays;
+  const nextHoliday = getNextHoliday(state.calendar.dayOffset);
+  const nextHolidayAccentClass = nextHoliday ? getHolidayTypeClass(nextHoliday) : "";
+  const nextHolidayGlyph = nextHoliday ? getHolidayGlyph(nextHoliday) : "✦";
 
   const items = [
     ["Net Daily", `${dailyNet >= 0 ? "+" : ""}${formatNumber(dailyNet, 0)}g`, dailyNet >= 0 ? "positive" : "negative"],
@@ -38,8 +42,25 @@ function renderTownStatistics(state) {
   return `
     <section class="panel town-statistics town-statistics--command-strip">
       <div class="panel__header">
-        <h3>Town Statistics</h3>
-        <span class="panel__subtle">The shortest useful read of Drift right now</span>
+        <div>
+          <h3>Town Statistics</h3>
+          <span class="panel__subtle">The shortest useful read of Drift right now</span>
+        </div>
+        ${
+          nextHoliday
+            ? `
+              <a
+                class="town-statistics__holiday-badge ${nextHolidayAccentClass}"
+                href="./chronicle.html?focusChronicleDay=${nextHoliday.dayOffset}"
+                title="Open Chronicle on ${escapeHtml(nextHoliday.name)}"
+              >
+                <span class="town-statistics__holiday-badge-label"><span class="holiday-glyph" aria-hidden="true">${nextHolidayGlyph}</span>Next Holiday${nextHoliday ? `<em class="holiday-countdown-badge">${escapeHtml(nextHoliday.daysUntil === 0 ? "Today" : `${nextHoliday.daysUntil}d`)}</em>` : ""}</span>
+                <strong>${escapeHtml(nextHoliday.name)}</strong>
+                <small>${escapeHtml(nextHoliday.daysUntil === 0 ? "Today" : `${nextHoliday.daysUntil} day(s)`)}</small>
+              </a>
+            `
+            : ""
+        }
       </div>
       <div class="town-statistics__grid town-statistics__grid--compact">
         ${items

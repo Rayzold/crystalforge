@@ -145,6 +145,44 @@ export function getHolidayName(dayOffset) {
   return getStructuredDate(dayOffset).holiday?.name ?? null;
 }
 
+export function getNextHoliday(dayOffset = 0) {
+  const currentDate = getStructuredDate(dayOffset);
+
+  const upcomingHoliday = HOLIDAYS.reduce((closestHoliday, holiday) => {
+    let holidayYear = currentDate.year;
+    let holidayOffset = dateFromParts(holidayYear, holiday.month, holiday.day);
+
+    if (holidayOffset === null) {
+      return closestHoliday;
+    }
+
+    if (holidayOffset <= dayOffset) {
+      holidayYear += 1;
+      holidayOffset = dateFromParts(holidayYear, holiday.month, holiday.day);
+    }
+
+    if (holidayOffset === null) {
+      return closestHoliday;
+    }
+
+    const daysUntil = holidayOffset - dayOffset;
+
+    if (!closestHoliday || daysUntil < closestHoliday.daysUntil) {
+      return {
+        ...holiday,
+        year: holidayYear,
+        dayOffset: holidayOffset,
+        daysUntil,
+        date: getStructuredDate(holidayOffset)
+      };
+    }
+
+    return closestHoliday;
+  }, null);
+
+  return upcomingHoliday;
+}
+
 export function getSeason(dayOffset) {
   return getStructuredDate(dayOffset).season;
 }

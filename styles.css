@@ -1410,6 +1410,98 @@ textarea {
   margin-bottom: 8px;
 }
 
+.town-statistics__holiday-badge {
+  display: inline-grid;
+  gap: 4px;
+  justify-items: start;
+  padding: 9px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 212, 124, 0.28);
+  background: linear-gradient(180deg, rgba(255, 212, 124, 0.14), rgba(255, 255, 255, 0.03));
+  color: rgba(248, 238, 213, 0.98);
+  text-decoration: none;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.town-statistics__holiday-badge:hover,
+.town-statistics__holiday-badge:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+}
+
+.town-statistics__holiday-badge-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 244, 220, 0.78);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.town-statistics__holiday-badge strong {
+  font-size: 0.88rem;
+}
+
+.town-statistics__holiday-badge small {
+  color: rgba(255, 244, 220, 0.82);
+}
+
+.holiday-countdown-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(8, 12, 24, 0.34);
+  color: rgba(244, 247, 255, 0.92);
+  font-size: 0.66rem;
+  font-style: normal;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.town-statistics__holiday-badge.holiday-accent--renewal {
+  border-color: rgba(112, 241, 194, 0.34);
+  background: linear-gradient(180deg, rgba(17, 42, 36, 0.86), rgba(14, 19, 32, 0.92));
+}
+
+.town-statistics__holiday-badge.holiday-accent--social,
+.town-statistics__holiday-badge.holiday-accent--harvest {
+  border-color: rgba(240, 196, 130, 0.34);
+  background: linear-gradient(180deg, rgba(56, 35, 22, 0.86), rgba(16, 18, 34, 0.92));
+}
+
+.town-statistics__holiday-badge.holiday-accent--equinox {
+  border-color: rgba(141, 214, 255, 0.36);
+  background: linear-gradient(180deg, rgba(18, 38, 58, 0.86), rgba(16, 18, 34, 0.92));
+}
+
+.town-statistics__holiday-badge.holiday-accent--solstice {
+  border-color: rgba(255, 140, 104, 0.38);
+  background: linear-gradient(180deg, rgba(63, 30, 22, 0.88), rgba(16, 18, 34, 0.92));
+}
+
+.town-statistics__holiday-badge.holiday-accent--astral,
+.town-statistics__holiday-badge.holiday-accent--arcane {
+  border-color: rgba(217, 99, 255, 0.38);
+  background: linear-gradient(180deg, rgba(55, 27, 70, 0.86), rgba(16, 18, 34, 0.92));
+}
+
+.town-statistics__holiday-badge.holiday-accent--death,
+.town-statistics__holiday-badge.holiday-accent--remembrance {
+  border-color: rgba(196, 174, 255, 0.3);
+  background: linear-gradient(180deg, rgba(40, 30, 58, 0.86), rgba(16, 18, 34, 0.92));
+}
+
+.town-statistics__holiday-badge.holiday-accent--civic,
+.town-statistics__holiday-badge.holiday-accent--travel {
+  border-color: rgba(120, 180, 255, 0.28);
+  background: linear-gradient(180deg, rgba(24, 33, 56, 0.86), rgba(16, 18, 34, 0.92));
+}
+
 .town-statistics--command-strip .town-statistics__section {
   gap: 8px;
 }
@@ -1858,6 +1950,11 @@ textarea {
   align-items: stretch;
 }
 
+.chronicle-intro__rail {
+  display: grid;
+  gap: 14px;
+}
+
 .chronicle-intro__copy {
   display: grid;
   gap: 12px;
@@ -1891,6 +1988,29 @@ textarea {
   align-content: start;
 }
 
+.chronicle-intro__feature--holiday {
+  position: relative;
+  overflow: hidden;
+}
+
+.chronicle-intro__feature--interactive {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.chronicle-intro__feature--interactive:hover,
+.chronicle-intro__feature--interactive:focus-visible,
+.calendar-panel__focus--link:hover,
+.calendar-panel__focus--link:focus-visible,
+.chronicle-calendar__yearly-event:hover,
+.chronicle-calendar__yearly-event:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+}
+
 .chronicle-intro__seal {
   width: 44px;
   height: 44px;
@@ -1899,6 +2019,10 @@ textarea {
   place-items: center;
   border: 1px solid rgba(226, 174, 96, 0.26);
   background: rgba(255, 255, 255, 0.03);
+}
+
+.chronicle-intro__seal--holiday {
+  font-size: 1.3rem;
 }
 
 .chronicle-intro__feature span {
@@ -1915,10 +2039,35 @@ textarea {
   text-transform: uppercase;
 }
 
+.chronicle-intro__feature-title,
+.calendar-panel__focus-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.holiday-glyph {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.1em;
+  line-height: 1;
+}
+
 .chronicle-intro__feature p {
   margin: 0;
   color: rgba(241, 247, 255, 0.78);
   line-height: 1.65;
+}
+
+.calendar-panel__focus--link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.world-summary__holiday-callout {
+  margin-top: 14px;
 }
 
 .home-route-card,
@@ -4015,6 +4164,10 @@ textarea {
   gap: 10px;
 }
 
+.player-session-banner__holiday-callout {
+  margin-top: 12px;
+}
+
 .player-session-banner__grid article,
 .player-mayor-panel__item {
   display: grid;
@@ -5041,6 +5194,72 @@ body:-webkit-full-screen #app {
 .calendar-panel__focus span {
   margin-top: 6px;
   color: var(--muted);
+}
+
+.calendar-panel__focus--holiday {
+  border-color: rgba(255, 212, 124, 0.28);
+  background:
+    linear-gradient(180deg, rgba(255, 212, 124, 0.14), rgba(255, 255, 255, 0.03)),
+    rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(255, 241, 203, 0.04);
+}
+
+.calendar-panel__focus--holiday strong {
+  color: rgba(248, 238, 213, 0.98);
+}
+
+.calendar-panel__focus--holiday span {
+  color: rgba(255, 244, 220, 0.86);
+}
+
+.calendar-panel__focus--holiday.holiday-accent--renewal,
+.chronicle-intro__feature--holiday.holiday-accent--renewal {
+  border-color: rgba(112, 241, 194, 0.34);
+  background: linear-gradient(180deg, rgba(17, 42, 36, 0.86), rgba(14, 19, 32, 0.92));
+}
+
+.calendar-panel__focus--holiday.holiday-accent--social,
+.calendar-panel__focus--holiday.holiday-accent--harvest,
+.chronicle-intro__feature--holiday.holiday-accent--social,
+.chronicle-intro__feature--holiday.holiday-accent--harvest {
+  border-color: rgba(240, 196, 130, 0.34);
+  background: linear-gradient(180deg, rgba(56, 35, 22, 0.86), rgba(16, 18, 34, 0.92));
+}
+
+.calendar-panel__focus--holiday.holiday-accent--equinox,
+.chronicle-intro__feature--holiday.holiday-accent--equinox {
+  border-color: rgba(141, 214, 255, 0.36);
+  background: linear-gradient(180deg, rgba(18, 38, 58, 0.86), rgba(16, 18, 34, 0.92));
+}
+
+.calendar-panel__focus--holiday.holiday-accent--solstice,
+.chronicle-intro__feature--holiday.holiday-accent--solstice {
+  border-color: rgba(255, 140, 104, 0.38);
+  background: linear-gradient(180deg, rgba(63, 30, 22, 0.88), rgba(16, 18, 34, 0.92));
+}
+
+.calendar-panel__focus--holiday.holiday-accent--astral,
+.calendar-panel__focus--holiday.holiday-accent--arcane,
+.chronicle-intro__feature--holiday.holiday-accent--astral,
+.chronicle-intro__feature--holiday.holiday-accent--arcane {
+  border-color: rgba(217, 99, 255, 0.38);
+  background: linear-gradient(180deg, rgba(55, 27, 70, 0.86), rgba(16, 18, 34, 0.92));
+}
+
+.calendar-panel__focus--holiday.holiday-accent--death,
+.calendar-panel__focus--holiday.holiday-accent--remembrance,
+.chronicle-intro__feature--holiday.holiday-accent--death,
+.chronicle-intro__feature--holiday.holiday-accent--remembrance {
+  border-color: rgba(196, 174, 255, 0.3);
+  background: linear-gradient(180deg, rgba(40, 30, 58, 0.86), rgba(16, 18, 34, 0.92));
+}
+
+.calendar-panel__focus--holiday.holiday-accent--civic,
+.calendar-panel__focus--holiday.holiday-accent--travel,
+.chronicle-intro__feature--holiday.holiday-accent--civic,
+.chronicle-intro__feature--holiday.holiday-accent--travel {
+  border-color: rgba(120, 180, 255, 0.28);
+  background: linear-gradient(180deg, rgba(24, 33, 56, 0.86), rgba(16, 18, 34, 0.92));
 }
 
 .calendar-panel__focus.is-due {
@@ -8869,6 +9088,50 @@ body:-webkit-full-screen #app {
   flex-wrap: wrap;
 }
 
+.chronicle-calendar__jump-link {
+  border-color: rgba(255, 212, 124, 0.26);
+  background: linear-gradient(180deg, rgba(255, 212, 124, 0.12), rgba(255, 255, 255, 0.03));
+}
+
+.chronicle-calendar__jump-link.holiday-accent--renewal {
+  border-color: rgba(112, 241, 194, 0.34);
+  background: linear-gradient(180deg, rgba(17, 42, 36, 0.86), rgba(14, 19, 32, 0.92));
+}
+
+.chronicle-calendar__jump-link.holiday-accent--social,
+.chronicle-calendar__jump-link.holiday-accent--harvest {
+  border-color: rgba(240, 196, 130, 0.34);
+  background: linear-gradient(180deg, rgba(56, 35, 22, 0.86), rgba(16, 18, 34, 0.92));
+}
+
+.chronicle-calendar__jump-link.holiday-accent--equinox {
+  border-color: rgba(141, 214, 255, 0.36);
+  background: linear-gradient(180deg, rgba(18, 38, 58, 0.86), rgba(16, 18, 34, 0.92));
+}
+
+.chronicle-calendar__jump-link.holiday-accent--solstice {
+  border-color: rgba(255, 140, 104, 0.38);
+  background: linear-gradient(180deg, rgba(63, 30, 22, 0.88), rgba(16, 18, 34, 0.92));
+}
+
+.chronicle-calendar__jump-link.holiday-accent--astral,
+.chronicle-calendar__jump-link.holiday-accent--arcane {
+  border-color: rgba(217, 99, 255, 0.38);
+  background: linear-gradient(180deg, rgba(55, 27, 70, 0.86), rgba(16, 18, 34, 0.92));
+}
+
+.chronicle-calendar__jump-link.holiday-accent--death,
+.chronicle-calendar__jump-link.holiday-accent--remembrance {
+  border-color: rgba(196, 174, 255, 0.3);
+  background: linear-gradient(180deg, rgba(40, 30, 58, 0.86), rgba(16, 18, 34, 0.92));
+}
+
+.chronicle-calendar__jump-link.holiday-accent--civic,
+.chronicle-calendar__jump-link.holiday-accent--travel {
+  border-color: rgba(120, 180, 255, 0.28);
+  background: linear-gradient(180deg, rgba(24, 33, 56, 0.86), rgba(16, 18, 34, 0.92));
+}
+
 .chronicle-calendar__month-nav strong {
   font-family: var(--display-font);
   letter-spacing: 0.06em;
@@ -8893,10 +9156,35 @@ body:-webkit-full-screen #app {
 .chronicle-calendar__yearly-event {
   display: grid;
   gap: 0.25rem;
+  width: 100%;
   padding: 0.8rem 0.9rem;
   border-radius: 16px;
   border: 1px solid rgba(125, 152, 214, 0.16);
   background: rgba(255, 255, 255, 0.03);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.chronicle-calendar__yearly-event-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chronicle-calendar__yearly-event-badge {
+  margin-left: auto;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(7, 11, 20, 0.34);
+  color: rgba(244, 247, 255, 0.92);
+  font-size: 0.68rem;
+  font-style: normal;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .chronicle-calendar__yearly-event span,
@@ -8951,8 +9239,29 @@ body:-webkit-full-screen #app {
   box-shadow: 0 0 0 1px rgba(217, 99, 255, 0.22), 0 20px 40px rgba(9, 10, 24, 0.3);
 }
 
+.chronicle-calendar__day.is-jump-highlight {
+  animation: chronicle-jump-highlight 2.8s ease-out 1;
+}
+
 .chronicle-calendar__day.is-today {
   box-shadow: inset 0 0 0 1px rgba(89, 220, 255, 0.35);
+}
+
+@keyframes chronicle-jump-highlight {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(255, 225, 138, 0.2),
+      0 0 0 0 rgba(255, 225, 138, 0.24),
+      0 18px 35px rgba(9, 10, 24, 0.28);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(255, 225, 138, 0.5),
+      0 0 0 8px rgba(255, 225, 138, 0.1),
+      0 22px 42px rgba(9, 10, 24, 0.34);
+  }
 }
 
 .chronicle-calendar__day.is-holiday {

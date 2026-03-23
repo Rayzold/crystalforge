@@ -6,7 +6,7 @@ import { BUILDING_ROLE_LEGEND } from "../content/BuildingCatalog.js";
 import { APP_VERSION, BUILD_NOTES } from "../content/Config.js";
 import { GLOSSARY_TERMS } from "../content/GlossaryConfig.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
-import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js";
+import { formatDate, getNextHoliday, getStructuredDate } from "../systems/CalendarSystem.js";
 import { formatBuildingExactQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js";
 import { getMayorAdvice, getTownFocusAvailability } from "../systems/TownFocusSystem.js";
 import { getTownFocusHistory } from "../systems/TownFocusSystem.js";
@@ -14,6 +14,7 @@ import { getCityTrendSummary, getResourceChainSummary } from "../systems/Resourc
 import { getManualSaveMeta } from "../systems/StorageSystem.js";
 import { renderBuildingArt } from "./BuildingArt.js";
 import { renderDriftEvolutionPanel } from "./DriftEvolutionPanel.js";
+import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js";
 import { getCurrentDriftEvolution } from "../systems/DriftEvolutionSystem.js";
 import { renderTownFocusPanel } from "./TownFocusPanel.js";
 import { renderTownFocusBadge } from "./TownFocusShared.js";
@@ -364,6 +365,9 @@ function renderFeaturedBuildings(state) {
 
 function renderWorldSummary(state) {
   const date = getStructuredDate(state.calendar.dayOffset);
+  const nextHoliday = getNextHoliday(state.calendar.dayOffset);
+  const nextHolidayGlyph = nextHoliday ? getHolidayGlyph(nextHoliday) : "✦";
+  const nextHolidayAccentClass = nextHoliday ? getHolidayTypeClass(nextHoliday) : "";
   const completedBuildings = state.buildings.filter((building) => building.isComplete).length;
   const activeEvents = state.events.active.length;
 
@@ -374,6 +378,20 @@ function renderWorldSummary(state) {
           <p class="world-summary__eyebrow">${date.season}</p>
           <h2>${formatDate(state.calendar.dayOffset)}</h2>
           <p>${date.holiday ? `Holiday: ${date.holiday.name}` : "No holiday today."}</p>
+          <a
+            class="world-summary__holiday-callout calendar-panel__focus calendar-panel__focus--holiday calendar-panel__focus--link ${nextHolidayAccentClass}"
+            href="${nextHoliday ? `./chronicle.html?focusChronicleDay=${nextHoliday.dayOffset}` : "./chronicle.html"}"
+            title="${nextHoliday ? `Open Chronicle on ${nextHoliday.name}` : "Open Chronicle"}"
+          >
+            <strong class="calendar-panel__focus-title"><span class="holiday-glyph" aria-hidden="true">${nextHolidayGlyph}</span>Upcoming Holiday</strong>
+            <span>
+              ${
+                nextHoliday
+                  ? `${nextHoliday.name} arrives in ${nextHoliday.daysUntil} day(s) on ${nextHoliday.date.weekday}, ${nextHoliday.date.month} ${nextHoliday.date.day}.`
+                  : "No upcoming holidays found."
+              }
+            </span>
+          </a>
         </div>
         <div class="world-summary__stats">
           <article><span>Buildings</span><strong>${state.buildings.length}</strong></article>

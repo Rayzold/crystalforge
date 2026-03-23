@@ -7,13 +7,14 @@ import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER, getCitizenHe
 import { GLOSSARY_TERMS } from "../content/GlossaryConfig.js";
 import { RARITY_ORDER } from "../content/Rarities.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
-import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js";
+import { formatDate, getNextHoliday, getStructuredDate } from "../systems/CalendarSystem.js";
 import { formatBuildingExactQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js";
 import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js";
 import { getCityTrendSummary, getResourceChainSummary } from "../systems/ResourceSystem.js";
 import { getMayorAdvice } from "../systems/TownFocusSystem.js";
 import { renderCrystalSelector } from "./CrystalSelector.js";
 import { createHelpBubble } from "./HelpBubbles.js";
+import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js";
 import { renderManifestPanel } from "./ManifestPanel.js";
 
 function renderStatusPill(state) {
@@ -61,6 +62,9 @@ function renderPublishedFooter(state) {
 
 function renderPlayerSessionBanner(state) {
   const date = getStructuredDate(state.calendar.dayOffset);
+  const nextHoliday = getNextHoliday(state.calendar.dayOffset);
+  const nextHolidayGlyph = nextHoliday ? getHolidayGlyph(nextHoliday) : "✦";
+  const nextHolidayAccentClass = nextHoliday ? getHolidayTypeClass(nextHoliday) : "";
   const meta = state.transientUi?.firebasePublishedMeta ?? null;
   const timestamp = meta?.updatedAtMs ? new Date(meta.updatedAtMs).toLocaleString() : "No published timestamp yet";
 
@@ -94,6 +98,20 @@ function renderPlayerSessionBanner(state) {
           <strong>${escapeHtml(timestamp)}</strong>
         </article>
       </div>
+      <a
+        class="player-session-banner__holiday-callout calendar-panel__focus calendar-panel__focus--holiday calendar-panel__focus--link ${nextHolidayAccentClass}"
+        href="${nextHoliday ? `./chronicle.html?focusChronicleDay=${nextHoliday.dayOffset}` : "./chronicle.html"}"
+        title="${nextHoliday ? `Open Chronicle on ${nextHoliday.name}` : "Open Chronicle"}"
+      >
+        <strong class="calendar-panel__focus-title"><span class="holiday-glyph" aria-hidden="true">${nextHolidayGlyph}</span>Upcoming Holiday${nextHoliday ? `<em class="holiday-countdown-badge">${nextHoliday.daysUntil === 0 ? "Today" : `${nextHoliday.daysUntil}d`}</em>` : ""}</strong>
+        <span>
+          ${
+            nextHoliday
+              ? `${nextHoliday.name} arrives in ${nextHoliday.daysUntil} day(s) on ${nextHoliday.date.weekday}, ${nextHoliday.date.month} ${nextHoliday.date.day}.`
+              : "No upcoming holidays found."
+          }
+        </span>
+      </a>
     </section>
   `;
 }

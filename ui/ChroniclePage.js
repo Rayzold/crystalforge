@@ -1,3 +1,5 @@
+import { getNextHoliday } from "../systems/CalendarSystem.js";
+import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js";
 import { renderChronicleCalendar } from "./ChronicleCalendar.js";
 import { renderEventChainPanel } from "./EventChainPanel.js";
 import { renderEventPanel } from "./EventPanel.js";
@@ -9,6 +11,9 @@ function renderChronicleIntro(state) {
     state.historyLog.find((entry) => entry.category === "Chronicle") ??
     state.historyLog[0] ??
     null;
+  const nextHoliday = getNextHoliday(state.calendar.dayOffset);
+  const nextHolidayGlyph = nextHoliday ? getHolidayGlyph(nextHoliday) : "✦";
+  const nextHolidayAccentClass = nextHoliday ? getHolidayTypeClass(nextHoliday) : "";
 
   return `
     <section class="scene-panel scene-panel--chronicle-intro">
@@ -18,11 +23,32 @@ function renderChronicleIntro(state) {
           <h2>The realm remembers in chapters.</h2>
           <p>Monthly stories, active disturbances, and the city's long memory are gathered here like illuminated pages instead of loose logs.</p>
         </div>
-        <div class="chronicle-intro__feature">
-          <div class="chronicle-intro__seal">${renderUiIcon("history", "Chronicle")}</div>
-          <span>Latest Chronicle</span>
-          <strong>${latestChronicle ? latestChronicle.title : "No monthly chapter yet"}</strong>
-          <p>${latestChronicle ? latestChronicle.details : "Advance time into a new month to record the first chapter."}</p>
+        <div class="chronicle-intro__rail">
+          <div class="chronicle-intro__feature">
+            <div class="chronicle-intro__seal">${renderUiIcon("history", "Chronicle")}</div>
+            <span>Latest Chronicle</span>
+            <strong>${latestChronicle ? latestChronicle.title : "No monthly chapter yet"}</strong>
+            <p>${latestChronicle ? latestChronicle.details : "Advance time into a new month to record the first chapter."}</p>
+          </div>
+          <button
+            class="chronicle-intro__feature chronicle-intro__feature--holiday chronicle-intro__feature--interactive ${nextHolidayAccentClass}"
+            type="button"
+            data-action="select-chronicle-day"
+            data-day-offset="${nextHoliday?.dayOffset ?? state.calendar.dayOffset}"
+            data-highlight-jump="1"
+            title="${nextHoliday ? `Jump to ${nextHoliday.name}` : "Open selected day in Chronicle"}"
+          >
+            <div class="chronicle-intro__seal chronicle-intro__seal--holiday"><span class="holiday-glyph" aria-hidden="true">${nextHolidayGlyph}</span></div>
+            <span>Upcoming Holiday</span>
+            <strong class="chronicle-intro__feature-title">${nextHoliday ? nextHoliday.name : "No holiday queued"}</strong>
+            <p>
+              ${
+                nextHoliday
+                  ? `Arrives in ${nextHoliday.daysUntil} day(s) on ${nextHoliday.date.weekday}, ${nextHoliday.date.month} ${nextHoliday.date.day}. ${nextHoliday.description}`
+                  : "The calendar has no upcoming fixed-date holidays right now."
+              }
+            </p>
+          </button>
         </div>
       </div>
     </section>

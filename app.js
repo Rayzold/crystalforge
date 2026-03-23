@@ -115,6 +115,7 @@ let projectorChromeTimer = null;
 let recentBuildingChangeTimer = null;
 let recentStateChangeTimer = null;
 let mapPlacementFxTimer = null;
+let chronicleJumpHighlightTimer = null;
 let manifestInProgress = false;
 let mapDragState = null;
 let suppressNextMapClick = false;
@@ -124,6 +125,39 @@ syncDerivedState(gameState.getState());
 // Rewrite the loaded session immediately so migration fixes are not lost while
 // moving between pages in an already-open browser session.
 saveGameState(gameState.getState());
+
+function clearChronicleJumpHighlightTimer() {
+  if (chronicleJumpHighlightTimer) {
+    clearTimeout(chronicleJumpHighlightTimer);
+    chronicleJumpHighlightTimer = null;
+  }
+}
+
+function scheduleChronicleJumpHighlightClear(dayOffset) {
+  clearChronicleJumpHighlightTimer();
+  if (!Number.isFinite(dayOffset)) {
+    return;
+  }
+  chronicleJumpHighlightTimer = window.setTimeout(() => {
+    if (renderer.transientUi.chronicleJumpHighlightDay === dayOffset) {
+      renderer.setTransientUi({ chronicleJumpHighlightDay: null }, getCurrentState());
+    }
+    chronicleJumpHighlightTimer = null;
+  }, 3200);
+}
+
+function scrollChronicleDayIntoView(dayOffset) {
+  if (!Number.isFinite(dayOffset)) {
+    return;
+  }
+
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      const dayButton = document.querySelector(`.chronicle-calendar__day[data-day-offset="${dayOffset}"]`);
+      dayButton?.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" });
+    });
+  });
+}
 
 function updateFirebasePublishedMeta(payload = null, connectionState = "idle") {
   renderer.transientUi.firebasePublishedMeta = payload
@@ -2615,22 +2649,32 @@ root.addEventListener("click", async (event) => {
       renderer.setTransientUi(
         {
           chronicleMonthOffset: getMonthStartOffset(targetMonthOffset),
-          chronicleSelectedDayOffset: getMonthStartOffset(targetMonthOffset)
+          chronicleSelectedDayOffset: getMonthStartOffset(targetMonthOffset),
+          chronicleJumpHighlightDay: null
         },
         getCurrentState()
       );
+      clearChronicleJumpHighlightTimer();
       break;
     }
     case "select-chronicle-day": {
       void audioEngine.playUiAccent("soft");
       const selectedDayOffset = Number(target.dataset.dayOffset ?? getCurrentState().calendar.dayOffset);
+      const shouldHighlightJump = target.dataset.highlightJump === "1";
       renderer.setTransientUi(
         {
           chronicleMonthOffset: getMonthStartOffset(selectedDayOffset),
-          chronicleSelectedDayOffset: selectedDayOffset
+          chronicleSelectedDayOffset: selectedDayOffset,
+          chronicleJumpHighlightDay: shouldHighlightJump ? selectedDayOffset : null
         },
         getCurrentState()
       );
+      if (shouldHighlightJump) {
+        scheduleChronicleJumpHighlightClear(selectedDayOffset);
+        scrollChronicleDayIntoView(selectedDayOffset);
+      } else {
+        clearChronicleJumpHighlightTimer();
+      }
       break;
     }
     case "save-chronicle-note": {
@@ -3038,9 +3082,11 @@ function applyUrlFocusTargets() {
   const focusBuildingId = params.get("focusBuilding");
   const openDossier = params.get("openDossier") === "1";
   const focusEventId = params.get("focusEvent");
+  const focusChronicleDayParam = params.get("focusChronicleDay");
+  const focusChronicleDay = focusChronicleDayParam === null ? null : Number(focusChronicleDayParam);
   const focusProblem = params.get("problem");
 
-  if (!focusBuildingId && !focusEventId && !focusProblem) {
+  if (!focusBuildingId && !focusEventId && !Number.isFinite(focusChronicleDay) && !focusProblem) {
     return;
   }
 
@@ -3058,6 +3104,19 @@ function applyUrlFocusTargets() {
 
   if (focusEventId) {
     renderer.setTransientUi({ focusEventId }, getCurrentState());
+  }
+
+  if (Number.isFinite(focusChronicleDay)) {
+    renderer.setTransientUi(
+      {
+        chronicleMonthOffset: getMonthStartOffset(focusChronicleDay),
+        chronicleSelectedDayOffset: focusChronicleDay,
+        chronicleJumpHighlightDay: focusChronicleDay
+      },
+      getCurrentState()
+    );
+    scheduleChronicleJumpHighlightClear(focusChronicleDay);
+    scrollChronicleDayIntoView(focusChronicleDay);
   }
 
   if (focusProblem) {

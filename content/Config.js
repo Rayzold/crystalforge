@@ -7,7 +7,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.2.77";
+export const APP_VERSION = "v1.2.84";
 export const SAVE_VERSION = 11;
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3";
 export const FIREBASE_CONFIG = {
@@ -35,6 +35,13 @@ export const PAGE_ROUTES = [
   { key: "help", label: "Help", href: "./help.html" }
 ];
 export const BUILD_NOTES = [
+  "Chronicle's next-holiday jump now adopts each holiday's own accent, City and Player callouts show compact countdown pills, and Chronicle jump targets scroll into view automatically.",
+  "Chronicle now includes a direct next-holiday jump in the calendar header, the City command strip shows a compact holiday countdown badge, and jump highlights fade on their own after a short pulse.",
+  "Player Mode now links upcoming holidays into Chronicle, yearly events show countdown badges, and jump-targeted holiday days pulse with a subtle highlight ring.",
+  "Upcoming holiday cards now open Chronicle on the exact day, and the Home dashboard plus yearly event strip both surface holiday glyphs and quick jumps.",
+  "Upcoming holidays now share a richer presentation across City and Chronicle: each card gets its own glyph, holiday-type accent, and Chronicle callout.",
+  "The next-holiday card in the session clock now has its own highlighted treatment, making upcoming celebrations easier to spot at a glance.",
+  "The session clock now calls out the next upcoming holiday by name, date, and flavor text so you can see what is approaching at a glance.",
   "The Help page now renders the full building image filename guide in-app, while keeping the plain text guide available for copying exact filenames.",
   "The Help page now links directly to the generated building image filename guide so artwork can be named to match the automatic pickup rules.",
   "Buildings now automatically look for committed artwork at assets/images/buildings/<building key>.png, including rarity keys like Crystal Upgrade__Epic.png, and the main HTML views fall back cleanly if a specific image is missing.",
