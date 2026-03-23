@@ -479,14 +479,11 @@ export function renderPlayerPage(state) {
       ${renderManifestPanel(state)}
       ${renderBuildingRarityFilters(state)}
       ${renderResourceChainPanel(state)}
-      ${renderBuildingRolesLegend()}
       <section class="player-lists">
         ${hideCompleted ? "" : renderManifestedList("Active Buildings", "Completed and already part of the Drift.", manifested, "No active buildings yet.", state)}
         ${renderIncubationList("Incubating Buildings", "Buildings currently growing inside an incubator slot.", incubating, "Nothing is incubating right now.", "incubating", state)}
       </section>
       ${renderIncubationList("Available Buildings", "Waiting buildings that can be swapped into an incubator.", available, "No waiting buildings are ready to incubate.", "available", state)}
-      ${renderBuildNotesPanel(state)}
-      ${renderGlossaryPanel()}
       ${renderPublishedFooter(state)}
     `
   };

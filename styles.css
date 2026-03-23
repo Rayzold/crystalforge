@@ -3514,6 +3514,17 @@ textarea {
   z-index: 2;
 }
 
+.page-build-tag {
+  justify-self: end;
+  margin: 0 4px -4px 0;
+  color: rgba(207, 216, 236, 0.46);
+  font-family: var(--label-font);
+  font-size: 0.64rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  user-select: none;
+}
+
 .sidebar-nav__brand p,
 .sidebar-nav__footer p,
 .page-hero__eyebrow,
@@ -4313,6 +4324,11 @@ textarea {
   color: var(--text-soft);
   line-height: 1.45;
   font-size: 0.84rem;
+}
+
+.help-page {
+  display: grid;
+  gap: 18px;
 }
 
 .player-list__items {

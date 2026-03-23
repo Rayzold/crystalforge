@@ -192,6 +192,7 @@ function renderHomeRouteDeck() {
     { group: "Core", title: "Manifest", label: "Forge", href: "./forge.html", details: "Choose a crystal, manifest a structure, and watch the roll resolve." },
     { group: "Core", title: "Shape", label: "City", href: "./city.html", details: "Place buildings on the map, tune districts, and direct construction." },
     { group: "Management", title: "Remember", label: "Chronicle", href: "./chronicle.html", details: "Track events, monthly stories, and the realm's living history." },
+    { group: "Management", title: "Reference", label: "Help", href: "./help.html", details: "Open the glossary, building roles, build notes, and release checklist." },
     { group: "Management", title: "Present", label: "Player Page", href: "./index.html", details: "Open the cleaner shared player view for testers, tables, and screens." }
   ];
   const groups = ["Core", "Management"];
@@ -767,10 +768,6 @@ export function renderHomePage(state) {
       ${renderCityTrendPanel(state)}
       ${renderMayorAdvice(state)}
       ${renderResourceChainPanel(state)}
-      ${renderBuildingRolesLegend()}
-      ${renderGlossaryPanel()}
-      ${renderReleaseChecklistPanel(state)}
-      ${renderBuildNotesPanel()}
     `
   };
 }

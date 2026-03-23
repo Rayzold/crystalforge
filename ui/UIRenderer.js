@@ -7,6 +7,7 @@ import { renderBuildingCatalogModal } from "./BuildingCatalogModal.js";
 import { renderCitizensPage } from "./CitizensPage.js";
 import { renderCityPage } from "./CityPage.js";
 import { renderForgePage } from "./ForgePage.js";
+import { renderHelpPage } from "./HelpPage.js";
 import { attachHelpBubbles } from "./HelpBubbles.js";
 import { renderHomePage } from "./HomePage.js";
 import { renderHomeHelpModal } from "./HomeHelpModal.js";
@@ -98,6 +99,8 @@ export class UIRenderer {
         return renderCitizensPage(state);
       case "chronicle":
         return renderChroniclePage(state);
+      case "help":
+        return renderHelpPage(state);
       case "player":
         return renderPlayerPage(state);
       case "home":

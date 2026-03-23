@@ -27,7 +27,8 @@ const ROUTE_GLYPHS = {
   forge: "\u{1F48E}",
   city: "\u{1F3D9}\uFE0F",
   citizens: "\u{1F465}",
-  chronicle: "\u{1F4DC}"
+  chronicle: "\u{1F4DC}",
+  help: "\u2754"
 };
 
 const ROUTE_SHORTCUTS = {
@@ -35,7 +36,8 @@ const ROUTE_SHORTCUTS = {
   forge: "2",
   city: "3",
   citizens: "4",
-  chronicle: "5"
+  chronicle: "5",
+  help: "6"
 };
 
 const DICE_TYPES = ["d2", "d4", "d6", "d8", "d10", "d12", "d20", "d100"];
@@ -192,6 +194,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
     return `
       <div class="game-shell game-shell--player game-shell--theme-dark ${state.transientUi?.projectorMode ? "game-shell--projector" : ""} ${state.transientUi?.projectorChromeHidden ? "game-shell--projector-hidden" : ""}">
         <main class="page-stage page-stage--player">
+          <div class="page-build-tag" aria-label="Current build">${APP_VERSION}</div>
           <header class="player-stage__header">
             <div class="player-stage__brand">
               <span>Crystal Forge</span>
@@ -216,7 +219,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
   const cityAlertCount = getCriticalAlerts(state).length;
   const availableCrystalCount = Object.values(state.crystals ?? {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
   const coreRoutes = PAGE_ROUTES.filter((route) => ["home", "forge", "city"].includes(route.key));
-  const managementRoutes = PAGE_ROUTES.filter((route) => ["citizens", "chronicle"].includes(route.key));
+  const managementRoutes = PAGE_ROUTES.filter((route) => ["citizens", "chronicle", "help"].includes(route.key));
   const manifestedBuildings = orderSidebarBuildings(state, state.buildings.filter((building) => building.isComplete));
   const incubatingBuildings = orderSidebarBuildings(state, getActiveConstructionQueue(state));
   const availableBuildings = orderSidebarBuildings(state, getAvailableConstructionQueue(state));
@@ -317,10 +320,6 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
             <span>View Mode</span>
             <strong>${state.settings.liveSessionView ? "Live Session" : "Deep Review"}</strong>
           </button>
-          <div class="sidebar-nav__build">
-            <span>Current Build</span>
-            <strong>${APP_VERSION}</strong>
-          </div>
           <div class="sidebar-dice">
             <div class="sidebar-dice__header">
               <span>Dice Roller</span>
@@ -355,6 +354,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
       </aside>
 
       <main class="page-stage page-stage--${pageKey}">
+        <div class="page-build-tag" aria-label="Current build">${APP_VERSION}</div>
         ${pageKey === "city" ? renderCrisisBanner(state, pageKey) : ""}
         <header class="page-hero">
           <div>
