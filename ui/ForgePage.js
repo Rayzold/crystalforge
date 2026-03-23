@@ -1,4 +1,5 @@
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
+import { renderBuildingArt } from "./BuildingArt.js";
 import { renderCrystalSelector } from "./CrystalSelector.js";
 import { renderManifestPanel } from "./ManifestPanel.js";
 
@@ -46,9 +47,11 @@ function renderManifestShrine(state) {
                     <article class="manifest-shrine__card ${building ? `rarity-${building.rarity.toLowerCase()}` : ""}">
                       <div class="manifest-shrine__art">
                         ${
-                          building?.imagePath
-                            ? `<img src="${escapeHtml(building.imagePath)}" alt="${escapeHtml(entry.title)} artwork" loading="lazy" />`
-                            : `<div class="manifest-shrine__fallback">${escapeHtml(entry.title.slice(0, 1))}</div>`
+                          renderBuildingArt(
+                            building?.imagePath,
+                            `${entry.title} artwork`,
+                            `<div class="manifest-shrine__fallback">${escapeHtml(entry.title.slice(0, 1))}</div>`
+                          )
                         }
                       </div>
                       <div class="manifest-shrine__meta">
@@ -74,9 +77,11 @@ function renderManifestShrine(state) {
 
 function renderForgeStage(state) {
   const selectedBuilding = state.buildings.find((building) => building.id === state.ui.selectedBuildingId) ?? null;
-  const visual = selectedBuilding?.imagePath
-    ? `<img src="${escapeHtml(selectedBuilding.imagePath)}" alt="${escapeHtml(selectedBuilding.displayName)} artwork" loading="lazy" />`
-    : `<div class="forge-stage__orb"><span>${escapeHtml(state.selectedRarity)}</span></div>`;
+  const visual = renderBuildingArt(
+    selectedBuilding?.imagePath,
+    `${selectedBuilding?.displayName ?? state.selectedRarity} artwork`,
+    `<div class="forge-stage__orb"><span>${escapeHtml(state.selectedRarity)}</span></div>`
+  );
 
   return `
     <section class="scene-panel scene-panel--forge">

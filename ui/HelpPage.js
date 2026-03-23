@@ -1,4 +1,8 @@
 import { BUILDING_ROLE_LEGEND } from "../content/BuildingCatalog.js";
+import {
+  BUILDING_IMAGE_FILENAME_SAMPLES,
+  BUILDING_IMAGE_LOOKUP_EXTENSIONS
+} from "../content/BuildingImageFilenameGuide.js";
 import { APP_VERSION, BUILD_NOTES } from "../content/Config.js";
 import { GLOSSARY_TERMS } from "../content/GlossaryConfig.js";
 import { escapeHtml } from "../engine/Utils.js";
@@ -49,9 +53,35 @@ function renderBuildNotesPanel(buildLabel = APP_VERSION) {
         <h3>Build Notes</h3>
         <span class="panel__subtle">What changed in ${escapeHtml(buildLabel)}.</span>
       </div>
+      <p class="help-page__guide-link">
+        Need exact artwork filenames? Open
+        <a href="./AVAILABLE_BUILDING_IMAGE_FILENAMES.txt" target="_blank" rel="noopener noreferrer">Building Image Filename Guide</a>.
+      </p>
       <ul class="build-notes-panel__list">
         ${BUILD_NOTES.map((note) => `<li>${escapeHtml(note)}</li>`).join("")}
       </ul>
+    </section>
+  `;
+}
+
+function renderBuildingImageGuidePanel() {
+  return `
+    <section class="panel building-image-guide-panel">
+      <div class="panel__header">
+        <h3>Building Image Filenames</h3>
+        <span class="panel__subtle">Name artwork to match these samples and place the files in assets/images/buildings/.</span>
+      </div>
+      <div class="building-image-guide-panel__intro">
+        <p>Automatic lookup order: ${BUILDING_IMAGE_LOOKUP_EXTENSIONS.map((extension) => escapeHtml(extension)).join(" -> ")}</p>
+        <p>Use the exact filename samples below. Crystal Upgrade uses rarity-specific filenames such as Crystal Upgrade__Epic.png.</p>
+      </div>
+      <div class="building-image-guide-panel__list">
+        ${BUILDING_IMAGE_FILENAME_SAMPLES.map((sample) => `<span>${escapeHtml(sample)}</span>`).join("")}
+      </div>
+      <p class="help-page__guide-link">
+        Prefer the plain text version? Open
+        <a href="./AVAILABLE_BUILDING_IMAGE_FILENAMES.txt" target="_blank" rel="noopener noreferrer">Building Image Filename Guide</a>.
+      </p>
     </section>
   `;
 }
@@ -121,6 +151,7 @@ export function renderHelpPage(state) {
         ${renderGlossaryPanel()}
         ${renderBuildingRolesPanel()}
         ${renderBuildNotesPanel()}
+        ${renderBuildingImageGuidePanel()}
         ${renderReleaseChecklistPanel(state)}
       </div>
     `

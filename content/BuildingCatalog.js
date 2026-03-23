@@ -33,26 +33,16 @@ function defineBuilding({ district, tags, iconKey, imagePath = null, flavorText 
   return { district, tags, iconKey, imagePath, flavorText, specialEffect, ...(profile ?? {}) };
 }
 
+function getDefaultBuildingImageFileName(name, rarity) {
+  return getCatalogKey(name, rarity)
+    .replace(/[:\\/\?%\*|"<>]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
-const DEFAULT_BUILDING_IMAGE_PATHS = {
-  "Apiary": "./assets/images/buildings/Apiary.png",
-  "Bakery": "./assets/images/buildings/Bakery.png",
-  "Ballistas": "./assets/images/buildings/Ballistas.png",
-  "Barn": "./assets/images/buildings/Barn.png",
-  "Basic Shrine": "./assets/images/buildings/Basic Shrine.png",
-  "Beast Pens": "./assets/images/buildings/Beast Pens.png",
-  "Blacksmith": "./assets/images/buildings/Blacksmith.png",
-  "Butcher": "./assets/images/buildings/Butcher.png",
-  "Fishery": "./assets/images/buildings/Fishery.png",
-  "Gardens": "./assets/images/buildings/Gardens.png",
-  "Grove": "./assets/images/buildings/Grove.png",
-  "Housing: Commoner": "./assets/images/buildings/Housing Commoner.png",
-  "Library": "./assets/images/buildings/Library.png",
-  "Mill": "./assets/images/buildings/Mill.png",
-  "Pond": "./assets/images/buildings/Pond.png",
-  "Smokehouse": "./assets/images/buildings/Smokehouse.png",
-  "Vendor": "./assets/images/buildings/Vendor.png"
-};
+export function getDefaultBuildingImagePath(name, rarity) {
+  return `./assets/images/buildings/${getDefaultBuildingImageFileName(name, rarity)}.png`;
+}
 
 
 
@@ -273,7 +263,7 @@ function createCatalogEntry(name, rarity) {
   const base = classifyBuilding(name);
   const override = BUILDING_DEFINITIONS[name] ?? {};
   const tags = [...new Set([...(override.tags ?? []), ...base.tags])];
-  const imagePath = override.imagePath ?? DEFAULT_BUILDING_IMAGE_PATHS[name] ?? null;
+  const imagePath = override.imagePath ?? getDefaultBuildingImagePath(name, rarity);
 
   return {
     key: getCatalogKey(name, rarity),
@@ -318,7 +308,7 @@ export function createCatalogEntryFromInput({ name, rarity, district, tags, icon
     district: district || base.district,
     tags: nextTags,
     iconKey: iconKey || base.iconKey,
-    imagePath: imagePath || null,
+    imagePath: imagePath || getDefaultBuildingImagePath(name, rarity),
     flavorText: flavorText || buildFlavorText({ name, district: district || base.district, tags: nextTags, rarity }),
     specialEffect: specialEffect || buildSpecialEffect({ district: district || base.district, tags: nextTags }),
     statOverrides,

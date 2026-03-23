@@ -10,6 +10,7 @@ import {
   isBuildingActivelyConstructed
 } from "../systems/ConstructionSystem.js";
 import { getBuildingPlacementBonuses } from "../systems/MapSystem.js";
+import { renderBuildingArt } from "./BuildingArt.js";
 import { renderModal } from "./Modal.js";
 
 function renderList(items, inactive) {
@@ -91,9 +92,11 @@ export function renderBuildingDetailModal(state, pageKey) {
   const signatureReadout = getSignatureReadout(building);
   const economySummary = getBuildingEconomySummary(building);
   const buildingEmoji = getBuildingEmoji(building);
-  const artMarkup = building.imagePath
-    ? `<img src="${escapeHtml(building.imagePath)}" alt="${escapeHtml(building.displayName)} artwork" loading="lazy" />`
-    : `<div class="building-detail__fallback">${escapeHtml(buildingEmoji)}</div>`;
+  const artMarkup = renderBuildingArt(
+    building.imagePath,
+    `${building.displayName} artwork`,
+    `<div class="building-detail__fallback">${escapeHtml(buildingEmoji)}</div>`
+  );
 
   const content = `
     <article class="building-detail" style="--rarity-color:${RARITY_COLORS[building.rarity]}">

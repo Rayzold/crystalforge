@@ -1,0 +1,160 @@
+CRYSTAL FORGE BUILDING IMAGE FILENAMES
+
+Put building artwork in:
+assets/images/buildings/
+
+Automatic lookup order:
+1. .png
+2. .jpg
+3. .jpeg
+4. .webp
+5. .svg
+
+Recommended naming:
+- Use the exact filename samples below.
+- Example: Housing Commoner.png
+- Crystal Upgrade uses rarity-specific keys such as Crystal Upgrade__Epic.png
+
+AVAILABLE FILENAME SAMPLES
+
+Apiary.png
+Bakery.png
+Ballistas.png
+Barn.png
+Basic Shrine.png
+Beast Pens.png
+Blacksmith.png
+Butcher.png
+Cider Press.png
+Crystal Upgrade__Common.png
+Farmlands.png
+Fishery.png
+Gardens.png
+Trade Center.png
+Grain Silo.png
+Graveyard.png
+Housing Commoner.png
+Inn.png
+Lumber Mill.png
+Mill.png
+Mine.png
+Quarry.png
+Smokehouse.png
+Stables.png
+Tailor.png
+Tavern.png
+Tool Shed.png
+Town Guard Post.png
+Vendor.png
+Water Trough.png
+Well.png
+Wooden Wall.png
+Woodcutter's Hut.png
+Alchemist.png
+Barracks.png
+Brewery.png
+Carpenter Shop.png
+Clocktower.png
+Community Oven.png
+Crystal Upgrade__Uncommon.png
+Distillery.png
+Dock.png
+Grove.png
+Guard Tower.png
+Hardwood Walls.png
+Housing Comfortable.png
+Immigration Center.png
+Jewelry Shop.png
+Library.png
+Market Square.png
+Mason's Workshop.png
+Pond.png
+Post Office.png
+Ropeworks.png
+School.png
+Tannery.png
+Town Hall.png
+Trade Post.png
+Trebuchets.png
+Warehouse.png
+Weaver's Hall.png
+Amphitheater.png
+Apothecary.png
+Aqueduct System.png
+Armory.png
+Bank.png
+Bathhouse.png
+Courthouse.png
+Crystal Upgrade__Rare.png
+Workshop Quarter.png
+Embassy Annex.png
+Engineers' Guild.png
+Explosive Ballistas.png
+Guildhall.png
+Herbal Greenhouse.png
+Hospital.png
+Housing Wealthy.png
+Lighthouse.png
+Mint.png
+Observatory.png
+Oracle.png
+Printing Press.png
+Prison.png
+Red Light District.png
+Stone Walls.png
+Training Grounds.png
+University.png
+Adventurers' Guildhall.png
+Airship Dockyard.png
+Artifact Vault.png
+Cannons.png
+Caravan Outpost.png
+Castle.png
+Communications Core.png
+Crystal Upgrade__Epic.png
+Fey Crossing.png
+Foreign Affairs Ministry.png
+Grand Shrine.png
+Housing Noble.png
+Illusion Field Generator.png
+Mirage Citadel.png
+Monster Arena.png
+Monster Capture Field.png
+Planar Beach.png
+Reinforced Stone Walls.png
+Relic Sanctum.png
+Skyharbor.png
+Steam Factory.png
+Temple.png
+Torture Chambers.png
+Wall Fortifications.png
+Arcana Tower.png
+Arcane Walls.png
+Captain's Quarters.png
+Crystal Upgrade__Legendary.png
+Deathless Grounds.png
+Doomsday Cannon.png
+Dragonforge.png
+Dreamweaver.png
+Elemental Cannons.png
+Elemental Shipmaker.png
+Enchanted Forest.png
+Housing Royal.png
+Mortality Limiter Remover.png
+Planar Anchor.png
+Planar Escape Pods.png
+Planar Tentacles.png
+Raestorum Center.png
+School of Driftum.png
+Shield Generator.png
+Techcrafter.png
+The Seeker.png
+War Academy Supreme.png
+Heart of Kosmos.png
+Universal Portal.png
+Lylandra's Residence.png
+New Drift Seed.png
+Dungeon of the Endless.png
+The Ark.png
+The Maker's Creatorium.png
+The First Last Tower of Chronomancy.png

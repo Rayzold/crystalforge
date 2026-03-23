@@ -1,3 +1,4 @@
+import { getBuildingArtCandidates, getBuildingArtFallbackAttribute } from "../ui/BuildingArt.js";
 import { RARITY_COLORS } from "../content/Rarities.js";
 
 const REVEAL_PROFILES = {
@@ -18,8 +19,10 @@ export class AnimationEngine {
 
   async playManifestReveal(result) {
     const profile = REVEAL_PROFILES[result.rarity] ?? REVEAL_PROFILES.Common;
+    const [primaryCandidate] = getBuildingArtCandidates(result.building?.imagePath);
+    const fallbackAttribute = getBuildingArtFallbackAttribute(result.building?.imagePath);
     const imageMarkup = result.building?.imagePath
-      ? `<div class="reveal-overlay__art"><img src="${result.building.imagePath}" alt="${result.rolledName} artwork" /></div>`
+      ? `<div class="reveal-overlay__art"><img src="${primaryCandidate}" data-fallback-srcs="${fallbackAttribute}" alt="${result.rolledName} artwork" onerror="const paths=(this.dataset.fallbackSrcs||'').split('|').filter(Boolean); if (paths.length) { const next=paths.shift(); this.dataset.fallbackSrcs=paths.join('|'); this.src=next; return; } this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='block';" /><div class="reveal-overlay__core" style="display:none; --rarity-color:${RARITY_COLORS[result.rarity]}"></div></div>`
       : `<div class="reveal-overlay__core" style="--rarity-color:${RARITY_COLORS[result.rarity]}"></div>`;
 
     const particles = Array.from({ length: profile.particles }, (_, index) => {

@@ -7,7 +7,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.2.74";
+export const APP_VERSION = "v1.2.77";
 export const SAVE_VERSION = 11;
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3";
 export const FIREBASE_CONFIG = {
@@ -35,6 +35,9 @@ export const PAGE_ROUTES = [
   { key: "help", label: "Help", href: "./help.html" }
 ];
 export const BUILD_NOTES = [
+  "The Help page now renders the full building image filename guide in-app, while keeping the plain text guide available for copying exact filenames.",
+  "The Help page now links directly to the generated building image filename guide so artwork can be named to match the automatic pickup rules.",
+  "Buildings now automatically look for committed artwork at assets/images/buildings/<building key>.png, including rarity keys like Crystal Upgrade__Epic.png, and the main HTML views fall back cleanly if a specific image is missing.",
   "Reference material now lives on the Help page: Rules Glossary, Building Roles, Build Notes, and the Release Checklist were consolidated there, and the build tag now sits quietly in the page chrome.",
   "Building artwork now ships from committed asset paths: supported buildings automatically show images from assets/images/buildings on deployed builds.",
   "Town Map planning is much smarter: Auto Place now supports preview/confirm, defense-only or civilian-only passes, district targeting, compact mode, re-roll placement, and lockable structures.",

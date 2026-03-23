@@ -12,6 +12,7 @@ import { getMayorAdvice, getTownFocusAvailability } from "../systems/TownFocusSy
 import { getTownFocusHistory } from "../systems/TownFocusSystem.js";
 import { getCityTrendSummary, getResourceChainSummary } from "../systems/ResourceSystem.js";
 import { getManualSaveMeta } from "../systems/StorageSystem.js";
+import { renderBuildingArt } from "./BuildingArt.js";
 import { renderDriftEvolutionPanel } from "./DriftEvolutionPanel.js";
 import { getCurrentDriftEvolution } from "../systems/DriftEvolutionSystem.js";
 import { renderTownFocusPanel } from "./TownFocusPanel.js";
@@ -169,9 +170,11 @@ function renderLandingHero(state) {
         <div class="landing-hero__visual">
           <div class="landing-hero__visual-stage">
             ${
-              highlightedBuilding?.imagePath
-                ? `<img src="${escapeHtml(highlightedBuilding.imagePath)}" alt="${escapeHtml(highlightedBuilding.displayName)} artwork" loading="lazy" />`
-                : `<div class="landing-hero__glyph">${escapeHtml(nextStep.title.slice(0, 1))}</div>`
+              renderBuildingArt(
+                highlightedBuilding?.imagePath,
+                `${highlightedBuilding?.displayName ?? nextStep.title} artwork`,
+                `<div class="landing-hero__glyph">${escapeHtml(nextStep.title.slice(0, 1))}</div>`
+              )
             }
             <div class="landing-hero__badge">
               <span>Step ${formatNumber((nextStepIndex === -1 ? progress.length : nextStepIndex + 1), 0)} / ${formatNumber(progress.length, 0)}</span>
@@ -332,9 +335,11 @@ function renderFeaturedBuildings(state) {
                     <article class="featured-building">
                       <div class="featured-building__visual">
                         ${
-                          building.imagePath
-                            ? `<img src="${escapeHtml(building.imagePath)}" alt="${escapeHtml(building.displayName)} artwork" loading="lazy" />`
-                            : `<div class="featured-building__fallback">${escapeHtml(building.displayName.charAt(0))}</div>`
+                          renderBuildingArt(
+                            building.imagePath,
+                            `${building.displayName} artwork`,
+                            `<div class="featured-building__fallback">${escapeHtml(building.displayName.charAt(0))}</div>`
+                          )
                         }
                       </div>
                       <div class="featured-building__meta">

@@ -9,6 +9,7 @@ import {
   isBuildingActivelyConstructed
 } from "../systems/ConstructionSystem.js";
 import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js";
+import { renderBuildingArt } from "./BuildingArt.js";
 import { renderUiIcon } from "./UiIcons.js";
 
 function renderIcon(iconKey) {
@@ -42,17 +43,13 @@ function renderIcon(iconKey) {
 }
 
 function renderMedia(building) {
-  if (building.imagePath) {
-    return `
-      <div class="building-card__banner">
-        <img src="${escapeHtml(building.imagePath)}" alt="${escapeHtml(building.displayName)} artwork" loading="lazy" />
-      </div>
-    `;
-  }
-
   return `
-    <div class="building-card__banner building-card__banner--fallback">
-      <div class="building-card__icon">${renderIcon(building.iconKey)}</div>
+    <div class="building-card__banner ${building.imagePath ? "" : "building-card__banner--fallback"}">
+      ${renderBuildingArt(
+        building.imagePath,
+        `${building.displayName} artwork`,
+        `<div class="building-card__icon">${renderIcon(building.iconKey)}</div>`
+      )}
     </div>
   `;
 }

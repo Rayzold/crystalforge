@@ -4331,6 +4331,45 @@ textarea {
   gap: 18px;
 }
 
+.help-page__guide-link {
+  margin: 0 0 14px;
+  color: var(--text-soft);
+  line-height: 1.5;
+}
+
+.help-page__guide-link a {
+  color: var(--accent);
+}
+
+.building-image-guide-panel__intro {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+  color: var(--text-soft);
+  line-height: 1.5;
+}
+
+.building-image-guide-panel__intro p {
+  margin: 0;
+}
+
+.building-image-guide-panel__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.building-image-guide-panel__list span {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-soft);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
 .player-list__items {
   display: grid;
   gap: 10px;

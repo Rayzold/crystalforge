@@ -2,6 +2,7 @@ import { getBuildingEconomySummary, getBuildingEmoji } from "../content/Building
 import { MAP_CONFIG, MAP_TERRAIN_THEMES } from "../content/MapConfig.js";
 import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
+import { getBuildingArtCandidates, getBuildingArtFallbackAttribute } from "./BuildingArt.js";
 import { getConstructionEtaDetails } from "../systems/ConstructionSystem.js";
 import { getBuildingMultiplier } from "../systems/BuildingSystem.js";
 import {
@@ -87,6 +88,9 @@ function renderBuildingThumb(building, cx, cy, size) {
     return "";
   }
   const clipId = `hex-clip-${safeSvgId(building.id)}`;
+  const emoji = getBuildingEmoji(building);
+  const [primaryCandidate] = getBuildingArtCandidates(building.imagePath);
+  const fallbackAttribute = getBuildingArtFallbackAttribute(building.imagePath);
   return `
     <defs>
       <clipPath id="${clipId}">
@@ -94,7 +98,8 @@ function renderBuildingThumb(building, cx, cy, size) {
       </clipPath>
     </defs>
     <image
-      href="${escapeHtml(building.imagePath)}"
+      href="${escapeHtml(primaryCandidate)}"
+      data-fallback-srcs="${fallbackAttribute}"
       x="${cx - size * 0.72}"
       y="${cy - size * 0.62}"
       width="${size * 1.44}"
@@ -102,7 +107,11 @@ function renderBuildingThumb(building, cx, cy, size) {
       preserveAspectRatio="xMidYMid slice"
       clip-path="url(#${clipId})"
       opacity="0.9"
+      onerror="const paths=(this.dataset.fallbackSrcs||'').split('|').filter(Boolean); if (paths.length) { const next=paths.shift(); this.dataset.fallbackSrcs=paths.join('|'); this.setAttribute('href', next); return; } this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='block';"
     ></image>
+    <text x="${cx}" y="${cy + 7}" text-anchor="middle" class="hex-map__label" aria-hidden="true" style="display:none">
+      ${escapeHtml(emoji)}
+    </text>
   `;
 }
 
