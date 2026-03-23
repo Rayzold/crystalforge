@@ -7,7 +7,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.2.71";
+export const APP_VERSION = "v1.2.72";
 export const SAVE_VERSION = 11;
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3";
 export const FIREBASE_CONFIG = {
@@ -34,6 +34,7 @@ export const PAGE_ROUTES = [
   { key: "chronicle", label: "Chronicle", href: "./chronicle.html" }
 ];
 export const BUILD_NOTES = [
+  "Building artwork now ships from committed asset paths: supported buildings automatically show images from assets/images/buildings on deployed builds.",
   "Town Map planning is much smarter: Auto Place now supports preview/confirm, defense-only or civilian-only passes, district targeting, compact mode, re-roll placement, and lockable structures.",
   "Town Map now includes Auto Place, which greedily assigns unplaced buildings to strong legal hexes while still respecting bastion-only defense rules.",
   "Town Map now feels more playful: placement toasts are punchier, the drawer language is friendlier, and new hex placements burst with a quick celebratory effect.",

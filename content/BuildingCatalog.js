@@ -34,6 +34,27 @@ function defineBuilding({ district, tags, iconKey, imagePath = null, flavorText 
 }
 
 
+const DEFAULT_BUILDING_IMAGE_PATHS = {
+  "Apiary": "./assets/images/buildings/Apiary.png",
+  "Bakery": "./assets/images/buildings/Bakery.png",
+  "Ballistas": "./assets/images/buildings/Ballistas.png",
+  "Barn": "./assets/images/buildings/Barn.png",
+  "Basic Shrine": "./assets/images/buildings/Basic Shrine.png",
+  "Beast Pens": "./assets/images/buildings/Beast Pens.png",
+  "Blacksmith": "./assets/images/buildings/Blacksmith.png",
+  "Butcher": "./assets/images/buildings/Butcher.png",
+  "Fishery": "./assets/images/buildings/Fishery.png",
+  "Gardens": "./assets/images/buildings/Gardens.png",
+  "Grove": "./assets/images/buildings/Grove.png",
+  "Housing: Commoner": "./assets/images/buildings/Housing Commoner.png",
+  "Library": "./assets/images/buildings/Library.png",
+  "Mill": "./assets/images/buildings/Mill.png",
+  "Pond": "./assets/images/buildings/Pond.png",
+  "Smokehouse": "./assets/images/buildings/Smokehouse.png",
+  "Vendor": "./assets/images/buildings/Vendor.png"
+};
+
+
 
 const BUILDING_DEFINITIONS = {
   "Heart of Kosmos": defineBuilding({ district: "Arcane District", tags: ["arcane", "religious"], iconKey: "star", flavorText: "Bound to Kosmos herself, this core magnifies the robotic sovereign's reach and lets her govern the Drift with far greater force.", profile: gameplay({ mana: 90, defense: 240, morale: 300, populationSupport: 1500 }) }),
@@ -252,6 +273,7 @@ function createCatalogEntry(name, rarity) {
   const base = classifyBuilding(name);
   const override = BUILDING_DEFINITIONS[name] ?? {};
   const tags = [...new Set([...(override.tags ?? []), ...base.tags])];
+  const imagePath = override.imagePath ?? DEFAULT_BUILDING_IMAGE_PATHS[name] ?? null;
 
   return {
     key: getCatalogKey(name, rarity),
@@ -261,7 +283,7 @@ function createCatalogEntry(name, rarity) {
     district: override.district ?? base.district,
     tags,
     iconKey: override.iconKey ?? base.iconKey,
-    imagePath: override.imagePath ?? null,
+    imagePath,
     flavorText: override.flavorText ?? buildFlavorText({ name, district: override.district ?? base.district, tags, rarity }),
     specialEffect: override.specialEffect ?? buildSpecialEffect({ district: override.district ?? base.district, tags }),
     statOverrides: override.statOverrides ?? null,
