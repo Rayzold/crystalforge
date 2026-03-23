@@ -176,9 +176,16 @@ export function restoreSessionSnapshot(snapshot) {
 
 function normalizeBuildingCatalog(sourceCatalog) {
   const baseCatalog = structuredClone(BASE_BUILDING_CATALOG);
-  const mergedCatalog = { ...baseCatalog, ...(sourceCatalog ?? {}) };
   return Object.fromEntries(
-    Object.entries(mergedCatalog).map(([key, entry]) => [
+    Object.entries(baseCatalog).map(([key, baseEntry]) => {
+      const sourceEntry = sourceCatalog?.[key] ?? {};
+      const entry = {
+        ...baseEntry,
+        ...sourceEntry,
+        imagePath: sourceEntry.imagePath ?? baseEntry.imagePath ?? null
+      };
+
+      return [
       key,
       {
         ...entry,
@@ -191,7 +198,8 @@ function normalizeBuildingCatalog(sourceCatalog) {
             rarity: entry.rarity
           })
       }
-    ])
+    ];
+    })
   );
 }
 
