@@ -5061,6 +5061,14 @@ body:-webkit-full-screen #app {
   gap: 12px;
 }
 
+.crisis-banner__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
 .crisis-banner {
   padding: 14px 16px;
   border-radius: 22px;
@@ -5087,20 +5095,23 @@ body:-webkit-full-screen #app {
   font-size: 0.76rem;
 }
 
-.crisis-banner__card {
+.crisis-banner__item {
   padding: 10px 12px;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.06);
   background: rgba(30, 8, 14, 0.32);
+  display: grid;
+  gap: 4px;
 }
 
-.crisis-banner__card.is-event {
+.crisis-banner__item.is-event {
   border-color: rgba(255, 186, 107, 0.18);
   background: linear-gradient(180deg, rgba(255, 186, 107, 0.12), rgba(30, 8, 14, 0.22));
 }
 
-.crisis-banner__card strong,
-.crisis-banner__card p {
+.crisis-banner__item strong,
+.crisis-banner__item span,
+.crisis-banner__item small {
   margin: 0;
 }
 
@@ -5108,14 +5119,18 @@ body:-webkit-full-screen #app {
   white-space: pre-line;
 }
 
-.crisis-banner__card p {
-  margin-top: 6px;
+.crisis-banner__item span,
+.crisis-banner__item small {
   color: rgba(255, 228, 234, 0.86);
-  line-height: 1.55;
+  line-height: 1.4;
 }
 
-.crisis-banner__card .button {
-  margin-top: 10px;
+.crisis-banner__link {
+  margin-top: 2px;
+  font-size: 0.8rem;
+  color: rgba(255, 228, 234, 0.9);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .page-hero {

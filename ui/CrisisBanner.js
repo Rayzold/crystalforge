@@ -99,8 +99,8 @@ function enrichEmergencyAlerts(state, emergencies) {
       ...emergency,
       kind: "resource",
       recommendation: suggestedFocus?.name ?? "",
-      actionLabel: focusBuilding ? `Inspect ${focusBuilding.displayName}` : "Open city command",
-      href: focusBuilding ? buildBuildingHref(focusBuilding) : "./city.html"
+      actionLabel: focusBuilding ? `Inspect ${focusBuilding.displayName}` : "",
+      href: focusBuilding ? buildBuildingHref(focusBuilding) : ""
     };
   });
 }
@@ -120,20 +120,20 @@ export function renderCrisisBanner(state, pageKey) {
           <strong>${alerts.length} urgent alert${alerts.length === 1 ? "" : "s"} demand attention</strong>
         </div>
       </div>
-      <div class="crisis-banner__stack">
+      <ul class="crisis-banner__list">
         ${alerts
           .map(
             (alert) => `
-              <article class="crisis-banner__card ${alert.kind === "event" ? "is-event" : "is-resource"}">
+              <li class="crisis-banner__item ${alert.kind === "event" ? "is-event" : "is-resource"}">
                 <strong>${escapeHtml(alert.label)}</strong>
-                <p>${escapeHtml(alert.details)}</p>
-                ${alert.recommendation ? `<small>Recommended response: ${escapeHtml(alert.recommendation)}</small>` : ""}
-                <a class="button button--ghost" href="${alert.href}">${escapeHtml(alert.actionLabel)}</a>
-              </article>
+                <span>${escapeHtml(alert.details)}</span>
+                ${alert.recommendation ? `<small>Response: ${escapeHtml(alert.recommendation)}</small>` : ""}
+                ${alert.actionLabel && alert.href ? `<a class="crisis-banner__link" href="${alert.href}">${escapeHtml(alert.actionLabel)}</a>` : ""}
+              </li>
             `
           )
           .join("")}
-      </div>
+      </ul>
     </section>
   `;
 }

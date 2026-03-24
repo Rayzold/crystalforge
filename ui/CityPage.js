@@ -307,7 +307,35 @@ function renderAdministrationView(state) {
           <button class="button button--ghost ${adminView === "operations" ? "is-active" : ""}" data-action="set-city-admin-view" data-view="operations">Operations</button>
           <button class="button button--ghost ${adminView === "readouts" ? "is-active" : ""}" data-action="set-city-admin-view" data-view="readouts">Readouts</button>
         </div>
-        <span class="city-workspace__total">${adminView === "operations" ? "Time, raising, and emergencies" : "Stores and district posture"}</span>
+        <div class="city-admin-view__actions">
+          <div class="city-workspace__time-controls">
+            <button class="button button--ghost" data-action="advance-time" data-step="day">Advance Day</button>
+            <button class="button button--ghost" data-action="advance-time" data-step="3days">Advance 3 Days</button>
+            <button class="button button--ghost" data-action="advance-time" data-step="week">Advance Week</button>
+          </div>
+          <div class="city-workspace__preset-time">
+            <label class="calendar-panel__custom-days">
+              Advance Multiple Days
+              <select data-role="advance-days-preset">
+                <option value="3">3 Days</option>
+                <option value="7">7 Days</option>
+                <option value="14" selected>14 Days</option>
+                <option value="28">28 Days</option>
+                <option value="56">56 Days</option>
+                <option value="112">112 Days</option>
+              </select>
+            </label>
+            <button class="button button--ghost" data-action="advance-selected-time">Advance Selected Span</button>
+          </div>
+          <div class="city-workspace__custom-time">
+            <label class="calendar-panel__custom-days">
+              Advance by Days
+              <input type="number" min="1" step="1" value="14" data-role="custom-days" />
+            </label>
+            <button class="button button--ghost" data-action="advance-custom-time">Advance Custom Span</button>
+          </div>
+          <span class="city-workspace__total">${adminView === "operations" ? "Time, raising, and emergencies" : "Stores and district posture"}</span>
+        </div>
       </div>
 
       ${
