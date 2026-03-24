@@ -2736,6 +2736,9 @@ root.addEventListener("click", async (event) => {
     case "toggle-player-hide-completed":
       renderer.setTransientUi({ playerHideCompleted: !renderer.transientUi.playerHideCompleted }, getCurrentState());
       break;
+    case "toggle-incubator-support":
+      setIncubatorSupportState(target.dataset.buildingId, target.dataset.supportKey, target.dataset.enabled !== "true");
+      break;
     case "set-player-building-rarity-filter":
       renderer.setTransientUi({ playerBuildingRarityFilter: target.dataset.rarity ?? "All" }, getCurrentState());
       break;
@@ -3212,9 +3215,6 @@ root.addEventListener("change", (event) => {
     });
   }
 
-  if (target.dataset.action === "toggle-incubator-support") {
-    setIncubatorSupportState(target.dataset.buildingId, target.dataset.supportKey, target.checked);
-  }
 });
 
 root.addEventListener("input", (event) => {

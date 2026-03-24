@@ -305,26 +305,30 @@ function renderBuildingsView(state) {
                               : `Ready ${escapeHtml(formatDate(etaDetails.readyDayOffset))}`
                           }</small>
                           <div class="incubator-support-toggles">
-                            <label class="incubator-support-toggle">
-                              <input
-                                type="checkbox"
-                                data-action="toggle-incubator-support"
-                                data-building-id="${building.id}"
-                                data-support-key="heroSupport"
-                                ${building.heroSupport ? "checked" : ""}
-                              />
+                            <button
+                              class="incubator-support-toggle ${building.heroSupport ? "is-active" : ""}"
+                              type="button"
+                              data-action="toggle-incubator-support"
+                              data-building-id="${building.id}"
+                              data-support-key="heroSupport"
+                              data-enabled="${building.heroSupport ? "true" : "false"}"
+                              aria-pressed="${building.heroSupport ? "true" : "false"}"
+                            >
+                              <span class="incubator-support-toggle__indicator" aria-hidden="true"></span>
                               <span>Hero Support</span>
-                            </label>
-                            <label class="incubator-support-toggle">
-                              <input
-                                type="checkbox"
-                                data-action="toggle-incubator-support"
-                                data-building-id="${building.id}"
-                                data-support-key="expertSupport"
-                                ${building.expertSupport ? "checked" : ""}
-                              />
+                            </button>
+                            <button
+                              class="incubator-support-toggle ${building.expertSupport ? "is-active" : ""}"
+                              type="button"
+                              data-action="toggle-incubator-support"
+                              data-building-id="${building.id}"
+                              data-support-key="expertSupport"
+                              data-enabled="${building.expertSupport ? "true" : "false"}"
+                              aria-pressed="${building.expertSupport ? "true" : "false"}"
+                            >
+                              <span class="incubator-support-toggle__indicator" aria-hidden="true"></span>
                               <span>Expert Support</span>
-                            </label>
+                            </button>
                           </div>
                           <button class="button button--ghost" data-action="pause-construction" data-building-id="${building.id}">Cancel Incubation</button>
                         </article>
