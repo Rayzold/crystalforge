@@ -114,11 +114,25 @@ function renderBuildingsView(state) {
         </div>
         <div class="city-workspace__top-actions">
           <div class="city-workspace__time-controls">
-            <button class="button button--ghost" data-action="advance-time" data-step="day">+1 Day</button>
-            <button class="button button--ghost" data-action="advance-time" data-step="3days">+3 Days</button>
-            <button class="button button--ghost" data-action="advance-time" data-step="week">+1 Week</button>
-            <button class="button button--ghost" data-action="advance-time" data-step="month">+1 Month</button>
-            <button class="button button--ghost" data-action="advance-time" data-step="year">+1 Year</button>
+            <button class="button button--ghost" data-action="advance-time" data-step="day">Advance Day</button>
+            <button class="button button--ghost" data-action="advance-time" data-step="3days">Advance 3 Days</button>
+            <button class="button button--ghost" data-action="advance-time" data-step="week">Advance Week</button>
+            <button class="button button--ghost" data-action="advance-time" data-step="month">Advance Month</button>
+            <button class="button button--ghost" data-action="advance-time" data-step="year">Advance Year</button>
+          </div>
+          <div class="city-workspace__preset-time">
+            <label class="calendar-panel__custom-days">
+              Advance Multiple Days
+              <select data-role="advance-days-preset">
+                <option value="3">3 Days</option>
+                <option value="7">7 Days</option>
+                <option value="14" selected>14 Days</option>
+                <option value="28">28 Days</option>
+                <option value="56">56 Days</option>
+                <option value="112">112 Days</option>
+              </select>
+            </label>
+            <button class="button button--ghost" data-action="advance-selected-time">Advance Selected Span</button>
           </div>
           <div class="city-workspace__custom-time">
             <label class="calendar-panel__custom-days">
@@ -167,7 +181,7 @@ function renderBuildingsView(state) {
           <span>Sort</span>
           <select data-action="set-building-sort">
             <option value="newest" ${sortKey === "newest" ? "selected" : ""}>Newest First</option>
-            <option value="quality" ${sortKey === "quality" ? "selected" : ""}>Highest Stage / Quality</option>
+            <option value="quality" ${sortKey === "quality" ? "selected" : ""}>Highest Quality</option>
             <option value="rarity" ${sortKey === "rarity" ? "selected" : ""}>Highest Rarity</option>
             <option value="impact-gold" ${sortKey === "impact-gold" ? "selected" : ""}>Gold Impact</option>
             <option value="impact-food" ${sortKey === "impact-food" ? "selected" : ""}>Food Impact</option>
@@ -355,7 +369,7 @@ function renderCityModes(state) {
 export function renderCityPage(state) {
   return {
     title: "The City",
-    subtitle: "Switch between structures and administration.",
+    subtitle: "Buildings and administration.",
     content: `
       <section class="city-command-screen">
         ${renderTownStatistics(state)}

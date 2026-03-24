@@ -145,7 +145,7 @@ function renderReleaseChecklistPanel(state) {
 export function renderHelpPage(state) {
   return {
     title: "Help",
-    subtitle: "Reference material, build notes, and the quick release pass.",
+    subtitle: "References and checks.",
     content: `
       <div class="help-page">
         ${renderGlossaryPanel()}

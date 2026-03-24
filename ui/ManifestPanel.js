@@ -13,21 +13,20 @@ export function renderManifestPanel(state) {
       <div class="manifest-panel__hero">
         <span class="manifest-panel__eyebrow">Manifest Chamber</span>
         <h3>Call forth a ${escapeHtml(state.selectedRarity)} reality.</h3>
-        <p class="manifest-panel__text">Each invocation consumes 1 crystal from the selected reality level.</p>
       </div>
-      <button class="manifest-panel__switch ${quickManifestationsEnabled ? "is-active" : ""}" type="button" data-action="toggle-quick-manifest" aria-pressed="${quickManifestationsEnabled ? "true" : "false"}">
-        <span class="manifest-panel__switch-track"><span class="manifest-panel__switch-thumb"></span></span>
-        <span class="manifest-panel__switch-copy">
-          <strong>Quick Manifestations</strong>
-          <small>${quickManifestationsEnabled ? "Instant reveal enabled." : "Default off. Play the full, slower reveal sequence."}</small>
-        </span>
-      </button>
       <div class="manifest-panel__controls manifest-panel__controls--centered">
         <button class="button manifest-panel__button" data-action="manifest" ${canManifest ? "" : "disabled"}>
           ${manifestInProgress ? "Manifesting..." : "Manifest"}
         </button>
         <button class="button button--ghost manifest-panel__audio" data-action="toggle-mute">${state.settings.muted ? "Audio Off" : "Audio On"}</button>
       </div>
+      <button class="manifest-panel__switch ${quickManifestationsEnabled ? "is-active" : ""}" type="button" data-action="toggle-quick-manifest" aria-pressed="${quickManifestationsEnabled ? "true" : "false"}">
+        <span class="manifest-panel__switch-track"><span class="manifest-panel__switch-thumb"></span></span>
+        <span class="manifest-panel__switch-copy">
+          <strong>Quick Manifestations</strong>
+          <small>${quickManifestationsEnabled ? "Enabled" : "Disabled"}</small>
+        </span>
+      </button>
       ${
         last
           ? `
@@ -55,7 +54,6 @@ export function renderManifestPanel(state) {
           `
           : ""
       }
-      <div class="manifest-panel__hint">If a roll lands on Crystal Upgrade, the current crystal is consumed and immediately elevated into the next rarity instead of creating a building.</div>
     </section>
   `;
 }

@@ -462,12 +462,12 @@ export function renderPlayerPage(state) {
 
   return {
     title: "Player Screen",
-    subtitle: "Available crystals, live manifestation, and the current building roster.",
+    subtitle: "Shared player view.",
     content: `
       <section class="player-hero">
         <div>
           <h2>Manifest What The Drift Can Hold</h2>
-          <p>The clean shared screen for crystal rolls, existing structures, and active incubation.</p>
+          <p>Crystal rolls and active structures.</p>
           ${renderStatusPill(state)}
           <div class="player-lock-note">
             <strong>Player-safe view</strong>

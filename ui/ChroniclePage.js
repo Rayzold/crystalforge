@@ -20,15 +20,15 @@ function renderChronicleIntro(state) {
       <div class="chronicle-intro">
         <div class="chronicle-intro__copy">
           <p class="world-summary__eyebrow">Codex Chamber</p>
-          <h2>The realm remembers in chapters.</h2>
-          <p>Monthly stories, active disturbances, and the city's long memory are gathered here like illuminated pages instead of loose logs.</p>
+          <h2>Chronicle</h2>
+          <p>Events, history, and notes.</p>
         </div>
         <div class="chronicle-intro__rail">
           <div class="chronicle-intro__feature">
             <div class="chronicle-intro__seal">${renderUiIcon("history", "Chronicle")}</div>
             <span>Latest Chronicle</span>
             <strong>${latestChronicle ? latestChronicle.title : "No monthly chapter yet"}</strong>
-            <p>${latestChronicle ? latestChronicle.details : "Advance time into a new month to record the first chapter."}</p>
+            <p>${latestChronicle ? latestChronicle.date : "No chapter yet."}</p>
           </div>
           <button
             class="chronicle-intro__feature chronicle-intro__feature--holiday chronicle-intro__feature--interactive ${nextHolidayAccentClass}"
@@ -44,8 +44,8 @@ function renderChronicleIntro(state) {
             <p>
               ${
                 nextHoliday
-                  ? `Arrives in ${nextHoliday.daysUntil} day(s) on ${nextHoliday.date.weekday}, ${nextHoliday.date.month} ${nextHoliday.date.day}. ${nextHoliday.description}`
-                  : "The calendar has no upcoming fixed-date holidays right now."
+                  ? `${nextHoliday.daysUntil} day(s) · ${nextHoliday.date.weekday}, ${nextHoliday.date.month} ${nextHoliday.date.day}`
+                  : "No upcoming holidays."
               }
             </p>
           </button>
@@ -58,7 +58,7 @@ function renderChronicleIntro(state) {
 export function renderChroniclePage(state) {
   return {
     title: "The Chronicle",
-    subtitle: "Calendar, chapters, and the realm's memory.",
+    subtitle: "Calendar.",
     content: `
       ${renderChronicleIntro(state)}
       ${renderChronicleCalendar(state)}

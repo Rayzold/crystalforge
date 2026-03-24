@@ -52,7 +52,7 @@ function renderCitizenCommand(state) {
 export function renderCitizensPage(state) {
   return {
     title: "Citizens",
-    subtitle: "Population roles, workforce balance, and the living social order.",
+    subtitle: "Population overview.",
     content: `
       ${renderCitizenPanel(state)}
     `,

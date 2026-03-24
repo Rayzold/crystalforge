@@ -1,6 +1,8 @@
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { renderBuildingArt } from "./BuildingArt.js";
 
+let lastAnimatedManifestToken = null;
+
 export function renderManifestCompleteModal(state) {
   const manifestModal = state.transientUi?.manifestCompleteModal;
   if (!manifestModal) {
@@ -11,7 +13,11 @@ export function renderManifestCompleteModal(state) {
     ? state.buildings.find((entry) => entry.id === manifestModal.buildingId) ?? null
     : null;
   const isCrystalUpgrade = Boolean(manifestModal.isCrystalUpgrade);
-  const shouldAnimate = Boolean(manifestModal.revealPercent);
+  const animationToken = String(manifestModal.animationToken ?? "");
+  const shouldAnimate = Boolean(manifestModal.revealPercent) && animationToken !== lastAnimatedManifestToken;
+  if (shouldAnimate && animationToken) {
+    lastAnimatedManifestToken = animationToken;
+  }
   const shouldShowImmediately = Boolean(manifestModal.showPercentImmediately);
   const previousQuality = Number(manifestModal.previousQuality ?? 0);
   const finalQuality = Number(manifestModal.finalQuality ?? manifestModal.qualityRoll ?? 0);
@@ -32,7 +38,7 @@ export function renderManifestCompleteModal(state) {
       <div class="modal__dialog manifest-complete-modal__dialog">
         <button class="icon-button manifest-complete-modal__close" data-action="close-manifest-complete" aria-label="Close manifest completion modal">x</button>
         <div class="manifest-complete-modal__body">
-          <div class="manifest-complete-modal__visual ${isCrystalUpgrade ? "manifest-complete-modal__visual--upgrade" : ""}">
+          <div class="manifest-complete-modal__visual ${isCrystalUpgrade ? "manifest-complete-modal__visual--upgrade" : ""} ${shouldAnimate ? "manifest-complete-modal__visual--reveal" : ""}">
             ${
               isCrystalUpgrade
                 ? `<div class="manifest-complete-modal__fallback">${escapeHtml(manifestModal.targetRarity?.slice(0, 1) ?? "U")}</div>`

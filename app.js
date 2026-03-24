@@ -1251,6 +1251,7 @@ async function handleManifest() {
       {
         manifestInProgress: false,
         manifestCompleteModal: {
+          animationToken: `manifest-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           rolledName: result.isCrystalUpgrade ? `${result.targetRarity} Crystal` : result.rolledName,
           rarity: result.rarity,
           buildingId: result.building?.id ?? null,
@@ -1262,7 +1263,7 @@ async function handleManifest() {
           previousQuality: result.previousQuality ?? 0,
           finalQuality: result.finalQuality ?? result.building?.quality ?? null,
           crossedActivation: Boolean(result.crossedActivation),
-          durationMs: quickManifestationsEnabled ? 0 : 1800,
+          durationMs: quickManifestationsEnabled ? 0 : 4200,
           revealPercent: !quickManifestationsEnabled,
           showPercentImmediately: quickManifestationsEnabled
         }
@@ -1444,6 +1445,18 @@ function editBuilding({ buildingId, quality, district, iconKey, imagePath, tags,
     };
   });
   reportSuccess("Building updated.");
+}
+
+function setBuildingQualityPercent({ buildingId, quality, source = "Admin" }) {
+  const result = commit((draft) => {
+    const building = draft.buildings.find((entry) => entry.id === buildingId);
+    if (!building) {
+      throw new Error("Building not found.");
+    }
+    setBuildingQuality(building, quality);
+    return { name: building.displayName, quality: building.quality, source };
+  });
+  reportSuccess(`${result.name} set to ${formatNumber(result.quality, 1)}% quality (${result.source}).`);
 }
 
 function parseBulkBuildingImageLines(rawText) {
@@ -2103,6 +2116,9 @@ const actions = {
   editBuilding(payload) {
     editBuilding(payload);
   },
+  setBuildingQuality(payload) {
+    setBuildingQualityPercent(payload);
+  },
   applyBulkBuildingImages(rawText) {
     applyBulkBuildingImages(rawText);
   },
@@ -2511,8 +2527,22 @@ root.addEventListener("click", async (event) => {
       break;
     }
     case "advance-custom-time": {
-      const panel = target.closest(".calendar-panel");
-      const input = panel?.querySelector('[data-role="custom-days"]');
+      const panel = target.closest(".calendar-panel, .city-workspace, .city-admin-view, .panel");
+      const input = panel?.querySelector('[data-role="custom-days"]') ?? root.querySelector('[data-role="custom-days"]');
+      const days = Math.max(1, Math.floor(Number(input?.value) || 0));
+      const previousState = structuredClone(getCurrentState());
+      const result = commit((draft) => advanceTimeByDays(draft, days));
+      const nextState = getCurrentState();
+      const turnSummary = createTurnSummary(previousState, nextState, result.days);
+      markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
+      renderer.setTransientUi({ turnSummaryModal: turnSummary }, nextState);
+      playTurnAdvanceEffect(previousState, nextState, turnSummary);
+      reportSuccess(`Advanced ${result.days} days.`);
+      break;
+    }
+    case "advance-selected-time": {
+      const panel = target.closest(".calendar-panel, .city-workspace, .city-admin-view, .panel");
+      const input = panel?.querySelector('[data-role="advance-days-preset"]') ?? root.querySelector('[data-role="advance-days-preset"]');
       const days = Math.max(1, Math.floor(Number(input?.value) || 0));
       const previousState = structuredClone(getCurrentState());
       const result = commit((draft) => advanceTimeByDays(draft, days));
@@ -2887,6 +2917,25 @@ root.addEventListener("click", async (event) => {
     case "toggle-building-pin":
       actions.toggleBuildingPin(target.dataset.buildingId);
       break;
+    case "save-building-quality": {
+      if (!getCurrentState().ui.adminUnlocked) {
+        reportError("Unlock GM mode before editing building quality.");
+        break;
+      }
+      const card = target.closest(".building-card");
+      const qualityInput = card?.querySelector('[data-role="gm-building-quality-input"]');
+      const quality = Number(qualityInput?.value);
+      if (!Number.isFinite(quality)) {
+        reportError("Enter a valid quality percentage.");
+        break;
+      }
+      actions.setBuildingQuality({
+        buildingId: target.dataset.buildingId,
+        quality,
+        source: "City GM"
+      });
+      break;
+    }
     case "manifest-building-now":
       manifestBuildingNow(target.dataset.buildingId);
       break;

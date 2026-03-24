@@ -157,10 +157,10 @@ function renderLandingHero(state) {
           <p class="landing-hero__summary">
             ${
               state.settings.liveSessionView
-                ? "A live session deck for the game master: grant crystals, place structures, advance time, and keep the settlement readable."
-                : "A quieter command deck for the realm: forge, map, and chronicle gathered into fewer, sharper decisions."
+                ? "GM session dashboard."
+                : "Overview of forge, city, and chronicle."
             }
-            ${date.holiday ? ` Today is ${escapeHtml(date.holiday.name)}.` : ""}
+            ${date.holiday ? ` ${escapeHtml(date.holiday.name)} today.` : ""}
           </p>
           <div class="landing-hero__actions">
             <a class="button landing-hero__primary-action" href="${nextStep.href}" title="${escapeHtml(`Primary next step: ${nextStep.cta}`)}">${escapeHtml(nextStep.cta)}</a>
@@ -180,7 +180,6 @@ function renderLandingHero(state) {
             <div class="landing-hero__badge">
               <span>Step ${formatNumber((nextStepIndex === -1 ? progress.length : nextStepIndex + 1), 0)} / ${formatNumber(progress.length, 0)}</span>
               <strong>${escapeHtml(nextStep.title)}</strong>
-              <p>${escapeHtml(nextStep.details)}</p>
               <a class="button landing-hero__badge-action" href="${nextStep.href}">${escapeHtml(nextStep.cta)}</a>
             </div>
           </div>
@@ -193,11 +192,11 @@ function renderLandingHero(state) {
 
 function renderHomeRouteDeck() {
   const routes = [
-    { group: "Core", title: "Manifest", label: "Forge", href: "./forge.html", details: "Choose a crystal, manifest a structure, and watch the roll resolve." },
-    { group: "Core", title: "Shape", label: "City", href: "./city.html", details: "Place buildings on the map, tune districts, and direct construction." },
-    { group: "Management", title: "Remember", label: "Chronicle", href: "./chronicle.html", details: "Track events, monthly stories, and the realm's living history." },
-    { group: "Management", title: "Reference", label: "Help", href: "./help.html", details: "Open the glossary, building roles, build notes, and release checklist." },
-    { group: "Management", title: "Present", label: "Player Page", href: "./index.html", details: "Open the cleaner shared player view for testers, tables, and screens." }
+    { group: "Core", title: "Manifest", label: "Forge", href: "./forge.html", details: "Manifest buildings" },
+    { group: "Core", title: "Shape", label: "City", href: "./city.html", details: "Manage map and construction" },
+    { group: "Management", title: "Remember", label: "Chronicle", href: "./chronicle.html", details: "Events and history" },
+    { group: "Management", title: "Reference", label: "Help", href: "./help.html", details: "Rules and notes" },
+    { group: "Management", title: "Present", label: "Player Page", href: "./index.html", details: "Shared player view" }
   ];
   const groups = ["Core", "Management"];
 
@@ -205,7 +204,7 @@ function renderHomeRouteDeck() {
     <section class="scene-panel scene-panel--home-route-deck">
       <div class="panel__header">
         <h3>Realm Routes</h3>
-        <span class="panel__subtle">The companion app's core and management routes</span>
+        <span class="panel__subtle">Quick links</span>
       </div>
       ${groups
         .map(
@@ -220,7 +219,6 @@ function renderHomeRouteDeck() {
                       <a class="home-route-card" href="${route.href}">
                         <span>${escapeHtml(route.label)}</span>
                         <strong>${escapeHtml(route.title)}</strong>
-                        <p>${escapeHtml(route.details)}</p>
                       </a>
                     `
                   )
@@ -245,7 +243,7 @@ function renderRealmGoals(state) {
     <section class="scene-panel">
       <div class="panel__header">
         <h3>Realm Goals</h3>
-        <span class="panel__subtle">Short milestones to keep the session moving</span>
+        <span class="panel__subtle">Milestones</span>
       </div>
       <div class="policy-history">
         ${goals
@@ -254,7 +252,6 @@ function renderRealmGoals(state) {
               <article class="policy-history__card ${goal.complete ? "is-complete" : ""}">
                 <strong>${escapeHtml(goal.title)}</strong>
                 <span>${formatNumber(Math.min(goal.progress, goal.target), 0)} / ${formatNumber(goal.target, 0)}</span>
-                <p>${escapeHtml(goal.details)}</p>
                 <a class="button button--ghost" href="${goal.href}">${goal.complete ? "Review" : "Go There"}</a>
               </article>
             `
@@ -285,7 +282,7 @@ function renderOnboardingPanel(state) {
       <div class="panel__header">
         <h3>First Steps Through Drift</h3>
         <div class="onboarding-panel__header">
-          <span class="panel__subtle">${completedCount} / ${progress.length} rites complete</span>
+          <span class="panel__subtle">${completedCount} / ${progress.length} complete</span>
           <button class="button button--ghost" data-action="dismiss-onboarding">Hide Guide</button>
         </div>
       </div>
@@ -296,7 +293,6 @@ function renderOnboardingPanel(state) {
               <article class="onboarding-card ${step.complete ? "is-complete" : ""}">
                 <span class="onboarding-card__index">0${index + 1}</span>
                 <h4>${escapeHtml(step.title)}</h4>
-                <p>${escapeHtml(step.details)}</p>
                 <div class="onboarding-card__footer">
                   <strong>${step.complete ? "Completed" : "Recommended next"}</strong>
                   <a class="button button--ghost" href="${step.href}">${escapeHtml(step.cta)}</a>
@@ -346,7 +342,6 @@ function renderFeaturedBuildings(state) {
                       <div class="featured-building__meta">
                         <h4>${escapeHtml(building.displayName)}</h4>
                         <span>${escapeHtml(building.rarity)} / ${escapeHtml(getQualityMultiplierReadout(building))}</span>
-                        <p>${escapeHtml(building.specialEffect)}</p>
                         <div class="featured-building__actions">
                           <button class="button button--ghost" data-action="inspect-building" data-building-id="${building.id}">Open Details</button>
                           <a class="button button--ghost" href="./city.html">Map It</a>
@@ -356,7 +351,7 @@ function renderFeaturedBuildings(state) {
                   `
                 )
                 .join("")
-            : `<div class="empty-state empty-state--action"><p>Manifest your first buildings to turn the skyline into something worth remembering.</p><a class="button button--ghost" href="./forge.html">Create First Building</a></div>`
+            : `<div class="empty-state empty-state--action"><p>No buildings yet.</p><a class="button button--ghost" href="./forge.html">Create First Building</a></div>`
         }
       </div>
     </section>
@@ -377,7 +372,7 @@ function renderWorldSummary(state) {
         <div>
           <p class="world-summary__eyebrow">${date.season}</p>
           <h2>${formatDate(state.calendar.dayOffset)}</h2>
-          <p>${date.holiday ? `Holiday: ${date.holiday.name}` : "No holiday today."}</p>
+          <p>${date.holiday ? `Holiday: ${date.holiday.name}` : ""}</p>
           <a
             class="world-summary__holiday-callout calendar-panel__focus calendar-panel__focus--holiday calendar-panel__focus--link ${nextHolidayAccentClass}"
             href="${nextHoliday ? `./chronicle.html?focusChronicleDay=${nextHoliday.dayOffset}` : "./chronicle.html"}"
@@ -387,8 +382,8 @@ function renderWorldSummary(state) {
             <span>
               ${
                 nextHoliday
-                  ? `${nextHoliday.name} arrives in ${nextHoliday.daysUntil} day(s) on ${nextHoliday.date.weekday}, ${nextHoliday.date.month} ${nextHoliday.date.day}.`
-                  : "No upcoming holidays found."
+                  ? `${nextHoliday.name} in ${nextHoliday.daysUntil} day(s).`
+                  : "No upcoming holidays."
               }
             </span>
           </a>
@@ -410,7 +405,7 @@ function renderPolicyHistory(state) {
     <section class="scene-panel">
       <div class="panel__header">
         <h3>Policy Memory</h3>
-        <span class="panel__subtle">The last decrees that shaped Drift</span>
+        <span class="panel__subtle">Recent focus history</span>
       </div>
       <div class="policy-history">
         ${
@@ -440,7 +435,7 @@ function renderRollTableReview(state) {
     <section class="scene-panel">
       <div class="panel__header">
         <h3>Roll Table Review</h3>
-        <span class="panel__subtle">Buildings still inactive in each reality</span>
+        <span class="panel__subtle">Unseen by rarity</span>
       </div>
       <div class="rolltable-review">
         ${Object.entries(state.rollTables)
@@ -491,7 +486,7 @@ function renderHomeShelves(state) {
     <section class="scene-panel home-shelves">
       <div class="panel__header">
         <h3>Command Shelves</h3>
-        <span class="panel__subtle">Show one cluster of information at a time</span>
+        <span class="panel__subtle">View mode</span>
       </div>
       <div class="home-shelves__tabs">
         ${tabs
@@ -521,7 +516,7 @@ function renderRecentSignals(state) {
     <section class="scene-panel">
       <div class="panel__header">
         <h3>Recent Signals</h3>
-        <span class="panel__subtle">A light overview before entering Chronicle</span>
+        <span class="panel__subtle">Latest entries</span>
       </div>
       <div class="recent-signals">
         ${
@@ -537,7 +532,7 @@ function renderRecentSignals(state) {
                   `
                 )
                 .join("")
-            : `<div class="empty-state empty-state--action"><p>No recent signals have been recorded yet.</p><a class="button button--ghost" href="./chronicle.html">Open Chronicle</a></div>`
+            : `<div class="empty-state empty-state--action"><p>No recent entries.</p><a class="button button--ghost" href="./chronicle.html">Open Chronicle</a></div>`
         }
       </div>
       <div class="recent-signals__actions">
@@ -558,7 +553,7 @@ function renderHomeSignals(state) {
     <section class="panel home-signals-panel">
       <div class="panel__header">
         <h3>Command Signals</h3>
-        <span class="panel__subtle">Only the overview that matters here</span>
+        <span class="panel__subtle">Status</span>
       </div>
       <div class="home-signals-panel__grid">
         <article class="home-signals-panel__card home-signals-panel__card--${eventState}">
@@ -592,7 +587,7 @@ function renderMayorAdvice(state) {
     <section class="panel mayor-advice-panel">
       <div class="panel__header">
         <h3>Mayor's Advice</h3>
-        <span class="panel__subtle">What the city is missing or mishandling right now</span>
+        <span class="panel__subtle">Priority actions</span>
       </div>
       <div class="mayor-advice-panel__list">
         ${
@@ -608,7 +603,7 @@ function renderMayorAdvice(state) {
                   `
                 )
                 .join("")
-            : `<div class="empty-state empty-state--action"><p>The mayor has no urgent guidance right now. The city appears steady.</p><a class="button button--ghost" href="./city.html">Review City</a></div>`
+            : `<div class="empty-state empty-state--action"><p>No urgent guidance.</p><a class="button button--ghost" href="./city.html">Review City</a></div>`
         }
       </div>
     </section>
@@ -620,7 +615,7 @@ function renderBuildingRolesLegend() {
     <section class="panel building-roles-panel">
       <div class="panel__header">
         <h3>Building Roles</h3>
-        <span class="panel__subtle">Quick legend for the main building profiles.</span>
+        <span class="panel__subtle">Legend</span>
       </div>
       <div class="building-roles-panel__list">
         ${BUILDING_ROLE_LEGEND.map((role) => `
@@ -639,7 +634,7 @@ function renderBuildNotesPanel(buildLabel = APP_VERSION) {
     <section class="panel build-notes-panel">
       <div class="panel__header">
         <h3>Build Notes</h3>
-        <span class="panel__subtle">What changed in ${escapeHtml(buildLabel)}.</span>
+        <span class="panel__subtle">${escapeHtml(buildLabel)}</span>
       </div>
       <ul class="build-notes-panel__list">
         ${BUILD_NOTES.map((note) => `<li>${escapeHtml(note)}</li>`).join("")}
@@ -654,7 +649,7 @@ function renderCityTrendPanel(state) {
     <section class="panel city-trend-panel">
       <div class="panel__header">
         <h3>City Trends</h3>
-        <span class="panel__subtle">Daily momentum for the core economy.</span>
+        <span class="panel__subtle">Daily change</span>
       </div>
       <div class="city-trend-panel__grid">
         ${trends
@@ -679,7 +674,7 @@ function renderResourceChainPanel(state) {
     <section class="panel resource-chain-panel">
       <div class="panel__header">
         <h3>Resource Chain</h3>
-        <span class="panel__subtle">How the current city turns output into value.</span>
+        <span class="panel__subtle">Roles by resource</span>
       </div>
       <div class="resource-chain-panel__grid">
         ${chains
@@ -703,7 +698,7 @@ function renderGlossaryPanel() {
     <section class="panel glossary-panel">
       <div class="panel__header">
         <h3>Rules Glossary</h3>
-        <span class="panel__subtle">Short explanations of the terms the city uses most.</span>
+        <span class="panel__subtle">Key terms</span>
       </div>
       <div class="glossary-panel__list">
         ${GLOSSARY_TERMS.map((entry) => `
@@ -756,7 +751,7 @@ function renderReleaseChecklistPanel(state) {
     <section class="panel release-checklist-panel">
       <div class="panel__header">
         <h3>Release Checklist</h3>
-        <span class="panel__subtle">A quick GM pass before a session or push.</span>
+        <span class="panel__subtle">Pre-session checks</span>
       </div>
       <div class="release-checklist-panel__list">
         ${items
@@ -778,7 +773,7 @@ export function renderHomePage(state) {
   const liveSessionView = state.settings.liveSessionView;
   return {
     title: "Command Chamber",
-    subtitle: liveSessionView ? "GM overview, session signals, and the next action." : "Overview, routes, and the next decision.",
+    subtitle: liveSessionView ? "GM overview." : "Overview.",
     content: `
       ${renderLandingHero(state)}
       ${liveSessionView ? "" : renderHomeRouteDeck()}

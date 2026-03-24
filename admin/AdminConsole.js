@@ -473,6 +473,13 @@ export class AdminConsole {
             resourceRates: this.getJson("edit-building-resources")
           });
           break;
+        case "save-active-building-quality":
+          this.actions.setBuildingQuality({
+            buildingId: target.dataset.buildingId,
+            quality: this.getNumberInput(`active-building-quality-${target.dataset.buildingId}`),
+            source: "GM Console"
+          });
+          break;
         case "remove-building":
           this.actions.removeBuilding(this.getValue("edit-building-id"));
           break;
@@ -783,11 +790,20 @@ export class AdminConsole {
             </p>
             <div class="admin-actions">
               <button class="button button--ghost" data-admin-action="apply-bulk-building-images">Apply Bulk Image Paths</button>
-            </div>
+                    <small>${building.mapPosition ? escapeHtml(`Placed at ${building.mapPosition.q}, ${building.mapPosition.r}`) : "Unplaced"} · ${escapeHtml(`Quality ${formatBuildingQualityDisplay(building)}`)}</small>
+                  </div>
+                  <div class="admin-active-building-card__actions">
+                    <label class="admin-active-building-card__quality">
+                      <span>Quality %</span>
+                      <input id="active-building-quality-${building.id}" type="number" value="${Number(building.quality ?? 0)}" min="0" max="350" step="0.1" />
+                    </label>
+                    <button class="button button--ghost" data-admin-action="save-active-building-quality" data-building-id="${building.id}">
+                      Save Quality
+                    </button>
+                    <button class="button button--ghost" data-admin-action="remove-active-building" data-building-id="${building.id}">
+                      Unmanifest
+                    </button>
             <div class="admin-grid">
-              <label>Unmanifested Rollable Building<select id="manifest-building-select">${renderUnmanifestedBuildingOptions(state)}</select></label>
-              <label>Chosen Quality<input id="manifest-building-quality" type="number" value="100" min="1" max="350" /></label>
-            </div>
             <div class="admin-actions">
               <button class="button" data-admin-action="manifest-unmanifested-building">Manifest Selected Unmanifested Building</button>
             </div>

@@ -2,12 +2,12 @@ import { getBuildingArtCandidates, getBuildingArtFallbackAttribute } from "../ui
 import { RARITY_COLORS } from "../content/Rarities.js";
 
 const REVEAL_PROFILES = {
-  Common: { duration: 2800, particles: 8, rings: 2, title: "Common Manifest", accent: "A faint pulse answers the forge." },
-  Uncommon: { duration: 3200, particles: 12, rings: 2, title: "Uncommon Manifest", accent: "The chamber hums with a brighter resonance." },
-  Rare: { duration: 3600, particles: 16, rings: 3, title: "Rare Manifest", accent: "A sharper current sweeps through the sigils." },
-  Epic: { duration: 4100, particles: 20, rings: 3, title: "Epic Manifest", accent: "The altar cracks with layered crystal thunder." },
-  Legendary: { duration: 4700, particles: 26, rings: 4, title: "Legendary Manifest", accent: "Radiant force bends the whole chamber around the pull." },
-  Beyond: { duration: 5400, particles: 34, rings: 5, title: "Beyond Manifest", accent: "Reality distorts as the forge tears open a higher answer." }
+  Common: { duration: 3900, particles: 8, rings: 2, title: "Common Manifest", accent: "A faint pulse answers the forge." },
+  Uncommon: { duration: 4400, particles: 12, rings: 2, title: "Uncommon Manifest", accent: "The chamber hums with a brighter resonance." },
+  Rare: { duration: 5000, particles: 16, rings: 3, title: "Rare Manifest", accent: "A sharper current sweeps through the sigils." },
+  Epic: { duration: 5700, particles: 20, rings: 3, title: "Epic Manifest", accent: "The altar cracks with layered crystal thunder." },
+  Legendary: { duration: 6500, particles: 26, rings: 4, title: "Legendary Manifest", accent: "Radiant force bends the whole chamber around the pull." },
+  Beyond: { duration: 7400, particles: 34, rings: 5, title: "Beyond Manifest", accent: "Reality distorts as the forge tears open a higher answer." }
 };
 
 export class AnimationEngine {
@@ -27,7 +27,7 @@ export class AnimationEngine {
 
     const particles = Array.from({ length: profile.particles }, (_, index) => {
       const angle = (360 / profile.particles) * index;
-      const delay = index * 40;
+      const delay = index * 70;
       return `<span class="reveal-overlay__particle" style="--particle-angle:${angle}deg; --particle-delay:${delay}ms; --rarity-color:${RARITY_COLORS[result.rarity]}"></span>`;
     }).join("");
 
@@ -39,7 +39,7 @@ export class AnimationEngine {
     `).join("");
 
     this.overlay.innerHTML = `
-      <div class="reveal-overlay__scene rarity-${result.rarity.toLowerCase()}" style="--rarity-color:${RARITY_COLORS[result.rarity]}">
+      <div class="reveal-overlay__scene rarity-${result.rarity.toLowerCase()}" style="--rarity-color:${RARITY_COLORS[result.rarity]}; --reveal-asset-duration:${Math.round(profile.duration * 0.62)}ms">
         <div class="reveal-overlay__backdrop"></div>
         ${rings}
         <div class="reveal-overlay__particles">${particles}</div>
@@ -55,7 +55,7 @@ export class AnimationEngine {
 
     await new Promise((resolve) => window.setTimeout(resolve, profile.duration));
     this.overlay.classList.remove("is-active");
-    await new Promise((resolve) => window.setTimeout(resolve, 250));
+    await new Promise((resolve) => window.setTimeout(resolve, 420));
     this.overlay.innerHTML = "";
   }
 }

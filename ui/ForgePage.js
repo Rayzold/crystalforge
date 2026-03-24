@@ -8,7 +8,7 @@ function renderForgeCommandDeck(state) {
   return `
     <section class="forge-command">
       <div class="forge-command__headline">
-        <p class="forge-command__eyebrow">Manifest Your Destiny</p>
+        <p class="forge-command__eyebrow">Forge</p>
         <h2>Crystal Forge</h2>
       </div>
       <div class="forge-command__actions">
@@ -16,7 +16,7 @@ function renderForgeCommandDeck(state) {
         <button class="button button--ghost" data-action="open-admin">Admin</button>
       </div>
       <div class="forge-command__footer">
-        <span>The realities answer only when invoked with precision.</span>
+        <span></span>
         <strong>Total Rolls: ${formatNumber(totalRolls, 0)}</strong>
       </div>
     </section>
@@ -36,7 +36,7 @@ function renderManifestShrine(state) {
     <section class="scene-panel">
       <div class="panel__header">
         <h3>Manifest Shrine</h3>
-        <span class="panel__subtle">Recent crystal revelations</span>
+        <span class="panel__subtle">Recent rolls</span>
       </div>
       <div class="manifest-shrine">
         ${
@@ -57,7 +57,6 @@ function renderManifestShrine(state) {
                       <div class="manifest-shrine__meta">
                         <span>${escapeHtml(entry.date)}</span>
                         <strong>${escapeHtml(entry.title)}</strong>
-                        <p>${escapeHtml(entry.details)}</p>
                         ${
                           building
                             ? `<button class="button button--ghost" data-action="inspect-building" data-building-id="${building.id}">Open Details</button>`
@@ -68,7 +67,7 @@ function renderManifestShrine(state) {
                   `
                 )
                 .join("")
-            : `<p class="empty-state">Your recent crystal revelations will gather here once the forge begins turning.</p>`
+            : `<p class="empty-state">No rolls yet.</p>`
         }
       </div>
     </section>
@@ -97,8 +96,8 @@ function renderForgeStage(state) {
           <h2>${selectedBuilding ? escapeHtml(selectedBuilding.displayName) : "Awaiting Manifest"}</h2>
           <p>${
             selectedBuilding
-              ? `${escapeHtml(selectedBuilding.specialEffect)} Current quality ${formatNumber(selectedBuilding.quality, 2)}%.`
-              : "Select a crystal level from the availability table and manifest a structure. The reveal page now gives the roll room more focus."
+              ? `Quality ${formatNumber(selectedBuilding.quality, 2)}%.`
+              : "Select a crystal and manifest."
           }</p>
           <div class="forge-stage__ritual-notes">
             <article><span>Reality Level</span><strong>${escapeHtml(state.selectedRarity)}</strong></article>
@@ -114,7 +113,7 @@ function renderForgeStage(state) {
 export function renderForgePage(state) {
   return {
     title: "Forge",
-    subtitle: "Choose a crystal and manifest.",
+    subtitle: "Manifest buildings.",
     content: `
       ${renderForgeCommandDeck(state)}
       ${renderCrystalSelector(state)}

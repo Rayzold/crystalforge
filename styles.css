@@ -1375,8 +1375,28 @@ textarea {
   padding: 0 12px 12px;
   display: flex;
   justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+}
+
+.building-card__gm-quality-editor {
+  margin-right: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.building-card__gm-quality-editor span {
+  white-space: nowrap;
+}
+
+.building-card__gm-quality-input {
+  width: 92px;
+  padding: 8px 10px;
+  border-radius: 10px;
 }
 
 .button--danger-icon {
@@ -2289,6 +2309,16 @@ textarea {
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
+.manifest-complete-modal__visual--reveal {
+  animation: manifestVisualReveal 900ms ease-out both;
+}
+
+.manifest-complete-modal__visual--reveal .building-art__image,
+.manifest-complete-modal__visual--reveal .building-art__fallback,
+.manifest-complete-modal__visual--reveal .manifest-complete-modal__fallback {
+  animation: manifestArtworkReveal 1400ms cubic-bezier(0.19, 1, 0.22, 1) both;
+}
+
 .manifest-complete-modal__visual .building-art,
 .manifest-complete-modal__visual .building-art__frame,
 .manifest-complete-modal__visual .building-art__image,
@@ -3180,6 +3210,29 @@ textarea {
   color: var(--muted);
 }
 
+.admin-active-building-card__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-self: end;
+}
+
+.admin-active-building-card__quality {
+  display: grid;
+  gap: 4px;
+  min-width: 98px;
+}
+
+.admin-active-building-card__quality span {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.admin-active-building-card__quality input {
+  min-width: 92px;
+  padding: 8px 10px;
+}
+
 .admin-snapshot-card {
   display: grid;
   gap: 8px;
@@ -3436,7 +3489,7 @@ textarea {
     0 0 0 1px rgba(255, 255, 255, 0.08),
     0 28px 60px rgba(0, 0, 0, 0.36),
     0 0 46px color-mix(in srgb, var(--rarity-color) 28%, transparent);
-  animation: pulseReveal 1.3s ease both;
+  animation: pulseReveal var(--reveal-asset-duration, 2200ms) cubic-bezier(0.19, 1, 0.22, 1) both;
 }
 
 .reveal-overlay__art img {
@@ -3456,7 +3509,7 @@ textarea {
   box-shadow:
     0 0 45px var(--rarity-color),
     inset 0 0 24px rgba(255, 255, 255, 0.24);
-  animation: pulseReveal 1.3s ease both;
+  animation: pulseReveal var(--reveal-asset-duration, 2200ms) cubic-bezier(0.19, 1, 0.22, 1) both;
 }
 
 .reveal-overlay__text {
@@ -3494,15 +3547,47 @@ textarea {
 
 @keyframes pulseReveal {
   0% {
-    transform: scale(0.45) rotate(-18deg);
-    filter: blur(12px);
+    opacity: 0;
+    clip-path: inset(48% 0 48% 0 round 34px);
+    transform: scale(1.08);
+    filter: blur(10px) saturate(0.9);
   }
-  40% {
-    transform: scale(1.1) rotate(7deg);
+  55% {
+    opacity: 1;
+    clip-path: inset(8% 0 8% 0 round 34px);
+    transform: scale(1.01);
     filter: blur(0);
   }
   100% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0 round 34px);
     transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes manifestVisualReveal {
+  0% {
+    opacity: 0;
+    filter: blur(10px) brightness(0.75);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0) brightness(1);
+  }
+}
+
+@keyframes manifestArtworkReveal {
+  0% {
+    opacity: 0;
+    clip-path: inset(52% 0 52% 0 round 24px);
+    transform: scale(1.06);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0 round 24px);
+    transform: scale(1);
+    filter: blur(0);
   }
 }
 
@@ -5642,7 +5727,7 @@ body:-webkit-full-screen #app {
 
 .manifest-panel__switch {
   width: min(100%, 720px);
-  margin: 16px auto 0;
+  margin: 8px auto 0;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   gap: 14px;
@@ -5726,7 +5811,7 @@ body:-webkit-full-screen #app {
 .manifest-panel__controls--centered {
   align-items: center;
   justify-content: center;
-  margin: 16px 0 10px;
+  margin: 8px 0 10px;
 }
 
 .manifest-panel__button {

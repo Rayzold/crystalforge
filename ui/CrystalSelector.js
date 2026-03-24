@@ -51,7 +51,7 @@ export function renderCrystalSelector(state) {
       <div class="panel__header crystal-panel__header">
         <div>
           <h3>Select Your Crystal</h3>
-          <span class="panel__subtle">Each reality has equal odds within its own pool.</span>
+          <span class="panel__subtle">Pick a rarity</span>
         </div>
         <span class="crystal-panel__total">Available rolls: ${formatNumber(totalVisible, 0)}</span>
       </div>
@@ -65,7 +65,7 @@ export function renderCrystalSelector(state) {
         <article>
           <span>Manifest Rule</span>
           <strong>Each manifest costs 1 crystal</strong>
-          <small>When a level reaches 0, it disappears from the table until crystals return.</small>
+          <small>0 means unavailable.</small>
         </article>
       </div>
       ${

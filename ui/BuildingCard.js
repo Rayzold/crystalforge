@@ -72,7 +72,7 @@ function getCompactStatus(building, { isIncomplete, isActiveConstruction, queueP
     return "Ruined / inactive until repaired";
   }
   if (!isIncomplete) {
-    return `Operational / Stage ${formatBuildingQualityDisplay(building)}`;
+    return `Operational / Quality ${formatBuildingQualityDisplay(building)}`;
   }
   if (isActiveConstruction) {
     return eta ? `Growing now / ETA ${eta}` : "Growing now / stalled";
@@ -181,7 +181,7 @@ export function renderBuildingCard(building, state) {
           <strong class="building-card__multiplier">${building.isComplete ? getQualityMultiplierReadout(building) : "--"}</strong>
         </div>
         <div class="building-card__quality">
-          <span>${building.isComplete ? escapeHtml(getQualityMultiplierReadout(building)) : `Stage ${escapeHtml(formatBuildingQualityDisplay(building))}`}</span>
+          <span>${building.isComplete ? escapeHtml(getQualityMultiplierReadout(building)) : `Quality ${escapeHtml(formatBuildingQualityDisplay(building))}`}</span>
           <span>${isRuined ? "Ruined" : building.isComplete ? "Complete" : "Incomplete"}</span>
         </div>
         <div class="progress-bar"><span style="width:${progressPercent}%"></span></div>
@@ -240,6 +240,25 @@ export function renderBuildingCard(building, state) {
         </div>
       </button>
       <div class="building-card__actions">
+        ${
+          state.ui.adminUnlocked
+            ? `
+              <label class="building-card__gm-quality-editor">
+                <span>Quality %</span>
+                <input
+                  class="building-card__gm-quality-input"
+                  type="number"
+                  min="0"
+                  max="350"
+                  step="0.1"
+                  value="${Number(building.quality ?? 0)}"
+                  data-role="gm-building-quality-input"
+                />
+              </label>
+              <button class="button button--ghost" data-action="save-building-quality" data-building-id="${building.id}">Save Quality</button>
+            `
+            : ""
+        }
         <button class="button button--ghost" data-action="inspect-building" data-building-id="${building.id}">Open Details</button>
         <button class="button button--ghost building-card__pin-button ${isPinned ? "is-active" : ""}" data-action="toggle-building-pin" data-building-id="${building.id}">${isPinned ? "Unpin" : "Pin"}</button>
         ${
