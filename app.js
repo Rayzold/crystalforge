@@ -1174,6 +1174,16 @@ function closeDirectManifestPopup() {
   document.querySelector("#direct-manifest-complete-modal")?.remove();
 }
 
+function showManifestDebugAlert(message) {
+  try {
+    window.setTimeout(() => {
+      window.alert(`Manifest debug: ${message}`);
+    }, 0);
+  } catch (error) {
+    reportError(`Manifest debug alert failed: ${error.message}`, null);
+  }
+}
+
 function showDirectManifestPopup(manifestCompleteModal) {
   closeDirectManifestPopup();
 
@@ -1233,6 +1243,7 @@ function scheduleManifestModalVerification(manifestCompleteModal) {
       window.requestAnimationFrame(() => {
         if (!document.querySelector("#manifest-complete-modal")) {
           reportError("Manifest popup retry failed.", null);
+          showManifestDebugAlert("standard popup retry failed; opening direct fallback popup");
           showDirectManifestPopup(manifestCompleteModal);
         }
       });
@@ -1276,6 +1287,7 @@ async function handleManifest() {
   if (manifestInProgress) {
     return;
   }
+  let manifestCompleteModal = null;
   manifestInProgress = true;
   if (manifestCompleteTimer) {
     window.clearTimeout(manifestCompleteTimer);
@@ -1319,7 +1331,7 @@ async function handleManifest() {
       },
       getCurrentState()
     );
-    const manifestCompleteModal = {
+    manifestCompleteModal = {
       animationToken: `manifest-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       rolledName: result.isCrystalUpgrade ? `${result.targetRarity} Crystal` : result.rolledName,
       rarity: result.rarity,
@@ -1343,6 +1355,7 @@ async function handleManifest() {
       },
       getCurrentState()
     );
+    showManifestDebugAlert(`popup queued for ${manifestCompleteModal.rolledName}`);
     scheduleManifestModalVerification(manifestCompleteModal);
     if (!quickManifestationsEnabled) {
       void audioEngine.playManifest(result.rarity).catch(() => {});
@@ -1353,6 +1366,12 @@ async function handleManifest() {
       reportSuccess(`${result.rolledName} manifested.`);
     } else if (result.isCrystalUpgrade) {
       reportSuccess(`${result.sourceRarity} crystal upgraded to ${result.targetRarity}.`);
+    }
+  } catch (error) {
+    reportError(`Manifest failed: ${error.message ?? error}`, null);
+    showManifestDebugAlert(`exception after manifest: ${error.message ?? error}`);
+    if (manifestCompleteModal) {
+      showDirectManifestPopup(manifestCompleteModal);
     }
   } finally {
     manifestInProgress = false;
