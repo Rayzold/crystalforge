@@ -770,21 +770,54 @@ textarea {
 }
 
 .incubator-support-toggles {
-  display: grid;
-  gap: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-top: 4px;
 }
 
 .incubator-support-toggle {
   display: inline-flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 8px;
-  color: var(--muted);
+  width: fit-content;
+  min-height: 38px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(141, 214, 255, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
   font-size: 0.82rem;
+  line-height: 1.2;
+  cursor: pointer;
+  user-select: none;
+  justify-self: start;
+  position: relative;
+  z-index: 1;
 }
 
 .incubator-support-toggle input {
   margin: 0;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  accent-color: rgba(141, 214, 255, 0.95);
+  cursor: pointer;
+}
+
+.incubator-support-toggle span {
+  display: block;
+}
+
+.incubator-support-toggle:hover {
+  border-color: rgba(141, 214, 255, 0.3);
+  background: rgba(141, 214, 255, 0.08);
+}
+
+.incubator-support-toggle:has(input:checked) {
+  border-color: rgba(141, 214, 255, 0.36);
+  background: linear-gradient(135deg, rgba(141, 214, 255, 0.14), rgba(120, 241, 194, 0.08));
 }
 
 .incubator-support-badge {
@@ -4134,6 +4167,15 @@ textarea {
   pointer-events: none;
 }
 
+.page-build-tag--player {
+  position: static;
+  top: auto;
+  right: auto;
+  z-index: auto;
+  margin-left: 2px;
+  flex: 0 0 auto;
+}
+
 .sidebar-nav__brand p,
 .sidebar-nav__footer p,
 .page-hero__eyebrow,
@@ -4484,6 +4526,8 @@ textarea {
   display: flex;
   gap: 10px;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .player-stage__brand {
@@ -5098,7 +5142,7 @@ textarea {
 }
 
 .player-list__actions-row .incubator-support-toggles {
-  justify-items: end;
+  justify-content: flex-end;
 }
 
 .player-list__actions .button {
@@ -9644,7 +9688,62 @@ body:-webkit-full-screen #app {
   }
 }
 
-@media (prefers-reduced-motion: reduce), (max-width: 640px) {
+@media (prefers-reduced-motion: reduce) {
+  .forge-command__headline h2,
+  .manifest-panel__button,
+  .forge-stage__visual::before,
+  .forge-stage__sigil,
+  .forge-stage__altar-glow,
+  .forge-stage__orb span,
+  .hex-map__district-field,
+  .hex-map__water-line,
+  .hex-map__water-shimmer,
+  .hex-map__road--main,
+  .hex-map__junction-glow,
+  .hex-map__district-aura,
+  .hex-map__preview polygon,
+  .mascot-backdrop__video,
+  body.is-page-entering .game-shell,
+  body.is-page-entering .sidebar-nav,
+  body.is-page-entering .page-hero,
+  body.is-page-entering .hud-ribbon,
+  body.is-page-entering .page-layout,
+  body.is-page-entering .crisis-banner,
+  .reveal-overlay__ring,
+  .reveal-overlay__particle,
+  .reveal-overlay__art,
+  .reveal-overlay__core,
+  .manifest-complete-modal__visual--reveal,
+  .manifest-complete-modal__visual--reveal .building-art__image,
+  .manifest-complete-modal__visual--reveal .building-art__fallback,
+  .manifest-complete-modal__visual--reveal .manifest-complete-modal__fallback,
+  .manifest-complete-modal__fill.is-revealed,
+  .manifest-complete-modal__carry-fill.is-revealed,
+  .manifest-complete-modal__burst.is-revealed,
+  .manifest-complete-modal__value.is-visible {
+    animation: none !important;
+  }
+
+  .panel,
+  .scene-panel,
+  .building-card--stream,
+  .hud-ribbon__item,
+  .sidebar-nav,
+  .page-hero,
+  .modal__dialog,
+  .button,
+  .icon-button,
+  .sidebar-link,
+  .hex-map__cell,
+  .reveal-overlay,
+  .manifest-complete-modal__fill,
+  .manifest-complete-modal__carry-fill,
+  .manifest-complete-modal__value {
+    transition: none !important;
+  }
+}
+
+@media (max-width: 640px) {
   .forge-command__headline h2,
   .manifest-panel__button,
   .forge-stage__visual::before,

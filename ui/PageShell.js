@@ -194,7 +194,6 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
     return `
       <div class="game-shell game-shell--player game-shell--theme-dark ${state.transientUi?.projectorMode ? "game-shell--projector" : ""} ${state.transientUi?.projectorChromeHidden ? "game-shell--projector-hidden" : ""}">
         <main class="page-stage page-stage--player">
-          <div class="page-build-tag" aria-label="Current build">${APP_VERSION}</div>
           <header class="player-stage__header">
             <div class="player-stage__brand">
               <span>Crystal Forge</span>
@@ -204,6 +203,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
               <button class="player-stage__return ${state.transientUi?.projectorMode ? "is-active" : ""}" type="button" data-action="toggle-projector-mode">Projector Mode</button>
               <button class="player-stage__return" type="button" data-action="enter-fullscreen">Fullscreen</button>
               <a class="player-stage__return" href="./gm.html">Return to GM Mode</a>
+              <div class="page-build-tag page-build-tag--player" aria-label="Current build">${APP_VERSION}</div>
             </div>
           </header>
           ${content}
