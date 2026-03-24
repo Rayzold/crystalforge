@@ -12,7 +12,7 @@ import {
   getDriftConstructionSlots,
   isBuildingActivelyConstructed
 } from "../systems/ConstructionSystem.js";
-import { getEmergencyStatus, getTradeGoodsGoldMultiplier } from "../systems/ResourceSystem.js";
+import { getEmergencyStatus, getGoodsSummary } from "../systems/ResourceSystem.js";
 import { getWorkforceCategoryLabel, getWorkforceSummary } from "../systems/WorkforceSystem.js";
 import { getVisibleBuildings, renderBuildingGrid } from "./BuildingGrid.js";
 import { renderCalendarPanel } from "./CalendarPanel.js";
@@ -24,14 +24,6 @@ import { renderResourcePanel } from "./ResourcePanel.js";
 import { renderTownFocusPanel } from "./TownFocusPanel.js";
 import { renderUiIcon } from "./UiIcons.js";
 
-function getTradeGoodsThreshold(goods) {
-  const normalizedGoods = Math.max(0, Number(goods ?? 0));
-  if (normalizedGoods <= 10) {
-    return 20;
-  }
-  return Math.ceil((normalizedGoods + 0.0001) / 10) * 10;
-}
-
 function renderTownStatistics(state) {
   const dailyNet = (state.cityStats.income ?? 0) - (state.cityStats.upkeep ?? 0);
   const emergencyState = getEmergencyStatus(state);
@@ -39,18 +31,15 @@ function renderTownStatistics(state) {
   const nextHoliday = getNextHoliday(state.calendar.dayOffset);
   const nextHolidayAccentClass = nextHoliday ? getHolidayTypeClass(nextHoliday) : "";
   const nextHolidayGlyph = nextHoliday ? getHolidayGlyph(nextHoliday) : "✦";
-  const goodsTotal = Number(state.cityStats.goods ?? 0);
-  const tradeGoodsGoldMultiplier = getTradeGoodsGoldMultiplier(state);
-  const nextGoodsThreshold = getTradeGoodsThreshold(goodsTotal);
-  const goodsToNextThreshold = Math.max(0, nextGoodsThreshold - goodsTotal);
+  const goodsSummary = getGoodsSummary(state);
 
   const items = [
     ["Net Daily", `${dailyNet >= 0 ? "+" : ""}${formatNumber(dailyNet, 0)}g`, dailyNet >= 0 ? "positive" : "negative"],
     ["Population", formatNumber(state.resources.population ?? 0, 0), "population"],
     ["Food Stores", formatNumber(state.resources.food ?? 0, 0), "food"],
     ["Food Runway", foodRunway === null ? "Stable" : `${formatNumber(foodRunway, 1)}d`, foodRunway !== null && foodRunway <= 5 ? "negative" : "food"],
-    ["Goods", formatNumber(goodsTotal, 1), "goods"],
-    ["Trade Gold", `x${formatNumber(tradeGoodsGoldMultiplier, 2)}`, tradeGoodsGoldMultiplier > 1 ? "positive" : "goods"],
+    ["Goods", formatNumber(goodsSummary.total, 1), "goods"],
+    ["Trade Gold", `x${formatNumber(goodsSummary.multiplier, 2)}`, goodsSummary.multiplier > 1 ? "positive" : "goods"],
     ["Defense", formatNumber(state.cityStats.defense ?? 0, 0), "defense"],
     ["Morale", formatNumber(state.cityStats.morale ?? 0, 0), "morale"]
   ];
@@ -108,11 +97,12 @@ function renderTownStatistics(state) {
       </div>
       <div class="panel__subtle">
         ${
-          tradeGoodsGoldMultiplier > 1
-            ? `Trade-tagged gold buildings are currently earning at ${formatNumber((tradeGoodsGoldMultiplier - 1) * 100, 0)}% bonus from goods.`
+          goodsSummary.multiplier > 1
+            ? `Trade-tagged gold buildings are currently earning at ${formatNumber((goodsSummary.multiplier - 1) * 100, 0)}% bonus from goods.`
             : "Trade-tagged gold buildings gain their first bonus at 20 goods."
         }
-        ${goodsToNextThreshold > 0 ? ` ${formatNumber(goodsToNextThreshold, 1)} more goods reaches the next trade bonus step.` : ""}
+        ${goodsSummary.toNextThreshold > 0 ? ` ${formatNumber(goodsSummary.toNextThreshold, 1)} more goods reaches the next trade bonus step.` : ""}
+        ${` Base ${formatNumber(goodsSummary.base, 1)} / GM ${goodsSummary.gmOverride >= 0 ? "+" : ""}${formatNumber(goodsSummary.gmOverride, 1)}.`}
       </div>
     </section>
   `;
@@ -294,12 +284,14 @@ function renderBuildingsView(state) {
                       (building, index) => {
                         const etaDetails = getConstructionEtaDetails(building, state);
                         const workforceSupportReadout = Number(etaDetails?.workforceSupportBpd ?? 0) > 0 ? ` / Staff +${formatNumber(etaDetails.workforceSupportBpd, 1)} BPD` : "";
+                        const supportMultiplier = Number(etaDetails?.incubatorSupportMultiplier ?? 1);
+                        const supportReadout = supportMultiplier > 1 ? ` / Support x${formatNumber(supportMultiplier, 2)}` : "";
                         return `
                         <article class="city-incubation-strip__item ${isBuildingActivelyConstructed(state, building.id) ? "is-active" : ""}" title="${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}">
                           <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
                           <span>${escapeHtml(formatNumber(building.quality, 1))}% quality</span>
                           <em>Slot ${index + 1}</em>
-                          <small>${etaDetails.isStalled ? "Incubation stalled" : `${formatNumber(etaDetails.totalBpd, 1)} build points/day${workforceSupportReadout} / ${formatNumber(etaDetails.dailyPercent, 2)}% quality per day`}</small>
+                          <small>${etaDetails.isStalled ? `Incubation stalled${supportReadout}` : `${formatNumber(etaDetails.totalBpd, 1)} build points/day${workforceSupportReadout}${supportReadout} / ${formatNumber(etaDetails.dailyPercent, 2)}% quality per day`}</small>
                           <small>${
                             etaDetails.daysRemaining === null
                               ? escapeHtml(etaDetails.stallReasons.join(", ") || "insufficient resources")
@@ -310,6 +302,28 @@ function renderBuildingsView(state) {
                               ? "Ready date unavailable"
                               : `Ready ${escapeHtml(formatDate(etaDetails.readyDayOffset))}`
                           }</small>
+                          <div class="incubator-support-toggles">
+                            <label class="incubator-support-toggle">
+                              <input
+                                type="checkbox"
+                                data-action="toggle-incubator-support"
+                                data-building-id="${building.id}"
+                                data-support-key="heroSupport"
+                                ${building.heroSupport ? "checked" : ""}
+                              />
+                              <span>Hero Support</span>
+                            </label>
+                            <label class="incubator-support-toggle">
+                              <input
+                                type="checkbox"
+                                data-action="toggle-incubator-support"
+                                data-building-id="${building.id}"
+                                data-support-key="expertSupport"
+                                ${building.expertSupport ? "checked" : ""}
+                              />
+                              <span>Expert Support</span>
+                            </label>
+                          </div>
                           <button class="button button--ghost" data-action="pause-construction" data-building-id="${building.id}">Cancel Incubation</button>
                         </article>
                       `;

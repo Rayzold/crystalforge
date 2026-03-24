@@ -463,6 +463,9 @@ export class AdminConsole {
             goods: this.getNumberInput("resource-goods")
           });
           break;
+        case "reset-goods-override":
+          this.actions.resetGoodsOverride();
+          break;
         case "citizen-add":
         case "citizen-remove":
         case "citizen-set":
@@ -775,7 +778,10 @@ export class AdminConsole {
               <label>Population<input id="resource-population" type="number" value="${state.resources.population}" disabled /></label>
             </div>
             <p class="admin-debug-note">Saving Goods applies a GM override on top of normal goods production.</p>
-            <button class="button" data-admin-action="apply-resources">Apply Resources</button>
+            <div class="admin-actions">
+              <button class="button" data-admin-action="apply-resources">Apply Resources</button>
+              <button class="button button--ghost" data-admin-action="reset-goods-override">Reset GM Goods Override</button>
+            </div>
           </section>
           ${renderEconomyDebugTable(state)}
         `

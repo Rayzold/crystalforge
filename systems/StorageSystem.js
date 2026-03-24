@@ -213,6 +213,8 @@ function normalizeBuildings(buildings, catalog) {
   return buildings.map((building) => ({
     ...building,
     isRuined: Boolean(building.isRuined),
+    heroSupport: building.heroSupport === true,
+    expertSupport: building.expertSupport === true,
     imagePath: building.imagePath || catalog?.[building.key]?.imagePath || null,
     flavorText: building.flavorText ?? catalog?.[building.key]?.flavorText ?? null,
     mapPosition:

@@ -1865,6 +1865,39 @@ function setConstructionActiveState(buildingId, shouldActivate) {
   reportSuccess(`${building?.displayName ?? "Building"} ${shouldActivate ? "assigned to an incubator" : "removed from active incubation"}.`);
 }
 
+function setIncubatorSupportState(buildingId, supportKey, enabled) {
+  const label = supportKey === "heroSupport" ? "Hero Support" : "Expert Support";
+  const result = commit((draft) => {
+    const building = draft.buildings.find((entry) => entry.id === buildingId);
+    if (!building) {
+      return { ok: false, reason: "Building not found." };
+    }
+    if (!building.isConstructing) {
+      return { ok: false, reason: `${building.displayName} is not assigned to an incubator.` };
+    }
+
+    const nextEnabled = Boolean(enabled);
+    if (building[supportKey] === nextEnabled) {
+      return { ok: true, changed: false, name: building.displayName };
+    }
+
+    building[supportKey] = nextEnabled;
+    return { ok: true, changed: true, name: building.displayName };
+  });
+
+  if (!result.ok) {
+    reportError(result.reason);
+    return;
+  }
+  if (result.changed === false) {
+    reportSuccess(`${label} unchanged.`);
+    return;
+  }
+
+  markRecentBuildingChanges([buildingId]);
+  reportSuccess(`${label} ${enabled ? "enabled" : "disabled"} for ${result.name}.`);
+}
+
 function manifestBuildingNow(buildingId) {
   const result = commit((draft) => {
     const building = draft.buildings.find((entry) => entry.id === buildingId);
@@ -2017,6 +2050,12 @@ const actions = {
     commit((draft) => reopenTownFocusSelection(draft, "Admin"));
     openTownFocusModal();
     reportSuccess("Town focus council reopened.");
+  },
+  resetGoodsOverride() {
+    commit((draft) => {
+      draft.adminOverrides.goods = 0;
+    });
+    reportSuccess("GM goods override reset.");
   },
   adjustCrystal,
   grantCrystalPack,
@@ -3171,6 +3210,10 @@ root.addEventListener("change", (event) => {
     commit((draft) => {
       draft.settings.diceType = target.value ?? "d20";
     });
+  }
+
+  if (target.dataset.action === "toggle-incubator-support") {
+    setIncubatorSupportState(target.dataset.buildingId, target.dataset.supportKey, target.checked);
   }
 });
 

@@ -20,8 +20,12 @@ const CONSTRUCTION_BONUS_THRESHOLDS = {
   materials: 100,
   mana: 10
 };
-const INCUBATOR_ACCELERATION_MULTIPLIER = 2;
-const SUPPORT_ACCELERATION_MULTIPLIER = 1.5;
+const INCUBATOR_ACCELERATION_MULTIPLIER = 3;
+const SUPPORT_ACCELERATION_MULTIPLIER = 2;
+
+export function getIncubatorSupportMultiplier(building) {
+  return 1 + (building?.heroSupport ? 1 : 0) + (building?.expertSupport ? 0.5 : 0);
+}
 
 function sortConstructionPriority(left, right) {
   if (right.quality !== left.quality) {
@@ -239,6 +243,7 @@ function calculateConstructionDayDetails(building, state, resourcePool, options 
     return rawSupportBpd + Math.floor(rawSupportBpd * extraMultiplier * 0.5);
   })();
   const acceleration = getAccelerationStatus(profile, resourcePool);
+  const incubatorSupportMultiplier = getIncubatorSupportMultiplier(building);
   const effectiveBaseBpd = baseBpd * (acceleration.isApplied ? INCUBATOR_ACCELERATION_MULTIPLIER : 1);
   const effectiveSupportBpd = supportBpd * (acceleration.isApplied ? SUPPORT_ACCELERATION_MULTIPLIER : 1);
 
@@ -254,6 +259,9 @@ function calculateConstructionDayDetails(building, state, resourcePool, options 
       rawSupportBpd,
       supportBpd,
       effectiveSupportBpd: roundTo(effectiveSupportBpd, 2),
+      incubatorSupportMultiplier: roundTo(incubatorSupportMultiplier, 2),
+      heroSupport: Boolean(building?.heroSupport),
+      expertSupport: Boolean(building?.expertSupport),
       totalBpd: 0,
       rate: 0,
       dailyPercent: 0,
@@ -277,7 +285,8 @@ function calculateConstructionDayDetails(building, state, resourcePool, options 
   const basePercent = Math.min(remainingPercent, baseTargetPercent);
   const supportTargetPercent = effectiveSupportBpd / profile.pointsPerPercent;
   const supportPercent = Math.min(Math.max(0, remainingPercent - basePercent), supportTargetPercent);
-  const dailyPercent = roundTo(basePercent + supportPercent, 4);
+  const rawDailyPercent = basePercent + supportPercent;
+  const dailyPercent = roundTo(rawDailyPercent * incubatorSupportMultiplier, 4);
   const dailyCosts = {
     materials: roundTo(acceleration.dailyCosts.materials, 4),
     salvage: roundTo(acceleration.dailyCosts.salvage, 4),
@@ -298,11 +307,14 @@ function calculateConstructionDayDetails(building, state, resourcePool, options 
     rawSupportBpd,
     supportBpd,
     effectiveSupportBpd: roundTo(effectiveSupportBpd, 2),
+    incubatorSupportMultiplier: roundTo(incubatorSupportMultiplier, 2),
+    heroSupport: Boolean(building?.heroSupport),
+    expertSupport: Boolean(building?.expertSupport),
     totalBpd,
     rate: roundTo(dailyPercent, 4),
     dailyPercent: roundTo(dailyPercent, 4),
-    basePercent: roundTo(basePercent, 4),
-    supportPercent: roundTo(supportPercent, 4),
+    basePercent: roundTo(basePercent * incubatorSupportMultiplier, 4),
+    supportPercent: roundTo(supportPercent * incubatorSupportMultiplier, 4),
     dailyCosts,
     requiresSalvage: profile.requiresSalvage,
     requiresMana: profile.requiresMana,

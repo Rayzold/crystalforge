@@ -135,6 +135,24 @@ export function getTradeGoodsGoldMultiplier(state) {
   return 1 + Math.min(0.6, bonusSteps * 0.08);
 }
 
+export function getGoodsSummary(state) {
+  const total = Math.max(0, Number(state.cityStats?.goods ?? 0) || 0);
+  const gmOverride = Number(state.adminOverrides?.goods ?? 0) || 0;
+  const base = Math.max(0, total - gmOverride);
+  const multiplier = getTradeGoodsGoldMultiplier(state);
+  const nextThreshold = total <= 10 ? 20 : Math.ceil((total + 0.0001) / 10) * 10;
+  const toNextThreshold = Math.max(0, nextThreshold - total);
+
+  return {
+    total,
+    base,
+    gmOverride,
+    multiplier,
+    nextThreshold,
+    toNextThreshold
+  };
+}
+
 export function getWarningFlags(state) {
   return {
     lowFood: state.resources.food <= 20,

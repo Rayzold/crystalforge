@@ -4,6 +4,7 @@ import { roundTo } from "../engine/Utils.js";
 const GENERAL_OUTPUT_FLOOR = 0.25;
 const SPECIALIST_OUTPUT_FLOOR = 0.7;
 const SPECIALIST_DEMAND_SHARE = 0.65;
+const CONSTRUCTION_WORKFORCE_SUPPORT_MULTIPLIER = 3;
 
 const WORKFORCE_DEMAND_BY_RANK = {
   1: 2,
@@ -266,11 +267,11 @@ export function getConstructionWorkforceSupportBpd(workforceSummary) {
       Number(workforceSummary.specialistSupply?.[category] ?? 0) - Number(workforceSummary.specialistDemand?.[category] ?? 0)
     );
     totalSpecialistExcess += specialistExcess;
-    specialistSupportBpdByCategory[category] = Math.floor(specialistExcess / 4);
+    specialistSupportBpdByCategory[category] = Math.floor(specialistExcess / 4) * CONSTRUCTION_WORKFORCE_SUPPORT_MULTIPLIER;
   }
 
-  const generalSupportBpd = Math.floor(generalExcess / 8);
-  const overflowSupportBpd = Math.floor(Math.sqrt(generalExcess + totalSpecialistExcess) / 2);
+  const generalSupportBpd = Math.floor(generalExcess / 8) * CONSTRUCTION_WORKFORCE_SUPPORT_MULTIPLIER;
+  const overflowSupportBpd = Math.floor(Math.sqrt(generalExcess + totalSpecialistExcess) / 2) * CONSTRUCTION_WORKFORCE_SUPPORT_MULTIPLIER;
   const specialistSupportBpd = Object.values(specialistSupportBpdByCategory).reduce((sum, value) => sum + value, 0);
 
   return {

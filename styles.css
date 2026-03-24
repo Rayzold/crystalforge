@@ -769,6 +769,24 @@ textarea {
   margin-top: 6px;
 }
 
+.incubator-support-toggles {
+  display: grid;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.incubator-support-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.incubator-support-toggle input {
+  margin: 0;
+}
+
 .citizen-tile .help-bubble {
   width: 24px;
   height: 24px;
@@ -5060,6 +5078,10 @@ textarea {
 .player-list__actions-row {
   display: grid;
   gap: 8px;
+  justify-items: end;
+}
+
+.player-list__actions-row .incubator-support-toggles {
   justify-items: end;
 }
 

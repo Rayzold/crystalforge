@@ -10,7 +10,7 @@ import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate, getNextHoliday, getStructuredDate } from "../systems/CalendarSystem.js";
 import { formatBuildingExactQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js";
 import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js";
-import { getTradeGoodsGoldMultiplier, getCityTrendSummary, getResourceChainSummary } from "../systems/ResourceSystem.js";
+import { getTradeGoodsGoldMultiplier, getCityTrendSummary, getGoodsSummary, getResourceChainSummary } from "../systems/ResourceSystem.js";
 import { getFoodOutputMultiplier, getGoldOutputMultiplier } from "../systems/CityConditionSystem.js";
 import { getBuildingPlacementBonuses } from "../systems/MapSystem.js";
 import { getMayorAdvice } from "../systems/TownFocusSystem.js";
@@ -267,6 +267,39 @@ function renderCityTrendPanel(state) {
   `;
 }
 
+function renderPlayerGoodsPanel(state) {
+  const goodsSummary = getGoodsSummary(state);
+  return `
+    <section class="panel player-goods-panel">
+      <div class="panel__header">
+        <div>
+          <h3>Goods and Trade</h3>
+          <span class="panel__subtle">Trade goods amplify gold from trade-tagged structures.</span>
+        </div>
+      </div>
+      <div class="town-statistics__grid town-statistics__grid--compact">
+        <article class="town-statistics__card town-statistics__card--goods">
+          <div class="town-statistics__card-head">
+            <span>Goods</span>
+          </div>
+          <strong>${formatNumber(goodsSummary.total, 1)}</strong>
+        </article>
+        <article class="town-statistics__card town-statistics__card--positive">
+          <div class="town-statistics__card-head">
+            <span>Trade Gold</span>
+          </div>
+          <strong>x${formatNumber(goodsSummary.multiplier, 2)}</strong>
+        </article>
+      </div>
+      <div class="panel__subtle">
+        Base ${formatNumber(goodsSummary.base, 1)} / GM ${goodsSummary.gmOverride >= 0 ? "+" : ""}${formatNumber(goodsSummary.gmOverride, 1)}.
+        ${goodsSummary.multiplier > 1 ? ` Trade-tagged gold buildings are earning ${formatNumber((goodsSummary.multiplier - 1) * 100, 0)}% bonus gold.` : " Trade-tagged gold buildings gain their first bonus at 20 goods."}
+        ${goodsSummary.toNextThreshold > 0 ? ` ${formatNumber(goodsSummary.toNextThreshold, 1)} more goods reaches the next step.` : ""}
+      </div>
+    </section>
+  `;
+}
+
 function renderResourceChainPanel(state) {
   const chains = getResourceChainSummary(state);
   return `
@@ -447,6 +480,8 @@ function renderIncubationList(title, subtitle, buildings, emptyText, variant, st
                   const workforceStatus = getBuildingWorkforceStatus(building, workforceSummary);
                   const readyLabel = etaDetails.readyDayOffset === null ? "Unavailable" : formatDate(etaDetails.readyDayOffset);
                   const workforceSupportReadout = Number(etaDetails?.workforceSupportBpd ?? 0) > 0 ? ` | Staff +${formatNumber(etaDetails.workforceSupportBpd, 1)} BPD` : "";
+                  const supportMultiplier = Number(etaDetails?.incubatorSupportMultiplier ?? 1);
+                  const supportReadout = supportMultiplier > 1 ? ` | Support x${formatNumber(supportMultiplier, 2)}` : "";
 
                   return `
                     <article class="player-list__item ${state.transientUi?.recentBuildingChanges?.[building.id] ? "is-recently-changed" : ""}" title="${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}">
@@ -457,12 +492,40 @@ function renderIncubationList(title, subtitle, buildings, emptyText, variant, st
                         <small>${
                           etaDetails.isStalled
                             ? `${formatNumber(building.quality, 0)}% quality now | Stalled | Why: ${escapeHtml(etaDetails.stallReasons.join(", ") || "insufficient resources")}`
-                            : `${formatNumber(building.quality, 0)}% quality now | ${formatNumber(etaDetails.totalBpd, 1)} build points/day${workforceSupportReadout} | ${formatNumber(etaDetails.dailyPercent, 2)}% quality per day | ${formatNumber(etaDetails.daysRemaining, 1)}d | Ready ${escapeHtml(readyLabel)}`
+                            : `${formatNumber(building.quality, 0)}% quality now | ${formatNumber(etaDetails.totalBpd, 1)} build points/day${workforceSupportReadout}${supportReadout} | ${formatNumber(etaDetails.dailyPercent, 2)}% quality per day | ${formatNumber(etaDetails.daysRemaining, 1)}d | Ready ${escapeHtml(readyLabel)}`
                         }</small>
                       </div>
                       <div class="player-list__actions">
                         <em>${formatNumber(building.quality, 0)}%</em>
                         <div class="player-list__actions-row">
+                          ${
+                            variant === "incubating"
+                              ? `
+                                <div class="incubator-support-toggles">
+                                  <label class="incubator-support-toggle">
+                                    <input
+                                      type="checkbox"
+                                      data-action="toggle-incubator-support"
+                                      data-building-id="${building.id}"
+                                      data-support-key="heroSupport"
+                                      ${building.heroSupport ? "checked" : ""}
+                                    />
+                                    <span>Hero Support</span>
+                                  </label>
+                                  <label class="incubator-support-toggle">
+                                    <input
+                                      type="checkbox"
+                                      data-action="toggle-incubator-support"
+                                      data-building-id="${building.id}"
+                                      data-support-key="expertSupport"
+                                      ${building.expertSupport ? "checked" : ""}
+                                    />
+                                    <span>Expert Support</span>
+                                  </label>
+                                </div>
+                              `
+                              : ""
+                          }
                           <button class="button button--ghost" data-action="${variant === "incubating" ? "pause-construction" : "activate-construction"}" data-building-id="${building.id}">
                             ${variant === "incubating" ? "Cancel Incubation" : "Use Incubator"}
                           </button>
@@ -531,6 +594,7 @@ export function renderPlayerPage(state) {
       </section>
       ${renderPlayerSessionBanner(state)}
       ${renderCityTrendPanel(state)}
+      ${renderPlayerGoodsPanel(state)}
       ${renderPlayerMayorPriorities(state)}
       ${renderCitizenSummaryToggle(state)}
       ${renderCrystalSelector(state)}
