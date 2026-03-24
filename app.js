@@ -1174,16 +1174,6 @@ function closeDirectManifestPopup() {
   document.querySelector("#direct-manifest-complete-modal")?.remove();
 }
 
-function showManifestDebugAlert(message) {
-  try {
-    window.setTimeout(() => {
-      window.alert(`Manifest debug: ${message}`);
-    }, 0);
-  } catch (error) {
-    reportError(`Manifest debug alert failed: ${error.message}`, null);
-  }
-}
-
 function showDirectManifestPopup(manifestCompleteModal) {
   closeDirectManifestPopup();
 
@@ -1243,7 +1233,6 @@ function scheduleManifestModalVerification(manifestCompleteModal) {
       window.requestAnimationFrame(() => {
         if (!document.querySelector("#manifest-complete-modal")) {
           reportError("Manifest popup retry failed.", null);
-          showManifestDebugAlert("standard popup retry failed; opening direct fallback popup");
           showDirectManifestPopup(manifestCompleteModal);
         }
       });
@@ -1355,7 +1344,6 @@ async function handleManifest() {
       },
       getCurrentState()
     );
-    showManifestDebugAlert(`popup queued for ${manifestCompleteModal.rolledName}`);
     scheduleManifestModalVerification(manifestCompleteModal);
     if (!quickManifestationsEnabled) {
       void audioEngine.playManifest(result.rarity).catch(() => {});
@@ -1369,7 +1357,6 @@ async function handleManifest() {
     }
   } catch (error) {
     reportError(`Manifest failed: ${error.message ?? error}`, null);
-    showManifestDebugAlert(`exception after manifest: ${error.message ?? error}`);
     if (manifestCompleteModal) {
       showDirectManifestPopup(manifestCompleteModal);
     }
