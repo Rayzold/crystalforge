@@ -1249,33 +1249,34 @@ async function handleManifest() {
       },
       getCurrentState()
     );
-    if (!quickManifestationsEnabled) {
-      await audioEngine.playManifest(result.rarity);
-      await animationEngine.playManifestReveal(result);
-    }
+    const manifestCompleteModal = {
+      animationToken: `manifest-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      rolledName: result.isCrystalUpgrade ? `${result.targetRarity} Crystal` : result.rolledName,
+      rarity: result.rarity,
+      buildingId: result.building?.id ?? null,
+      isCrystalUpgrade: Boolean(result.isCrystalUpgrade),
+      sourceRarity: result.sourceRarity ?? result.rarity,
+      targetRarity: result.targetRarity ?? null,
+      qualityRoll: result.qualityRoll,
+      wasNew: Boolean(result.wasNew),
+      previousQuality: result.previousQuality ?? 0,
+      finalQuality: result.finalQuality ?? result.building?.quality ?? null,
+      crossedActivation: Boolean(result.crossedActivation),
+      durationMs: quickManifestationsEnabled ? 0 : 4200,
+      revealPercent: !quickManifestationsEnabled,
+      showPercentImmediately: quickManifestationsEnabled
+    };
     renderer.setTransientUi(
       {
         manifestInProgress: false,
-        manifestCompleteModal: {
-          animationToken: `manifest-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-          rolledName: result.isCrystalUpgrade ? `${result.targetRarity} Crystal` : result.rolledName,
-          rarity: result.rarity,
-          buildingId: result.building?.id ?? null,
-          isCrystalUpgrade: Boolean(result.isCrystalUpgrade),
-          sourceRarity: result.sourceRarity ?? result.rarity,
-          targetRarity: result.targetRarity ?? null,
-          qualityRoll: result.qualityRoll,
-          wasNew: Boolean(result.wasNew),
-          previousQuality: result.previousQuality ?? 0,
-          finalQuality: result.finalQuality ?? result.building?.quality ?? null,
-          crossedActivation: Boolean(result.crossedActivation),
-          durationMs: quickManifestationsEnabled ? 0 : 4200,
-          revealPercent: !quickManifestationsEnabled,
-          showPercentImmediately: quickManifestationsEnabled
-        }
+        manifestCompleteModal
       },
       getCurrentState()
     );
+    if (!quickManifestationsEnabled) {
+      void audioEngine.playManifest(result.rarity).catch(() => {});
+      void animationEngine.playManifestReveal(result).catch(() => {});
+    }
     if (result.building?.id) {
       markRecentBuildingChanges([result.building.id]);
       reportSuccess(`${result.rolledName} manifested.`);
