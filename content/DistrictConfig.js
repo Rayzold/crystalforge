@@ -12,8 +12,8 @@ export const BASE_DISTRICT_CONFIG = {
     name: "Trade District",
     color: "#f1c453",
     description: "Concentrated commerce, ledgers, and mercantile routes.",
-    bonusText: "+15% gold generation per level",
-    bonuses: { goldProductionPercent: 15, prestigeFlat: 2 }
+    bonusText: "+10% gold generation per level",
+    bonuses: { goldProductionPercent: 10, prestigeFlat: 2 }
   },
   "Residential District": {
     name: "Residential District",
@@ -54,8 +54,8 @@ export const BASE_DISTRICT_CONFIG = {
     name: "Harbor District",
     color: "#3ca7c7",
     description: "Sea and sky logistics improve exchange and movement.",
-    bonusText: "+10% gold and +10% materials per level",
-    bonuses: { goldProductionPercent: 10, materialsProductionPercent: 10, securityFlat: 2 }
+    bonusText: "+6% gold and +10% materials per level",
+    bonuses: { goldProductionPercent: 6, materialsProductionPercent: 10, securityFlat: 2 }
   },
   "Cultural District": {
     name: "Cultural District",

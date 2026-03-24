@@ -7,7 +7,11 @@ import { RARITY_BUILD_POINTS_PER_PERCENT, RARITY_RANKS } from "../content/Rariti
 import { roundTo } from "../engine/Utils.js";
 import { getDriftConstructionSlots, getDriftConstructionSpeedMultiplier } from "./DriftEvolutionSystem.js";
 import { getBuildingMultiplier } from "./BuildingSystem.js";
-import { getConstructionWorkforceSupportBpd, getWorkforceSummary } from "./WorkforceSystem.js";
+import {
+  getBuildingWorkforceCategory,
+  getConstructionWorkforceSupportBpd,
+  getWorkforceSummary
+} from "./WorkforceSystem.js";
 
 export { getDriftConstructionSlots };
 
@@ -106,6 +110,62 @@ function getEffectiveConstructionSupportBpd(state) {
   return rawSupportBpd + Math.floor(rawSupportBpd * extraMultiplier * 0.5);
 }
 
+function createConstructionSupportAllocation(buildings = []) {
+  return new Map(buildings.map((building) => [building.id, 0]));
+}
+
+function distributeSharedSupportBpd(buildings, totalBpd, allocation) {
+  const normalizedBpd = Math.max(0, Math.floor(Number(totalBpd ?? 0) || 0));
+  if (!buildings.length || normalizedBpd <= 0) {
+    return allocation;
+  }
+
+  let remainingBpd = normalizedBpd;
+  let remainingBuildings = buildings.length;
+
+  for (const building of buildings) {
+    const guaranteedShare = Math.floor(remainingBpd / remainingBuildings);
+    allocation.set(building.id, (allocation.get(building.id) ?? 0) + guaranteedShare);
+    remainingBpd -= guaranteedShare;
+    remainingBuildings -= 1;
+  }
+
+  for (let index = 0; remainingBpd > 0; index = (index + 1) % buildings.length) {
+    const building = buildings[index];
+    allocation.set(building.id, (allocation.get(building.id) ?? 0) + 1);
+    remainingBpd -= 1;
+  }
+
+  return allocation;
+}
+
+function buildActiveConstructionWorkforceSupportAllocation(activeQueue, workforceSummary) {
+  const allocation = createConstructionSupportAllocation(activeQueue);
+  if (!activeQueue.length) {
+    return allocation;
+  }
+
+  const supportPools = getConstructionWorkforceSupportBpd(workforceSummary);
+  distributeSharedSupportBpd(activeQueue, supportPools.generalSupportBpd, allocation);
+  distributeSharedSupportBpd(activeQueue, supportPools.overflowSupportBpd, allocation);
+
+  const categoryBuckets = new Map();
+  for (const building of activeQueue) {
+    const category = getBuildingWorkforceCategory(building);
+    if (!categoryBuckets.has(category)) {
+      categoryBuckets.set(category, []);
+    }
+    categoryBuckets.get(category).push(building);
+  }
+
+  for (const [category, buildings] of categoryBuckets.entries()) {
+    const categorySupportBpd = supportPools.specialistSupportBpdByCategory?.[category] ?? 0;
+    distributeSharedSupportBpd(buildings, categorySupportBpd, allocation);
+  }
+
+  return allocation;
+}
+
 function getAccelerationDailyCosts(profile) {
   return {
     materials: profile.materialDailyCost,
@@ -163,15 +223,16 @@ function getAccelerationStatus(profile, resourcePool) {
   };
 }
 
-function calculateConstructionDayDetails(building, state, resourcePool) {
+function calculateConstructionDayDetails(building, state, resourcePool, options = {}) {
+  const { workforceSummary: providedWorkforceSummary, workforceSupportBpd: providedWorkforceSupportBpd } = options;
   const quality = Number(building.quality ?? 0);
   const remainingPercent = Math.max(0, BUILDING_ACTIVE_THRESHOLD - quality);
   const profile = getConstructionRequirementProfile(building);
   const speedMultiplier = getConstructionSpeedMultiplier(state);
   const baseBpd = BASE_INCUBATION_BPD * speedMultiplier;
-  const workforceSummary = getWorkforceSummary(state);
+  const workforceSummary = providedWorkforceSummary ?? getWorkforceSummary(state);
   const buildingSupportBpd = getCompletedConstructionSupportBuildingBpd(state);
-  const workforceSupportBpd = getConstructionWorkforceSupportBpd(building, workforceSummary);
+  const workforceSupportBpd = Math.max(0, Number(providedWorkforceSupportBpd ?? 0) || 0);
   const rawSupportBpd = buildingSupportBpd + workforceSupportBpd;
   const supportBpd = (() => {
     const extraMultiplier = Math.max(0, speedMultiplier - 1);
@@ -257,9 +318,15 @@ function calculateConstructionDayDetails(building, state, resourcePool) {
 function buildActiveConstructionPreview(state) {
   const preview = new Map();
   const resourcePool = createResourcePool(state.resources);
+  const activeQueue = getActiveConstructionQueue(state);
+  const workforceSummary = getWorkforceSummary(state);
+  const workforceSupportAllocation = buildActiveConstructionWorkforceSupportAllocation(activeQueue, workforceSummary);
 
-  for (const building of getActiveConstructionQueue(state)) {
-    const details = calculateConstructionDayDetails(building, state, resourcePool);
+  for (const building of activeQueue) {
+    const details = calculateConstructionDayDetails(building, state, resourcePool, {
+      workforceSummary,
+      workforceSupportBpd: workforceSupportAllocation.get(building.id) ?? 0
+    });
     spendFromResourcePool(resourcePool, details.dailyCosts);
     preview.set(building.id, details);
   }

@@ -14,7 +14,7 @@ import { renderModal } from "../ui/Modal.js";
 import { formatDate } from "../systems/CalendarSystem.js";
 import { formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
 import { getDriftEvolutionStages } from "../systems/DriftEvolutionSystem.js";
-import { getEconomyDebugSummary } from "../systems/ResourceSystem.js";
+import { getEconomyDebugSummary, getEconomyTopContributorsSummary } from "../systems/ResourceSystem.js";
 import { getManualSaveMeta } from "../systems/StorageSystem.js";
 
 function options(values, selectedValue) {
@@ -232,10 +232,53 @@ function renderManifestedBuildingAdminList(state) {
 
 function renderEconomyDebugTable(state) {
   const debug = getEconomyDebugSummary(state);
+  const topContributors = getEconomyTopContributorsSummary(state);
+  const renderContributorPills = (entries) => {
+    if (!entries.length) {
+      return '<span class="admin-contributor-pill admin-contributor-pill--neutral">none</span>';
+    }
+    return entries
+      .map((entry) => {
+        const toneClass = entry.amount > 0.005
+          ? "admin-contributor-pill--positive"
+          : entry.amount < -0.005
+            ? "admin-contributor-pill--negative"
+            : "admin-contributor-pill--neutral";
+        return `<span class="admin-contributor-pill ${toneClass}"><strong>${escapeHtml(entry.label)}</strong><em>${escapeHtml(entry.channel)}</em><span>${entry.amount >= 0 ? "+" : ""}${formatNumber(entry.amount, 2)}</span></span>`;
+      })
+      .join("");
+  };
+  const renderContributorSection = (label, entries) => {
+    const resourceGlyph = {
+      "Top Gold": "$",
+      "Top Food": "◒",
+      "Top Materials": "▦",
+      "Top Salvage": "⛭",
+      "Top Mana": "✦"
+    }[label] ?? "•";
+    const positiveEntries = entries.filter((entry) => entry.amount > 0.005);
+    const negativeEntries = entries.filter((entry) => entry.amount < -0.005);
+
+    return `
+      <div class="admin-contributor-row">
+        <div class="admin-contributor-row__label"><span class="admin-contributor-row__glyph" aria-hidden="true">${escapeHtml(resourceGlyph)}</span><strong>${escapeHtml(label)}:</strong></div>
+        <div class="admin-contributor-row__groups">
+          <div class="admin-contributor-group">
+            <span class="admin-contributor-group__label admin-contributor-group__label--positive"><span class="admin-contributor-group__icon" aria-hidden="true">↗</span> Gains</span>
+            <div class="admin-contributor-group__pills">${renderContributorPills(positiveEntries)}</div>
+          </div>
+          <div class="admin-contributor-group">
+            <span class="admin-contributor-group__label admin-contributor-group__label--negative"><span class="admin-contributor-group__icon" aria-hidden="true">↘</span> Drains</span>
+            <div class="admin-contributor-group__pills">${renderContributorPills(negativeEntries)}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  };
   return `
     <section class="admin-section">
       <h3>Economy Debug</h3>
-      <p>Use this to compare current stock against daily inflow, citizen drain, and event/focus modifiers.</p>
+      <p>Use this to compare current stock against base building output, district bonuses, citizen flow, and event or focus modifiers.</p>
       <div class="admin-debug-meta">
         <span>Trade from goods: x${debug.modifiers.tradeGoodsGoldMultiplier.toFixed(2)}</span>
         <span>Gold output: x${debug.modifiers.goldOutputMultiplier.toFixed(2)}</span>
@@ -248,9 +291,11 @@ function renderEconomyDebugTable(state) {
               <th>Resource</th>
               <th>Stock</th>
               <th>Buildings</th>
+              <th>District</th>
               <th>Citizens +</th>
               <th>Citizens -</th>
-              <th>Events/Focus</th>
+              <th>Events</th>
+              <th>Focus</th>
               <th>Net / Day</th>
             </tr>
           </thead>
@@ -261,10 +306,12 @@ function renderEconomyDebugTable(state) {
                   <tr>
                     <td>${escapeHtml(row.resource)}</td>
                     <td>${formatNumber(row.stock, 2)}</td>
-                    <td>${formatNumber(row.buildingProduction, 2)}</td>
+                    <td>${formatNumber(row.buildingBaseProduction, 2)}</td>
+                    <td>${formatNumber(row.districtBonus, 2)}</td>
                     <td>${formatNumber(row.citizenProduction, 2)}</td>
                     <td>${formatNumber(row.citizenConsumption, 2)}</td>
-                    <td>${formatNumber(row.eventAndFocus, 2)}</td>
+                    <td>${formatNumber(row.eventProduction, 2)}</td>
+                    <td>${formatNumber(row.focusProduction, 2)}</td>
                     <td class="${row.net > 0.005 ? "is-positive" : row.net < -0.005 ? "is-negative" : "is-neutral"}">${formatNumber(row.net, 2)}</td>
                   </tr>
                 `
@@ -272,6 +319,13 @@ function renderEconomyDebugTable(state) {
               .join("")}
           </tbody>
         </table>
+      </div>
+      <div class="admin-contributor-stack">
+        ${renderContributorSection("Top Gold", topContributors.gold)}
+        ${renderContributorSection("Top Food", topContributors.food)}
+        ${renderContributorSection("Top Materials", topContributors.materials)}
+        ${renderContributorSection("Top Salvage", topContributors.salvage)}
+        ${renderContributorSection("Top Mana", topContributors.mana)}
       </div>
       ${
         debug.districtModifiers.length

@@ -39,7 +39,7 @@ export const TOWN_FOCUS_DEFINITIONS = {
     badgeShort: "Trade",
     mayorLine: "We should push commerce before the season turns against us.",
     summary: "Roads, stalls, and caravans take precedence as the council chases wealth.",
-    resourceDaily: { gold: 10, food: -1 },
+    resourceDaily: { gold: 6, food: -1 },
     statFlat: { prosperity: 4, prestige: 2 }
   },
   "civic-restoration": {

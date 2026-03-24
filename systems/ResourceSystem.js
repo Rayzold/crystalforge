@@ -27,27 +27,12 @@ function addDeltaInto(target, source) {
   }
 }
 
-export function getTradeGoodsGoldMultiplier(state) {
-  const goods = Math.max(0, Number(state.cityStats?.goods ?? 0) || 0);
-  const excessGoods = Math.max(0, goods - 10);
-  const bonusSteps = Math.floor(excessGoods / 10);
-  return 1 + Math.min(1, bonusSteps * 0.1);
+function sortContributionRows(left, right) {
+  return Math.abs(right.amount) - Math.abs(left.amount);
 }
 
-export function getWarningFlags(state) {
-  return {
-    lowFood: state.resources.food <= 20,
-    lowGold: state.resources.gold <= 20,
-    lowMana: state.resources.mana <= 12
-  };
-}
-
-export function calculateDailyResourceDelta(state) {
+function getBuildingProductionDelta(state, workforceSummary, tradeGoodsGoldMultiplier, goldOutputMultiplier, foodOutputMultiplier) {
   const deltas = createDeltaRecord();
-  const tradeGoodsGoldMultiplier = getTradeGoodsGoldMultiplier(state);
-  const goldOutputMultiplier = getGoldOutputMultiplier(state);
-  const foodOutputMultiplier = getFoodOutputMultiplier(state);
-  const workforceSummary = getWorkforceSummary(state);
 
   for (const building of state.buildings) {
     if (!building.isComplete || building.isRuined) {
@@ -67,16 +52,24 @@ export function calculateDailyResourceDelta(state) {
     }
 
     deltas.gold += goldDelta;
+
     let foodDelta = applyBuildingWorkforceToResource(building.resourceRates.food, workforceMultiplier) * building.multiplier * placementMultiplier;
     if (foodDelta > 0) {
       foodDelta *= foodOutputMultiplier;
     }
+
     deltas.food += foodDelta;
     deltas.materials += applyBuildingWorkforceToResource(building.resourceRates.materials, workforceMultiplier) * building.multiplier * placementMultiplier;
     deltas.salvage += applyBuildingWorkforceToResource(building.resourceRates.salvage ?? 0, workforceMultiplier) * building.multiplier * placementMultiplier;
     deltas.mana += applyBuildingWorkforceToResource(building.resourceRates.mana, workforceMultiplier) * building.multiplier * placementMultiplier;
     deltas.prosperity += applyBuildingWorkforceToResource(building.stats.prosperity * 0.02, workforceMultiplier) * building.multiplier * placementMultiplier;
   }
+
+  return deltas;
+}
+
+function getCitizenProductionDelta(state, goldOutputMultiplier, foodOutputMultiplier) {
+  const deltas = createDeltaRecord();
 
   for (const [citizenClass, count] of Object.entries(state.citizens)) {
     const citizenDefinition = state.citizenDefinitions[citizenClass];
@@ -90,12 +83,25 @@ export function calculateDailyResourceDelta(state) {
       }
       deltas[resource] = (deltas[resource] ?? 0) + nextAmount;
     }
+  }
+
+  return deltas;
+}
+
+function getCitizenConsumptionDelta(state) {
+  const deltas = createDeltaRecord();
+
+  for (const [citizenClass, count] of Object.entries(state.citizens)) {
+    const citizenDefinition = state.citizenDefinitions[citizenClass];
     for (const [resource, amount] of Object.entries(citizenDefinition.consumption)) {
       deltas[resource] = (deltas[resource] ?? 0) - amount * count;
     }
   }
 
-  const districtSummary = getDistrictSummary(state);
+  return deltas;
+}
+
+function applyDistrictProductionBonuses(deltas, districtSummary) {
   for (const district of districtSummary) {
     if (district.level <= 0) {
       continue;
@@ -118,6 +124,42 @@ export function calculateDailyResourceDelta(state) {
     }
     deltas.prosperity += (bonuses.prosperityFlat ?? 0) * district.level * 0.05;
   }
+
+  return deltas;
+}
+
+export function getTradeGoodsGoldMultiplier(state) {
+  const goods = Math.max(0, Number(state.cityStats?.goods ?? 0) || 0);
+  const excessGoods = Math.max(0, goods - 10);
+  const bonusSteps = Math.floor(excessGoods / 10);
+  return 1 + Math.min(0.6, bonusSteps * 0.08);
+}
+
+export function getWarningFlags(state) {
+  return {
+    lowFood: state.resources.food <= 20,
+    lowGold: state.resources.gold <= 20,
+    lowMana: state.resources.mana <= 12
+  };
+}
+
+export function calculateDailyResourceDelta(state) {
+  const deltas = createDeltaRecord();
+  const tradeGoodsGoldMultiplier = getTradeGoodsGoldMultiplier(state);
+  const goldOutputMultiplier = getGoldOutputMultiplier(state);
+  const foodOutputMultiplier = getFoodOutputMultiplier(state);
+  const workforceSummary = getWorkforceSummary(state);
+  const districtSummary = getDistrictSummary(state);
+  const buildingProduction = applyDistrictProductionBonuses(
+    getBuildingProductionDelta(state, workforceSummary, tradeGoodsGoldMultiplier, goldOutputMultiplier, foodOutputMultiplier),
+    districtSummary
+  );
+  const citizenProduction = getCitizenProductionDelta(state, goldOutputMultiplier, foodOutputMultiplier);
+  const citizenConsumption = getCitizenConsumptionDelta(state);
+
+  addDeltaInto(deltas, buildingProduction);
+  addDeltaInto(deltas, citizenProduction);
+  addDeltaInto(deltas, citizenConsumption);
 
   for (const event of state.events.active) {
     const effects = event.effects;
@@ -159,65 +201,32 @@ export function calculateDailyResourceDelta(state) {
 
 export function getEconomyDebugSummary(state) {
   const resources = ["gold", "food", "materials", "salvage", "mana", "prosperity"];
-  const buildingProduction = createDeltaRecord();
+  const buildingBaseProduction = createDeltaRecord();
+  const districtBonus = createDeltaRecord();
   const citizenProduction = createDeltaRecord();
   const citizenConsumption = createDeltaRecord();
-  const eventAndFocus = createDeltaRecord();
+  const eventProduction = createDeltaRecord();
+  const focusProduction = createDeltaRecord();
   const net = calculateDailyResourceDelta(state);
   const tradeGoodsGoldMultiplier = getTradeGoodsGoldMultiplier(state);
   const goldOutputMultiplier = getGoldOutputMultiplier(state);
   const foodOutputMultiplier = getFoodOutputMultiplier(state);
   const workforceSummary = getWorkforceSummary(state);
-
-  for (const building of state.buildings) {
-    if (!building.isComplete || building.isRuined) {
-      continue;
-    }
-
-    const placementBonus = getBuildingPlacementBonuses(state, building);
-    const placementMultiplier = 1 + placementBonus.totalPercent;
-    const nextDelta = createDeltaRecord();
-    const workforceMultiplier = getBuildingWorkforceMultiplier(building, workforceSummary);
-
-    let goldDelta = applyBuildingWorkforceToResource(building.resourceRates.gold, workforceMultiplier) * building.multiplier * placementMultiplier;
-    if (goldDelta > 0 && building.tags?.includes("trade")) {
-      goldDelta *= tradeGoodsGoldMultiplier;
-    }
-    if (goldDelta > 0) {
-      goldDelta *= goldOutputMultiplier;
-    }
-    nextDelta.gold += goldDelta;
-
-    let foodDelta = applyBuildingWorkforceToResource(building.resourceRates.food, workforceMultiplier) * building.multiplier * placementMultiplier;
-    if (foodDelta > 0) {
-      foodDelta *= foodOutputMultiplier;
-    }
-    nextDelta.food += foodDelta;
-    nextDelta.materials += applyBuildingWorkforceToResource(building.resourceRates.materials, workforceMultiplier) * building.multiplier * placementMultiplier;
-    nextDelta.salvage += applyBuildingWorkforceToResource(building.resourceRates.salvage ?? 0, workforceMultiplier) * building.multiplier * placementMultiplier;
-    nextDelta.mana += applyBuildingWorkforceToResource(building.resourceRates.mana, workforceMultiplier) * building.multiplier * placementMultiplier;
-    nextDelta.prosperity += applyBuildingWorkforceToResource(building.stats.prosperity * 0.02, workforceMultiplier) * building.multiplier * placementMultiplier;
-    addDeltaInto(buildingProduction, nextDelta);
-  }
-
-  for (const [citizenClass, count] of Object.entries(state.citizens)) {
-    const citizenDefinition = state.citizenDefinitions[citizenClass];
-    for (const [resource, amount] of Object.entries(citizenDefinition.production)) {
-      let nextAmount = amount * count;
-      if (resource === "gold" && nextAmount > 0) {
-        nextAmount *= goldOutputMultiplier;
-      }
-      if (resource === "food" && nextAmount > 0) {
-        nextAmount *= foodOutputMultiplier;
-      }
-      citizenProduction[resource] = (citizenProduction[resource] ?? 0) + nextAmount;
-    }
-    for (const [resource, amount] of Object.entries(citizenDefinition.consumption)) {
-      citizenConsumption[resource] = (citizenConsumption[resource] ?? 0) - amount * count;
-    }
-  }
-
   const districtSummary = getDistrictSummary(state);
+  const baseBuildingProduction = getBuildingProductionDelta(
+    state,
+    workforceSummary,
+    tradeGoodsGoldMultiplier,
+    goldOutputMultiplier,
+    foodOutputMultiplier
+  );
+  const districtAdjustedBuildingProduction = applyDistrictProductionBonuses(structuredClone(baseBuildingProduction), districtSummary);
+  addDeltaInto(buildingBaseProduction, baseBuildingProduction);
+  for (const resource of resources) {
+    districtBonus[resource] = Number(districtAdjustedBuildingProduction[resource] ?? 0) - Number(baseBuildingProduction[resource] ?? 0);
+  }
+  addDeltaInto(citizenProduction, getCitizenProductionDelta(state, goldOutputMultiplier, foodOutputMultiplier));
+  addDeltaInto(citizenConsumption, getCitizenConsumptionDelta(state));
   const districtModifiers = [];
   for (const district of districtSummary) {
     if (district.level <= 0) {
@@ -238,32 +247,34 @@ export function getEconomyDebugSummary(state) {
 
   for (const event of state.events.active) {
     const effects = event.effects;
-    eventAndFocus.gold += effects.goldFlat ?? 0;
-    eventAndFocus.food += effects.foodFlat ?? 0;
-    eventAndFocus.materials += effects.materialsFlat ?? 0;
-    eventAndFocus.salvage += effects.salvageFlat ?? 0;
-    eventAndFocus.mana += effects.manaFlat ?? 0;
-    eventAndFocus.prosperity += effects.prosperityFlat ?? 0;
+    eventProduction.gold += effects.goldFlat ?? 0;
+    eventProduction.food += effects.foodFlat ?? 0;
+    eventProduction.materials += effects.materialsFlat ?? 0;
+    eventProduction.salvage += effects.salvageFlat ?? 0;
+    eventProduction.mana += effects.manaFlat ?? 0;
+    eventProduction.prosperity += effects.prosperityFlat ?? 0;
   }
 
   const focus = getCurrentTownFocus(state);
   if (focus?.resourceDaily) {
-    eventAndFocus.gold += focus.resourceDaily.gold ?? 0;
-    eventAndFocus.food += focus.resourceDaily.food ?? 0;
-    eventAndFocus.materials += focus.resourceDaily.materials ?? 0;
-    eventAndFocus.salvage += focus.resourceDaily.salvage ?? 0;
-    eventAndFocus.mana += focus.resourceDaily.mana ?? 0;
-    eventAndFocus.prosperity += focus.resourceDaily.prosperity ?? 0;
+    focusProduction.gold += focus.resourceDaily.gold ?? 0;
+    focusProduction.food += focus.resourceDaily.food ?? 0;
+    focusProduction.materials += focus.resourceDaily.materials ?? 0;
+    focusProduction.salvage += focus.resourceDaily.salvage ?? 0;
+    focusProduction.mana += focus.resourceDaily.mana ?? 0;
+    focusProduction.prosperity += focus.resourceDaily.prosperity ?? 0;
   }
 
   return {
     rows: resources.map((resource) => ({
       resource,
       stock: Number(state.resources?.[resource] ?? 0),
-      buildingProduction: Number(buildingProduction[resource] ?? 0),
+      buildingBaseProduction: Number(buildingBaseProduction[resource] ?? 0),
+      districtBonus: Number(districtBonus[resource] ?? 0),
       citizenProduction: Number(citizenProduction[resource] ?? 0),
       citizenConsumption: Number(citizenConsumption[resource] ?? 0),
-      eventAndFocus: Number(eventAndFocus[resource] ?? 0),
+      eventProduction: Number(eventProduction[resource] ?? 0),
+      focusProduction: Number(focusProduction[resource] ?? 0),
       net: Number(net[resource] ?? 0)
     })),
     modifiers: {
@@ -272,6 +283,163 @@ export function getEconomyDebugSummary(state) {
       foodOutputMultiplier
     },
     districtModifiers
+  };
+}
+
+export function getEconomyTopContributorsSummary(state) {
+  const tradeGoodsGoldMultiplier = getTradeGoodsGoldMultiplier(state);
+  const goldOutputMultiplier = getGoldOutputMultiplier(state);
+  const foodOutputMultiplier = getFoodOutputMultiplier(state);
+  const workforceSummary = getWorkforceSummary(state);
+  const gold = [];
+  const food = [];
+  const materials = [];
+  const salvage = [];
+  const mana = [];
+
+  for (const building of state.buildings) {
+    if (!building.isComplete || building.isRuined) {
+      continue;
+    }
+
+    const placementBonus = getBuildingPlacementBonuses(state, building);
+    const placementMultiplier = 1 + placementBonus.totalPercent;
+    const workforceMultiplier = getBuildingWorkforceMultiplier(building, workforceSummary);
+
+    let goldAmount = applyBuildingWorkforceToResource(building.resourceRates.gold, workforceMultiplier) * building.multiplier * placementMultiplier;
+    if (goldAmount > 0 && building.tags?.includes("trade")) {
+      goldAmount *= tradeGoodsGoldMultiplier;
+    }
+    if (goldAmount > 0) {
+      goldAmount *= goldOutputMultiplier;
+    }
+    if (Math.abs(goldAmount) > 0.005) {
+      gold.push({
+        label: building.displayName,
+        channel: "Building",
+        amount: Number(goldAmount)
+      });
+    }
+
+    let foodAmount = applyBuildingWorkforceToResource(building.resourceRates.food, workforceMultiplier) * building.multiplier * placementMultiplier;
+    if (foodAmount > 0) {
+      foodAmount *= foodOutputMultiplier;
+    }
+    if (Math.abs(foodAmount) > 0.005) {
+      food.push({
+        label: building.displayName,
+        channel: "Building",
+        amount: Number(foodAmount)
+      });
+    }
+
+    const materialsAmount = applyBuildingWorkforceToResource(building.resourceRates.materials, workforceMultiplier) * building.multiplier * placementMultiplier;
+    if (Math.abs(materialsAmount) > 0.005) {
+      materials.push({
+        label: building.displayName,
+        channel: "Building",
+        amount: Number(materialsAmount)
+      });
+    }
+
+    const salvageAmount = applyBuildingWorkforceToResource(building.resourceRates.salvage ?? 0, workforceMultiplier) * building.multiplier * placementMultiplier;
+    if (Math.abs(salvageAmount) > 0.005) {
+      salvage.push({
+        label: building.displayName,
+        channel: "Building",
+        amount: Number(salvageAmount)
+      });
+    }
+
+    const manaAmount = applyBuildingWorkforceToResource(building.resourceRates.mana, workforceMultiplier) * building.multiplier * placementMultiplier;
+    if (Math.abs(manaAmount) > 0.005) {
+      mana.push({
+        label: building.displayName,
+        channel: "Building",
+        amount: Number(manaAmount)
+      });
+    }
+  }
+
+  for (const [citizenClass, count] of Object.entries(state.citizens)) {
+    const citizenDefinition = state.citizenDefinitions[citizenClass];
+    const goldAmount = ((citizenDefinition.production?.gold ?? 0) * count * goldOutputMultiplier) - ((citizenDefinition.consumption?.gold ?? 0) * count);
+    const foodAmount = ((citizenDefinition.production?.food ?? 0) * count * foodOutputMultiplier) - ((citizenDefinition.consumption?.food ?? 0) * count);
+    const materialsAmount = ((citizenDefinition.production?.materials ?? 0) * count) - ((citizenDefinition.consumption?.materials ?? 0) * count);
+    const salvageAmount = ((citizenDefinition.production?.salvage ?? 0) * count) - ((citizenDefinition.consumption?.salvage ?? 0) * count);
+    const manaAmount = ((citizenDefinition.production?.mana ?? 0) * count) - ((citizenDefinition.consumption?.mana ?? 0) * count);
+
+    if (Math.abs(goldAmount) > 0.005) {
+      gold.push({ label: citizenClass, channel: "Citizens", amount: Number(goldAmount) });
+    }
+    if (Math.abs(foodAmount) > 0.005) {
+      food.push({ label: citizenClass, channel: "Citizens", amount: Number(foodAmount) });
+    }
+    if (Math.abs(materialsAmount) > 0.005) {
+      materials.push({ label: citizenClass, channel: "Citizens", amount: Number(materialsAmount) });
+    }
+    if (Math.abs(salvageAmount) > 0.005) {
+      salvage.push({ label: citizenClass, channel: "Citizens", amount: Number(salvageAmount) });
+    }
+    if (Math.abs(manaAmount) > 0.005) {
+      mana.push({ label: citizenClass, channel: "Citizens", amount: Number(manaAmount) });
+    }
+  }
+
+  for (const event of state.events.active) {
+    const goldAmount = Number(event.effects?.goldFlat ?? 0);
+    const foodAmount = Number(event.effects?.foodFlat ?? 0);
+    const materialsAmount = Number(event.effects?.materialsFlat ?? 0);
+    const salvageAmount = Number(event.effects?.salvageFlat ?? 0);
+    const manaAmount = Number(event.effects?.manaFlat ?? 0);
+    if (Math.abs(goldAmount) > 0.005) {
+      gold.push({ label: event.title ?? event.name ?? "Event", channel: "Event", amount: goldAmount });
+    }
+    if (Math.abs(foodAmount) > 0.005) {
+      food.push({ label: event.title ?? event.name ?? "Event", channel: "Event", amount: foodAmount });
+    }
+    if (Math.abs(materialsAmount) > 0.005) {
+      materials.push({ label: event.title ?? event.name ?? "Event", channel: "Event", amount: materialsAmount });
+    }
+    if (Math.abs(salvageAmount) > 0.005) {
+      salvage.push({ label: event.title ?? event.name ?? "Event", channel: "Event", amount: salvageAmount });
+    }
+    if (Math.abs(manaAmount) > 0.005) {
+      mana.push({ label: event.title ?? event.name ?? "Event", channel: "Event", amount: manaAmount });
+    }
+  }
+
+  const focus = getCurrentTownFocus(state);
+  if (focus?.resourceDaily) {
+    const focusLabel = focus.name ?? "Town Focus";
+    const goldAmount = Number(focus.resourceDaily.gold ?? 0);
+    const foodAmount = Number(focus.resourceDaily.food ?? 0);
+    const materialsAmount = Number(focus.resourceDaily.materials ?? 0);
+    const salvageAmount = Number(focus.resourceDaily.salvage ?? 0);
+    const manaAmount = Number(focus.resourceDaily.mana ?? 0);
+    if (Math.abs(goldAmount) > 0.005) {
+      gold.push({ label: focusLabel, channel: "Focus", amount: goldAmount });
+    }
+    if (Math.abs(foodAmount) > 0.005) {
+      food.push({ label: focusLabel, channel: "Focus", amount: foodAmount });
+    }
+    if (Math.abs(materialsAmount) > 0.005) {
+      materials.push({ label: focusLabel, channel: "Focus", amount: materialsAmount });
+    }
+    if (Math.abs(salvageAmount) > 0.005) {
+      salvage.push({ label: focusLabel, channel: "Focus", amount: salvageAmount });
+    }
+    if (Math.abs(manaAmount) > 0.005) {
+      mana.push({ label: focusLabel, channel: "Focus", amount: manaAmount });
+    }
+  }
+
+  return {
+    gold: gold.sort(sortContributionRows).slice(0, 5),
+    food: food.sort(sortContributionRows).slice(0, 5),
+    materials: materials.sort(sortContributionRows).slice(0, 5),
+    salvage: salvage.sort(sortContributionRows).slice(0, 5),
+    mana: mana.sort(sortContributionRows).slice(0, 5)
   };
 }
 

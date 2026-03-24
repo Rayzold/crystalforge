@@ -1,9 +1,9 @@
 import { RARITY_RANKS } from "../content/Rarities.js";
 import { roundTo } from "../engine/Utils.js";
 
-const GENERAL_OUTPUT_FLOOR = 0.4;
-const SPECIALIST_OUTPUT_FLOOR = 0.85;
-const SPECIALIST_DEMAND_SHARE = 0.5;
+const GENERAL_OUTPUT_FLOOR = 0.25;
+const SPECIALIST_OUTPUT_FLOOR = 0.7;
+const SPECIALIST_DEMAND_SHARE = 0.65;
 
 const WORKFORCE_DEMAND_BY_RANK = {
   1: 2,
@@ -246,22 +246,39 @@ export function getBuildingWorkforceStatus(building, workforceSummary) {
   };
 }
 
-export function getConstructionWorkforceSupportBpd(building, workforceSummary) {
-  if (!building || !workforceSummary) {
-    return 0;
+export function getConstructionWorkforceSupportBpd(workforceSummary) {
+  if (!workforceSummary) {
+    return {
+      generalSupportBpd: 0,
+      specialistSupportBpdByCategory: {},
+      overflowSupportBpd: 0,
+      totalSupportBpd: 0
+    };
   }
 
-  const category = getBuildingWorkforceCategory(building);
   const generalExcess = Math.max(0, Number(workforceSummary.generalSupply ?? 0) - Number(workforceSummary.generalDemand ?? 0));
-  const specialistExcess = Math.max(
-    0,
-    Number(workforceSummary.specialistSupply?.[category] ?? 0) - Number(workforceSummary.specialistDemand?.[category] ?? 0)
-  );
-  const generalSupport = Math.floor(generalExcess / 8);
-  const specialistSupport = Math.floor(specialistExcess / 4);
-  const overflowSupport = Math.floor(Math.sqrt(generalExcess + specialistExcess) / 2);
+  const specialistSupportBpdByCategory = {};
+  let totalSpecialistExcess = 0;
 
-  return Math.max(0, generalSupport + specialistSupport + overflowSupport);
+  for (const category of Object.keys(SPECIALIST_WORKFORCE_WEIGHTS)) {
+    const specialistExcess = Math.max(
+      0,
+      Number(workforceSummary.specialistSupply?.[category] ?? 0) - Number(workforceSummary.specialistDemand?.[category] ?? 0)
+    );
+    totalSpecialistExcess += specialistExcess;
+    specialistSupportBpdByCategory[category] = Math.floor(specialistExcess / 4);
+  }
+
+  const generalSupportBpd = Math.floor(generalExcess / 8);
+  const overflowSupportBpd = Math.floor(Math.sqrt(generalExcess + totalSpecialistExcess) / 2);
+  const specialistSupportBpd = Object.values(specialistSupportBpdByCategory).reduce((sum, value) => sum + value, 0);
+
+  return {
+    generalSupportBpd,
+    specialistSupportBpdByCategory,
+    overflowSupportBpd,
+    totalSupportBpd: Math.max(0, generalSupportBpd + specialistSupportBpd + overflowSupportBpd)
+  };
 }
 
 export function applyBuildingWorkforceToResource(value, multiplier) {
