@@ -49,9 +49,11 @@ function formatFlowList(entries, emptyLabel) {
               <strong>${formatSigned(entry.value)}</strong>
             </li>
           `
-        )
-        .join("")}
-    </ul>
+                      : etaDetails?.accelerationApplied
+                        ? "Incubation acceleration is active and consuming the listed daily resources."
+                        : etaDetails?.accelerationReasons?.length
+                          ? `Acceleration offline: ${etaDetails.accelerationReasons.join(", ")}.`
+                          : "Incubation is healthy at its normal daily speed."
   `;
 }
 

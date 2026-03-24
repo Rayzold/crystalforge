@@ -25,10 +25,10 @@ function renderQueueItem(state, building, index, activeCount) {
         <small>${
           isActive
             ? etaDetails.isStalled
-              ? `Stalled / ${escapeHtml(etaDetails.stallReasons.join(", ") || "insufficient resources")} / Support build points pause at reserve thresholds`
+              ? `Stalled / ${escapeHtml(etaDetails.stallReasons.join(", ") || "incubation is offline")}`
               : `${formatNumber(etaDetails.totalBpd, 1)} build points/day / ${formatNumber(etaDetails.dailyPercent, 2)}% quality per day / ${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"} / Ready ${escapeHtml(eta)}`
             : etaDetails.isStalled
-              ? `If activated: stalled / ${escapeHtml(etaDetails.stallReasons.join(", ") || "insufficient resources")}`
+              ? `If activated: stalled / ${escapeHtml(etaDetails.stallReasons.join(", ") || "incubation is offline")}`
               : `If activated: ${formatNumber(etaDetails.totalBpd, 1)} build points/day / ${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"} / Ready ${escapeHtml(eta)}`
         }</small>
       </div>

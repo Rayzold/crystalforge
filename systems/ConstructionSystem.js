@@ -13,9 +13,10 @@ export { getDriftConstructionSlots };
 const BASE_INCUBATION_BPD = 10;
 const CONSTRUCTION_BONUS_THRESHOLDS = {
   materials: 100,
-  salvage: 50,
-  mana: 1
+  mana: 10
 };
+const INCUBATOR_ACCELERATION_MULTIPLIER = 2;
+const SUPPORT_ACCELERATION_MULTIPLIER = 1.5;
 
 function sortConstructionPriority(left, right) {
   if (right.quality !== left.quality) {
@@ -61,32 +62,24 @@ function getBuildPointsPerPercent(buildingOrRarity) {
 }
 
 function getConstructionRequirementProfile(building) {
-  const tags = new Set(building.tags ?? []);
   const rank = getBuildingRank(building);
-  const requiresSalvage =
-    rank >= 2 &&
-    (
-      tags.has("industry") ||
-      tags.has("military") ||
-      tags.has("harbor") ||
-      tags.has("civic") ||
-      tags.has("culture") ||
-      tags.has("arcane") ||
-      tags.has("frontier")
-    );
+  const tags = new Set(building.tags ?? []);
+  const district = String(building.district ?? "");
+  const isArcaneOrFrontier = tags.has("arcane") || tags.has("frontier") || district === "Arcane District" || district === "Frontier District";
+  const isMilitary = tags.has("military") || district === "Military District";
+  const requiresSalvage = rank >= 3;
   const requiresMana =
-    tags.has("arcane") ||
-    tags.has("frontier") ||
-    (tags.has("religious") && rank >= 3);
+    isArcaneOrFrontier ||
+    (isMilitary && rank >= 5);
 
   return {
     rank,
     requiresSalvage,
     requiresMana,
     pointsPerPercent: getBuildPointsPerPercent(building),
-    materialPerPercent: rank ** 2,
-    salvagePerPercent: requiresSalvage ? rank ** 2 : 0,
-    manaPerPercent: requiresMana ? rank : 0
+    materialDailyCost: rank ** 2 * 10,
+    salvageDailyCost: requiresSalvage ? rank ** 2 * 10 : 0,
+    manaDailyCost: requiresMana ? rank * 2 : 0
   };
 }
 
@@ -112,32 +105,12 @@ function getEffectiveConstructionSupportBpd(state) {
   return rawSupportBpd + Math.floor(rawSupportBpd * extraMultiplier * 0.5);
 }
 
-function calculatePercentCost(profile, percent) {
+function getAccelerationDailyCosts(profile) {
   return {
-    materials: profile.materialPerPercent * percent,
-    salvage: profile.salvagePerPercent * percent,
-    mana: profile.manaPerPercent * percent
+    materials: profile.materialDailyCost,
+    salvage: profile.salvageDailyCost,
+    mana: profile.manaDailyCost
   };
-}
-
-function getMaxAffordablePercent(resourcePool, profile, reserveMode = false) {
-  const limits = [];
-
-  const materialReserve = reserveMode ? CONSTRUCTION_BONUS_THRESHOLDS.materials : 0;
-  const salvageReserve = reserveMode ? CONSTRUCTION_BONUS_THRESHOLDS.salvage : 0;
-  const manaReserve = reserveMode ? CONSTRUCTION_BONUS_THRESHOLDS.mana : 0;
-
-  limits.push(Math.max(0, resourcePool.materials - materialReserve) / profile.materialPerPercent);
-
-  if (profile.salvagePerPercent > 0) {
-    limits.push(Math.max(0, resourcePool.salvage - salvageReserve) / profile.salvagePerPercent);
-  }
-
-  if (profile.manaPerPercent > 0) {
-    limits.push(Math.max(0, resourcePool.mana - manaReserve) / profile.manaPerPercent);
-  }
-
-  return Math.max(0, Math.min(...limits));
 }
 
 function spendFromResourcePool(resourcePool, costs) {
@@ -151,13 +124,42 @@ function getStallReasons(profile, resourcePool) {
   if (resourcePool.materials <= 0) {
     reasons.push("materials depleted");
   }
-  if (profile.salvagePerPercent > 0 && resourcePool.salvage <= 0) {
+  if (profile.requiresSalvage && resourcePool.salvage <= 0) {
     reasons.push("salvage depleted");
   }
-  if (profile.manaPerPercent > 0 && resourcePool.mana <= 0) {
+  if (profile.requiresMana && resourcePool.mana <= 0) {
     reasons.push("mana depleted");
   }
   return reasons;
+}
+
+function getAccelerationStatus(profile, resourcePool) {
+  const dailyCosts = getAccelerationDailyCosts(profile);
+  const blockers = [];
+
+  if (resourcePool.materials <= CONSTRUCTION_BONUS_THRESHOLDS.materials) {
+    blockers.push(`materials must stay above ${CONSTRUCTION_BONUS_THRESHOLDS.materials}`);
+  } else if (resourcePool.materials - CONSTRUCTION_BONUS_THRESHOLDS.materials < dailyCosts.materials) {
+    blockers.push(`need ${dailyCosts.materials} materials beyond the ${CONSTRUCTION_BONUS_THRESHOLDS.materials} reserve`);
+  }
+
+  if (dailyCosts.salvage > 0 && resourcePool.salvage < dailyCosts.salvage) {
+    blockers.push(`need ${dailyCosts.salvage} salvage`);
+  }
+
+  if (dailyCosts.mana > 0) {
+    if (resourcePool.mana <= CONSTRUCTION_BONUS_THRESHOLDS.mana) {
+      blockers.push(`mana must stay above ${CONSTRUCTION_BONUS_THRESHOLDS.mana}`);
+    } else if (resourcePool.mana - CONSTRUCTION_BONUS_THRESHOLDS.mana < dailyCosts.mana) {
+      blockers.push(`need ${dailyCosts.mana} mana beyond the ${CONSTRUCTION_BONUS_THRESHOLDS.mana} reserve`);
+    }
+  }
+
+  return {
+    isApplied: blockers.length === 0,
+    dailyCosts: blockers.length === 0 ? dailyCosts : { materials: 0, salvage: 0, mana: 0 },
+    blockers
+  };
 }
 
 function calculateConstructionDayDetails(building, state, resourcePool) {
@@ -168,15 +170,20 @@ function calculateConstructionDayDetails(building, state, resourcePool) {
   const baseBpd = BASE_INCUBATION_BPD * speedMultiplier;
   const rawSupportBpd = getCompletedConstructionSupportBuildingBpd(state);
   const supportBpd = getEffectiveConstructionSupportBpd(state);
+  const acceleration = getAccelerationStatus(profile, resourcePool);
+  const effectiveBaseBpd = baseBpd * (acceleration.isApplied ? INCUBATOR_ACCELERATION_MULTIPLIER : 1);
+  const effectiveSupportBpd = supportBpd * (acceleration.isApplied ? SUPPORT_ACCELERATION_MULTIPLIER : 1);
 
   if (remainingPercent <= 0) {
     return {
       rank: profile.rank,
       pointsPerPercent: profile.pointsPerPercent,
       remainingPercent,
-      baseBpd,
+      baseBpd: roundTo(baseBpd, 2),
+      effectiveBaseBpd: roundTo(effectiveBaseBpd, 2),
       rawSupportBpd,
       supportBpd,
+      effectiveSupportBpd: roundTo(effectiveSupportBpd, 2),
       totalBpd: 0,
       rate: 0,
       dailyPercent: 0,
@@ -187,35 +194,27 @@ function calculateConstructionDayDetails(building, state, resourcePool) {
       requiresMana: profile.requiresMana,
       isStalled: false,
       stallReasons: [],
+      accelerationApplied: acceleration.isApplied,
+      accelerationBlocked: false,
+      accelerationReasons: [],
       supportReserved: false,
       readyDayOffset: state.calendar.dayOffset,
       daysRemaining: 0
     };
   }
 
-  const baseTargetPercent = baseBpd / profile.pointsPerPercent;
+  const baseTargetPercent = effectiveBaseBpd / profile.pointsPerPercent;
   const basePercent = Math.min(remainingPercent, baseTargetPercent);
-
-  const baseAffordablePercent = getMaxAffordablePercent(resourcePool, profile, false);
-  const basePaidPercent = Math.min(basePercent, baseAffordablePercent);
-  const baseCosts = calculatePercentCost(profile, basePaidPercent);
-
-  const afterBasePool = { ...resourcePool };
-  spendFromResourcePool(afterBasePool, baseCosts);
-
-  const supportTargetPercent = supportBpd / profile.pointsPerPercent;
-  const supportAffordablePercent = getMaxAffordablePercent(afterBasePool, profile, true);
-  const supportPercent = Math.min(Math.max(0, remainingPercent - basePercent), supportTargetPercent, supportAffordablePercent);
-  const supportCosts = calculatePercentCost(profile, supportPercent);
-
+  const supportTargetPercent = effectiveSupportBpd / profile.pointsPerPercent;
+  const supportPercent = Math.min(Math.max(0, remainingPercent - basePercent), supportTargetPercent);
   const dailyPercent = roundTo(basePercent + supportPercent, 4);
   const dailyCosts = {
-    materials: roundTo(baseCosts.materials + supportCosts.materials, 4),
-    salvage: roundTo(baseCosts.salvage + supportCosts.salvage, 4),
-    mana: roundTo(baseCosts.mana + supportCosts.mana, 4)
+    materials: roundTo(acceleration.dailyCosts.materials, 4),
+    salvage: roundTo(acceleration.dailyCosts.salvage, 4),
+    mana: roundTo(acceleration.dailyCosts.mana, 4)
   };
   const totalBpd = roundTo(dailyPercent * profile.pointsPerPercent, 2);
-  const supportReserved = supportBpd > 0 && supportPercent < supportTargetPercent;
+  const supportReserved = !acceleration.isApplied && supportBpd > 0;
   const isStalled = dailyPercent <= 0;
 
   return {
@@ -223,8 +222,10 @@ function calculateConstructionDayDetails(building, state, resourcePool) {
     pointsPerPercent: profile.pointsPerPercent,
     remainingPercent,
     baseBpd: roundTo(baseBpd, 2),
+    effectiveBaseBpd: roundTo(effectiveBaseBpd, 2),
     rawSupportBpd,
     supportBpd,
+    effectiveSupportBpd: roundTo(effectiveSupportBpd, 2),
     totalBpd,
     rate: roundTo(dailyPercent, 4),
     dailyPercent: roundTo(dailyPercent, 4),
@@ -235,6 +236,9 @@ function calculateConstructionDayDetails(building, state, resourcePool) {
     requiresMana: profile.requiresMana,
     isStalled,
     stallReasons: isStalled ? getStallReasons(profile, resourcePool) : [],
+    accelerationApplied: acceleration.isApplied,
+    accelerationBlocked: !acceleration.isApplied,
+    accelerationReasons: acceleration.blockers,
     supportReserved
   };
 }
