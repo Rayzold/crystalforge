@@ -13,6 +13,7 @@ import {
   isBuildingActivelyConstructed
 } from "../systems/ConstructionSystem.js";
 import { getEmergencyStatus } from "../systems/ResourceSystem.js";
+import { getWorkforceCategoryLabel, getWorkforceSummary } from "../systems/WorkforceSystem.js";
 import { getVisibleBuildings, renderBuildingGrid } from "./BuildingGrid.js";
 import { renderCalendarPanel } from "./CalendarPanel.js";
 import { renderDistrictPanel } from "./DistrictPanel.js";
@@ -89,6 +90,59 @@ function renderTownStatistics(state) {
             `
           )
           .join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderWorkforcePanel(state) {
+  const workforce = getWorkforceSummary(state);
+  const specialistEntries = Object.entries(workforce.specialistDemand)
+    .filter(([, demand]) => demand > 0)
+    .sort((left, right) => right[1] - left[1]);
+
+  return `
+    <section class="panel workforce-panel">
+      <div class="panel__header">
+        <div>
+          <h3>Workforce</h3>
+          <span class="panel__subtle">General labor sets the floor. Specialists sharpen each district role.</span>
+        </div>
+        <span class="workforce-panel__headline">Base Output x${formatNumber(workforce.generalMultiplier ?? 1, 2)}</span>
+      </div>
+      <div class="workforce-panel__overview">
+        <article class="workforce-panel__stat">
+          <span>General Supply</span>
+          <strong>${formatNumber(workforce.generalSupply ?? 0, 1)}</strong>
+          <small>Weighted workforce available now</small>
+        </article>
+        <article class="workforce-panel__stat">
+          <span>General Demand</span>
+          <strong>${formatNumber(workforce.generalDemand ?? 0, 1)}</strong>
+          <small>Completed building demand</small>
+        </article>
+        <article class="workforce-panel__stat">
+          <span>General Staffing</span>
+          <strong>${formatNumber((workforce.generalRatio ?? 1) * 100, 0)}%</strong>
+          <small>General multiplier x${formatNumber(workforce.generalMultiplier ?? 1, 2)}</small>
+        </article>
+      </div>
+      <div class="workforce-panel__specialists">
+        ${
+          specialistEntries.length
+            ? specialistEntries
+                .map(([category, demand]) => `
+                  <article class="workforce-panel__role-card ${(workforce.specialistMultipliers?.[category] ?? 1) < 0.999 ? "is-constrained" : ""}">
+                    <div>
+                      <span>${escapeHtml(getWorkforceCategoryLabel(category))}</span>
+                      <strong>${formatNumber((workforce.specialistRatios?.[category] ?? 1) * 100, 0)}%</strong>
+                    </div>
+                    <small>Supply ${formatNumber(workforce.specialistSupply?.[category] ?? 0, 1)} / Demand ${formatNumber(demand, 1)} / x${formatNumber(workforce.specialistMultipliers?.[category] ?? 1, 2)}</small>
+                  </article>
+                `)
+                .join("")
+            : `<p class="empty-state">No active buildings are currently drawing workforce demand.</p>`
+        }
       </div>
     </section>
   `;
@@ -171,6 +225,7 @@ function renderBuildingsView(state) {
         <div class="city-workspace__filters city-workspace__filters--quick">
           <button class="button button--ghost city-filter ${quickFilter === "All" ? "is-active" : ""}" data-action="set-building-quick-filter" data-filter="All">All</button>
           <button class="button button--ghost city-filter ${quickFilter === "Pinned" ? "is-active" : ""}" data-action="set-building-quick-filter" data-filter="Pinned">Pinned</button>
+          <button class="button button--ghost city-filter ${quickFilter === "Understaffed" ? "is-active" : ""}" data-action="set-building-quick-filter" data-filter="Understaffed">Understaffed</button>
           <button class="button button--ghost city-filter ${quickFilter === "Stalled" ? "is-active" : ""}" data-action="set-building-quick-filter" data-filter="Stalled">Stalled</button>
           <button class="button button--ghost city-filter ${quickFilter === "Consuming Input" ? "is-active" : ""}" data-action="set-building-quick-filter" data-filter="Consuming Input">Needs Input</button>
           <button class="button button--ghost city-filter ${quickFilter === "Produces Gold" ? "is-active" : ""}" data-action="set-building-quick-filter" data-filter="Produces Gold">Gold</button>
@@ -215,12 +270,13 @@ function renderBuildingsView(state) {
                     .map(
                       (building, index) => {
                         const etaDetails = getConstructionEtaDetails(building, state);
+                        const workforceSupportReadout = Number(etaDetails?.workforceSupportBpd ?? 0) > 0 ? ` / Staff +${formatNumber(etaDetails.workforceSupportBpd, 1)} BPD` : "";
                         return `
                         <article class="city-incubation-strip__item ${isBuildingActivelyConstructed(state, building.id) ? "is-active" : ""}" title="${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}">
                           <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
                           <span>${escapeHtml(formatNumber(building.quality, 1))}% quality</span>
                           <em>Slot ${index + 1}</em>
-                          <small>${etaDetails.isStalled ? "Incubation stalled" : `${formatNumber(etaDetails.totalBpd, 1)} build points/day / ${formatNumber(etaDetails.dailyPercent, 2)}% quality per day`}</small>
+                          <small>${etaDetails.isStalled ? "Incubation stalled" : `${formatNumber(etaDetails.totalBpd, 1)} build points/day${workforceSupportReadout} / ${formatNumber(etaDetails.dailyPercent, 2)}% quality per day`}</small>
                           <small>${
                             etaDetails.daysRemaining === null
                               ? escapeHtml(etaDetails.stallReasons.join(", ") || "insufficient resources")
@@ -251,6 +307,7 @@ function renderBuildingsView(state) {
                     ${waiting
                       .map((building, index) => {
                         const etaDetails = getConstructionEtaDetails(building, state);
+                        const workforceSupportReadout = Number(etaDetails?.workforceSupportBpd ?? 0) > 0 ? ` / Staff +${formatNumber(etaDetails.workforceSupportBpd, 1)} BPD` : "";
                         return `
                           <article class="city-incubation-strip__item" title="${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}">
                             <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
@@ -259,7 +316,7 @@ function renderBuildingsView(state) {
                             <small>${
                               etaDetails.isStalled
                                 ? "Cannot progress with current reserves"
-                                : `If incubated: ${formatNumber(etaDetails.totalBpd, 1)} build points/day / ${formatNumber(etaDetails.dailyPercent, 2)}% quality per day / ${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"}`
+                                : `If incubated: ${formatNumber(etaDetails.totalBpd, 1)} build points/day${workforceSupportReadout} / ${formatNumber(etaDetails.dailyPercent, 2)}% quality per day / ${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"}`
                             }</small>
                             <small>${
                               etaDetails.readyDayOffset === null
@@ -401,6 +458,7 @@ export function renderCityPage(state) {
     content: `
       <section class="city-command-screen">
         ${renderTownStatistics(state)}
+        ${renderWorkforcePanel(state)}
         ${renderCityModes(state)}
       </section>
     `

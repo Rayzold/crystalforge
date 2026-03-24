@@ -3,6 +3,7 @@ import { getBuildingEconomySummary } from "../content/BuildingCatalog.js";
 import { RARITY_ORDER } from "../content/Rarities.js";
 import { sortBuildings } from "../engine/Utils.js";
 import { getActiveConstructionQueue, getConstructionEtaDetails, getDriftConstructionSlots, isBuildingActivelyConstructed } from "../systems/ConstructionSystem.js";
+import { getBuildingWorkforceStatus, getWorkforceSummary } from "../systems/WorkforceSystem.js";
 import { renderBuildingCard } from "./BuildingCard.js";
 
 function getPinnedBuildingIds(state) {
@@ -70,12 +71,15 @@ function matchesQuickFilter(building, state, quickFilter) {
   }
 
   const economySummary = getBuildingEconomySummary(building);
+  const workforceSummary = getWorkforceSummary(state);
 
   switch (quickFilter) {
     case "Pinned":
       return Boolean(state.settings?.pinnedBuildingIds?.includes(building.id));
     case "Stalled":
       return !building.isComplete && getConstructionEtaDetails(building, state).isStalled;
+    case "Understaffed":
+      return getBuildingWorkforceStatus(building, workforceSummary).totalMultiplier < 0.999;
     case "Consuming Input":
       return economySummary.consumes.some((entry) => entry.key !== "upkeep");
     case "Produces Gold":
@@ -118,6 +122,7 @@ export function renderBuildingGrid(state, options = {}) {
   const mainGrid = limit == null ? visibleBuildings : visibleBuildings.slice(0, limit);
   const activeConstruction = getActiveConstructionQueue(state);
   const constructionSlots = getDriftConstructionSlots(state);
+  const workforceSummary = getWorkforceSummary(state);
 
   return `
     <section class="panel building-grid-panel ${className}">
@@ -143,7 +148,7 @@ export function renderBuildingGrid(state, options = {}) {
           : ""
       }
       <div class="building-grid ${className ? `${className}__grid` : ""}">
-        ${mainGrid.length ? mainGrid.map((building) => renderBuildingCard(building, state)).join("") : `<p class="empty-state">No buildings yet. Manifest your first structure.</p>`}
+        ${mainGrid.length ? mainGrid.map((building) => renderBuildingCard(building, state, workforceSummary)).join("") : `<p class="empty-state">No buildings yet. Manifest your first structure.</p>`}
       </div>
     </section>
   `;

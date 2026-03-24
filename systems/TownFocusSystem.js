@@ -261,7 +261,8 @@ export function getSuggestedFocusForAlert(state, alertKey) {
     gold: "trade-drive",
     mana: "crystal-expedition",
     morale: "civic-restoration",
-    housing: "civic-restoration"
+    housing: "civic-restoration",
+    workforce: "civic-restoration"
   };
   const focusId = mapping[alertKey];
   return focusId ? TOWN_FOCUS_DEFINITIONS[focusId] ?? null : null;

@@ -7,6 +7,11 @@ import { scalePopulationSupport } from "./DriftEvolutionSystem.js";
 import { getBuildingPlacementBonuses } from "./MapSystem.js";
 import { getCurrentTownFocus } from "./TownFocusSystem.js";
 import { getGoodsOutputMultiplier, getHousingStrainPenalty } from "./CityConditionSystem.js";
+import {
+  applyBuildingWorkforceToStat,
+  getBuildingWorkforceMultiplier,
+  getWorkforceSummary
+} from "./WorkforceSystem.js";
 
 const EMPTY_CITY_STATS = {
   goods: 0,
@@ -36,15 +41,17 @@ export function recalculateCityStats(state) {
   const nextStats = structuredClone(EMPTY_CITY_STATS);
   let rawPopulationSupport = 0;
   const goodsOutputMultiplier = getGoodsOutputMultiplier(state);
+  const workforceSummary = getWorkforceSummary(state);
 
   for (const building of state.buildings) {
     if (!building.isComplete || building.isRuined) {
       continue;
     }
     const placementMultiplier = 1 + getBuildingPlacementBonuses(state, building).totalPercent;
+    const workforceMultiplier = getBuildingWorkforceMultiplier(building, workforceSummary);
     for (const [key, value] of Object.entries(building.stats)) {
       const normalizedKey = key === "value" ? "goods" : key;
-      const statContribution = value * building.multiplier * placementMultiplier;
+      const statContribution = applyBuildingWorkforceToStat(key, value, workforceMultiplier) * building.multiplier * placementMultiplier;
       nextStats[normalizedKey] =
         (nextStats[normalizedKey] ?? 0) +
         (normalizedKey === "goods" && statContribution > 0 ? statContribution * goodsOutputMultiplier : statContribution);
@@ -105,14 +112,15 @@ export function recalculateCityStats(state) {
       .reduce(
         (record, building) => {
           const placementMultiplier = 1 + getBuildingPlacementBonuses(state, building).totalPercent;
-          let goldIncome = Math.max(0, building.resourceRates.gold) * building.multiplier * placementMultiplier;
+          const workforceMultiplier = getBuildingWorkforceMultiplier(building, workforceSummary);
+          let goldIncome = Math.max(0, applyBuildingWorkforceToStat("gold", building.resourceRates.gold, workforceMultiplier)) * building.multiplier * placementMultiplier;
           if (goldIncome > 0 && building.tags?.includes("trade")) {
             goldIncome *= getTradeGoodsGoldMultiplier(state);
           }
           record.gold += goldIncome;
-          record.food += Math.max(0, building.resourceRates.food) * building.multiplier * placementMultiplier;
-          record.materials += Math.max(0, building.resourceRates.materials) * building.multiplier * placementMultiplier;
-          record.mana += Math.max(0, building.resourceRates.mana) * building.multiplier * placementMultiplier;
+          record.food += Math.max(0, applyBuildingWorkforceToStat("food", building.resourceRates.food, workforceMultiplier)) * building.multiplier * placementMultiplier;
+          record.materials += Math.max(0, applyBuildingWorkforceToStat("materials", building.resourceRates.materials, workforceMultiplier)) * building.multiplier * placementMultiplier;
+          record.mana += Math.max(0, applyBuildingWorkforceToStat("mana", building.resourceRates.mana, workforceMultiplier)) * building.multiplier * placementMultiplier;
           return record;
         },
         { gold: 0, food: 0, materials: 0, mana: 0 }

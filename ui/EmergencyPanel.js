@@ -35,6 +35,11 @@ export function renderEmergencyPanel(state) {
         ${renderRunway("Food runway", emergencyState.runway.foodDays, emergencyState.deltas.food)}
         ${renderRunway("Gold runway", emergencyState.runway.goldDays, emergencyState.deltas.gold)}
         ${renderRunway("Mana runway", emergencyState.runway.manaDays, emergencyState.deltas.mana)}
+        <article class="emergency-panel__metric ${(emergencyState.workforce?.staffingRatio ?? 1) < 0.8 ? ((emergencyState.workforce?.staffingRatio ?? 1) < 0.55 ? "is-critical" : "is-warning") : ""}">
+          <span>Workforce</span>
+          <strong>${formatNumber((emergencyState.workforce?.staffingRatio ?? 1) * 100, 0)}%</strong>
+          <small>${(emergencyState.workforce?.staffingRatio ?? 1) < 0.8 ? "Staffing is suppressing output" : "Staffing is healthy"}</small>
+        </article>
         <article class="emergency-panel__metric ${state.cityStats.morale <= 18 ? "is-warning" : ""}">
           <span>Morale</span>
           <strong>${formatNumber(state.cityStats.morale, 1)}</strong>

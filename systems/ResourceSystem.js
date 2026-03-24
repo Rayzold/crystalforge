@@ -7,6 +7,11 @@ import { getDistrictSummary } from "./DistrictSystem.js";
 import { getBuildingPlacementBonuses } from "./MapSystem.js";
 import { getCurrentTownFocus } from "./TownFocusSystem.js";
 import {
+  applyBuildingWorkforceToResource,
+  getBuildingWorkforceMultiplier,
+  getWorkforceSummary
+} from "./WorkforceSystem.js";
+import {
   getEventRollModifier,
   getFoodOutputMultiplier,
   getGoldOutputMultiplier
@@ -42,6 +47,7 @@ export function calculateDailyResourceDelta(state) {
   const tradeGoodsGoldMultiplier = getTradeGoodsGoldMultiplier(state);
   const goldOutputMultiplier = getGoldOutputMultiplier(state);
   const foodOutputMultiplier = getFoodOutputMultiplier(state);
+  const workforceSummary = getWorkforceSummary(state);
 
   for (const building of state.buildings) {
     if (!building.isComplete || building.isRuined) {
@@ -50,8 +56,9 @@ export function calculateDailyResourceDelta(state) {
 
     const placementBonus = getBuildingPlacementBonuses(state, building);
     const placementMultiplier = 1 + placementBonus.totalPercent;
+    const workforceMultiplier = getBuildingWorkforceMultiplier(building, workforceSummary);
 
-    let goldDelta = building.resourceRates.gold * building.multiplier * placementMultiplier;
+    let goldDelta = applyBuildingWorkforceToResource(building.resourceRates.gold, workforceMultiplier) * building.multiplier * placementMultiplier;
     if (goldDelta > 0 && building.tags?.includes("trade")) {
       goldDelta *= tradeGoodsGoldMultiplier;
     }
@@ -60,15 +67,15 @@ export function calculateDailyResourceDelta(state) {
     }
 
     deltas.gold += goldDelta;
-    let foodDelta = building.resourceRates.food * building.multiplier * placementMultiplier;
+    let foodDelta = applyBuildingWorkforceToResource(building.resourceRates.food, workforceMultiplier) * building.multiplier * placementMultiplier;
     if (foodDelta > 0) {
       foodDelta *= foodOutputMultiplier;
     }
     deltas.food += foodDelta;
-    deltas.materials += building.resourceRates.materials * building.multiplier * placementMultiplier;
-    deltas.salvage += (building.resourceRates.salvage ?? 0) * building.multiplier * placementMultiplier;
-    deltas.mana += building.resourceRates.mana * building.multiplier * placementMultiplier;
-    deltas.prosperity += building.stats.prosperity * 0.02 * building.multiplier * placementMultiplier;
+    deltas.materials += applyBuildingWorkforceToResource(building.resourceRates.materials, workforceMultiplier) * building.multiplier * placementMultiplier;
+    deltas.salvage += applyBuildingWorkforceToResource(building.resourceRates.salvage ?? 0, workforceMultiplier) * building.multiplier * placementMultiplier;
+    deltas.mana += applyBuildingWorkforceToResource(building.resourceRates.mana, workforceMultiplier) * building.multiplier * placementMultiplier;
+    deltas.prosperity += applyBuildingWorkforceToResource(building.stats.prosperity * 0.02, workforceMultiplier) * building.multiplier * placementMultiplier;
   }
 
   for (const [citizenClass, count] of Object.entries(state.citizens)) {
@@ -160,6 +167,7 @@ export function getEconomyDebugSummary(state) {
   const tradeGoodsGoldMultiplier = getTradeGoodsGoldMultiplier(state);
   const goldOutputMultiplier = getGoldOutputMultiplier(state);
   const foodOutputMultiplier = getFoodOutputMultiplier(state);
+  const workforceSummary = getWorkforceSummary(state);
 
   for (const building of state.buildings) {
     if (!building.isComplete || building.isRuined) {
@@ -169,8 +177,9 @@ export function getEconomyDebugSummary(state) {
     const placementBonus = getBuildingPlacementBonuses(state, building);
     const placementMultiplier = 1 + placementBonus.totalPercent;
     const nextDelta = createDeltaRecord();
+    const workforceMultiplier = getBuildingWorkforceMultiplier(building, workforceSummary);
 
-    let goldDelta = building.resourceRates.gold * building.multiplier * placementMultiplier;
+    let goldDelta = applyBuildingWorkforceToResource(building.resourceRates.gold, workforceMultiplier) * building.multiplier * placementMultiplier;
     if (goldDelta > 0 && building.tags?.includes("trade")) {
       goldDelta *= tradeGoodsGoldMultiplier;
     }
@@ -179,15 +188,15 @@ export function getEconomyDebugSummary(state) {
     }
     nextDelta.gold += goldDelta;
 
-    let foodDelta = building.resourceRates.food * building.multiplier * placementMultiplier;
+    let foodDelta = applyBuildingWorkforceToResource(building.resourceRates.food, workforceMultiplier) * building.multiplier * placementMultiplier;
     if (foodDelta > 0) {
       foodDelta *= foodOutputMultiplier;
     }
     nextDelta.food += foodDelta;
-    nextDelta.materials += building.resourceRates.materials * building.multiplier * placementMultiplier;
-    nextDelta.salvage += (building.resourceRates.salvage ?? 0) * building.multiplier * placementMultiplier;
-    nextDelta.mana += building.resourceRates.mana * building.multiplier * placementMultiplier;
-    nextDelta.prosperity += building.stats.prosperity * 0.02 * building.multiplier * placementMultiplier;
+    nextDelta.materials += applyBuildingWorkforceToResource(building.resourceRates.materials, workforceMultiplier) * building.multiplier * placementMultiplier;
+    nextDelta.salvage += applyBuildingWorkforceToResource(building.resourceRates.salvage ?? 0, workforceMultiplier) * building.multiplier * placementMultiplier;
+    nextDelta.mana += applyBuildingWorkforceToResource(building.resourceRates.mana, workforceMultiplier) * building.multiplier * placementMultiplier;
+    nextDelta.prosperity += applyBuildingWorkforceToResource(building.stats.prosperity * 0.02, workforceMultiplier) * building.multiplier * placementMultiplier;
     addDeltaInto(buildingProduction, nextDelta);
   }
 
@@ -281,12 +290,18 @@ function roundDisplayNumber(value, decimals = 2) {
   return Math.round(Number(value) * factor) / factor;
 }
 
+function formatPercent(value) {
+  return `${roundDisplayNumber((Number(value ?? 0) || 0) * 100, 0)}%`;
+}
+
 export function getEmergencyStatus(state) {
   const deltas = calculateDailyResourceDelta(state);
   const emergencies = [];
   const foodRunwayDays = getRunwayDays(state.resources.food, deltas.food);
   const goldRunwayDays = getRunwayDays(state.resources.gold, deltas.gold);
   const manaRunwayDays = getRunwayDays(state.resources.mana, deltas.mana);
+  const workforceSummary = getWorkforceSummary(state);
+  const incompleteBuildings = state.buildings.filter((building) => !building.isComplete && !building.isRuined).length;
   const housingGap = roundDisplayNumber(
     Math.max(0, state.resources.population - (state.cityStats.populationSupport ?? 0)),
     2
@@ -339,6 +354,19 @@ export function getEmergencyStatus(state) {
     });
   }
 
+  if ((workforceSummary.generalDemand ?? 0) > 0 && (workforceSummary.generalRatio ?? 1) < 0.8) {
+    const severity = (workforceSummary.generalRatio ?? 1) < 0.55 ? "critical" : "warning";
+    const incubationDetail = incompleteBuildings > 0
+      ? " Excess staffing is too thin to strongly boost incubation support right now."
+      : "";
+    emergencies.push({
+      key: "workforce",
+      severity,
+      label: "Workforce strain",
+      details: `${formatPercent(workforceSummary.generalRatio)} of general staffing demand is covered, reducing staffed building output.${incubationDetail}`
+    });
+  }
+
   return {
     deltas,
     emergencies,
@@ -346,6 +374,11 @@ export function getEmergencyStatus(state) {
       foodDays: foodRunwayDays,
       goldDays: goldRunwayDays,
       manaDays: manaRunwayDays
+    },
+    workforce: {
+      supply: workforceSummary.generalSupply ?? 0,
+      demand: workforceSummary.generalDemand ?? 0,
+      staffingRatio: workforceSummary.generalRatio ?? 1
     }
   };
 }

@@ -570,6 +570,12 @@ function applyProblemFocus(problemKey) {
       patch.cityMode = "administration";
       patch.cityAdminView = "readouts";
       break;
+    case "workforce":
+      patch.cityMode = "buildings";
+      patch.cityBuildingView = "stream";
+      patch.buildingStatusFilter = "All";
+      patch.buildingQuickFilter = "Understaffed";
+      break;
     case "morale":
       patch.cityMode = "administration";
       patch.cityAdminView = "operations";

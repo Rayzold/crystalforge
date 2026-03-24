@@ -2,6 +2,7 @@ import { getBuildingEconomySummary, getBuildingEmoji } from "../content/Building
 import { RARITY_COLORS } from "../content/Rarities.js";
 import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
+import { getFoodOutputMultiplier, getGoldOutputMultiplier } from "../systems/CityConditionSystem.js";
 import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js";
 import {
   getConstructionEtaDetails,
@@ -10,6 +11,8 @@ import {
   isBuildingActivelyConstructed
 } from "../systems/ConstructionSystem.js";
 import { getBuildingPlacementBonuses } from "../systems/MapSystem.js";
+import { getTradeGoodsGoldMultiplier } from "../systems/ResourceSystem.js";
+import { applyBuildingWorkforceToResource, getBuildingWorkforceStatus, getBuildingWorkforceMultiplier, getWorkforceSummary } from "../systems/WorkforceSystem.js";
 import { renderBuildingArt } from "./BuildingArt.js";
 import { renderModal } from "./Modal.js";
 
@@ -49,11 +52,9 @@ function formatFlowList(entries, emptyLabel) {
               <strong>${formatSigned(entry.value)}</strong>
             </li>
           `
-                      : etaDetails?.accelerationApplied
-                        ? "Incubation acceleration is active and consuming the listed daily resources."
-                        : etaDetails?.accelerationReasons?.length
-                          ? `Acceleration offline: ${etaDetails.accelerationReasons.join(", ")}.`
-                          : "Incubation is healthy at its normal daily speed."
+        )
+        .join("")}
+    </ul>
   `;
 }
 
@@ -70,6 +71,32 @@ function getSignatureReadout(building) {
 function getQualityMultiplierReadout(building) {
   const multiplier = getBuildingMultiplier(building?.quality ?? 0);
   return `${formatBuildingExactQualityDisplay(building)}${multiplier > 1 ? ` · ${multiplier}x` : ""}`;
+}
+
+function getEffectiveRateSummary(building, state, workforceSummary, placementBonus) {
+  const workforceMultiplier = getBuildingWorkforceMultiplier(building, workforceSummary);
+  const placementMultiplier = 1 + placementBonus.totalPercent;
+  const tradeGoodsGoldMultiplier = getTradeGoodsGoldMultiplier(state);
+  const goldOutputMultiplier = getGoldOutputMultiplier(state);
+  const foodOutputMultiplier = getFoodOutputMultiplier(state);
+
+  return Object.entries(building.resourceRates ?? {})
+    .map(([resource, value]) => {
+      let nextValue = applyBuildingWorkforceToResource(value, workforceMultiplier) * building.multiplier * placementMultiplier;
+      if (resource === "gold" && nextValue > 0 && building.tags?.includes("trade")) {
+        nextValue *= tradeGoodsGoldMultiplier;
+      }
+      if (resource === "gold" && nextValue > 0) {
+        nextValue *= goldOutputMultiplier;
+      }
+      if (resource === "food" && nextValue > 0) {
+        nextValue *= foodOutputMultiplier;
+      }
+      return { key: `${resource}/day`, value: nextValue };
+    })
+    .filter((entry) => Math.abs(entry.value) > 0.05)
+    .sort((left, right) => Math.abs(right.value) - Math.abs(left.value))
+    .slice(0, 4);
 }
 
 export function renderBuildingDetailModal(state, pageKey) {
@@ -93,6 +120,9 @@ export function renderBuildingDetailModal(state, pageKey) {
   const placementBonus = getBuildingPlacementBonuses(state, building);
   const signatureReadout = getSignatureReadout(building);
   const economySummary = getBuildingEconomySummary(building);
+  const workforceSummary = getWorkforceSummary(state);
+  const workforceStatus = getBuildingWorkforceStatus(building, workforceSummary);
+  const effectiveRateSummary = getEffectiveRateSummary(building, state, workforceSummary, placementBonus);
   const buildingEmoji = getBuildingEmoji(building);
   const artMarkup = renderBuildingArt(
     building.imagePath,
@@ -131,6 +161,7 @@ export function renderBuildingDetailModal(state, pageKey) {
             <span class="detail-chip">${isRuined ? "Ruined" : building.isComplete ? escapeHtml(formatBuildingQualityDisplay(building)) : "Inactive"}</span>
             <span class="detail-chip">${escapeHtml(getQualityMultiplierReadout(building))}</span>
             <span class="detail-chip">${building.mapPosition ? `Hex ${building.mapPosition.q}, ${building.mapPosition.r}` : "Unplaced"}</span>
+            ${workforceStatus.totalMultiplier < 0.999 ? `<span class="detail-chip detail-chip--warning">Understaffed</span>` : ""}
           </div>
           <div class="building-detail__actions">
             <button class="button" data-action="select-building" data-building-id="${building.id}">Select Building</button>
@@ -150,6 +181,19 @@ export function renderBuildingDetailModal(state, pageKey) {
           <h4>Building Role</h4>
           <p class="building-detail__role-line">${escapeHtml(`${economySummary.role.emoji} ${economySummary.role.label} - ${economySummary.role.detail}`)}</p>
           <div class="building-detail__chips">${renderTagRow(building.tags)}</div>
+        </section>
+
+        <section class="building-detail__panel">
+          <h4>Workforce</h4>
+          <ul class="building-detail__facts">
+            <li><span>Role Crew</span><strong>${escapeHtml(workforceStatus.categoryLabel)}</strong></li>
+            <li><span>Total Multiplier</span><strong>x${formatNumber(workforceStatus.totalMultiplier ?? 1, 2)}</strong></li>
+            <li><span>General Staffing</span><strong>${formatNumber((workforceStatus.generalRatio ?? 1) * 100, 0)}%</strong></li>
+            <li><span>Specialist Staffing</span><strong>${formatNumber((workforceStatus.specialistRatio ?? 1) * 100, 0)}%</strong></li>
+            <li><span>General Demand</span><strong>${formatNumber(workforceStatus.demand ?? 0, 1)}</strong></li>
+            <li><span>Specialist Demand</span><strong>${formatNumber(workforceStatus.specialistDemand ?? 0, 1)}</strong></li>
+          </ul>
+          <p class="building-detail__status-note">${escapeHtml(workforceStatus.note)}</p>
         </section>
 
         <section class="building-detail__panel">
@@ -180,6 +224,7 @@ export function renderBuildingDetailModal(state, pageKey) {
             <li><span>Progress</span><strong>${isIncomplete ? `${formatNumber(etaDetails?.dailyPercent ?? 0, 2)}% quality / day` : "Finished"}</strong></li>
             <li><span>Forecast</span><strong>${building.isComplete ? escapeHtml(building.completedAt ?? "Completed") : escapeHtml(eta ?? "Waiting for a slot")}</strong></li>
             <li><span>Drift Queue</span><strong>${building.isComplete ? "Finished" : isActiveConstruction ? `Active within ${driftSlots} slots` : `Queued #${queuePosition + 1}`}</strong></li>
+            <li><span>Support Mix</span><strong>${isIncomplete ? `Structures ${formatNumber(etaDetails?.buildingSupportBpd ?? 0, 1)} / Staff ${formatNumber(etaDetails?.workforceSupportBpd ?? 0, 1)}` : "Not needed"}</strong></li>
             <li><span>Daily Drain</span><strong>${
               isIncomplete
                 ? `M ${formatNumber(etaDetails?.dailyCosts?.materials ?? 0, 1)} / S ${formatNumber(etaDetails?.dailyCosts?.salvage ?? 0, 1)} / Mn ${formatNumber(etaDetails?.dailyCosts?.mana ?? 0, 1)}`
@@ -190,10 +235,12 @@ export function renderBuildingDetailModal(state, pageKey) {
             isIncomplete
               ? `<p class="building-detail__status-note">${escapeHtml(
                   etaDetails?.isStalled
-                    ? `Why stalled: ${etaDetails?.stallReasons?.join(", ") || "insufficient stock to support incubation."}`
-                    : etaDetails?.supportReserved
-                      ? "Support build points are partially throttled because reserve thresholds are being protected."
-                      : "Incubation is healthy and receiving its current daily support."
+                    ? `Why stalled: ${etaDetails?.stallReasons?.join(", ") || "incubation is offline."}`
+                    : etaDetails?.accelerationApplied
+                      ? "Incubation acceleration is active and consuming the listed daily resources."
+                      : etaDetails?.accelerationReasons?.length
+                        ? `Acceleration offline: ${etaDetails.accelerationReasons.join(", ")}.`
+                        : "Incubation is healthy at its normal daily speed."
                 )}</p>`
               : economySummary.supportBpd
                 ? `<p class="building-detail__status-note">This active building contributes ${formatNumber(economySummary.supportBpd * (building.multiplier || 1), 0)} support build points/day to all incubators at its current stage.</p>`
@@ -212,6 +259,16 @@ export function renderBuildingDetailModal(state, pageKey) {
         </section>
 
         <section class="building-detail__panel">
+          <h4>Effective Output</h4>
+          ${
+            effectiveRateSummary.length
+              ? `<ul class="building-detail__list">${renderList(Object.fromEntries(effectiveRateSummary.map((entry) => [entry.key, entry.value])), isIncomplete)}</ul>`
+              : `<p class="empty-state">No strong staffed daily flow.</p>`
+          }
+          <p class="building-detail__status-note">Shown after workforce, placement, and city output multipliers.</p>
+        </section>
+
+        <section class="building-detail__panel">
           <h4>Consumes / Produces</h4>
           <div class="building-detail__flow-grid">
             <div>
@@ -226,6 +283,11 @@ export function renderBuildingDetailModal(state, pageKey) {
           ${
             economySummary.supportBpd
               ? `<p class="building-detail__status-note">Construction support: ${formatNumber(economySummary.supportBpd, 0)} base build points/day before stage scaling.</p>`
+              : ""
+          }
+          ${
+            isIncomplete && (etaDetails?.workforceSupportBpd ?? 0) > 0
+              ? `<p class="building-detail__status-note">Excess workforce adds ${formatNumber(etaDetails.workforceSupportBpd, 1)} build points/day to this incubation lane before speed scaling.</p>`
               : ""
           }
         </section>

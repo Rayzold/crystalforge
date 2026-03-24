@@ -13,6 +13,7 @@ function renderQueueItem(state, building, index, activeCount) {
   const isActive = index < activeCount;
   const etaDetails = getConstructionEtaDetails(building, state);
   const eta = etaDetails?.readyDayOffset !== null ? formatDate(etaDetails.readyDayOffset) : "Stalled";
+  const workforceSupportReadout = Number(etaDetails?.workforceSupportBpd ?? 0) > 0 ? ` / Staff +${formatNumber(etaDetails.workforceSupportBpd, 1)} BPD` : "";
 
   return `
     <article class="construction-queue__item ${isActive ? "is-active" : "is-queued"}" title="${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}">
@@ -26,10 +27,10 @@ function renderQueueItem(state, building, index, activeCount) {
           isActive
             ? etaDetails.isStalled
               ? `Stalled / ${escapeHtml(etaDetails.stallReasons.join(", ") || "incubation is offline")}`
-              : `${formatNumber(etaDetails.totalBpd, 1)} build points/day / ${formatNumber(etaDetails.dailyPercent, 2)}% quality per day / ${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"} / Ready ${escapeHtml(eta)}`
+              : `${formatNumber(etaDetails.totalBpd, 1)} build points/day${workforceSupportReadout} / ${formatNumber(etaDetails.dailyPercent, 2)}% quality per day / ${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"} / Ready ${escapeHtml(eta)}`
             : etaDetails.isStalled
               ? `If activated: stalled / ${escapeHtml(etaDetails.stallReasons.join(", ") || "incubation is offline")}`
-              : `If activated: ${formatNumber(etaDetails.totalBpd, 1)} build points/day / ${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"} / Ready ${escapeHtml(eta)}`
+              : `If activated: ${formatNumber(etaDetails.totalBpd, 1)} build points/day${workforceSupportReadout} / ${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"} / Ready ${escapeHtml(eta)}`
         }</small>
       </div>
       <div class="construction-queue__actions">

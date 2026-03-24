@@ -10,8 +10,11 @@ import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate, getNextHoliday, getStructuredDate } from "../systems/CalendarSystem.js";
 import { formatBuildingExactQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js";
 import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js";
-import { getCityTrendSummary, getResourceChainSummary } from "../systems/ResourceSystem.js";
+import { getTradeGoodsGoldMultiplier, getCityTrendSummary, getResourceChainSummary } from "../systems/ResourceSystem.js";
+import { getFoodOutputMultiplier, getGoldOutputMultiplier } from "../systems/CityConditionSystem.js";
+import { getBuildingPlacementBonuses } from "../systems/MapSystem.js";
 import { getMayorAdvice } from "../systems/TownFocusSystem.js";
+import { applyBuildingWorkforceToResource, getBuildingWorkforceStatus, getBuildingWorkforceMultiplier, getWorkforceSummary } from "../systems/WorkforceSystem.js";
 import { renderCrystalSelector } from "./CrystalSelector.js";
 import { createHelpBubble } from "./HelpBubbles.js";
 import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js";
@@ -357,7 +360,36 @@ function getQualityMultiplierReadout(building) {
   return `${formatBuildingExactQualityDisplay(building)}${multiplier > 1 ? ` · ${multiplier}x` : ""}`;
 }
 
+function getPlayerEffectiveRateSummary(building, state, workforceSummary) {
+  const workforceMultiplier = getBuildingWorkforceMultiplier(building, workforceSummary);
+  const placementMultiplier = 1 + getBuildingPlacementBonuses(state, building).totalPercent;
+  const tradeGoodsGoldMultiplier = getTradeGoodsGoldMultiplier(state);
+  const goldOutputMultiplier = getGoldOutputMultiplier(state);
+  const foodOutputMultiplier = getFoodOutputMultiplier(state);
+  const entries = Object.entries(building.resourceRates ?? {})
+    .map(([resource, value]) => {
+      let nextValue = applyBuildingWorkforceToResource(value, workforceMultiplier) * building.multiplier * placementMultiplier;
+      if (resource === "gold" && nextValue > 0 && building.tags?.includes("trade")) {
+        nextValue *= tradeGoodsGoldMultiplier;
+      }
+      if (resource === "gold" && nextValue > 0) {
+        nextValue *= goldOutputMultiplier;
+      }
+      if (resource === "food" && nextValue > 0) {
+        nextValue *= foodOutputMultiplier;
+      }
+      return [resource, nextValue];
+    })
+    .filter(([, value]) => Math.abs(value) > 0.05)
+    .sort((left, right) => Math.abs(right[1]) - Math.abs(left[1]))
+    .slice(0, 2)
+    .map(([resource, value]) => `${resource} ${value >= 0 ? "+" : ""}${formatNumber(value, 1)}`);
+
+  return entries.length ? entries.join(" / ") : "No strong daily flow";
+}
+
 function renderManifestedList(title, subtitle, buildings, emptyText, state) {
+  const workforceSummary = getWorkforceSummary(state);
   return `
     <section class="panel player-list player-list--manifested">
       <div class="panel__header">
@@ -371,17 +403,21 @@ function renderManifestedList(title, subtitle, buildings, emptyText, state) {
           ? `
             <div class="player-list__items">
               ${buildings
-                .map(
-                  (building) => `
+                .map((building) => {
+                  const workforceStatus = getBuildingWorkforceStatus(building, workforceSummary);
+                  const effectiveRateSummary = getPlayerEffectiveRateSummary(building, state, workforceSummary);
+                  return `
                     <article class="player-list__item ${state.transientUi?.recentBuildingChanges?.[building.id] ? "is-recently-changed" : ""}" title="${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}">
                       <div class="player-list__copy">
                         <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
                         <span>${escapeHtml(building.rarity)} / ${escapeHtml(building.district ?? "Unassigned")}</span>
+                        ${workforceStatus.totalMultiplier < 0.999 ? `<div class="player-list__badges"><span class="status-badge status-badge--warning">Understaffed</span></div>` : ""}
+                        <small>Effective flow: ${escapeHtml(effectiveRateSummary)} | Workforce x${formatNumber(workforceStatus.totalMultiplier ?? 1, 2)}</small>
                       </div>
                       <em>${escapeHtml(getQualityMultiplierReadout(building))}</em>
                     </article>
-                  `
-                )
+                  `;
+                })
                 .join("")}
             </div>
           `
@@ -392,6 +428,7 @@ function renderManifestedList(title, subtitle, buildings, emptyText, state) {
 }
 
 function renderIncubationList(title, subtitle, buildings, emptyText, variant, state) {
+  const workforceSummary = getWorkforceSummary(state);
   return `
     <section class="panel player-list player-list--${variant}">
       <div class="panel__header">
@@ -407,17 +444,20 @@ function renderIncubationList(title, subtitle, buildings, emptyText, variant, st
               ${buildings
                 .map((building) => {
                   const etaDetails = getConstructionEtaDetails(building, state);
+                  const workforceStatus = getBuildingWorkforceStatus(building, workforceSummary);
                   const readyLabel = etaDetails.readyDayOffset === null ? "Unavailable" : formatDate(etaDetails.readyDayOffset);
+                  const workforceSupportReadout = Number(etaDetails?.workforceSupportBpd ?? 0) > 0 ? ` | Staff +${formatNumber(etaDetails.workforceSupportBpd, 1)} BPD` : "";
 
                   return `
                     <article class="player-list__item ${state.transientUi?.recentBuildingChanges?.[building.id] ? "is-recently-changed" : ""}" title="${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}">
                       <div class="player-list__copy">
                         <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
                         <span>${escapeHtml(building.rarity)} / ${escapeHtml(building.district ?? "Unassigned")}</span>
+                        ${workforceStatus.totalMultiplier < 0.999 ? `<div class="player-list__badges"><span class="status-badge status-badge--warning">Understaffed</span></div>` : ""}
                         <small>${
                           etaDetails.isStalled
                             ? `${formatNumber(building.quality, 0)}% quality now | Stalled | Why: ${escapeHtml(etaDetails.stallReasons.join(", ") || "insufficient resources")}`
-                            : `${formatNumber(building.quality, 0)}% quality now | ${formatNumber(etaDetails.totalBpd, 1)} build points/day | ${formatNumber(etaDetails.dailyPercent, 2)}% quality per day | ${formatNumber(etaDetails.daysRemaining, 1)}d | Ready ${escapeHtml(readyLabel)}`
+                            : `${formatNumber(building.quality, 0)}% quality now | ${formatNumber(etaDetails.totalBpd, 1)} build points/day${workforceSupportReadout} | ${formatNumber(etaDetails.dailyPercent, 2)}% quality per day | ${formatNumber(etaDetails.daysRemaining, 1)}d | Ready ${escapeHtml(readyLabel)}`
                         }</small>
                       </div>
                       <div class="player-list__actions">

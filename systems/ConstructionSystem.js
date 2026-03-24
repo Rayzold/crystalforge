@@ -7,6 +7,7 @@ import { RARITY_BUILD_POINTS_PER_PERCENT, RARITY_RANKS } from "../content/Rariti
 import { roundTo } from "../engine/Utils.js";
 import { getDriftConstructionSlots, getDriftConstructionSpeedMultiplier } from "./DriftEvolutionSystem.js";
 import { getBuildingMultiplier } from "./BuildingSystem.js";
+import { getConstructionWorkforceSupportBpd, getWorkforceSummary } from "./WorkforceSystem.js";
 
 export { getDriftConstructionSlots };
 
@@ -168,8 +169,14 @@ function calculateConstructionDayDetails(building, state, resourcePool) {
   const profile = getConstructionRequirementProfile(building);
   const speedMultiplier = getConstructionSpeedMultiplier(state);
   const baseBpd = BASE_INCUBATION_BPD * speedMultiplier;
-  const rawSupportBpd = getCompletedConstructionSupportBuildingBpd(state);
-  const supportBpd = getEffectiveConstructionSupportBpd(state);
+  const workforceSummary = getWorkforceSummary(state);
+  const buildingSupportBpd = getCompletedConstructionSupportBuildingBpd(state);
+  const workforceSupportBpd = getConstructionWorkforceSupportBpd(building, workforceSummary);
+  const rawSupportBpd = buildingSupportBpd + workforceSupportBpd;
+  const supportBpd = (() => {
+    const extraMultiplier = Math.max(0, speedMultiplier - 1);
+    return rawSupportBpd + Math.floor(rawSupportBpd * extraMultiplier * 0.5);
+  })();
   const acceleration = getAccelerationStatus(profile, resourcePool);
   const effectiveBaseBpd = baseBpd * (acceleration.isApplied ? INCUBATOR_ACCELERATION_MULTIPLIER : 1);
   const effectiveSupportBpd = supportBpd * (acceleration.isApplied ? SUPPORT_ACCELERATION_MULTIPLIER : 1);
@@ -181,6 +188,8 @@ function calculateConstructionDayDetails(building, state, resourcePool) {
       remainingPercent,
       baseBpd: roundTo(baseBpd, 2),
       effectiveBaseBpd: roundTo(effectiveBaseBpd, 2),
+      buildingSupportBpd: roundTo(buildingSupportBpd, 2),
+      workforceSupportBpd: roundTo(workforceSupportBpd, 2),
       rawSupportBpd,
       supportBpd,
       effectiveSupportBpd: roundTo(effectiveSupportBpd, 2),
@@ -223,6 +232,8 @@ function calculateConstructionDayDetails(building, state, resourcePool) {
     remainingPercent,
     baseBpd: roundTo(baseBpd, 2),
     effectiveBaseBpd: roundTo(effectiveBaseBpd, 2),
+    buildingSupportBpd: roundTo(buildingSupportBpd, 2),
+    workforceSupportBpd: roundTo(workforceSupportBpd, 2),
     rawSupportBpd,
     supportBpd,
     effectiveSupportBpd: roundTo(effectiveSupportBpd, 2),

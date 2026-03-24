@@ -81,6 +81,12 @@ function findBestBuildingForAlert(state, alertKey) {
           Math.max(0, building.citizenEffects.populationSupport) * building.multiplier +
           (building.tags.includes("housing") ? 6 : 0)
         );
+      case "workforce":
+        return (
+          Math.max(0, building.citizenEffects.populationSupport) * building.multiplier +
+          Math.max(0, building.stats.prosperity) * 0.25 * building.multiplier +
+          (building.tags.includes("housing") || building.tags.includes("civic") ? 6 : 0)
+        );
       default:
         return 0;
     }

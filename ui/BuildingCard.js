@@ -9,6 +9,7 @@ import {
   isBuildingActivelyConstructed
 } from "../systems/ConstructionSystem.js";
 import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js";
+import { getBuildingWorkforceStatus } from "../systems/WorkforceSystem.js";
 import { renderBuildingArt } from "./BuildingArt.js";
 import { renderUiIcon } from "./UiIcons.js";
 
@@ -89,6 +90,14 @@ function getQualityMultiplierReadout(building) {
   return `${formatBuildingExactQualityDisplay(building)}${multiplier > 1 ? ` · ${multiplier}x` : ""}`;
 }
 
+function getConstructionSupportReadout(etaDetails) {
+  if (!etaDetails || etaDetails.isStalled) {
+    return "";
+  }
+  const workforceSupport = Number(etaDetails.workforceSupportBpd ?? 0);
+  return workforceSupport > 0 ? ` / Staff +${formatNumber(workforceSupport, 1)} BPD` : "";
+}
+
 function getInputWarnings(building, state, etaDetails, economySummary) {
   const warnings = [];
   if (etaDetails?.isStalled) {
@@ -129,7 +138,7 @@ function getBuildingSignature(building) {
   return signatures[primaryTag] ?? ["building", "Structure"];
 }
 
-export function renderBuildingCard(building, state) {
+export function renderBuildingCard(building, state, workforceSummary = null) {
   const buildingEmoji = getBuildingEmoji(building);
   const selected = state.ui.selectedBuildingId === building.id;
   const isRecentlyChanged = Boolean(state.transientUi?.recentBuildingChanges?.[building.id]);
@@ -152,6 +161,7 @@ export function renderBuildingCard(building, state) {
     .slice(0, 2);
   const compactStatus = getCompactStatus(building, { isIncomplete, isActiveConstruction, queuePosition, driftSlots, eta });
   const inputWarnings = getInputWarnings(building, state, etaDetails, economySummary);
+  const workforceStatus = getBuildingWorkforceStatus(building, workforceSummary);
 
   return `
     <article class="building-card building-card--stream ${selected ? "is-selected" : ""} ${isIncomplete ? "is-incomplete" : ""} ${isRuined ? "is-ruined" : ""} ${isRecentlyChanged ? "is-recently-changed" : ""} ${isPinned ? "is-pinned" : ""}" style="--rarity-color:${RARITY_COLORS[building.rarity]}">
@@ -184,6 +194,11 @@ export function renderBuildingCard(building, state) {
           <span>${building.isComplete ? escapeHtml(getQualityMultiplierReadout(building)) : `Quality ${escapeHtml(formatBuildingQualityDisplay(building))}`}</span>
           <span>${isRuined ? "Ruined" : building.isComplete ? "Complete" : "Incomplete"}</span>
         </div>
+        ${
+          workforceStatus.isManaged && workforceStatus.totalMultiplier < 0.999
+            ? `<div class="building-card__badges"><span class="status-badge status-badge--warning">Understaffed</span></div>`
+            : ""
+        }
         <div class="progress-bar"><span style="width:${progressPercent}%"></span></div>
         <div class="building-card__meta building-card__meta--compact">
           <span>${
@@ -192,11 +207,19 @@ export function renderBuildingCard(building, state) {
               : isIncomplete
                 ? etaDetails?.isStalled
                   ? "Incubation stalled"
-                  : `${formatNumber(etaDetails?.totalBpd ?? 0, 1)} build points/day / ${formatNumber(etaDetails?.dailyPercent ?? 0, 2)}% quality per day`
+                  : `${formatNumber(etaDetails?.totalBpd ?? 0, 1)} build points/day${getConstructionSupportReadout(etaDetails)} / ${formatNumber(etaDetails?.dailyPercent ?? 0, 2)}% quality per day`
                 : `Completed ${escapeHtml(building.completedAt ?? "today")}`
           }</span>
           <span>${escapeHtml(building.district)}</span>
         </div>
+        ${
+          workforceStatus.isManaged
+            ? `<div class="building-card__meta building-card__meta--compact building-card__meta--workforce ${workforceStatus.totalMultiplier < 0.999 ? "is-constrained" : ""}">
+                <span>Workforce x${formatNumber(workforceStatus.totalMultiplier, 2)} · General ${formatNumber(workforceStatus.generalRatio * 100, 0)}%</span>
+                <span>${escapeHtml(workforceStatus.categoryLabel)} ${formatNumber(workforceStatus.specialistRatio * 100, 0)}%</span>
+              </div>`
+            : ""
+        }
         <div class="building-card__spotlights">
           ${topStats
             .map(
@@ -216,6 +239,11 @@ export function renderBuildingCard(building, state) {
             ? `<div class="building-card__warning-strip">${inputWarnings
                 .map((warning) => `<span>${escapeHtml(warning)}</span>`)
                 .join("")}</div>`
+            : ""
+        }
+        ${
+          workforceStatus.isManaged && workforceStatus.totalMultiplier < 0.999
+            ? `<div class="building-card__warning-strip building-card__warning-strip--workforce"><span>${escapeHtml(workforceStatus.note)}</span></div>`
             : ""
         }
         <div class="building-card__resource-strip">

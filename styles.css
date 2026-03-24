@@ -1167,6 +1167,46 @@ textarea {
   padding-top: 2px;
 }
 
+.building-card__meta--workforce span:last-child {
+  text-align: right;
+}
+
+.building-card__meta--workforce.is-constrained span:first-child {
+  color: #f1c785;
+}
+
+.building-card__badges,
+.player-list__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-inline: 12px;
+}
+
+.player-list__badges {
+  padding-inline: 0;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(241, 247, 255, 0.9);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.status-badge--warning,
+.detail-chip--warning {
+  border-color: rgba(255, 184, 112, 0.28);
+  background: linear-gradient(180deg, rgba(255, 184, 112, 0.14), rgba(255, 124, 157, 0.08));
+  color: rgba(255, 228, 196, 0.92);
+}
+
 .building-card__spotlight {
   padding: 8px 10px;
   border-radius: 12px;
@@ -1285,6 +1325,12 @@ textarea {
 .building-card__meta span,
 .building-card__warning-strip span {
   line-height: 1.45;
+}
+
+.building-card__warning-strip--workforce {
+  margin-top: 8px;
+  background: linear-gradient(180deg, rgba(241, 199, 133, 0.1), rgba(255, 255, 255, 0.03));
+  border-color: rgba(241, 199, 133, 0.22);
 }
 
 .admin-debug-meta {
@@ -1837,6 +1883,79 @@ textarea {
   margin-top: 6px;
   color: var(--muted);
   font-size: 0.78rem;
+}
+
+.workforce-panel {
+  background:
+    radial-gradient(circle at top left, rgba(241, 199, 133, 0.1), transparent 24%),
+    linear-gradient(180deg, rgba(18, 17, 28, 0.94), rgba(11, 12, 20, 0.98));
+  border-color: rgba(241, 199, 133, 0.16);
+}
+
+.workforce-panel__headline {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(241, 199, 133, 0.22);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 241, 212, 0.9);
+  font-family: var(--display-font);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.workforce-panel__overview,
+.workforce-panel__specialists {
+  display: grid;
+  gap: 12px;
+}
+
+.workforce-panel__overview {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 14px;
+}
+
+.workforce-panel__stat,
+.workforce-panel__role-card {
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.workforce-panel__stat span,
+.workforce-panel__role-card span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.workforce-panel__stat strong,
+.workforce-panel__role-card strong {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--display-font);
+  font-size: 1.2rem;
+  letter-spacing: 0.04em;
+}
+
+.workforce-panel__stat small,
+.workforce-panel__role-card small {
+  display: block;
+  margin-top: 8px;
+  color: rgba(223, 233, 247, 0.72);
+  line-height: 1.5;
+}
+
+.workforce-panel__specialists {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-top: 12px;
+}
+
+.workforce-panel__role-card.is-constrained {
+  border-color: rgba(241, 199, 133, 0.2);
+  background: linear-gradient(180deg, rgba(241, 199, 133, 0.08), rgba(255, 255, 255, 0.03));
 }
 
 .rolltable-review {
@@ -2760,6 +2879,10 @@ textarea {
   background: linear-gradient(180deg, rgba(141, 214, 255, 0.08), rgba(255, 255, 255, 0.03));
   color: rgba(223, 233, 247, 0.82);
   line-height: 1.5;
+}
+
+.building-detail__panel .building-detail__status-note + .building-detail__status-note {
+  margin-top: 10px;
 }
 
 .building-detail__spotlight strong,
