@@ -857,20 +857,11 @@ export class AdminConsole {
             </p>
             <div class="admin-actions">
               <button class="button button--ghost" data-admin-action="apply-bulk-building-images">Apply Bulk Image Paths</button>
-                    <small>${building.mapPosition ? escapeHtml(`Placed at ${building.mapPosition.q}, ${building.mapPosition.r}`) : "Unplaced"} · ${escapeHtml(`Quality ${formatBuildingQualityDisplay(building)}`)}</small>
-                  </div>
-                  <div class="admin-active-building-card__actions">
-                    <label class="admin-active-building-card__quality">
-                      <span>Quality %</span>
-                      <input id="active-building-quality-${building.id}" type="number" value="${Number(building.quality ?? 0)}" min="0" max="350" step="0.1" />
-                    </label>
-                    <button class="button button--ghost" data-admin-action="save-active-building-quality" data-building-id="${building.id}">
-                      Save Quality
-                    </button>
-                    <button class="button button--ghost" data-admin-action="remove-active-building" data-building-id="${building.id}">
-                      Unmanifest
-                    </button>
+            </div>
             <div class="admin-grid">
+              <label>Manifest Unmanifested Building<select id="manifest-building-select">${renderUnmanifestedBuildingOptions(state)}</select></label>
+              <label>Manifest Quality %<input id="manifest-building-quality" type="number" value="100" min="0" max="350" step="0.1" /></label>
+            </div>
             <div class="admin-actions">
               <button class="button" data-admin-action="manifest-unmanifested-building">Manifest Selected Unmanifested Building</button>
             </div>
