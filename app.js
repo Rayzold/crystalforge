@@ -1220,7 +1220,7 @@ async function handleManifest() {
   );
 
   const state = getCurrentState();
-  const quickManifestationsEnabled = Boolean(state.settings?.quickManifestations);
+  const quickManifestationsEnabled = state.settings?.quickManifestations === true;
   try {
     const result = commit((draft) => {
       const manifestResult = manifestSelectedRarity(draft, draft.selectedRarity);
@@ -1327,6 +1327,8 @@ function adjustShard({ mode, rarity, amount }) {
 }
 
 function setResources(nextResources) {
+  const currentState = getCurrentState();
+  const desiredGoods = Number(nextResources.goods);
   commit((draft) => {
     draft.resources.gold = Math.max(0, Number(nextResources.gold));
     draft.resources.food = Math.max(0, Number(nextResources.food));
@@ -1334,6 +1336,11 @@ function setResources(nextResources) {
     draft.resources.salvage = Math.max(0, Number(nextResources.salvage ?? draft.resources.salvage ?? 0));
     draft.resources.mana = Math.max(0, Number(nextResources.mana));
     draft.resources.prosperity = Math.max(0, Number(nextResources.prosperity));
+    if (Number.isFinite(desiredGoods)) {
+      const currentOverride = Number(currentState.adminOverrides?.goods ?? 0);
+      const currentBaseGoods = Math.max(0, Number(currentState.cityStats?.goods ?? 0) - currentOverride);
+      draft.adminOverrides.goods = desiredGoods - currentBaseGoods;
+    }
   });
   markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
   reportSuccess("Resources updated.");
@@ -2518,7 +2525,7 @@ root.addEventListener("click", async (event) => {
       break;
     case "toggle-quick-manifest":
       commit((draft) => {
-        draft.settings.quickManifestations = !draft.settings.quickManifestations;
+        draft.settings.quickManifestations = draft.settings.quickManifestations !== true;
       });
       break;
     case "advance-time": {

@@ -77,6 +77,9 @@ export function createInitialState(preset = DEFAULT_START_PRESET) {
     driftEvolution: createDefaultDriftEvolutionState(),
     townFocus: createDefaultTownFocusState(),
     sessionSnapshots: [],
+    adminOverrides: {
+      goods: 0
+    },
     settings: structuredClone(startState.settings),
     ui: {
       selectedBuildingId: null,
@@ -263,6 +266,10 @@ function normalizeSettings(sourceSettings, baseSettings) {
     ...baseSettings,
     ...(sourceSettings ?? {})
   };
+  normalized.muted = normalized.muted === true;
+  normalized.quickManifestations = normalized.quickManifestations === true;
+  normalized.onboardingDismissed = normalized.onboardingDismissed === true;
+  normalized.liveSessionView = normalized.liveSessionView === true;
   normalized.pinnedBuildingIds = Array.isArray(normalized.pinnedBuildingIds)
     ? [...new Set(normalized.pinnedBuildingIds.filter((id) => typeof id === "string" && id.trim()))]
     : [];
@@ -279,6 +286,15 @@ function normalizeSettings(sourceSettings, baseSettings) {
   delete normalized.firebaseAutoLoad;
   delete normalized.firebaseLiveSync;
   delete normalized.firebaseAutoPublish;
+  return normalized;
+}
+
+function normalizeAdminOverrides(sourceOverrides, baseOverrides) {
+  const normalized = {
+    ...baseOverrides,
+    ...(sourceOverrides ?? {})
+  };
+  normalized.goods = Number.isFinite(Number(normalized.goods)) ? Number(normalized.goods) : 0;
   return normalized;
 }
 
@@ -410,6 +426,7 @@ export function validateAndMigrateSave(rawSave) {
     driftEvolution: normalizeDriftEvolutionState(rawSave.driftEvolution, Array.isArray(rawSave.buildings) ? rawSave.buildings.length : 0),
     townFocus: normalizeTownFocusState(rawSave.townFocus),
     sessionSnapshots: Array.isArray(rawSave.sessionSnapshots) ? rawSave.sessionSnapshots : [],
+    adminOverrides: normalizeAdminOverrides(rawSave.adminOverrides, base.adminOverrides),
     settings: normalizeSettings(rawSave.settings, base.settings),
     ui: {
       ...base.ui,

@@ -34,7 +34,7 @@ function getTradeGoodsGoldMultiplier(state) {
   const goods = Math.max(0, Number(state.cityStats?.goods ?? 0) || 0);
   const excessGoods = Math.max(0, goods - 10);
   const bonusSteps = Math.floor(excessGoods / 10);
-  return 1 + Math.min(1, bonusSteps * 0.1);
+  return 1 + Math.min(0.6, bonusSteps * 0.08);
 }
 
 export function recalculateCityStats(state) {
@@ -69,6 +69,8 @@ export function recalculateCityStats(state) {
         (normalizedKey === "goods" && statContribution > 0 ? statContribution * goodsOutputMultiplier : statContribution);
     }
   }
+
+  nextStats.goods = Math.max(0, nextStats.goods + Number(state.adminOverrides?.goods ?? 0));
 
   const districtSummary = getDistrictSummary(state);
   state.districtSummary = districtSummary;

@@ -233,6 +233,8 @@ function renderManifestedBuildingAdminList(state) {
 function renderEconomyDebugTable(state) {
   const debug = getEconomyDebugSummary(state);
   const topContributors = getEconomyTopContributorsSummary(state);
+  const goodsTotal = Number(state.cityStats?.goods ?? 0);
+  const goodsOverride = Number(state.adminOverrides?.goods ?? 0);
   const renderContributorPills = (entries) => {
     if (!entries.length) {
       return '<span class="admin-contributor-pill admin-contributor-pill--neutral">none</span>';
@@ -280,6 +282,8 @@ function renderEconomyDebugTable(state) {
       <h3>Economy Debug</h3>
       <p>Use this to compare current stock against base building output, district bonuses, citizen flow, and event or focus modifiers.</p>
       <div class="admin-debug-meta">
+        <span>Goods: ${formatNumber(goodsTotal, 2)}</span>
+        <span>GM goods: ${goodsOverride >= 0 ? "+" : ""}${formatNumber(goodsOverride, 2)}</span>
         <span>Trade from goods: x${debug.modifiers.tradeGoodsGoldMultiplier.toFixed(2)}</span>
         <span>Gold output: x${debug.modifiers.goldOutputMultiplier.toFixed(2)}</span>
         <span>Food output: x${debug.modifiers.foodOutputMultiplier.toFixed(2)}</span>
@@ -455,7 +459,8 @@ export class AdminConsole {
             materials: this.getNumberInput("resource-materials"),
             salvage: this.getNumberInput("resource-salvage"),
             mana: this.getNumberInput("resource-mana"),
-            prosperity: this.getNumberInput("resource-prosperity")
+            prosperity: this.getNumberInput("resource-prosperity"),
+            goods: this.getNumberInput("resource-goods")
           });
           break;
         case "citizen-add":
@@ -766,8 +771,10 @@ export class AdminConsole {
               <label>Salvage<input id="resource-salvage" type="number" value="${state.resources.salvage ?? 0}" /></label>
               <label>Mana<input id="resource-mana" type="number" value="${state.resources.mana}" /></label>
               <label>Prosperity<input id="resource-prosperity" type="number" value="${state.resources.prosperity}" /></label>
+              <label>Goods<input id="resource-goods" type="number" value="${formatNumber(state.cityStats?.goods ?? 0, 2)}" step="0.1" /></label>
               <label>Population<input id="resource-population" type="number" value="${state.resources.population}" disabled /></label>
             </div>
+            <p class="admin-debug-note">Saving Goods applies a GM override on top of normal goods production.</p>
             <button class="button" data-admin-action="apply-resources">Apply Resources</button>
           </section>
           ${renderEconomyDebugTable(state)}

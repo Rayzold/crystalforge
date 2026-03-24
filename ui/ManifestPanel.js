@@ -6,7 +6,7 @@ export function renderManifestPanel(state) {
   const manifestInProgress = Boolean(state.transientUi?.manifestInProgress);
   const selectedCrystals = Number(state.crystals?.[state.selectedRarity] ?? 0);
   const canManifest = !manifestInProgress && selectedCrystals > 0;
-  const quickManifestationsEnabled = Boolean(state.settings?.quickManifestations);
+  const quickManifestationsEnabled = state.settings?.quickManifestations === true;
 
   return `
     <section class="panel manifest-panel">

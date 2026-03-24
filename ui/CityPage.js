@@ -12,7 +12,7 @@ import {
   getDriftConstructionSlots,
   isBuildingActivelyConstructed
 } from "../systems/ConstructionSystem.js";
-import { getEmergencyStatus } from "../systems/ResourceSystem.js";
+import { getEmergencyStatus, getTradeGoodsGoldMultiplier } from "../systems/ResourceSystem.js";
 import { getWorkforceCategoryLabel, getWorkforceSummary } from "../systems/WorkforceSystem.js";
 import { getVisibleBuildings, renderBuildingGrid } from "./BuildingGrid.js";
 import { renderCalendarPanel } from "./CalendarPanel.js";
@@ -21,7 +21,16 @@ import { renderEmergencyPanel } from "./EmergencyPanel.js";
 import { renderHexMap } from "./HexMap.js";
 import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js";
 import { renderResourcePanel } from "./ResourcePanel.js";
+import { renderTownFocusPanel } from "./TownFocusPanel.js";
 import { renderUiIcon } from "./UiIcons.js";
+
+function getTradeGoodsThreshold(goods) {
+  const normalizedGoods = Math.max(0, Number(goods ?? 0));
+  if (normalizedGoods <= 10) {
+    return 20;
+  }
+  return Math.ceil((normalizedGoods + 0.0001) / 10) * 10;
+}
 
 function renderTownStatistics(state) {
   const dailyNet = (state.cityStats.income ?? 0) - (state.cityStats.upkeep ?? 0);
@@ -30,12 +39,18 @@ function renderTownStatistics(state) {
   const nextHoliday = getNextHoliday(state.calendar.dayOffset);
   const nextHolidayAccentClass = nextHoliday ? getHolidayTypeClass(nextHoliday) : "";
   const nextHolidayGlyph = nextHoliday ? getHolidayGlyph(nextHoliday) : "✦";
+  const goodsTotal = Number(state.cityStats.goods ?? 0);
+  const tradeGoodsGoldMultiplier = getTradeGoodsGoldMultiplier(state);
+  const nextGoodsThreshold = getTradeGoodsThreshold(goodsTotal);
+  const goodsToNextThreshold = Math.max(0, nextGoodsThreshold - goodsTotal);
 
   const items = [
     ["Net Daily", `${dailyNet >= 0 ? "+" : ""}${formatNumber(dailyNet, 0)}g`, dailyNet >= 0 ? "positive" : "negative"],
     ["Population", formatNumber(state.resources.population ?? 0, 0), "population"],
     ["Food Stores", formatNumber(state.resources.food ?? 0, 0), "food"],
     ["Food Runway", foodRunway === null ? "Stable" : `${formatNumber(foodRunway, 1)}d`, foodRunway !== null && foodRunway <= 5 ? "negative" : "food"],
+    ["Goods", formatNumber(goodsTotal, 1), "goods"],
+    ["Trade Gold", `x${formatNumber(tradeGoodsGoldMultiplier, 2)}`, tradeGoodsGoldMultiplier > 1 ? "positive" : "goods"],
     ["Defense", formatNumber(state.cityStats.defense ?? 0, 0), "defense"],
     ["Morale", formatNumber(state.cityStats.morale ?? 0, 0), "morale"]
   ];
@@ -90,6 +105,14 @@ function renderTownStatistics(state) {
             `
           )
           .join("")}
+      </div>
+      <div class="panel__subtle">
+        ${
+          tradeGoodsGoldMultiplier > 1
+            ? `Trade-tagged gold buildings are currently earning at ${formatNumber((tradeGoodsGoldMultiplier - 1) * 100, 0)}% bonus from goods.`
+            : "Trade-tagged gold buildings gain their first bonus at 20 goods."
+        }
+        ${goodsToNextThreshold > 0 ? ` ${formatNumber(goodsToNextThreshold, 1)} more goods reaches the next trade bonus step.` : ""}
       </div>
     </section>
   `;
@@ -459,6 +482,7 @@ export function renderCityPage(state) {
       <section class="city-command-screen">
         ${renderTownStatistics(state)}
         ${renderWorkforcePanel(state)}
+        ${renderTownFocusPanel(state, { expanded: true })}
         ${renderCityModes(state)}
       </section>
     `

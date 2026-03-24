@@ -2436,8 +2436,14 @@ textarea {
 }
 
 .admin-root {
-  position: relative;
-  z-index: 5;
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  pointer-events: none;
+}
+
+.admin-root .modal {
+  pointer-events: auto;
 }
 
 .rolltable-editor-grid {
