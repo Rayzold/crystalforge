@@ -482,6 +482,7 @@ function renderIncubationList(title, subtitle, buildings, emptyText, variant, st
                   const workforceSupportReadout = Number(etaDetails?.workforceSupportBpd ?? 0) > 0 ? ` | Staff +${formatNumber(etaDetails.workforceSupportBpd, 1)} BPD` : "";
                   const supportMultiplier = Number(etaDetails?.incubatorSupportMultiplier ?? 1);
                   const supportReadout = supportMultiplier > 1 ? ` | Support x${formatNumber(supportMultiplier, 2)}` : "";
+                  const supportBonusLabel = building.heroSupport && building.expertSupport ? "+150% Support" : building.heroSupport ? "+100% Support" : building.expertSupport ? "+50% Support" : "";
 
                   return `
                     <article class="player-list__item ${state.transientUi?.recentBuildingChanges?.[building.id] ? "is-recently-changed" : ""}" title="${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}">
@@ -489,6 +490,7 @@ function renderIncubationList(title, subtitle, buildings, emptyText, variant, st
                         <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
                         <span>${escapeHtml(building.rarity)} / ${escapeHtml(building.district ?? "Unassigned")}</span>
                         ${workforceStatus.totalMultiplier < 0.999 ? `<div class="player-list__badges"><span class="status-badge status-badge--warning">Understaffed</span></div>` : ""}
+                        ${supportBonusLabel ? `<div class="player-list__badges"><span class="incubator-support-badge">${escapeHtml(supportBonusLabel)}</span></div>` : ""}
                         <small>${
                           etaDetails.isStalled
                             ? `${formatNumber(building.quality, 0)}% quality now | Stalled | Why: ${escapeHtml(etaDetails.stallReasons.join(", ") || "insufficient resources")}`

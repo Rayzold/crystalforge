@@ -286,11 +286,13 @@ function renderBuildingsView(state) {
                         const workforceSupportReadout = Number(etaDetails?.workforceSupportBpd ?? 0) > 0 ? ` / Staff +${formatNumber(etaDetails.workforceSupportBpd, 1)} BPD` : "";
                         const supportMultiplier = Number(etaDetails?.incubatorSupportMultiplier ?? 1);
                         const supportReadout = supportMultiplier > 1 ? ` / Support x${formatNumber(supportMultiplier, 2)}` : "";
+                        const supportBonusLabel = building.heroSupport && building.expertSupport ? "+150% Support" : building.heroSupport ? "+100% Support" : building.expertSupport ? "+50% Support" : "";
                         return `
                         <article class="city-incubation-strip__item ${isBuildingActivelyConstructed(state, building.id) ? "is-active" : ""}" title="${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}">
                           <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
                           <span>${escapeHtml(formatNumber(building.quality, 1))}% quality</span>
                           <em>Slot ${index + 1}</em>
+                          ${supportBonusLabel ? `<div class="incubator-support-badge">${escapeHtml(supportBonusLabel)}</div>` : ""}
                           <small>${etaDetails.isStalled ? `Incubation stalled${supportReadout}` : `${formatNumber(etaDetails.totalBpd, 1)} build points/day${workforceSupportReadout}${supportReadout} / ${formatNumber(etaDetails.dailyPercent, 2)}% quality per day`}</small>
                           <small>${
                             etaDetails.daysRemaining === null
