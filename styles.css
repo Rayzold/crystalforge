@@ -2833,7 +2833,7 @@ textarea {
 }
 
 .manifest-complete-modal__value.is-visible {
-  animation: manifestPercentReveal 420ms ease-out forwards;
+  animation: manifestPercentReveal 420ms ease-out var(--manifest-value-delay, 0ms) forwards;
 }
 
 .manifest-complete-modal__carry-copy {

@@ -2,12 +2,12 @@ import { getBuildingArtCandidates, getBuildingArtFallbackAttribute } from "../ui
 import { RARITY_COLORS } from "../content/Rarities.js";
 
 const REVEAL_PROFILES = {
-  Common: { duration: 3900, particles: 8, rings: 2, title: "Common Manifest", accent: "A faint pulse answers the forge." },
-  Uncommon: { duration: 4400, particles: 12, rings: 2, title: "Uncommon Manifest", accent: "The chamber hums with a brighter resonance." },
-  Rare: { duration: 5000, particles: 16, rings: 3, title: "Rare Manifest", accent: "A sharper current sweeps through the sigils." },
-  Epic: { duration: 5700, particles: 20, rings: 3, title: "Epic Manifest", accent: "The altar cracks with layered crystal thunder." },
-  Legendary: { duration: 6500, particles: 26, rings: 4, title: "Legendary Manifest", accent: "Radiant force bends the whole chamber around the pull." },
-  Beyond: { duration: 7400, particles: 34, rings: 5, title: "Beyond Manifest", accent: "Reality distorts as the forge tears open a higher answer." }
+  Common: { duration: 3300, particles: 8, rings: 2, title: "Common Manifest", accent: "A faint pulse answers the forge." },
+  Uncommon: { duration: 3750, particles: 12, rings: 2, title: "Uncommon Manifest", accent: "The chamber hums with a brighter resonance." },
+  Rare: { duration: 4300, particles: 16, rings: 3, title: "Rare Manifest", accent: "A sharper current sweeps through the sigils." },
+  Epic: { duration: 4900, particles: 20, rings: 3, title: "Epic Manifest", accent: "The altar cracks with layered crystal thunder." },
+  Legendary: { duration: 5600, particles: 26, rings: 4, title: "Legendary Manifest", accent: "Radiant force bends the whole chamber around the pull." },
+  Beyond: { duration: 6400, particles: 34, rings: 5, title: "Beyond Manifest", accent: "Reality distorts as the forge tears open a higher answer." }
 };
 
 const REVEAL_OUTRO_MS = 420;

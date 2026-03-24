@@ -29,6 +29,13 @@ export function renderManifestCompleteModal(state) {
     const firstFillPercent = Math.max(0, Math.min(100 - stageProgressStart, filledWithinStage));
     const overflowIntoNext = Math.max(0, finalQuality - firstThreshold);
     const carryPercent = Math.max(0, Math.min(100, overflowIntoNext));
+    const qualityValueDelayMs = shouldShowImmediately
+      ? 0
+      : manifestModal.wasNew
+        ? Number(manifestModal.durationMs ?? 0)
+        : carryPercent > 0
+          ? Number(manifestModal.durationMs ?? 0) + 900
+          : Number(manifestModal.durationMs ?? 0);
     const manifestSentence = isCrystalUpgrade
       ? `The ${escapeHtml(manifestModal.sourceRarity)} crystal resonated as a crystal upgrade and became <strong>${escapeHtml(manifestModal.targetRarity)}</strong>.`
       : `The ${escapeHtml(manifestModal.rarity)} crystal manifested the <strong>${escapeHtml(manifestModal.rolledName)}</strong>.`;
@@ -72,7 +79,7 @@ export function renderManifestCompleteModal(state) {
                       style="--manifest-quality:${manifestModal.qualityRoll}%; --manifest-duration:${manifestModal.durationMs}ms"
                     ></div>
                     <div class="manifest-complete-modal__track"></div>
-                    <strong class="manifest-complete-modal__value ${shouldAnimate || shouldShowImmediately ? "is-visible" : ""}">
+                    <strong class="manifest-complete-modal__value ${shouldAnimate || shouldShowImmediately ? "is-visible" : ""}" style="--manifest-value-delay:${qualityValueDelayMs}ms">
                       ${formatNumber(manifestModal.qualityRoll, 0)}%
                     </strong>
                   </div>
@@ -98,7 +105,7 @@ export function renderManifestCompleteModal(state) {
                             ></div>`
                           : ""
                       }
-                      <strong class="manifest-complete-modal__value ${shouldAnimate || shouldShowImmediately ? "is-visible" : ""}">
+                      <strong class="manifest-complete-modal__value ${shouldAnimate || shouldShowImmediately ? "is-visible" : ""}" style="--manifest-value-delay:${qualityValueDelayMs}ms">
                         ${formatNumber(previousQuality, 0)}% -> ${formatNumber(finalQuality, 0)}%
                       </strong>
                     </div>
