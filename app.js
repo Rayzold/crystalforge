@@ -13,7 +13,7 @@ import {
 import { EVENT_POOLS } from "./content/EventPools.js";
 import { RARITY_ORDER } from "./content/Rarities.js";
 import { GameState } from "./engine/GameState.js";
-import { AnimationEngine } from "./fx/AnimationEngine.js";
+import { AnimationEngine, getManifestRevealTotalDuration } from "./fx/AnimationEngine.js";
 import { AudioEngine } from "./fx/AudioEngine.js";
 import { ensureFirebaseAuth, getFirebaseUserId } from "./firebase/FirebaseConfig.js";
 import {
@@ -1240,6 +1240,17 @@ function scheduleManifestModalVerification(manifestCompleteModal) {
   });
 }
 
+function showManifestCompleteModal(manifestCompleteModal) {
+  renderer.setTransientUi(
+    {
+      manifestInProgress: false,
+      manifestCompleteModal
+    },
+    getCurrentState()
+  );
+  scheduleManifestModalVerification(manifestCompleteModal);
+}
+
 function showAdjacencyPulse(payload) {
   if (adjacencyPulseTimer) {
     window.clearTimeout(adjacencyPulseTimer);
@@ -1337,15 +1348,21 @@ async function handleManifest() {
       revealPercent: !quickManifestationsEnabled,
       showPercentImmediately: quickManifestationsEnabled
     };
-    renderer.setTransientUi(
-      {
-        manifestInProgress: false,
-        manifestCompleteModal
-      },
-      getCurrentState()
-    );
-    scheduleManifestModalVerification(manifestCompleteModal);
-    if (!quickManifestationsEnabled) {
+    if (quickManifestationsEnabled) {
+      showManifestCompleteModal(manifestCompleteModal);
+    } else {
+      const revealDelayMs = getManifestRevealTotalDuration(result.rarity);
+      renderer.setTransientUi(
+        {
+          manifestInProgress: false,
+          manifestCompleteModal: null
+        },
+        getCurrentState()
+      );
+      manifestCompleteTimer = window.setTimeout(() => {
+        manifestCompleteTimer = null;
+        showManifestCompleteModal(manifestCompleteModal);
+      }, revealDelayMs);
       void audioEngine.playManifest(result.rarity).catch(() => {});
       void animationEngine.playManifestReveal(result).catch(() => {});
     }

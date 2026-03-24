@@ -10,6 +10,13 @@ const REVEAL_PROFILES = {
   Beyond: { duration: 7400, particles: 34, rings: 5, title: "Beyond Manifest", accent: "Reality distorts as the forge tears open a higher answer." }
 };
 
+const REVEAL_OUTRO_MS = 420;
+
+export function getManifestRevealTotalDuration(rarity) {
+  const profile = REVEAL_PROFILES[rarity] ?? REVEAL_PROFILES.Common;
+  return profile.duration + REVEAL_OUTRO_MS;
+}
+
 export class AnimationEngine {
   constructor() {
     this.overlay = document.createElement("div");
@@ -56,7 +63,7 @@ export class AnimationEngine {
 
       await new Promise((resolve) => window.setTimeout(resolve, profile.duration));
       this.overlay.classList.remove("is-active");
-      await new Promise((resolve) => window.setTimeout(resolve, 420));
+      await new Promise((resolve) => window.setTimeout(resolve, REVEAL_OUTRO_MS));
       this.overlay.innerHTML = "";
     } catch (error) {
       this.overlay.classList.remove("is-active");
