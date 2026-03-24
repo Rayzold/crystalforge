@@ -9,30 +9,31 @@ export function renderManifestCompleteModal(state) {
     return "";
   }
 
-  const building = manifestModal.buildingId
-    ? state.buildings.find((entry) => entry.id === manifestModal.buildingId) ?? null
-    : null;
-  const isCrystalUpgrade = Boolean(manifestModal.isCrystalUpgrade);
-  const animationToken = String(manifestModal.animationToken ?? "");
-  const shouldAnimate = Boolean(manifestModal.revealPercent) && animationToken !== lastAnimatedManifestToken;
-  if (shouldAnimate && animationToken) {
-    lastAnimatedManifestToken = animationToken;
-  }
-  const shouldShowImmediately = Boolean(manifestModal.showPercentImmediately);
-  const previousQuality = Number(manifestModal.previousQuality ?? 0);
-  const finalQuality = Number(manifestModal.finalQuality ?? manifestModal.qualityRoll ?? 0);
-  const firstThreshold = previousQuality < 100 ? 100 : Math.ceil(previousQuality / 100) * 100;
-  const stageStart = previousQuality < 100 ? 0 : Math.floor(previousQuality / 100) * 100;
-  const stageProgressStart = Math.max(0, Math.min(100, previousQuality - stageStart));
-  const filledWithinStage = Math.max(0, Math.min(firstThreshold, finalQuality) - previousQuality);
-  const firstFillPercent = Math.max(0, Math.min(100 - stageProgressStart, filledWithinStage));
-  const overflowIntoNext = Math.max(0, finalQuality - firstThreshold);
-  const carryPercent = Math.max(0, Math.min(100, overflowIntoNext));
-  const manifestSentence = isCrystalUpgrade
-    ? `The ${escapeHtml(manifestModal.sourceRarity)} crystal resonated as a crystal upgrade and became <strong>${escapeHtml(manifestModal.targetRarity)}</strong>.`
-    : `The ${escapeHtml(manifestModal.rarity)} crystal manifested the <strong>${escapeHtml(manifestModal.rolledName)}</strong>.`;
+  try {
+    const building = manifestModal.buildingId
+      ? state.buildings.find((entry) => entry.id === manifestModal.buildingId) ?? null
+      : null;
+    const isCrystalUpgrade = Boolean(manifestModal.isCrystalUpgrade);
+    const animationToken = String(manifestModal.animationToken ?? "");
+    const shouldAnimate = Boolean(manifestModal.revealPercent) && animationToken !== lastAnimatedManifestToken;
+    if (shouldAnimate && animationToken) {
+      lastAnimatedManifestToken = animationToken;
+    }
+    const shouldShowImmediately = Boolean(manifestModal.showPercentImmediately);
+    const previousQuality = Number(manifestModal.previousQuality ?? 0);
+    const finalQuality = Number(manifestModal.finalQuality ?? manifestModal.qualityRoll ?? 0);
+    const firstThreshold = previousQuality < 100 ? 100 : Math.ceil(previousQuality / 100) * 100;
+    const stageStart = previousQuality < 100 ? 0 : Math.floor(previousQuality / 100) * 100;
+    const stageProgressStart = Math.max(0, Math.min(100, previousQuality - stageStart));
+    const filledWithinStage = Math.max(0, Math.min(firstThreshold, finalQuality) - previousQuality);
+    const firstFillPercent = Math.max(0, Math.min(100 - stageProgressStart, filledWithinStage));
+    const overflowIntoNext = Math.max(0, finalQuality - firstThreshold);
+    const carryPercent = Math.max(0, Math.min(100, overflowIntoNext));
+    const manifestSentence = isCrystalUpgrade
+      ? `The ${escapeHtml(manifestModal.sourceRarity)} crystal resonated as a crystal upgrade and became <strong>${escapeHtml(manifestModal.targetRarity)}</strong>.`
+      : `The ${escapeHtml(manifestModal.rarity)} crystal manifested the <strong>${escapeHtml(manifestModal.rolledName)}</strong>.`;
 
-  return `
+    return `
     <div class="modal manifest-complete-modal is-open" id="manifest-complete-modal">
       <div class="modal__backdrop" data-action="close-manifest-complete"></div>
       <div class="modal__dialog manifest-complete-modal__dialog">
@@ -124,4 +125,29 @@ export function renderManifestCompleteModal(state) {
       </div>
     </div>
   `;
+  } catch (error) {
+    return `
+      <div class="modal manifest-complete-modal is-open" id="manifest-complete-modal">
+        <div class="modal__backdrop" data-action="close-manifest-complete"></div>
+        <div class="modal__dialog manifest-complete-modal__dialog">
+          <button class="icon-button manifest-complete-modal__close" data-action="close-manifest-complete" aria-label="Close manifest completion modal">x</button>
+          <div class="manifest-complete-modal__body">
+            <span class="manifest-complete-modal__eyebrow">Manifestation Complete</span>
+            <h2>${escapeHtml(String(manifestModal.rolledName ?? "Manifest Result"))}</h2>
+            <p>Fallback manifest popup rendered because the full result view failed to build.</p>
+            <div class="manifest-complete-modal__quality">
+              <span>Quality</span>
+              <div class="manifest-complete-modal__bar">
+                <div class="manifest-complete-modal__track"></div>
+                <strong class="manifest-complete-modal__value is-visible">${escapeHtml(String(formatNumber(manifestModal.finalQuality ?? manifestModal.qualityRoll ?? 0, 0)))}%</strong>
+              </div>
+            </div>
+            <div class="manifest-complete-modal__actions">
+              <button class="button button--ghost manifest-complete-modal__continue" data-action="close-manifest-complete">Continue</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
 }

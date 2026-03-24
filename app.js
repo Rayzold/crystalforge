@@ -1170,6 +1170,31 @@ function openTownFocusModal(focusId = null) {
   );
 }
 
+function scheduleManifestModalVerification(manifestCompleteModal) {
+  const animationToken = String(manifestCompleteModal?.animationToken ?? "");
+  if (!animationToken) {
+    return;
+  }
+
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      const modal = document.querySelector("#manifest-complete-modal");
+      if (modal) {
+        return;
+      }
+
+      reportError("Manifest popup did not mount. Retrying.", null);
+      renderer.setTransientUi({ manifestCompleteModal }, getCurrentState());
+
+      window.requestAnimationFrame(() => {
+        if (!document.querySelector("#manifest-complete-modal")) {
+          reportError("Manifest popup retry failed.", null);
+        }
+      });
+    });
+  });
+}
+
 function showAdjacencyPulse(payload) {
   if (adjacencyPulseTimer) {
     window.clearTimeout(adjacencyPulseTimer);
@@ -1273,6 +1298,7 @@ async function handleManifest() {
       },
       getCurrentState()
     );
+    scheduleManifestModalVerification(manifestCompleteModal);
     if (!quickManifestationsEnabled) {
       void audioEngine.playManifest(result.rarity).catch(() => {});
       void animationEngine.playManifestReveal(result).catch(() => {});
