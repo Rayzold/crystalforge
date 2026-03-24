@@ -1170,6 +1170,50 @@ function openTownFocusModal(focusId = null) {
   );
 }
 
+function closeDirectManifestPopup() {
+  document.querySelector("#direct-manifest-complete-modal")?.remove();
+}
+
+function showDirectManifestPopup(manifestCompleteModal) {
+  closeDirectManifestPopup();
+
+  const modal = document.createElement("div");
+  modal.id = "direct-manifest-complete-modal";
+  modal.style.position = "fixed";
+  modal.style.inset = "0";
+  modal.style.zIndex = "1600";
+  modal.style.display = "grid";
+  modal.style.placeItems = "center";
+  modal.style.background = "rgba(3, 6, 11, 0.84)";
+  modal.style.backdropFilter = "blur(10px)";
+
+  const rolledName = String(manifestCompleteModal?.rolledName ?? "Manifest Result");
+  const rarity = String(manifestCompleteModal?.rarity ?? "Unknown");
+  const quality = Number(manifestCompleteModal?.finalQuality ?? manifestCompleteModal?.qualityRoll ?? 0);
+  const isCrystalUpgrade = Boolean(manifestCompleteModal?.isCrystalUpgrade);
+
+  modal.innerHTML = `
+    <div style="position:relative; width:min(680px, calc(100vw - 24px)); padding:28px; border-radius:24px; border:1px solid rgba(141, 214, 255, 0.22); background:linear-gradient(180deg, rgba(9, 13, 22, 0.985), rgba(6, 9, 16, 0.985)); box-shadow:0 28px 80px rgba(0, 0, 0, 0.46); color:rgba(236, 244, 255, 0.96); text-align:center;">
+      <button type="button" data-role="close-direct-manifest" style="position:absolute; top:12px; right:12px; width:36px; height:36px; border-radius:999px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:inherit; cursor:pointer;">x</button>
+      <p style="margin:0 0 10px; color:rgba(222, 229, 246, 0.82); letter-spacing:0.08em; text-transform:uppercase; font-size:0.82rem;">Manifestation Complete</p>
+      <h2 style="margin:0 0 10px; font-size:clamp(2rem, 6vw, 3.6rem); line-height:1; text-transform:uppercase;">${rolledName}</h2>
+      <p style="margin:0 0 18px; color:rgba(212, 219, 236, 0.82);">${isCrystalUpgrade ? `Crystal upgrade to ${String(manifestCompleteModal?.targetRarity ?? "higher rarity")}` : `${rarity} reality manifested successfully.`}</p>
+      <div style="margin:0 auto 20px; width:min(100%, 420px); min-height:42px; display:grid; place-items:center; border-radius:12px; border:1px solid rgba(255,255,255,0.08); background:#131c31; font-size:1.1rem; font-weight:700;">${isCrystalUpgrade ? `${String(manifestCompleteModal?.sourceRarity ?? "")}${manifestCompleteModal?.targetRarity ? ` -> ${String(manifestCompleteModal.targetRarity)}` : ""}` : `${Math.round(quality)}% quality`}</div>
+      <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+        <button type="button" data-role="close-direct-manifest" style="padding:10px 16px; border-radius:12px; border:1px solid rgba(141, 214, 255, 0.22); background:rgba(255,255,255,0.04); color:inherit; cursor:pointer; text-transform:uppercase; letter-spacing:0.06em; font-weight:700;">Continue</button>
+      </div>
+    </div>
+  `;
+
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal || event.target.closest('[data-role="close-direct-manifest"]')) {
+      closeDirectManifestPopup();
+    }
+  });
+
+  document.body.append(modal);
+}
+
 function scheduleManifestModalVerification(manifestCompleteModal) {
   const animationToken = String(manifestCompleteModal?.animationToken ?? "");
   if (!animationToken) {
@@ -1189,6 +1233,7 @@ function scheduleManifestModalVerification(manifestCompleteModal) {
       window.requestAnimationFrame(() => {
         if (!document.querySelector("#manifest-complete-modal")) {
           reportError("Manifest popup retry failed.", null);
+          showDirectManifestPopup(manifestCompleteModal);
         }
       });
     });
