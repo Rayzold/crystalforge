@@ -441,12 +441,14 @@ function renderRollTableReview(state) {
         ${Object.entries(state.rollTables)
           .map(
             ([rarity, entries]) => {
-              const remainingCount = entries.filter((entry) => entry !== "Crystal Upgrade" && !ownedKeys.has(`${rarity}::${entry}`)).length;
+              const rollableEntries = entries.filter((entry) => entry !== "Crystal Upgrade");
+              const remainingCount = rollableEntries.filter((entry) => !ownedKeys.has(`${rarity}::${entry}`)).length;
+              const totalCount = rollableEntries.length;
               return `
               <article class="rolltable-review__card">
                 <span>${escapeHtml(rarity)}</span>
                 <strong>${remainingCount}</strong>
-                <small>${remainingCount === 1 ? "building remains unseen" : "buildings remain unseen"}</small>
+                <small>${remainingCount} out of ${totalCount} ${totalCount === 1 ? "building is unseen" : "buildings are unseen"}</small>
               </article>
             `;
             }

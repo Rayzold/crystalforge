@@ -540,8 +540,8 @@ export function getEmergencyStatus(state) {
     });
   }
 
-  if ((workforceSummary.generalDemand ?? 0) > 0 && (workforceSummary.generalRatio ?? 1) < 0.8) {
-    const severity = (workforceSummary.generalRatio ?? 1) < 0.55 ? "critical" : "warning";
+  if ((workforceSummary.generalDemand ?? 0) > 0 && (workforceSummary.generalRatio ?? 1) < 1) {
+    const severity = (workforceSummary.generalRatio ?? 1) < 0.75 ? "critical" : "warning";
     const incubationDetail = incompleteBuildings > 0
       ? " Excess staffing is too thin to strongly boost incubation support right now."
       : "";
@@ -549,7 +549,7 @@ export function getEmergencyStatus(state) {
       key: "workforce",
       severity,
       label: "Workforce strain",
-      details: `${formatPercent(workforceSummary.generalRatio)} of general staffing demand is covered, reducing staffed building output.${incubationDetail}`
+      details: `${formatPercent(workforceSummary.generalRatio)} of general staffing demand is covered, shutting down operated building production until staffing recovers.${incubationDetail}`
     });
   }
 

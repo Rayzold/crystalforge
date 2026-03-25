@@ -122,6 +122,10 @@ function getDemandMultiplier(ratio, floor) {
   return roundTo(floor + (1 - floor) * clampRatio(ratio), 4);
 }
 
+function isDemandCovered(ratio) {
+  return (Number(ratio ?? 0) || 0) >= 0.9999;
+}
+
 export function isWorkforceManagedBuilding(building) {
   return Boolean(building?.isComplete && !building?.isRuined && hasWorkforceManagedOutput(building));
 }
@@ -193,7 +197,12 @@ export function getBuildingWorkforceMultiplier(building, workforceSummary) {
   }
 
   const category = getBuildingWorkforceCategory(building);
-  return roundTo((workforceSummary?.generalMultiplier ?? 1) * (workforceSummary?.specialistMultipliers?.[category] ?? 1), 4);
+  const generalRatio = workforceSummary?.generalRatio ?? 1;
+  const specialistRatio = workforceSummary?.specialistRatios?.[category] ?? 1;
+  if (!isDemandCovered(generalRatio) || !isDemandCovered(specialistRatio)) {
+    return 0;
+  }
+  return 1;
 }
 
 export function getBuildingWorkforceStatus(building, workforceSummary) {
@@ -242,7 +251,7 @@ export function getBuildingWorkforceStatus(building, workforceSummary) {
     specialistMultiplier,
     totalMultiplier,
     note: pressure.length
-      ? `Limited by ${pressure.join(" and ")}.`
+      ? `Offline: insufficient ${pressure.join(" and ")} to operate this structure.`
       : `${getWorkforceCategoryLabel(category)} staffing is fully supporting this structure.`
   };
 }
