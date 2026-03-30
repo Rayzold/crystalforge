@@ -191,35 +191,35 @@ export function normalizeExpeditionState(sourceState) {
           .map((entry) => {
             const vehicleId = normalizeVehicleId(entry.vehicleId ?? VEHICLE_ORDER[0]);
             return {
-            id: String(entry.id ?? createId("expedition")),
-            typeId: entry.typeId ?? "resourceRun",
-            typeLabel: entry.typeLabel ?? EXPEDITION_TYPES[entry.typeId]?.label ?? "Expedition",
-            missionId: entry.missionId ?? null,
-            missionName: entry.missionName ?? entry.typeLabel ?? EXPEDITION_TYPES[entry.typeId]?.label ?? "Expedition",
-            missionSummary: entry.missionSummary ?? "",
-            missionRisk: MISSION_RISK_SETTINGS[entry.missionRisk] ? entry.missionRisk : "Medium",
-            missionDistance: MISSION_DISTANCE_SETTINGS[entry.missionDistance] ? entry.missionDistance : "Mid",
-            missionIsSpecial: entry.missionIsSpecial === true,
-            vehicleId,
-            vehicleName: VEHICLE_DEFINITIONS[vehicleId]?.name ?? entry.vehicleName ?? "Vehicle",
-            approachId: entry.approachId ?? "balanced",
-            durationDaysBase: Math.max(1, Number(entry.durationDaysBase ?? entry.durationDays ?? 7) || 7),
-            durationDays: Math.max(1, Number(entry.durationDays ?? 7) || 7),
-            departedDayOffset: Number(entry.departedDayOffset ?? 0) || 0,
-            departedAt: String(entry.departedAt ?? formatDate(Number(entry.departedDayOffset ?? 0) || 0)),
-            expectedReturnDayOffset: Number(entry.expectedReturnDayOffset ?? 0) || 0,
-            expectedReturnAt: String(entry.expectedReturnAt ?? formatDate(Number(entry.expectedReturnDayOffset ?? 0) || 0)),
-            committedResources: Object.fromEntries(
-              RESOURCE_KEYS.map((resource) => [resource, Math.max(0, Number(entry.committedResources?.[resource] ?? 0) || 0)])
-            ),
-            team: structuredClone(entry.team ?? {}),
-            powerScore: Number(entry.powerScore ?? 0) || 0,
-            difficultyScore: Number(entry.difficultyScore ?? 0) || 0,
-            successScore: Number(entry.successScore ?? 0) || 0,
-            buildingSynergySummary: Array.isArray(entry.buildingSynergySummary) ? [...entry.buildingSynergySummary] : [],
-            delayCount: Math.max(0, Number(entry.delayCount ?? 0) || 0),
-            notes: String(entry.notes ?? "")
-          };
+              id: String(entry.id ?? createId("expedition")),
+              typeId: entry.typeId ?? "resourceRun",
+              typeLabel: entry.typeLabel ?? EXPEDITION_TYPES[entry.typeId]?.label ?? "Expedition",
+              missionId: entry.missionId ?? null,
+              missionName: entry.missionName ?? entry.typeLabel ?? EXPEDITION_TYPES[entry.typeId]?.label ?? "Expedition",
+              missionSummary: entry.missionSummary ?? "",
+              missionRisk: MISSION_RISK_SETTINGS[entry.missionRisk] ? entry.missionRisk : "Medium",
+              missionDistance: MISSION_DISTANCE_SETTINGS[entry.missionDistance] ? entry.missionDistance : "Mid",
+              missionIsSpecial: entry.missionIsSpecial === true,
+              vehicleId,
+              vehicleName: VEHICLE_DEFINITIONS[vehicleId]?.name ?? entry.vehicleName ?? "Vehicle",
+              approachId: entry.approachId ?? "balanced",
+              durationDaysBase: Math.max(1, Number(entry.durationDaysBase ?? entry.durationDays ?? 7) || 7),
+              durationDays: Math.max(1, Number(entry.durationDays ?? 7) || 7),
+              departedDayOffset: Number(entry.departedDayOffset ?? 0) || 0,
+              departedAt: String(entry.departedAt ?? formatDate(Number(entry.departedDayOffset ?? 0) || 0)),
+              expectedReturnDayOffset: Number(entry.expectedReturnDayOffset ?? 0) || 0,
+              expectedReturnAt: String(entry.expectedReturnAt ?? formatDate(Number(entry.expectedReturnDayOffset ?? 0) || 0)),
+              committedResources: Object.fromEntries(
+                RESOURCE_KEYS.map((resource) => [resource, Math.max(0, Number(entry.committedResources?.[resource] ?? 0) || 0)])
+              ),
+              team: structuredClone(entry.team ?? {}),
+              powerScore: Number(entry.powerScore ?? 0) || 0,
+              difficultyScore: Number(entry.difficultyScore ?? 0) || 0,
+              successScore: Number(entry.successScore ?? 0) || 0,
+              buildingSynergySummary: Array.isArray(entry.buildingSynergySummary) ? [...entry.buildingSynergySummary] : [],
+              delayCount: Math.max(0, Number(entry.delayCount ?? 0) || 0),
+              notes: String(entry.notes ?? "")
+            };
           })
       : base.active,
     recent: Array.isArray(sourceState?.recent)

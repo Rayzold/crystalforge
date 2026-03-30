@@ -7,7 +7,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.4.4";
+export const APP_VERSION = "v1.4.5";
 export const SAVE_VERSION = 12;
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3";
 export const FIREBASE_CONFIG = {
@@ -38,6 +38,7 @@ export const PAGE_ROUTES = [
   { key: "help", label: "Help", href: "./help.html" }
 ];
 export const BUILD_NOTES = [
+  "Fixed a bad expedition-module boot path that could leave some pages stuck at Loading the forge after the six-vehicle fleet update.",
   "The expedition fleet now uses six vehicle tiers instead of four: three land buggies and three elemental airships, each with its own travel speed, cargo profile, and mission fit.",
   "Expedition closing polish landed: the Mission Board now stays stable until its real refresh window, Expeditions include a clearer quick-start block, and GM-only expedition tools can refresh the board or force the soonest return for testing.",
   "Expeditions now run from a real mission board with random weekly opportunities, optional day-one special missions, vehicle traits, building synergies, and clearer strengths versus risks before launch.",
