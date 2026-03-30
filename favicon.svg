@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="forgeGem" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#86d7ff" />
+      <stop offset="55%" stop-color="#5f8dff" />
+      <stop offset="100%" stop-color="#b67dff" />
+    </linearGradient>
+    <linearGradient id="forgeGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#142238" />
+      <stop offset="100%" stop-color="#0a101c" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#forgeGlow)" />
+  <path
+    d="M32 8 50 24 32 56 14 24 32 8Z"
+    fill="url(#forgeGem)"
+    stroke="#f4fbff"
+    stroke-width="2.5"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M20 24h24M24 24l8 32m8-32-8 32"
+    fill="none"
+    stroke="#f4fbff"
+    stroke-opacity=".82"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>

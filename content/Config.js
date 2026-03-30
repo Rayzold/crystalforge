@@ -7,7 +7,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.4.7";
+export const APP_VERSION = "v1.4.8";
 export const SAVE_VERSION = 12;
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3";
 export const FIREBASE_CONFIG = {
@@ -38,6 +38,7 @@ export const PAGE_ROUTES = [
   { key: "help", label: "Help", href: "./help.html" }
 ];
 export const BUILD_NOTES = [
+  "Every page now ships with a real Crystal Forge favicon, removing the misleading browser 404 noise for /favicon.ico while making the live build easier to recognize in tabs.",
   "The sidebar now calls the Unique Citizens page Legends, that screen drops the unnecessary resource strip, and its layout now reads more like a named-character roster.",
   "Expedition and vehicle stat tiles now stack labels and values correctly again, fixing collapsed text like RiskLow and ReturnDazzleday.",
   "Fixed a bad expedition-module boot path that could leave some pages stuck at Loading the forge after the six-vehicle fleet update.",

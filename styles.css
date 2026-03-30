@@ -10895,6 +10895,54 @@ body:-webkit-full-screen #app {
   margin-top: 0.9rem;
 }
 
+.legends-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.8rem;
+  margin-top: 0.85rem;
+}
+
+.legends-summary-grid article,
+.legends-guidance-card {
+  border-radius: 1rem;
+  border: 1px solid rgba(132, 160, 220, 0.14);
+  background: rgba(10, 15, 28, 0.64);
+  padding: 0.85rem 0.95rem;
+}
+
+.legends-summary-grid article span {
+  display: block;
+  color: rgba(184, 200, 233, 0.76);
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.legends-summary-grid article strong {
+  display: block;
+  margin-top: 0.28rem;
+  color: rgba(244, 248, 255, 0.96);
+  font-size: 1.02rem;
+  line-height: 1.2;
+}
+
+.legends-page__guidance {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+
+.legends-guidance-card strong {
+  display: block;
+  margin-bottom: 0.45rem;
+}
+
+.legends-guidance-card p {
+  margin: 0;
+  color: rgba(214, 224, 249, 0.78);
+}
+
 .notable-card__bonuses {
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   margin-top: 0.9rem;
