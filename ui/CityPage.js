@@ -2,6 +2,7 @@
 // This page combines the building stream, map access, incubation controls,
 // filters, and city-side summaries used during active management play.
 import { getBuildingEmoji } from "../content/BuildingCatalog.js";
+import { SPEED_MULTIPLIERS } from "../content/Config.js";
 import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate, getNextHoliday } from "../systems/CalendarSystem.js";
@@ -9,7 +10,11 @@ import {
   getActiveConstructionQueue,
   getAvailableConstructionQueue,
   getConstructionEtaDetails,
+  getConstructionQueue,
+  getConstructionQueuePosition,
   getDriftConstructionSlots,
+  getIncubatorQueuedBuildings,
+  INCUBATOR_QUEUE_LIMIT,
   isBuildingActivelyConstructed
 } from "../systems/ConstructionSystem.js";
 import { getEmergencyStatus, getGoodsSummary } from "../systems/ResourceSystem.js";
@@ -23,6 +28,70 @@ import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js";
 import { renderResourcePanel } from "./ResourcePanel.js";
 import { renderTownFocusPanel } from "./TownFocusPanel.js";
 import { renderUiIcon } from "./UiIcons.js";
+
+function renderCitySectionNav(pageKey) {
+  return `
+    <section class="city-section-nav">
+      <div class="city-section-nav__tabs">
+        <a class="button button--ghost ${pageKey === "economy" ? "is-active" : ""}" href="./economy.html">Economy</a>
+        <a class="button button--ghost ${pageKey === "city" ? "is-active" : ""}" href="./city.html">City</a>
+      </div>
+    </section>
+  `;
+}
+
+function renderCitySessionControls(state) {
+  return `
+    <section class="panel city-session-controls">
+      <div class="panel__header">
+        <div>
+          <h3>Session Controls</h3>
+          <span class="panel__subtle">Advance time and tune raising speed from one place.</span>
+        </div>
+      </div>
+      <div class="city-session-controls__actions">
+        <div class="time-controls">
+          <button class="button button--ghost" data-action="advance-time" data-step="day">Advance Day</button>
+          <button class="button button--ghost" data-action="advance-time" data-step="3days">Advance 3 Days</button>
+          <button class="button button--ghost" data-action="advance-time" data-step="week">Advance Week</button>
+          <button class="button button--ghost" data-action="advance-time" data-step="month">Advance Month</button>
+          <button class="button button--ghost" data-action="advance-time" data-step="year">Advance Year</button>
+        </div>
+        <div class="city-session-controls__advanced">
+          <div class="city-workspace__preset-time">
+            <label class="calendar-panel__custom-days">
+              Advance Multiple Days
+              <select data-role="advance-days-preset">
+                <option value="3">3 Days</option>
+                <option value="7">7 Days</option>
+                <option value="14" selected>14 Days</option>
+                <option value="28">28 Days</option>
+                <option value="56">56 Days</option>
+                <option value="112">112 Days</option>
+              </select>
+            </label>
+            <button class="button button--ghost" data-action="advance-selected-time">Advance Selected Span</button>
+          </div>
+          <div class="city-workspace__custom-time">
+            <label class="calendar-panel__custom-days">
+              Advance by Days
+              <input type="number" min="1" step="1" value="14" data-role="custom-days" />
+            </label>
+            <button class="button button--ghost" data-action="advance-custom-time">Advance Custom Span</button>
+          </div>
+          <label class="speed-selector">
+            Raising Speed
+            <select data-action="set-speed-multiplier">
+              ${SPEED_MULTIPLIERS.map(
+                (value) => `<option value="${value}" ${state.constructionSpeedMultiplier === value ? "selected" : ""}>${value}x</option>`
+              ).join("")}
+            </select>
+          </label>
+        </div>
+      </div>
+    </section>
+  `;
+}
 
 function renderTownStatistics(state) {
   const dailyNet = (state.cityStats.income ?? 0) - (state.cityStats.upkeep ?? 0);
@@ -169,7 +238,10 @@ function renderBuildingsView(state) {
   const totalRolls = state.historyLog.filter((entry) => entry.category === "Manifest").length;
   const visibleBuildings = getVisibleBuildings(state);
   const incubating = getActiveConstructionQueue(state);
-  const waiting = getAvailableConstructionQueue(state);
+  const queued = getIncubatorQueuedBuildings(state);
+  const constructionQueue = getConstructionQueue(state);
+  const queuedIds = new Set(queued.map((building) => building.id));
+  const waiting = getAvailableConstructionQueue(state).filter((building) => !queuedIds.has(building.id));
   const slots = getDriftConstructionSlots(state);
 
   return `
@@ -180,34 +252,6 @@ function renderBuildingsView(state) {
           <button class="button button--ghost ${currentView === "map" ? "is-active" : ""}" data-action="set-city-building-view" data-view="map">Town Map</button>
         </div>
         <div class="city-workspace__top-actions">
-          <div class="city-workspace__time-controls">
-            <button class="button button--ghost" data-action="advance-time" data-step="day">Advance Day</button>
-            <button class="button button--ghost" data-action="advance-time" data-step="3days">Advance 3 Days</button>
-            <button class="button button--ghost" data-action="advance-time" data-step="week">Advance Week</button>
-            <button class="button button--ghost" data-action="advance-time" data-step="month">Advance Month</button>
-            <button class="button button--ghost" data-action="advance-time" data-step="year">Advance Year</button>
-          </div>
-          <div class="city-workspace__preset-time">
-            <label class="calendar-panel__custom-days">
-              Advance Multiple Days
-              <select data-role="advance-days-preset">
-                <option value="3">3 Days</option>
-                <option value="7">7 Days</option>
-                <option value="14" selected>14 Days</option>
-                <option value="28">28 Days</option>
-                <option value="56">56 Days</option>
-                <option value="112">112 Days</option>
-              </select>
-            </label>
-            <button class="button button--ghost" data-action="advance-selected-time">Advance Selected Span</button>
-          </div>
-          <div class="city-workspace__custom-time">
-            <label class="calendar-panel__custom-days">
-              Advance by Days
-              <input type="number" min="1" step="1" value="14" data-role="custom-days" />
-            </label>
-            <button class="button button--ghost" data-action="advance-custom-time">Advance Custom Span</button>
-          </div>
           <button class="button city-workspace__map-shortcut ${currentView === "map" ? "is-active" : ""}" data-action="set-city-building-view" data-view="map">Open Map</button>
           <span class="city-workspace__total">Total Rolls: ${formatNumber(totalRolls, 0)}</span>
         </div>
@@ -268,7 +312,7 @@ function renderBuildingsView(state) {
             <span>${formatNumber(incubating.length, 0)} active / ${formatNumber(slots, 0)} slots</span>
           </div>
           <div class="city-incubation-strip__head-actions">
-            <small>${waiting.length ? `${formatNumber(waiting.length, 0)} additional structures are waiting for a slot.` : "No additional structures are waiting right now."}</small>
+            <small>${queued.length ? `${formatNumber(queued.length, 0)} buildings are reserved in the incubator queue.` : "No buildings are reserved in the incubator queue right now."}</small>
             <div class="city-incubation-strip__buttons">
               <button class="button button--ghost" data-action="pause-all-construction">Pause All</button>
               <button class="button button--ghost" data-action="resume-all-construction">Resume All</button>
@@ -338,44 +382,66 @@ function renderBuildingsView(state) {
                     .join("")}
                 </div>
               `
-            : `<div class="empty-state empty-state--action"><p>Manifest incomplete buildings to let the Drift incubate them over time.</p>${waiting[0] ? `<button class="button button--ghost" data-action="activate-construction" data-building-id="${waiting[0].id}">Start Incubation</button>` : `<a class="button button--ghost" href="./forge.html">Create First Building</a>`}</div>`
+            : `<div class="empty-state empty-state--action"><p>Manifest incomplete buildings to let the Drift incubate them over time.</p>${queued[0] ? `<button class="button button--ghost" data-action="activate-construction" data-building-id="${queued[0].id}">Start Incubation</button>` : waiting[0] ? `<button class="button button--ghost" data-action="activate-construction" data-building-id="${waiting[0].id}">Queue First Building</button>` : `<a class="button button--ghost" href="./forge.html">Create First Building</a>`}</div>`
         }
 
-        ${
-          waiting.length
-            ? `
-                <div class="city-incubation-strip__waiting">
-                  <h5>Available</h5>
-                  <div class="city-incubation-strip__list">
+        <div class="city-incubation-strip__waiting">
+          <h5>Incubator Queue</h5>
+          <p class="city-incubation-queue__summary">Up to ${INCUBATOR_QUEUE_LIMIT} reserved buildings wait here and auto-fill the next open incubator slot.</p>
+          <div class="city-incubation-queue">
+            ${Array.from({ length: INCUBATOR_QUEUE_LIMIT }, (_, index) => {
+              const building = queued[index] ?? null;
+              const queueIndex = building ? getConstructionQueuePosition(state, building.id) : -1;
+              return `
+                <article class="city-incubation-queue__slot ${building ? "is-filled" : ""}">
+                  <span class="city-incubation-queue__slot-label">Queue Slot ${index + 1}</span>
+                  ${
+                    building
+                      ? `
+                          <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
+                          <small>${escapeHtml(`Construction queue #${queueIndex + 1}. Auto-fills the next open incubator.`)}</small>
+                          <div class="city-incubation-queue__actions">
+                            <button class="button button--ghost" data-action="prioritize-construction" data-direction="top" data-building-id="${building.id}">Raise Now</button>
+                            <button class="button button--ghost" data-action="prioritize-construction" data-direction="up" data-building-id="${building.id}" ${queueIndex <= 0 ? "disabled" : ""}>Up</button>
+                            <button class="button button--ghost" data-action="prioritize-construction" data-direction="down" data-building-id="${building.id}" ${queueIndex === constructionQueue.length - 1 ? "disabled" : ""}>Down</button>
+                            <button class="button button--ghost" data-action="inspect-building" data-building-id="${building.id}">Open Details</button>
+                          </div>
+                        `
+                      : `
+                          <strong>Empty</strong>
+                          <small>No building reserved for this slot yet.</small>
+                        `
+                  }
+                </article>
+              `;
+            }).join("")}
+          </div>
+        </div>
+
+        <div class="city-incubation-strip__waiting">
+          <h5>Available Buildings</h5>
+          ${
+            waiting.length
+              ? `
+                  <div class="city-available-buildings">
                     ${waiting
-                      .map((building, index) => {
-                        const etaDetails = getConstructionEtaDetails(building, state);
-                        const workforceSupportReadout = Number(etaDetails?.workforceSupportBpd ?? 0) > 0 ? ` / Staff +${formatNumber(etaDetails.workforceSupportBpd, 1)} BPD` : "";
-                        return `
-                          <article class="city-incubation-strip__item" title="${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}">
+                      .map(
+                        (building) => `
+                          <article class="city-available-buildings__item" title="${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}">
                             <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
-                            <span>${escapeHtml(formatNumber(building.quality, 1))}% quality</span>
-                            <em>Waiting #${index + 1}</em>
-                            <small>${
-                              etaDetails.isStalled
-                                ? "Cannot progress with current reserves"
-                                : `If incubated: ${formatNumber(etaDetails.totalBpd, 1)} build points/day${workforceSupportReadout} / ${formatNumber(etaDetails.dailyPercent, 2)}% quality per day / ${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"}`
-                            }</small>
-                            <small>${
-                              etaDetails.readyDayOffset === null
-                                ? "Ready date unavailable"
-                                : `Ready ${escapeHtml(formatDate(etaDetails.readyDayOffset))}`
-                            }</small>
-                            <button class="button button--ghost" data-action="activate-construction" data-building-id="${building.id}">Use Incubator</button>
+                            <div class="city-available-buildings__actions">
+                              <button class="button button--ghost" data-action="activate-construction" data-building-id="${building.id}">Queue</button>
+                              <button class="button button--ghost" data-action="inspect-building" data-building-id="${building.id}">Open Details</button>
+                            </div>
                           </article>
-                        `;
-                      })
+                        `
+                      )
                       .join("")}
                   </div>
-                </div>
-              `
-            : ""
-        }
+                `
+              : `<p class="empty-state">No additional buildings are outside the queue right now.</p>`
+          }
+        </div>
       </section>
 
       ${
@@ -407,35 +473,7 @@ function renderAdministrationView(state) {
           <button class="button button--ghost ${adminView === "operations" ? "is-active" : ""}" data-action="set-city-admin-view" data-view="operations">Operations</button>
           <button class="button button--ghost ${adminView === "readouts" ? "is-active" : ""}" data-action="set-city-admin-view" data-view="readouts">Readouts</button>
         </div>
-        <div class="city-admin-view__actions">
-          <div class="city-workspace__time-controls">
-            <button class="button button--ghost" data-action="advance-time" data-step="day">Advance Day</button>
-            <button class="button button--ghost" data-action="advance-time" data-step="3days">Advance 3 Days</button>
-            <button class="button button--ghost" data-action="advance-time" data-step="week">Advance Week</button>
-          </div>
-          <div class="city-workspace__preset-time">
-            <label class="calendar-panel__custom-days">
-              Advance Multiple Days
-              <select data-role="advance-days-preset">
-                <option value="3">3 Days</option>
-                <option value="7">7 Days</option>
-                <option value="14" selected>14 Days</option>
-                <option value="28">28 Days</option>
-                <option value="56">56 Days</option>
-                <option value="112">112 Days</option>
-              </select>
-            </label>
-            <button class="button button--ghost" data-action="advance-selected-time">Advance Selected Span</button>
-          </div>
-          <div class="city-workspace__custom-time">
-            <label class="calendar-panel__custom-days">
-              Advance by Days
-              <input type="number" min="1" step="1" value="14" data-role="custom-days" />
-            </label>
-            <button class="button button--ghost" data-action="advance-custom-time">Advance Custom Span</button>
-          </div>
-          <span class="city-workspace__total">${adminView === "operations" ? "Time, raising, and emergencies" : "Stores and district posture"}</span>
-        </div>
+        <span class="city-workspace__total">${adminView === "operations" ? "Session clock, queue, and emergencies" : "Stores and district posture"}</span>
       </div>
 
       ${
@@ -445,9 +483,9 @@ function renderAdministrationView(state) {
                 <section class="city-command-drawer__section">
                   <div class="city-command-drawer__section-head">
                     <span>Session Clock</span>
-                    <small>Advance time and raising</small>
+                    <small>Date, holidays, council timing, and queue</small>
                   </div>
-                  ${renderCalendarPanel(state, { showQueue: true })}
+                  ${renderCalendarPanel(state, { showQueue: true, hideControls: true, hideSpeedSelector: true })}
                 </section>
                 <section class="city-command-drawer__section">
                   <div class="city-command-drawer__section-head">
@@ -494,15 +532,29 @@ function renderCityModes(state) {
   `;
 }
 
-export function renderCityPage(state) {
+export function renderEconomyPage(state) {
   return {
-    title: "The City",
-    subtitle: "Buildings and administration.",
+    title: "Economy",
+    subtitle: "Town readouts and mayoral direction.",
     content: `
       <section class="city-command-screen">
+        ${renderCitySectionNav("economy")}
         ${renderTownStatistics(state)}
         ${renderWorkforcePanel(state)}
         ${renderTownFocusPanel(state, { expanded: true })}
+      </section>
+    `
+  };
+}
+
+export function renderCityPage(state) {
+  return {
+    title: "City",
+    subtitle: "Incubation, buildings, and administration.",
+    content: `
+      <section class="city-command-screen">
+        ${renderCitySectionNav("city")}
+        ${renderCitySessionControls(state)}
         ${renderCityModes(state)}
       </section>
     `

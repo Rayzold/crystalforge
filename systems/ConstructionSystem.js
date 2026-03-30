@@ -15,6 +15,8 @@ import {
 
 export { getDriftConstructionSlots };
 
+export const INCUBATOR_QUEUE_LIMIT = 5;
+
 const BASE_INCUBATION_BPD = 10;
 const CONSTRUCTION_BONUS_THRESHOLDS = {
   materials: 100,
@@ -365,6 +367,36 @@ function buildActiveConstructionPreview(state) {
   return preview;
 }
 
+function syncActiveConstructionAssignments(state) {
+  const queue = state.constructionPriority ?? [];
+  const slots = getDriftConstructionSlots(state);
+  const pausedIds = new Set(state.pausedConstructionIds ?? []);
+  const nextActiveIds = [];
+
+  for (const id of state.activeConstructionIds ?? []) {
+    if (nextActiveIds.length >= slots) {
+      break;
+    }
+    if (!queue.includes(id) || pausedIds.has(id) || nextActiveIds.includes(id)) {
+      continue;
+    }
+    nextActiveIds.push(id);
+  }
+
+  for (const id of queue) {
+    if (nextActiveIds.length >= slots) {
+      break;
+    }
+    if (pausedIds.has(id) || nextActiveIds.includes(id)) {
+      continue;
+    }
+    nextActiveIds.push(id);
+  }
+
+  state.activeConstructionIds = nextActiveIds;
+  return nextActiveIds;
+}
+
 export function normalizeConstructionPriority(state) {
   const validIds = new Set(
     state.buildings
@@ -396,6 +428,7 @@ export function normalizeConstructionPriority(state) {
   state.activeConstructionIds = active.filter((id, index) => validIds.has(id) && active.indexOf(id) === index);
   const paused = Array.isArray(state.pausedConstructionIds) ? state.pausedConstructionIds : [];
   state.pausedConstructionIds = paused.filter((id, index) => validIds.has(id) && paused.indexOf(id) === index);
+  syncActiveConstructionAssignments(state);
   return deduped;
 }
 
@@ -416,6 +449,14 @@ export function getActiveConstructionQueue(state) {
 export function getAvailableConstructionQueue(state) {
   const activeIds = new Set(getActiveConstructionQueue(state).map((building) => building.id));
   return getConstructionQueue(state).filter((building) => !activeIds.has(building.id));
+}
+
+export function getIncubatorQueuedBuildings(state, limit = INCUBATOR_QUEUE_LIMIT) {
+  const activeIds = new Set(getActiveConstructionQueue(state).map((building) => building.id));
+  const pausedIds = new Set(state.pausedConstructionIds ?? []);
+  return getConstructionQueue(state)
+    .filter((building) => !activeIds.has(building.id) && !pausedIds.has(building.id))
+    .slice(0, limit);
 }
 
 export function getConstructionQueuePosition(state, buildingId) {
@@ -463,6 +504,8 @@ export function pauseConstruction(state, buildingId) {
   }
 
   state.activeConstructionIds = (state.activeConstructionIds ?? []).filter((id) => id !== buildingId);
+  state.pausedConstructionIds = [...new Set([...(state.pausedConstructionIds ?? []), buildingId])];
+  syncActiveConstructionAssignments(state);
   return { ok: true, changed: true };
 }
 
@@ -477,13 +520,17 @@ export function activateConstruction(state, buildingId) {
   if (currentActiveIds.includes(buildingId)) {
     return { ok: true, changed: false };
   }
-  if (currentActiveIds.length >= getDriftConstructionSlots(state)) {
-    return { ok: false, reason: "All incubator slots are already occupied." };
-  }
-
-  currentActiveIds.push(buildingId);
-  state.activeConstructionIds = currentActiveIds;
-  return { ok: true, changed: true };
+  state.pausedConstructionIds = (state.pausedConstructionIds ?? []).filter((id) => id !== buildingId);
+  const reorderedQueue = queue.filter((id) => id !== buildingId);
+  const insertIndex = Math.min(currentActiveIds.length, reorderedQueue.length);
+  reorderedQueue.splice(insertIndex, 0, buildingId);
+  state.constructionPriority = reorderedQueue;
+  syncActiveConstructionAssignments(state);
+  return {
+    ok: true,
+    changed: true,
+    queued: !state.activeConstructionIds.includes(buildingId)
+  };
 }
 
 export function getConstructionProgressDetails(building, state, options = {}) {

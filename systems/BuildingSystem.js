@@ -43,6 +43,28 @@ export function formatBuildingExactQualityDisplay(building) {
   return `${Math.round(quality)}%`;
 }
 
+export function getBuildingCatalogStatusLabel(building) {
+  if (!building) {
+    return "Not Found";
+  }
+
+  if (building.isRuined) {
+    return "Inactive";
+  }
+
+  const multiplier = getBuildingMultiplier(building.quality);
+  if (multiplier >= 3) {
+    return "Active x3";
+  }
+  if (multiplier >= 2) {
+    return "Active x2";
+  }
+  if (multiplier >= 1) {
+    return "Active";
+  }
+  return "Inactive";
+}
+
 function updateCompletionState(building, completedAt, completedDayOffset) {
   const wasComplete = building.isComplete;
   building.multiplier = getBuildingMultiplier(building.quality);

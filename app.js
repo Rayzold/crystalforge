@@ -22,7 +22,14 @@ import {
   saveFirebaseRealmState,
   subscribeFirebaseRealmState
 } from "./firebase/FirebaseSharedState.js";
-import { manifestIntoBuilding, removeBuilding, setBuildingQuality, setBuildingRuinState } from "./systems/BuildingSystem.js";
+import {
+  formatBuildingExactQualityDisplay,
+  getBuildingCatalogStatusLabel,
+  manifestIntoBuilding,
+  removeBuilding,
+  setBuildingQuality,
+  setBuildingRuinState
+} from "./systems/BuildingSystem.js";
 import { addMonthsToOffset, dateFromParts, formatDate, getMonthStartOffset, getStructuredDate } from "./systems/CalendarSystem.js";
 import {
   addCitizens,
@@ -679,10 +686,13 @@ function getCurrentState() {
 
 function exportBuildingCatalogStatus() {
   const state = getCurrentState();
-  const rows = ["Building,Rarity,District,Manifested,Quality"];
+  const rows = ["Building,Rarity,District,Status,Current Quality"];
 
   for (const rarity of RARITY_ORDER) {
     for (const name of state.rollTables[rarity] ?? []) {
+      if (name === "Crystal Upgrade") {
+        continue;
+      }
       const building = state.buildings.find((entry) => entry.name === name && entry.rarity === rarity) ?? null;
       const district = state.buildingCatalog[getCatalogKey(name, rarity)]?.district ?? "";
       rows.push(
@@ -690,8 +700,8 @@ function exportBuildingCatalogStatus() {
           `"${name.replaceAll('"', '""')}"`,
           rarity,
           `"${district.replaceAll('"', '""')}"`,
-          building ? "Yes" : "No",
-          building ? Number(building.quality).toFixed(2) : ""
+          `"${getBuildingCatalogStatusLabel(building)}"`,
+          building ? formatBuildingExactQualityDisplay(building) : "0%"
         ].join(",")
       );
     }
@@ -2046,7 +2056,11 @@ function setConstructionActiveState(buildingId, shouldActivate) {
 
   markRecentBuildingChanges([buildingId]);
   const building = getCurrentState().buildings.find((entry) => entry.id === buildingId);
-  reportSuccess(`${building?.displayName ?? "Building"} ${shouldActivate ? "assigned to an incubator" : "removed from active incubation"}.`);
+  reportSuccess(
+    shouldActivate
+      ? `${building?.displayName ?? "Building"} ${result.queued ? "queued for the next free incubator" : "assigned to an incubator"}.`
+      : `${building?.displayName ?? "Building"} removed from active incubation.`
+  );
 }
 
 function setIncubatorSupportState(buildingId, supportKey, enabled) {
@@ -2772,13 +2786,14 @@ document.addEventListener("keydown", (event) => {
   const shortcuts = {
     "1": "./gm.html",
     "2": "./forge.html",
-    "3": "./city.html",
-    "4": "./citizens.html",
-    "5": "./chronicle.html",
-    "6": "./expeditions.html",
-    "7": "./vehicles.html",
-    "8": "./uniques.html",
-    "9": "./help.html"
+    "3": "./economy.html",
+    "4": "./city.html",
+    "5": "./citizens.html",
+    "6": "./chronicle.html",
+    "7": "./expeditions.html",
+    "8": "./vehicles.html",
+    "9": "./uniques.html",
+    "0": "./help.html"
   };
   const isAdminCodeKey = key.length === 1 && /[0-9!]/.test(key);
 

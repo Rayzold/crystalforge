@@ -29,6 +29,7 @@ export const MASCOT_MEDIA = {
 export const PAGE_ROUTES = [
   { key: "home", label: "Home", href: "./gm.html" },
   { key: "forge", label: "Forge", href: "./forge.html" },
+  { key: "economy", label: "Economy", href: "./economy.html" },
   { key: "city", label: "City", href: "./city.html" },
   { key: "citizens", label: "Citizens", href: "./citizens.html" },
   { key: "expeditions", label: "Expeditions", href: "./expeditions.html" },

@@ -62,11 +62,6 @@ export function renderCrystalSelector(state) {
           <small>${formatNumber(state.crystals[selectedRarity] ?? 0)} crystals remaining</small>
           <small>${formatNumber(state.shards[selectedRarity] ?? 0)} shards stored</small>
         </article>
-        <article>
-          <span>Manifest Rule</span>
-          <strong>Each manifest costs 1 crystal</strong>
-          <small>0 means unavailable.</small>
-        </article>
       </div>
       ${
         visibleRarities.length

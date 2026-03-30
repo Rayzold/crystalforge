@@ -5,7 +5,7 @@ import { renderChroniclePage } from "./ChroniclePage.js";
 import { renderBuildingDetailModal } from "./BuildingDetailModal.js";
 import { renderBuildingCatalogModal } from "./BuildingCatalogModal.js";
 import { renderCitizensPage } from "./CitizensPage.js";
-import { renderCityPage } from "./CityPage.js";
+import { renderCityPage, renderEconomyPage } from "./CityPage.js";
 import { renderExpeditionsPage } from "./ExpeditionsPage.js";
 import { renderForgePage } from "./ForgePage.js";
 import { renderHelpPage } from "./HelpPage.js";
@@ -107,6 +107,8 @@ export class UIRenderer {
         return renderForgePage(state);
       case "city":
         return renderCityPage(state);
+      case "economy":
+        return renderEconomyPage(state);
       case "citizens":
         return renderCitizensPage(state);
       case "expeditions":

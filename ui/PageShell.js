@@ -25,6 +25,7 @@ const HUD_ICON_KEYS = {
 const ROUTE_GLYPHS = {
   home: "\u{1F3E0}",
   forge: "\u{1F48E}",
+  economy: "\u{1F4CA}",
   city: "\u{1F3D9}\uFE0F",
   citizens: "\u{1F465}",
   expeditions: "\u{1F9ED}",
@@ -37,13 +38,14 @@ const ROUTE_GLYPHS = {
 const ROUTE_SHORTCUTS = {
   home: "1",
   forge: "2",
-  city: "3",
-  citizens: "4",
-  chronicle: "5",
-  expeditions: "6",
-  vehicles: "7",
-  uniques: "8",
-  help: "9"
+  economy: "3",
+  city: "4",
+  citizens: "5",
+  chronicle: "6",
+  expeditions: "7",
+  vehicles: "8",
+  uniques: "9",
+  help: "0"
 };
 
 const DICE_TYPES = ["d2", "d4", "d6", "d8", "d10", "d12", "d20", "d100"];
@@ -187,7 +189,7 @@ function renderSidebarRouteGroup(routes, pageKey, cityAlertCount, availableCryst
           href="${route.href}"
           data-short="${route.label.slice(0, 2).toUpperCase()}"
           data-glyph="${ROUTE_GLYPHS[route.key] ?? "\u2022"}"
-          title="${escapeHtml(`${route.label} (${ROUTE_SHORTCUTS[route.key] ?? ""})`)}"
+          title="${escapeHtml(ROUTE_SHORTCUTS[route.key] ? `${route.label} (${ROUTE_SHORTCUTS[route.key]})` : route.label)}"
         >
           <span class="sidebar-link__label">
             <span class="sidebar-link__emoji">${ROUTE_GLYPHS[route.key] ?? "\u2022"}</span>
@@ -231,7 +233,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
   const availableCrystalCount = Object.values(state.crystals ?? {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
   const expeditionCount = state.expeditions?.active?.length ?? 0;
   const uniqueCitizenCount = state.uniqueCitizens?.length ?? 0;
-  const coreRoutes = PAGE_ROUTES.filter((route) => ["home", "forge", "city"].includes(route.key));
+  const coreRoutes = PAGE_ROUTES.filter((route) => ["home", "forge", "economy", "city"].includes(route.key));
   const managementRoutes = PAGE_ROUTES.filter((route) => ["citizens", "expeditions", "vehicles", "uniques", "chronicle", "help"].includes(route.key));
   const manifestedBuildings = orderSidebarBuildings(state, state.buildings.filter((building) => building.isComplete));
   const incubatingBuildings = orderSidebarBuildings(state, getActiveConstructionQueue(state));
@@ -368,7 +370,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
 
       <main class="page-stage page-stage--${pageKey}">
         <div class="page-build-tag" aria-label="Current build">${APP_VERSION}</div>
-        ${pageKey === "city" ? renderCrisisBanner(state, pageKey) : ""}
+        ${pageKey === "city" || pageKey === "economy" ? renderCrisisBanner(state, pageKey) : ""}
         <header class="page-hero">
           <div>
             <p class="page-hero__eyebrow">${pageKey}</p>
@@ -388,7 +390,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
           }
         </header>
 
-        ${pageKey === "uniques" ? "" : renderResourceDeltaStrip(state)}
+        ${pageKey === "uniques" || pageKey === "forge" || pageKey === "citizens" || pageKey === "chronicle" ? "" : renderResourceDeltaStrip(state)}
 
         ${
           pageKey === "home" || pageKey === "forge" || pageKey === "citizens" || pageKey === "chronicle"

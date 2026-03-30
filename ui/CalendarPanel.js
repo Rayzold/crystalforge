@@ -10,7 +10,7 @@ export function renderCalendarPanel(state, options = {}) {
   const nextHolidayGlyph = nextHoliday ? getHolidayGlyph(nextHoliday) : "✦";
   const nextHolidayAccentClass = nextHoliday ? getHolidayTypeClass(nextHoliday) : "";
   const townFocusAvailability = getTownFocusAvailability(state);
-  const { showQueue = true, compact = false } = options;
+  const { showQueue = true, compact = false, hideControls = false, hideSpeedSelector = false } = options;
 
   return `
     <section class="panel calendar-panel ${compact ? "calendar-panel--compact" : ""}">
@@ -46,28 +46,40 @@ export function renderCalendarPanel(state, options = {}) {
           }
         </span>
       </div>
-      <div class="time-controls">
-        <button class="button button--ghost" data-action="advance-time" data-step="day">+1 Day</button>
-        <button class="button button--ghost" data-action="advance-time" data-step="3days">+3 Days</button>
-        <button class="button button--ghost" data-action="advance-time" data-step="week">+1 Week</button>
-        <button class="button button--ghost" data-action="advance-time" data-step="month">+1 Month</button>
-        <button class="button button--ghost" data-action="advance-time" data-step="year">+1 Year</button>
-      </div>
-      <div class="calendar-panel__custom">
-        <label class="calendar-panel__custom-days">
-          Advance by Days
-          <input type="number" min="1" step="1" value="14" data-role="custom-days" />
-        </label>
-        <button class="button" data-action="advance-custom-time">Advance Custom Span</button>
-      </div>
-      <label class="speed-selector">
-        Raising Speed
-        <select data-action="set-speed-multiplier">
-          ${SPEED_MULTIPLIERS.map(
-            (value) => `<option value="${value}" ${state.constructionSpeedMultiplier === value ? "selected" : ""}>${value}x</option>`
-          ).join("")}
-        </select>
-      </label>
+      ${
+        hideControls
+          ? ""
+          : `
+              <div class="time-controls">
+                <button class="button button--ghost" data-action="advance-time" data-step="day">+1 Day</button>
+                <button class="button button--ghost" data-action="advance-time" data-step="3days">+3 Days</button>
+                <button class="button button--ghost" data-action="advance-time" data-step="week">+1 Week</button>
+                <button class="button button--ghost" data-action="advance-time" data-step="month">+1 Month</button>
+                <button class="button button--ghost" data-action="advance-time" data-step="year">+1 Year</button>
+              </div>
+              <div class="calendar-panel__custom">
+                <label class="calendar-panel__custom-days">
+                  Advance by Days
+                  <input type="number" min="1" step="1" value="14" data-role="custom-days" />
+                </label>
+                <button class="button" data-action="advance-custom-time">Advance Custom Span</button>
+              </div>
+            `
+      }
+      ${
+        hideSpeedSelector
+          ? ""
+          : `
+              <label class="speed-selector">
+                Raising Speed
+                <select data-action="set-speed-multiplier">
+                  ${SPEED_MULTIPLIERS.map(
+                    (value) => `<option value="${value}" ${state.constructionSpeedMultiplier === value ? "selected" : ""}>${value}x</option>`
+                  ).join("")}
+                </select>
+              </label>
+            `
+      }
       ${showQueue ? renderConstructionQueuePanel(state) : ""}
     </section>
   `;

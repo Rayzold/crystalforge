@@ -1,7 +1,7 @@
 import { getBuildingEmoji, getCatalogKey } from "../content/BuildingCatalog.js";
 import { RARITY_ORDER } from "../content/Rarities.js";
-import { escapeHtml, formatNumber } from "../engine/Utils.js";
-import { formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
+import { escapeHtml } from "../engine/Utils.js";
+import { formatBuildingExactQualityDisplay, getBuildingCatalogStatusLabel } from "../systems/BuildingSystem.js";
 import { renderModal } from "./Modal.js";
 
 function getCatalogEntries(state) {
@@ -12,7 +12,7 @@ function getCatalogEntries(state) {
       }
       const entry = state.buildingCatalog[getCatalogKey(name, rarity)];
       const manifested = state.buildings.find((building) => building.name === name && building.rarity === rarity) ?? null;
-      const status = manifested ? (manifested.isRuined ? "Ruined" : "Active") : "Not Yet Active";
+      const status = getBuildingCatalogStatusLabel(manifested);
       return {
         name,
         rarity,
@@ -57,7 +57,7 @@ function renderRows(entries) {
         <td>${escapeHtml(entry.rarity)}</td>
         <td>${escapeHtml(entry.district)}</td>
         <td>${escapeHtml(entry.status)}</td>
-        <td>${entry.manifested ? escapeHtml(formatBuildingQualityDisplay(entry.manifested)) : "0%"}</td>
+        <td>${entry.manifested ? escapeHtml(formatBuildingExactQualityDisplay(entry.manifested)) : "0%"}</td>
       </tr>
     `)
     .join("");
@@ -76,7 +76,7 @@ export function renderBuildingCatalogModal(state) {
   const entries = getCatalogEntries(state);
   const filteredEntries = filterEntries(entries, filters);
   const districts = [...new Set(entries.map((entry) => entry.district))].sort((left, right) => left.localeCompare(right));
-  const statuses = ["Active", "Not Yet Active", "Ruined"];
+  const statuses = ["Inactive", "Active", "Active x2", "Active x3", "Not Found"];
 
   return renderModal({
     id: "building-catalog-modal",
@@ -87,7 +87,7 @@ export function renderBuildingCatalogModal(state) {
       <div class="catalog-modal">
         <div class="catalog-modal__toolbar">
           <p class="catalog-modal__intro">
-            This table lists the current rollable building entries, their district placement, activation state, and current stage.
+            This table lists the current rollable building entries, their district placement, activation state, and current quality.
           </p>
           <button class="button button--ghost" data-action="export-building-catalog">Export Building Status</button>
         </div>
@@ -122,7 +122,7 @@ export function renderBuildingCatalogModal(state) {
                 <th>Rarity</th>
                 <th>District</th>
                 <th>Status</th>
-                <th>Current Stage</th>
+                <th>Current Quality</th>
               </tr>
             </thead>
             <tbody>
