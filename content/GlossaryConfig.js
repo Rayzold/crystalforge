@@ -44,11 +44,19 @@ export const GLOSSARY_TERMS = [
     detail: "A temporary mission that sends selected citizens and a vehicle beyond the Drift to return later with recruits, resources, crystals, or rare discoveries."
   },
   {
+    term: "Mission Board",
+    detail: "The rotating list of expedition opportunities. Each refresh brings a random number of normal and special mission cards to choose from."
+  },
+  {
+    term: "Special Mission",
+    detail: "A rarer expedition card with stronger rewards, greater pressure, or a better chance to attract a Unique Citizen."
+  },
+  {
     term: "Vehicle",
-    detail: "Each expedition needs one vehicle. Air vehicles cut travel time in half, while land vehicles are slower but steady."
+    detail: "Each expedition needs one vehicle. Better land buggies and elemental airships shorten travel time by different amounts, with the best airships being the fastest."
   },
   {
     term: "Unique Citizen",
-    detail: "A named notable who joins rarely, lives on the Unique Citizens page, and grants special bonuses beyond normal citizen rarity."
+    detail: "A named citizen who joins rarely, lives on the Unique Citizens page, and grants special bonuses beyond normal citizen rarity."
   }
 ];

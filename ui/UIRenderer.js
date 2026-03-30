@@ -74,8 +74,9 @@ export class UIRenderer {
       projectorMode: false,
       projectorChromeHidden: false,
       expeditionDraft: {
+        missionId: null,
         typeId: "rescue",
-        vehicleId: "caravanWagon",
+        vehicleId: "trailBuggy",
         approachId: "balanced",
         durationDays: 7,
         team: {},

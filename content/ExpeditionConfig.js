@@ -1,5 +1,6 @@
 // Expeditions are the player-facing population and external resource loop.
-// Each mission type defines favored roles, recruit pools, and reward emphasis.
+// Mission types provide the rules backbone, while mission templates generate
+// concrete board cards with names, flavor, and board-specific risk.
 export const EXPEDITION_RARITIES = ["Common", "Rare", "Epic"];
 
 export const EXPEDITION_RARITY_REWARD_MULTIPLIERS = {
@@ -126,3 +127,230 @@ export const EXPEDITION_TYPES = {
 };
 
 export const EXPEDITION_ORDER = Object.keys(EXPEDITION_TYPES);
+
+export const EXPEDITION_MISSION_TEMPLATES = [
+  {
+    id: "collapsedHamlet",
+    typeId: "rescue",
+    name: "Collapsed Hamlet to the West",
+    summary: "A broken settlement still sends smoke by dusk. Survivors may be trapped within.",
+    risk: "Low",
+    distance: "Near",
+    suggestedDurationDays: 7,
+    likelyRewards: ["citizens", "food", "morale"],
+    recommendedVehicleTags: ["land", "safe"],
+    buildingTags: ["civic", "housing"],
+    terrainTags: ["ruins", "settlement"],
+    isSpecial: false
+  },
+  {
+    id: "lostCaravan",
+    typeId: "recruit",
+    name: "Lost Caravan on the Salt Road",
+    summary: "A caravan has stalled beyond the visible routes, with guards and workers still unclaimed.",
+    risk: "Low",
+    distance: "Mid",
+    suggestedDurationDays: 7,
+    likelyRewards: ["citizens", "gold", "goods"],
+    recommendedVehicleTags: ["land", "cargo"],
+    buildingTags: ["trade", "frontier"],
+    terrainTags: ["road", "salt"],
+    isSpecial: false
+  },
+  {
+    id: "crystalEchoField",
+    typeId: "crystalHunt",
+    name: "Crystal Echo Field",
+    summary: "Blue harmonic bursts mark a shallow field of unstable shard growth.",
+    risk: "Medium",
+    distance: "Mid",
+    suggestedDurationDays: 7,
+    likelyRewards: ["crystals", "shards", "mana"],
+    recommendedVehicleTags: ["air", "scout"],
+    buildingTags: ["arcane", "culture"],
+    terrainTags: ["shards", "field"],
+    isSpecial: false
+  },
+  {
+    id: "ruinedMonastery",
+    typeId: "pilgrimage",
+    name: "Ruined Monastery of Veils",
+    summary: "A holy site flickers with half-remembered rites and unexplained guidance.",
+    risk: "Medium",
+    distance: "Far",
+    suggestedDurationDays: 14,
+    likelyRewards: ["mana", "rare recruits", "unique chance"],
+    recommendedVehicleTags: ["air", "arcane"],
+    buildingTags: ["religious", "arcane"],
+    terrainTags: ["ruins", "sacred"],
+    isSpecial: false
+  },
+  {
+    id: "bloodthornNest",
+    typeId: "monsterHunt",
+    name: "Bloodthorn Nest",
+    summary: "Predatory growth and captured bone suggest something territorial has settled in.",
+    risk: "High",
+    distance: "Mid",
+    suggestedDurationDays: 7,
+    likelyRewards: ["salvage", "security", "capture chance"],
+    recommendedVehicleTags: ["land", "military"],
+    buildingTags: ["military", "agriculture"],
+    terrainTags: ["wild", "monster"],
+    isSpecial: false
+  },
+  {
+    id: "brokenWatchtowerRelay",
+    typeId: "resourceRun",
+    name: "Broken Watchtower Relay",
+    summary: "Collapsed relay towers hold salvageable stock and route maps if crews can carry them back.",
+    risk: "Medium",
+    distance: "Near",
+    suggestedDurationDays: 7,
+    likelyRewards: ["materials", "salvage", "scouts"],
+    recommendedVehicleTags: ["scout", "cargo"],
+    buildingTags: ["security", "trade"],
+    terrainTags: ["tower", "road"],
+    isSpecial: false
+  },
+  {
+    id: "floodedQuarryEncampment",
+    typeId: "resourceRun",
+    name: "Flooded Quarry Encampment",
+    summary: "An abandoned camp near the flooded quarry still holds stone, rope, and buried supply caches.",
+    risk: "Low",
+    distance: "Near",
+    suggestedDurationDays: 3,
+    likelyRewards: ["materials", "food", "laborers"],
+    recommendedVehicleTags: ["land", "cargo"],
+    buildingTags: ["industry", "trade"],
+    terrainTags: ["quarry", "water"],
+    isSpecial: false
+  },
+  {
+    id: "silentShrine",
+    typeId: "pilgrimage",
+    name: "Silent Shrine of Glass",
+    summary: "Pilgrims vanished here years ago, but the shrine still hums at moonrise.",
+    risk: "High",
+    distance: "Far",
+    suggestedDurationDays: 14,
+    likelyRewards: ["mana", "priests", "unique chance"],
+    recommendedVehicleTags: ["air", "arcane"],
+    buildingTags: ["religious", "arcane"],
+    terrainTags: ["glass", "sacred"],
+    isSpecial: false
+  },
+  {
+    id: "ashDuneTrail",
+    typeId: "rescue",
+    name: "Ash Dune Survivor Trail",
+    summary: "Refugees are leaving faint campfires along the ash dunes, but raiders are nearby.",
+    risk: "Medium",
+    distance: "Mid",
+    suggestedDurationDays: 7,
+    likelyRewards: ["citizens", "food", "medics"],
+    recommendedVehicleTags: ["land", "safe"],
+    buildingTags: ["civic", "military"],
+    terrainTags: ["ash", "dunes"],
+    isSpecial: false
+  },
+  {
+    id: "forsakenStorehouse",
+    typeId: "relicRecovery",
+    name: "Forsaken Storehouse Vault",
+    summary: "A sealed vault beneath a dead trade house may still hold old salvage and rarer pieces.",
+    risk: "Medium",
+    distance: "Mid",
+    suggestedDurationDays: 14,
+    likelyRewards: ["salvage", "goods", "rare recruits"],
+    recommendedVehicleTags: ["scout", "cargo"],
+    buildingTags: ["trade", "culture"],
+    terrainTags: ["vault", "ruins"],
+    isSpecial: false
+  },
+  {
+    id: "pilgrimRoad",
+    typeId: "diplomatic",
+    name: "Pilgrims on the Root Road",
+    summary: "A moving camp of pilgrims and merchants is open to escort, barter, and recruitment.",
+    risk: "Low",
+    distance: "Mid",
+    suggestedDurationDays: 7,
+    likelyRewards: ["gold", "citizens", "prosperity"],
+    recommendedVehicleTags: ["land", "cargo"],
+    buildingTags: ["trade", "religious"],
+    terrainTags: ["road", "pilgrims"],
+    isSpecial: false
+  },
+  {
+    id: "derelictSkyMooring",
+    typeId: "relicRecovery",
+    name: "Derelict Sky Mooring",
+    summary: "A sky-anchored ruin drifts just beyond safe reach, rich with relic fittings and risk.",
+    risk: "High",
+    distance: "Far",
+    suggestedDurationDays: 14,
+    likelyRewards: ["salvage", "crystals", "epic chance"],
+    recommendedVehicleTags: ["air", "cargo"],
+    buildingTags: ["harbor", "arcane"],
+    terrainTags: ["sky", "ruins"],
+    isSpecial: false
+  },
+  {
+    id: "sunkenReliquary",
+    typeId: "relicRecovery",
+    name: "Sunken Reliquary of Tides",
+    summary: "Relics and sealed chambers lie beneath unstable waterlogged stone.",
+    risk: "High",
+    distance: "Far",
+    suggestedDurationDays: 28,
+    likelyRewards: ["relics", "mana", "unique chance"],
+    recommendedVehicleTags: ["air", "scout"],
+    buildingTags: ["arcane", "religious", "harbor"],
+    terrainTags: ["water", "vault"],
+    isSpecial: true
+  },
+  {
+    id: "embercourtParley",
+    typeId: "diplomatic",
+    name: "Embercourt Parley",
+    summary: "An invitation to negotiate with a volatile but wealthy court has finally arrived.",
+    risk: "Medium",
+    distance: "Far",
+    suggestedDurationDays: 14,
+    likelyRewards: ["gold", "nobles", "prestige"],
+    recommendedVehicleTags: ["air", "safe"],
+    buildingTags: ["trade", "civic", "culture"],
+    terrainTags: ["court", "diplomacy"],
+    isSpecial: true
+  },
+  {
+    id: "stormGlassPassage",
+    typeId: "crystalHunt",
+    name: "Stormglass Passage",
+    summary: "A temporary crystal storm has opened a dangerous passage full of shard resonance.",
+    risk: "High",
+    distance: "Far",
+    suggestedDurationDays: 14,
+    likelyRewards: ["crystals", "mana", "epic chance"],
+    recommendedVehicleTags: ["air", "arcane"],
+    buildingTags: ["arcane", "harbor"],
+    terrainTags: ["storm", "shards"],
+    isSpecial: true
+  },
+  {
+    id: "hollowCrownProcession",
+    typeId: "pilgrimage",
+    name: "Hollow Crown Procession",
+    summary: "An ancient rite is moving through the wastes, and those who meet it rarely return unchanged.",
+    risk: "High",
+    distance: "Far",
+    suggestedDurationDays: 28,
+    likelyRewards: ["priests", "druids", "unique chance"],
+    recommendedVehicleTags: ["air", "arcane"],
+    buildingTags: ["religious", "culture"],
+    terrainTags: ["procession", "ritual"],
+    isSpecial: true
+  }
+];

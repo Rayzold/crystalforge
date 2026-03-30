@@ -2,6 +2,7 @@
 // Named notables live here so they feel distinct from the normal workforce and
 // their one-off bonuses can be read without scanning the whole roster.
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
+import { EXPEDITION_TYPES } from "../content/ExpeditionConfig.js";
 
 function renderUniqueCitizenCard(uniqueCitizen) {
   return `
@@ -18,6 +19,7 @@ function renderUniqueCitizenCard(uniqueCitizen) {
       <div class="notable-card__meta">
         <span>Status: ${escapeHtml(uniqueCitizen.status === "inCity" ? "In City" : uniqueCitizen.status)}</span>
         <span>Joined: ${escapeHtml(uniqueCitizen.joinedAt)}</span>
+        ${uniqueCitizen.sourceTypeId ? `<span>Found through ${escapeHtml(EXPEDITION_TYPES[uniqueCitizen.sourceTypeId]?.label ?? uniqueCitizen.sourceTypeId)}</span>` : ""}
       </div>
       <div class="notable-card__bonuses">
         ${Object.entries(uniqueCitizen.bonuses?.resources ?? {}).map(([key, amount]) => `

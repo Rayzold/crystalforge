@@ -48,11 +48,13 @@ import { resetDistrictLevels, setDistrictDefinition, setDistrictLevelOverride, g
 import { setDriftEvolutionStageOverride, syncDriftEvolutionState } from "./systems/DriftEvolutionSystem.js";
 import { clearActiveEvents, triggerEvent } from "./systems/EventSystem.js";
 import {
+  forceReturnExpedition,
   getAvailableVehicleCounts,
   getExpeditionCalendarEntries,
   normalizeExpeditionState,
   normalizeUniqueCitizens,
   normalizeVehicleFleet,
+  refreshExpeditionBoardIfNeeded,
   startExpedition
 } from "./systems/ExpeditionSystem.js";
 import { VEHICLE_DEFINITIONS } from "./content/VehicleConfig.js";
@@ -374,6 +376,7 @@ function syncDerivedState(state) {
   state.vehicles = normalizeVehicleFleet(state.vehicles);
   state.expeditions = normalizeExpeditionState(state.expeditions);
   state.uniqueCitizens = normalizeUniqueCitizens(state.uniqueCitizens);
+  refreshExpeditionBoardIfNeeded(state);
   if ((state.crystals[state.selectedRarity] ?? 0) <= 0) {
     state.selectedRarity =
       RARITY_ORDER.find((rarity) => (state.crystals[rarity] ?? 0) > 0) ?? state.selectedRarity;
@@ -1233,8 +1236,9 @@ function resetTransientUi() {
       mapPanY: 0,
       mapPlacementPulseCell: null,
       expeditionDraft: {
+        missionId: null,
         typeId: "rescue",
-        vehicleId: "caravanWagon",
+        vehicleId: "trailBuggy",
         approachId: "balanced",
         durationDays: 7,
         team: {},
@@ -2119,6 +2123,7 @@ function launchExpeditionFromDraft() {
     {
       expeditionDraft: {
         ...renderer.transientUi.expeditionDraft,
+        missionId: result.expedition.missionId ?? null,
         typeId: result.expedition.typeId,
         vehicleId: result.expedition.vehicleId,
         approachId: result.expedition.approachId,
@@ -2129,7 +2134,33 @@ function launchExpeditionFromDraft() {
     },
     getCurrentState()
   );
-  reportSuccess(`${result.expedition.typeLabel} launched. Expected back ${result.expedition.expectedReturnAt}.`, "confirm");
+  reportSuccess(`${result.expedition.missionName ?? result.expedition.typeLabel} launched. Expected back ${result.expedition.expectedReturnAt}.`, "confirm");
+}
+
+function refreshExpeditionBoardManually() {
+  const board = commit((draft) => refreshExpeditionBoardIfNeeded(draft, { force: true }));
+  reportSuccess(`Mission Board refreshed with ${formatNumber(board?.length ?? 0, 0)} card${(board?.length ?? 0) === 1 ? "" : "s"}.`);
+}
+
+function forceReturnSoonestExpedition() {
+  const result = commit((draft) => forceReturnExpedition(draft));
+  if (!result?.ok) {
+    reportError(result?.reason ?? "No expedition could be forced home.");
+    return;
+  }
+
+  const touchedResources = [
+    ...Object.entries(result.record?.rewards?.resources ?? {}).filter(([, amount]) => Number(amount) > 0).map(([resource]) => resource),
+    ...Object.entries(result.record?.rewards?.crystals ?? {}).filter(([, amount]) => Number(amount) > 0).map(([rarity]) => `${rarity} crystal`),
+    ...Object.entries(result.record?.rewards?.shards ?? {}).filter(([, amount]) => Number(amount) > 0).map(([rarity]) => `${rarity} shards`)
+  ];
+  if (touchedResources.length) {
+    markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
+  }
+  if (result.record?.rewards?.recruits && Object.keys(result.record.rewards.recruits).length) {
+    markRecentCitizenChanges(Object.keys(result.record.rewards.recruits));
+  }
+  reportSuccess(`${result.expedition.missionName ?? result.expedition.typeLabel} was forced to return immediately.`, "confirm");
 }
 
 function manifestBuildingNow(buildingId) {
@@ -2304,6 +2335,12 @@ const actions = {
   },
   launchExpedition() {
     launchExpeditionFromDraft();
+  },
+  refreshExpeditionBoard() {
+    refreshExpeditionBoardManually();
+  },
+  forceReturnSoonestExpedition() {
+    forceReturnSoonestExpedition();
   },
   saveDriftEvolutionStage({ stageId, patch }) {
     commit((draft) => {
@@ -2980,6 +3017,21 @@ root.addEventListener("click", async (event) => {
     case "toggle-player-hide-completed":
       renderer.setTransientUi({ playerHideCompleted: !renderer.transientUi.playerHideCompleted }, getCurrentState());
       break;
+    case "set-expedition-mission":
+      void audioEngine.playUiAccent("soft");
+      renderer.setTransientUi(
+        {
+          expeditionDraft: {
+            ...(renderer.transientUi.expeditionDraft ?? {}),
+            missionId: target.dataset.missionId ?? null,
+            typeId: target.dataset.typeId ?? "rescue",
+            durationDays: Math.max(1, Number(target.dataset.durationDays ?? 7) || 7),
+            team: {}
+          }
+        },
+        getCurrentState()
+      );
+      break;
     case "set-expedition-type":
       void audioEngine.playUiAccent("soft");
       renderer.setTransientUi(
@@ -2987,6 +3039,7 @@ root.addEventListener("click", async (event) => {
           expeditionDraft: {
             ...(renderer.transientUi.expeditionDraft ?? {}),
             typeId: target.dataset.typeId ?? "rescue",
+            missionId: null,
             team: {}
           }
         },
@@ -2999,7 +3052,7 @@ root.addEventListener("click", async (event) => {
         {
           expeditionDraft: {
             ...(renderer.transientUi.expeditionDraft ?? {}),
-            vehicleId: target.dataset.vehicleId ?? "caravanWagon"
+            vehicleId: target.dataset.vehicleId ?? "trailBuggy"
           }
         },
         getCurrentState()
@@ -3032,6 +3085,14 @@ root.addEventListener("click", async (event) => {
     case "launch-expedition":
       void audioEngine.playUiAccent("confirm");
       actions.launchExpedition();
+      break;
+    case "refresh-expedition-board":
+      void audioEngine.playUiAccent("soft");
+      actions.refreshExpeditionBoard();
+      break;
+    case "force-return-expedition":
+      void audioEngine.playUiAccent("confirm");
+      actions.forceReturnSoonestExpedition();
       break;
     case "adjust-vehicle-count":
       void audioEngine.playUiAccent("soft");

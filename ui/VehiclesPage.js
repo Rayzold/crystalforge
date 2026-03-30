@@ -4,6 +4,7 @@
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { getAvailableVehicleCounts, getVehicleAssignments } from "../systems/ExpeditionSystem.js";
 import { VEHICLE_DEFINITIONS, VEHICLE_ORDER } from "../content/VehicleConfig.js";
+import { EXPEDITION_TYPES } from "../content/ExpeditionConfig.js";
 
 function renderVehicleCard(state, vehicleId) {
   const definition = VEHICLE_DEFINITIONS[vehicleId];
@@ -14,7 +15,7 @@ function renderVehicleCard(state, vehicleId) {
     <article class="panel vehicle-card">
       <div class="vehicle-card__head">
         <div>
-          <p class="vehicle-card__eyebrow">${escapeHtml(definition.type === "air" ? "Air Vehicle" : "Land Vehicle")}</p>
+          <p class="vehicle-card__eyebrow">${escapeHtml(definition.sizeLabel ?? (definition.type === "air" ? "Air Vehicle" : "Land Vehicle"))}</p>
           <h3>${escapeHtml(`${definition.emoji} ${definition.name}`)}</h3>
         </div>
         <strong>${formatNumber(total)}</strong>
@@ -23,9 +24,12 @@ function renderVehicleCard(state, vehicleId) {
       <div class="vehicle-card__stats">
         <article><span>Free</span><strong>${formatNumber(available)}</strong></article>
         <article><span>Assigned</span><strong>${formatNumber(assigned)}</strong></article>
-        <article><span>Time</span><strong>${definition.timeMultiplier === 0.5 ? "x0.5" : "x1.0"}</strong></article>
+        <article><span>Time</span><strong>x${formatNumber(definition.timeMultiplier ?? 1, 2)}</strong></article>
         <article><span>Cargo</span><strong>x${formatNumber(definition.cargoMultiplier, 2)}</strong></article>
+        <article><span>Safety</span><strong>x${formatNumber(definition.safety ?? 1, 2)}</strong></article>
+        <article><span>Scout</span><strong>x${formatNumber(definition.scouting ?? 1, 2)}</strong></article>
       </div>
+      <p class="panel__subtle">Best for: ${escapeHtml((definition.favoredMissionTags ?? []).map((typeId) => EXPEDITION_TYPES[typeId]?.label ?? typeId).join(", "))}</p>
       ${
         state.ui?.adminUnlocked
           ? `
@@ -50,12 +54,12 @@ export function renderVehiclesPage(state) {
 
   return {
     title: "Vehicles",
-    subtitle: "Each expedition needs a vehicle, and air travel cuts journey time in half.",
+    subtitle: "Each expedition needs a vehicle, and stronger buggies or airships shorten the journey by different amounts.",
     content: `
       <section class="panel vehicle-summary-panel">
         <div class="panel__header">
           <h3>Fleet Summary</h3>
-          <span class="panel__subtle">Land and air transport determine how many expeditions can leave the Drift at once.</span>
+          <span class="panel__subtle">Three land buggies and three elemental airships now define how many expeditions can leave the Drift at once.</span>
         </div>
         <div class="vehicle-card__stats">
           <article><span>Total Fleet</span><strong>${formatNumber(totalVehicles)}</strong></article>

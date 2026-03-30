@@ -7,7 +7,7 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.4.1";
+export const APP_VERSION = "v1.4.4";
 export const SAVE_VERSION = 12;
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3";
 export const FIREBASE_CONFIG = {
@@ -38,6 +38,9 @@ export const PAGE_ROUTES = [
   { key: "help", label: "Help", href: "./help.html" }
 ];
 export const BUILD_NOTES = [
+  "The expedition fleet now uses six vehicle tiers instead of four: three land buggies and three elemental airships, each with its own travel speed, cargo profile, and mission fit.",
+  "Expedition closing polish landed: the Mission Board now stays stable until its real refresh window, Expeditions include a clearer quick-start block, and GM-only expedition tools can refresh the board or force the soonest return for testing.",
+  "Expeditions now run from a real mission board with random weekly opportunities, optional day-one special missions, vehicle traits, building synergies, and clearer strengths versus risks before launch.",
   "The citizen system is evolving into an expedition game: Expeditions, Vehicles, and Unique Citizens now form a new route for recruiting population, gathering resources, and discovering named heroes over time.",
   "GM building quality editing is faster now, with -10 / -1 / +1 / +10 nudges beside the quality input on both City cards and building dossiers.",
   "GM building quality editing is easier now: City cards and building dossiers both expose a direct quality input plus Save Quality action after 432! is unlocked.",

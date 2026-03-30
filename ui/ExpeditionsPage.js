@@ -1,6 +1,6 @@
 // Expedition planning page.
-// This screen is the player-facing mini-game for sending crews and vehicles
-// beyond the Drift to return with resources, recruits, and rare notables.
+// This screen renders the rotating mission board, launch setup, and the return
+// feed that turns expeditions into a proper citizen-and-resource mini-game.
 import { EXPEDITION_APPROACHES, EXPEDITION_DURATION_OPTIONS, EXPEDITION_ORDER, EXPEDITION_TYPES } from "../content/ExpeditionConfig.js";
 import { CITIZEN_DEFINITIONS } from "../content/CitizenConfig.js";
 import { VEHICLE_DEFINITIONS, VEHICLE_ORDER } from "../content/VehicleConfig.js";
@@ -21,35 +21,60 @@ const RESOURCE_LABELS = {
 };
 
 function getDefaultDraft(state) {
-  const firstType = EXPEDITION_TYPES[state.transientUi?.expeditionDraft?.typeId] ? state.transientUi.expeditionDraft.typeId : EXPEDITION_ORDER[0];
+  const board = state.expeditions?.board ?? [];
+  const missionId = board.some((mission) => mission.id === state.transientUi?.expeditionDraft?.missionId)
+    ? state.transientUi.expeditionDraft.missionId
+    : board[0]?.id ?? null;
+  const selectedMission = board.find((mission) => mission.id === missionId) ?? board[0] ?? null;
+  const firstType = EXPEDITION_TYPES[selectedMission?.typeId ?? state.transientUi?.expeditionDraft?.typeId]
+    ? (selectedMission?.typeId ?? state.transientUi?.expeditionDraft?.typeId)
+    : EXPEDITION_ORDER[0];
+  const durationDays =
+    EXPEDITION_DURATION_OPTIONS.includes(Number(state.transientUi?.expeditionDraft?.durationDays))
+      ? Number(state.transientUi.expeditionDraft.durationDays)
+      : Number(selectedMission?.suggestedDurationDays ?? 7);
   return {
+    missionId,
     typeId: firstType,
-    vehicleId: state.transientUi?.expeditionDraft?.vehicleId ?? "caravanWagon",
+    vehicleId: state.transientUi?.expeditionDraft?.vehicleId ?? "trailBuggy",
     approachId: state.transientUi?.expeditionDraft?.approachId ?? "balanced",
-    durationDays: Number(state.transientUi?.expeditionDraft?.durationDays ?? 7) || 7,
+    durationDays,
     team: structuredClone(state.transientUi?.expeditionDraft?.team ?? {}),
     resources: structuredClone(state.transientUi?.expeditionDraft?.resources ?? {})
   };
 }
 
-function renderMissionCards(draft) {
+function renderMissionBoard(state, draft) {
+  const board = state.expeditions?.board ?? [];
+  if (!board.length) {
+    return `<p class="panel__empty">No mission cards are currently available.</p>`;
+  }
+
   return `
     <div class="expedition-grid expedition-grid--missions">
-      ${EXPEDITION_ORDER.map((typeId) => {
-        const expeditionType = EXPEDITION_TYPES[typeId];
-        return `
-          <button
-            type="button"
-            class="expedition-card expedition-card--mission ${draft.typeId === typeId ? "is-active" : ""}"
-            data-action="set-expedition-type"
-            data-type-id="${typeId}"
-          >
-            <span class="expedition-card__emoji" aria-hidden="true">${escapeHtml(expeditionType.emoji)}</span>
-            <strong>${escapeHtml(expeditionType.label)}</strong>
-            <small>${escapeHtml(expeditionType.summary)}</small>
-          </button>
-        `;
-      }).join("")}
+      ${board.map((mission) => `
+        <button
+          type="button"
+          class="expedition-card expedition-card--mission ${draft.missionId === mission.id ? "is-active" : ""} ${mission.isSpecial ? "is-special" : ""}"
+          data-action="set-expedition-mission"
+          data-mission-id="${mission.id}"
+          data-type-id="${mission.typeId}"
+          data-duration-days="${mission.suggestedDurationDays}"
+        >
+          <div class="expedition-card__row">
+            <span class="expedition-card__emoji" aria-hidden="true">${escapeHtml(mission.typeEmoji ?? "•")}</span>
+            <strong>${escapeHtml(mission.name)}</strong>
+          </div>
+          <small>${escapeHtml(mission.summary)}</small>
+          <div class="expedition-card__tags">
+            <em>${escapeHtml(mission.risk)} Risk</em>
+            <em>${escapeHtml(mission.distance)}</em>
+            <em>${formatNumber(Math.max(0, mission.expiresDayOffset - state.calendar.dayOffset), 0)}d left</em>
+            ${mission.isSpecial ? `<em class="expedition-card__tag expedition-card__tag--special">Special</em>` : ""}
+          </div>
+          <span class="expedition-card__footer">${escapeHtml((mission.likelyRewards ?? []).join(" • "))}</span>
+        </button>
+      `).join("")}
     </div>
   `;
 }
@@ -76,8 +101,14 @@ function renderVehicleOptions(state, draft) {
               <span class="expedition-card__emoji" aria-hidden="true">${escapeHtml(definition?.emoji ?? "•")}</span>
               <strong>${escapeHtml(definition?.name ?? vehicleId)}</strong>
             </div>
-            <small>${escapeHtml(definition?.type === "air" ? "Air vehicle · half travel time" : "Land vehicle")}</small>
-            <em>${formatNumber(available)} free / ${formatNumber(total)} total</em>
+            <small>${escapeHtml(definition?.summary ?? "")}</small>
+            <div class="expedition-card__tags">
+              <em>${escapeHtml(definition?.sizeLabel ?? (definition?.type === "air" ? "Air Vehicle" : "Land Vehicle"))}</em>
+              <em>Travel x${formatNumber(definition?.timeMultiplier ?? 1, 2)}</em>
+              <em>Cargo x${formatNumber(definition?.cargoMultiplier ?? 1, 2)}</em>
+              <em>Scout x${formatNumber(definition?.scouting ?? 1, 2)}</em>
+            </div>
+            <span class="expedition-card__footer">${formatNumber(available)} free / ${formatNumber(total)} total</span>
           </button>
         `;
       }).join("")}
@@ -172,6 +203,18 @@ function renderSupplyInputs(state, draft) {
 }
 
 function renderPreviewPanel(state, draft) {
+  if (!(state.expeditions?.board ?? []).length) {
+    return `
+      <section class="panel expedition-launch-preview">
+        <div class="panel__header">
+          <h3>Launch Preview</h3>
+          <span class="panel__subtle">No mission card is currently selected.</span>
+        </div>
+        <p class="panel__empty">The Mission Board is empty right now. Wait for the next refresh or use the GM refresh action.</p>
+      </section>
+    `;
+  }
+
   const preview = createExpeditionLaunchPreview(state, draft);
   const outcomeText =
     preview.successScore >= 1.35
@@ -185,21 +228,46 @@ function renderPreviewPanel(state, draft) {
   return `
     <section class="panel expedition-launch-preview">
       <div class="panel__header">
-        <h3>Launch Preview</h3>
-        <span class="panel__subtle">Who leaves, when they return, and how bold the mission feels.</span>
+        <h3>${escapeHtml(preview.mission.name)}</h3>
+        <span class="panel__subtle">${escapeHtml(preview.mission.summary)}</span>
       </div>
       <div class="expedition-preview-grid">
-        <article><span>Team</span><strong>${formatNumber(preview.teamSize)}</strong></article>
-        <article><span>Travel Time</span><strong>${formatNumber(preview.durationDays, 0)}d</strong></article>
-        <article><span>Expected Return</span><strong>${escapeHtml(formatDate(preview.expectedReturnDayOffset))}</strong></article>
+        <article><span>Risk</span><strong>${escapeHtml(preview.mission.risk)}</strong></article>
+        <article><span>Travel</span><strong>${formatNumber(preview.durationDays, 0)}d</strong></article>
+        <article><span>Return</span><strong>${escapeHtml(formatDate(preview.expectedReturnDayOffset))}</strong></article>
         <article><span>Power</span><strong>${formatNumber(preview.powerScore, 1)}</strong></article>
       </div>
       <p class="expedition-launch-preview__outlook">${escapeHtml(outcomeText)}</p>
+      <div class="expedition-preview-insights">
+        <div class="expedition-preview-insights__col">
+          <strong>Strengths</strong>
+          ${
+            preview.strengths.length
+              ? `<ul>${preview.strengths.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul>`
+              : `<p>No clear strengths yet.</p>`
+          }
+        </div>
+        <div class="expedition-preview-insights__col">
+          <strong>Risks</strong>
+          ${
+            preview.risks.length
+              ? `<ul>${preview.risks.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul>`
+              : `<p>No major weaknesses detected.</p>`
+          }
+        </div>
+      </div>
       <button class="button expedition-launch-preview__launch" type="button" data-action="launch-expedition">
         Launch Expedition
       </button>
     </section>
   `;
+}
+
+function getTeamSizeText(team) {
+  const total = Object.values(team ?? {}).reduce((sum, bundle) => {
+    return sum + Object.values(bundle ?? {}).reduce((bundleSum, amount) => bundleSum + (Number(amount) || 0), 0);
+  }, 0);
+  return `${formatNumber(total)} crew`;
 }
 
 function renderActiveExpeditions(state) {
@@ -226,26 +294,24 @@ function renderActiveExpeditions(state) {
         ${active.map((expedition) => `
           <article class="expedition-return-card">
             <div class="expedition-return-card__head">
-              <strong>${escapeHtml(expedition.typeLabel)}</strong>
+              <strong>${escapeHtml(expedition.missionName ?? expedition.typeLabel)}</strong>
               <span>${escapeHtml(expedition.vehicleName)}</span>
             </div>
-            <p>${escapeHtml(`${getTeamSizeText(expedition.team)} deployed / ${expedition.notes}`)}</p>
+            <p>${escapeHtml(expedition.missionSummary ?? expedition.notes)}</p>
+            <div class="expedition-card__tags">
+              <em>${escapeHtml(expedition.missionRisk)} Risk</em>
+              <em>${escapeHtml(expedition.missionDistance)}</em>
+              ${expedition.missionIsSpecial ? `<em class="expedition-card__tag expedition-card__tag--special">Special</em>` : ""}
+            </div>
             <div class="expedition-return-card__meta">
+              <span>${escapeHtml(getTeamSizeText(expedition.team))}</span>
               <span>Returns ${escapeHtml(expedition.expectedReturnAt)}</span>
-              <span>${escapeHtml(EXPEDITION_APPROACHES[expedition.approachId]?.label ?? "Balanced")}</span>
             </div>
           </article>
         `).join("")}
       </div>
     </section>
   `;
-}
-
-function getTeamSizeText(team) {
-  const total = Object.values(team ?? {}).reduce((sum, bundle) => {
-    return sum + Object.values(bundle ?? {}).reduce((bundleSum, amount) => bundleSum + (Number(amount) || 0), 0);
-  }, 0);
-  return `${formatNumber(total)} crew`;
 }
 
 function renderRecentReturns(state) {
@@ -262,10 +328,17 @@ function renderRecentReturns(state) {
               ${recent.map((record) => `
                 <article class="expedition-return-card">
                   <div class="expedition-return-card__head">
-                    <strong>${escapeHtml(record.typeLabel)}</strong>
+                    <strong>${escapeHtml(record.missionName ?? record.typeLabel)}</strong>
                     <span>${escapeHtml(record.outcomeLabel)}</span>
                   </div>
-                  <p>${escapeHtml(record.summary)}</p>
+                  <p>${escapeHtml(record.narrative ?? record.summary)}</p>
+                  ${
+                    record.detailLines?.length
+                      ? `<ul class="expedition-return-card__details">
+                          ${record.detailLines.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}
+                        </ul>`
+                      : ""
+                  }
                   <div class="expedition-return-card__meta">
                     <span>${escapeHtml(record.returnDateLabel)}</span>
                     <span>${escapeHtml(record.vehicleName)}</span>
@@ -285,21 +358,59 @@ function renderExpeditionSummary(state) {
     <section class="panel expedition-summary-panel">
       <div class="panel__header">
         <h3>Expedition Command</h3>
-        <span class="panel__subtle">Citizens leave the city while deployed, and air vehicles halve travel time.</span>
+        <span class="panel__subtle">Mission cards rotate over time, vehicles gate departures, and Unique Citizens arrive only after repeated success.</span>
       </div>
       <div class="expedition-preview-grid">
+        <article><span>Board</span><strong>${formatNumber(overview.boardMissions)}</strong></article>
         <article><span>Active</span><strong>${formatNumber(overview.activeExpeditions)}</strong></article>
         <article><span>Vehicles Free</span><strong>${formatNumber(overview.freeVehicles)} / ${formatNumber(overview.totalVehicles)}</strong></article>
-        <article><span>Unique Progress</span><strong>${formatNumber(overview.uniqueProgress)} / ${formatNumber(overview.nextUniqueThreshold)}</strong></article>
-        <article><span>Notables</span><strong>${formatNumber(overview.uniqueCitizens)}</strong></article>
+        <article><span>Unique Progress</span><strong>${formatNumber(overview.uniqueProgress, 0)} / ${formatNumber(overview.nextUniqueThreshold, 0)}</strong></article>
+        <article><span>Unique Citizens</span><strong>${formatNumber(overview.uniqueCitizens)}</strong></article>
       </div>
+      <div class="expedition-summary-panel__guidance">
+        <article class="expedition-guidance-card">
+          <strong>Quick Start</strong>
+          <ul>
+            <li>Pick a mission card from the Mission Board.</li>
+            <li>Each expedition needs exactly one free vehicle.</li>
+            <li>Better vehicles shorten travel time by different amounts.</li>
+            <li>Long success fills the Unique Citizen meter.</li>
+          </ul>
+        </article>
+        <article class="expedition-guidance-card">
+          <strong>Board Rules</strong>
+          <ul>
+            <li>The Mission Board refreshes every 7 days.</li>
+            <li>It rolls 5-7 normal cards and 0-2 special cards.</li>
+            <li>Taking every card does not force an early reroll.</li>
+            <li>GM can refresh the board manually for testing.</li>
+          </ul>
+        </article>
+      </div>
+      ${
+        state.ui?.adminUnlocked
+          ? `
+            <div class="expedition-gm-strip">
+              <strong>GM Expedition Tools</strong>
+              <div class="expedition-button-row">
+                <button class="button button--ghost" type="button" data-action="refresh-expedition-board">Refresh Board</button>
+                <button class="button button--ghost" type="button" data-action="force-return-expedition" ${overview.activeExpeditions ? "" : "disabled"}>Force Soonest Return</button>
+                <button class="button button--ghost" type="button" data-action="advance-time" data-step="day">+1 Day</button>
+                <button class="button button--ghost" type="button" data-action="adjust-vehicle-count" data-vehicle-id="trailBuggy" data-delta="1">+ Trail Buggy</button>
+                <button class="button button--ghost" type="button" data-action="adjust-vehicle-count" data-vehicle-id="elementalSkiff" data-delta="1">+ Elemental Skiff</button>
+              </div>
+            </div>
+          `
+          : ""
+      }
     </section>
   `;
 }
 
 export function renderExpeditionsPage(state) {
   const draft = getDefaultDraft(state);
-  const expeditionType = EXPEDITION_TYPES[draft.typeId] ?? EXPEDITION_TYPES[EXPEDITION_ORDER[0]];
+  const selectedMission = (state.expeditions?.board ?? []).find((mission) => mission.id === draft.missionId) ?? (state.expeditions?.board ?? [])[0] ?? null;
+  const expeditionType = EXPEDITION_TYPES[selectedMission?.typeId ?? draft.typeId] ?? EXPEDITION_TYPES[EXPEDITION_ORDER[0]];
 
   return {
     title: "Expeditions",
@@ -308,14 +419,17 @@ export function renderExpeditionsPage(state) {
       ${renderExpeditionSummary(state)}
       <section class="panel expedition-launch-panel">
         <div class="panel__header">
-          <h3>Launch Expedition</h3>
-          <span class="panel__subtle">Choose the mission, vehicle, crew, supplies, and pace.</span>
+          <h3>Mission Board</h3>
+          <span class="panel__subtle">The board refreshes with fresh opportunities, including a random number of special missions.</span>
+        </div>
+        ${renderMissionBoard(state, draft)}
+      </section>
+      <section class="panel expedition-launch-panel">
+        <div class="panel__header">
+          <h3>Prepare Mission</h3>
+          <span class="panel__subtle">Choose the vehicle, approach, crew, and supplies for the selected card.</span>
         </div>
         <div class="expedition-launch-panel__stack">
-          <div>
-            <div class="panel__subtle">Mission Type</div>
-            ${renderMissionCards(draft)}
-          </div>
           <div>
             <div class="panel__subtle">Vehicle</div>
             ${renderVehicleOptions(state, draft)}

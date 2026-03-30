@@ -63,8 +63,8 @@ export function createInitialState(preset = DEFAULT_START_PRESET) {
   const isTestingPreset = preset === "testing";
   const initialVehicles = createDefaultVehicleFleet(
     isTestingPreset
-      ? { caravanWagon: 2, surveyWalker: 2, cloudskiff: 1, skybarge: 1 }
-      : { caravanWagon: 1, surveyWalker: 1, cloudskiff: 0, skybarge: 0 }
+      ? { scoutBuggy: 2, trailBuggy: 2, siegeBuggy: 1, elementalSkiff: 1, elementalFrigate: 1, grandElementalAirship: 1 }
+      : { scoutBuggy: 1, trailBuggy: 1, siegeBuggy: 0, elementalSkiff: 0, elementalFrigate: 0, grandElementalAirship: 0 }
   );
   const state = {
     version: SAVE_VERSION,
@@ -139,7 +139,7 @@ export function createSingleCommonCrystalResetState() {
   };
   state.citizens = createEmptyCitizenCollection(0);
   state.citizenRarityRoster = createCitizenRarityRoster();
-  state.vehicles = createDefaultVehicleFleet({ caravanWagon: 1, surveyWalker: 1, cloudskiff: 0, skybarge: 0 });
+  state.vehicles = createDefaultVehicleFleet({ scoutBuggy: 1, trailBuggy: 1, siegeBuggy: 0, elementalSkiff: 0, elementalFrigate: 0, grandElementalAirship: 0 });
   state.expeditions = createDefaultExpeditionState();
   state.uniqueCitizens = [];
   state.buildings = [];
