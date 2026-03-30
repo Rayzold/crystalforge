@@ -22,6 +22,7 @@ import { getWorkforceCategoryLabel, getWorkforceSummary } from "../systems/Workf
 import { getVisibleBuildings, renderBuildingGrid } from "./BuildingGrid.js";
 import { renderCalendarPanel } from "./CalendarPanel.js";
 import { renderDistrictPanel } from "./DistrictPanel.js";
+import { renderDriftEvolutionPanel } from "./DriftEvolutionPanel.js";
 import { renderEmergencyPanel } from "./EmergencyPanel.js";
 import { renderHexMap } from "./HexMap.js";
 import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js";
@@ -37,6 +38,16 @@ function renderCitySectionNav(pageKey) {
         <a class="button button--ghost ${pageKey === "city" ? "is-active" : ""}" href="./city.html">City</a>
       </div>
     </section>
+  `;
+}
+
+function renderActionEmptyState(title, detail, actionMarkup) {
+  return `
+    <div class="empty-state empty-state--action">
+      <strong>${escapeHtml(title)}</strong>
+      <p>${escapeHtml(detail)}</p>
+      ${actionMarkup}
+    </div>
   `;
 }
 
@@ -223,7 +234,11 @@ function renderWorkforcePanel(state) {
                   </article>
                 `)
                 .join("")
-            : `<p class="empty-state">No active buildings are currently drawing workforce demand.</p>`
+            : renderActionEmptyState(
+                "No workforce demand yet",
+                "Workforce demand appears once completed buildings begin operating, and it explains why output can rise or soften even when resources look healthy.",
+                `<a class="button button--ghost" href="./city.html">Open City</a>`
+              )
         }
       </div>
     </section>
@@ -382,7 +397,15 @@ function renderBuildingsView(state) {
                     .join("")}
                 </div>
               `
-            : `<div class="empty-state empty-state--action"><p>Manifest incomplete buildings to let the Drift incubate them over time.</p>${queued[0] ? `<button class="button button--ghost" data-action="activate-construction" data-building-id="${queued[0].id}">Start Incubation</button>` : waiting[0] ? `<button class="button button--ghost" data-action="activate-construction" data-building-id="${waiting[0].id}">Queue First Building</button>` : `<a class="button button--ghost" href="./forge.html">Create First Building</a>`}</div>`
+            : renderActionEmptyState(
+                "No buildings are incubating",
+                "The incubator is where incomplete buildings are actively raised toward readiness, so this panel tells you whether the next part of the city is moving.",
+                queued[0]
+                  ? `<button class="button button--ghost" data-action="activate-construction" data-building-id="${queued[0].id}">Start Incubation</button>`
+                  : waiting[0]
+                    ? `<button class="button button--ghost" data-action="activate-construction" data-building-id="${waiting[0].id}">Queue First Building</button>`
+                    : `<a class="button button--ghost" href="./forge.html">Create First Building</a>`
+              )
         }
 
         <div class="city-incubation-strip__waiting">
@@ -439,7 +462,11 @@ function renderBuildingsView(state) {
                       .join("")}
                   </div>
                 `
-              : `<p class="empty-state">No additional buildings are outside the queue right now.</p>`
+              : renderActionEmptyState(
+                  "No extra buildings are waiting",
+                  "Available buildings are manifested structures that are not yet reserved for incubation, so this list is where you choose what should enter the queue next.",
+                  `<a class="button button--ghost" href="./forge.html">Open Forge</a>`
+                )
           }
         </div>
       </section>
@@ -540,6 +567,7 @@ export function renderEconomyPage(state) {
       <section class="city-command-screen">
         ${renderCitySectionNav("economy")}
         ${renderTownStatistics(state)}
+        ${renderDriftEvolutionPanel(state)}
         ${renderWorkforcePanel(state)}
         ${renderTownFocusPanel(state, { expanded: true })}
       </section>

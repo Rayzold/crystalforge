@@ -91,7 +91,38 @@ function renderDiceHistory(history = []) {
   `;
 }
 
+function renderSidebarEmptyState(title, detail, href, cta) {
+  return `
+    <div class="empty-state empty-state--action sidebar-manifest-list__empty-state">
+      <strong>${escapeHtml(title)}</strong>
+      <p>${escapeHtml(detail)}</p>
+      <a class="button button--ghost" href="${href}">${escapeHtml(cta)}</a>
+    </div>
+  `;
+}
+
 function renderSidebarBuildingList(state, title, items, emptyLabel, variant = "active") {
+  const emptyStateByVariant = {
+    active: renderSidebarEmptyState(
+      `No ${title.toLowerCase()} buildings`,
+      "Active buildings are the structures currently powering your economy, defenses, and city bonuses.",
+      "./city.html",
+      "Open City"
+    ),
+    incubating: renderSidebarEmptyState(
+      `No ${title.toLowerCase()} buildings`,
+      "Incubating buildings are the next structures the Drift is actively raising toward completion.",
+      "./city.html",
+      "Manage Incubation"
+    ),
+    available: renderSidebarEmptyState(
+      `No ${title.toLowerCase()} buildings`,
+      "Available buildings are manifested structures waiting to be queued into the incubator flow.",
+      "./forge.html",
+      "Open Forge"
+    )
+  };
+
   return `
     <section class="sidebar-manifest-list sidebar-manifest-list--${variant}">
       <div class="sidebar-manifest-list__head">
@@ -134,7 +165,7 @@ function renderSidebarBuildingList(state, title, items, emptyLabel, variant = "a
                   .join("")}
               </div>
             `
-          : `<p class="sidebar-manifest-list__empty">${escapeHtml(emptyLabel)}</p>`
+          : emptyStateByVariant[variant] ?? `<p class="sidebar-manifest-list__empty">${escapeHtml(emptyLabel)}</p>`
       }
     </section>
   `;
@@ -304,67 +335,75 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
             <strong>Open Shared Player Screen</strong>
           </a>
           <button class="button button--ghost" data-action="open-catalog">Building Catalog</button>
-          <button class="button button--ghost" data-action="open-admin">${state.settings.liveSessionView ? "GM Console" : "Admin Console"}</button>
-          <div class="sidebar-nav__save-actions">
-            <button class="button button--ghost" data-action="save-firebase-realm">Save</button>
-            <button class="button button--ghost" data-action="load-firebase-realm">Load</button>
-            <button class="button button--ghost" data-action="save-manual-state">Local Save</button>
-            <button class="button button--ghost" data-action="load-manual-state">Local Load</button>
-          </div>
-          ${
-            firebaseMeta?.updatedAtMs
-              ? `
-                <div class="sidebar-nav__build">
-                  <span>Firebase Save</span>
-                  <strong>${new Date(firebaseMeta.updatedAtMs).toLocaleString()}</strong>
+          <details class="sidebar-gm-tools">
+            <summary class="sidebar-gm-tools__summary">
+              <span>GM Tools</span>
+              <strong>Admin, saves, view mode, and dice</strong>
+            </summary>
+            <div class="sidebar-gm-tools__body">
+              <button class="button button--ghost" data-action="open-admin">${state.settings.liveSessionView ? "GM Console" : "Admin Console"}</button>
+              <div class="sidebar-nav__save-actions">
+                <button class="button button--ghost" data-action="save-firebase-realm">Save</button>
+                <button class="button button--ghost" data-action="load-firebase-realm">Load</button>
+                <button class="button button--ghost" data-action="save-manual-state">Local Save</button>
+                <button class="button button--ghost" data-action="load-manual-state">Local Load</button>
+              </div>
+              ${
+                firebaseMeta?.updatedAtMs
+                  ? `
+                    <div class="sidebar-nav__build">
+                      <span>Firebase Save</span>
+                      <strong>${new Date(firebaseMeta.updatedAtMs).toLocaleString()}</strong>
+                    </div>
+                  `
+                  : ""
+              }
+              ${
+                manualSaveMeta?.manualSavedAt
+                  ? `
+                    <div class="sidebar-nav__build">
+                      <span>Local Save</span>
+                      <strong>${new Date(manualSaveMeta.manualSavedAt).toLocaleString()}</strong>
+                    </div>
+                  `
+                  : ""
+              }
+              <button class="sidebar-nav__build sidebar-nav__build--mode" data-action="toggle-session-view">
+                <span>View Mode</span>
+                <strong>${state.settings.liveSessionView ? "Live Session" : "Deep Review"}</strong>
+              </button>
+              <div class="sidebar-dice">
+                <div class="sidebar-dice__header">
+                  <span>Dice Roller</span>
+                  <button class="button button--ghost sidebar-dice__history-toggle" data-action="toggle-dice-history">History</button>
                 </div>
-              `
-              : ""
-          }
-          ${
-            manualSaveMeta?.manualSavedAt
-              ? `
-                <div class="sidebar-nav__build">
-                  <span>Local Save</span>
-                  <strong>${new Date(manualSaveMeta.manualSavedAt).toLocaleString()}</strong>
+                <div class="sidebar-dice__controls">
+                  <label>
+                    <span>Amount</span>
+                    <input type="number" min="1" max="20" value="${diceAmount}" data-action="set-dice-amount" />
+                  </label>
+                  <label>
+                    <span>Die</span>
+                    <select data-action="set-dice-type">
+                      ${DICE_TYPES.map((type) => `<option value="${type}" ${type === diceType ? "selected" : ""}>${type}</option>`).join("")}
+                    </select>
+                  </label>
                 </div>
-              `
-              : ""
-          }
-          <button class="sidebar-nav__build sidebar-nav__build--mode" data-action="toggle-session-view">
-            <span>View Mode</span>
-            <strong>${state.settings.liveSessionView ? "Live Session" : "Deep Review"}</strong>
-          </button>
-          <div class="sidebar-dice">
-            <div class="sidebar-dice__header">
-              <span>Dice Roller</span>
-              <button class="button button--ghost sidebar-dice__history-toggle" data-action="toggle-dice-history">History</button>
+                <button class="button sidebar-dice__roll" data-action="roll-dice">Roll</button>
+                ${
+                  lastDiceRoll
+                    ? `<div class="sidebar-dice__last"><strong>${escapeHtml(lastDiceRoll.label ?? "Last Roll")}</strong><span>${escapeHtml((lastDiceRoll.results ?? []).join(", "))}</span><em>Total ${formatNumber(lastDiceRoll.total ?? 0)}</em></div>`
+                    : `<p class="sidebar-dice__empty">Roll any combination to log it here.</p>`
+                }
+                ${
+                  state.transientUi?.diceHistoryOpen
+                    ? `<div class="sidebar-dice__history">${renderDiceHistory(state.settings.diceHistory ?? [])}</div>`
+                    : ""
+                }
+              </div>
+              <p>Type <code>432!</code> anywhere to open admin instantly.</p>
             </div>
-            <div class="sidebar-dice__controls">
-              <label>
-                <span>Amount</span>
-                <input type="number" min="1" max="20" value="${diceAmount}" data-action="set-dice-amount" />
-              </label>
-              <label>
-                <span>Die</span>
-                <select data-action="set-dice-type">
-                  ${DICE_TYPES.map((type) => `<option value="${type}" ${type === diceType ? "selected" : ""}>${type}</option>`).join("")}
-                </select>
-              </label>
-            </div>
-            <button class="button sidebar-dice__roll" data-action="roll-dice">Roll</button>
-            ${
-              lastDiceRoll
-                ? `<div class="sidebar-dice__last"><strong>${escapeHtml(lastDiceRoll.label ?? "Last Roll")}</strong><span>${escapeHtml((lastDiceRoll.results ?? []).join(", "))}</span><em>Total ${formatNumber(lastDiceRoll.total ?? 0)}</em></div>`
-                : `<p class="sidebar-dice__empty">Roll any combination to log it here.</p>`
-            }
-            ${
-              state.transientUi?.diceHistoryOpen
-                ? `<div class="sidebar-dice__history">${renderDiceHistory(state.settings.diceHistory ?? [])}</div>`
-                : ""
-            }
-          </div>
-          <p>Type <code>432!</code> anywhere to open admin instantly.</p>
+          </details>
         </div>
       </aside>
 
