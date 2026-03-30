@@ -43,10 +43,13 @@ const CITIZEN_GROUPS = CITIZEN_GROUP_ORDER.map((groupTitle) => ({
   classes: CITIZEN_CLASSES.filter((citizenClass) => CITIZEN_DEFINITIONS[citizenClass]?.group === groupTitle)
 }));
 
-function renderCitizenTile(citizenClass, count, definition) {
+function renderCitizenTile(citizenClass, count, rarityRoster, definition) {
   const keyEffect = Object.entries(definition?.stats ?? {})[0] ?? Object.entries(definition?.production ?? {})[0] ?? null;
   const summary = keyEffect ? `${keyEffect[0]} +${formatNumber(keyEffect[1], 2)} each` : "Support role";
   const emoji = definition?.emoji ?? "*";
+  const raritySummary = ["Common", "Rare", "Epic"]
+    .map((rarity) => `${rarity[0]} ${formatNumber(rarityRoster?.[rarity] ?? 0, 0)}`)
+    .join(" / ");
 
   return `
     <article class="citizen-tile">
@@ -60,6 +63,7 @@ function renderCitizenTile(citizenClass, count, definition) {
       </div>
       <strong>${formatNumber(count)}</strong>
       <small>${escapeHtml(summary)}</small>
+      <small class="citizen-tile__rarity">${escapeHtml(raritySummary)}</small>
     </article>
   `;
 }
@@ -88,7 +92,14 @@ export function renderCitizenPanel(state) {
               </div>
               <div class="citizen-panel__grid citizen-panel__grid--grouped">
                 ${group.classes
-                  .map((citizenClass) => renderCitizenTile(citizenClass, state.citizens[citizenClass] ?? 0, state.citizenDefinitions[citizenClass]))
+                  .map((citizenClass) =>
+                    renderCitizenTile(
+                      citizenClass,
+                      state.citizens[citizenClass] ?? 0,
+                      state.citizenRarityRoster?.[citizenClass],
+                      state.citizenDefinitions[citizenClass]
+                    )
+                  )
                   .join("")}
               </div>
             </section>

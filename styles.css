@@ -1670,6 +1670,18 @@ textarea {
   border-radius: 10px;
 }
 
+.gm-quality-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gm-quality-stepper__button {
+  min-width: 46px;
+  padding: 8px 10px;
+  font-size: 0.74rem;
+}
+
 .button--danger-icon {
   min-width: 46px;
   width: 46px;
@@ -3178,6 +3190,32 @@ textarea {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.building-detail__gm-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.building-detail__gm-quality-editor {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.building-detail__gm-quality-editor span {
+  white-space: nowrap;
+}
+
+.building-detail__gm-quality-input {
+  width: 110px;
+  padding: 9px 10px;
+  border-radius: 12px;
 }
 
 .detail-chip {
@@ -10545,4 +10583,198 @@ body:-webkit-full-screen #app {
   border: 1px solid rgba(126, 153, 214, 0.18);
   background: rgba(37, 46, 74, 0.85);
   color: rgba(245, 247, 255, 0.92);
+}
+
+.panel__empty {
+  margin: 0;
+  color: rgba(212, 222, 249, 0.72);
+}
+
+.citizen-tile__rarity {
+  color: rgba(180, 197, 234, 0.78);
+}
+
+.citizen-command-panel__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.expedition-grid,
+.vehicle-grid,
+.notable-grid,
+.expedition-return-list,
+.expedition-preview-grid,
+.expedition-button-row,
+.vehicle-card__stats,
+.notable-card__bonuses {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.expedition-grid--missions,
+.expedition-grid--vehicles {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.expedition-grid--team,
+.expedition-grid--supplies,
+.vehicle-grid,
+.notable-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.expedition-preview-grid,
+.vehicle-card__stats {
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+}
+
+.expedition-button-row {
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  align-items: start;
+}
+
+.expedition-card,
+.expedition-team-card,
+.expedition-return-card,
+.vehicle-card,
+.notable-card {
+  border-radius: 1.15rem;
+  border: 1px solid rgba(134, 167, 230, 0.14);
+  background: rgba(12, 18, 34, 0.76);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.expedition-card,
+.expedition-team-card {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.95rem 1rem;
+}
+
+.expedition-card {
+  appearance: none;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.expedition-card:hover,
+.expedition-card.is-active {
+  transform: translateY(-1px);
+  border-color: rgba(147, 204, 255, 0.28);
+  background: rgba(18, 27, 49, 0.88);
+}
+
+.expedition-card[disabled] {
+  opacity: 0.46;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.expedition-card__emoji {
+  font-size: 1.2rem;
+}
+
+.expedition-card__row,
+.expedition-return-card__head,
+.vehicle-card__head,
+.expedition-team-card__head,
+.notable-card__head,
+.expedition-return-card__meta,
+.notable-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.expedition-card small,
+.vehicle-card p,
+.notable-card p,
+.expedition-return-card p,
+.vehicle-card__eyebrow,
+.notable-card__eyebrow,
+.expedition-launch-preview__outlook {
+  color: rgba(212, 222, 249, 0.72);
+}
+
+.expedition-launch-panel__stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.expedition-team-card input {
+  width: 100%;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(125, 152, 214, 0.16);
+  background: rgba(5, 10, 20, 0.82);
+  color: inherit;
+  padding: 0.7rem 0.85rem;
+  font: inherit;
+}
+
+.expedition-launch-preview__launch {
+  width: 100%;
+}
+
+.expedition-return-list,
+.notable-grid {
+  margin-top: 0.8rem;
+}
+
+.expedition-return-card,
+.vehicle-card,
+.notable-card {
+  padding: 1rem 1.05rem;
+}
+
+.expedition-return-card__meta,
+.notable-card__meta,
+.vehicle-card__eyebrow {
+  color: rgba(184, 200, 233, 0.76);
+  font-size: 0.84rem;
+}
+
+.vehicle-card__eyebrow,
+.notable-card__eyebrow {
+  margin: 0 0 0.25rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+
+.vehicle-card__head h3,
+.notable-card__head h3 {
+  margin: 0;
+}
+
+.vehicle-card__head strong,
+.notable-card__head strong {
+  font-size: 1.08rem;
+}
+
+.vehicle-card__actions {
+  display: flex;
+  gap: 0.65rem;
+  margin-top: 0.9rem;
+}
+
+.notable-card__bonuses {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  margin-top: 0.9rem;
+}
+
+.notable-card__bonuses em {
+  display: block;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.8rem;
+  border: 1px solid rgba(142, 173, 233, 0.12);
+  background: rgba(18, 26, 46, 0.78);
+  color: rgba(226, 233, 249, 0.84);
+  font-style: normal;
+  font-size: 0.86rem;
 }

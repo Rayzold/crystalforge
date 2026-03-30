@@ -1,5 +1,7 @@
 import { RARITY_RANKS } from "../content/Rarities.js";
 import { roundTo } from "../engine/Utils.js";
+import { CITIZEN_RARITY_OUTPUT_MULTIPLIERS } from "../content/CitizenConfig.js";
+import { iterateCitizenRarityEntries } from "./CitizenSystem.js";
 
 const GENERAL_OUTPUT_FLOOR = 0.25;
 const SPECIALIST_OUTPUT_FLOOR = 0.7;
@@ -97,12 +99,15 @@ const TAG_CATEGORY_PRIORITY = [
 ];
 
 function sumWeightedCitizens(state, weights) {
-  return roundTo(
-    Object.entries(weights).reduce((sum, [citizenClass, weight]) => {
-      return sum + (Number(state.citizens?.[citizenClass] ?? 0) || 0) * weight;
-    }, 0),
-    2
-  );
+  let total = 0;
+  iterateCitizenRarityEntries(state, (citizenClass, rarity, count) => {
+    const weight = Number(weights?.[citizenClass] ?? 0) || 0;
+    if (!weight) {
+      return;
+    }
+    total += count * weight * (CITIZEN_RARITY_OUTPUT_MULTIPLIERS[rarity] ?? 1);
+  });
+  return roundTo(total, 2);
 }
 
 function hasWorkforceManagedOutput(building) {

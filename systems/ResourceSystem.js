@@ -1,11 +1,17 @@
 // Daily economy engine.
 // This system totals resource production/consumption, applies district, focus,
 // placement, and city-condition modifiers, and produces warning/delta summaries.
+import {
+  CITIZEN_RARITY_OUTPUT_MULTIPLIERS,
+  CITIZEN_RARITY_UPKEEP_MULTIPLIERS
+} from "../content/CitizenConfig.js";
 import { RESOURCE_MINIMUMS } from "../content/Config.js";
 import { clamp } from "../engine/Utils.js";
 import { getDistrictSummary } from "./DistrictSystem.js";
+import { getUniqueCitizenResourceBonuses } from "./ExpeditionSystem.js";
 import { getBuildingPlacementBonuses } from "./MapSystem.js";
 import { getCurrentTownFocus } from "./TownFocusSystem.js";
+import { iterateCitizenRarityEntries } from "./CitizenSystem.js";
 import {
   applyBuildingWorkforceToResource,
   getBuildingWorkforceMultiplier,
@@ -71,10 +77,11 @@ function getBuildingProductionDelta(state, workforceSummary, tradeGoodsGoldMulti
 function getCitizenProductionDelta(state, goldOutputMultiplier, foodOutputMultiplier) {
   const deltas = createDeltaRecord();
 
-  for (const [citizenClass, count] of Object.entries(state.citizens)) {
+  iterateCitizenRarityEntries(state, (citizenClass, rarity, count) => {
     const citizenDefinition = state.citizenDefinitions[citizenClass];
+    const outputMultiplier = CITIZEN_RARITY_OUTPUT_MULTIPLIERS[rarity] ?? 1;
     for (const [resource, amount] of Object.entries(citizenDefinition.production)) {
-      let nextAmount = amount * count;
+      let nextAmount = amount * count * outputMultiplier;
       if (resource === "gold" && nextAmount > 0) {
         nextAmount *= goldOutputMultiplier;
       }
@@ -83,7 +90,7 @@ function getCitizenProductionDelta(state, goldOutputMultiplier, foodOutputMultip
       }
       deltas[resource] = (deltas[resource] ?? 0) + nextAmount;
     }
-  }
+  });
 
   return deltas;
 }
@@ -91,12 +98,13 @@ function getCitizenProductionDelta(state, goldOutputMultiplier, foodOutputMultip
 function getCitizenConsumptionDelta(state) {
   const deltas = createDeltaRecord();
 
-  for (const [citizenClass, count] of Object.entries(state.citizens)) {
+  iterateCitizenRarityEntries(state, (citizenClass, rarity, count) => {
     const citizenDefinition = state.citizenDefinitions[citizenClass];
+    const upkeepMultiplier = CITIZEN_RARITY_UPKEEP_MULTIPLIERS[rarity] ?? 1;
     for (const [resource, amount] of Object.entries(citizenDefinition.consumption)) {
-      deltas[resource] = (deltas[resource] ?? 0) - amount * count;
+      deltas[resource] = (deltas[resource] ?? 0) - amount * count * upkeepMultiplier;
     }
-  }
+  });
 
   return deltas;
 }
@@ -174,10 +182,12 @@ export function calculateDailyResourceDelta(state) {
   );
   const citizenProduction = getCitizenProductionDelta(state, goldOutputMultiplier, foodOutputMultiplier);
   const citizenConsumption = getCitizenConsumptionDelta(state);
+  const uniqueCitizenBonuses = getUniqueCitizenResourceBonuses(state);
 
   addDeltaInto(deltas, buildingProduction);
   addDeltaInto(deltas, citizenProduction);
   addDeltaInto(deltas, citizenConsumption);
+  addDeltaInto(deltas, uniqueCitizenBonuses);
 
   for (const event of state.events.active) {
     const effects = event.effects;
@@ -223,6 +233,7 @@ export function getEconomyDebugSummary(state) {
   const districtBonus = createDeltaRecord();
   const citizenProduction = createDeltaRecord();
   const citizenConsumption = createDeltaRecord();
+  const uniqueCitizenProduction = createDeltaRecord();
   const eventProduction = createDeltaRecord();
   const focusProduction = createDeltaRecord();
   const net = calculateDailyResourceDelta(state);
@@ -245,6 +256,7 @@ export function getEconomyDebugSummary(state) {
   }
   addDeltaInto(citizenProduction, getCitizenProductionDelta(state, goldOutputMultiplier, foodOutputMultiplier));
   addDeltaInto(citizenConsumption, getCitizenConsumptionDelta(state));
+  addDeltaInto(uniqueCitizenProduction, getUniqueCitizenResourceBonuses(state));
   const districtModifiers = [];
   for (const district of districtSummary) {
     if (district.level <= 0) {
@@ -291,6 +303,7 @@ export function getEconomyDebugSummary(state) {
       districtBonus: Number(districtBonus[resource] ?? 0),
       citizenProduction: Number(citizenProduction[resource] ?? 0),
       citizenConsumption: Number(citizenConsumption[resource] ?? 0),
+      uniqueCitizenProduction: Number(uniqueCitizenProduction[resource] ?? 0),
       eventProduction: Number(eventProduction[resource] ?? 0),
       focusProduction: Number(focusProduction[resource] ?? 0),
       net: Number(net[resource] ?? 0)

@@ -27,6 +27,9 @@ const ROUTE_GLYPHS = {
   forge: "\u{1F48E}",
   city: "\u{1F3D9}\uFE0F",
   citizens: "\u{1F465}",
+  expeditions: "\u{1F9ED}",
+  vehicles: "\u{1F69A}",
+  uniques: "\u2728",
   chronicle: "\u{1F4DC}",
   help: "\u2754"
 };
@@ -37,7 +40,10 @@ const ROUTE_SHORTCUTS = {
   city: "3",
   citizens: "4",
   chronicle: "5",
-  help: "6"
+  expeditions: "6",
+  vehicles: "7",
+  uniques: "8",
+  help: "9"
 };
 
 const DICE_TYPES = ["d2", "d4", "d6", "d8", "d10", "d12", "d20", "d100"];
@@ -161,10 +167,21 @@ function renderResourceDeltaStrip(state) {
   `;
 }
 
-function renderSidebarRouteGroup(routes, pageKey, cityAlertCount, availableCrystalCount) {
+function renderSidebarRouteGroup(routes, pageKey, cityAlertCount, availableCrystalCount, expeditionCount, uniqueCitizenCount) {
   return routes
-    .map(
-      (route) => `
+    .map((route) => {
+      let badge = "";
+      if (route.key === "city" && cityAlertCount) {
+        badge = `<em class="sidebar-link__badge">${cityAlertCount}</em>`;
+      } else if (route.key === "forge" && availableCrystalCount > 0) {
+        badge = `<em class="sidebar-link__badge">${availableCrystalCount}</em>`;
+      } else if (route.key === "expeditions" && expeditionCount > 0) {
+        badge = `<em class="sidebar-link__badge">${expeditionCount}</em>`;
+      } else if (route.key === "uniques" && uniqueCitizenCount > 0) {
+        badge = `<em class="sidebar-link__badge">${uniqueCitizenCount}</em>`;
+      }
+
+      return `
         <a
           class="sidebar-link ${route.key === pageKey ? "is-active" : ""}"
           href="${route.href}"
@@ -176,16 +193,10 @@ function renderSidebarRouteGroup(routes, pageKey, cityAlertCount, availableCryst
             <span class="sidebar-link__emoji">${ROUTE_GLYPHS[route.key] ?? "\u2022"}</span>
             <span>${route.label}</span>
           </span>
-          ${
-            route.key === "city" && cityAlertCount
-              ? `<em class="sidebar-link__badge">${cityAlertCount}</em>`
-              : route.key === "forge" && availableCrystalCount > 0
-                ? `<em class="sidebar-link__badge">${availableCrystalCount}</em>`
-                : ""
-          }
+          ${badge}
         </a>
       `
-    )
+    })
     .join("");
 }
 
@@ -218,8 +229,10 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
   const currentFocus = getCurrentTownFocus(state);
   const cityAlertCount = getCriticalAlerts(state).length;
   const availableCrystalCount = Object.values(state.crystals ?? {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
+  const expeditionCount = state.expeditions?.active?.length ?? 0;
+  const uniqueCitizenCount = state.uniqueCitizens?.length ?? 0;
   const coreRoutes = PAGE_ROUTES.filter((route) => ["home", "forge", "city"].includes(route.key));
-  const managementRoutes = PAGE_ROUTES.filter((route) => ["citizens", "chronicle", "help"].includes(route.key));
+  const managementRoutes = PAGE_ROUTES.filter((route) => ["citizens", "expeditions", "vehicles", "uniques", "chronicle", "help"].includes(route.key));
   const manifestedBuildings = orderSidebarBuildings(state, state.buildings.filter((building) => building.isComplete));
   const incubatingBuildings = orderSidebarBuildings(state, getActiveConstructionQueue(state));
   const availableBuildings = orderSidebarBuildings(state, getAvailableConstructionQueue(state));
@@ -271,11 +284,11 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
         <nav class="sidebar-nav__links">
           <div class="sidebar-link-group">
             <span class="sidebar-link-group__label">Core</span>
-            ${renderSidebarRouteGroup(coreRoutes, pageKey, cityAlertCount, availableCrystalCount)}
+            ${renderSidebarRouteGroup(coreRoutes, pageKey, cityAlertCount, availableCrystalCount, expeditionCount, uniqueCitizenCount)}
           </div>
           <div class="sidebar-link-group">
             <span class="sidebar-link-group__label">Management</span>
-            ${renderSidebarRouteGroup(managementRoutes, pageKey, cityAlertCount, availableCrystalCount)}
+            ${renderSidebarRouteGroup(managementRoutes, pageKey, cityAlertCount, availableCrystalCount, expeditionCount, uniqueCitizenCount)}
           </div>
         </nav>
         <div class="sidebar-nav__status">

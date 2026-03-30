@@ -16,7 +16,13 @@ import { BASE_BUILDING_CATALOG, buildFlavorText } from "../content/BuildingCatal
 import { getNextRarity } from "../content/Rarities.js";
 import { createId, safeJsonParse } from "../engine/Utils.js";
 import { formatDate } from "./CalendarSystem.js";
-import { createCitizenDefinitionsSnapshot, normalizeCitizens } from "./CitizenSystem.js";
+import {
+  createCitizenDefinitionsSnapshot,
+  createCitizenRarityRoster,
+  normalizeCitizenRarityRoster,
+  normalizeCitizens,
+  syncCitizenTotalsFromRoster
+} from "./CitizenSystem.js";
 import { normalizeCrystalCollection } from "./CrystalSystem.js";
 import { recalculateCityStats } from "./CityStatsSystem.js";
 import { getDistrictSummary } from "./DistrictSystem.js";
@@ -26,6 +32,13 @@ import { createDefaultDriftEvolutionState, normalizeDriftEvolutionState, syncDri
 import { getDriftConstructionSlots, normalizeConstructionPriority } from "./ConstructionSystem.js";
 import { createDefaultTownFocusState, normalizeTownFocusState } from "./TownFocusSystem.js";
 import { captureDailyCitySnapshot } from "./CitySnapshotSystem.js";
+import {
+  createDefaultExpeditionState,
+  normalizeExpeditionState,
+  normalizeUniqueCitizens,
+  normalizeVehicleFleet
+} from "./ExpeditionSystem.js";
+import { createDefaultVehicleFleet } from "../content/VehicleConfig.js";
 
 const SESSION_STATE_KEY = "crystal-forge-session-state-v1";
 
@@ -47,6 +60,12 @@ function getSessionSaveRawText() {
 
 export function createInitialState(preset = DEFAULT_START_PRESET) {
   const startState = getStartPreset(preset);
+  const isTestingPreset = preset === "testing";
+  const initialVehicles = createDefaultVehicleFleet(
+    isTestingPreset
+      ? { caravanWagon: 2, surveyWalker: 2, cloudskiff: 1, skybarge: 1 }
+      : { caravanWagon: 1, surveyWalker: 1, cloudskiff: 0, skybarge: 0 }
+  );
   const state = {
     version: SAVE_VERSION,
     selectedRarity: startState.selectedRarity,
@@ -56,7 +75,11 @@ export function createInitialState(preset = DEFAULT_START_PRESET) {
     shards: normalizeShardCollection(startState.shards),
     resources: structuredClone(startState.resources),
     citizens: normalizeCitizens(startState.citizens),
+    citizenRarityRoster: createCitizenRarityRoster(startState.citizens),
     citizenDefinitions: createCitizenDefinitionsSnapshot(),
+    vehicles: initialVehicles,
+    expeditions: createDefaultExpeditionState(),
+    uniqueCitizens: [],
     buildings: [],
     rollTables: createDefaultRollTables(),
     buildingCatalog: structuredClone(BASE_BUILDING_CATALOG),
@@ -90,7 +113,7 @@ export function createInitialState(preset = DEFAULT_START_PRESET) {
     }
   };
 
-  state.resources.population = Object.values(state.citizens).reduce((sum, value) => sum + value, 0);
+  syncCitizenTotalsFromRoster(state);
   syncDriftEvolutionState(state);
   normalizeConstructionPriority(state);
   state.districtSummary = getDistrictSummary(state);
@@ -115,6 +138,10 @@ export function createSingleCommonCrystalResetState() {
     prosperity: 0
   };
   state.citizens = createEmptyCitizenCollection(0);
+  state.citizenRarityRoster = createCitizenRarityRoster();
+  state.vehicles = createDefaultVehicleFleet({ caravanWagon: 1, surveyWalker: 1, cloudskiff: 0, skybarge: 0 });
+  state.expeditions = createDefaultExpeditionState();
+  state.uniqueCitizens = [];
   state.buildings = [];
   state.constructionPriority = [];
   state.activeConstructionIds = [];
@@ -139,7 +166,7 @@ export function createSingleCommonCrystalResetState() {
   state.rollTables = createDefaultRollTables();
   state.buildingCatalog = structuredClone(BASE_BUILDING_CATALOG);
   state.map = { cells: createMapCells() };
-  state.resources.population = 0;
+  syncCitizenTotalsFromRoster(state);
   syncDriftEvolutionState(state);
   normalizeConstructionPriority(state);
   state.districtSummary = getDistrictSummary(state);
@@ -278,6 +305,9 @@ function normalizeSettings(sourceSettings, baseSettings) {
   normalized.lockedMapBuildingIds = Array.isArray(normalized.lockedMapBuildingIds)
     ? [...new Set(normalized.lockedMapBuildingIds.filter((id) => typeof id === "string" && id.trim()))]
     : [];
+  normalized.mapPresets = Array.isArray(normalized.mapPresets)
+    ? normalized.mapPresets.filter((preset) => preset && typeof preset === "object").slice(0, 8)
+    : [];
   delete normalized.activeSaveSlot;
   delete normalized.sharedStateUrl;
   delete normalized.autoLoadSharedState;
@@ -374,7 +404,8 @@ function repairLikelyCitizenInflation(rawSave, nextState, base) {
   }
 
   nextState.citizens = structuredClone(base.citizens);
-  nextState.resources.population = Object.values(nextState.citizens).reduce((sum, value) => sum + Number(value || 0), 0);
+  nextState.citizenRarityRoster = createCitizenRarityRoster(base.citizens);
+  syncCitizenTotalsFromRoster(nextState);
   nextState.historyLog = [
     {
       category: "Citizens",
@@ -394,6 +425,7 @@ export function validateAndMigrateSave(rawSave) {
 
   const normalizedCatalog = normalizeBuildingCatalog(rawSave.buildingCatalog);
   const normalizedCitizens = normalizeCitizens(rawSave.citizens ?? base.citizens);
+  const normalizedCitizenRarityRoster = normalizeCitizenRarityRoster(rawSave.citizenRarityRoster, normalizedCitizens);
 
   const nextState = {
     ...base,
@@ -403,7 +435,11 @@ export function validateAndMigrateSave(rawSave) {
     shards: normalizeShardCollection(rawSave.shards ?? base.shards),
     resources: { ...base.resources, ...(rawSave.resources ?? {}) },
     citizens: normalizedCitizens,
+    citizenRarityRoster: normalizedCitizenRarityRoster,
     buildings: normalizeBuildings(rawSave.buildings, normalizedCatalog),
+    vehicles: normalizeVehicleFleet(rawSave.vehicles ?? base.vehicles),
+    expeditions: normalizeExpeditionState(rawSave.expeditions ?? base.expeditions),
+    uniqueCitizens: normalizeUniqueCitizens(rawSave.uniqueCitizens ?? base.uniqueCitizens),
     rollTables: normalizeRollTables(rawSave.rollTables),
     buildingCatalog: normalizedCatalog,
     districts: normalizeDistrictState(rawSave.districts),
@@ -445,7 +481,7 @@ export function validateAndMigrateSave(rawSave) {
     nextState.activeConstructionIds = seededActiveIds;
   }
 
-  nextState.resources.population = Object.values(nextState.citizens).reduce((sum, value) => sum + value, 0);
+  syncCitizenTotalsFromRoster(nextState);
   repairLikelyCitizenInflation(rawSave, nextState, base);
   // Old saves may still contain Crystal Upgrade as a building, so normalize them into crystals on load.
   migrateLegacyCrystalUpgradeBuildings(nextState);

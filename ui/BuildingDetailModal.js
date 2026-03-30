@@ -173,6 +173,35 @@ export function renderBuildingDetailModal(state, pageKey) {
             }
             ${pageKey === "city" ? "" : `<a class="button button--ghost" href="./city.html">Open City Map</a>`}
           </div>
+          ${
+            state.ui.adminUnlocked
+              ? `
+                <div class="building-detail__gm-tools">
+                  <label class="building-detail__gm-quality-editor">
+                    <span>GM Quality %</span>
+                    <div class="gm-quality-stepper">
+                      <button class="button button--ghost gm-quality-stepper__button" type="button" data-action="nudge-building-quality-input" data-delta="-10">-10</button>
+                      <button class="button button--ghost gm-quality-stepper__button" type="button" data-action="nudge-building-quality-input" data-delta="-1">-1</button>
+                    </div>
+                    <input
+                      class="building-detail__gm-quality-input"
+                      type="number"
+                      min="0"
+                      max="350"
+                      step="0.1"
+                      value="${Number(building.quality ?? 0)}"
+                      data-role="gm-building-quality-input"
+                    />
+                    <div class="gm-quality-stepper">
+                      <button class="button button--ghost gm-quality-stepper__button" type="button" data-action="nudge-building-quality-input" data-delta="1">+1</button>
+                      <button class="button button--ghost gm-quality-stepper__button" type="button" data-action="nudge-building-quality-input" data-delta="10">+10</button>
+                    </div>
+                  </label>
+                  <button class="button button--ghost" data-action="save-building-quality" data-building-id="${building.id}">Save Quality</button>
+                </div>
+              `
+              : ""
+          }
         </div>
       </div>
 

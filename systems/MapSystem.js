@@ -1,6 +1,9 @@
 import { MAP_ADJACENCY_CONFIG, MAP_CONFIG } from "../content/MapConfig.js";
 import { addHistoryEntry } from "./HistoryLogSystem.js";
 
+const mapCellIndexCache = new WeakMap();
+const buildingCellIndexCache = new WeakMap();
+
 function getDistanceFromCenter(q, r) {
   const s = -q - r;
   return Math.max(Math.abs(q), Math.abs(r), Math.abs(s));
@@ -85,15 +88,29 @@ export function getMapCells(state) {
 }
 
 export function findMapCell(state, q, r) {
-  return state.map.cells.find((cell) => cell.q === q && cell.r === r) ?? null;
+  const cells = state.map?.cells ?? [];
+  let index = mapCellIndexCache.get(cells);
+  if (!index) {
+    index = new Map(cells.map((cell) => [getCellKey(cell.q, cell.r), cell]));
+    mapCellIndexCache.set(cells, index);
+  }
+  return index.get(getCellKey(q, r)) ?? null;
 }
 
 export function getBuildingAtCell(state, q, r) {
-  return (
-    state.buildings.find(
-      (building) => building.mapPosition && building.mapPosition.q === q && building.mapPosition.r === r
-    ) ?? null
-  );
+  const buildings = state.buildings ?? [];
+  let index = buildingCellIndexCache.get(buildings);
+  if (!index) {
+    index = new Map();
+    for (const building of buildings) {
+      if (!building?.mapPosition) {
+        continue;
+      }
+      index.set(getCellKey(building.mapPosition.q, building.mapPosition.r), building);
+    }
+    buildingCellIndexCache.set(buildings, index);
+  }
+  return index.get(getCellKey(q, r)) ?? null;
 }
 
 export function getBuildingTerrain(state, building) {

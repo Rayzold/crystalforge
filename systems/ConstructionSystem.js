@@ -198,8 +198,14 @@ function getStallReasons(profile, resourcePool) {
   return reasons;
 }
 
-function getAccelerationStatus(profile, resourcePool) {
-  const dailyCosts = getAccelerationDailyCosts(profile);
+function getAccelerationStatus(profile, resourcePool, usageScale = 1) {
+  const fullDailyCosts = getAccelerationDailyCosts(profile);
+  const demandScale = Math.max(0, Math.min(1, Number(usageScale ?? 1) || 0));
+  const dailyCosts = {
+    materials: roundTo(fullDailyCosts.materials * demandScale, 4),
+    salvage: roundTo(fullDailyCosts.salvage * demandScale, 4),
+    mana: roundTo(fullDailyCosts.mana * demandScale, 4)
+  };
   const blockers = [];
 
   if (resourcePool.materials <= CONSTRUCTION_BONUS_THRESHOLDS.materials) {
@@ -242,7 +248,14 @@ function calculateConstructionDayDetails(building, state, resourcePool, options 
     const extraMultiplier = Math.max(0, speedMultiplier - 1);
     return rawSupportBpd + Math.floor(rawSupportBpd * extraMultiplier * 0.5);
   })();
-  const acceleration = getAccelerationStatus(profile, resourcePool);
+  // Near completion, acceleration should only ask for the fraction of support
+  // resources needed to cover the remaining work, not a whole extra day.
+  const acceleratedCapacityPercent =
+    (baseBpd * INCUBATOR_ACCELERATION_MULTIPLIER + supportBpd * SUPPORT_ACCELERATION_MULTIPLIER) /
+    profile.pointsPerPercent;
+  const accelerationUsageScale =
+    acceleratedCapacityPercent > 0 ? Math.min(1, remainingPercent / acceleratedCapacityPercent) : 1;
+  const acceleration = getAccelerationStatus(profile, resourcePool, accelerationUsageScale);
   const incubatorSupportMultiplier = getIncubatorSupportMultiplier(building);
   const effectiveBaseBpd = baseBpd * (acceleration.isApplied ? INCUBATOR_ACCELERATION_MULTIPLIER : 1);
   const effectiveSupportBpd = supportBpd * (acceleration.isApplied ? SUPPORT_ACCELERATION_MULTIPLIER : 1);
@@ -286,7 +299,10 @@ function calculateConstructionDayDetails(building, state, resourcePool, options 
   const supportTargetPercent = effectiveSupportBpd / profile.pointsPerPercent;
   const supportPercent = Math.min(Math.max(0, remainingPercent - basePercent), supportTargetPercent);
   const rawDailyPercent = basePercent + supportPercent;
-  const dailyPercent = roundTo(rawDailyPercent * incubatorSupportMultiplier, 4);
+  // Keep the real construction progress unrounded so the last sliver of a
+  // building can still finish cleanly on the next day instead of rounding
+  // down to zero and getting stuck just under 100%.
+  const dailyPercent = Math.min(remainingPercent, rawDailyPercent * incubatorSupportMultiplier);
   const dailyCosts = {
     materials: roundTo(acceleration.dailyCosts.materials, 4),
     salvage: roundTo(acceleration.dailyCosts.salvage, 4),
@@ -311,10 +327,13 @@ function calculateConstructionDayDetails(building, state, resourcePool, options 
     heroSupport: Boolean(building?.heroSupport),
     expertSupport: Boolean(building?.expertSupport),
     totalBpd,
-    rate: roundTo(dailyPercent, 4),
-    dailyPercent: roundTo(dailyPercent, 4),
-    basePercent: roundTo(basePercent * incubatorSupportMultiplier, 4),
-    supportPercent: roundTo(supportPercent * incubatorSupportMultiplier, 4),
+    rate: dailyPercent,
+    dailyPercent,
+    basePercent: Math.min(remainingPercent, basePercent * incubatorSupportMultiplier),
+    supportPercent: Math.min(
+      Math.max(0, remainingPercent - Math.min(remainingPercent, basePercent * incubatorSupportMultiplier)),
+      supportPercent * incubatorSupportMultiplier
+    ),
     dailyCosts,
     requiresSalvage: profile.requiresSalvage,
     requiresMana: profile.requiresMana,

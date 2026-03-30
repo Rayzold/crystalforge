@@ -38,5 +38,17 @@ export const GLOSSARY_TERMS = [
   {
     term: "Support BPD",
     detail: "Extra build points/day provided by active construction-support buildings like Tool Shed or Techcrafter."
+  },
+  {
+    term: "Expedition",
+    detail: "A temporary mission that sends selected citizens and a vehicle beyond the Drift to return later with recruits, resources, crystals, or rare discoveries."
+  },
+  {
+    term: "Vehicle",
+    detail: "Each expedition needs one vehicle. Air vehicles cut travel time in half, while land vehicles are slower but steady."
+  },
+  {
+    term: "Unique Citizen",
+    detail: "A named notable who joins rarely, lives on the Unique Citizens page, and grants special bonuses beyond normal citizen rarity."
   }
 ];

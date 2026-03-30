@@ -6,6 +6,7 @@ import { renderBuildingDetailModal } from "./BuildingDetailModal.js";
 import { renderBuildingCatalogModal } from "./BuildingCatalogModal.js";
 import { renderCitizensPage } from "./CitizensPage.js";
 import { renderCityPage } from "./CityPage.js";
+import { renderExpeditionsPage } from "./ExpeditionsPage.js";
 import { renderForgePage } from "./ForgePage.js";
 import { renderHelpPage } from "./HelpPage.js";
 import { attachHelpBubbles } from "./HelpBubbles.js";
@@ -16,6 +17,8 @@ import { renderPageShell } from "./PageShell.js";
 import { renderPlayerPage } from "./PlayerPage.js";
 import { renderTownFocusCouncilModal } from "./TownFocusCouncilModal.js";
 import { renderTurnSummaryModal } from "./TurnSummaryModal.js";
+import { renderUniqueCitizensPage } from "./UniqueCitizensPage.js";
+import { renderVehiclesPage } from "./VehiclesPage.js";
 import { getMayorSuggestions } from "../systems/TownFocusSystem.js";
 import { getDefaultTownFocusPreviewId } from "./TownFocusShared.js";
 import { renderTownFocusCeremonyOverlay } from "./TownFocusCeremonyOverlay.js";
@@ -69,7 +72,15 @@ export class UIRenderer {
       playerHideCompleted: false,
       turnSummaryModal: null,
       projectorMode: false,
-      projectorChromeHidden: false
+      projectorChromeHidden: false,
+      expeditionDraft: {
+        typeId: "rescue",
+        vehicleId: "caravanWagon",
+        approachId: "balanced",
+        durationDays: 7,
+        team: {},
+        resources: {}
+      }
     };
   }
 
@@ -97,6 +108,12 @@ export class UIRenderer {
         return renderCityPage(state);
       case "citizens":
         return renderCitizensPage(state);
+      case "expeditions":
+        return renderExpeditionsPage(state);
+      case "vehicles":
+        return renderVehiclesPage(state);
+      case "uniques":
+        return renderUniqueCitizensPage(state);
       case "chronicle":
         return renderChroniclePage(state);
       case "help":

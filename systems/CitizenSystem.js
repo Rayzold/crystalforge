@@ -1,6 +1,7 @@
 import {
   CITIZEN_CLASSES,
   CITIZEN_DEFINITIONS,
+  CITIZEN_RARITIES,
   CITIZEN_PROMOTION_PATHS
 } from "../content/CitizenConfig.js";
 import { sumObjectValues } from "../engine/Utils.js";
@@ -24,6 +25,119 @@ const LEGACY_CITIZEN_MIGRATION = {
 
 export function createCitizenDefinitionsSnapshot() {
   return structuredClone(CITIZEN_DEFINITIONS);
+}
+
+export function createCitizenRarityRoster(counts = {}, defaultRarity = "Common") {
+  return Object.fromEntries(
+    CITIZEN_CLASSES.map((citizenClass) => [
+      citizenClass,
+      Object.fromEntries(
+        CITIZEN_RARITIES.map((rarity) => [
+          rarity,
+          rarity === defaultRarity ? Math.max(0, Number(counts?.[citizenClass] ?? 0) || 0) : 0
+        ])
+      )
+    ])
+  );
+}
+
+export function normalizeCitizenRarityRoster(roster, counts = {}) {
+  const normalized = createCitizenRarityRoster();
+
+  for (const citizenClass of CITIZEN_CLASSES) {
+    for (const rarity of CITIZEN_RARITIES) {
+      normalized[citizenClass][rarity] = Math.max(0, Number(roster?.[citizenClass]?.[rarity] ?? 0) || 0);
+    }
+
+    const rosterTotal = CITIZEN_RARITIES.reduce((sum, rarity) => sum + normalized[citizenClass][rarity], 0);
+    const countTotal = Math.max(0, Number(counts?.[citizenClass] ?? 0) || 0);
+    if (countTotal > rosterTotal) {
+      normalized[citizenClass].Common += countTotal - rosterTotal;
+    }
+  }
+
+  return normalized;
+}
+
+export function syncCitizenTotalsFromRoster(state) {
+  state.citizens = state.citizens ?? {};
+  for (const citizenClass of CITIZEN_CLASSES) {
+    state.citizens[citizenClass] = CITIZEN_RARITIES.reduce(
+      (sum, rarity) => sum + Math.max(0, Number(state.citizenRarityRoster?.[citizenClass]?.[rarity] ?? 0) || 0),
+      0
+    );
+  }
+  state.resources.population = getTotalPopulation(state);
+}
+
+function ensureCitizenRarityRoster(state) {
+  if (!state.citizenRarityRoster) {
+    state.citizenRarityRoster = createCitizenRarityRoster(state.citizens);
+  }
+}
+
+export function iterateCitizenRarityEntries(state, callback) {
+  const roster = normalizeCitizenRarityRoster(state.citizenRarityRoster, state.citizens);
+  for (const citizenClass of CITIZEN_CLASSES) {
+    for (const rarity of CITIZEN_RARITIES) {
+      const count = Math.max(0, Number(roster[citizenClass]?.[rarity] ?? 0) || 0);
+      if (count <= 0) {
+        continue;
+      }
+      callback(citizenClass, rarity, count);
+    }
+  }
+}
+
+export function addCitizensByRarity(state, citizenClass, rarity, amount, source = "Expedition") {
+  ensureCitizenRarityRoster(state);
+  const normalizedRarity = CITIZEN_RARITIES.includes(rarity) ? rarity : "Common";
+  state.citizenRarityRoster[citizenClass][normalizedRarity] =
+    Math.max(0, Number(state.citizenRarityRoster[citizenClass][normalizedRarity] ?? 0) || 0) + Math.max(0, Number(amount) || 0);
+  syncCitizenTotalsFromRoster(state);
+  addHistoryEntry(state, {
+    category: "Citizens",
+    title: `${source} added ${amount} ${normalizedRarity} ${citizenClass}`,
+    details: `${source} added ${amount} ${normalizedRarity} ${citizenClass}.`
+  });
+}
+
+export function takeCitizensFromRoster(state, citizenClass, amount, preferredOrder = ["Common", "Rare", "Epic"]) {
+  ensureCitizenRarityRoster(state);
+  const nextAmount = Math.max(0, Number(amount) || 0);
+  const removed = Object.fromEntries(CITIZEN_RARITIES.map((rarity) => [rarity, 0]));
+  let remaining = nextAmount;
+
+  for (const rarity of preferredOrder) {
+    if (!CITIZEN_RARITIES.includes(rarity) || remaining <= 0) {
+      continue;
+    }
+    const available = Math.max(0, Number(state.citizenRarityRoster[citizenClass]?.[rarity] ?? 0) || 0);
+    const used = Math.min(available, remaining);
+    if (used <= 0) {
+      continue;
+    }
+    state.citizenRarityRoster[citizenClass][rarity] = available - used;
+    removed[rarity] += used;
+    remaining -= used;
+  }
+
+  syncCitizenTotalsFromRoster(state);
+  return removed;
+}
+
+function addCitizenBundle(state, citizenClass, bundle) {
+  ensureCitizenRarityRoster(state);
+  for (const rarity of CITIZEN_RARITIES) {
+    state.citizenRarityRoster[citizenClass][rarity] =
+      Math.max(0, Number(state.citizenRarityRoster[citizenClass][rarity] ?? 0) || 0) +
+      Math.max(0, Number(bundle?.[rarity] ?? 0) || 0);
+  }
+  syncCitizenTotalsFromRoster(state);
+}
+
+export function addCitizenRarityBundle(state, citizenClass, bundle) {
+  addCitizenBundle(state, citizenClass, bundle);
 }
 
 export function normalizeCitizens(citizens) {
@@ -61,8 +175,11 @@ export function getTotalPopulation(state) {
 }
 
 function applyCitizenDelta(state, citizenClass, amount) {
-  state.citizens[citizenClass] = Math.max(0, (state.citizens[citizenClass] ?? 0) + amount);
-  state.resources.population = getTotalPopulation(state);
+  if (amount >= 0) {
+    addCitizenBundle(state, citizenClass, { Common: Math.max(0, Number(amount) || 0) });
+    return;
+  }
+  takeCitizensFromRoster(state, citizenClass, Math.abs(amount));
 }
 
 export function addCitizens(state, citizenClass, amount, source = "Admin") {
@@ -85,8 +202,9 @@ export function removeCitizens(state, citizenClass, amount, source = "Admin") {
 }
 
 export function setCitizens(state, citizenClass, amount, source = "Admin") {
-  state.citizens[citizenClass] = Math.max(0, Number(amount));
-  state.resources.population = getTotalPopulation(state);
+  ensureCitizenRarityRoster(state);
+  state.citizenRarityRoster[citizenClass] = { Common: Math.max(0, Number(amount) || 0), Rare: 0, Epic: 0 };
+  syncCitizenTotalsFromRoster(state);
   addHistoryEntry(state, {
     category: "Citizens",
     title: `${source} set ${citizenClass} to ${state.citizens[citizenClass]}`,
@@ -99,9 +217,8 @@ export function promoteCitizens(state, fromClass, toClass, amount, source = "Adm
   if (moveAmount <= 0) {
     return;
   }
-  state.citizens[fromClass] -= moveAmount;
-  state.citizens[toClass] = (state.citizens[toClass] ?? 0) + moveAmount;
-  state.resources.population = getTotalPopulation(state);
+  const movedBundle = takeCitizensFromRoster(state, fromClass, moveAmount);
+  addCitizenBundle(state, toClass, movedBundle);
   addHistoryEntry(state, {
     category: "Citizens",
     title: `${source} ${action} ${moveAmount} ${fromClass} to ${toClass}`,
@@ -110,10 +227,8 @@ export function promoteCitizens(state, fromClass, toClass, amount, source = "Adm
 }
 
 export function resetCitizens(state, source = "Admin") {
-  for (const citizenClass of CITIZEN_CLASSES) {
-    state.citizens[citizenClass] = 0;
-  }
-  state.resources.population = 0;
+  state.citizenRarityRoster = createCitizenRarityRoster();
+  syncCitizenTotalsFromRoster(state);
   addHistoryEntry(state, {
     category: "Citizens",
     title: `${source} reset all citizen counts`,
@@ -122,13 +237,18 @@ export function resetCitizens(state, source = "Admin") {
 }
 
 export function applyCitizenBulkSet(state, bulkValues, source = "Admin") {
+  ensureCitizenRarityRoster(state);
   for (const citizenClass of CITIZEN_CLASSES) {
     if (bulkValues[citizenClass] === undefined) {
       continue;
     }
-    state.citizens[citizenClass] = Math.max(0, Number(bulkValues[citizenClass]));
+    state.citizenRarityRoster[citizenClass] = {
+      Common: Math.max(0, Number(bulkValues[citizenClass]) || 0),
+      Rare: 0,
+      Epic: 0
+    };
   }
-  state.resources.population = getTotalPopulation(state);
+  syncCitizenTotalsFromRoster(state);
   addHistoryEntry(state, {
     category: "Citizens",
     title: `${source} applied bulk citizen update`,

@@ -13,6 +13,7 @@ import {
   getStructuredDate
 } from "../systems/CalendarSystem.js";
 import { getDailyCitySnapshot } from "../systems/CitySnapshotSystem.js";
+import { getExpeditionCalendarEntries } from "../systems/ExpeditionSystem.js";
 import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js";
 import { renderUiIcon } from "./UiIcons.js";
 
@@ -68,6 +69,28 @@ function collectEventsForMonth(state, monthOffsets) {
         grouped[dayOffset].push(event);
       }
     }
+  }
+
+  const historyEntries = (state.historyLog ?? []).filter((entry) => ["Expedition", "Unique Citizen"].includes(entry.category));
+  for (const entry of historyEntries) {
+    const dayOffset = Number(entry.dayOffset);
+    if (!Number.isFinite(dayOffset) || !grouped[dayOffset]) {
+      continue;
+    }
+    grouped[dayOffset].push({
+      id: entry.id,
+      name: entry.title,
+      type: entry.category,
+      description: entry.details
+    });
+  }
+
+  for (const entry of getExpeditionCalendarEntries(state)) {
+    const dayOffset = Number(entry.dayOffset);
+    if (!Number.isFinite(dayOffset) || !grouped[dayOffset]) {
+      continue;
+    }
+    grouped[dayOffset].push(entry);
   }
 
   return grouped;

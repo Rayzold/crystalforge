@@ -273,6 +273,10 @@ export function renderBuildingCard(building, state, workforceSummary = null) {
             ? `
               <label class="building-card__gm-quality-editor">
                 <span>Quality %</span>
+                <div class="gm-quality-stepper">
+                  <button class="button button--ghost gm-quality-stepper__button" type="button" data-action="nudge-building-quality-input" data-delta="-10">-10</button>
+                  <button class="button button--ghost gm-quality-stepper__button" type="button" data-action="nudge-building-quality-input" data-delta="-1">-1</button>
+                </div>
                 <input
                   class="building-card__gm-quality-input"
                   type="number"
@@ -282,6 +286,10 @@ export function renderBuildingCard(building, state, workforceSummary = null) {
                   value="${Number(building.quality ?? 0)}"
                   data-role="gm-building-quality-input"
                 />
+                <div class="gm-quality-stepper">
+                  <button class="button button--ghost gm-quality-stepper__button" type="button" data-action="nudge-building-quality-input" data-delta="1">+1</button>
+                  <button class="button button--ghost gm-quality-stepper__button" type="button" data-action="nudge-building-quality-input" data-delta="10">+10</button>
+                </div>
               </label>
               <button class="button button--ghost" data-action="save-building-quality" data-building-id="${building.id}">Save Quality</button>
             `

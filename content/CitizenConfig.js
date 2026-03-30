@@ -23,6 +23,20 @@ export const CITIZEN_CLASSES = [
   "Elderly"
 ];
 
+export const CITIZEN_RARITIES = ["Common", "Rare", "Epic"];
+
+export const CITIZEN_RARITY_OUTPUT_MULTIPLIERS = {
+  Common: 1,
+  Rare: 1.5,
+  Epic: 2.25
+};
+
+export const CITIZEN_RARITY_UPKEEP_MULTIPLIERS = {
+  Common: 1,
+  Rare: 1.1,
+  Epic: 1.25
+};
+
 export const CITIZEN_GROUP_ORDER = [
   "Provision",
   "Labor & Industry",

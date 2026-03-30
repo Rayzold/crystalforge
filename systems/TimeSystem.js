@@ -3,6 +3,7 @@ import { formatDate, getStructuredDate } from "./CalendarSystem.js";
 import { recalculateCityStats } from "./CityStatsSystem.js";
 import { advanceConstructionOneDay } from "./ConstructionSystem.js";
 import { expireEvents, maybeTriggerHolidayEvents, maybeTriggerRandomEvents, processScheduledEvents } from "./EventSystem.js";
+import { advanceExpeditionsOneDay } from "./ExpeditionSystem.js";
 import { addHistoryEntry } from "./HistoryLogSystem.js";
 import { addMonthlyChronicleIfNeeded } from "./MonthlyChronicleSystem.js";
 import { applyDailyResources } from "./ResourceSystem.js";
@@ -12,6 +13,7 @@ import { applyTownFocusDailyEffects, updateTownFocusAvailability } from "./TownF
 function runTimeAdvance(state, days, stepKey = null) {
   const completions = [];
   const triggeredEvents = [];
+  const expeditionReturns = [];
 
   for (let index = 0; index < days; index += 1) {
     const previousDayOffset = state.calendar.dayOffset;
@@ -28,6 +30,7 @@ function runTimeAdvance(state, days, stepKey = null) {
     }
 
     expireEvents(state);
+    expeditionReturns.push(...advanceExpeditionsOneDay(state));
     const completedToday = advanceConstructionOneDay(state, currentDate, state.calendar.dayOffset);
     completions.push(...completedToday);
     for (const building of completedToday) {
@@ -57,7 +60,7 @@ function runTimeAdvance(state, days, stepKey = null) {
     });
   }
 
-  return { days, completions, triggeredEvents };
+  return { days, completions, triggeredEvents, expeditionReturns };
 }
 
 export function advanceTime(state, stepKey) {

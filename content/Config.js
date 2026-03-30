@@ -7,8 +7,8 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.3.39";
-export const SAVE_VERSION = 11;
+export const APP_VERSION = "v1.4.1";
+export const SAVE_VERSION = 12;
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3";
 export const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDl51M8_ywD944xPSByUujzMdATeoy503I",
@@ -31,10 +31,19 @@ export const PAGE_ROUTES = [
   { key: "forge", label: "Forge", href: "./forge.html" },
   { key: "city", label: "City", href: "./city.html" },
   { key: "citizens", label: "Citizens", href: "./citizens.html" },
+  { key: "expeditions", label: "Expeditions", href: "./expeditions.html" },
+  { key: "vehicles", label: "Vehicles", href: "./vehicles.html" },
+  { key: "uniques", label: "Uniques", href: "./uniques.html" },
   { key: "chronicle", label: "Chronicle", href: "./chronicle.html" },
   { key: "help", label: "Help", href: "./help.html" }
 ];
 export const BUILD_NOTES = [
+  "The citizen system is evolving into an expedition game: Expeditions, Vehicles, and Unique Citizens now form a new route for recruiting population, gathering resources, and discovering named heroes over time.",
+  "GM building quality editing is faster now, with -10 / -1 / +1 / +10 nudges beside the quality input on both City cards and building dossiers.",
+  "GM building quality editing is easier now: City cards and building dossiers both expose a direct quality input plus Save Quality action after 432! is unlocked.",
+  "Hero Support and Expert Support toggles now validate against the real active incubator queue again, so incubating buildings can be boosted without false 'not assigned' errors.",
+  "Near-finished incubating buildings now consume only the support resources they actually need and no longer get stuck on the last sliver of progress because of rounding.",
+  "Town Map placement is snappier now: map cell lookups are cached, hover preview updates are throttled, and a single placement no longer forces as many immediate rerenders.",
   "Ambient page loops now use the same cached direct-play path as manifest and effect audio, so asset-backed background tracks start more reliably after the first user gesture.",
   "Asset-backed effect hooks now cover placement, move, error, construction completion, events, holidays, emergencies, and save/load/publish feedback, with exact drop-in paths documented under assets/audio.",
   "Manifest music now preloads and starts more reliably from the manifest click itself, and the current build version is pinned in the top-right page chrome.",
@@ -151,6 +160,7 @@ export const START_STATE_PRESETS = {
       firebaseRealmId: FIREBASE_DEFAULT_REALM_ID,
       pinnedBuildingIds: [],
       lockedMapBuildingIds: [],
+      mapPresets: [],
       diceAmount: 1,
       diceType: "d20",
       diceHistory: [],
@@ -207,6 +217,7 @@ export const START_STATE_PRESETS = {
       firebaseRealmId: FIREBASE_DEFAULT_REALM_ID,
       pinnedBuildingIds: [],
       lockedMapBuildingIds: [],
+      mapPresets: [],
       diceAmount: 1,
       diceType: "d20",
       diceHistory: [],

@@ -45,6 +45,11 @@ function renderCitizenCommand(state) {
           )
           .join("")}
       </div>
+      <div class="citizen-command-panel__links">
+        <a class="button" href="./expeditions.html">Open Expeditions</a>
+        <a class="button button--ghost" href="./vehicles.html">View Vehicles</a>
+        <a class="button button--ghost" href="./uniques.html">View Uniques</a>
+      </div>
     </section>
   `;
 }

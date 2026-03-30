@@ -1,9 +1,12 @@
 // Aggregated city stat calculation.
 // This file turns citizens, buildings, districts, and condition modifiers into
 // the shared city-stat block used across the UI and downstream systems.
+import { CITIZEN_RARITY_OUTPUT_MULTIPLIERS } from "../content/CitizenConfig.js";
 import { sumObjectValues } from "../engine/Utils.js";
 import { getDistrictSummary } from "./DistrictSystem.js";
 import { scalePopulationSupport } from "./DriftEvolutionSystem.js";
+import { getUniqueCitizenStatBonuses } from "./ExpeditionSystem.js";
+import { iterateCitizenRarityEntries } from "./CitizenSystem.js";
 import { getBuildingPlacementBonuses } from "./MapSystem.js";
 import { getCurrentTownFocus } from "./TownFocusSystem.js";
 import { getGoodsOutputMultiplier, getHousingStrainPenalty } from "./CityConditionSystem.js";
@@ -59,16 +62,17 @@ export function recalculateCityStats(state) {
     rawPopulationSupport += building.citizenEffects.populationSupport * placementMultiplier;
   }
 
-  for (const [citizenClass, count] of Object.entries(state.citizens)) {
+  iterateCitizenRarityEntries(state, (citizenClass, rarity, count) => {
     const citizenDefinition = state.citizenDefinitions[citizenClass];
+    const outputMultiplier = CITIZEN_RARITY_OUTPUT_MULTIPLIERS[rarity] ?? 1;
     for (const [statKey, statValue] of Object.entries(citizenDefinition.stats)) {
       const normalizedKey = statKey === "value" ? "goods" : statKey;
-      const statContribution = statValue * count;
+      const statContribution = statValue * count * outputMultiplier;
       nextStats[normalizedKey] =
         (nextStats[normalizedKey] ?? 0) +
         (normalizedKey === "goods" && statContribution > 0 ? statContribution * goodsOutputMultiplier : statContribution);
     }
-  }
+  });
 
   nextStats.goods = Math.max(0, nextStats.goods + Number(state.adminOverrides?.goods ?? 0));
 
@@ -107,6 +111,14 @@ export function recalculateCityStats(state) {
     nextStats.health += townFocus.statFlat.health ?? 0;
     nextStats.prosperity += townFocus.statFlat.prosperity ?? 0;
   }
+
+  const uniqueCitizenBonuses = getUniqueCitizenStatBonuses(state);
+  nextStats.defense += uniqueCitizenBonuses.defense ?? 0;
+  nextStats.security += uniqueCitizenBonuses.security ?? 0;
+  nextStats.prestige += uniqueCitizenBonuses.prestige ?? 0;
+  nextStats.morale += uniqueCitizenBonuses.morale ?? 0;
+  nextStats.health += uniqueCitizenBonuses.health ?? 0;
+  nextStats.prosperity += uniqueCitizenBonuses.prosperity ?? 0;
 
   const totalIncome = sumObjectValues(
     state.buildings

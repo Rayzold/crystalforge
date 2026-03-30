@@ -39,6 +39,7 @@ import {
   getActiveConstructionQueue,
   getAvailableConstructionQueue,
   getConstructionEtaDetails,
+  isBuildingActivelyConstructed,
   moveConstructionPriority,
   normalizeConstructionPriority,
   pauseConstruction
@@ -46,6 +47,15 @@ import {
 import { resetDistrictLevels, setDistrictDefinition, setDistrictLevelOverride, getDistrictSummary } from "./systems/DistrictSystem.js";
 import { setDriftEvolutionStageOverride, syncDriftEvolutionState } from "./systems/DriftEvolutionSystem.js";
 import { clearActiveEvents, triggerEvent } from "./systems/EventSystem.js";
+import {
+  getAvailableVehicleCounts,
+  getExpeditionCalendarEntries,
+  normalizeExpeditionState,
+  normalizeUniqueCitizens,
+  normalizeVehicleFleet,
+  startExpedition
+} from "./systems/ExpeditionSystem.js";
+import { VEHICLE_DEFINITIONS } from "./content/VehicleConfig.js";
 import { getDailyCitySnapshot } from "./systems/CitySnapshotSystem.js";
 import { manifestSelectedRarity } from "./systems/GachaSystem.js";
 import { addHistoryEntry } from "./systems/HistoryLogSystem.js";
@@ -118,6 +128,8 @@ let mapPlacementFxTimer = null;
 let chronicleJumpHighlightTimer = null;
 let manifestInProgress = false;
 let mapDragState = null;
+let mapHoverFrame = null;
+let pendingHoveredMapCell = null;
 let suppressNextMapClick = false;
 let navigationShortcutTimer = null;
 let navigationShortcutBuffer = "";
@@ -359,6 +371,9 @@ function markRecentCitizenChanges(citizenKeys = []) {
 }
 
 function syncDerivedState(state) {
+  state.vehicles = normalizeVehicleFleet(state.vehicles);
+  state.expeditions = normalizeExpeditionState(state.expeditions);
+  state.uniqueCitizens = normalizeUniqueCitizens(state.uniqueCitizens);
   if ((state.crystals[state.selectedRarity] ?? 0) <= 0) {
     state.selectedRarity =
       RARITY_ORDER.find((rarity) => (state.crystals[rarity] ?? 0) > 0) ?? state.selectedRarity;
@@ -479,6 +494,10 @@ function describeChronicleDay(state, dayOffset) {
     const end = Number(event.endsDayOffset ?? event.startedDayOffset);
     return Number.isFinite(start) && dayOffset >= start && dayOffset <= end;
   });
+  const expeditionEvents = getExpeditionCalendarEntries(state).filter((entry) => Number(entry.dayOffset) === dayOffset);
+  const historyEvents = (state.historyLog ?? []).filter(
+    (entry) => Number(entry.dayOffset) === dayOffset && ["Expedition", "Unique Citizen"].includes(entry.category)
+  );
   const note = String(state.chronicleNotes?.[String(dayOffset)] ?? "").trim();
 
   return [
@@ -486,13 +505,17 @@ function describeChronicleDay(state, dayOffset) {
     `Holiday: ${date.holiday?.name ?? "None"}`,
     `Weather: ${date.weather.icon} ${date.weather.name}`,
     `Moon: ${date.moonPhase.icon} ${date.moonPhase.name}`,
-    `Events: ${events.length ? events.map((event) => event.name).join(", ") : "None"}`,
+    `Events: ${
+      [...events.map((event) => event.name), ...expeditionEvents.map((event) => event.name), ...historyEvents.map((event) => event.title)].length
+        ? [...events.map((event) => event.name), ...expeditionEvents.map((event) => event.name), ...historyEvents.map((event) => event.title)].join(", ")
+        : "None"
+    }`,
     `City Conditions: ${snapshot?.conditions?.join(", ") ?? "No snapshot recorded"}`,
     note ? `Note: ${note}` : "Note: None"
   ].join("\n");
 }
 
-function createTurnSummary(previousState, nextState, days) {
+function createTurnSummary(previousState, nextState, days, advanceResult = null) {
   const resourceKeys = [
     ["gold", "Gold"],
     ["food", "Food"],
@@ -511,6 +534,9 @@ function createTurnSummary(previousState, nextState, days) {
     .filter((event) => !previousRecentKeys.has(`${event.id ?? event.name}-${event.startedDayOffset ?? ""}`))
     .map((event) => event.name)
     .slice(0, 6);
+  const expeditionReturns = Array.isArray(advanceResult?.expeditionReturns)
+    ? advanceResult.expeditionReturns.map((entry) => entry.typeLabel).slice(0, 6)
+    : [];
 
   return {
     days,
@@ -531,7 +557,8 @@ function createTurnSummary(previousState, nextState, days) {
       before: previousEmergencyCount,
       after: nextEmergencyCount
     },
-    newEventTitles
+    newEventTitles,
+    expeditionReturns
   };
 }
 
@@ -752,9 +779,37 @@ function navigateWithTransition(href) {
 }
 
 function clearHoveredMapCell() {
+  pendingHoveredMapCell = null;
+  if (mapHoverFrame) {
+    cancelAnimationFrame(mapHoverFrame);
+    mapHoverFrame = null;
+  }
   if (renderer.transientUi.hoveredMapCell) {
     renderer.setTransientUi({ hoveredMapCell: null }, getCurrentState());
   }
+}
+
+function queueHoveredMapCell(nextHoveredMapCell) {
+  pendingHoveredMapCell = nextHoveredMapCell;
+  if (mapHoverFrame) {
+    return;
+  }
+
+  mapHoverFrame = requestAnimationFrame(() => {
+    mapHoverFrame = null;
+    const currentHovered = renderer.transientUi.hoveredMapCell;
+    const nextHovered = pendingHoveredMapCell;
+    pendingHoveredMapCell = null;
+
+    if (
+      (currentHovered?.q ?? null) === (nextHovered?.q ?? null) &&
+      (currentHovered?.r ?? null) === (nextHovered?.r ?? null)
+    ) {
+      return;
+    }
+
+    renderer.setTransientUi({ hoveredMapCell: nextHovered }, getCurrentState());
+  });
 }
 
 function getMapViewState() {
@@ -1102,6 +1157,30 @@ function showMapPlacementPulse(q, r, building = null) {
   }, 1200);
 }
 
+function applyMapPlacementFeedback(lastPlacement, building = null) {
+  if (mapPlacementFxTimer) {
+    clearTimeout(mapPlacementFxTimer);
+  }
+
+  renderer.setTransientUi(
+    {
+      lastPlacement,
+      mapPlacementPulseCell: {
+        q: Number(lastPlacement?.to?.q ?? building?.mapPosition?.q ?? 0),
+        r: Number(lastPlacement?.to?.r ?? building?.mapPosition?.r ?? 0),
+        emoji: building ? getBuildingEmoji(building) : null,
+        rarity: building?.rarity ?? null
+      }
+    },
+    getCurrentState()
+  );
+
+  mapPlacementFxTimer = setTimeout(() => {
+    renderer.setTransientUi({ mapPlacementPulseCell: null }, getCurrentState());
+    mapPlacementFxTimer = null;
+  }, 1200);
+}
+
 function getPlacementZoneLabel(cell) {
   if (!cell) {
     return "Town Map";
@@ -1152,7 +1231,15 @@ function resetTransientUi() {
       mapZoom: 1,
       mapPanX: 0,
       mapPanY: 0,
-      mapPlacementPulseCell: null
+      mapPlacementPulseCell: null,
+      expeditionDraft: {
+        typeId: "rescue",
+        vehicleId: "caravanWagon",
+        approachId: "balanced",
+        durationDays: 7,
+        team: {},
+        resources: {}
+      }
     },
     getCurrentState()
   );
@@ -1564,6 +1651,7 @@ function setBuildingQualityPercent({ buildingId, quality, source = "Admin" }) {
     setBuildingQuality(building, quality);
     return { name: building.displayName, quality: building.quality, source };
   });
+  markRecentBuildingChanges([buildingId]);
   reportSuccess(`${result.name} set to ${formatNumber(result.quality, 1)}% quality (${result.source}).`);
 }
 
@@ -1760,12 +1848,11 @@ function moveBuildingOnMap({ buildingId, q, r, source = "Player" }) {
 
   playEffect(result.previousPosition ? "move" : "placement");
   reportSuccess(getPlacementSuccessMessage(result.building, q, r, result.resonanceGain ?? 0));
-  recordLastPlacement({
+  applyMapPlacementFeedback({
     buildingId: result.building.id,
     from: result.previousPosition ?? null,
     to: { q: Number(q), r: Number(r) }
-  });
-  showMapPlacementPulse(q, r, result.building);
+  }, result.building);
   advanceMapPlannerAfterPlacement(result.building.id);
   if ((result.resonanceGain ?? 0) > 0) {
     showAdjacencyPulse({
@@ -1805,12 +1892,11 @@ function forceMoveBuildingOnMap({ buildingId, q, r, source = "Admin" }) {
     reportSuccess(
       `${getBuildingEmoji(result.building)} ${result.building.displayName} seized hex ${q}, ${r}. ${result.displacedBuilding.displayName} was cleared.`
     );
-    recordLastPlacement({
+    applyMapPlacementFeedback({
       buildingId: result.building.id,
       from: result.previousPosition ?? null,
       to: { q: Number(q), r: Number(r) }
-    });
-    showMapPlacementPulse(q, r, result.building);
+    }, result.building);
     advanceMapPlannerAfterPlacement(result.building.id);
     if ((result.resonanceGain ?? 0) > 0) {
       showAdjacencyPulse({
@@ -1825,12 +1911,11 @@ function forceMoveBuildingOnMap({ buildingId, q, r, source = "Admin" }) {
   }
 
   reportSuccess(getPlacementSuccessMessage(result.building, q, r, result.resonanceGain ?? 0));
-  recordLastPlacement({
+  applyMapPlacementFeedback({
     buildingId: result.building.id,
     from: result.previousPosition ?? null,
     to: { q: Number(q), r: Number(r) }
-  });
-  showMapPlacementPulse(q, r, result.building);
+  }, result.building);
   advanceMapPlannerAfterPlacement(result.building.id);
   if ((result.resonanceGain ?? 0) > 0) {
     showAdjacencyPulse({
@@ -1967,7 +2052,9 @@ function setIncubatorSupportState(buildingId, supportKey, enabled) {
     if (!building) {
       return { ok: false, reason: "Building not found." };
     }
-    if (!building.isConstructing) {
+    // Incubation is tracked by the activeConstructionIds queue now, not by the
+    // old per-building isConstructing flag.
+    if (!isBuildingActivelyConstructed(draft, buildingId)) {
       return { ok: false, reason: `${building.displayName} is not assigned to an incubator.` };
     }
 
@@ -1991,6 +2078,58 @@ function setIncubatorSupportState(buildingId, supportKey, enabled) {
 
   markRecentBuildingChanges([buildingId]);
   reportSuccess(`${label} ${enabled ? "enabled" : "disabled"} for ${result.name}.`);
+}
+
+function adjustVehicleCount(vehicleId, delta) {
+  const definition = normalizeVehicleFleet(getCurrentState().vehicles)[vehicleId];
+  if (definition === undefined) {
+    reportError("Vehicle type not found.");
+    return;
+  }
+
+  const total = Number(getCurrentState().vehicles?.[vehicleId] ?? 0) || 0;
+  const assigned = total - (getAvailableVehicleCounts(getCurrentState())?.[vehicleId] ?? 0);
+  const nextTotal = Math.max(0, total + Math.trunc(Number(delta) || 0));
+  if (nextTotal < assigned) {
+    reportError("That vehicle is still assigned to an active expedition.");
+    return;
+  }
+
+  commit((draft) => {
+    draft.vehicles[vehicleId] = nextTotal;
+  });
+  reportSuccess(`${VEHICLE_DEFINITIONS[vehicleId]?.name ?? vehicleId} fleet adjusted to ${nextTotal}.`);
+}
+
+function launchExpeditionFromDraft() {
+  const expeditionDraft = renderer.transientUi.expeditionDraft ?? {};
+  const result = commit((draft) => startExpedition(draft, expeditionDraft));
+  if (!result?.ok) {
+    reportError(result?.reason ?? "Could not launch the expedition.");
+    return;
+  }
+
+  const touchedResources = Object.entries(result.expedition.committedResources ?? {})
+    .filter(([, amount]) => Number(amount) > 0)
+    .map(([resource]) => resource);
+  const touchedCitizens = Object.keys(result.expedition.team ?? {});
+  markRecentResourceChanges(touchedResources);
+  markRecentCitizenChanges(touchedCitizens);
+  renderer.setTransientUi(
+    {
+      expeditionDraft: {
+        ...renderer.transientUi.expeditionDraft,
+        typeId: result.expedition.typeId,
+        vehicleId: result.expedition.vehicleId,
+        approachId: result.expedition.approachId,
+        durationDays: result.expedition.durationDaysBase,
+        team: {},
+        resources: {}
+      }
+    },
+    getCurrentState()
+  );
+  reportSuccess(`${result.expedition.typeLabel} launched. Expected back ${result.expedition.expectedReturnAt}.`, "confirm");
 }
 
 function manifestBuildingNow(buildingId) {
@@ -2159,6 +2298,12 @@ const actions = {
       draft.settings.liveSessionView = !draft.settings.liveSessionView;
     });
     reportSuccess(`Live session view ${getCurrentState().settings.liveSessionView ? "enabled" : "disabled"}.`);
+  },
+  adjustVehicleCount({ vehicleId, delta }) {
+    adjustVehicleCount(vehicleId, delta);
+  },
+  launchExpedition() {
+    launchExpeditionFromDraft();
   },
   saveDriftEvolutionStage({ stageId, patch }) {
     commit((draft) => {
@@ -2592,7 +2737,11 @@ document.addEventListener("keydown", (event) => {
     "2": "./forge.html",
     "3": "./city.html",
     "4": "./citizens.html",
-    "5": "./chronicle.html"
+    "5": "./chronicle.html",
+    "6": "./expeditions.html",
+    "7": "./vehicles.html",
+    "8": "./uniques.html",
+    "9": "./help.html"
   };
   const isAdminCodeKey = key.length === 1 && /[0-9!]/.test(key);
 
@@ -2666,7 +2815,7 @@ root.addEventListener("click", async (event) => {
       const previousState = structuredClone(getCurrentState());
       const result = commit((draft) => advanceTime(draft, target.dataset.step));
       const nextState = getCurrentState();
-      const turnSummary = createTurnSummary(previousState, nextState, result.days);
+      const turnSummary = createTurnSummary(previousState, nextState, result.days, result);
       markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
       renderer.setTransientUi({ turnSummaryModal: turnSummary }, nextState);
       playTurnAdvanceEffect(previousState, nextState, turnSummary);
@@ -2680,7 +2829,7 @@ root.addEventListener("click", async (event) => {
       const previousState = structuredClone(getCurrentState());
       const result = commit((draft) => advanceTimeByDays(draft, days));
       const nextState = getCurrentState();
-      const turnSummary = createTurnSummary(previousState, nextState, result.days);
+      const turnSummary = createTurnSummary(previousState, nextState, result.days, result);
       markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
       renderer.setTransientUi({ turnSummaryModal: turnSummary }, nextState);
       playTurnAdvanceEffect(previousState, nextState, turnSummary);
@@ -2694,7 +2843,7 @@ root.addEventListener("click", async (event) => {
       const previousState = structuredClone(getCurrentState());
       const result = commit((draft) => advanceTimeByDays(draft, days));
       const nextState = getCurrentState();
-      const turnSummary = createTurnSummary(previousState, nextState, result.days);
+      const turnSummary = createTurnSummary(previousState, nextState, result.days, result);
       markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
       renderer.setTransientUi({ turnSummaryModal: turnSummary }, nextState);
       playTurnAdvanceEffect(previousState, nextState, turnSummary);
@@ -2830,6 +2979,66 @@ root.addEventListener("click", async (event) => {
       break;
     case "toggle-player-hide-completed":
       renderer.setTransientUi({ playerHideCompleted: !renderer.transientUi.playerHideCompleted }, getCurrentState());
+      break;
+    case "set-expedition-type":
+      void audioEngine.playUiAccent("soft");
+      renderer.setTransientUi(
+        {
+          expeditionDraft: {
+            ...(renderer.transientUi.expeditionDraft ?? {}),
+            typeId: target.dataset.typeId ?? "rescue",
+            team: {}
+          }
+        },
+        getCurrentState()
+      );
+      break;
+    case "set-expedition-vehicle":
+      void audioEngine.playUiAccent("soft");
+      renderer.setTransientUi(
+        {
+          expeditionDraft: {
+            ...(renderer.transientUi.expeditionDraft ?? {}),
+            vehicleId: target.dataset.vehicleId ?? "caravanWagon"
+          }
+        },
+        getCurrentState()
+      );
+      break;
+    case "set-expedition-approach":
+      void audioEngine.playUiAccent("soft");
+      renderer.setTransientUi(
+        {
+          expeditionDraft: {
+            ...(renderer.transientUi.expeditionDraft ?? {}),
+            approachId: target.dataset.approachId ?? "balanced"
+          }
+        },
+        getCurrentState()
+      );
+      break;
+    case "set-expedition-duration":
+      void audioEngine.playUiAccent("soft");
+      renderer.setTransientUi(
+        {
+          expeditionDraft: {
+            ...(renderer.transientUi.expeditionDraft ?? {}),
+            durationDays: Math.max(1, Number(target.dataset.durationDays ?? 7) || 7)
+          }
+        },
+        getCurrentState()
+      );
+      break;
+    case "launch-expedition":
+      void audioEngine.playUiAccent("confirm");
+      actions.launchExpedition();
+      break;
+    case "adjust-vehicle-count":
+      void audioEngine.playUiAccent("soft");
+      actions.adjustVehicleCount({
+        vehicleId: target.dataset.vehicleId,
+        delta: Number(target.dataset.delta ?? 0)
+      });
       break;
     case "toggle-incubator-support":
       setIncubatorSupportState(target.dataset.buildingId, target.dataset.supportKey, target.dataset.enabled !== "true");
@@ -3067,13 +3276,27 @@ root.addEventListener("click", async (event) => {
     case "toggle-building-pin":
       actions.toggleBuildingPin(target.dataset.buildingId);
       break;
+    case "nudge-building-quality-input": {
+      const container = target.closest(".building-card, .building-detail");
+      const qualityInput = container?.querySelector('[data-role="gm-building-quality-input"]');
+      const currentValue = Number(qualityInput?.value);
+      const delta = Number(target.dataset.delta ?? 0);
+      if (!qualityInput || !Number.isFinite(currentValue) || !Number.isFinite(delta)) {
+        reportError("Quality control unavailable.");
+        break;
+      }
+      const nextValue = Math.min(350, Math.max(0, currentValue + delta));
+      qualityInput.value = String(Math.round(nextValue * 10) / 10);
+      qualityInput.dispatchEvent(new Event("input", { bubbles: true }));
+      break;
+    }
     case "save-building-quality": {
       if (!getCurrentState().ui.adminUnlocked) {
         reportError("Unlock GM mode before editing building quality.");
         break;
       }
-      const card = target.closest(".building-card");
-      const qualityInput = card?.querySelector('[data-role="gm-building-quality-input"]');
+      const container = target.closest(".building-card, .building-detail");
+      const qualityInput = container?.querySelector('[data-role="gm-building-quality-input"]');
       const quality = Number(qualityInput?.value);
       if (!Number.isFinite(quality)) {
         reportError("Enter a valid quality percentage.");
@@ -3082,7 +3305,7 @@ root.addEventListener("click", async (event) => {
       actions.setBuildingQuality({
         buildingId: target.dataset.buildingId,
         quality,
-        source: "City GM"
+        source: container?.classList.contains("building-detail") ? "Building Dossier" : "City GM"
       });
       break;
     }
@@ -3154,7 +3377,7 @@ root.addEventListener("mouseover", (event) => {
     return;
   }
 
-  renderer.setTransientUi({ hoveredMapCell: { q, r } }, getCurrentState());
+  queueHoveredMapCell({ q, r });
 });
 
 root.addEventListener("mouseout", (event) => {
@@ -3200,9 +3423,7 @@ document.addEventListener("pointerdown", (event) => {
   if (!svg || event.button !== 0) {
     return;
   }
-  if (renderer.transientUi.hoveredMapCell) {
-    renderer.setTransientUi({ hoveredMapCell: null }, getCurrentState());
-  }
+  clearHoveredMapCell();
   const liveSvg = root.querySelector(".hex-map");
   mapDragState = {
     pointerId: event.pointerId,
@@ -3323,6 +3544,36 @@ root.addEventListener("input", (event) => {
       draft.settings.diceAmount = Math.max(1, Math.min(20, Number(target.value) || 1));
     });
   }
+
+  if (target.dataset.action === "set-expedition-team-count") {
+    renderer.setTransientUi(
+      {
+        expeditionDraft: {
+          ...(renderer.transientUi.expeditionDraft ?? {}),
+          team: {
+            ...(renderer.transientUi.expeditionDraft?.team ?? {}),
+            [target.dataset.citizenClass]: Math.max(0, Math.floor(Number(target.value) || 0))
+          }
+        }
+      },
+      getCurrentState()
+    );
+  }
+
+  if (target.dataset.action === "set-expedition-resource") {
+    renderer.setTransientUi(
+      {
+        expeditionDraft: {
+          ...(renderer.transientUi.expeditionDraft ?? {}),
+          resources: {
+            ...(renderer.transientUi.expeditionDraft?.resources ?? {}),
+            [target.dataset.resourceKey]: Math.max(0, Math.floor(Number(target.value) || 0))
+          }
+        }
+      },
+      getCurrentState()
+    );
+  }
 });
 
 audioEngine.setMuted(getCurrentState().settings.muted);
@@ -3385,4 +3636,3 @@ adminConsole.render(getCurrentState());
 
 applyUrlFocusTargets();
 startPageEnter();
-
