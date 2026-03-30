@@ -388,7 +388,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
           }
         </header>
 
-        ${renderResourceDeltaStrip(state)}
+        ${pageKey === "uniques" ? "" : renderResourceDeltaStrip(state)}
 
         ${
           pageKey === "home" || pageKey === "forge" || pageKey === "citizens" || pageKey === "chronicle"

@@ -10630,6 +10630,34 @@ body:-webkit-full-screen #app {
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
 }
 
+.expedition-preview-grid article,
+.vehicle-card__stats article {
+  display: grid;
+  gap: 0.28rem;
+  align-content: start;
+  border-radius: 0.95rem;
+  border: 1px solid rgba(130, 160, 220, 0.12);
+  background: rgba(10, 15, 28, 0.52);
+  padding: 0.75rem 0.8rem;
+}
+
+.expedition-preview-grid article span,
+.vehicle-card__stats article span {
+  display: block;
+  color: rgba(184, 200, 233, 0.76);
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.expedition-preview-grid article strong,
+.vehicle-card__stats article strong {
+  display: block;
+  color: rgba(244, 248, 255, 0.96);
+  font-size: 1.02rem;
+  line-height: 1.2;
+}
+
 .expedition-button-row {
   grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
   align-items: start;
