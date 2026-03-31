@@ -11926,6 +11926,85 @@ body:-webkit-full-screen #app {
   font-size: 1.2rem;
 }
 
+.vehicle-groups,
+.expedition-vehicle-groups,
+.expedition-vehicle-group {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.expedition-card--vehicle {
+  grid-template-columns: 92px minmax(0, 1fr);
+  align-items: start;
+}
+
+.expedition-card__vehicle-media,
+.vehicle-card__media {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid rgba(141, 182, 255, 0.14);
+  background:
+    radial-gradient(circle at 50% 30%, rgba(148, 201, 255, 0.18), transparent 46%),
+    linear-gradient(180deg, rgba(21, 31, 54, 0.98), rgba(10, 16, 31, 0.94));
+}
+
+.expedition-card__vehicle-media {
+  aspect-ratio: 1 / 1;
+  min-height: 92px;
+}
+
+.vehicle-card__media {
+  aspect-ratio: 16 / 9;
+  min-height: 180px;
+}
+
+.expedition-card__vehicle-media img,
+.vehicle-card__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.expedition-card__vehicle-copy,
+.vehicle-card__content {
+  display: grid;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.vehicle-art-fallback {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  color: rgba(236, 244, 255, 0.96);
+  text-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+}
+
+.vehicle-art-fallback--full {
+  min-height: 180px;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(130, 217, 255, 0.18), transparent 36%),
+    linear-gradient(180deg, rgba(19, 31, 54, 0.94), rgba(8, 15, 28, 0.96));
+}
+
+.vehicle-art-fallback--full span {
+  font-size: 2.35rem;
+}
+
+.vehicle-art-fallback--compact {
+  min-height: 92px;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(130, 217, 255, 0.16), transparent 38%),
+    linear-gradient(180deg, rgba(19, 31, 54, 0.92), rgba(8, 15, 28, 0.96));
+}
+
+.vehicle-art-fallback--compact span {
+  font-size: 1.85rem;
+}
+
 .expedition-card__tags {
   display: flex;
   flex-wrap: wrap;
@@ -11977,6 +12056,38 @@ body:-webkit-full-screen #app {
 .notable-card__eyebrow,
 .expedition-launch-preview__outlook {
   color: rgba(212, 222, 249, 0.72);
+}
+
+.vehicle-roster-panel,
+.expedition-vehicle-group {
+  padding: 1rem 1.05rem;
+  border-radius: 1.15rem;
+  border: 1px solid rgba(134, 167, 230, 0.14);
+  background: rgba(12, 18, 34, 0.58);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.vehicle-roster-panel__head,
+.expedition-vehicle-group__head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.9rem;
+}
+
+.vehicle-roster-panel__counts,
+.expedition-vehicle-group__head span {
+  display: grid;
+  gap: 0.1rem;
+  justify-items: end;
+  color: rgba(188, 204, 238, 0.78);
+  font-size: 0.82rem;
+}
+
+.vehicle-roster-panel__counts strong,
+.expedition-vehicle-group__head strong {
+  color: rgba(244, 248, 255, 0.96);
 }
 
 .expedition-launch-panel__stack {
@@ -12222,6 +12333,11 @@ body:-webkit-full-screen #app {
 .vehicle-card,
 .notable-card {
   padding: 1rem 1.05rem;
+}
+
+.vehicle-card {
+  display: grid;
+  gap: 0.85rem;
 }
 
 .expedition-return-card__meta,
@@ -12521,6 +12637,21 @@ body:-webkit-full-screen #app {
 }
 
 @media (max-width: 760px) {
+  .expedition-card--vehicle {
+    grid-template-columns: 1fr;
+  }
+
+  .vehicle-roster-panel__head,
+  .expedition-vehicle-group__head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .vehicle-roster-panel__counts,
+  .expedition-vehicle-group__head span {
+    justify-items: start;
+  }
+
   .expedition-journey-modal__header {
     grid-template-columns: 1fr;
     padding-right: 0;

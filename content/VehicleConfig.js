@@ -6,8 +6,9 @@ export const VEHICLE_DEFINITIONS = {
   scoutBuggy: {
     id: "scoutBuggy",
     name: "Scout Buggy",
-    emoji: "🏎️",
+    emoji: "\u{1F3CE}\uFE0F",
     type: "land",
+    imagePath: "./assets/images/vehicles/Scout Buggy.png",
     sizeLabel: "Light Land Buggy",
     timeMultiplier: 0.95,
     cargoMultiplier: 0.85,
@@ -20,8 +21,9 @@ export const VEHICLE_DEFINITIONS = {
   trailBuggy: {
     id: "trailBuggy",
     name: "Trail Buggy",
-    emoji: "🚙",
+    emoji: "\u{1F699}",
     type: "land",
+    imagePath: "./assets/images/vehicles/Trail Buggy.png",
     sizeLabel: "Mid Land Buggy",
     timeMultiplier: 0.82,
     cargoMultiplier: 1,
@@ -34,8 +36,9 @@ export const VEHICLE_DEFINITIONS = {
   siegeBuggy: {
     id: "siegeBuggy",
     name: "Siege Buggy",
-    emoji: "🚛",
+    emoji: "\u{1F69B}",
     type: "land",
+    imagePath: "./assets/images/vehicles/Siege Buggy.png",
     sizeLabel: "Heavy Land Buggy",
     timeMultiplier: 0.72,
     cargoMultiplier: 1.22,
@@ -48,8 +51,9 @@ export const VEHICLE_DEFINITIONS = {
   elementalSkiff: {
     id: "elementalSkiff",
     name: "Elemental Skiff",
-    emoji: "🛩️",
+    emoji: "\u{1F6E9}\uFE0F",
     type: "air",
+    imagePath: "./assets/images/vehicles/Elemental Skiff.png",
     sizeLabel: "Light Elemental Airship",
     timeMultiplier: 0.65,
     cargoMultiplier: 0.9,
@@ -62,8 +66,9 @@ export const VEHICLE_DEFINITIONS = {
   elementalFrigate: {
     id: "elementalFrigate",
     name: "Elemental Frigate",
-    emoji: "🛸",
+    emoji: "\u{1F6F8}",
     type: "air",
+    imagePath: "./assets/images/vehicles/Elemental Frigate.png",
     sizeLabel: "Mid Elemental Airship",
     timeMultiplier: 0.5,
     cargoMultiplier: 1.02,
@@ -76,8 +81,9 @@ export const VEHICLE_DEFINITIONS = {
   grandElementalAirship: {
     id: "grandElementalAirship",
     name: "Grand Elemental Airship",
-    emoji: "🚢",
+    emoji: "\u{1F6A2}",
     type: "air",
+    imagePath: "./assets/images/vehicles/Grand Elemental Airship.png",
     sizeLabel: "Heavy Elemental Airship",
     timeMultiplier: 0.35,
     cargoMultiplier: 1.18,
@@ -88,6 +94,19 @@ export const VEHICLE_DEFINITIONS = {
     summary: "A towering elemental flagship that crosses great distance quickly while hauling elite crews and heavier returns."
   }
 };
+
+export const VEHICLE_TYPE_SECTIONS = [
+  {
+    type: "land",
+    title: "Land Vehicles",
+    detail: "Buggies and overland rigs built for roads, ruins, and hostile ground."
+  },
+  {
+    type: "air",
+    title: "Air Vehicles",
+    detail: "Elemental ships that trade altitude and speed for stronger reach across the frontier."
+  }
+];
 
 export const VEHICLE_ORDER = Object.keys(VEHICLE_DEFINITIONS);
 

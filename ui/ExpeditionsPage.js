@@ -3,7 +3,7 @@
 // feed that turns expeditions into a proper citizen-and-resource mini-game.
 import { EXPEDITION_APPROACHES, EXPEDITION_DURATION_OPTIONS, EXPEDITION_ORDER, EXPEDITION_TYPES } from "../content/ExpeditionConfig.js";
 import { CITIZEN_DEFINITIONS } from "../content/CitizenConfig.js";
-import { VEHICLE_DEFINITIONS, VEHICLE_ORDER } from "../content/VehicleConfig.js";
+import { VEHICLE_DEFINITIONS, VEHICLE_ORDER, VEHICLE_TYPE_SECTIONS } from "../content/VehicleConfig.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import {
   createExpeditionLaunchPreview,
@@ -18,6 +18,7 @@ import {
   getExpeditionOverview
 } from "../systems/ExpeditionSystem.js";
 import { formatDate } from "../systems/CalendarSystem.js";
+import { renderVehicleArt } from "./VehicleArt.js";
 import { renderUiIcon } from "./UiIcons.js";
 
 const RESOURCE_LABELS = {
@@ -89,6 +90,74 @@ function renderMissionBoard(state, draft) {
 function renderVehicleOptions(state, draft) {
   const availableVehicles = getAvailableVehicleCounts(state);
   const totalVehicles = state.vehicles ?? {};
+  const renderVehicleImage = (definition) =>
+    renderVehicleArt(
+      definition?.imagePath,
+      `${definition?.name ?? "Vehicle"} artwork`,
+      `
+        <div class="vehicle-art-fallback vehicle-art-fallback--compact" aria-hidden="true">
+          <span>${escapeHtml(definition?.emoji ?? "*")}</span>
+        </div>
+      `
+    );
+
+  return `
+    <div class="expedition-vehicle-groups">
+      ${VEHICLE_TYPE_SECTIONS.map((section) => {
+        const vehicleIds = VEHICLE_ORDER.filter((vehicleId) => VEHICLE_DEFINITIONS[vehicleId]?.type === section.type);
+        const total = vehicleIds.reduce((sum, vehicleId) => sum + (Number(totalVehicles[vehicleId] ?? 0) || 0), 0);
+        const available = vehicleIds.reduce((sum, vehicleId) => sum + (Number(availableVehicles[vehicleId] ?? 0) || 0), 0);
+
+        return `
+          <section class="expedition-vehicle-group">
+            <div class="expedition-vehicle-group__head">
+              <div>
+                <strong>${escapeHtml(section.title)}</strong>
+                <small>${escapeHtml(section.detail)}</small>
+              </div>
+              <span>${formatNumber(available)} free / ${formatNumber(total)} total</span>
+            </div>
+            <div class="expedition-grid expedition-grid--vehicles">
+              ${vehicleIds.map((vehicleId) => {
+                const total = totalVehicles[vehicleId] ?? 0;
+                const definition = VEHICLE_DEFINITIONS[vehicleId];
+                const available = availableVehicles[vehicleId] ?? 0;
+                const isSelected = draft.vehicleId === vehicleId;
+
+                return `
+                  <button
+                    type="button"
+                    class="expedition-card expedition-card--vehicle ${isSelected ? "is-active" : ""}"
+                    data-action="set-expedition-vehicle"
+                    data-vehicle-id="${vehicleId}"
+                    ${available <= 0 && !isSelected ? "disabled" : ""}
+                  >
+                    <div class="expedition-card__vehicle-media">
+                      ${renderVehicleImage(definition)}
+                    </div>
+                    <div class="expedition-card__vehicle-copy">
+                      <div class="expedition-card__row">
+                        <strong>${escapeHtml(definition?.name ?? vehicleId)}</strong>
+                      </div>
+                      <small>${escapeHtml(definition?.summary ?? "")}</small>
+                      <div class="expedition-card__tags">
+                        <em>${escapeHtml(definition?.sizeLabel ?? (definition?.type === "air" ? "Air Vehicle" : "Land Vehicle"))}</em>
+                        <em>Travel x${formatNumber(definition?.timeMultiplier ?? 1, 2)}</em>
+                        <em>Cargo x${formatNumber(definition?.cargoMultiplier ?? 1, 2)}</em>
+                        <em>Scout x${formatNumber(definition?.scouting ?? 1, 2)}</em>
+                      </div>
+                      <span class="expedition-card__footer">${formatNumber(available)} free / ${formatNumber(total)} total</span>
+                    </div>
+                  </button>
+                `;
+              }).join("")}
+            </div>
+          </section>
+        `;
+      }).join("")}
+    </div>
+  `;
+
   return `
     <div class="expedition-grid expedition-grid--vehicles">
       ${VEHICLE_ORDER.map((vehicleId) => {
