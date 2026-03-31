@@ -46,8 +46,16 @@ function Invoke-GitChecked {
     [string[]]$Arguments
   )
 
-  $output = & $git @Arguments 2>&1
-  $exitCode = $LASTEXITCODE
+  $previousErrorActionPreference = $ErrorActionPreference
+  try {
+    $ErrorActionPreference = "Continue"
+    $output = & $git @Arguments 2>&1
+    $exitCode = $LASTEXITCODE
+  }
+  finally {
+    $ErrorActionPreference = $previousErrorActionPreference
+  }
+
   if ($exitCode -ne 0) {
     $joinedOutput = ($output | ForEach-Object { "$_" }) -join [Environment]::NewLine
     throw "git $($Arguments -join ' ') failed with exit code $exitCode.`n$joinedOutput"

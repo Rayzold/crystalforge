@@ -8,7 +8,7 @@ import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
 // APP_VERSION must stay monotonic because Firebase publish safety compares builds numerically.
-export const APP_VERSION = "v1.6.9";
+export const APP_VERSION = "v1.6.11";
 // Release maturity is tracked separately so unreleased builds do not need to pretend they are public/stable.
 export const APP_RELEASE_STAGE = "preview";
 const RELEASE_STAGE_LABELS = {
@@ -57,6 +57,8 @@ export const PAGE_ROUTES = [
   { key: "help", label: "Help", href: "./help.html" }
 ];
 export const BUILD_NOTES = [
+  "Release script git warnings no longer break the release button: harmless stderr notices like LF/CRLF line-ending warnings are now tolerated unless git returns a real failure exit code.",
+  "A new save-point recreation spec now lives at the repo root, documenting the product shape, architecture, content systems, state model, and rebuild path for future recovery work.",
   "Expedition callsigns are now themed by mission type, so rescue crews, relic teams, hunters, diplomats, and pilgrims each read like distinct named outfits instead of rotating generic placeholders.",
   "Pending Decisions now keeps a short decision history, relics can awaken extra synergy bonuses from matching legend posts, town focuses, and building tags, and Home goals now grant small celebratory rewards when you complete them.",
   "Pending Decisions now works like a real priority inbox with urgency, snooze, and resolve-next flow, expeditions can recover relics or trophies that slot into the Drift for ongoing bonuses, and Home now guides new runs through a clearer six-phase onboarding arc.",
