@@ -1,4 +1,4 @@
-import { APP_VERSION, MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js";
+import { APP_DISPLAY_VERSION, MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js";
 import { getBuildingEmoji } from "../content/BuildingCatalog.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
@@ -49,6 +49,8 @@ const ROUTE_SHORTCUTS = {
 };
 
 const DICE_TYPES = ["d2", "d4", "d6", "d8", "d10", "d12", "d20", "d100"];
+const RESOURCE_CHROME_PAGES = new Set(["city", "economy"]);
+const BUILDING_STATUS_PAGES = new Set(["city", "economy"]);
 
 function formatSidebarEtaDays(daysRemaining) {
   if (!Number.isFinite(daysRemaining)) {
@@ -247,7 +249,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
               <button class="player-stage__return ${state.transientUi?.projectorMode ? "is-active" : ""}" type="button" data-action="toggle-projector-mode">Projector Mode</button>
               <button class="player-stage__return" type="button" data-action="enter-fullscreen">Fullscreen</button>
               <a class="player-stage__return" href="./gm.html">Return to GM Mode</a>
-              <div class="page-build-tag page-build-tag--player" aria-label="Current build">${APP_VERSION}</div>
+              <div class="page-build-tag page-build-tag--player" aria-label="Current build">${APP_DISPLAY_VERSION}</div>
             </div>
           </header>
           ${content}
@@ -260,9 +262,11 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
   const manualSaveMeta = getManualSaveMeta();
   const townFocusAvailability = getTownFocusAvailability(state);
   const currentFocus = getCurrentTownFocus(state);
+  const showResourceChrome = RESOURCE_CHROME_PAGES.has(pageKey);
+  const showBuildingStatus = BUILDING_STATUS_PAGES.has(pageKey);
   const cityAlertCount = getCriticalAlerts(state).length;
   const availableCrystalCount = Object.values(state.crystals ?? {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
-  const expeditionCount = state.expeditions?.active?.length ?? 0;
+  const expeditionCount = (state.expeditions?.active?.length ?? 0) + (state.expeditions?.pending?.length ?? 0);
   const uniqueCitizenCount = state.uniqueCitizens?.length ?? 0;
   const coreRoutes = PAGE_ROUTES.filter((route) => ["home", "forge", "economy", "city"].includes(route.key));
   const managementRoutes = PAGE_ROUTES.filter((route) => ["citizens", "expeditions", "vehicles", "uniques", "chronicle", "help"].includes(route.key));
@@ -324,11 +328,17 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
             ${renderSidebarRouteGroup(managementRoutes, pageKey, cityAlertCount, availableCrystalCount, expeditionCount, uniqueCitizenCount)}
           </div>
         </nav>
-        <div class="sidebar-nav__status">
-          ${renderSidebarBuildingList(state, "Active", manifestedBuildings, "No active buildings yet.", "active")}
-          ${renderSidebarBuildingList(state, "Incubating", incubatingBuildings, "No buildings are incubating.", "incubating")}
-          ${renderSidebarBuildingList(state, "Available", availableBuildings, "No additional buildings are waiting.", "available")}
-        </div>
+        ${
+          showBuildingStatus
+            ? `
+                <div class="sidebar-nav__status">
+                  ${renderSidebarBuildingList(state, "Active", manifestedBuildings, "No active buildings yet.", "active")}
+                  ${renderSidebarBuildingList(state, "Incubating", incubatingBuildings, "No buildings are incubating.", "incubating")}
+                  ${renderSidebarBuildingList(state, "Available", availableBuildings, "No additional buildings are waiting.", "available")}
+                </div>
+              `
+            : ""
+        }
         <div class="sidebar-nav__footer">
           <a class="sidebar-mode-link" href="./index.html">
             <span>Player Mode</span>
@@ -408,7 +418,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
       </aside>
 
       <main class="page-stage page-stage--${pageKey}">
-        <div class="page-build-tag" aria-label="Current build">${APP_VERSION}</div>
+        <div class="page-build-tag" aria-label="Current build">${APP_DISPLAY_VERSION}</div>
         ${pageKey === "city" || pageKey === "economy" ? renderCrisisBanner(state, pageKey) : ""}
         <header class="page-hero">
           <div>
@@ -429,12 +439,11 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
           }
         </header>
 
-        ${pageKey === "uniques" || pageKey === "forge" || pageKey === "citizens" || pageKey === "chronicle" ? "" : renderResourceDeltaStrip(state)}
+        ${showResourceChrome ? renderResourceDeltaStrip(state) : ""}
 
         ${
-          pageKey === "home" || pageKey === "forge" || pageKey === "citizens" || pageKey === "chronicle"
-            ? ""
-            : `
+          showResourceChrome
+            ? `
               <section class="hud-ribbon">
                 ${summary
                   .map(
@@ -464,6 +473,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
                   .join("")}
               </section>
             `
+            : ""
         }
 
         <div class="page-layout ${aside ? "page-layout--with-aside" : ""}">

@@ -7,6 +7,7 @@ import { renderBuildingCatalogModal } from "./BuildingCatalogModal.js";
 import { renderCitizensPage } from "./CitizensPage.js";
 import { renderCityPage, renderEconomyPage } from "./CityPage.js";
 import { renderExpeditionsPage } from "./ExpeditionsPage.js";
+import { renderExpeditionJourneyModal } from "./ExpeditionJourneyModal.js";
 import { renderForgePage } from "./ForgePage.js";
 import { renderHelpPage } from "./HelpPage.js";
 import { attachHelpBubbles } from "./HelpBubbles.js";
@@ -64,6 +65,7 @@ export class UIRenderer {
       adjacencyPulse: null,
       focusCeremony: null,
       manifestCompleteModal: null,
+      expeditionJourneyOpen: false,
       manifestInProgress: false,
       firebasePublishedMeta: null,
       firebaseConnectionState: "idle",
@@ -141,6 +143,7 @@ export class UIRenderer {
       renderBuildingCatalogModal(viewState),
       renderHomeHelpModal(viewState),
       renderManifestCompleteModal(viewState),
+      renderExpeditionJourneyModal(viewState),
       renderTownFocusCouncilModal(viewState),
       renderTownFocusCeremonyOverlay(viewState),
       renderTurnSummaryModal(viewState)

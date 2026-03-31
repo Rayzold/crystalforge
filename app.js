@@ -57,8 +57,11 @@ import { clearActiveEvents, triggerEvent } from "./systems/EventSystem.js";
 import {
   forceReturnExpedition,
   getAvailableVehicleCounts,
+  getCurrentPendingExpeditionJourney,
   getExpeditionCalendarEntries,
+  hasPendingExpeditionJourneys,
   normalizeExpeditionState,
+  resolveExpeditionJourneyChoice,
   normalizeUniqueCitizens,
   normalizeVehicleFleet,
   refreshExpeditionBoardIfNeeded,
@@ -544,8 +547,8 @@ function createTurnSummary(previousState, nextState, days, advanceResult = null)
     .filter((event) => !previousRecentKeys.has(`${event.id ?? event.name}-${event.startedDayOffset ?? ""}`))
     .map((event) => event.name)
     .slice(0, 6);
-  const expeditionReturns = Array.isArray(advanceResult?.expeditionReturns)
-    ? advanceResult.expeditionReturns.map((entry) => entry.typeLabel).slice(0, 6)
+  const expeditionJourneys = Array.isArray(advanceResult?.expeditionJourneys)
+    ? advanceResult.expeditionJourneys.map((entry) => entry.expedition?.missionName ?? entry.expedition?.typeLabel ?? "Expedition").slice(0, 6)
     : [];
 
   return {
@@ -568,7 +571,7 @@ function createTurnSummary(previousState, nextState, days, advanceResult = null)
       after: nextEmergencyCount
     },
     newEventTitles,
-    expeditionReturns
+    expeditionJourneys
   };
 }
 
@@ -1234,6 +1237,7 @@ function resetTransientUi() {
       inspectedBuildingId: null,
       catalogOpen: false,
       manifestCompleteModal: null,
+      expeditionJourneyOpen: false,
       turnSummaryModal: null,
       mapOverlay: "District",
       mapLegendOpen: true,
@@ -2163,18 +2167,83 @@ function forceReturnSoonestExpedition() {
     return;
   }
 
+  renderer.setTransientUi({ expeditionJourneyOpen: true, turnSummaryModal: null }, getCurrentState());
+  reportSuccess(`${result.expedition.missionName ?? result.expedition.typeLabel} returned and now awaits a journey debrief.`, "confirm");
+}
+
+function highlightResolvedExpeditionJourney(record) {
   const touchedResources = [
-    ...Object.entries(result.record?.rewards?.resources ?? {}).filter(([, amount]) => Number(amount) > 0).map(([resource]) => resource),
-    ...Object.entries(result.record?.rewards?.crystals ?? {}).filter(([, amount]) => Number(amount) > 0).map(([rarity]) => `${rarity} crystal`),
-    ...Object.entries(result.record?.rewards?.shards ?? {}).filter(([, amount]) => Number(amount) > 0).map(([rarity]) => `${rarity} shards`)
+    ...Object.entries(record?.rewards?.resources ?? {}).filter(([, amount]) => Number(amount) > 0).map(([resource]) => resource),
+    ...Object.entries(record?.rewards?.crystals ?? {}).filter(([, amount]) => Number(amount) > 0).map(([rarity]) => `${rarity} crystal`),
+    ...Object.entries(record?.rewards?.shards ?? {}).filter(([, amount]) => Number(amount) > 0).map(([rarity]) => `${rarity} shards`)
   ];
   if (touchedResources.length) {
     markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
   }
-  if (result.record?.rewards?.recruits && Object.keys(result.record.rewards.recruits).length) {
-    markRecentCitizenChanges(Object.keys(result.record.rewards.recruits));
+  const touchedCitizens = [
+    ...Object.keys(record?.rewards?.recruits ?? {}),
+    ...(record?.rewards?.uniqueCitizen?.className ? [record.rewards.uniqueCitizen.className] : [])
+  ];
+  if (touchedCitizens.length) {
+    markRecentCitizenChanges([...new Set(touchedCitizens)]);
   }
-  reportSuccess(`${result.expedition.missionName ?? result.expedition.typeLabel} was forced to return immediately.`, "confirm");
+}
+
+function openPendingExpeditionJourney() {
+  const currentJourney = getCurrentPendingExpeditionJourney(getCurrentState());
+  if (!currentJourney) {
+    renderer.setTransientUi({ expeditionJourneyOpen: false }, getCurrentState());
+    return false;
+  }
+  renderer.setTransientUi({ expeditionJourneyOpen: true, turnSummaryModal: null }, getCurrentState());
+  return true;
+}
+
+function resolveExpeditionJourneyOption(journeyId, optionId) {
+  const result = commit((draft) => resolveExpeditionJourneyChoice(draft, journeyId, optionId));
+  if (!result?.ok) {
+    reportError(result?.reason ?? "That expedition choice could not be resolved.");
+    return;
+  }
+
+  const nextState = getCurrentState();
+  if (result.completed) {
+    highlightResolvedExpeditionJourney(result.record);
+    renderer.setTransientUi({ expeditionJourneyOpen: hasPendingExpeditionJourneys(nextState) }, nextState);
+    reportSuccess(`${result.record.missionName ?? result.record.typeLabel} debrief resolved. Rewards granted.`, "confirm");
+    return;
+  }
+
+  renderer.setTransientUi({ expeditionJourneyOpen: true, turnSummaryModal: null }, nextState);
+  reportSuccess(`${result.stage?.chosenLabel ?? "Decision"} locked in for ${result.journey?.expedition?.missionName ?? "the expedition"}.`);
+}
+
+function advanceTimeWithJourneyGuard(runAdvance) {
+  if (hasPendingExpeditionJourneys(getCurrentState())) {
+    openPendingExpeditionJourney();
+    reportError("Resolve the pending expedition journey before advancing time again.");
+    return;
+  }
+
+  const previousState = structuredClone(getCurrentState());
+  const result = commit(runAdvance);
+  const nextState = getCurrentState();
+  const turnSummary = createTurnSummary(previousState, nextState, result.days, result);
+  markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
+
+  if (result?.expeditionJourneys?.length) {
+    renderer.setTransientUi({ expeditionJourneyOpen: true, turnSummaryModal: null }, nextState);
+    playTurnAdvanceEffect(previousState, nextState, turnSummary);
+    reportSuccess(
+      `Advanced ${result.days} days. ${result.expeditionJourneys.length} expedition debrief${result.expeditionJourneys.length === 1 ? "" : "s"} waiting.`,
+      "confirm"
+    );
+    return;
+  }
+
+  renderer.setTransientUi({ turnSummaryModal: turnSummary }, nextState);
+  playTurnAdvanceEffect(previousState, nextState, turnSummary);
+  reportSuccess(`Advanced ${result.days} days.`);
 }
 
 function manifestBuildingNow(buildingId) {
@@ -2864,42 +2933,21 @@ root.addEventListener("click", async (event) => {
       });
       break;
     case "advance-time": {
-      const previousState = structuredClone(getCurrentState());
-      const result = commit((draft) => advanceTime(draft, target.dataset.step));
-      const nextState = getCurrentState();
-      const turnSummary = createTurnSummary(previousState, nextState, result.days, result);
-      markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
-      renderer.setTransientUi({ turnSummaryModal: turnSummary }, nextState);
-      playTurnAdvanceEffect(previousState, nextState, turnSummary);
-      reportSuccess(`Advanced ${result.days} days.`);
+      advanceTimeWithJourneyGuard((draft) => advanceTime(draft, target.dataset.step));
       break;
     }
     case "advance-custom-time": {
       const panel = target.closest(".calendar-panel, .city-workspace, .city-admin-view, .panel");
       const input = panel?.querySelector('[data-role="custom-days"]') ?? root.querySelector('[data-role="custom-days"]');
       const days = Math.max(1, Math.floor(Number(input?.value) || 0));
-      const previousState = structuredClone(getCurrentState());
-      const result = commit((draft) => advanceTimeByDays(draft, days));
-      const nextState = getCurrentState();
-      const turnSummary = createTurnSummary(previousState, nextState, result.days, result);
-      markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
-      renderer.setTransientUi({ turnSummaryModal: turnSummary }, nextState);
-      playTurnAdvanceEffect(previousState, nextState, turnSummary);
-      reportSuccess(`Advanced ${result.days} days.`);
+      advanceTimeWithJourneyGuard((draft) => advanceTimeByDays(draft, days));
       break;
     }
     case "advance-selected-time": {
       const panel = target.closest(".calendar-panel, .city-workspace, .city-admin-view, .panel");
       const input = panel?.querySelector('[data-role="advance-days-preset"]') ?? root.querySelector('[data-role="advance-days-preset"]');
       const days = Math.max(1, Math.floor(Number(input?.value) || 0));
-      const previousState = structuredClone(getCurrentState());
-      const result = commit((draft) => advanceTimeByDays(draft, days));
-      const nextState = getCurrentState();
-      const turnSummary = createTurnSummary(previousState, nextState, result.days, result);
-      markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
-      renderer.setTransientUi({ turnSummaryModal: turnSummary }, nextState);
-      playTurnAdvanceEffect(previousState, nextState, turnSummary);
-      reportSuccess(`Advanced ${result.days} days.`);
+      advanceTimeWithJourneyGuard((draft) => advanceTimeByDays(draft, days));
       break;
     }
     case "select-building":
@@ -3101,6 +3149,18 @@ root.addEventListener("click", async (event) => {
       void audioEngine.playUiAccent("confirm");
       actions.launchExpedition();
       break;
+    case "open-expedition-journey":
+      void audioEngine.playUiAccent("soft");
+      openPendingExpeditionJourney();
+      break;
+    case "choose-expedition-journey-option":
+      void audioEngine.playUiAccent("confirm");
+      resolveExpeditionJourneyOption(target.dataset.journeyId, target.dataset.optionId);
+      break;
+    case "close-expedition-journey":
+      void audioEngine.playUiAccent("soft");
+      renderer.setTransientUi({ expeditionJourneyOpen: false }, getCurrentState());
+      break;
     case "refresh-expedition-board":
       void audioEngine.playUiAccent("soft");
       actions.refreshExpeditionBoard();
@@ -3227,6 +3287,8 @@ root.addEventListener("click", async (event) => {
         renderer.setTransientUi({ homeHelpOpen: false }, getCurrentState());
       } else if (target.dataset.modal === "town-focus-council-modal") {
         renderer.setTransientUi({ councilModalOpen: false }, getCurrentState());
+      } else if (target.dataset.modal === "expedition-journey-modal") {
+        renderer.setTransientUi({ expeditionJourneyOpen: false }, getCurrentState());
       }
       break;
     case "close-manifest-complete":

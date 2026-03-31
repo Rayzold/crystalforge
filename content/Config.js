@@ -7,7 +7,25 @@ import { CITIZEN_CLASSES } from "./CitizenConfig.js";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
-export const APP_VERSION = "v1.4.8";
+// APP_VERSION must stay monotonic because Firebase publish safety compares builds numerically.
+export const APP_VERSION = "v1.5.1";
+// Release maturity is tracked separately so unreleased builds do not need to pretend they are public/stable.
+export const APP_RELEASE_STAGE = "preview";
+const RELEASE_STAGE_LABELS = {
+  prototype: "Prototype",
+  preview: "Preview",
+  beta: "Beta",
+  stable: "Stable"
+};
+export const APP_RELEASE_STAGE_LABEL = RELEASE_STAGE_LABELS[APP_RELEASE_STAGE] ?? String(APP_RELEASE_STAGE);
+export const APP_DISPLAY_VERSION = APP_RELEASE_STAGE === "stable" ? APP_VERSION : `${APP_RELEASE_STAGE_LABEL} ${APP_VERSION}`;
+export const VERSIONING_RULES = [
+  "APP_VERSION is the forward-only sync/build number used by Firebase safety checks.",
+  "APP_RELEASE_STAGE says whether the app is prototype, preview, beta, or stable.",
+  "While the app is unreleased, keep the stage below stable even if the numeric build line is already 1.x.",
+  "Bump patch for fixes and polish, minor for meaningful feature drops, and major only for deliberate breakpoints or a true public-release era.",
+  "Do not reset the numeric build line back to 0.x unless the shared published-version checks are migrated on purpose."
+];
 export const SAVE_VERSION = 12;
 export const MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3";
 export const FIREBASE_CONFIG = {
@@ -39,6 +57,8 @@ export const PAGE_ROUTES = [
   { key: "help", label: "Help", href: "./help.html" }
 ];
 export const BUILD_NOTES = [
+  "Legend and Unique Citizen arrivals now draw from a broader, more mythic name pool, avoiding overly common first names and spreading rolls across the full curated set.",
+  "Expeditions now come back into staged journey debriefs before rewards are finalized, and the shared page chrome was tightened so heroes, panels, badges, and mobile stacks feel less oversized across the app.",
   "Every page now ships with a real Crystal Forge favicon, removing the misleading browser 404 noise for /favicon.ico while making the live build easier to recognize in tabs.",
   "The sidebar now calls the Unique Citizens page Legends, that screen drops the unnecessary resource strip, and its layout now reads more like a named-character roster.",
   "Expedition and vehicle stat tiles now stack labels and values correctly again, fixing collapsed text like RiskLow and ReturnDazzleday.",

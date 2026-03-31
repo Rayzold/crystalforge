@@ -9,6 +9,8 @@ import {
   createExpeditionLaunchPreview,
   getAvailableExpeditionCitizenCount,
   getAvailableVehicleCounts,
+  getCurrentPendingExpeditionJourney,
+  getExpeditionJourneyProjection,
   getExpeditionOverview
 } from "../systems/ExpeditionSystem.js";
 import { formatDate } from "../systems/CalendarSystem.js";
@@ -352,6 +354,59 @@ function renderRecentReturns(state) {
   `;
 }
 
+function renderPendingJourneyPanel(state) {
+  const pending = state.expeditions?.pending ?? [];
+  const currentJourney = getCurrentPendingExpeditionJourney(state);
+  if (!pending.length || !currentJourney) {
+    return "";
+  }
+
+  const projection = getExpeditionJourneyProjection(currentJourney);
+  const nextStage = currentJourney.stages?.[currentJourney.currentStageIndex] ?? null;
+  return `
+    <section class="panel expedition-pending-panel">
+      <div class="panel__header">
+        <div>
+          <h3>Journey Debriefs</h3>
+          <span class="panel__subtle">Returned expeditions now resolve their route one decision at a time before rewards are granted.</span>
+        </div>
+        <button class="button" type="button" data-action="open-expedition-journey">Open Debrief</button>
+      </div>
+      <div class="expedition-preview-grid">
+        <article><span>Waiting</span><strong>${formatNumber(pending.length, 0)}</strong></article>
+        <article><span>Current Route</span><strong>${escapeHtml(currentJourney.expedition.missionName ?? currentJourney.expedition.typeLabel)}</strong></article>
+        <article><span>Stage</span><strong>${formatNumber(Math.min(currentJourney.currentStageIndex + 1, currentJourney.stages.length), 0)} / ${formatNumber(currentJourney.stages.length, 0)}</strong></article>
+        <article><span>Projected Outcome</span><strong>${escapeHtml(projection.outcomeLabel)}</strong></article>
+      </div>
+      <p class="expedition-pending-panel__copy">
+        ${
+          nextStage
+            ? escapeHtml(`Next call: ${nextStage.title}. ${nextStage.prompt}`)
+            : escapeHtml("A returned crew is ready for final debrief decisions.")
+        }
+      </p>
+      <div class="expedition-return-list">
+        ${pending
+          .slice(0, 3)
+          .map((journey) => `
+            <article class="expedition-return-card">
+              <div class="expedition-return-card__head">
+                <strong>${escapeHtml(journey.expedition.missionName ?? journey.expedition.typeLabel)}</strong>
+                <span>${formatNumber(Math.min(journey.currentStageIndex + 1, journey.stages.length), 0)} / ${formatNumber(journey.stages.length, 0)}</span>
+              </div>
+              <p>${escapeHtml(journey.expedition.missionSummary ?? journey.expedition.notes ?? "Returned expedition awaiting debrief.")}</p>
+              <div class="expedition-return-card__meta">
+                <span>${escapeHtml(journey.returnDateLabel)}</span>
+                <span>${escapeHtml(journey.expedition.vehicleName)}</span>
+              </div>
+            </article>
+          `)
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
 function renderExpeditionSummary(state) {
   const overview = getExpeditionOverview(state);
   return `
@@ -363,6 +418,7 @@ function renderExpeditionSummary(state) {
       <div class="expedition-preview-grid">
         <article><span>Board</span><strong>${formatNumber(overview.boardMissions)}</strong></article>
         <article><span>Active</span><strong>${formatNumber(overview.activeExpeditions)}</strong></article>
+        <article><span>Debriefs</span><strong>${formatNumber(overview.pendingJourneys ?? 0, 0)}</strong></article>
         <article><span>Vehicles Free</span><strong>${formatNumber(overview.freeVehicles)} / ${formatNumber(overview.totalVehicles)}</strong></article>
         <article><span>Unique Progress</span><strong>${formatNumber(overview.uniqueProgress, 0)} / ${formatNumber(overview.nextUniqueThreshold, 0)}</strong></article>
         <article><span>Unique Citizens</span><strong>${formatNumber(overview.uniqueCitizens)}</strong></article>
@@ -374,6 +430,7 @@ function renderExpeditionSummary(state) {
             <li>Pick a mission card from the Mission Board.</li>
             <li>Each expedition needs exactly one free vehicle.</li>
             <li>Better vehicles shorten travel time by different amounts.</li>
+            <li>Returned expeditions open journey debriefs every 4 travel days, up to 5 stages.</li>
             <li>Long success fills the Unique Citizen meter.</li>
           </ul>
         </article>
@@ -414,9 +471,10 @@ export function renderExpeditionsPage(state) {
 
   return {
     title: "Expeditions",
-    subtitle: "Send crews beyond the Drift to gather recruits, resources, crystals, and legends.",
+    subtitle: "Send crews beyond the Drift, then debrief their trip stage by stage before the final haul is settled.",
     content: `
       ${renderExpeditionSummary(state)}
+      ${renderPendingJourneyPanel(state)}
       <section class="panel expedition-launch-panel">
         <div class="panel__header">
           <h3>Mission Board</h3>

@@ -13,7 +13,7 @@ import { applyTownFocusDailyEffects, updateTownFocusAvailability } from "./TownF
 function runTimeAdvance(state, days, stepKey = null) {
   const completions = [];
   const triggeredEvents = [];
-  const expeditionReturns = [];
+  const expeditionJourneys = [];
 
   for (let index = 0; index < days; index += 1) {
     const previousDayOffset = state.calendar.dayOffset;
@@ -30,7 +30,7 @@ function runTimeAdvance(state, days, stepKey = null) {
     }
 
     expireEvents(state);
-    expeditionReturns.push(...advanceExpeditionsOneDay(state));
+    expeditionJourneys.push(...advanceExpeditionsOneDay(state));
     const completedToday = advanceConstructionOneDay(state, currentDate, state.calendar.dayOffset);
     completions.push(...completedToday);
     for (const building of completedToday) {
@@ -60,7 +60,7 @@ function runTimeAdvance(state, days, stepKey = null) {
     });
   }
 
-  return { days, completions, triggeredEvents, expeditionReturns };
+  return { days, completions, triggeredEvents, expeditionJourneys };
 }
 
 export function advanceTime(state, stepKey) {

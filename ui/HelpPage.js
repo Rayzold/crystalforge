@@ -3,7 +3,7 @@ import {
   BUILDING_IMAGE_FILENAME_SAMPLES,
   BUILDING_IMAGE_LOOKUP_EXTENSIONS
 } from "../content/BuildingImageFilenameGuide.js";
-import { APP_VERSION, BUILD_NOTES } from "../content/Config.js";
+import { APP_DISPLAY_VERSION, BUILD_NOTES, VERSIONING_RULES } from "../content/Config.js";
 import { GLOSSARY_TERMS } from "../content/GlossaryConfig.js";
 import { escapeHtml } from "../engine/Utils.js";
 import { getManualSaveMeta } from "../systems/StorageSystem.js";
@@ -128,7 +128,12 @@ function renderStartHereSection(state) {
         </article>
         <article class="help-page__callout">
           <h4>Build Notes</h4>
-          <p class="help-page__guide-link">Current build: <strong>${escapeHtml(APP_VERSION)}</strong></p>
+          <p class="help-page__guide-link">Current build: <strong>${escapeHtml(APP_DISPLAY_VERSION)}</strong></p>
+          <p class="help-page__guide-link">Versioning policy lives in the config now:</p>
+          <ul class="build-notes-panel__list">
+            ${VERSIONING_RULES.map((rule) => `<li>${escapeHtml(rule)}</li>`).join("")}
+          </ul>
+          <p class="help-page__guide-link">Recent release notes:</p>
           <ul class="build-notes-panel__list">
             ${BUILD_NOTES.map((note) => `<li>${escapeHtml(note)}</li>`).join("")}
           </ul>

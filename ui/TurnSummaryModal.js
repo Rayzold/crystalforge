@@ -62,9 +62,9 @@ export function renderTurnSummaryModal(state) {
                 <small>${escapeHtml(summary.newEventTitles.length ? summary.newEventTitles.join(", ") : "No new event records this turn.")}</small>
               </article>
               <article>
-                <span>Expeditions Returned</span>
-                <strong>${formatNumber(summary.expeditionReturns?.length ?? 0, 0)}</strong>
-                <small>${escapeHtml(summary.expeditionReturns?.length ? summary.expeditionReturns.join(", ") : "No expedition returns this turn.")}</small>
+                <span>Journey Debriefs</span>
+                <strong>${formatNumber(summary.expeditionJourneys?.length ?? 0, 0)}</strong>
+                <small>${escapeHtml(summary.expeditionJourneys?.length ? summary.expeditionJourneys.join(", ") : "No expedition debriefs opened this turn.")}</small>
               </article>
             </div>
           </section>

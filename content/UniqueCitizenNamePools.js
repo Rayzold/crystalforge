@@ -1,22 +1,22 @@
 // Unique citizens draw from a curated pool of 300 fantasy-oriented full names.
 // The given/family pieces stay editable so more names can be generated later.
 export const UNIQUE_CITIZEN_GIVEN_NAMES = [
-  "Aelric","Aelwen","Aerin","Aldren","Althaea","Alric","Amarys","Anwyn","Aric","Arianne",
-  "Arlen","Armina","Arthen","Aster","Aveline","Bastian","Belthar","Brenna","Brennor","Briseis",
+  "Aelric","Aelwen","Aerin","Aldren","Althaea","Alric","Amarys","Anwyn","Arctheris","Arianne",
+  "Arlen","Armina","Arthen","Aster","Aveline","Bastivar","Belthar","Brenna","Brennor","Briseis",
   "Brynden","Caelan","Caelric","Caelys","Calista","Cassian","Cedren","Cerys","Corwin","Cyrene",
-  "Daelor","Dain","Damaris","Delphine","Dorian","Draeven","Edrin","Eirwen","Elaria","Elowen",
-  "Emrys","Endric","Eryndor","Evania","Evander","Faelan","Faelynn","Fenric","Fenra","Fintan",
-  "Fiora","Galen","Garrick","Gavriel","Gwyneira","Halric","Heliora","Heron","Hestia","Idris",
-  "Ilyra","Iseult","Isolde","Ivor","Jareth","Jessamine","Jorren","Jorvik","Kael","Kaelen",
-  "Kaelora","Kaida","Kellan","Kerensa","Kestrel","Korren","Leander","Leoric","Liora","Lirael",
-  "Lorcan","Lucan","Lucien","Luneth","Lysandra","Lysandor","Maelis","Mairen","Malric","Marrok",
+  "Daelor","Dain","Damaris","Delphara","Dorevyr","Draeven","Edrin","Eirwen","Elaria","Elowen",
+  "Emrys","Endric","Eryndor","Evania","Evendros","Faelan","Faelynn","Fenric","Fenra","Fintan",
+  "Fiora","Galivor","Garrivar","Gavriel","Gwyneira","Halric","Heliora","Herovar","Hestrel","Idravel",
+  "Ilyra","Iseult","Isolde","Ivaris","Jareth","Jessara","Jorren","Jorvik","Kael","Kaelen",
+  "Kaelora","Kaivra","Kellan","Kerensa","Kestrel","Korren","Leandor","Leoric","Liora","Lirael",
+  "Lorcan","Luceryn","Lucivar","Luneth","Lysandra","Lysandor","Maelis","Mairen","Malric","Marrok",
   "Mavric","Melian","Meridia","Mireth","Mirelle","Morwen","Myrren","Naevys","Nerisse","Nerys",
-  "Nuala","Nymera","Nyra","Nyssara","Oberon","Odran","Oren","Oriana","Orik","Orlian",
-  "Osric","Paloma","Percival","Phaedra","Quenara","Quillan","Quorin","Raelor","Rhiannon","Riven",
-  "Roderic","Ronan","Roswyn","Rowen","Sable","Selene","Selvara","Seraphine","Siora","Sorrel",
-  "Sorin","Sylra","Sylvara","Taliah","Tarian","Tavian","Thalen","Thamira","Theron","Thessa",
+  "Nuala","Nymera","Nyra","Nyssara","Obreth","Odran","Oryndar","Oriava","Orik","Orlian",
+  "Osric","Palyra","Perivane","Phaedra","Quenara","Quillan","Quorin","Raelor","Rhivara","Riven",
+  "Roderic","Ronovar","Roswyn","Rovaine","Sable","Selenyx","Selvara","Seravelle","Siora","Sorevyn",
+  "Sorin","Sylra","Sylvara","Taliah","Tarian","Tavian","Thalen","Thamira","Theravar","Thessa",
   "Torin","Torven","Trystan","Ulric","Uthric","Vaelin","Vaessa","Valessa","Varen","Vespera",
-  "Veyla","Vireya","Wren","Wystan","Xavian","Xyra","Yara","Ysolde","Ysella","Zephyra"
+  "Veyla","Vireya","Wyren","Wystan","Xavian","Xyra","Yariveth","Ysolde","Ysella","Zephyra"
 ];
 
 export const UNIQUE_CITIZEN_FAMILY_NAMES = [
@@ -36,15 +36,38 @@ export const UNIQUE_CITIZEN_FAMILY_NAMES = [
   "Flamebriar","Mistward","Wolfmere","Silvershade","Hollowthorn","Firemere","Violetvale","Brightfen","Dawnweave","Stormhollow"
 ];
 
+function greatestCommonDivisor(left, right) {
+  let a = Math.abs(left);
+  let b = Math.abs(right);
+  while (b !== 0) {
+    const next = a % b;
+    a = b;
+    b = next;
+  }
+  return a;
+}
+
 export const UNIQUE_CITIZEN_FULL_NAMES = (() => {
   const names = [];
-  for (const givenName of UNIQUE_CITIZEN_GIVEN_NAMES) {
-    for (const familyName of UNIQUE_CITIZEN_FAMILY_NAMES) {
-      names.push(`${givenName} ${familyName}`);
-      if (names.length >= 300) {
-        return names;
-      }
-    }
+  const givenCount = UNIQUE_CITIZEN_GIVEN_NAMES.length;
+  const familyCount = UNIQUE_CITIZEN_FAMILY_NAMES.length;
+  const totalCombinations = givenCount * familyCount;
+  const targetCount = Math.min(300, totalCombinations);
+  if (!targetCount) {
+    return names;
+  }
+
+  const startIndex = 37 % totalCombinations;
+  let step = Math.max(7, Math.floor(totalCombinations / targetCount) + 1);
+  while (greatestCommonDivisor(step, totalCombinations) !== 1) {
+    step += 1;
+  }
+
+  for (let index = 0; index < targetCount; index += 1) {
+    const flatIndex = (startIndex + index * step) % totalCombinations;
+    const givenIndex = Math.floor(flatIndex / familyCount);
+    const familyIndex = flatIndex % familyCount;
+    names.push(`${UNIQUE_CITIZEN_GIVEN_NAMES[givenIndex]} ${UNIQUE_CITIZEN_FAMILY_NAMES[familyIndex]}`);
   }
   return names;
 })();

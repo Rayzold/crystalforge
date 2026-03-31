@@ -29,6 +29,8 @@ const EXPEDITION_RESOURCE_REWARD_KEYS = ["gold", "food", "materials", "salvage",
 const DEFAULT_UNIQUE_THRESHOLD = 120;
 const MAX_RECENT_RETURNS = 10;
 const EXPEDITION_BOARD_REFRESH_DAYS = 7;
+const JOURNEY_STAGE_DAY_SPAN = 4;
+const MAX_JOURNEY_STAGES = 5;
 const LEGACY_VEHICLE_ID_MAP = {
   caravanWagon: "siegeBuggy",
   surveyWalker: "trailBuggy",
@@ -62,6 +64,10 @@ const TYPE_RESOURCE_PALETTES = {
 const UNIQUE_STATUS_LABELS = {
   inCity: "In City"
 };
+
+const ARCANE_JOURNEY_TYPES = new Set(["crystalHunt", "pilgrimage"]);
+const SALVAGE_JOURNEY_TYPES = new Set(["resourceRun", "relicRecovery", "monsterHunt"]);
+const SOCIAL_JOURNEY_TYPES = new Set(["rescue", "recruit", "diplomatic"]);
 
 function createEmptyResourceRecord() {
   return { gold: 0, food: 0, materials: 0, salvage: 0, mana: 0, prosperity: 0 };
@@ -110,10 +116,99 @@ export function createDefaultExpeditionState() {
   return {
     board: [],
     active: [],
+    pending: [],
     recent: [],
     lastRefreshDayOffset: null,
     uniqueProgress: 0,
     nextUniqueThreshold: DEFAULT_UNIQUE_THRESHOLD
+  };
+}
+
+function normalizeJourneyEffects(effects = {}) {
+  return {
+    successDelta: Number(effects?.successDelta ?? 0) || 0,
+    rewardMultiplier: Math.max(0.5, Number(effects?.rewardMultiplier ?? 1) || 1),
+    recruitMultiplier: Math.max(0.5, Number(effects?.recruitMultiplier ?? 1) || 1),
+    uniquePercentBonus: Number(effects?.uniquePercentBonus ?? 0) || 0,
+    resourceBonuses: { ...createEmptyResourceRecord(), ...(effects?.resourceBonuses ?? {}) },
+    crystalBonuses: { ...createEmptyCrystalRecord(), ...(effects?.crystalBonuses ?? {}) },
+    shardBonuses: { ...createEmptyCrystalRecord(), ...(effects?.shardBonuses ?? {}) },
+    modifier: String(effects?.modifier ?? "").trim(),
+    result: String(effects?.result ?? "").trim()
+  };
+}
+
+function normalizeJourneyOption(option = {}) {
+  return {
+    id: String(option?.id ?? createId("journey-option")),
+    label: String(option?.label ?? "Choice").trim() || "Choice",
+    summary: String(option?.summary ?? "").trim(),
+    effects: normalizeJourneyEffects(option?.effects)
+  };
+}
+
+function normalizeActiveExpedition(entry = {}) {
+  const vehicleId = normalizeVehicleId(entry.vehicleId ?? VEHICLE_ORDER[0]);
+  return {
+    id: String(entry.id ?? createId("expedition")),
+    typeId: entry.typeId ?? "resourceRun",
+    typeLabel: entry.typeLabel ?? EXPEDITION_TYPES[entry.typeId]?.label ?? "Expedition",
+    missionId: entry.missionId ?? null,
+    missionName: entry.missionName ?? entry.typeLabel ?? EXPEDITION_TYPES[entry.typeId]?.label ?? "Expedition",
+    missionSummary: entry.missionSummary ?? "",
+    missionRisk: MISSION_RISK_SETTINGS[entry.missionRisk] ? entry.missionRisk : "Medium",
+    missionDistance: MISSION_DISTANCE_SETTINGS[entry.missionDistance] ? entry.missionDistance : "Mid",
+    missionIsSpecial: entry.missionIsSpecial === true,
+    vehicleId,
+    vehicleName: VEHICLE_DEFINITIONS[vehicleId]?.name ?? entry.vehicleName ?? "Vehicle",
+    approachId: entry.approachId ?? "balanced",
+    durationDaysBase: Math.max(1, Number(entry.durationDaysBase ?? entry.durationDays ?? 7) || 7),
+    durationDays: Math.max(1, Number(entry.durationDays ?? 7) || 7),
+    departedDayOffset: Number(entry.departedDayOffset ?? 0) || 0,
+    departedAt: String(entry.departedAt ?? formatDate(Number(entry.departedDayOffset ?? 0) || 0)),
+    expectedReturnDayOffset: Number(entry.expectedReturnDayOffset ?? 0) || 0,
+    expectedReturnAt: String(entry.expectedReturnAt ?? formatDate(Number(entry.expectedReturnDayOffset ?? 0) || 0)),
+    committedResources: Object.fromEntries(
+      RESOURCE_KEYS.map((resource) => [resource, Math.max(0, Number(entry.committedResources?.[resource] ?? 0) || 0)])
+    ),
+    team: structuredClone(entry.team ?? {}),
+    powerScore: Number(entry.powerScore ?? 0) || 0,
+    difficultyScore: Number(entry.difficultyScore ?? 0) || 0,
+    successScore: Number(entry.successScore ?? 0) || 0,
+    rewardPercent: Number(entry.rewardPercent ?? 0) || 0,
+    uniquePercent: Number(entry.uniquePercent ?? 0) || 0,
+    buildingSynergySummary: Array.isArray(entry.buildingSynergySummary) ? [...entry.buildingSynergySummary] : [],
+    delayCount: Math.max(0, Number(entry.delayCount ?? 0) || 0),
+    notes: String(entry.notes ?? "")
+  };
+}
+
+function normalizePendingJourneyStage(stage = {}, index = 0) {
+  const options = Array.isArray(stage?.options) ? stage.options.map((entry) => normalizeJourneyOption(entry)) : [];
+  return {
+    id: String(stage?.id ?? createId("journey-stage")),
+    index: Math.max(0, Number(stage?.index ?? index) || index),
+    dayMarker: Math.max(1, Number(stage?.dayMarker ?? (index + 1) * JOURNEY_STAGE_DAY_SPAN) || (index + 1) * JOURNEY_STAGE_DAY_SPAN),
+    kind: String(stage?.kind ?? "journey").trim() || "journey",
+    title: String(stage?.title ?? "Journey Stage").trim() || "Journey Stage",
+    prompt: String(stage?.prompt ?? "").trim(),
+    options,
+    chosenOptionId: stage?.chosenOptionId ? String(stage.chosenOptionId) : null,
+    chosenLabel: stage?.chosenLabel ? String(stage.chosenLabel) : null,
+    chosenSummary: stage?.chosenSummary ? String(stage.chosenSummary) : null
+  };
+}
+
+function normalizePendingJourney(entry = {}) {
+  const stages = Array.isArray(entry?.stages) ? entry.stages.map((stage, index) => normalizePendingJourneyStage(stage, index)) : [];
+  return {
+    id: String(entry?.id ?? createId("expedition-journey")),
+    expedition: normalizeActiveExpedition(entry?.expedition ?? {}),
+    returnDayOffset: Number(entry?.returnDayOffset ?? 0) || 0,
+    returnDateLabel: String(entry?.returnDateLabel ?? formatDate(Number(entry?.returnDayOffset ?? 0) || 0)),
+    travelDays: Math.max(1, Number(entry?.travelDays ?? 1) || 1),
+    currentStageIndex: Math.max(0, Math.min(stages.length, Number(entry?.currentStageIndex ?? 0) || 0)),
+    stages
   };
 }
 
@@ -188,40 +283,11 @@ export function normalizeExpeditionState(sourceState) {
     active: Array.isArray(sourceState?.active)
       ? sourceState.active
           .filter((entry) => entry && typeof entry === "object")
-          .map((entry) => {
-            const vehicleId = normalizeVehicleId(entry.vehicleId ?? VEHICLE_ORDER[0]);
-            return {
-              id: String(entry.id ?? createId("expedition")),
-              typeId: entry.typeId ?? "resourceRun",
-              typeLabel: entry.typeLabel ?? EXPEDITION_TYPES[entry.typeId]?.label ?? "Expedition",
-              missionId: entry.missionId ?? null,
-              missionName: entry.missionName ?? entry.typeLabel ?? EXPEDITION_TYPES[entry.typeId]?.label ?? "Expedition",
-              missionSummary: entry.missionSummary ?? "",
-              missionRisk: MISSION_RISK_SETTINGS[entry.missionRisk] ? entry.missionRisk : "Medium",
-              missionDistance: MISSION_DISTANCE_SETTINGS[entry.missionDistance] ? entry.missionDistance : "Mid",
-              missionIsSpecial: entry.missionIsSpecial === true,
-              vehicleId,
-              vehicleName: VEHICLE_DEFINITIONS[vehicleId]?.name ?? entry.vehicleName ?? "Vehicle",
-              approachId: entry.approachId ?? "balanced",
-              durationDaysBase: Math.max(1, Number(entry.durationDaysBase ?? entry.durationDays ?? 7) || 7),
-              durationDays: Math.max(1, Number(entry.durationDays ?? 7) || 7),
-              departedDayOffset: Number(entry.departedDayOffset ?? 0) || 0,
-              departedAt: String(entry.departedAt ?? formatDate(Number(entry.departedDayOffset ?? 0) || 0)),
-              expectedReturnDayOffset: Number(entry.expectedReturnDayOffset ?? 0) || 0,
-              expectedReturnAt: String(entry.expectedReturnAt ?? formatDate(Number(entry.expectedReturnDayOffset ?? 0) || 0)),
-              committedResources: Object.fromEntries(
-                RESOURCE_KEYS.map((resource) => [resource, Math.max(0, Number(entry.committedResources?.[resource] ?? 0) || 0)])
-              ),
-              team: structuredClone(entry.team ?? {}),
-              powerScore: Number(entry.powerScore ?? 0) || 0,
-              difficultyScore: Number(entry.difficultyScore ?? 0) || 0,
-              successScore: Number(entry.successScore ?? 0) || 0,
-              buildingSynergySummary: Array.isArray(entry.buildingSynergySummary) ? [...entry.buildingSynergySummary] : [],
-              delayCount: Math.max(0, Number(entry.delayCount ?? 0) || 0),
-              notes: String(entry.notes ?? "")
-            };
-          })
+          .map((entry) => normalizeActiveExpedition(entry))
       : base.active,
+    pending: Array.isArray(sourceState?.pending)
+      ? sourceState.pending.filter((entry) => entry && typeof entry === "object").map((entry) => normalizePendingJourney(entry))
+      : base.pending,
     recent: Array.isArray(sourceState?.recent)
       ? sourceState.recent.map((entry) => createExpeditionRecentRecord(entry)).slice(0, MAX_RECENT_RETURNS)
       : base.recent,
@@ -636,7 +702,7 @@ function computeExpeditionDifficultyScore(expeditionType, mission, approach, veh
   );
 }
 
-function rollOutcomeLabel(successScore) {
+export function getExpeditionOutcomeLabel(successScore) {
   if (successScore >= 1.35) {
     return "Strong Return";
   }
@@ -844,24 +910,36 @@ function applyExpeditionOutcomeModifiers(expedition, rewards) {
   return modifiers;
 }
 
-function buildExpeditionRewards(state, expedition) {
+function buildExpeditionRewards(state, expedition, journeyProjection = null) {
   const expeditionType = getExpeditionType(expedition.typeId);
   const missionRisk = getMissionRiskSettings(expedition.missionRisk);
   const qualityNoise = 0.88 + Math.random() * 0.3;
   const rewardSynergy = 1 + (Number(expedition.rewardPercent ?? 0) || 0) / 100;
-  const rewardScore = Math.max(0.75, expedition.successScore * qualityNoise * 4 * missionRisk.reward * rewardSynergy);
+  const rewardScore = Math.max(
+    0.75,
+    expedition.successScore *
+      qualityNoise *
+      4 *
+      missionRisk.reward *
+      rewardSynergy *
+      (Number(journeyProjection?.rewardMultiplier ?? 1) || 1)
+  );
   const citizenRewardScore = rewardScore * (Number(expeditionType.rewardFocus?.citizens ?? 0) || 0);
   const resourceRewardScore = rewardScore * (Number(expeditionType.rewardFocus?.resources ?? 0) || 0);
   const crystalRewardScore = rewardScore * (Number(expeditionType.rewardFocus?.crystals ?? 0) || 0);
   const recruits = buildRecruitRewards(expeditionType, citizenRewardScore);
   const resources = buildResourceRewards(expeditionType, resourceRewardScore);
   const crystalRewards = buildCrystalRewards(expeditionType, crystalRewardScore);
+  scaleRecruitBundles(recruits, Number(journeyProjection?.recruitMultiplier ?? 1) || 1);
+  addResourceBonuses(resources, journeyProjection?.resourceBonuses);
+  addCrystalBonuses(crystalRewards.crystals, journeyProjection?.crystalBonuses);
+  addCrystalBonuses(crystalRewards.shards, journeyProjection?.shardBonuses);
 
   state.expeditions.uniqueProgress += Math.round(
     rewardScore *
       (Number(expeditionType.uniqueWeight ?? 1) || 1) *
       missionRisk.unique *
-      (1 + (Number(expedition.uniquePercent ?? 0) || 0) / 100)
+      (1 + (Number(journeyProjection?.uniquePercent ?? expedition.uniquePercent ?? 0) || 0) / 100)
   );
 
   let uniqueCitizen = null;
@@ -876,6 +954,10 @@ function buildExpeditionRewards(state, expedition) {
     recruits,
     ...crystalRewards
   });
+
+  if (journeyProjection?.modifiers?.length) {
+    modifiers.unshift(...journeyProjection.modifiers);
+  }
 
   return {
     resources,
@@ -902,11 +984,597 @@ function addTeamBackToCity(state, team) {
   }
 }
 
-function resolveExpeditionReturn(state, expedition, returnDayOffset = state.calendar.dayOffset) {
+function addResourceBonuses(target, source) {
+  for (const key of EXPEDITION_RESOURCE_REWARD_KEYS) {
+    target[key] = (Number(target[key]) || 0) + (Number(source?.[key] ?? 0) || 0);
+  }
+}
+
+function addCrystalBonuses(target, source) {
+  for (const rarity of RARITY_ORDER) {
+    target[rarity] = (Number(target[rarity]) || 0) + (Number(source?.[rarity] ?? 0) || 0);
+  }
+}
+
+function createJourneyOption({ id, label, summary, effects = {} }) {
+  return normalizeJourneyOption({
+    id,
+    label,
+    summary,
+    effects
+  });
+}
+
+function getJourneyTravelDays(expedition, returnDayOffset) {
+  return Math.max(1, Number(returnDayOffset ?? expedition.expectedReturnDayOffset ?? 0) - Number(expedition.departedDayOffset ?? 0));
+}
+
+function createJourneyBonusBundle(expedition, bundleKey) {
+  const resourceBonuses = createEmptyResourceRecord();
+  const crystalBonuses = createEmptyCrystalRecord();
+  const shardBonuses = createEmptyCrystalRecord();
+  let recruitMultiplier = 1;
+  let uniquePercentBonus = 0;
+
+  switch (bundleKey) {
+    case "supplies":
+      if (SALVAGE_JOURNEY_TYPES.has(expedition.typeId)) {
+        resourceBonuses.food += 4;
+        resourceBonuses.materials += 4;
+        resourceBonuses.salvage += 3;
+      } else if (SOCIAL_JOURNEY_TYPES.has(expedition.typeId)) {
+        resourceBonuses.food += 3;
+        resourceBonuses.gold += 4;
+        resourceBonuses.prosperity += 2;
+      } else {
+        resourceBonuses.food += 2;
+        resourceBonuses.mana += 3;
+        resourceBonuses.salvage += 2;
+      }
+      break;
+    case "discovery":
+      if (ARCANE_JOURNEY_TYPES.has(expedition.typeId)) {
+        resourceBonuses.mana += 5;
+        shardBonuses.Common += 10;
+        shardBonuses.Uncommon += 3;
+        uniquePercentBonus += 8;
+      } else if (SOCIAL_JOURNEY_TYPES.has(expedition.typeId)) {
+        resourceBonuses.gold += 5;
+        resourceBonuses.prosperity += 4;
+        recruitMultiplier += 0.06;
+        uniquePercentBonus += 4;
+      } else {
+        resourceBonuses.salvage += 6;
+        resourceBonuses.materials += 4;
+        uniquePercentBonus += 4;
+      }
+      break;
+    case "excavation":
+      if (ARCANE_JOURNEY_TYPES.has(expedition.typeId)) {
+        resourceBonuses.mana += 4;
+        shardBonuses.Common += 12;
+        shardBonuses.Uncommon += 4;
+        if (expedition.typeId === "crystalHunt") {
+          crystalBonuses.Common += 1;
+        }
+        uniquePercentBonus += 6;
+      } else if (SOCIAL_JOURNEY_TYPES.has(expedition.typeId)) {
+        resourceBonuses.gold += 4;
+        resourceBonuses.materials += 3;
+        recruitMultiplier += 0.08;
+      } else {
+        resourceBonuses.salvage += 8;
+        resourceBonuses.materials += 6;
+        shardBonuses.Common += 5;
+      }
+      break;
+    case "contact":
+      if (expedition.typeId === "diplomatic") {
+        resourceBonuses.gold += 10;
+        resourceBonuses.prosperity += 6;
+        recruitMultiplier += 0.1;
+      } else if (["rescue", "recruit"].includes(expedition.typeId)) {
+        resourceBonuses.food += 3;
+        resourceBonuses.prosperity += 4;
+        recruitMultiplier += 0.14;
+      } else if (expedition.typeId === "pilgrimage") {
+        resourceBonuses.mana += 4;
+        resourceBonuses.prosperity += 4;
+        recruitMultiplier += 0.08;
+      } else {
+        resourceBonuses.gold += 4;
+        resourceBonuses.food += 2;
+        recruitMultiplier += 0.05;
+      }
+      break;
+    case "combat":
+      if (["monsterHunt", "rescue"].includes(expedition.typeId)) {
+        resourceBonuses.salvage += 6;
+        resourceBonuses.food += 2;
+        resourceBonuses.materials += 3;
+      } else if (ARCANE_JOURNEY_TYPES.has(expedition.typeId)) {
+        resourceBonuses.mana += 3;
+        resourceBonuses.salvage += 4;
+        shardBonuses.Common += 5;
+      } else {
+        resourceBonuses.salvage += 5;
+        resourceBonuses.materials += 4;
+        resourceBonuses.gold += 2;
+      }
+      break;
+    default:
+      break;
+  }
+
+  return {
+    resourceBonuses,
+    crystalBonuses,
+    shardBonuses,
+    recruitMultiplier,
+    uniquePercentBonus
+  };
+}
+
+function buildSupplyJourneyStage(expedition, index, dayMarker) {
+  return {
+    id: createId("journey-stage"),
+    index,
+    dayMarker,
+    kind: "supply",
+    title: "Supply Strain",
+    prompt: `By day ${dayMarker}, the crew aboard the ${expedition.vehicleName} is burning through stores faster than planned and needs to decide how to steady the route.`,
+    options: [
+      createJourneyOption({
+        id: "salvage-stores",
+        label: "Salvage the Route",
+        summary: "Strip nearby ruins and camps for fresh stores. Higher haul, rougher passage.",
+        effects: {
+          ...createJourneyBonusBundle(expedition, "supplies"),
+          successDelta: -0.04,
+          rewardMultiplier: 1.04,
+          modifier: "Route salvage",
+          result: "salvaged the road itself to keep the mission moving"
+        }
+      }),
+      createJourneyOption({
+        id: "ration-carefully",
+        label: "Ration Carefully",
+        summary: "Protect the crew and secure the return, but expect a lighter haul.",
+        effects: {
+          successDelta: 0.08,
+          rewardMultiplier: 0.9,
+          modifier: "Tight rationing",
+          result: "cut the route down to the essentials and protected the crew"
+        }
+      }),
+      createJourneyOption({
+        id: "push-with-reserves",
+        label: "Push With Reserves",
+        summary: "Maintain pace and pressure. Faster haul, shakier footing.",
+        effects: {
+          successDelta: -0.08,
+          rewardMultiplier: 1.07,
+          modifier: "Hidden reserves spent",
+          result: "burned reserve packs to keep the expedition aggressive"
+        }
+      })
+    ]
+  };
+}
+
+function buildSignalJourneyStage(expedition, index, dayMarker) {
+  return {
+    id: createId("journey-stage"),
+    index,
+    dayMarker,
+    kind: "signal",
+    title: ARCANE_JOURNEY_TYPES.has(expedition.typeId) ? "Strange Echo" : "Unmarked Landmark",
+    prompt: `Near day ${dayMarker}, ${expedition.missionName} passes a strange pull off the main route. The crew can lean into it, survey it, or leave it untouched.`,
+    options: [
+      createJourneyOption({
+        id: "approach-signal",
+        label: "Approach It",
+        summary: "Investigate the oddity directly for rare insight or hidden gain.",
+        effects: {
+          ...createJourneyBonusBundle(expedition, "discovery"),
+          successDelta: -0.07,
+          rewardMultiplier: 1.06,
+          modifier: "Strange detour",
+          result: "leaned into the unknown instead of staying on the safe line"
+        }
+      }),
+      createJourneyOption({
+        id: "survey-signal",
+        label: "Survey From Range",
+        summary: "Take a measured read without fully committing.",
+        effects: {
+          ...createJourneyBonusBundle(expedition, "discovery"),
+          successDelta: 0.03,
+          rewardMultiplier: 0.98,
+          recruitMultiplier: 1,
+          modifier: "Measured survey",
+          result: "surveyed the anomaly carefully before moving on"
+        }
+      }),
+      createJourneyOption({
+        id: "avoid-signal",
+        label: "Avoid It",
+        summary: "Keep the crew safe and maintain discipline, even if it costs opportunities.",
+        effects: {
+          successDelta: 0.08,
+          rewardMultiplier: 0.92,
+          modifier: "Skipped anomaly",
+          result: "gave the strange place a wide berth and stayed disciplined"
+        }
+      })
+    ]
+  };
+}
+
+function buildExcavationJourneyStage(expedition, index, dayMarker) {
+  return {
+    id: createId("journey-stage"),
+    index,
+    dayMarker,
+    kind: "excavation",
+    title: SALVAGE_JOURNEY_TYPES.has(expedition.typeId) ? "Promising Cache" : "Buried Site",
+    prompt: `By day ${dayMarker}, the crew finds a place worth digging into. Time spent here could change the whole return.`,
+    options: [
+      createJourneyOption({
+        id: "dig-deep",
+        label: "Dig Properly",
+        summary: "Commit labor and time for the biggest possible payoff.",
+        effects: {
+          ...createJourneyBonusBundle(expedition, "excavation"),
+          successDelta: -0.06,
+          rewardMultiplier: 1.09,
+          modifier: "Deep excavation",
+          result: "stayed long enough to pry the best pieces out of the site"
+        }
+      }),
+      createJourneyOption({
+        id: "take-surface",
+        label: "Take Surface Finds",
+        summary: "Grab the obvious value and avoid getting bogged down.",
+        effects: {
+          ...createJourneyBonusBundle(expedition, "discovery"),
+          successDelta: 0,
+          rewardMultiplier: 1.02,
+          modifier: "Surface salvage",
+          result: "took what was easy to lift and kept the route alive"
+        }
+      }),
+      createJourneyOption({
+        id: "mark-and-move",
+        label: "Mark It And Move",
+        summary: "Leave the deeper prize for another day and preserve the mission.",
+        effects: {
+          successDelta: 0.05,
+          rewardMultiplier: 0.94,
+          modifier: "Skipped dig",
+          result: "marked the site for later and kept the expedition intact"
+        }
+      })
+    ]
+  };
+}
+
+function buildEncounterJourneyStage(expedition, index, dayMarker) {
+  return {
+    id: createId("journey-stage"),
+    index,
+    dayMarker,
+    kind: "encounter",
+    title: expedition.typeId === "monsterHunt" ? "Enemy Contact" : "Threat On The Route",
+    prompt: `Around day ${dayMarker}, the crew meets resistance that can be fought, outplayed, or avoided entirely.`,
+    options: [
+      createJourneyOption({
+        id: "fight-through",
+        label: "Fight Through",
+        summary: "Press the threat head-on for a stronger haul at higher risk.",
+        effects: {
+          ...createJourneyBonusBundle(expedition, "combat"),
+          successDelta: -0.1,
+          rewardMultiplier: 1.12,
+          modifier: "Direct engagement",
+          result: "fought through the pressure instead of conceding the route"
+        }
+      }),
+      createJourneyOption({
+        id: "set-ambush",
+        label: "Outplay Them",
+        summary: "Use scouting and positioning to keep initiative without a full clash.",
+        effects: {
+          ...createJourneyBonusBundle(expedition, "combat"),
+          successDelta: 0.02,
+          rewardMultiplier: 1.03,
+          modifier: "Tactical contact",
+          result: "used positioning and traps to win without a full grind"
+        }
+      }),
+      createJourneyOption({
+        id: "avoid-conflict",
+        label: "Avoid Conflict",
+        summary: "Keep the crew safe and preserve the return, even if it costs prize.",
+        effects: {
+          successDelta: 0.09,
+          rewardMultiplier: 0.88,
+          modifier: "Avoided contact",
+          result: "refused the fight and protected the crew over the haul"
+        }
+      })
+    ]
+  };
+}
+
+function buildCrossingJourneyStage(expedition, index, dayMarker) {
+  return {
+    id: createId("journey-stage"),
+    index,
+    dayMarker,
+    kind: "crossing",
+    title: "Broken Passage",
+    prompt: `Near day ${dayMarker}, the expedition reaches a crossing that can be forced, repaired, or rerouted around.`,
+    options: [
+      createJourneyOption({
+        id: "force-crossing",
+        label: "Force The Crossing",
+        summary: "Take the dangerous line and keep pace.",
+        effects: {
+          successDelta: -0.06,
+          rewardMultiplier: 1.08,
+          modifier: "Forced crossing",
+          result: "forced the passage instead of slowing down"
+        }
+      }),
+      createJourneyOption({
+        id: "secure-crossing",
+        label: "Secure It First",
+        summary: "Spend effort on a safer passage and protect the return.",
+        effects: {
+          ...createJourneyBonusBundle(expedition, "supplies"),
+          successDelta: 0.06,
+          rewardMultiplier: 0.95,
+          modifier: "Secured passage",
+          result: "made the crossing stable before moving the whole crew through"
+        }
+      }),
+      createJourneyOption({
+        id: "scout-reroute",
+        label: "Scout A Reroute",
+        summary: "Look for a smarter line that preserves both pace and safety.",
+        effects: {
+          successDelta: 0.03,
+          rewardMultiplier: 0.99,
+          uniquePercentBonus: 4,
+          modifier: "Alternate route",
+          result: "found a workable alternate line instead of committing blind"
+        }
+      })
+    ]
+  };
+}
+
+function buildContactJourneyStage(expedition, index, dayMarker) {
+  return {
+    id: createId("journey-stage"),
+    index,
+    dayMarker,
+    kind: "contact",
+    title: expedition.typeId === "diplomatic" ? "Unexpected Delegation" : "People On The Road",
+    prompt: `By day ${dayMarker}, the crew runs into people who might trade, join, or slow the mission depending on how the expedition handles them.`,
+    options: [
+      createJourneyOption({
+        id: "stop-and-help",
+        label: "Stop And Engage",
+        summary: "Take the time to help, escort, or negotiate with the people on the route.",
+        effects: {
+          ...createJourneyBonusBundle(expedition, "contact"),
+          successDelta: 0.02,
+          rewardMultiplier: 0.98,
+          modifier: "Deliberate contact",
+          result: "spent real time dealing with the people they found instead of brushing past"
+        }
+      }),
+      createJourneyOption({
+        id: "bargain-fast",
+        label: "Bargain Fast",
+        summary: "Trade quickly and pull value from the stop without lingering.",
+        effects: {
+          ...createJourneyBonusBundle(expedition, "contact"),
+          successDelta: -0.02,
+          rewardMultiplier: 1.05,
+          recruitMultiplier: 1,
+          modifier: "Hard bargain",
+          result: "cut a fast bargain and kept the expedition moving"
+        }
+      }),
+      createJourneyOption({
+        id: "pass-by",
+        label: "Pass By",
+        summary: "Keep the crew focused on the mission and leave the detour behind.",
+        effects: {
+          successDelta: 0.05,
+          rewardMultiplier: 0.93,
+          modifier: "Stayed focused",
+          result: "held the line and refused to drift off mission"
+        }
+      })
+    ]
+  };
+}
+
+function pickJourneyStageKinds(expedition, stageCount) {
+  const teamSize = getTeamCount(expedition.team);
+  const committedFood = Number(expedition.committedResources?.food ?? 0) || 0;
+  const lowSupplies = committedFood < Math.max(4, teamSize * 2);
+  const preferred = [];
+
+  if (lowSupplies) {
+    preferred.push("supply");
+  }
+  if (expedition.missionDistance === "Far" || Number(expedition.delayCount ?? 0) > 0) {
+    preferred.push("crossing");
+  }
+  if (ARCANE_JOURNEY_TYPES.has(expedition.typeId)) {
+    preferred.push("signal");
+  }
+  if (SALVAGE_JOURNEY_TYPES.has(expedition.typeId)) {
+    preferred.push("excavation");
+  }
+  if (SOCIAL_JOURNEY_TYPES.has(expedition.typeId)) {
+    preferred.push("contact");
+  }
+  if (expedition.missionRisk === "High" || ["monsterHunt", "rescue"].includes(expedition.typeId)) {
+    preferred.push("encounter");
+  }
+
+  const stagePreferenceOrder = [
+    ["supply", "crossing", "contact", "signal", "encounter", "excavation"],
+    ["signal", "contact", "crossing", "supply", "encounter", "excavation"],
+    ["encounter", "excavation", "signal", "contact", "crossing", "supply"],
+    ["excavation", "encounter", "contact", "signal", "crossing", "supply"],
+    ["contact", "crossing", "signal", "encounter", "excavation", "supply"]
+  ];
+  const fallback = ["crossing", "signal", "encounter", "excavation", "contact", "supply"];
+  const sequence = [];
+
+  for (let index = 0; index < stageCount; index += 1) {
+    const preferredForStage = stagePreferenceOrder[Math.min(index, stagePreferenceOrder.length - 1)];
+    const nextKind =
+      preferredForStage.find((kind) => preferred.includes(kind) && !sequence.includes(kind)) ??
+      preferred.find((kind) => !sequence.includes(kind)) ??
+      fallback.find((kind) => !sequence.includes(kind)) ??
+      fallback[index % fallback.length];
+    sequence.push(nextKind);
+  }
+
+  return sequence;
+}
+
+function buildJourneyStage(kind, expedition, index, dayMarker) {
+  switch (kind) {
+    case "supply":
+      return buildSupplyJourneyStage(expedition, index, dayMarker);
+    case "signal":
+      return buildSignalJourneyStage(expedition, index, dayMarker);
+    case "excavation":
+      return buildExcavationJourneyStage(expedition, index, dayMarker);
+    case "encounter":
+      return buildEncounterJourneyStage(expedition, index, dayMarker);
+    case "crossing":
+      return buildCrossingJourneyStage(expedition, index, dayMarker);
+    case "contact":
+    default:
+      return buildContactJourneyStage(expedition, index, dayMarker);
+  }
+}
+
+function createPendingExpeditionJourney(state, expedition, returnDayOffset = state.calendar.dayOffset) {
+  const travelDays = getJourneyTravelDays(expedition, returnDayOffset);
+  const stageCount = Math.max(1, Math.min(MAX_JOURNEY_STAGES, Math.ceil(travelDays / JOURNEY_STAGE_DAY_SPAN)));
+  const stageKinds = pickJourneyStageKinds(expedition, stageCount);
+  const stages = stageKinds.map((kind, index) =>
+    buildJourneyStage(kind, expedition, index, Math.min(travelDays, (index + 1) * JOURNEY_STAGE_DAY_SPAN))
+  );
+
   addTeamBackToCity(state, expedition.team);
-  const rewards = buildExpeditionRewards(state, expedition);
+
+  addHistoryEntry(state, {
+    category: "Expedition",
+    title: `Debrief Ready: ${expedition.missionName ?? expedition.typeLabel}`,
+    details: `${expedition.missionName ?? expedition.typeLabel} made it back to the Drift. Resolve ${stageCount} journey stage(s) to settle the final rewards.`
+  });
+
+  return normalizePendingJourney({
+    id: createId("expedition-journey"),
+    expedition,
+    returnDayOffset,
+    returnDateLabel: formatDate(returnDayOffset),
+    travelDays,
+    currentStageIndex: 0,
+    stages
+  });
+}
+
+function getJourneyProjection(journey) {
+  const successBase = Number(journey?.expedition?.successScore ?? 0) || 0;
+  const uniquePercentBase = Number(journey?.expedition?.uniquePercent ?? 0) || 0;
+  const resourceBonuses = createEmptyResourceRecord();
+  const crystalBonuses = createEmptyCrystalRecord();
+  const shardBonuses = createEmptyCrystalRecord();
+  const stageHighlights = [];
+  const modifiers = [];
+  let successDelta = 0;
+  let rewardMultiplier = 1;
+  let recruitMultiplier = 1;
+  let uniquePercentBonus = 0;
+
+  for (const stage of journey?.stages ?? []) {
+    if (!stage?.chosenOptionId) {
+      continue;
+    }
+    const selectedOption = (stage.options ?? []).find((option) => option.id === stage.chosenOptionId);
+    if (!selectedOption) {
+      continue;
+    }
+    const effects = normalizeJourneyEffects(selectedOption.effects);
+    successDelta += effects.successDelta;
+    rewardMultiplier *= effects.rewardMultiplier;
+    recruitMultiplier *= effects.recruitMultiplier;
+    uniquePercentBonus += effects.uniquePercentBonus;
+    addResourceBonuses(resourceBonuses, effects.resourceBonuses);
+    addCrystalBonuses(crystalBonuses, effects.crystalBonuses);
+    addCrystalBonuses(shardBonuses, effects.shardBonuses);
+    if (effects.modifier) {
+      modifiers.push(effects.modifier);
+    }
+    stageHighlights.push(`Day ${stage.dayMarker}: ${stage.chosenLabel ?? selectedOption.label} - ${effects.result || selectedOption.summary}`);
+  }
+
+  const successScore = clamp(successBase + successDelta, 0.45, 2.25);
+  return {
+    successScore,
+    rewardMultiplier: clamp(rewardMultiplier, 0.55, 1.75),
+    recruitMultiplier: clamp(recruitMultiplier, 0.65, 1.85),
+    uniquePercent: uniquePercentBase + uniquePercentBonus,
+    resourceBonuses,
+    crystalBonuses,
+    shardBonuses,
+    modifiers,
+    stageHighlights
+  };
+}
+
+export function getExpeditionJourneyProjection(journey) {
+  const projection = getJourneyProjection(journey);
+  return {
+    ...projection,
+    outcomeLabel: getExpeditionOutcomeLabel(projection.successScore)
+  };
+}
+
+export function getCurrentPendingExpeditionJourney(state) {
+  const pending = normalizeExpeditionState(state.expeditions).pending ?? [];
+  return pending[0] ?? null;
+}
+
+export function hasPendingExpeditionJourneys(state) {
+  return Boolean(getCurrentPendingExpeditionJourney(state));
+}
+
+function resolveExpeditionReturn(state, expedition, returnDayOffset = state.calendar.dayOffset, journey = null) {
+  const journeyProjection = journey ? getJourneyProjection(journey) : null;
+  const resolvedExpedition = journeyProjection
+    ? {
+        ...expedition,
+        successScore: journeyProjection.successScore,
+        uniquePercent: journeyProjection.uniquePercent
+      }
+    : expedition;
+  const rewards = buildExpeditionRewards(state, resolvedExpedition, journeyProjection);
   grantRewardCollections(state, rewards);
-  const outcomeLabel = rollOutcomeLabel(expedition.successScore);
+  const outcomeLabel = getExpeditionOutcomeLabel(resolvedExpedition.successScore);
   const rewardSummaryParts = [
     summarizeRecruitRewards(rewards.recruits),
     summarizeResourceRewards(rewards.resources),
@@ -921,11 +1589,13 @@ function resolveExpeditionReturn(state, expedition, returnDayOffset = state.cale
         : outcomeLabel === "Hard Return"
           ? `${expedition.missionName ?? expedition.typeLabel} returned battered but useful, with enough recovered value to justify the risk.`
           : `${expedition.missionName ?? expedition.typeLabel} returned thin and strained, but the crew made it back alive.`;
+  const stageHighlights = journeyProjection?.stageHighlights ?? [];
   const summary =
     rewardSummaryParts.join(" | ") ||
     `${expedition.missionName ?? expedition.typeLabel} returned light, but the crew made it home intact.`;
   const detailLines = [
     `${outcomeLabel} on a ${String(expedition.missionRisk ?? "Medium").toLowerCase()}-risk route.`,
+    ...stageHighlights,
     ...((rewards.modifiers ?? []).map((modifier) => `Outcome modifier: ${modifier}`)),
     ...rewardSummaryParts,
     ...(expedition.buildingSynergySummary ?? []).slice(0, 2)
@@ -960,6 +1630,50 @@ function resolveExpeditionReturn(state, expedition, returnDayOffset = state.cale
     detailLines,
     rewards
   });
+}
+
+export function resolveExpeditionJourneyChoice(state, journeyId, optionId) {
+  state.expeditions = normalizeExpeditionState(state.expeditions);
+  const pendingJourneys = state.expeditions.pending ?? [];
+  const journeyIndex = pendingJourneys.findIndex((entry) => entry.id === journeyId);
+  if (journeyIndex === -1) {
+    return { ok: false, reason: "That expedition journey is no longer waiting." };
+  }
+
+  const journey = pendingJourneys[journeyIndex];
+  const stage = journey.stages?.[journey.currentStageIndex] ?? null;
+  if (!stage) {
+    return { ok: false, reason: "This expedition journey is already complete." };
+  }
+
+  const selectedOption = (stage.options ?? []).find((entry) => entry.id === optionId) ?? null;
+  if (!selectedOption) {
+    return { ok: false, reason: "That journey choice is no longer available." };
+  }
+
+  stage.chosenOptionId = selectedOption.id;
+  stage.chosenLabel = selectedOption.label;
+  stage.chosenSummary = selectedOption.summary;
+  journey.currentStageIndex += 1;
+
+  if (journey.currentStageIndex < (journey.stages?.length ?? 0)) {
+    return {
+      ok: true,
+      completed: false,
+      journey,
+      stage
+    };
+  }
+
+  const record = resolveExpeditionReturn(state, journey.expedition, journey.returnDayOffset, journey);
+  state.expeditions.pending = pendingJourneys.filter((entry) => entry.id !== journey.id);
+  state.expeditions.recent = [record, ...(state.expeditions.recent ?? [])].slice(0, MAX_RECENT_RETURNS);
+  return {
+    ok: true,
+    completed: true,
+    journey,
+    record
+  };
 }
 
 function buildPreviewInsights(preview) {
@@ -1187,7 +1901,7 @@ export function advanceExpeditionsOneDay(state) {
   state.uniqueCitizens = normalizeUniqueCitizens(state.uniqueCitizens);
 
   const remaining = [];
-  const returned = [];
+  const pendingJourneys = [];
 
   for (const expedition of state.expeditions.active) {
     if (expedition.expectedReturnDayOffset > state.calendar.dayOffset) {
@@ -1209,12 +1923,14 @@ export function advanceExpeditionsOneDay(state) {
       continue;
     }
 
-    returned.push(resolveExpeditionReturn(state, expedition, state.calendar.dayOffset));
+    pendingJourneys.push(createPendingExpeditionJourney(state, expedition, state.calendar.dayOffset));
   }
 
   state.expeditions.active = remaining;
-  state.expeditions.recent = [...returned.reverse(), ...(state.expeditions.recent ?? [])].slice(0, MAX_RECENT_RETURNS);
-  return returned;
+  if (pendingJourneys.length) {
+    state.expeditions.pending = [...pendingJourneys, ...(state.expeditions.pending ?? [])];
+  }
+  return pendingJourneys;
 }
 
 export function forceReturnExpedition(state, expeditionId = null) {
@@ -1239,9 +1955,9 @@ export function forceReturnExpedition(state, expeditionId = null) {
   target.expectedReturnDayOffset = Number(state.calendar?.dayOffset ?? 0) || 0;
   target.expectedReturnAt = formatDate(target.expectedReturnDayOffset);
   state.expeditions.active = state.expeditions.active.filter((expedition) => expedition.id !== target.id);
-  const record = resolveExpeditionReturn(state, target, target.expectedReturnDayOffset);
-  state.expeditions.recent = [record, ...(state.expeditions.recent ?? [])].slice(0, MAX_RECENT_RETURNS);
-  return { ok: true, expedition: target, record };
+  const journey = createPendingExpeditionJourney(state, target, target.expectedReturnDayOffset);
+  state.expeditions.pending = [journey, ...(state.expeditions.pending ?? [])];
+  return { ok: true, expedition: target, journey };
 }
 
 export function getExpeditionOverview(state) {
@@ -1256,6 +1972,7 @@ export function getExpeditionOverview(state) {
     freeVehicles,
     boardMissions: expeditionState.board.length,
     activeExpeditions: expeditionState.active.length,
+    pendingJourneys: expeditionState.pending.length,
     uniqueProgress: expeditionState.uniqueProgress,
     nextUniqueThreshold: expeditionState.nextUniqueThreshold,
     uniqueCitizens: (state.uniqueCitizens ?? []).length
