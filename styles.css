@@ -7201,6 +7201,17 @@ body:-webkit-full-screen #app {
   color: rgba(224, 232, 243, 0.72);
 }
 
+.city-available-buildings__copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.city-available-buildings__copy small {
+  color: rgba(224, 232, 243, 0.72);
+  line-height: 1.35;
+}
+
 .city-incubation-queue__actions {
   display: flex;
   flex-wrap: wrap;
@@ -7209,7 +7220,7 @@ body:-webkit-full-screen #app {
 
 .city-available-buildings__item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
 }

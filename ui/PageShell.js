@@ -50,7 +50,7 @@ const ROUTE_SHORTCUTS = {
 };
 
 const DICE_TYPES = ["d2", "d4", "d6", "d8", "d10", "d12", "d20", "d100"];
-const RESOURCE_CHROME_PAGES = new Set(["city", "economy"]);
+const RESOURCE_CHROME_PAGES = new Set(["economy"]);
 const BUILDING_STATUS_PAGES = new Set(["city", "economy"]);
 const RESOURCE_BREAKDOWN_KEYS = new Set(["gold", "food", "materials", "salvage", "mana", "population", "prosperity"]);
 const UI_DENSITY_OPTIONS = [
@@ -502,6 +502,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
   const townFocusAvailability = getTownFocusAvailability(state);
   const currentFocus = getCurrentTownFocus(state);
   const showResourceChrome = RESOURCE_CHROME_PAGES.has(pageKey);
+  const showGlobalCommandStrip = !["city", "forge", "expeditions", "vehicles", "uniques", "chronicle", "help"].includes(pageKey);
   const showBuildingStatus = BUILDING_STATUS_PAGES.has(pageKey);
   const cityAlertCount = getCriticalAlerts(state).length;
   const availableCrystalCount = Object.values(state.crystals ?? {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
@@ -733,7 +734,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
             : ""
         }
 
-        ${renderGlobalCommandStrip(state, townFocusAvailability, pageKey)}
+        ${showGlobalCommandStrip ? renderGlobalCommandStrip(state, townFocusAvailability, pageKey) : ""}
 
         <div class="page-layout ${aside ? "page-layout--with-aside" : ""}">
           <section class="page-layout__content">${content}</section>

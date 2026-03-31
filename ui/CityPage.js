@@ -51,6 +51,25 @@ function renderActionEmptyState(title, detail, actionMarkup) {
   `;
 }
 
+function getAvailableConstructionSortDays(etaDetails) {
+  return Number.isFinite(etaDetails?.daysRemaining) ? etaDetails.daysRemaining : Number.POSITIVE_INFINITY;
+}
+
+function compareAvailableConstructionEntries(left, right) {
+  const leftDays = getAvailableConstructionSortDays(left.etaDetails);
+  const rightDays = getAvailableConstructionSortDays(right.etaDetails);
+
+  if (leftDays !== rightDays) {
+    return leftDays - rightDays;
+  }
+
+  if ((right.building.quality ?? 0) !== (left.building.quality ?? 0)) {
+    return (right.building.quality ?? 0) - (left.building.quality ?? 0);
+  }
+
+  return left.building.displayName.localeCompare(right.building.displayName);
+}
+
 function renderCitySessionControls(state) {
   return `
     <section class="panel city-session-controls">
@@ -256,7 +275,14 @@ function renderBuildingsView(state) {
   const queued = getIncubatorQueuedBuildings(state);
   const constructionQueue = getConstructionQueue(state);
   const queuedIds = new Set(queued.map((building) => building.id));
-  const waiting = getAvailableConstructionQueue(state).filter((building) => !queuedIds.has(building.id));
+  const waitingEntries = getAvailableConstructionQueue(state)
+    .filter((building) => !queuedIds.has(building.id))
+    .map((building) => ({
+      building,
+      etaDetails: getConstructionEtaDetails(building, state)
+    }))
+    .sort(compareAvailableConstructionEntries);
+  const waiting = waitingEntries.map((entry) => entry.building);
   const slots = getDriftConstructionSlots(state);
 
   return `
@@ -444,21 +470,28 @@ function renderBuildingsView(state) {
         <div class="city-incubation-strip__waiting">
           <h5>Available Buildings</h5>
           ${
-            waiting.length
+            waitingEntries.length
               ? `
                   <div class="city-available-buildings">
-                    ${waiting
-                      .map(
-                        (building) => `
+                    ${waitingEntries
+                      .map(({ building, etaDetails }) => {
+                        const etaNote =
+                          etaDetails.daysRemaining === null
+                            ? `Queue ETA unavailable${etaDetails.stallReasons.length ? `: ${etaDetails.stallReasons.join(", ")}` : "."}`
+                            : `If queued now: ${formatNumber(etaDetails.daysRemaining, 1)} day${etaDetails.daysRemaining === 1 ? "" : "s"} remaining`;
+                        return `
                           <article class="city-available-buildings__item" title="${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}">
-                            <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
+                            <div class="city-available-buildings__copy">
+                              <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
+                              <small>${escapeHtml(etaNote)}</small>
+                            </div>
                             <div class="city-available-buildings__actions">
                               <button class="button button--ghost" data-action="activate-construction" data-building-id="${building.id}">Queue</button>
                               <button class="button button--ghost" data-action="inspect-building" data-building-id="${building.id}">Open Details</button>
                             </div>
                           </article>
-                        `
-                      )
+                        `;
+                      })
                       .join("")}
                   </div>
                 `

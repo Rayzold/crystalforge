@@ -8,7 +8,7 @@ import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
 // APP_VERSION must stay monotonic because Firebase publish safety compares builds numerically.
-export const APP_VERSION = "v1.6.12";
+export const APP_VERSION = "v1.6.13";
 // Release maturity is tracked separately so unreleased builds do not need to pretend they are public/stable.
 export const APP_RELEASE_STAGE = "preview";
 const RELEASE_STAGE_LABELS = {
@@ -57,6 +57,7 @@ export const PAGE_ROUTES = [
   { key: "help", label: "Help", href: "./help.html" }
 ];
 export const BUILD_NOTES = [
+  "Mission board variety grew again with fresh named expedition templates across rescue, recruit, resource runs, crystal hunts, monster hunts, diplomacy, pilgrimage, and relic recovery.",
   "Expedition callsign pools are broader again, so repeated launches stay flavorful longer before falling back to generated overflow names.",
   "Release script git warnings no longer break the release button: harmless stderr notices like LF/CRLF line-ending warnings are now tolerated unless git returns a real failure exit code.",
   "A new save-point recreation spec now lives at the repo root, documenting the product shape, architecture, content systems, state model, and rebuild path for future recovery work.",
