@@ -1,7 +1,6 @@
 import { FIREBASE_CONFIG } from "../content/Config.js";
-import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+const FIREBASE_SDK_VERSION = "12.10.0";
 
 function hasFirebaseConfig(config) {
   return Boolean(
@@ -13,26 +12,62 @@ function hasFirebaseConfig(config) {
 }
 
 export const firebaseConfigured = hasFirebaseConfig(FIREBASE_CONFIG);
+let firebaseRuntimePromise = null;
+let cachedFirebaseRuntime = null;
 
-export const firebaseApp = firebaseConfigured
-  ? getApps().length
-    ? getApp()
-    : initializeApp(FIREBASE_CONFIG)
-  : null;
+function buildFirebaseSdkError(error) {
+  const message = error?.message ? String(error.message) : String(error ?? "Unknown Firebase SDK error.");
+  return new Error(`Firebase SDK failed to load. ${message}`);
+}
 
-export const firebaseAuth = firebaseApp ? getAuth(firebaseApp) : null;
-export const firebaseDb = firebaseApp ? getFirestore(firebaseApp) : null;
-
-export async function ensureFirebaseAuth() {
-  if (!firebaseConfigured || !firebaseAuth) {
+export async function loadFirebaseRuntime() {
+  if (!firebaseConfigured) {
     throw new Error("Firebase is not configured.");
   }
-  if (!firebaseAuth.currentUser) {
-    await signInAnonymously(firebaseAuth);
+
+  if (cachedFirebaseRuntime) {
+    return cachedFirebaseRuntime;
   }
-  return firebaseAuth.currentUser;
+
+  if (!firebaseRuntimePromise) {
+    firebaseRuntimePromise = Promise.all([
+      import(`https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}/firebase-app.js`),
+      import(`https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}/firebase-auth.js`),
+      import(`https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}/firebase-firestore.js`)
+    ])
+      .then(([firebaseAppModule, firebaseAuthModule, firebaseFirestoreModule]) => {
+        const app = firebaseAppModule.getApps().length
+          ? firebaseAppModule.getApp()
+          : firebaseAppModule.initializeApp(FIREBASE_CONFIG);
+        cachedFirebaseRuntime = {
+          app,
+          auth: firebaseAuthModule.getAuth(app),
+          db: firebaseFirestoreModule.getFirestore(app),
+          signInAnonymously: firebaseAuthModule.signInAnonymously,
+          firestoreModule: firebaseFirestoreModule
+        };
+        return cachedFirebaseRuntime;
+      })
+      .catch((error) => {
+        firebaseRuntimePromise = null;
+        throw buildFirebaseSdkError(error);
+      });
+  }
+
+  return firebaseRuntimePromise;
+}
+
+export async function ensureFirebaseAuth() {
+  if (!firebaseConfigured) {
+    throw new Error("Firebase is not configured.");
+  }
+  const runtime = await loadFirebaseRuntime();
+  if (!runtime.auth.currentUser) {
+    await runtime.signInAnonymously(runtime.auth);
+  }
+  return runtime.auth.currentUser;
 }
 
 export function getFirebaseUserId() {
-  return firebaseAuth?.currentUser?.uid ?? null;
+  return cachedFirebaseRuntime?.auth?.currentUser?.uid ?? null;
 }

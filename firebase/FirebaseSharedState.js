@@ -1,14 +1,20 @@
 import { FIREBASE_REALM_COLLECTION } from "../content/Config.js";
-import { firebaseConfigured, firebaseDb, ensureFirebaseAuth, getFirebaseUserId } from "./FirebaseConfig.js";
-import {
-  doc,
-  getDoc,
-  onSnapshot,
-  setDoc
-} from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+import { firebaseConfigured, ensureFirebaseAuth, getFirebaseUserId, loadFirebaseRuntime } from "./FirebaseConfig.js";
 
-function getRealmRef(realmId) {
-  return doc(firebaseDb, FIREBASE_REALM_COLLECTION, String(realmId || "main").trim() || "main");
+async function getFirestoreRuntime() {
+  const runtime = await loadFirebaseRuntime();
+  return {
+    db: runtime.db,
+    doc: runtime.firestoreModule.doc,
+    getDoc: runtime.firestoreModule.getDoc,
+    onSnapshot: runtime.firestoreModule.onSnapshot,
+    setDoc: runtime.firestoreModule.setDoc
+  };
+}
+
+async function getRealmRef(realmId) {
+  const { db, doc } = await getFirestoreRuntime();
+  return doc(db, FIREBASE_REALM_COLLECTION, String(realmId || "main").trim() || "main");
 }
 
 export function isFirebaseConfigured() {
@@ -20,7 +26,8 @@ export async function loadFirebaseRealmState(realmId) {
     throw new Error("Firebase is not configured.");
   }
   await ensureFirebaseAuth();
-  const snapshot = await getDoc(getRealmRef(realmId));
+  const { getDoc } = await getFirestoreRuntime();
+  const snapshot = await getDoc(await getRealmRef(realmId));
   if (!snapshot.exists()) {
     return null;
   }
@@ -32,7 +39,8 @@ export async function saveFirebaseRealmState(realmId, state, sourceClientId, app
     throw new Error("Firebase is not configured.");
   }
   await ensureFirebaseAuth();
-  await setDoc(getRealmRef(realmId), {
+  const { setDoc } = await getFirestoreRuntime();
+  await setDoc(await getRealmRef(realmId), {
     state,
     appVersion,
     sourceClientId: sourceClientId ?? null,
@@ -46,7 +54,8 @@ export async function subscribeFirebaseRealmState(realmId, callback) {
     throw new Error("Firebase is not configured.");
   }
   await ensureFirebaseAuth();
-  return onSnapshot(getRealmRef(realmId), (snapshot) => {
+  const { onSnapshot } = await getFirestoreRuntime();
+  return onSnapshot(await getRealmRef(realmId), (snapshot) => {
     callback(snapshot.exists() ? snapshot.data() : null);
   });
 }
