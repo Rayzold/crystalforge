@@ -44,7 +44,11 @@ const EXPEDITION_GENERAL_CALLSIGNS = [
   "Wayfinder",
   "Ghost Current",
   "Stormthread",
-  "Silver Wake"
+  "Silver Wake",
+  "Dawn Spur",
+  "Blue Lantern",
+  "Horizon Pike",
+  "Ember Current"
 ];
 const EXPEDITION_CALLSIGN_POOLS = {
   rescue: [
@@ -59,7 +63,9 @@ const EXPEDITION_CALLSIGN_POOLS = {
     "Cinder Veil",
     "Warm Signal",
     "Dawn Refuge",
-    "Safe Return"
+    "Safe Return",
+    "Harbor Mercy",
+    "Winter Hearth"
   ],
   recruit: [
     "Open Banner",
@@ -73,7 +79,9 @@ const EXPEDITION_CALLSIGN_POOLS = {
     "Gatefire",
     "Gathering Bell",
     "Clear Promise",
-    "Wanderhome"
+    "Wanderhome",
+    "New Hearth",
+    "Far Covenant"
   ],
   resourceRun: [
     "Iron Rain",
@@ -87,7 +95,9 @@ const EXPEDITION_CALLSIGN_POOLS = {
     "Roadforge",
     "Quarry Wind",
     "Supply Rook",
-    "Carry Dawn"
+    "Carry Dawn",
+    "Cargo Lantern",
+    "Gravel Song"
   ],
   crystalHunt: [
     "Shardflare",
@@ -101,7 +111,9 @@ const EXPEDITION_CALLSIGN_POOLS = {
     "Bright Fault",
     "Crystal Thorn",
     "Sky Prism",
-    "Halo Spark"
+    "Halo Spark",
+    "Veinfire",
+    "Gleamwake"
   ],
   relicRecovery: [
     "Vaultwind",
@@ -115,7 +127,9 @@ const EXPEDITION_CALLSIGN_POOLS = {
     "Tombglass",
     "Lockstar",
     "Ash Reliquary",
-    "Deep Cinder"
+    "Deep Cinder",
+    "Sealwake",
+    "Cairn Bell"
   ],
   diplomatic: [
     "White Banner",
@@ -129,7 +143,9 @@ const EXPEDITION_CALLSIGN_POOLS = {
     "Clear Parlance",
     "Peace Ember",
     "Crown Current",
-    "Blue Compact"
+    "Blue Compact",
+    "Gilded Truce",
+    "Velvet Accord"
   ],
   monsterHunt: [
     "Red Fang",
@@ -143,7 +159,9 @@ const EXPEDITION_CALLSIGN_POOLS = {
     "Grim Step",
     "Storm Spear",
     "Blood Lantern",
-    "Hollow Claw"
+    "Hollow Claw",
+    "Wolf Ember",
+    "Razor Wake"
   ],
   pilgrimage: [
     "Veilstar",
@@ -157,7 +175,9 @@ const EXPEDITION_CALLSIGN_POOLS = {
     "Sainted Wake",
     "Sun Veil",
     "Bright Mercy",
-    "Soft Pilgrim"
+    "Soft Pilgrim",
+    "Ash Psalm",
+    "Quiet Halo"
   ]
 };
 const EXPEDITION_CALLSIGN_OVERFLOW = {
