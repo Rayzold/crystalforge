@@ -8,7 +8,7 @@ import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
 // APP_VERSION must stay monotonic because Firebase publish safety compares builds numerically.
-export const APP_VERSION = "v1.6.4";
+export const APP_VERSION = "v1.6.6";
 // Release maturity is tracked separately so unreleased builds do not need to pretend they are public/stable.
 export const APP_RELEASE_STAGE = "preview";
 const RELEASE_STAGE_LABELS = {
@@ -57,6 +57,7 @@ export const PAGE_ROUTES = [
   { key: "help", label: "Help", href: "./help.html" }
 ];
 export const BUILD_NOTES = [
+  "Expedition callsigns are now themed by mission type, so rescue crews, relic teams, hunters, diplomats, and pilgrims each read like distinct named outfits instead of rotating generic placeholders.",
   "Pending Decisions now keeps a short decision history, relics can awaken extra synergy bonuses from matching legend posts, town focuses, and building tags, and Home goals now grant small celebratory rewards when you complete them.",
   "Pending Decisions now works like a real priority inbox with urgency, snooze, and resolve-next flow, expeditions can recover relics or trophies that slot into the Drift for ongoing bonuses, and Home now guides new runs through a clearer six-phase onboarding arc.",
   "Time advances now open a fuller turn digest with risk shifts and next-action guidance, Legends can be assigned to District Posts, Expedition Wings, or Council Seats for extra specialty bonuses, and warning surfaces now explain both the cause and the top fixes instead of only naming the problem.",

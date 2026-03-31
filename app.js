@@ -62,6 +62,7 @@ import {
 import { setDriftEvolutionStageOverride, syncDriftEvolutionState } from "./systems/DriftEvolutionSystem.js";
 import { clearActiveEvents, triggerEvent } from "./systems/EventSystem.js";
 import {
+  formatExpeditionDisplayName,
   forceReturnExpedition,
   getAvailableVehicleCounts,
   getCurrentPendingExpeditionJourney,
@@ -584,7 +585,7 @@ function createTurnSummary(previousState, nextState, days, advanceResult = null)
     .map((entry) => entry.fullName)
     .slice(0, 4);
   const expeditionJourneys = Array.isArray(advanceResult?.expeditionJourneys)
-    ? advanceResult.expeditionJourneys.map((entry) => entry.expedition?.missionName ?? entry.expedition?.typeLabel ?? "Expedition").slice(0, 6)
+    ? advanceResult.expeditionJourneys.map((entry) => formatExpeditionDisplayName(entry.expedition)).slice(0, 6)
     : [];
   const severityValue = { warning: 1, critical: 2 };
   const previousEmergenciesByKey = new Map(previousEmergencyState.emergencies.map((entry) => [entry.key, entry]));
@@ -2222,7 +2223,7 @@ function launchExpeditionFromDraft() {
     },
     getCurrentState()
   );
-  reportSuccess(`${result.expedition.missionName ?? result.expedition.typeLabel} launched. Expected back ${result.expedition.expectedReturnAt}.`, "confirm");
+  reportSuccess(`${formatExpeditionDisplayName(result.expedition)} launched. Expected back ${result.expedition.expectedReturnAt}.`, "confirm");
 }
 
 function refreshExpeditionBoardManually() {
@@ -2238,7 +2239,7 @@ function forceReturnSoonestExpedition() {
   }
 
   renderer.setTransientUi({ expeditionJourneyOpen: true, turnSummaryModal: null }, getCurrentState());
-  reportSuccess(`${result.expedition.missionName ?? result.expedition.typeLabel} returned and now awaits a journey debrief.`, "confirm");
+  reportSuccess(`${formatExpeditionDisplayName(result.expedition)} returned and now awaits a journey debrief.`, "confirm");
 }
 
 function highlightResolvedExpeditionJourney(record) {
@@ -2309,7 +2310,7 @@ function resolveExpeditionJourneyOption(journeyId, optionId) {
     if (nextResult?.ok) {
       recordDecisionHistory(draft, {
         kind: "journey",
-        title: nextResult.journey?.expedition?.missionName ?? nextResult.journey?.expedition?.typeLabel ?? "Expedition debrief",
+        title: formatExpeditionDisplayName(nextResult.journey?.expedition),
         detail: nextResult.stage?.prompt ?? nextResult.journey?.expedition?.missionSummary ?? "Journey choice resolved.",
         outcome: nextResult.stage?.chosenLabel ?? "Journey choice locked in",
         iconKey: "route"
@@ -2342,14 +2343,14 @@ function resolveExpeditionJourneyOption(journeyId, optionId) {
       .filter(Boolean)
       .join(" ");
     reportSuccess(
-      `${result.record.missionName ?? result.record.typeLabel} debrief resolved. Rewards granted.${rewardHighlights ? ` ${rewardHighlights}` : ""}`,
+      `${formatExpeditionDisplayName(result.record)} debrief resolved. Rewards granted.${rewardHighlights ? ` ${rewardHighlights}` : ""}`,
       "confirm"
     );
     return;
   }
 
   renderer.setTransientUi({ expeditionJourneyOpen: true, turnSummaryModal: null }, nextState);
-  reportSuccess(`${result.stage?.chosenLabel ?? "Decision"} locked in for ${result.journey?.expedition?.missionName ?? "the expedition"}.`);
+  reportSuccess(`${result.stage?.chosenLabel ?? "Decision"} locked in for ${formatExpeditionDisplayName(result.journey?.expedition)}.`);
 }
 
 function advanceTimeWithJourneyGuard(runAdvance) {

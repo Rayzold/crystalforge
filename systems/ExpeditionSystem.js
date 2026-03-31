@@ -32,6 +32,172 @@ const MAX_RECENT_RETURNS = 10;
 const EXPEDITION_BOARD_REFRESH_DAYS = 7;
 const JOURNEY_STAGE_DAY_SPAN = 4;
 const MAX_JOURNEY_STAGES = 5;
+const EXPEDITION_GENERAL_CALLSIGNS = [
+  "Rainwake",
+  "Northglass",
+  "Bright Ember",
+  "Drift Arrow",
+  "Ash Lantern",
+  "Sky Rook",
+  "Farseam",
+  "Cinder Bell",
+  "Wayfinder",
+  "Ghost Current",
+  "Stormthread",
+  "Silver Wake"
+];
+const EXPEDITION_CALLSIGN_POOLS = {
+  rescue: [
+    "Lantern Wake",
+    "Mercy Bell",
+    "Hearthward",
+    "Beacon Thread",
+    "Shelter Wing",
+    "Kindled Road",
+    "Ash Harbor",
+    "Morrow Light",
+    "Cinder Veil",
+    "Warm Signal",
+    "Dawn Refuge",
+    "Safe Return"
+  ],
+  recruit: [
+    "Open Banner",
+    "Bridgewind",
+    "New Accord",
+    "Threshold Song",
+    "Road Lantern",
+    "Far Welcome",
+    "Hearth Oath",
+    "Crosswake",
+    "Gatefire",
+    "Gathering Bell",
+    "Clear Promise",
+    "Wanderhome"
+  ],
+  resourceRun: [
+    "Iron Rain",
+    "Loadstar",
+    "Stonewake",
+    "Mulefire",
+    "Dust Harbor",
+    "Timber Gale",
+    "Grain Echo",
+    "Coal Thread",
+    "Roadforge",
+    "Quarry Wind",
+    "Supply Rook",
+    "Carry Dawn"
+  ],
+  crystalHunt: [
+    "Shardflare",
+    "Prism Wake",
+    "Blue Echo",
+    "Glassfire",
+    "Aether Pike",
+    "Mana Vein",
+    "Starfract",
+    "Lumen Drift",
+    "Bright Fault",
+    "Crystal Thorn",
+    "Sky Prism",
+    "Halo Spark"
+  ],
+  relicRecovery: [
+    "Vaultwind",
+    "Dust Lantern",
+    "Old Flame",
+    "Gravespark",
+    "Sealbreaker",
+    "Ruinwake",
+    "Ember Key",
+    "Silent Spire",
+    "Tombglass",
+    "Lockstar",
+    "Ash Reliquary",
+    "Deep Cinder"
+  ],
+  diplomatic: [
+    "White Banner",
+    "Silver Accord",
+    "Bridgewake",
+    "Soft Bell",
+    "Trucewind",
+    "Golden Thread",
+    "Velvet Pike",
+    "Open Sky",
+    "Clear Parlance",
+    "Peace Ember",
+    "Crown Current",
+    "Blue Compact"
+  ],
+  monsterHunt: [
+    "Red Fang",
+    "Ash Pike",
+    "Black Spur",
+    "Ember Talon",
+    "Rookfire",
+    "Gorewind",
+    "Night Harrow",
+    "Iron Thorn",
+    "Grim Step",
+    "Storm Spear",
+    "Blood Lantern",
+    "Hollow Claw"
+  ],
+  pilgrimage: [
+    "Veilstar",
+    "Stillwater",
+    "Halo Wind",
+    "Dawn Psalm",
+    "Quiet Ember",
+    "Glass Hymn",
+    "Moon Road",
+    "Gentle Flame",
+    "Sainted Wake",
+    "Sun Veil",
+    "Bright Mercy",
+    "Soft Pilgrim"
+  ]
+};
+const EXPEDITION_CALLSIGN_OVERFLOW = {
+  rescue: {
+    prefixes: ["Lantern", "Mercy", "Hearth", "Beacon", "Shelter", "Kindled"],
+    suffixes: ["Wake", "Bell", "Road", "Wing", "Harbor", "Promise"]
+  },
+  recruit: {
+    prefixes: ["Open", "Bridge", "Threshold", "Gathering", "Banner", "Far"],
+    suffixes: ["Accord", "Wake", "Promise", "Road", "Song", "Welcome"]
+  },
+  resourceRun: {
+    prefixes: ["Iron", "Stone", "Dust", "Load", "Quarry", "Timber"],
+    suffixes: ["Wake", "Wind", "Forge", "Thread", "Harbor", "Rain"]
+  },
+  crystalHunt: {
+    prefixes: ["Shard", "Prism", "Glass", "Blue", "Halo", "Lumen"],
+    suffixes: ["Wake", "Flare", "Echo", "Spark", "Fault", "Drift"]
+  },
+  relicRecovery: {
+    prefixes: ["Vault", "Dust", "Ruin", "Ember", "Silent", "Ash"],
+    suffixes: ["Wind", "Lantern", "Key", "Wake", "Spire", "Cinder"]
+  },
+  diplomatic: {
+    prefixes: ["Silver", "White", "Bridge", "Open", "Golden", "Truce"],
+    suffixes: ["Accord", "Bell", "Wake", "Thread", "Sky", "Compact"]
+  },
+  monsterHunt: {
+    prefixes: ["Red", "Ash", "Black", "Storm", "Grim", "Iron"],
+    suffixes: ["Fang", "Pike", "Spur", "Talon", "Claw", "Spear"]
+  },
+  pilgrimage: {
+    prefixes: ["Veil", "Dawn", "Halo", "Still", "Moon", "Bright"],
+    suffixes: ["Star", "Psalm", "Wake", "Flame", "Road", "Mercy"]
+  },
+  fallback: {
+    prefixes: ["Rain", "North", "Bright", "Ash", "Storm", "Silver"],
+    suffixes: ["Wake", "Ember", "Thread", "Rook", "Current", "Bell"]
+  }
+};
 const LEGACY_VEHICLE_ID_MAP = {
   caravanWagon: "siegeBuggy",
   surveyWalker: "trailBuggy",
@@ -496,8 +662,18 @@ function normalizeVehicleId(vehicleId) {
 
 function createExpeditionRecentRecord(partial = {}) {
   const vehicleId = normalizeVehicleId(partial.vehicleId ?? VEHICLE_ORDER[0]);
+  const expeditionNumber = Math.max(1, Number(partial.expeditionNumber ?? 1) || 1);
+  const expeditionTypeId = String(partial.typeId ?? "resourceRun").trim() || "resourceRun";
+  const expeditionCallsign =
+    String(partial.expeditionCallsign ?? getExpeditionCallsign(expeditionTypeId, expeditionNumber)).trim() ||
+    getExpeditionCallsign(expeditionTypeId, expeditionNumber);
   return {
     id: partial.id ?? createId("expedition-return"),
+    expeditionNumber,
+    expeditionCallsign,
+    expeditionLabel:
+      String(partial.expeditionLabel ?? `Expedition ${expeditionNumber}: ${expeditionCallsign}`).trim() ||
+      `Expedition ${expeditionNumber}: ${expeditionCallsign}`,
     typeId: partial.typeId ?? "resourceRun",
     typeLabel: partial.typeLabel ?? "Expedition",
     missionId: partial.missionId ?? null,
@@ -528,9 +704,66 @@ export function createDefaultExpeditionState() {
     pending: [],
     recent: [],
     relics: [],
+    aftermaths: [],
+    followUps: [],
     lastRefreshDayOffset: null,
+    nextExpeditionNumber: 1,
     uniqueProgress: 0,
     nextUniqueThreshold: DEFAULT_UNIQUE_THRESHOLD
+  };
+}
+
+function createEmptyAftermathStatRecord() {
+  return { prosperity: 0, defense: 0, security: 0, prestige: 0, morale: 0, health: 0, populationSupport: 0 };
+}
+
+function createAftermathEffectRecord(partial = {}) {
+  return {
+    resources: { ...createEmptyResourceRecord(), ...(partial.resources ?? {}) },
+    stats: { ...createEmptyAftermathStatRecord(), ...(partial.stats ?? {}) }
+  };
+}
+
+function normalizeExpeditionAftermath(entry = {}) {
+  return {
+    id: String(entry.id ?? createId("expedition-aftermath")),
+    title: String(entry.title ?? "Expedition Aftermath").trim() || "Expedition Aftermath",
+    summary: String(entry.summary ?? "A recent expedition left a temporary mark on the Drift.").trim() || "A recent expedition left a temporary mark on the Drift.",
+    effectText: String(entry.effectText ?? "").trim(),
+    iconKey: String(entry.iconKey ?? "route").trim() || "route",
+    sourceMissionName: String(entry.sourceMissionName ?? "Expedition").trim() || "Expedition",
+    severity: ["boon", "warning", "strain"].includes(String(entry.severity ?? "")) ? entry.severity : "boon",
+    startedDayOffset: Number(entry.startedDayOffset ?? 0) || 0,
+    expiresDayOffset: Math.max(Number(entry.expiresDayOffset ?? 0) || 0, Number(entry.startedDayOffset ?? 0) || 0),
+    startedAt: String(entry.startedAt ?? formatDate(Number(entry.startedDayOffset ?? 0) || 0)),
+    expiresAt: String(entry.expiresAt ?? formatDate(Number(entry.expiresDayOffset ?? 0) || 0)),
+    effects: createAftermathEffectRecord(entry.effects)
+  };
+}
+
+function normalizeExpeditionFollowUpOption(option = {}) {
+  return {
+    id: String(option.id ?? createId("expedition-follow-up-option")),
+    label: String(option.label ?? "Choose").trim() || "Choose",
+    summary: String(option.summary ?? "").trim(),
+    outcome: String(option.outcome ?? "").trim(),
+    effects: createAftermathEffectRecord(option.effects),
+    durationDeltaDays: Number(option.durationDeltaDays ?? 0) || 0
+  };
+}
+
+function normalizeExpeditionFollowUp(entry = {}) {
+  return {
+    id: String(entry.id ?? createId("expedition-follow-up")),
+    aftermathId: String(entry.aftermathId ?? "").trim() || null,
+    title: String(entry.title ?? "Expedition Follow-up").trim() || "Expedition Follow-up",
+    detail: String(entry.detail ?? "A recent expedition consequence needs a policy answer.").trim() || "A recent expedition consequence needs a policy answer.",
+    iconKey: String(entry.iconKey ?? "route").trim() || "route",
+    sourceMissionName: String(entry.sourceMissionName ?? "Expedition").trim() || "Expedition",
+    urgency: ["critical", "high", "medium", "low"].includes(String(entry.urgency ?? "")) ? entry.urgency : "medium",
+    createdDayOffset: Number(entry.createdDayOffset ?? 0) || 0,
+    options: Array.isArray(entry.options) ? entry.options.map((option) => normalizeExpeditionFollowUpOption(option)) : [],
+    chosenOptionId: typeof entry.chosenOptionId === "string" && entry.chosenOptionId.trim() ? entry.chosenOptionId.trim() : null
   };
 }
 
@@ -694,8 +927,16 @@ function normalizeJourneyOption(option = {}) {
 
 function normalizeActiveExpedition(entry = {}) {
   const vehicleId = normalizeVehicleId(entry.vehicleId ?? VEHICLE_ORDER[0]);
+  const expeditionNumber = Math.max(1, Number(entry.expeditionNumber ?? 1) || 1);
+  const expeditionTypeId = String(entry.typeId ?? "resourceRun").trim() || "resourceRun";
+  const expeditionCallsign =
+    String(entry.expeditionCallsign ?? getExpeditionCallsign(expeditionTypeId, expeditionNumber)).trim() ||
+    getExpeditionCallsign(expeditionTypeId, expeditionNumber);
   return {
     id: String(entry.id ?? createId("expedition")),
+    expeditionNumber,
+    expeditionCallsign,
+    expeditionLabel: String(entry.expeditionLabel ?? `Expedition ${expeditionNumber}: ${expeditionCallsign}`).trim() || `Expedition ${expeditionNumber}: ${expeditionCallsign}`,
     typeId: entry.typeId ?? "resourceRun",
     typeLabel: entry.typeLabel ?? EXPEDITION_TYPES[entry.typeId]?.label ?? "Expedition",
     missionId: entry.missionId ?? null,
@@ -842,7 +1083,28 @@ export function normalizeUniqueCitizens(sourceCitizens) {
       sigilSeed:
         typeof entry.sigilSeed === "string" && entry.sigilSeed.trim()
           ? entry.sigilSeed.trim()
-          : `${String(entry.fullName ?? "Unknown Notable")}|${String(entry.title ?? "Unique Citizen")}|${String(entry.sourceTypeId ?? "unknown")}`
+          : `${String(entry.fullName ?? "Unknown Notable")}|${String(entry.title ?? "Unique Citizen")}|${String(entry.sourceTypeId ?? "unknown")}`,
+      routeHistory: Array.isArray(entry.routeHistory)
+        ? entry.routeHistory
+            .filter((record) => record && typeof record === "object")
+            .map((record) => ({
+              id: String(record.id ?? createId("legend-route")),
+              kind: String(record.kind ?? "route").trim() || "route",
+              label: String(record.label ?? "Recorded Route").trim() || "Recorded Route",
+              detail: String(record.detail ?? "").trim(),
+              date: String(record.date ?? formatDate(Number(record.dayOffset ?? entry.joinedDayOffset ?? 0) || 0)),
+              dayOffset: Number(record.dayOffset ?? entry.joinedDayOffset ?? 0) || 0
+            }))
+        : [
+            {
+              id: createId("legend-route"),
+              kind: "arrival",
+              label: entry.originLabel ?? (EXPEDITION_TYPES[entry.sourceTypeId]?.label ?? "Recorded Route"),
+              detail: entry.originMemory ?? "Reached the Drift and stayed.",
+              date: String(entry.joinedAt ?? formatDate(Number(entry.joinedDayOffset ?? 0) || 0)),
+              dayOffset: Number(entry.joinedDayOffset ?? 0) || 0
+            }
+          ]
     }));
 }
 
@@ -970,6 +1232,19 @@ export function setUniqueCitizenAssignment(state, citizenId, assignmentPostId = 
   const normalizedAssignmentId =
     typeof assignmentPostId === "string" && LEGEND_ASSIGNMENT_POST_BY_ID[assignmentPostId] ? assignmentPostId : null;
   uniqueCitizen.assignmentPostId = normalizedAssignmentId;
+  uniqueCitizen.routeHistory = [
+    {
+      id: createId("legend-route"),
+      kind: "assignment",
+      label: normalizedAssignmentId ? (LEGEND_ASSIGNMENT_POST_BY_ID[normalizedAssignmentId]?.label ?? "Legend Post") : "At Large",
+      detail: normalizedAssignmentId
+        ? `${uniqueCitizen.fullName} accepted the ${LEGEND_ASSIGNMENT_POST_BY_ID[normalizedAssignmentId]?.label ?? "assigned"} role.`
+        : `${uniqueCitizen.fullName} was released from formal duty and remains at large in the Drift.`,
+      date: formatDate(state.calendar.dayOffset),
+      dayOffset: state.calendar.dayOffset
+    },
+    ...(uniqueCitizen.routeHistory ?? [])
+  ].slice(0, 8);
   return {
     ok: true,
     citizen: uniqueCitizen,
@@ -1172,10 +1447,17 @@ export function normalizeExpeditionState(sourceState) {
       ? sourceState.recent.map((entry) => createExpeditionRecentRecord(entry)).slice(0, MAX_RECENT_RETURNS)
       : base.recent,
     relics,
+    aftermaths: Array.isArray(sourceState?.aftermaths)
+      ? sourceState.aftermaths.filter((entry) => entry && typeof entry === "object").map((entry) => normalizeExpeditionAftermath(entry))
+      : base.aftermaths,
+    followUps: Array.isArray(sourceState?.followUps)
+      ? sourceState.followUps.filter((entry) => entry && typeof entry === "object").map((entry) => normalizeExpeditionFollowUp(entry))
+      : base.followUps,
     lastRefreshDayOffset:
       sourceState?.lastRefreshDayOffset === null || sourceState?.lastRefreshDayOffset === undefined
         ? base.lastRefreshDayOffset
         : Number(sourceState.lastRefreshDayOffset) || 0,
+    nextExpeditionNumber: Math.max(1, Number(sourceState?.nextExpeditionNumber ?? base.nextExpeditionNumber) || 1),
     uniqueProgress: Math.max(0, Number(sourceState?.uniqueProgress ?? base.uniqueProgress) || 0),
     nextUniqueThreshold: Math.max(60, Number(sourceState?.nextUniqueThreshold ?? base.nextUniqueThreshold) || DEFAULT_UNIQUE_THRESHOLD)
   };
@@ -1183,6 +1465,29 @@ export function normalizeExpeditionState(sourceState) {
 
 function getMissionApproach(approachId) {
   return EXPEDITION_APPROACHES[approachId] ?? EXPEDITION_APPROACHES.balanced;
+}
+
+function getExpeditionCallsign(typeId, number) {
+  const normalizedNumber = Math.max(1, Number(number ?? 1) || 1);
+  const pool = EXPEDITION_CALLSIGN_POOLS[typeId] ?? EXPEDITION_GENERAL_CALLSIGNS;
+  if (normalizedNumber <= pool.length) {
+    return pool[normalizedNumber - 1];
+  }
+
+  const overflowPool = EXPEDITION_CALLSIGN_OVERFLOW[typeId] ?? EXPEDITION_CALLSIGN_OVERFLOW.fallback;
+  const overflowIndex = normalizedNumber - pool.length - 1;
+  const prefix = overflowPool.prefixes[overflowIndex % overflowPool.prefixes.length];
+  const suffix = overflowPool.suffixes[Math.floor(overflowIndex / overflowPool.prefixes.length) % overflowPool.suffixes.length];
+  return `${prefix} ${suffix}`;
+}
+
+export function formatExpeditionDisplayName(expedition) {
+  const expeditionNumber = Math.max(1, Number(expedition?.expeditionNumber ?? 1) || 1);
+  const expeditionTypeId = String(expedition?.typeId ?? "resourceRun").trim() || "resourceRun";
+  const expeditionCallsign =
+    String(expedition?.expeditionCallsign ?? getExpeditionCallsign(expeditionTypeId, expeditionNumber)).trim() ||
+    getExpeditionCallsign(expeditionTypeId, expeditionNumber);
+  return String(expedition?.expeditionLabel ?? "").trim() || `Expedition ${expeditionNumber}: ${expeditionCallsign}`;
 }
 
 function getExpeditionType(typeId) {
@@ -1834,6 +2139,16 @@ function createUniqueCitizen(state, expedition) {
     joinedAt,
     status: "inCity",
     sourceTypeId: expeditionTypeId,
+    routeHistory: [
+      {
+        id: createId("legend-route"),
+        kind: "arrival",
+        label: identity.originLabel,
+        detail: identity.originMemory,
+        date: joinedAt,
+        dayOffset: state.calendar.dayOffset
+      }
+    ],
     ...identity
   };
 
@@ -1998,6 +2313,186 @@ function addCrystalBonuses(target, source) {
   for (const rarity of RARITY_ORDER) {
     target[rarity] = (Number(target[rarity]) || 0) + (Number(source?.[rarity] ?? 0) || 0);
   }
+}
+
+function createExpeditionAftermath(state, expedition, config = {}) {
+  const durationDays = Math.max(3, Number(config.durationDays ?? 8) || 8);
+  return normalizeExpeditionAftermath({
+    id: createId("expedition-aftermath"),
+    title: config.title,
+    summary: config.summary,
+    effectText: config.effectText,
+    iconKey: config.iconKey,
+    sourceMissionName: expedition.missionName ?? expedition.typeLabel ?? "Expedition",
+    severity: config.severity,
+    startedDayOffset: state.calendar.dayOffset,
+    expiresDayOffset: state.calendar.dayOffset + durationDays,
+    startedAt: formatDate(state.calendar.dayOffset),
+    expiresAt: formatDate(state.calendar.dayOffset + durationDays),
+    effects: config.effects
+  });
+}
+
+function createExpeditionFollowUp(state, expedition, aftermath, config = {}) {
+  return normalizeExpeditionFollowUp({
+    id: createId("expedition-follow-up"),
+    aftermathId: aftermath?.id ?? null,
+    title: config.title,
+    detail: config.detail,
+    iconKey: config.iconKey ?? aftermath?.iconKey ?? "route",
+    sourceMissionName: expedition.missionName ?? expedition.typeLabel ?? "Expedition",
+    urgency: config.urgency ?? "medium",
+    createdDayOffset: state.calendar.dayOffset,
+    options: config.options
+  });
+}
+
+function buildExpeditionAftermathPackage(state, expedition, rewards, journeyProjection = null) {
+  const modifiers = new Set([...(rewards.modifiers ?? []), ...(journeyProjection?.modifiers ?? [])]);
+
+  if (modifiers.has("Unexpected Survivors")) {
+    const aftermath = createExpeditionAftermath(state, expedition, {
+      title: "Recovered Families",
+      summary: "The return brought in extra survivors who need shelter and civic steadiness for a short stretch.",
+      effectText: "+6 prosperity and +4 morale while the city absorbs the newcomers.",
+      iconKey: "citizens",
+      severity: "boon",
+      durationDays: 10,
+      effects: { stats: { prosperity: 6, morale: 4, populationSupport: 40 } }
+    });
+    const followUp = createExpeditionFollowUp(state, expedition, aftermath, {
+      title: "Recovered families need placement",
+      detail: "The returnees can be folded into the city carefully or settled quickly for immediate relief.",
+      urgency: "medium",
+      iconKey: "citizens",
+      options: [
+        {
+          id: "settle-carefully",
+          label: "Settle Carefully",
+          summary: "Lean into a longer civic welcome.",
+          outcome: "Extended the recovered-families boon with a steadier civic response.",
+          effects: { stats: { morale: 3, health: 2 } },
+          durationDeltaDays: 4
+        },
+        {
+          id: "settle-fast",
+          label: "Settle Fast",
+          summary: "Convert the arrivals into immediate labor and stores.",
+          outcome: "Converted part of the return into immediate food and materials.",
+          effects: { resources: { food: 20, materials: 16 } },
+          durationDeltaDays: -2
+        }
+      ]
+    });
+    return { aftermath, followUp };
+  }
+
+  if (modifiers.has("Arcane Windfall")) {
+    const aftermath = createExpeditionAftermath(state, expedition, {
+      title: "Open Ley Window",
+      summary: "The return disturbed a useful arcane channel that will hum for a few days.",
+      effectText: "+1.5 mana/day and +5 prestige while the ley window holds.",
+      iconKey: "mana",
+      severity: "boon",
+      durationDays: 9,
+      effects: { resources: { mana: 1.5 }, stats: { prestige: 5 } }
+    });
+    const followUp = createExpeditionFollowUp(state, expedition, aftermath, {
+      title: "A ley window is still open",
+      detail: "You can harvest it aggressively or stabilize it for a safer, longer benefit.",
+      urgency: "high",
+      iconKey: "mana",
+      options: [
+        {
+          id: "harvest-window",
+          label: "Harvest It",
+          summary: "Take immediate mana before the channel fades.",
+          outcome: "Drew immediate mana from the unstable ley window.",
+          effects: { resources: { mana: 24 } },
+          durationDeltaDays: -3
+        },
+        {
+          id: "stabilize-window",
+          label: "Stabilize It",
+          summary: "Extend the benefit and soften the instability.",
+          outcome: "Stabilized the ley window for a longer arcane dividend.",
+          effects: { stats: { prestige: 2 }, resources: { mana: 0.5 } },
+          durationDeltaDays: 4
+        }
+      ]
+    });
+    return { aftermath, followUp };
+  }
+
+  if (modifiers.has("Lost Supplies")) {
+    const aftermath = createExpeditionAftermath(state, expedition, {
+      title: "Shaken Logistics",
+      summary: "The return line came back strained and local stores are compensating for the disruption.",
+      effectText: "-1 food/day, -1 materials/day, and -4 morale until the route quiets down.",
+      iconKey: "supplies",
+      severity: "strain",
+      durationDays: 8,
+      effects: { resources: { food: -1, materials: -1 }, stats: { morale: -4 } }
+    });
+    const followUp = createExpeditionFollowUp(state, expedition, aftermath, {
+      title: "Repair the shaken route",
+      detail: "The city can absorb the loss and restore discipline, or patch it with salvage and move on.",
+      urgency: "high",
+      iconKey: "supplies",
+      options: [
+        {
+          id: "stabilize-route",
+          label: "Stabilize It",
+          summary: "Reduce the strain at the cost of supplies now.",
+          outcome: "Spent stores to settle the shaken route.",
+          effects: { resources: { food: -10, materials: -8 }, stats: { morale: 3 } },
+          durationDeltaDays: -4
+        },
+        {
+          id: "patch-route",
+          label: "Patch It",
+          summary: "Accept the strain and squeeze value back from salvage crews.",
+          outcome: "Patched the route with rough salvage work.",
+          effects: { resources: { salvage: 14 } },
+          durationDeltaDays: 0
+        }
+      ]
+    });
+    return { aftermath, followUp };
+  }
+
+  if (expedition.typeId === "diplomatic" && rewards.resources?.gold > 0) {
+    return {
+      aftermath: createExpeditionAftermath(state, expedition, {
+        title: "Open Trade Window",
+        summary: "The diplomatic route left local buyers and brokers unusually receptive for a short while.",
+        effectText: "+1.2 gold/day and +4 prosperity while the window stays open.",
+        iconKey: "gold",
+        severity: "boon",
+        durationDays: 7,
+        effects: { resources: { gold: 1.2 }, stats: { prosperity: 4 } }
+      }),
+      followUp: null
+    };
+  }
+
+  return { aftermath: null, followUp: null };
+}
+
+function pruneExpeditionThreads(state) {
+  state.expeditions = normalizeExpeditionState(state.expeditions);
+  const currentDay = Number(state.calendar?.dayOffset ?? 0) || 0;
+  const activeAftermathIds = new Set();
+  state.expeditions.aftermaths = (state.expeditions.aftermaths ?? []).filter((entry) => {
+    const keep = Number(entry.expiresDayOffset ?? 0) >= currentDay;
+    if (keep) {
+      activeAftermathIds.add(entry.id);
+    }
+    return keep;
+  });
+  state.expeditions.followUps = (state.expeditions.followUps ?? []).filter(
+    (entry) => !entry.chosenOptionId && (!entry.aftermathId || activeAftermathIds.has(entry.aftermathId))
+  );
 }
 
 function createJourneyOption({ id, label, summary, effects = {} }) {
@@ -2648,6 +3143,9 @@ function resolveExpeditionReturn(state, expedition, returnDayOffset = state.cale
   }
 
   return createExpeditionRecentRecord({
+    expeditionNumber: expedition.expeditionNumber,
+    expeditionCallsign: expedition.expeditionCallsign,
+    expeditionLabel: expedition.expeditionLabel,
     typeId: expedition.typeId,
     typeLabel: expedition.typeLabel,
     missionId: expedition.missionId,
@@ -2884,9 +3382,15 @@ export function startExpedition(state, payload) {
     preview.buildingSynergy
   );
   const actualSuccessScore = actualDifficultyScore > 0 ? actualPowerScore / actualDifficultyScore : 1;
+  const expeditionNumber = Math.max(1, Number(state.expeditions.nextExpeditionNumber ?? 1) || 1);
+  const expeditionCallsign = getExpeditionCallsign(preview.expeditionType.id, expeditionNumber);
+  const expeditionLabel = `Expedition ${expeditionNumber}: ${expeditionCallsign}`;
 
   const expedition = {
     id: createId("expedition"),
+    expeditionNumber,
+    expeditionCallsign,
+    expeditionLabel,
     typeId: preview.expeditionType.id,
     typeLabel: preview.expeditionType.label,
     missionId: preview.mission.id,
@@ -2917,11 +3421,12 @@ export function startExpedition(state, payload) {
   };
 
   state.expeditions.active = [...state.expeditions.active, expedition];
+  state.expeditions.nextExpeditionNumber = expeditionNumber + 1;
   state.expeditions.board = (state.expeditions.board ?? []).filter((mission) => mission.id !== preview.mission.id);
   addHistoryEntry(state, {
     category: "Expedition",
-    title: `Departure: ${expedition.missionName}`,
-    details: `${expedition.missionName} departed on ${expedition.departedAt} aboard the ${expedition.vehicleName}. Expected return ${expedition.expectedReturnAt}.`
+    title: `Departure: ${expedition.expeditionLabel}`,
+    details: `${expedition.expeditionLabel} departed for ${expedition.missionName} on ${expedition.departedAt} aboard the ${expedition.vehicleName}. Expected return ${expedition.expectedReturnAt}.`
   });
 
   return { ok: true, expedition, preview };

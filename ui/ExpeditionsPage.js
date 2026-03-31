@@ -7,6 +7,7 @@ import { VEHICLE_DEFINITIONS, VEHICLE_ORDER } from "../content/VehicleConfig.js"
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import {
   createExpeditionLaunchPreview,
+  formatExpeditionDisplayName,
   getAvailableExpeditionCitizenCount,
   getAvailableVehicleCounts,
   getCurrentPendingExpeditionJourney,
@@ -300,7 +301,7 @@ function renderActiveExpeditions(state) {
         ${active.map((expedition) => `
           <article class="expedition-return-card">
             <div class="expedition-return-card__head">
-              <strong>${escapeHtml(expedition.missionName ?? expedition.typeLabel)}</strong>
+              <strong>${escapeHtml(formatExpeditionDisplayName(expedition))}</strong>
               <span>${escapeHtml(expedition.vehicleName)}</span>
             </div>
             <p>${escapeHtml(expedition.missionSummary ?? expedition.notes)}</p>
@@ -334,7 +335,7 @@ function renderRecentReturns(state) {
               ${recent.map((record) => `
                 <article class="expedition-return-card">
                   <div class="expedition-return-card__head">
-                    <strong>${escapeHtml(record.missionName ?? record.typeLabel)}</strong>
+                    <strong>${escapeHtml(formatExpeditionDisplayName(record))}</strong>
                     <span>${escapeHtml(record.outcomeLabel)}</span>
                   </div>
                   <p>${escapeHtml(record.narrative ?? record.summary)}</p>
@@ -378,7 +379,7 @@ function renderPendingJourneyPanel(state) {
       </div>
       <div class="expedition-preview-grid">
         <article><span>Waiting</span><strong>${formatNumber(pending.length, 0)}</strong></article>
-        <article><span>Current Route</span><strong>${escapeHtml(currentJourney.expedition.missionName ?? currentJourney.expedition.typeLabel)}</strong></article>
+        <article><span>Current Route</span><strong>${escapeHtml(formatExpeditionDisplayName(currentJourney.expedition))}</strong></article>
         <article><span>Stage</span><strong>${formatNumber(Math.min(currentJourney.currentStageIndex + 1, currentJourney.stages.length), 0)} / ${formatNumber(currentJourney.stages.length, 0)}</strong></article>
         <article><span>Projected Outcome</span><strong>${escapeHtml(projection.outcomeLabel)}</strong></article>
       </div>
@@ -395,7 +396,7 @@ function renderPendingJourneyPanel(state) {
           .map((journey) => `
             <article class="expedition-return-card">
               <div class="expedition-return-card__head">
-                <strong>${escapeHtml(journey.expedition.missionName ?? journey.expedition.typeLabel)}</strong>
+                <strong>${escapeHtml(formatExpeditionDisplayName(journey.expedition))}</strong>
                 <span>${formatNumber(Math.min(journey.currentStageIndex + 1, journey.stages.length), 0)} / ${formatNumber(journey.stages.length, 0)}</span>
               </div>
               <p>${escapeHtml(journey.expedition.missionSummary ?? journey.expedition.notes ?? "Returned expedition awaiting debrief.")}</p>

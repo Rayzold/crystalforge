@@ -1,5 +1,6 @@
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import {
+  formatExpeditionDisplayName,
   getCurrentPendingExpeditionJourney,
   getExpeditionJourneyOptionPreview,
   getExpeditionJourneyProjection
@@ -84,7 +85,7 @@ export function renderExpeditionJourneyModal(state) {
         <div class="expedition-journey-modal__header">
           <div>
             <span>Journey Debrief${queueCount > 1 ? ` / ${queueCount} waiting` : ""}</span>
-            <h3 id="expedition-journey-title">${escapeHtml(journey.expedition.missionName ?? journey.expedition.typeLabel)}</h3>
+            <h3 id="expedition-journey-title">${escapeHtml(formatExpeditionDisplayName(journey.expedition))}</h3>
             <p>${escapeHtml(journey.expedition.missionSummary ?? journey.expedition.notes ?? "Returned expedition awaiting route decisions.")}</p>
           </div>
           <div class="expedition-journey-modal__pillbox">
