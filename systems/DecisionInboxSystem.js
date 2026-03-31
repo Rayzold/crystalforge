@@ -106,7 +106,8 @@ function createCouncilDecision(state) {
 }
 
 function createEmergencyDecisions(state, pageKey) {
-  const emergencies = getEmergencyStatus(state);
+  const emergencyState = getEmergencyStatus(state);
+  const emergencies = Array.isArray(emergencyState?.emergencies) ? emergencyState.emergencies : [];
   return emergencies.slice(0, 3).map((emergency, index) => ({
     id: `problem:${emergency.key}`,
     urgency: emergency.severity === "critical" ? "critical" : "high",
