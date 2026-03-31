@@ -40,22 +40,38 @@ function Get-AppVersion {
   return $match.Matches[0].Groups[1].Value
 }
 
+function Invoke-GitChecked {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string[]]$Arguments
+  )
+
+  $output = & $git @Arguments 2>&1
+  $exitCode = $LASTEXITCODE
+  if ($exitCode -ne 0) {
+    $joinedOutput = ($output | ForEach-Object { "$_" }) -join [Environment]::NewLine
+    throw "git $($Arguments -join ' ') failed with exit code $exitCode.`n$joinedOutput"
+  }
+
+  return $output
+}
+
 $git = Get-GitExecutable
 $version = Get-AppVersion
 
 Push-Location $scriptRoot
 try {
-  & $git rev-parse --is-inside-work-tree | Out-Null
-  & $git add .
+  Invoke-GitChecked -Arguments @("rev-parse", "--is-inside-work-tree") | Out-Null
+  Invoke-GitChecked -Arguments @("add", ".") | Out-Null
 
-  $status = & $git status --porcelain
+  $status = Invoke-GitChecked -Arguments @("status", "--porcelain")
   if (-not $status) {
     Write-Host "No changes to release. Current build is $version" -ForegroundColor Yellow
     exit 0
   }
 
-  & $git commit -m $version
-  & $git push origin main
+  Invoke-GitChecked -Arguments @("commit", "-m", $version) | Out-Null
+  Invoke-GitChecked -Arguments @("push", "origin", "main") | Out-Null
 
   Write-Host "Released $version to origin/main" -ForegroundColor Green
 }

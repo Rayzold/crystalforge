@@ -8,7 +8,7 @@ import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
 // APP_VERSION must stay monotonic because Firebase publish safety compares builds numerically.
-export const APP_VERSION = "v1.6.8";
+export const APP_VERSION = "v1.6.9";
 // Release maturity is tracked separately so unreleased builds do not need to pretend they are public/stable.
 export const APP_RELEASE_STAGE = "preview";
 const RELEASE_STAGE_LABELS = {

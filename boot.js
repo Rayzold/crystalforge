@@ -1,4 +1,4 @@
-const APP_ENTRY = "./app.js?v=1.6.8";
+const APP_ENTRY = "./app.js?v=1.6.9";
 
 function getBootFailureTitle() {
   const page = String(document.body?.dataset?.page ?? "forge").trim();
