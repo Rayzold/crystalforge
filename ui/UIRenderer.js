@@ -1,6 +1,9 @@
 // Top-level page renderer.
 // It selects the correct page shell/content for the current route and injects
 // transient overlays like modals, help bubbles, and reveal states.
+import { APP_VERSION } from "../content/Config.js";
+import { getSeenBuildNotesVersion } from "../systems/StorageSystem.js";
+import { renderBuildNotesModal } from "./BuildNotesModal.js";
 import { renderChroniclePage } from "./ChroniclePage.js";
 import { renderBuildingDetailModal } from "./BuildingDetailModal.js";
 import { renderBuildingCatalogModal } from "./BuildingCatalogModal.js";
@@ -16,6 +19,7 @@ import { renderHomeHelpModal } from "./HomeHelpModal.js";
 import { renderManifestCompleteModal } from "./ManifestCompleteModal.js";
 import { renderPageShell } from "./PageShell.js";
 import { renderPlayerPage } from "./PlayerPage.js";
+import { renderResourceBreakdownModal } from "./ResourceBreakdownModal.js";
 import { renderTownFocusCouncilModal } from "./TownFocusCouncilModal.js";
 import { renderTurnSummaryModal } from "./TurnSummaryModal.js";
 import { renderUniqueCitizensPage } from "./UniqueCitizensPage.js";
@@ -66,6 +70,11 @@ export class UIRenderer {
       focusCeremony: null,
       manifestCompleteModal: null,
       expeditionJourneyOpen: false,
+      buildNotesOpen: false,
+      buildNotesPromptedVersion: null,
+      decisionInboxShowSnoozed: false,
+      deferredTurnSummary: null,
+      resourceBreakdownKey: null,
       manifestInProgress: false,
       firebasePublishedMeta: null,
       firebaseConnectionState: "idle",
@@ -103,6 +112,21 @@ export class UIRenderer {
     }
   }
 
+  syncBuildNotesModal() {
+    if (this.pageKey === "player") {
+      return;
+    }
+    if (this.transientUi.buildNotesPromptedVersion === APP_VERSION) {
+      return;
+    }
+    if (getSeenBuildNotesVersion() === APP_VERSION) {
+      this.transientUi.buildNotesPromptedVersion = APP_VERSION;
+      return;
+    }
+    this.transientUi.buildNotesOpen = true;
+    this.transientUi.buildNotesPromptedVersion = APP_VERSION;
+  }
+
   resolvePage(state) {
     switch (this.pageKey) {
       case "forge":
@@ -133,16 +157,19 @@ export class UIRenderer {
 
   render(state) {
     this.syncCouncilModal(state);
+    this.syncBuildNotesModal();
     const viewState = {
       ...state,
       transientUi: this.transientUi
     };
     const page = this.resolvePage(viewState);
     const overlays = [
+      renderBuildNotesModal(viewState),
       renderBuildingDetailModal(viewState, this.pageKey),
       renderBuildingCatalogModal(viewState),
       renderHomeHelpModal(viewState),
       renderManifestCompleteModal(viewState),
+      renderResourceBreakdownModal(viewState),
       renderExpeditionJourneyModal(viewState),
       renderTownFocusCouncilModal(viewState),
       renderTownFocusCeremonyOverlay(viewState),

@@ -2,79 +2,17 @@ import { renderUiIcon } from "./UiIcons.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { getStructuredDate } from "../systems/CalendarSystem.js";
 import { formatBuildingExactQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js";
+import { getOnboardingGoals, getRealmGoals as getRealmGoalCards } from "../systems/GoalSystem.js";
 import { getMayorAdvice, getTownFocusAvailability } from "../systems/TownFocusSystem.js";
 import { getCityTrendSummary } from "../systems/ResourceSystem.js";
 import { renderBuildingArt } from "./BuildingArt.js";
 
 function getHomeProgress(state) {
-  const hasBuilding = state.buildings.length > 0;
-  const hasPlacedBuilding = state.buildings.some((building) => building.mapPosition);
-  const hasCompletedBuilding = state.buildings.some((building) => building.isComplete);
-  const hasEventFootprint = state.events.active.length > 0 || state.events.recent.length > 0;
-
-  return [
-    {
-      title: "Create a building",
-      details: "Manifest your first structure from the Forge.",
-      complete: hasBuilding,
-      href: "./forge.html",
-      cta: hasBuilding ? "Open Forge" : "Manifest First Building"
-    },
-    {
-      title: "Place it in the city",
-      details: "Claim a district and give the building a home.",
-      complete: hasPlacedBuilding,
-      href: "./city.html",
-      cta: hasPlacedBuilding ? "Open City" : "Place First Building"
-    },
-    {
-      title: "Raise it to life",
-      details: "Advance time until at least one building becomes active.",
-      complete: hasCompletedBuilding,
-      href: "./city.html",
-      cta: hasCompletedBuilding ? "Review Incubation" : "Advance Construction"
-    },
-    {
-      title: "Read the realm",
-      details: "Check Chronicle once the city starts generating history.",
-      complete: hasEventFootprint,
-      href: "./chronicle.html",
-      cta: hasEventFootprint ? "Open Chronicle" : "Read Chronicle"
-    }
-  ];
+  return getOnboardingGoals(state);
 }
 
 function getRealmGoals(state) {
-  const activeBuildings = state.buildings.filter((building) => building.isComplete).length;
-  const placedBuildings = state.buildings.filter((building) => building.mapPosition).length;
-  const recordedSignals = state.historyLog.length;
-
-  return [
-    {
-      title: "Stabilize the first district",
-      details: "Reach 1 active building so the city begins producing real output.",
-      progress: activeBuildings,
-      target: 1,
-      href: "./city.html"
-    },
-    {
-      title: "Claim the outer ring",
-      details: "Place 3 buildings to give Drift a usable footprint.",
-      progress: placedBuildings,
-      target: 3,
-      href: "./city.html"
-    },
-    {
-      title: "Build a living record",
-      details: "Create 5 chronicle entries so the world starts answering back.",
-      progress: recordedSignals,
-      target: 5,
-      href: "./chronicle.html"
-    }
-  ].map((goal) => ({
-    ...goal,
-    complete: goal.progress >= goal.target
-  }));
+  return getRealmGoalCards(state);
 }
 
 function getQualityMultiplierReadout(building) {
@@ -242,13 +180,18 @@ function renderHomeRouteDeck() {
 }
 
 function renderOnboardingPanel(state) {
+  const progress = getHomeProgress(state);
+  const completedCount = progress.filter((step) => step.complete).length;
+  const currentStep = progress.find((step) => !step.complete) ?? progress[progress.length - 1];
+  const currentStepIndex = Math.max(0, progress.findIndex((step) => step.id === currentStep.id));
+
   if (state.settings.onboardingDismissed) {
     return `
       <section class="scene-panel scene-panel--compact">
         <div class="panel__header">
           <div>
             <h3>First Session</h3>
-            <span class="panel__subtle">Bring back the step-by-step guide whenever you want it.</span>
+            <span class="panel__subtle">Next up: ${escapeHtml(currentStep.title)}.</span>
           </div>
           <button class="button button--ghost" data-action="show-onboarding">Show Guide</button>
         </div>
@@ -256,29 +199,45 @@ function renderOnboardingPanel(state) {
     `;
   }
 
-  const progress = getHomeProgress(state);
-  const completedCount = progress.filter((step) => step.complete).length;
-
   return `
-    <section class="scene-panel">
+    <section class="scene-panel onboarding-panel">
       <div class="panel__header">
         <div>
           <h3>First Session</h3>
-          <span class="panel__subtle">${completedCount} / ${progress.length} steps complete</span>
+          <span class="panel__subtle">${completedCount} / ${progress.length} phases complete</span>
         </div>
         <button class="button button--ghost" data-action="dismiss-onboarding">Hide Guide</button>
       </div>
+      <article class="onboarding-panel__current">
+        <div>
+          <span>Current Objective</span>
+          <strong>${escapeHtml(currentStep.title)}</strong>
+          <p>${escapeHtml(currentStep.details)}</p>
+          <small>${escapeHtml(currentStep.impact)}</small>
+        </div>
+        <div class="onboarding-panel__current-actions">
+          <em>Stage ${formatNumber(currentStepIndex + 1, 0)} / ${formatNumber(progress.length, 0)}</em>
+          <strong>${escapeHtml(currentStep.complete ? "Arc Complete" : currentStep.progressText)}</strong>
+          <small class="goal-reward-pill ${currentStep.claimed ? "is-claimed" : ""}">${escapeHtml(currentStep.claimed ? `Reward claimed: ${currentStep.rewardLabel}` : `Reward: ${currentStep.rewardLabel}`)}</small>
+          <a class="button" href="${currentStep.href}">${escapeHtml(currentStep.cta)}</a>
+        </div>
+      </article>
       <div class="onboarding-grid">
         ${progress
           .map(
             (step, index) => `
-              <article class="onboarding-card ${step.complete ? "is-complete" : ""}">
-                <span class="onboarding-card__index">0${index + 1}</span>
+              <article class="onboarding-card ${step.complete ? "is-complete" : ""} ${step.id === currentStep.id ? "is-current" : ""}">
+                <div class="onboarding-card__head">
+                  <span class="onboarding-card__index">${escapeHtml(step.phase)}</span>
+                  <strong class="onboarding-card__status">${step.complete ? "Complete" : step.id === currentStep.id ? "Current Objective" : `Stage ${formatNumber(index + 1, 0)}`}</strong>
+                </div>
                 <h4>${escapeHtml(step.title)}</h4>
                 <p>${escapeHtml(step.details)}</p>
+                <small class="onboarding-card__impact">${escapeHtml(step.impact)}</small>
                 <div class="onboarding-card__footer">
-                  <strong>${step.complete ? "Completed" : "Recommended next"}</strong>
-                  <a class="button button--ghost" href="${step.href}">${escapeHtml(step.cta)}</a>
+                  <strong>${escapeHtml(step.progressText)}</strong>
+                  <span class="goal-reward-pill ${step.claimed ? "is-claimed" : ""}">${escapeHtml(step.claimed ? "Reward claimed" : step.rewardLabel)}</span>
+                  <a class="button button--ghost" href="${step.href}">${escapeHtml(step.complete ? "Review" : step.cta)}</a>
                 </div>
               </article>
             `
@@ -305,6 +264,7 @@ function renderRealmGoals(state) {
                 <strong>${escapeHtml(goal.title)}</strong>
                 <span>${formatNumber(Math.min(goal.progress, goal.target), 0)} / ${formatNumber(goal.target, 0)}</span>
                 <p>${escapeHtml(goal.details)}</p>
+                <small class="goal-reward-pill ${goal.claimed ? "is-claimed" : ""}">${escapeHtml(goal.claimed ? `Reward claimed: ${goal.rewardLabel}` : `Reward: ${goal.rewardLabel}`)}</small>
                 <a class="button button--ghost" href="${goal.href}">${goal.complete ? "Review" : "Go There"}</a>
               </article>
             `

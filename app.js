@@ -52,6 +52,13 @@ import {
   pauseConstruction
 } from "./systems/ConstructionSystem.js";
 import { resetDistrictLevels, setDistrictDefinition, setDistrictLevelOverride, getDistrictSummary } from "./systems/DistrictSystem.js";
+import {
+  clearDecisionSnooze,
+  getDecisionInboxItems,
+  getTopDecisionInboxItem,
+  recordDecisionHistory,
+  setDecisionSnooze
+} from "./systems/DecisionInboxSystem.js";
 import { setDriftEvolutionStageOverride, syncDriftEvolutionState } from "./systems/DriftEvolutionSystem.js";
 import { clearActiveEvents, triggerEvent } from "./systems/EventSystem.js";
 import {
@@ -60,6 +67,8 @@ import {
   getCurrentPendingExpeditionJourney,
   getExpeditionCalendarEntries,
   hasPendingExpeditionJourneys,
+  setExpeditionRelicSlot,
+  setUniqueCitizenAssignment,
   normalizeExpeditionState,
   resolveExpeditionJourneyChoice,
   normalizeUniqueCitizens,
@@ -91,6 +100,7 @@ import {
   importSave,
   loadGameState,
   loadManualState,
+  markBuildNotesVersionSeen,
   resetSave,
   restoreSessionSnapshot,
   createSerializableState,
@@ -99,7 +109,8 @@ import {
   validateAndMigrateSave
 } from "./systems/StorageSystem.js";
 import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js";
-import { forceTownFocus, reopenTownFocusSelection, selectTownFocus, updateTownFocusAvailability } from "./systems/TownFocusSystem.js";
+import { applyCompletedGoalRewards } from "./systems/GoalSystem.js";
+import { forceTownFocus, getMayorAdvice, reopenTownFocusSelection, selectTownFocus, updateTownFocusAvailability } from "./systems/TownFocusSystem.js";
 import { getEmergencyStatus, getCityTrendSummary } from "./systems/ResourceSystem.js";
 import { Toasts } from "./ui/Toasts.js";
 import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js";
@@ -407,15 +418,33 @@ function syncDerivedState(state) {
   state.resources.population = Object.values(state.citizens).reduce((sum, value) => sum + value, 0);
   updateTownFocusAvailability(state);
   recalculateCityStats(state);
+  return applyCompletedGoalRewards(state);
+}
+
+function formatGoalRewardToast(rewards = []) {
+  if (!rewards.length) {
+    return "";
+  }
+  if (rewards.length === 1) {
+    return `${rewards[0].title} complete. ${rewards[0].rewardLabel} granted.`;
+  }
+  const titles = rewards.slice(0, 3).map((reward) => reward.title);
+  return `${rewards.length} goal rewards granted: ${titles.join(", ")}.`;
 }
 
 function commit(mutator) {
   let result;
+  let goalRewards = [];
   gameState.update((draft) => {
     result = mutator(draft);
-    syncDerivedState(draft);
+    goalRewards = syncDerivedState(draft) ?? [];
     return draft;
   });
+  if (goalRewards.length) {
+    const touchedResources = [...new Set(goalRewards.flatMap((reward) => reward.touchedResources ?? []))];
+    markRecentResourceChanges(touchedResources);
+    reportSuccess(formatGoalRewardToast(goalRewards), "confirm");
+  }
   return result;
 }
 
@@ -540,16 +569,49 @@ function createTurnSummary(previousState, nextState, days, advanceResult = null)
     .filter((building) => building.isComplete && !previousState.buildings.find((entry) => entry.id === building.id)?.isComplete)
     .map((building) => building.displayName)
     .slice(0, 6);
-  const previousEmergencyCount = getEmergencyStatus(previousState).emergencies.length;
-  const nextEmergencyCount = getEmergencyStatus(nextState).emergencies.length;
+  const previousEmergencyState = getEmergencyStatus(previousState);
+  const nextEmergencyState = getEmergencyStatus(nextState);
+  const previousEmergencyCount = previousEmergencyState.emergencies.length;
+  const nextEmergencyCount = nextEmergencyState.emergencies.length;
   const previousRecentKeys = new Set((previousState.events.recent ?? []).map((event) => `${event.id ?? event.name}-${event.startedDayOffset ?? ""}`));
   const newEventTitles = (nextState.events.recent ?? [])
     .filter((event) => !previousRecentKeys.has(`${event.id ?? event.name}-${event.startedDayOffset ?? ""}`))
     .map((event) => event.name)
     .slice(0, 6);
+  const previousLegendIds = new Set((previousState.uniqueCitizens ?? []).map((entry) => entry.id));
+  const newLegendNames = (nextState.uniqueCitizens ?? [])
+    .filter((entry) => !previousLegendIds.has(entry.id))
+    .map((entry) => entry.fullName)
+    .slice(0, 4);
   const expeditionJourneys = Array.isArray(advanceResult?.expeditionJourneys)
     ? advanceResult.expeditionJourneys.map((entry) => entry.expedition?.missionName ?? entry.expedition?.typeLabel ?? "Expedition").slice(0, 6)
     : [];
+  const severityValue = { warning: 1, critical: 2 };
+  const previousEmergenciesByKey = new Map(previousEmergencyState.emergencies.map((entry) => [entry.key, entry]));
+  const nextEmergenciesByKey = new Map(nextEmergencyState.emergencies.map((entry) => [entry.key, entry]));
+  const riskShifts = nextEmergencyState.emergencies
+    .filter((entry) => {
+      const previous = previousEmergenciesByKey.get(entry.key);
+      return !previous || (severityValue[entry.severity] ?? 0) > (severityValue[previous.severity] ?? 0);
+    })
+    .slice(0, 3)
+    .map((entry) => ({
+      ...entry,
+      changeLabel: previousEmergenciesByKey.has(entry.key) ? "Worsened" : "New"
+    }));
+  const stabilizedRisks = previousEmergencyState.emergencies
+    .flatMap((entry) => {
+      const current = nextEmergenciesByKey.get(entry.key);
+      if (!current) {
+        return [`${entry.label} cleared.`];
+      }
+      if ((severityValue[current.severity] ?? 0) < (severityValue[entry.severity] ?? 0)) {
+        return [`${entry.label} eased to ${current.severity}.`];
+      }
+      return [];
+    })
+    .slice(0, 3);
+  const nextAttention = getMayorAdvice(nextState).slice(0, 2);
 
   return {
     days,
@@ -566,12 +628,16 @@ function createTurnSummary(previousState, nextState, days, advanceResult = null)
       };
     }),
     completedBuildings,
+    newLegendNames,
     emergencyCount: {
       before: previousEmergencyCount,
       after: nextEmergencyCount
     },
     newEventTitles,
-    expeditionJourneys
+    expeditionJourneys,
+    riskShifts,
+    stabilizedRisks,
+    nextAttention
   };
 }
 
@@ -1238,6 +1304,10 @@ function resetTransientUi() {
       catalogOpen: false,
       manifestCompleteModal: null,
       expeditionJourneyOpen: false,
+      buildNotesOpen: false,
+      decisionInboxShowSnoozed: false,
+      deferredTurnSummary: null,
+      resourceBreakdownKey: null,
       turnSummaryModal: null,
       mapOverlay: "District",
       mapLegendOpen: true,
@@ -2199,8 +2269,54 @@ function openPendingExpeditionJourney() {
   return true;
 }
 
+function getDecisionInboxItemById(decisionId) {
+  return getDecisionInboxItems(getCurrentState(), pageKey, { includeSnoozed: true }).find((item) => item.id === decisionId) ?? null;
+}
+
+function resolveDecisionInboxItem(decisionId) {
+  const item = getDecisionInboxItemById(decisionId);
+  if (!item) {
+    reportError("That pending decision is no longer available.");
+    return;
+  }
+
+  if (item.action === "open-expedition-journey") {
+    openPendingExpeditionJourney();
+    return;
+  }
+
+  if (item.action === "open-town-focus-modal") {
+    openTownFocusModal();
+    return;
+  }
+
+  if (item.action === "go-to-problem") {
+    actions.goToProblem(item.problemKey ?? item.actionData?.problem ?? "overview");
+    return;
+  }
+
+  if (item.href) {
+    navigateWithTransition(item.href);
+    return;
+  }
+
+  reportError("That decision does not have a destination yet.");
+}
+
 function resolveExpeditionJourneyOption(journeyId, optionId) {
-  const result = commit((draft) => resolveExpeditionJourneyChoice(draft, journeyId, optionId));
+  const result = commit((draft) => {
+    const nextResult = resolveExpeditionJourneyChoice(draft, journeyId, optionId);
+    if (nextResult?.ok) {
+      recordDecisionHistory(draft, {
+        kind: "journey",
+        title: nextResult.journey?.expedition?.missionName ?? nextResult.journey?.expedition?.typeLabel ?? "Expedition debrief",
+        detail: nextResult.stage?.prompt ?? nextResult.journey?.expedition?.missionSummary ?? "Journey choice resolved.",
+        outcome: nextResult.stage?.chosenLabel ?? "Journey choice locked in",
+        iconKey: "route"
+      });
+    }
+    return nextResult;
+  });
   if (!result?.ok) {
     reportError(result?.reason ?? "That expedition choice could not be resolved.");
     return;
@@ -2209,8 +2325,26 @@ function resolveExpeditionJourneyOption(journeyId, optionId) {
   const nextState = getCurrentState();
   if (result.completed) {
     highlightResolvedExpeditionJourney(result.record);
-    renderer.setTransientUi({ expeditionJourneyOpen: hasPendingExpeditionJourneys(nextState) }, nextState);
-    reportSuccess(`${result.record.missionName ?? result.record.typeLabel} debrief resolved. Rewards granted.`, "confirm");
+    const journeysStillPending = hasPendingExpeditionJourneys(nextState);
+    const deferredTurnSummary = renderer.transientUi.deferredTurnSummary ?? null;
+    renderer.setTransientUi(
+      {
+        expeditionJourneyOpen: journeysStillPending,
+        turnSummaryModal: !journeysStillPending ? deferredTurnSummary : null,
+        deferredTurnSummary: journeysStillPending ? deferredTurnSummary : null
+      },
+      nextState
+    );
+    const rewardHighlights = [
+      result.record?.rewards?.relic ? `${result.record.rewards.relic.name} recovered.` : "",
+      result.record?.rewards?.uniqueCitizen ? `${result.record.rewards.uniqueCitizen.fullName} joined the Drift.` : ""
+    ]
+      .filter(Boolean)
+      .join(" ");
+    reportSuccess(
+      `${result.record.missionName ?? result.record.typeLabel} debrief resolved. Rewards granted.${rewardHighlights ? ` ${rewardHighlights}` : ""}`,
+      "confirm"
+    );
     return;
   }
 
@@ -2232,7 +2366,7 @@ function advanceTimeWithJourneyGuard(runAdvance) {
   markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
 
   if (result?.expeditionJourneys?.length) {
-    renderer.setTransientUi({ expeditionJourneyOpen: true, turnSummaryModal: null }, nextState);
+    renderer.setTransientUi({ expeditionJourneyOpen: true, turnSummaryModal: null, deferredTurnSummary: turnSummary }, nextState);
     playTurnAdvanceEffect(previousState, nextState, turnSummary);
     reportSuccess(
       `Advanced ${result.days} days. ${result.expeditionJourneys.length} expedition debrief${result.expeditionJourneys.length === 1 ? "" : "s"} waiting.`,
@@ -2241,7 +2375,7 @@ function advanceTimeWithJourneyGuard(runAdvance) {
     return;
   }
 
-  renderer.setTransientUi({ turnSummaryModal: turnSummary }, nextState);
+  renderer.setTransientUi({ turnSummaryModal: turnSummary, deferredTurnSummary: null }, nextState);
   playTurnAdvanceEffect(previousState, nextState, turnSummary);
   reportSuccess(`Advanced ${result.days} days.`);
 }
@@ -2376,7 +2510,17 @@ const actions = {
       if (!draft.townFocus.isSelectionPending) {
         return { ok: false, reason: "The council cannot change focus yet." };
       }
-      return selectTownFocus(draft, focusId, "Council");
+      const nextResult = selectTownFocus(draft, focusId, "Council");
+      if (nextResult?.ok) {
+        recordDecisionHistory(draft, {
+          kind: "council",
+          title: "Town focus due",
+          detail: "The council chamber set a new policy direction for the next stretch of planning.",
+          outcome: `${nextResult.focus.name} selected`,
+          iconKey: "calendar"
+        });
+      }
+      return nextResult;
     });
     if (!result.ok) {
       reportError(result.reason);
@@ -2932,6 +3076,26 @@ root.addEventListener("click", async (event) => {
         draft.settings.quickManifestations = draft.settings.quickManifestations !== true;
       });
       break;
+    case "set-ui-density":
+      commit((draft) => {
+        draft.settings.uiDensity = ["comfort", "compact", "dense"].includes(target.dataset.density) ? target.dataset.density : "compact";
+      });
+      break;
+    case "open-build-notes":
+      void audioEngine.playUiAccent("soft");
+      renderer.setTransientUi({ buildNotesOpen: true, buildNotesPromptedVersion: APP_VERSION }, getCurrentState());
+      break;
+    case "close-build-notes":
+      void audioEngine.playUiAccent("soft");
+      markBuildNotesVersionSeen(APP_VERSION);
+      renderer.setTransientUi({ buildNotesOpen: false, buildNotesPromptedVersion: APP_VERSION }, getCurrentState());
+      break;
+    case "open-build-notes-help":
+      void audioEngine.playUiAccent("soft");
+      markBuildNotesVersionSeen(APP_VERSION);
+      renderer.setTransientUi({ buildNotesOpen: false, buildNotesPromptedVersion: APP_VERSION }, getCurrentState());
+      window.location.assign(target.dataset.href ?? "./help.html");
+      break;
     case "advance-time": {
       advanceTimeWithJourneyGuard((draft) => advanceTime(draft, target.dataset.step));
       break;
@@ -2971,6 +3135,124 @@ root.addEventListener("click", async (event) => {
       void audioEngine.playUiAccent("soft");
       actions.openTownFocusModal();
       break;
+    case "resolve-next-decision": {
+      void audioEngine.playUiAccent("soft");
+      const nextItem = getTopDecisionInboxItem(getCurrentState(), pageKey);
+      if (!nextItem) {
+        reportSuccess("No pending decisions are waiting right now.");
+        break;
+      }
+      resolveDecisionInboxItem(nextItem.id);
+      break;
+    }
+    case "resolve-decision-item":
+      void audioEngine.playUiAccent("soft");
+      resolveDecisionInboxItem(target.dataset.decisionId ?? "");
+      break;
+    case "snooze-decision-item": {
+      void audioEngine.playUiAccent("soft");
+      const decisionId = target.dataset.decisionId ?? "";
+      const item = getDecisionInboxItemById(decisionId);
+      if (!item) {
+        reportError("That pending decision is no longer available.");
+        break;
+      }
+      if (item.snoozeable === false) {
+        reportError("That decision cannot be snoozed.");
+        break;
+      }
+      const snoozeDays = Math.max(1, Number(item.snoozeDays ?? 3) || 3);
+      commit((draft) => {
+        setDecisionSnooze(draft, decisionId, snoozeDays);
+        recordDecisionHistory(draft, {
+          kind: "snoozed",
+          title: item.title,
+          detail: item.detail,
+          outcome: `Snoozed for ${snoozeDays} day(s)`,
+          iconKey: item.iconKey ?? "route"
+        });
+      });
+      reportSuccess(`${item.title} snoozed for ${snoozeDays} day(s).`);
+      break;
+    }
+    case "clear-decision-snooze": {
+      void audioEngine.playUiAccent("soft");
+      const decisionId = target.dataset.decisionId ?? "";
+      const item = getDecisionInboxItemById(decisionId);
+      commit((draft) => {
+        clearDecisionSnooze(draft, decisionId);
+        recordDecisionHistory(draft, {
+          kind: "unsnoozed",
+          title: item?.title ?? "Pending decision",
+          detail: item?.detail ?? "A snoozed decision was restored to the active queue.",
+          outcome: "Returned to the active queue",
+          iconKey: item?.iconKey ?? "route"
+        });
+      });
+      reportSuccess(`${item?.title ?? "Decision"} is back in the active queue.`);
+      break;
+    }
+    case "toggle-decision-snoozed":
+      void audioEngine.playUiAccent("soft");
+      renderer.setTransientUi({ decisionInboxShowSnoozed: !renderer.transientUi.decisionInboxShowSnoozed }, getCurrentState());
+      break;
+    case "set-legend-assignment": {
+      void audioEngine.playUiAccent("soft");
+      const result = commit((draft) => {
+        const nextResult = setUniqueCitizenAssignment(draft, target.dataset.citizenId, target.dataset.postId || null);
+        if (nextResult?.ok) {
+          recordDecisionHistory(draft, {
+            kind: "assignment",
+            title: "Legend assignment",
+            detail: nextResult.assignment?.summary ?? "A legend was repositioned inside the Drift.",
+            outcome: nextResult.assignment?.post
+              ? `${nextResult.citizen.fullName} -> ${nextResult.assignment.post.label}`
+              : `${nextResult.citizen.fullName} set at large`,
+            iconKey: "citizens"
+          });
+        }
+        return nextResult;
+      });
+      if (!result?.ok) {
+        reportError(result?.reason ?? "That legend could not be reassigned.");
+        break;
+      }
+      reportSuccess(
+        result.assignment?.post
+          ? `${result.citizen.fullName} now holds the ${result.assignment.post.label}.`
+          : `${result.citizen.fullName} is now at large in the Drift.`
+      );
+      break;
+    }
+    case "set-expedition-relic-slot": {
+      void audioEngine.playUiAccent("soft");
+      const result = commit((draft) => {
+        const nextResult = setExpeditionRelicSlot(draft, target.dataset.relicId, target.dataset.slotId || null);
+        if (nextResult?.ok) {
+          recordDecisionHistory(draft, {
+            kind: "slot",
+            title: "Relic rack updated",
+            detail: "A frontier relic was repositioned inside the Drift.",
+            outcome: nextResult.slot
+              ? `${nextResult.relic.name} -> ${nextResult.slot.label}`
+              : `${nextResult.relic.name} returned to storage`,
+            iconKey: nextResult.relic?.iconKey ?? "relic"
+          });
+        }
+        return nextResult;
+      });
+      if (!result?.ok) {
+        reportError(result?.reason ?? "That relic could not be moved.");
+        break;
+      }
+      markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
+      reportSuccess(
+        result.slot
+          ? `${result.relic.name} is now slotted into the ${result.slot.label}.`
+          : `${result.relic.name} was returned to relic storage.`
+      );
+      break;
+    }
     case "set-home-shelf":
       void audioEngine.playUiAccent("soft");
       renderer.setTransientUi({ homeShelfTab: target.dataset.shelf }, getCurrentState());
@@ -3160,6 +3442,14 @@ root.addEventListener("click", async (event) => {
     case "close-expedition-journey":
       void audioEngine.playUiAccent("soft");
       renderer.setTransientUi({ expeditionJourneyOpen: false }, getCurrentState());
+      break;
+    case "open-resource-breakdown":
+      void audioEngine.playUiAccent("soft");
+      renderer.setTransientUi({ resourceBreakdownKey: target.dataset.resourceKey ?? null }, getCurrentState());
+      break;
+    case "close-resource-breakdown":
+      void audioEngine.playUiAccent("soft");
+      renderer.setTransientUi({ resourceBreakdownKey: null }, getCurrentState());
       break;
     case "refresh-expedition-board":
       void audioEngine.playUiAccent("soft");

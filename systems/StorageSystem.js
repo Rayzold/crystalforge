@@ -41,6 +41,7 @@ import {
 import { createDefaultVehicleFleet } from "../content/VehicleConfig.js";
 
 const SESSION_STATE_KEY = "crystal-forge-session-state-v1";
+const BUILD_NOTES_SEEN_KEY = "crystal-forge-build-notes-seen-v1";
 
 function getStartPreset(preset = DEFAULT_START_PRESET) {
   return structuredClone(START_STATE_PRESETS[preset] ?? DEFAULT_START_STATE);
@@ -55,6 +56,26 @@ function getSessionSaveRawText() {
     return sessionStorage.getItem(SESSION_STATE_KEY);
   } catch (error) {
     return null;
+  }
+}
+
+export function getSeenBuildNotesVersion() {
+  try {
+    return localStorage.getItem(BUILD_NOTES_SEEN_KEY);
+  } catch (error) {
+    return null;
+  }
+}
+
+export function markBuildNotesVersionSeen(version) {
+  const normalizedVersion = String(version ?? "").trim();
+  if (!normalizedVersion) {
+    return;
+  }
+  try {
+    localStorage.setItem(BUILD_NOTES_SEEN_KEY, normalizedVersion);
+  } catch (error) {
+    // Ignore storage failures so the modal never blocks app use.
   }
 }
 
@@ -295,10 +316,39 @@ function normalizeSettings(sourceSettings, baseSettings) {
     ...baseSettings,
     ...(sourceSettings ?? {})
   };
+  const allowedDensities = new Set(["comfort", "compact", "dense"]);
   normalized.muted = normalized.muted === true;
   normalized.quickManifestations = normalized.quickManifestations === true;
   normalized.onboardingDismissed = normalized.onboardingDismissed === true;
   normalized.liveSessionView = normalized.liveSessionView === true;
+  normalized.uiDensity = allowedDensities.has(normalized.uiDensity) ? normalized.uiDensity : (baseSettings?.uiDensity ?? "compact");
+  normalized.decisionSnoozes =
+    normalized.decisionSnoozes && typeof normalized.decisionSnoozes === "object"
+      ? Object.fromEntries(
+          Object.entries(normalized.decisionSnoozes)
+            .filter(([key, value]) => typeof key === "string" && key.trim() && Number.isFinite(Number(value)) && Number(value) > 0)
+            .map(([key, value]) => [key, Math.max(1, Math.round(Number(value)))])
+        )
+      : {};
+  normalized.decisionHistory = Array.isArray(normalized.decisionHistory)
+    ? normalized.decisionHistory
+        .filter((entry) => entry && typeof entry === "object")
+        .map((entry) => ({
+          id: typeof entry.id === "string" && entry.id.trim() ? entry.id.trim() : createId("decision-history"),
+          kind: typeof entry.kind === "string" && entry.kind.trim() ? entry.kind.trim() : "resolved",
+          title: typeof entry.title === "string" ? entry.title.trim() : "",
+          detail: typeof entry.detail === "string" ? entry.detail.trim() : "",
+          outcome: typeof entry.outcome === "string" ? entry.outcome.trim() : "",
+          date: typeof entry.date === "string" ? entry.date.trim() : formatDate(0),
+          dayOffset: Number.isFinite(Number(entry.dayOffset)) ? Number(entry.dayOffset) : 0,
+          iconKey: typeof entry.iconKey === "string" && entry.iconKey.trim() ? entry.iconKey.trim() : "route"
+        }))
+        .filter((entry) => entry.title || entry.outcome)
+        .slice(0, 10)
+    : [];
+  normalized.claimedGoalRewardIds = Array.isArray(normalized.claimedGoalRewardIds)
+    ? [...new Set(normalized.claimedGoalRewardIds.filter((entry) => typeof entry === "string" && entry.trim()))]
+    : [];
   normalized.pinnedBuildingIds = Array.isArray(normalized.pinnedBuildingIds)
     ? [...new Set(normalized.pinnedBuildingIds.filter((id) => typeof id === "string" && id.trim()))]
     : [];

@@ -1,4 +1,4 @@
-import { formatNumber } from "../engine/Utils.js";
+import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { getEmergencyStatus } from "../systems/ResourceSystem.js";
 import { getSuggestedFocusForAlert } from "../systems/TownFocusSystem.js";
 
@@ -53,11 +53,17 @@ export function renderEmergencyPanel(state) {
                 .map(
                   (emergency) => `
                     <article class="emergency-card is-${emergency.severity}">
-                      <strong>${emergency.label}</strong>
-                      <p>${emergency.details}</p>
+                      <strong>${escapeHtml(emergency.label)}</strong>
+                      <p>${escapeHtml(emergency.details)}</p>
+                      ${emergency.cause ? `<small>Cause: ${escapeHtml(emergency.cause)}</small>` : ""}
+                      ${
+                        emergency.fixes?.length
+                          ? `<div class="emergency-card__fixes">${emergency.fixes.map((fix) => `<em>${escapeHtml(fix)}</em>`).join("")}</div>`
+                          : ""
+                      }
                       ${
                         getSuggestedFocusForAlert(state, emergency.key)
-                          ? `<small>Recommended response: ${getSuggestedFocusForAlert(state, emergency.key).name}</small>`
+                          ? `<small>Recommended response: ${escapeHtml(getSuggestedFocusForAlert(state, emergency.key).name)}</small>`
                           : ""
                       }
                       <div class="emergency-card__actions">

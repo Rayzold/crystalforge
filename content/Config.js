@@ -8,7 +8,7 @@ import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
 // APP_VERSION must stay monotonic because Firebase publish safety compares builds numerically.
-export const APP_VERSION = "v1.5.1";
+export const APP_VERSION = "v1.6.4";
 // Release maturity is tracked separately so unreleased builds do not need to pretend they are public/stable.
 export const APP_RELEASE_STAGE = "preview";
 const RELEASE_STAGE_LABELS = {
@@ -23,7 +23,7 @@ export const VERSIONING_RULES = [
   "APP_VERSION is the forward-only sync/build number used by Firebase safety checks.",
   "APP_RELEASE_STAGE says whether the app is prototype, preview, beta, or stable.",
   "While the app is unreleased, keep the stage below stable even if the numeric build line is already 1.x.",
-  "Bump patch for fixes and polish, minor for meaningful feature drops, and major only for deliberate breakpoints or a true public-release era.",
+  "While the app is unreleased, prefer the patch digit for almost all updates; use minor only for clearly major internal milestones, and major only for deliberate breakpoints or a true public-release era.",
   "Do not reset the numeric build line back to 0.x unless the shared published-version checks are migrated on purpose."
 ];
 export const SAVE_VERSION = 12;
@@ -57,6 +57,11 @@ export const PAGE_ROUTES = [
   { key: "help", label: "Help", href: "./help.html" }
 ];
 export const BUILD_NOTES = [
+  "Pending Decisions now keeps a short decision history, relics can awaken extra synergy bonuses from matching legend posts, town focuses, and building tags, and Home goals now grant small celebratory rewards when you complete them.",
+  "Pending Decisions now works like a real priority inbox with urgency, snooze, and resolve-next flow, expeditions can recover relics or trophies that slot into the Drift for ongoing bonuses, and Home now guides new runs through a clearer six-phase onboarding arc.",
+  "Time advances now open a fuller turn digest with risk shifts and next-action guidance, Legends can be assigned to District Posts, Expedition Wings, or Council Seats for extra specialty bonuses, and warning surfaces now explain both the cause and the top fixes instead of only naming the problem.",
+  "Legends now carry route memory and sigil-style identities, every GM page surfaces a shared Pending Decisions plus Next Actions strip, and the build tag opens a once-per-version What Changed popover so recent updates are easier to follow.",
+  "UI density is now adjustable between Comfort, Compact, and Dense; resource tiles open real source-and-drain breakdowns; and expedition debrief choices now show stronger stage cues with clearer projected outcome shifts before you commit.",
   "Legend and Unique Citizen arrivals now draw from a broader, more mythic name pool, avoiding overly common first names and spreading rolls across the full curated set.",
   "Expeditions now come back into staged journey debriefs before rewards are finalized, and the shared page chrome was tightened so heroes, panels, badges, and mobile stacks feel less oversized across the app.",
   "Every page now ships with a real Crystal Forge favicon, removing the misleading browser 404 noise for /favicon.ico while making the live build easier to recognize in tabs.",
@@ -185,6 +190,10 @@ export const START_STATE_PRESETS = {
       onboardingDismissed: false,
       liveSessionView: true,
       theme: "dark",
+      uiDensity: "compact",
+      decisionSnoozes: {},
+      decisionHistory: [],
+      claimedGoalRewardIds: [],
       firebaseRealmId: FIREBASE_DEFAULT_REALM_ID,
       pinnedBuildingIds: [],
       lockedMapBuildingIds: [],
@@ -242,6 +251,10 @@ export const START_STATE_PRESETS = {
       onboardingDismissed: false,
       liveSessionView: false,
       theme: "dark",
+      uiDensity: "compact",
+      decisionSnoozes: {},
+      decisionHistory: [],
+      claimedGoalRewardIds: [],
       firebaseRealmId: FIREBASE_DEFAULT_REALM_ID,
       pinnedBuildingIds: [],
       lockedMapBuildingIds: [],

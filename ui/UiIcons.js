@@ -27,8 +27,15 @@ const ICONS = {
   event: `<path d="m30 10-12 22h10l-2 14 18-24H34l4-12Z" />`,
   history: `<path d="M18 16h24a8 8 0 0 1 8 8v22H26a8 8 0 0 0-8 8Z" /><path d="M26 16v38" />`,
   route: `<path d="M14 46c8-10 16-16 26-20m-8 20c6-8 10-14 10-24" /><circle cx="42" cy="22" r="6" />`,
+  relic: `<path d="m32 10 10 8v14c0 9-4 16-10 22-6-6-10-13-10-22V18Z" /><path d="M24 26h16M28 34h8" />`,
   citizens: `<circle cx="24" cy="24" r="6" /><circle cx="40" cy="22" r="5" /><path d="M18 46c1-7 5-11 10-11h7c5 0 9 4 10 11" />`,
-  forge: `<path d="M18 42 32 12l14 30Z" /><path d="M24 34h16" />`
+  forge: `<path d="M18 42 32 12l14 30Z" /><path d="M24 34h16" />`,
+  supplies: `<path d="M18 22h28v24H18Z" /><path d="M18 30h28" /><path d="M28 22v-6h8v6" />`,
+  signal: `<path d="M18 38c3-6 8-10 14-10s11 4 14 10" /><path d="M22 32c2-4 6-7 10-7s8 3 10 7" /><circle cx="32" cy="22" r="3" />`,
+  excavation: `<path d="M22 16h12" /><path d="M28 16v22" /><path d="M28 38 20 50" /><path d="M28 38 36 50" /><path d="M36 18c8 0 12 4 12 12" />`,
+  encounter: `<path d="M20 18 44 42" /><path d="M44 18 20 42" /><path d="M18 14 24 20" /><path d="M40 40 46 46" />`,
+  crossing: `<path d="M16 42h32" /><path d="M20 42c2-10 6-16 12-16s10 6 12 16" /><path d="M24 42v-8m8 8V30m8 12v-8" />`,
+  contact: `<circle cx="24" cy="24" r="5" /><circle cx="40" cy="24" r="5" /><path d="M20 40c2-5 5-8 10-8h4c5 0 8 3 10 8" /><path d="M28 30h8" />`
 };
 
 export function renderUiIcon(name, label = "", className = "") {

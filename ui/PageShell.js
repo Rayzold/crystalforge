@@ -4,9 +4,10 @@ import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
 import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js";
 import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js";
+import { getDecisionHistory, getDecisionInboxItems } from "../systems/DecisionInboxSystem.js";
 import { getCityTrendSummary } from "../systems/ResourceSystem.js";
 import { getManualSaveMeta } from "../systems/StorageSystem.js";
-import { getCurrentTownFocus, getTownFocusAvailability } from "../systems/TownFocusSystem.js";
+import { getCurrentTownFocus, getMayorAdvice, getTownFocusAvailability } from "../systems/TownFocusSystem.js";
 import { getCriticalAlerts, renderCrisisBanner } from "./CrisisBanner.js";
 import { renderTownFocusBadge } from "./TownFocusShared.js";
 import { renderUiIcon } from "./UiIcons.js";
@@ -51,6 +52,12 @@ const ROUTE_SHORTCUTS = {
 const DICE_TYPES = ["d2", "d4", "d6", "d8", "d10", "d12", "d20", "d100"];
 const RESOURCE_CHROME_PAGES = new Set(["city", "economy"]);
 const BUILDING_STATUS_PAGES = new Set(["city", "economy"]);
+const RESOURCE_BREAKDOWN_KEYS = new Set(["gold", "food", "materials", "salvage", "mana", "population", "prosperity"]);
+const UI_DENSITY_OPTIONS = [
+  { id: "comfort", label: "Comfort" },
+  { id: "compact", label: "Compact" },
+  { id: "dense", label: "Dense" }
+];
 
 function formatSidebarEtaDays(daysRemaining) {
   if (!Number.isFinite(daysRemaining)) {
@@ -187,17 +194,249 @@ function renderResourceDeltaStrip(state) {
       ${deltas
         .map(
           (entry) => `
-            <article class="page-delta-strip__item page-delta-strip__item--${entry.delta > 0 ? "positive" : entry.delta < 0 ? "negative" : "neutral"} ${state.transientUi?.recentResourceChanges?.[entry.key] ? "is-recently-changed" : ""}">
+            <button
+              class="page-delta-strip__item page-delta-strip__item--button page-delta-strip__item--${entry.delta > 0 ? "positive" : entry.delta < 0 ? "negative" : "neutral"} ${state.transientUi?.recentResourceChanges?.[entry.key] ? "is-recently-changed" : ""}"
+              type="button"
+              data-action="open-resource-breakdown"
+              data-resource-key="${entry.key}"
+            >
               <div class="page-delta-strip__head">
                 ${renderUiIcon(entry.key, entry.label)}
                 <span>${escapeHtml(entry.label)}</span>
               </div>
               <strong>${formatNumber(resourceValues[entry.key] ?? 0, 0)}</strong>
               <small>${entry.delta >= 0 ? "+" : ""}${formatNumber(entry.delta, 2)} / day</small>
-            </article>
+            </button>
           `
         )
         .join("")}
+    </section>
+  `;
+}
+
+function renderDensityControls(currentDensity = "compact") {
+  return `
+    <div class="sidebar-density-picker">
+      <div class="sidebar-density-picker__copy">
+        <span>Density</span>
+        <strong>${escapeHtml(UI_DENSITY_OPTIONS.find((option) => option.id === currentDensity)?.label ?? "Compact")}</strong>
+      </div>
+      <div class="sidebar-density-picker__buttons" role="group" aria-label="UI density">
+        ${UI_DENSITY_OPTIONS.map(
+          (option) => `
+            <button
+              class="button button--ghost sidebar-density-picker__button ${currentDensity === option.id ? "is-active" : ""}"
+              type="button"
+              data-action="set-ui-density"
+              data-density="${option.id}"
+              aria-pressed="${currentDensity === option.id ? "true" : "false"}"
+            >
+              ${escapeHtml(option.label)}
+            </button>
+          `
+        ).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderCommandStripAction(item) {
+  const body = `
+    <div class="page-command-strip__action-copy">
+      <span>${renderUiIcon(item.icon ?? "route", item.title)}${escapeHtml(item.title)}</span>
+      <strong>${escapeHtml(item.detail)}</strong>
+    </div>
+    <em>${escapeHtml(item.cta)}</em>
+  `;
+
+  if (item.action) {
+    return `
+      <button class="page-command-strip__action" type="button" data-action="${item.action}">
+        ${body}
+      </button>
+    `;
+  }
+
+  return `
+    <a class="page-command-strip__action" href="${item.href}">
+      ${body}
+    </a>
+  `;
+}
+
+function renderDecisionInboxItem(item) {
+  const urgencyLabel = item.urgency === "critical" ? "Critical" : item.urgency === "high" ? "High" : item.urgency === "medium" ? "Medium" : "Low";
+  return `
+    <article class="page-command-strip__decision page-command-strip__decision--${escapeHtml(item.urgency ?? "medium")} ${item.snoozed ? "is-snoozed" : ""}">
+      <div class="page-command-strip__decision-head">
+        <span>${renderUiIcon(item.iconKey ?? "route", item.title)}${escapeHtml(item.title)}</span>
+        <div class="page-command-strip__decision-badges">
+          <em class="page-command-strip__decision-badge">${escapeHtml(urgencyLabel)}</em>
+          ${item.blocking ? `<em class="page-command-strip__decision-badge is-blocking">Blocking</em>` : ""}
+          ${item.snoozed ? `<em class="page-command-strip__decision-badge is-snoozed">Snoozed ${formatNumber(item.snoozeRemainingDays ?? 0, 0)}d</em>` : ""}
+        </div>
+      </div>
+      <strong>${escapeHtml(item.detail)}</strong>
+      <div class="page-command-strip__decision-actions">
+        <button class="button ${item.snoozed ? "button--ghost" : ""}" type="button" data-action="resolve-decision-item" data-decision-id="${escapeHtml(item.id)}">
+          ${escapeHtml(item.cta ?? "Resolve")}
+        </button>
+        ${
+          item.snoozeable === false
+            ? ""
+            : item.snoozed
+              ? `<button class="button button--ghost" type="button" data-action="clear-decision-snooze" data-decision-id="${escapeHtml(item.id)}">Unsnooze</button>`
+              : `<button class="button button--ghost" type="button" data-action="snooze-decision-item" data-decision-id="${escapeHtml(item.id)}">Snooze</button>`
+        }
+      </div>
+    </article>
+  `;
+}
+
+function getDecisionHistoryKindLabel(kind) {
+  switch (kind) {
+    case "journey":
+      return "Journey";
+    case "council":
+      return "Council";
+    case "assignment":
+      return "Assignment";
+    case "slot":
+      return "Relic";
+    case "snoozed":
+      return "Snoozed";
+    case "unsnoozed":
+      return "Reopened";
+    default:
+      return "Decision";
+  }
+}
+
+function renderDecisionHistory(history = []) {
+  if (!history.length) {
+    return "";
+  }
+
+  return `
+    <div class="page-command-strip__history">
+      <div class="page-command-strip__history-head">
+        <span>Decision History</span>
+        <strong>Recent answers</strong>
+      </div>
+      <div class="page-command-strip__history-list">
+        ${history
+          .map(
+            (entry) => `
+              <article class="page-command-strip__history-item">
+                <div class="page-command-strip__history-copy">
+                  <span>${renderUiIcon(entry.iconKey ?? "route", entry.title)}${escapeHtml(getDecisionHistoryKindLabel(entry.kind))}</span>
+                  <strong>${escapeHtml(entry.title)}</strong>
+                  <p>${escapeHtml(entry.outcome || entry.detail || "Decision updated.")}</p>
+                </div>
+                <em>${escapeHtml(entry.date ?? "")}</em>
+              </article>
+            `
+          )
+          .join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderGlobalCommandStrip(state, townFocusAvailability, pageKey) {
+  const allDecisionItems = getDecisionInboxItems(state, pageKey, { includeSnoozed: true });
+  const decisionHistory = getDecisionHistory(state, 4);
+  const showSnoozed = state.transientUi?.decisionInboxShowSnoozed === true;
+  const activeDecisionItems = allDecisionItems.filter((item) => !item.snoozed);
+  const snoozedDecisionItems = allDecisionItems.filter((item) => item.snoozed);
+  const visibleDecisionItems = showSnoozed ? allDecisionItems : activeDecisionItems;
+  const mayorAdvice = getMayorAdvice(state).slice(0, 2);
+
+  return `
+    <section class="page-command-strip">
+      <article class="page-command-strip__section ${activeDecisionItems.length ? "is-attention" : ""}">
+        <div class="page-command-strip__section-head">
+          <div>
+            <span>Pending Decisions</span>
+            <strong>${activeDecisionItems.length ? `${formatNumber(activeDecisionItems.length, 0)} active` : "Clear"}</strong>
+          </div>
+          <div class="page-command-strip__section-tools">
+            ${
+              activeDecisionItems.length
+                ? `<button class="button button--ghost" type="button" data-action="resolve-next-decision">Resolve Next</button>`
+                : ""
+            }
+            ${
+              snoozedDecisionItems.length
+                ? `<button class="button button--ghost" type="button" data-action="toggle-decision-snoozed">${
+                    showSnoozed ? "Hide Snoozed" : `Show Snoozed (${formatNumber(snoozedDecisionItems.length, 0)})`
+                  }</button>`
+                : ""
+            }
+          </div>
+          <small>${
+            activeDecisionItems.length
+              ? "This queue ranks blocking items, live problems, and assignable opportunities in one place."
+              : snoozedDecisionItems.length
+                ? "Nothing is active right now. Some decisions are snoozed and will return to the queue later."
+                : townFocusAvailability.isSelectionPending
+                  ? "A new council choice is ready."
+                  : `Nothing is blocking progress right now. Next council in ${formatNumber(townFocusAvailability.daysUntilCouncil, 0)} day(s).`
+          }</small>
+        </div>
+        <div class="page-command-strip__list">
+          ${
+            visibleDecisionItems.length
+              ? visibleDecisionItems.map((item) => renderDecisionInboxItem(item)).join("")
+              : `
+                  <article class="page-command-strip__status">
+                    ${renderUiIcon("completed", "All clear")}
+                    <div>
+                      <strong>No pending decisions</strong>
+                      <p>Journeys, council picks, and other high-priority choices will surface here the moment they need you.</p>
+                    </div>
+                  </article>
+                `
+          }
+        </div>
+        ${renderDecisionHistory(decisionHistory)}
+      </article>
+      <article class="page-command-strip__section">
+        <div class="page-command-strip__section-head">
+          <div>
+            <span>Next Actions</span>
+            <strong>Mayor's short list</strong>
+          </div>
+          <small>These are the fastest useful next moves from anywhere in the app.</small>
+        </div>
+        <div class="page-command-strip__list">
+          ${
+            mayorAdvice.length
+              ? mayorAdvice
+                  .map(
+                    (entry) => `
+                      <a class="page-command-strip__action" href="${entry.href}">
+                        <div class="page-command-strip__action-copy">
+                          <span>${renderUiIcon("route", entry.title)}${escapeHtml(entry.title)}</span>
+                          <strong>${escapeHtml(entry.detail)}</strong>
+                        </div>
+                        <em>${escapeHtml(entry.cta)}</em>
+                      </a>
+                    `
+                  )
+                  .join("")
+              : `
+                  <article class="page-command-strip__status">
+                    ${renderUiIcon("completed", "Stable")}
+                    <div>
+                      <strong>The mayor has no urgent asks</strong>
+                      <p>The city is relatively balanced right now, so use this moment to review Economy or Chronicle at your own pace.</p>
+                    </div>
+                  </article>
+                `
+          }
+        </div>
+      </article>
     </section>
   `;
 }
@@ -238,7 +477,7 @@ function renderSidebarRouteGroup(routes, pageKey, cityAlertCount, availableCryst
 export function renderPageShell(state, pageKey, { title, subtitle, content, aside = "" }, overlays = "") {
   if (pageKey === "player") {
     return `
-      <div class="game-shell game-shell--player game-shell--theme-dark ${state.transientUi?.projectorMode ? "game-shell--projector" : ""} ${state.transientUi?.projectorChromeHidden ? "game-shell--projector-hidden" : ""}">
+      <div class="game-shell game-shell--player game-shell--density-${state.settings?.uiDensity ?? "compact"} game-shell--theme-dark ${state.transientUi?.projectorMode ? "game-shell--projector" : ""} ${state.transientUi?.projectorChromeHidden ? "game-shell--projector-hidden" : ""}">
         <main class="page-stage page-stage--player">
           <header class="player-stage__header">
             <div class="player-stage__brand">
@@ -249,7 +488,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
               <button class="player-stage__return ${state.transientUi?.projectorMode ? "is-active" : ""}" type="button" data-action="toggle-projector-mode">Projector Mode</button>
               <button class="player-stage__return" type="button" data-action="enter-fullscreen">Fullscreen</button>
               <a class="player-stage__return" href="./gm.html">Return to GM Mode</a>
-              <div class="page-build-tag page-build-tag--player" aria-label="Current build">${APP_DISPLAY_VERSION}</div>
+              <button class="page-build-tag page-build-tag--player" type="button" data-action="open-build-notes" aria-label="Open build notes">${APP_DISPLAY_VERSION}</button>
             </div>
           </header>
           ${content}
@@ -299,8 +538,9 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
   const diceAmount = Math.max(1, Math.min(20, Number(state.settings.diceAmount ?? 1) || 1));
   const diceType = DICE_TYPES.includes(state.settings.diceType) ? state.settings.diceType : "d20";
   const lastDiceRoll = state.settings.lastDiceRoll ?? null;
+  const uiDensity = UI_DENSITY_OPTIONS.some((option) => option.id === state.settings?.uiDensity) ? state.settings.uiDensity : "compact";
   return `
-    <div class="game-shell game-shell--page-${pageKey} ${currentFocus ? `game-shell--focus-${currentFocus.id}` : ""} ${state.settings.liveSessionView ? "game-shell--live-session" : ""} game-shell--theme-${state.settings.theme ?? "dark"}">
+    <div class="game-shell game-shell--density-${uiDensity} game-shell--page-${pageKey} ${currentFocus ? `game-shell--focus-${currentFocus.id}` : ""} ${state.settings.liveSessionView ? "game-shell--live-session" : ""} game-shell--theme-${state.settings.theme ?? "dark"}">
       ${
         MASCOT_MEDIA?.enabled
           ? `
@@ -352,6 +592,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
             </summary>
             <div class="sidebar-gm-tools__body">
               <button class="button button--ghost" data-action="open-admin">${state.settings.liveSessionView ? "GM Console" : "Admin Console"}</button>
+              ${renderDensityControls(uiDensity)}
               <div class="sidebar-nav__save-actions">
                 <button class="button button--ghost" data-action="save-firebase-realm">Save</button>
                 <button class="button button--ghost" data-action="load-firebase-realm">Load</button>
@@ -418,7 +659,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
       </aside>
 
       <main class="page-stage page-stage--${pageKey}">
-        <div class="page-build-tag" aria-label="Current build">${APP_DISPLAY_VERSION}</div>
+        <button class="page-build-tag" type="button" data-action="open-build-notes" aria-label="Open build notes">${APP_DISPLAY_VERSION}</button>
         ${pageKey === "city" || pageKey === "economy" ? renderCrisisBanner(state, pageKey) : ""}
         <header class="page-hero">
           <div>
@@ -459,6 +700,22 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
                               ${sublabel ? `<small>${sublabel}</small>` : ""}
                             </a>
                           `
+                        : RESOURCE_BREAKDOWN_KEYS.has(String(label).toLowerCase())
+                          ? `
+                              <button
+                                class="${className} hud-ribbon__item--button"
+                                type="button"
+                                data-action="open-resource-breakdown"
+                                data-resource-key="${String(label).toLowerCase()}"
+                              >
+                                <div class="hud-ribbon__head">
+                                  ${renderUiIcon(HUD_ICON_KEYS[label] ?? "route", label)}
+                                  <span>${label}</span>
+                                </div>
+                                <strong>${typeof value === "number" ? formatNumber(value, 2) : value}</strong>
+                                ${sublabel ? `<small>${sublabel}</small>` : ""}
+                              </button>
+                            `
                         : `
                             <article class="${className}">
                               <div class="hud-ribbon__head">
@@ -475,6 +732,8 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
             `
             : ""
         }
+
+        ${renderGlobalCommandStrip(state, townFocusAvailability, pageKey)}
 
         <div class="page-layout ${aside ? "page-layout--with-aside" : ""}">
           <section class="page-layout__content">${content}</section>

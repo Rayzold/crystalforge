@@ -44,6 +44,11 @@ function getCriticalEventAlerts(state) {
       severity: "critical",
       label: event.name,
       details: `${event.description} Active until ${event.endsAt}.`,
+      cause: `A negative ${event.type ?? "world"} event is actively applying pressure to the city right now.`,
+      fixes: [
+        "Review the event in Chronicle and check which effects are dragging the city.",
+        getSuggestedFocusForEvent(state, event)?.name ? `Consider shifting focus toward ${getSuggestedFocusForEvent(state, event).name}.` : ""
+      ].filter(Boolean).slice(0, 2),
       recommendation: getSuggestedFocusForEvent(state, event)?.name ?? "",
       actionLabel: "Review event",
       href: `./chronicle.html?focusEvent=${encodeURIComponent(event.id)}`
@@ -133,6 +138,12 @@ export function renderCrisisBanner(state, pageKey) {
               <li class="crisis-banner__item ${alert.kind === "event" ? "is-event" : "is-resource"}">
                 <strong>${escapeHtml(alert.label)}</strong>
                 <span>${escapeHtml(alert.details)}</span>
+                ${alert.cause ? `<small>Cause: ${escapeHtml(alert.cause)}</small>` : ""}
+                ${
+                  alert.fixes?.length
+                    ? `<div class="crisis-banner__fixes">${alert.fixes.map((fix) => `<em>${escapeHtml(fix)}</em>`).join("")}</div>`
+                    : ""
+                }
                 ${alert.recommendation ? `<small>Response: ${escapeHtml(alert.recommendation)}</small>` : ""}
                 ${alert.actionLabel && alert.href ? `<a class="crisis-banner__link" href="${alert.href}">${escapeHtml(alert.actionLabel)}</a>` : ""}
               </li>

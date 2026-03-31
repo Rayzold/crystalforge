@@ -23,6 +23,7 @@ import {
 import { formatDate } from "./CalendarSystem.js";
 import { addHistoryEntry } from "./HistoryLogSystem.js";
 import { addShards } from "./ShardSystem.js";
+import { getCurrentTownFocus } from "./TownFocusSystem.js";
 
 const RESOURCE_KEYS = ["food", "gold", "materials", "mana"];
 const EXPEDITION_RESOURCE_REWARD_KEYS = ["gold", "food", "materials", "salvage", "mana", "prosperity"];
@@ -50,6 +51,337 @@ const MISSION_DISTANCE_SETTINGS = {
   Far: { difficulty: 1.12, label: "Far" }
 };
 
+const LEGEND_ASSIGNMENT_POSTS = [
+  {
+    id: "district",
+    label: "District Post",
+    iconKey: "building",
+    summary: "Anchors this legend inside the Drift, deepening their city-facing strengths."
+  },
+  {
+    id: "expedition",
+    label: "Expedition Wing",
+    iconKey: "route",
+    summary: "Turns this legend into a field mentor who sharpens matching expeditions."
+  },
+  {
+    id: "council",
+    label: "Council Seat",
+    iconKey: "calendar",
+    summary: "Seats this legend near policy and daily governance."
+  }
+];
+const LEGEND_ASSIGNMENT_POST_BY_ID = Object.fromEntries(LEGEND_ASSIGNMENT_POSTS.map((post) => [post.id, post]));
+const EXPEDITION_RELIC_SLOTS = [
+  {
+    id: "spire",
+    label: "Signal Spire",
+    summary: "Projects route relics into the city so their guidance affects daily operations."
+  },
+  {
+    id: "vault",
+    label: "Reliquary Vault",
+    summary: "Anchors trophies and artifacts into the Drift as stable civic bonuses."
+  }
+];
+const EXPEDITION_RELIC_SLOT_BY_ID = Object.fromEntries(EXPEDITION_RELIC_SLOTS.map((slot) => [slot.id, slot]));
+const EXPEDITION_RELIC_TYPE_CHANCE = {
+  rescue: 0.15,
+  recruit: 0.16,
+  resourceRun: 0.22,
+  crystalHunt: 0.28,
+  relicRecovery: 0.46,
+  diplomatic: 0.18,
+  monsterHunt: 0.34,
+  pilgrimage: 0.24
+};
+const EXPEDITION_RELIC_TEMPLATES = [
+  {
+    id: "glassway-compass",
+    name: "Glassway Compass",
+    kindLabel: "Relic",
+    iconKey: "route",
+    summary: "A routefinder calibrated to profit currents and safe return lines.",
+    effectText: "Guides crews toward cleaner routes and better trade finds.",
+    sourceTypeIds: ["resourceRun", "relicRecovery", "diplomatic"],
+    bonuses: {
+      resources: { gold: 0.8, prosperity: 0.4 },
+      expeditionPowerPercent: 12,
+      expeditionTags: ["resourceRun", "diplomatic"]
+    },
+    synergy: {
+      summary: "Its routes flare brightest when a field legend is steering the city's trade push.",
+      requirements: [
+        { type: "legendPost", value: "expedition", label: "An active legend in the Expedition Wing" },
+        { type: "townFocus", value: "trade-drive", label: "Town Focus: Trade Drive" }
+      ],
+      bonuses: {
+        resources: { gold: 0.5, prosperity: 0.3 },
+        expeditionPowerPercent: 8,
+        expeditionTags: ["resourceRun", "diplomatic"]
+      }
+    }
+  },
+  {
+    id: "vaultbreaker-gauntlet",
+    name: "Vaultbreaker Gauntlet",
+    kindLabel: "Relic",
+    iconKey: "salvage",
+    summary: "An articulated relic glove built for prying open fused ruin seals.",
+    effectText: "Turns salvage crews into much sharper recovery teams.",
+    sourceTypeIds: ["relicRecovery", "resourceRun", "monsterHunt"],
+    bonuses: {
+      resources: { salvage: 1.4, materials: 0.8 },
+      expeditionPowerPercent: 10,
+      expeditionTags: ["relicRecovery", "resourceRun"]
+    },
+    synergy: {
+      summary: "It wakes up around real workshops and heavier recovery discipline.",
+      requirements: [{ type: "buildingTag", value: "industry", label: "1 active industry building" }],
+      bonuses: {
+        resources: { salvage: 0.9, materials: 0.7 },
+        expeditionPowerPercent: 6,
+        expeditionTags: ["relicRecovery"]
+      }
+    }
+  },
+  {
+    id: "storm-prism-cage",
+    name: "Storm Prism Cage",
+    kindLabel: "Relic",
+    iconKey: "mana",
+    summary: "A humming crystal lattice that drinks in stray mana and route-signals.",
+    effectText: "Steadies mana flow and sharpens arcane field expeditions.",
+    sourceTypeIds: ["crystalHunt", "pilgrimage", "relicRecovery"],
+    bonuses: {
+      resources: { mana: 0.9, prosperity: 0.3 },
+      stats: { prestige: 5 },
+      expeditionPowerPercent: 12,
+      expeditionTags: ["crystalHunt", "pilgrimage"]
+    },
+    synergy: {
+      summary: "Arcane infrastructure and crystal policy let it draw a much cleaner charge.",
+      requirements: [
+        { type: "buildingTag", value: "arcane", label: "1 active arcane building" },
+        { type: "townFocus", value: "crystal-expedition", label: "Town Focus: Crystal Expedition" }
+      ],
+      bonuses: {
+        resources: { mana: 0.7 },
+        stats: { prestige: 4 },
+        expeditionPowerPercent: 8,
+        expeditionTags: ["crystalHunt", "relicRecovery"]
+      }
+    }
+  },
+  {
+    id: "emberroot-urn",
+    name: "Emberroot Urn",
+    kindLabel: "Relic",
+    iconKey: "food",
+    summary: "An old ward vessel packed with seed-char and soil that never cools.",
+    effectText: "Improves food resilience and helps the city recover its strength.",
+    sourceTypeIds: ["rescue", "resourceRun", "pilgrimage"],
+    bonuses: {
+      resources: { food: 1.1, prosperity: 0.4 },
+      stats: { health: 6, morale: 4 }
+    },
+    synergy: {
+      summary: "It settles into a stronger civic hearth when a district legend protects the food spine.",
+      requirements: [
+        { type: "legendPost", value: "district", label: "An active legend in a District Post" },
+        { type: "buildingTag", value: "agriculture", label: "1 active agriculture building" }
+      ],
+      bonuses: {
+        resources: { food: 0.9 },
+        stats: { health: 4, morale: 3 }
+      }
+    }
+  },
+  {
+    id: "bastion-tusk-standard",
+    name: "Bastion Tusk Standard",
+    kindLabel: "Trophy",
+    iconKey: "defense",
+    summary: "A war-banner strung with plated tusk fragments from a fallen siege beast.",
+    effectText: "Hardens the city watch and keeps dangerous routes from slipping the net.",
+    sourceTypeIds: ["monsterHunt", "rescue"],
+    bonuses: {
+      stats: { defense: 10, security: 6 },
+      expeditionPowerPercent: 8,
+      expeditionTags: ["monsterHunt", "rescue"]
+    },
+    synergy: {
+      summary: "Mounted in a real watch-line, it keeps frontier predators from slipping close.",
+      requirements: [{ type: "buildingTag", value: "military", label: "1 active military building" }],
+      bonuses: {
+        stats: { defense: 6, security: 4 },
+        expeditionPowerPercent: 6,
+        expeditionTags: ["monsterHunt", "rescue"]
+      }
+    }
+  },
+  {
+    id: "ledger-of-last-markets",
+    name: "Ledger of Last Markets",
+    kindLabel: "Relic",
+    iconKey: "gold",
+    summary: "A trade-book full of vanished buyers, prices, and route margins.",
+    effectText: "Improves civic trade instincts and makes diplomatic runs pay cleaner dividends.",
+    sourceTypeIds: ["diplomatic", "recruit", "resourceRun"],
+    bonuses: {
+      resources: { gold: 0.6, prosperity: 0.6 },
+      stats: { prestige: 5 },
+      expeditionPowerPercent: 10,
+      expeditionTags: ["diplomatic", "recruit"]
+    },
+    synergy: {
+      summary: "Market memory compounds when the Drift is openly leaning into trade.",
+      requirements: [
+        { type: "buildingTag", value: "trade", label: "1 active trade building" },
+        { type: "townFocus", value: "trade-drive", label: "Town Focus: Trade Drive" }
+      ],
+      bonuses: {
+        resources: { gold: 0.6, prosperity: 0.5 },
+        expeditionPowerPercent: 6,
+        expeditionTags: ["diplomatic", "recruit", "resourceRun"]
+      }
+    }
+  },
+  {
+    id: "mercy-banner",
+    name: "Mercy Banner",
+    kindLabel: "Trophy",
+    iconKey: "health",
+    summary: "A field standard carried back from a mission where the crew chose lives over loot.",
+    effectText: "Raises morale, health, and the odds of getting people home alive.",
+    sourceTypeIds: ["rescue", "monsterHunt", "recruit"],
+    bonuses: {
+      stats: { morale: 8, health: 8 },
+      expeditionPowerPercent: 6,
+      expeditionTags: ["rescue", "recruit", "monsterHunt"]
+    },
+    synergy: {
+      summary: "Its field vows matter most when the council is explicitly restoring the city's spirit.",
+      requirements: [
+        { type: "legendPost", value: "council", label: "An active legend in the Council Seat" },
+        { type: "townFocus", value: "civic-restoration", label: "Town Focus: Civic Restoration" }
+      ],
+      bonuses: {
+        resources: { prosperity: 0.4 },
+        stats: { morale: 5, health: 5 },
+        expeditionPowerPercent: 4,
+        expeditionTags: ["rescue", "recruit"]
+      }
+    }
+  },
+  {
+    id: "star-map-vellum",
+    name: "Star Map Vellum",
+    kindLabel: "Relic",
+    iconKey: "signal",
+    summary: "A living chart that shifts to show routes hidden under weather, ruin-glare, and old wards.",
+    effectText: "Makes distant scouting sharper and raises the city's confidence in strange roads.",
+    sourceTypeIds: ["crystalHunt", "relicRecovery", "diplomatic", "pilgrimage"],
+    bonuses: {
+      resources: { mana: 0.6, prosperity: 0.5 },
+      stats: { security: 4, prestige: 3 },
+      expeditionPowerPercent: 14,
+      expeditionTags: ["crystalHunt", "relicRecovery", "pilgrimage"]
+    },
+    synergy: {
+      summary: "Its route lattice sharpens when frontier planning and expedition command are aligned.",
+      requirements: [
+        { type: "legendPost", value: "expedition", label: "An active legend in the Expedition Wing" },
+        { type: "townFocus", value: "crystal-expedition", label: "Town Focus: Crystal Expedition" }
+      ],
+      bonuses: {
+        resources: { mana: 0.4, prosperity: 0.4 },
+        stats: { security: 3 },
+        expeditionPowerPercent: 9,
+        expeditionTags: ["crystalHunt", "pilgrimage", "relicRecovery"]
+      }
+    }
+  }
+];
+
+const LEGEND_ORIGIN_PATTERNS = {
+  rescue: [
+    "Pulled free from %mission% and escorted home%vehicle%.",
+    "Found at the edge of %mission% and persuaded to return with the convoy%vehicle%.",
+    "Walked out of %mission% beside the crew and chose the Drift over the wastes%vehicle%."
+  ],
+  recruit: [
+    "Met during %mission% and won over as the road turned back toward the Drift%vehicle%.",
+    "Came aboard after %mission% proved the Drift still had a future worth betting on%vehicle%.",
+    "Joined the return from %mission% after seeing the crew hold formation under pressure%vehicle%."
+  ],
+  resourceRun: [
+    "Unearthed amid the hard work of %mission%, where salvage crews found more than stockpiles%vehicle%.",
+    "Stepped out of the dust and wreckage around %mission%, carrying routes the city had long forgotten%vehicle%.",
+    "Returned from %mission% with the crews, reading opportunity where others saw only scrap%vehicle%."
+  ],
+  crystalHunt: [
+    "First marked by the crystal echoes of %mission% before following the signal line back%vehicle%.",
+    "Answered the harmonic pull of %mission% and emerged with the convoy under a veil of blue fire%vehicle%.",
+    "Came in from %mission% carrying shard-light, route signs, and a name the crew would not forget%vehicle%."
+  ],
+  relicRecovery: [
+    "Recovered during %mission%, where relic vaults and broken halls hid a living answer among the spoils%vehicle%.",
+    "Walked out of %mission% with the crew after the old ruins finally gave up one more secret%vehicle%.",
+    "Claimed from the long silence of %mission% and brought back under heavy guard%vehicle%."
+  ],
+  diplomatic: [
+    "Met on the road through %mission%, where parley turned into an oath of shared cause%vehicle%.",
+    "Came back with the delegates from %mission%, carrying gifts, terms, and a sharper read of the world%vehicle%.",
+    "Chose the Drift after %mission% proved its word still carried weight beyond the walls%vehicle%."
+  ],
+  monsterHunt: [
+    "Seen first at %mission%, standing where the hunt had gone hottest before returning with the victors%vehicle%.",
+    "Came in from %mission% with trophy crews and a reputation already spreading ahead of them%vehicle%.",
+    "Walked back from %mission% through bloodied ground, choosing the Drift after the beast fell%vehicle%."
+  ],
+  pilgrimage: [
+    "Arrived through the long road of %mission%, carrying omens, vows, and a steadier kind of silence%vehicle%.",
+    "Followed the sacred line of %mission% until it bent toward the Drift and stayed there%vehicle%.",
+    "Returned from %mission% with the crew as though the route itself had chosen a new keeper%vehicle%."
+  ]
+};
+
+const LEGEND_ARRIVAL_PATTERNS = {
+  wallMarshal: [
+    "Took the Bastion Oath on %joinedAt% and was handed command of the outer watch before dusk.",
+    "Reached the gates on %joinedAt%, measured the walls once, and started drilling the watch that same night."
+  ],
+  horizonSeer: [
+    "Marked new approach lines into the Drift on %joinedAt% before even asking for rest.",
+    "Arrived on %joinedAt% with wind-burned maps and a route memory no scout in Drift could match."
+  ],
+  rootkeeper: [
+    "Set root-charms around the first ward circle on %joinedAt%, and the kitchens noticed the change by evening.",
+    "Crossed into Drift on %joinedAt% carrying living cuttings, river mud, and a calmer pulse for the city."
+  ],
+  quartermaster: [
+    "Spent %joinedAt% counting stores, broken tools, and wasted motions before anyone thought to introduce them.",
+    "Reached the city on %joinedAt% and turned the first unloading line into a lesson in order."
+  ],
+  manasavant: [
+    "Stepped into the Drift on %joinedAt% and the lantern lattice steadied around them.",
+    "Arrived on %joinedAt% with crystal dust on their sleeves and a cleaner rhythm in every nearby circuit."
+  ],
+  skybroker: [
+    "Spent the evening of %joinedAt% learning prices, names, and promises before the market fires dimmed.",
+    "Reached Drift on %joinedAt% already speaking in routes, margins, and opportunities no one else had named."
+  ],
+  mercysaint: [
+    "Opened a field clinic on %joinedAt% before the crew had even finished unloading the wagons.",
+    "Entered the city on %joinedAt% with triage cloth, prayer ash, and the kind of calm people obey."
+  ],
+  archivistRegent: [
+    "Claimed a quiet desk on %joinedAt% and had already corrected three records by moonrise.",
+    "Arrived on %joinedAt% with sealed folios, old songs, and a memory sharp enough to reorder the ledgers."
+  ]
+};
+
 const TYPE_RESOURCE_PALETTES = {
   rescue: { food: 1.05, gold: 0.3, materials: 0.25, mana: 0.15, prosperity: 0.2 },
   recruit: { gold: 0.75, food: 0.35, materials: 0.3, prosperity: 0.35 },
@@ -68,9 +400,30 @@ const UNIQUE_STATUS_LABELS = {
 const ARCANE_JOURNEY_TYPES = new Set(["crystalHunt", "pilgrimage"]);
 const SALVAGE_JOURNEY_TYPES = new Set(["resourceRun", "relicRecovery", "monsterHunt"]);
 const SOCIAL_JOURNEY_TYPES = new Set(["rescue", "recruit", "diplomatic"]);
+const JOURNEY_STAGE_PRESENTATION = {
+  journey: { cue: "Route Decision", iconKey: "route", tone: "balanced" },
+  supply: { cue: "Supply Pressure", iconKey: "supplies", tone: "caution" },
+  signal: { cue: "Strange Signal", iconKey: "signal", tone: "mystery" },
+  excavation: { cue: "Buried Opportunity", iconKey: "excavation", tone: "opportunity" },
+  encounter: { cue: "Threat Contact", iconKey: "encounter", tone: "danger" },
+  crossing: { cue: "Terrain Obstacle", iconKey: "crossing", tone: "challenge" },
+  contact: { cue: "Roadside Contact", iconKey: "contact", tone: "social" }
+};
+const JOURNEY_RESOURCE_LABELS = {
+  gold: "Gold",
+  food: "Food",
+  materials: "Materials",
+  salvage: "Salvage",
+  mana: "Mana",
+  prosperity: "Prosperity"
+};
 
 function createEmptyResourceRecord() {
   return { gold: 0, food: 0, materials: 0, salvage: 0, mana: 0, prosperity: 0 };
+}
+
+function createEmptyLegendStatRecord() {
+  return { prosperity: 0, defense: 0, security: 0, prestige: 0, morale: 0, health: 0 };
 }
 
 function createEmptyCrystalRecord() {
@@ -79,6 +432,61 @@ function createEmptyCrystalRecord() {
 
 function createEmptyTeamRecord() {
   return {};
+}
+
+function createRelicBonusRecord(partial = {}) {
+  return {
+    resources: { ...createEmptyResourceRecord(), ...(partial.resources ?? {}) },
+    stats: { ...createEmptyLegendStatRecord(), ...(partial.stats ?? {}) },
+    expeditionPowerPercent: Math.max(0, Number(partial.expeditionPowerPercent ?? 0) || 0),
+    expeditionTags: Array.isArray(partial.expeditionTags) ? [...new Set(partial.expeditionTags.filter(Boolean))] : []
+  };
+}
+
+function createRelicSynergyRequirementRecord(partial = {}) {
+  const type = typeof partial.type === "string" ? partial.type.trim() : "";
+  const value = typeof partial.value === "string" ? partial.value.trim() : "";
+  return {
+    type,
+    value,
+    label: String(partial.label ?? value).trim() || value
+  };
+}
+
+function normalizeExpeditionRelicSynergy(source = null) {
+  if (!source || typeof source !== "object") {
+    return null;
+  }
+
+  const requirements = Array.isArray(source.requirements)
+    ? source.requirements
+        .map((requirement) => createRelicSynergyRequirementRecord(requirement))
+        .filter((requirement) => requirement.type && requirement.value)
+    : [];
+
+  if (!requirements.length) {
+    return null;
+  }
+
+  const bonuses = createRelicBonusRecord(source.bonuses);
+  return {
+    summary: String(source.summary ?? "Matching conditions can awaken a stronger relic state.").trim() || "Matching conditions can awaken a stronger relic state.",
+    requirements,
+    bonuses,
+    bonusSummary: buildExpeditionRelicBonusSummary({ bonuses })
+  };
+}
+
+function addRelicBonuses(target, source) {
+  for (const [key, amount] of Object.entries(source?.resources ?? {})) {
+    target.resources[key] = (target.resources[key] ?? 0) + (Number(amount) || 0);
+  }
+  for (const [key, amount] of Object.entries(source?.stats ?? {})) {
+    target.stats[key] = (target.stats[key] ?? 0) + (Number(amount) || 0);
+  }
+  target.expeditionPowerPercent += Number(source?.expeditionPowerPercent ?? 0) || 0;
+  target.expeditionTags = [...new Set([...(target.expeditionTags ?? []), ...(source?.expeditionTags ?? [])])];
+  return target;
 }
 
 function normalizeVehicleId(vehicleId) {
@@ -107,7 +515,8 @@ function createExpeditionRecentRecord(partial = {}) {
       crystals: { ...createEmptyCrystalRecord(), ...(partial.rewards?.crystals ?? {}) },
       shards: { ...createEmptyCrystalRecord(), ...(partial.rewards?.shards ?? {}) },
       recruits: structuredClone(partial.rewards?.recruits ?? {}),
-      uniqueCitizen: partial.rewards?.uniqueCitizen ?? null
+      uniqueCitizen: partial.rewards?.uniqueCitizen ?? null,
+      relic: partial.rewards?.relic ? normalizeExpeditionRelic(partial.rewards.relic) : null
     }
   };
 }
@@ -118,9 +527,84 @@ export function createDefaultExpeditionState() {
     active: [],
     pending: [],
     recent: [],
+    relics: [],
     lastRefreshDayOffset: null,
     uniqueProgress: 0,
     nextUniqueThreshold: DEFAULT_UNIQUE_THRESHOLD
+  };
+}
+
+function buildExpeditionRelicBonusSummary(relic) {
+  const bonuses = createRelicBonusRecord(relic?.bonuses);
+  const resourceParts = Object.entries(bonuses.resources)
+    .filter(([, amount]) => Number(amount) > 0)
+    .slice(0, 2)
+    .map(([key, amount]) => formatLegendBonusPart(key, amount));
+  const statParts = Object.entries(bonuses.stats)
+    .filter(([, amount]) => Number(amount) > 0)
+    .slice(0, 2)
+    .map(([key, amount]) => formatLegendBonusPart(key, amount));
+  const expeditionPart =
+    bonuses.expeditionPowerPercent > 0
+      ? `+${roundTo(bonuses.expeditionPowerPercent, 0)}% expedition power${
+          bonuses.expeditionTags.length
+            ? ` on ${bonuses.expeditionTags.map((tag) => EXPEDITION_TYPES[tag]?.label ?? tag).join(", ")}`
+            : ""
+        }`
+      : "";
+  return joinLegendBonusParts([...resourceParts, ...statParts, expeditionPart]);
+}
+
+function createExpeditionRelicRecord(template, expedition, discoveredDayOffset) {
+  return normalizeExpeditionRelic({
+    id: createId("expedition-relic"),
+    templateId: template.id,
+    name: template.name,
+    kindLabel: template.kindLabel ?? "Relic",
+    iconKey: template.iconKey ?? "relic",
+    summary: template.summary,
+    effectText: template.effectText,
+    sourceTypeId: expedition?.typeId ?? null,
+    sourceLabel: expedition?.typeLabel ?? EXPEDITION_TYPES[expedition?.typeId]?.label ?? "Expedition",
+    sourceMissionName: expedition?.missionName ?? expedition?.typeLabel ?? "Expedition",
+    discoveredDayOffset,
+    discoveredAt: formatDate(discoveredDayOffset),
+    equippedSlotId: null,
+    bonuses: createRelicBonusRecord(template.bonuses),
+    synergy: normalizeExpeditionRelicSynergy(template.synergy),
+    bonusSummary: buildExpeditionRelicBonusSummary({ bonuses: template.bonuses })
+  });
+}
+
+function normalizeExpeditionRelic(source = {}) {
+  const bonuses = createRelicBonusRecord(source?.bonuses);
+  const synergy = normalizeExpeditionRelicSynergy(source?.synergy);
+  return {
+    id: String(source?.id ?? createId("expedition-relic")),
+    templateId: typeof source?.templateId === "string" && source.templateId.trim() ? source.templateId.trim() : null,
+    name: String(source?.name ?? "Recovered Relic").trim() || "Recovered Relic",
+    kindLabel: String(source?.kindLabel ?? "Relic").trim() || "Relic",
+    iconKey: String(source?.iconKey ?? "relic").trim() || "relic",
+    summary: String(source?.summary ?? "Recovered from the frontier.").trim() || "Recovered from the frontier.",
+    effectText: String(source?.effectText ?? "Its presence changes how the Drift functions.").trim() || "Its presence changes how the Drift functions.",
+    sourceTypeId: typeof source?.sourceTypeId === "string" && source.sourceTypeId.trim() ? source.sourceTypeId.trim() : null,
+    sourceLabel:
+      typeof source?.sourceLabel === "string" && source.sourceLabel.trim()
+        ? source.sourceLabel.trim()
+        : (EXPEDITION_TYPES[source?.sourceTypeId]?.label ?? "Expedition"),
+    sourceMissionName: String(source?.sourceMissionName ?? source?.sourceLabel ?? "Expedition").trim() || "Expedition",
+    discoveredDayOffset: Number(source?.discoveredDayOffset ?? 0) || 0,
+    discoveredAt: String(source?.discoveredAt ?? formatDate(Number(source?.discoveredDayOffset ?? 0) || 0)),
+    equippedSlotId:
+      typeof source?.equippedSlotId === "string" && EXPEDITION_RELIC_SLOT_BY_ID[source.equippedSlotId]
+        ? source.equippedSlotId
+        : null,
+    bonuses,
+    synergy,
+    bonusSummary:
+      typeof source?.bonusSummary === "string" && source.bonusSummary.trim()
+        ? source.bonusSummary.trim()
+        : buildExpeditionRelicBonusSummary({ bonuses })
   };
 }
 
@@ -138,12 +622,73 @@ function normalizeJourneyEffects(effects = {}) {
   };
 }
 
+function formatJourneyTagAmount(value) {
+  const rounded = roundTo(Number(value ?? 0) || 0, Math.abs(Number(value ?? 0) || 0) >= 10 ? 0 : 1);
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+}
+
+function getJourneyOptionTone(effects = {}) {
+  if ((effects.successDelta ?? 0) >= 0.05 && (effects.rewardMultiplier ?? 1) <= 0.96) {
+    return "cautious";
+  }
+  if ((effects.successDelta ?? 0) <= -0.05 && (effects.rewardMultiplier ?? 1) >= 1.04) {
+    return "aggressive";
+  }
+  if ((effects.uniquePercentBonus ?? 0) >= 4 || Object.values(effects.resourceBonuses ?? {}).some((value) => Number(value) > 0.5)) {
+    return "opportunity";
+  }
+  return "balanced";
+}
+
+function getJourneyOptionTags(effects = {}) {
+  const tags = [];
+  const resourceTags = Object.entries(effects.resourceBonuses ?? {})
+    .filter(([, amount]) => Number(amount) > 0.5)
+    .sort((left, right) => Number(right[1]) - Number(left[1]))
+    .slice(0, 2)
+    .map(([resource, amount]) => `+${formatJourneyTagAmount(amount)} ${JOURNEY_RESOURCE_LABELS[resource] ?? resource}`);
+
+  if ((effects.successDelta ?? 0) >= 0.05) {
+    tags.push("Safer");
+  } else if ((effects.successDelta ?? 0) <= -0.05) {
+    tags.push("Riskier");
+  }
+
+  if ((effects.rewardMultiplier ?? 1) >= 1.05) {
+    tags.push("Bigger Haul");
+  } else if ((effects.rewardMultiplier ?? 1) <= 0.95) {
+    tags.push("Lighter Haul");
+  }
+
+  if ((effects.recruitMultiplier ?? 1) >= 1.05) {
+    tags.push("Recruit Chance");
+  }
+
+  if ((effects.uniquePercentBonus ?? 0) >= 4) {
+    tags.push("Legend Chance");
+  }
+
+  if (Object.values(effects.crystalBonuses ?? {}).some((value) => Number(value) > 0)) {
+    tags.push("Crystal Find");
+  }
+
+  if (Object.values(effects.shardBonuses ?? {}).some((value) => Number(value) > 0)) {
+    tags.push("Shard Find");
+  }
+
+  tags.push(...resourceTags);
+  return [...new Set(tags)].slice(0, 4);
+}
+
 function normalizeJourneyOption(option = {}) {
+  const effects = normalizeJourneyEffects(option?.effects);
   return {
     id: String(option?.id ?? createId("journey-option")),
     label: String(option?.label ?? "Choice").trim() || "Choice",
     summary: String(option?.summary ?? "").trim(),
-    effects: normalizeJourneyEffects(option?.effects)
+    tone: String(option?.tone ?? getJourneyOptionTone(effects)).trim() || "balanced",
+    tags: Array.isArray(option?.tags) ? option.tags.map((tag) => String(tag).trim()).filter(Boolean).slice(0, 4) : getJourneyOptionTags(effects),
+    effects
   };
 }
 
@@ -185,11 +730,15 @@ function normalizeActiveExpedition(entry = {}) {
 
 function normalizePendingJourneyStage(stage = {}, index = 0) {
   const options = Array.isArray(stage?.options) ? stage.options.map((entry) => normalizeJourneyOption(entry)) : [];
+  const presentation = JOURNEY_STAGE_PRESENTATION[String(stage?.kind ?? "journey").trim() || "journey"] ?? JOURNEY_STAGE_PRESENTATION.journey;
   return {
     id: String(stage?.id ?? createId("journey-stage")),
     index: Math.max(0, Number(stage?.index ?? index) || index),
     dayMarker: Math.max(1, Number(stage?.dayMarker ?? (index + 1) * JOURNEY_STAGE_DAY_SPAN) || (index + 1) * JOURNEY_STAGE_DAY_SPAN),
     kind: String(stage?.kind ?? "journey").trim() || "journey",
+    cue: String(stage?.cue ?? presentation.cue).trim() || presentation.cue,
+    iconKey: String(stage?.iconKey ?? presentation.iconKey).trim() || presentation.iconKey,
+    tone: String(stage?.tone ?? presentation.tone).trim() || presentation.tone,
     title: String(stage?.title ?? "Journey Stage").trim() || "Journey Stage",
     prompt: String(stage?.prompt ?? "").trim(),
     options,
@@ -267,17 +816,348 @@ export function normalizeUniqueCitizens(sourceCitizens) {
       title: String(entry.title ?? "Unique Citizen").trim() || "Unique Citizen",
       className: String(entry.className ?? "Citizens").trim() || "Citizens",
       effectText: String(entry.effectText ?? "Their presence changes the Drift.").trim() || "Their presence changes the Drift.",
+      archetypeId: typeof entry.archetypeId === "string" && entry.archetypeId.trim() ? entry.archetypeId.trim() : null,
+      assignmentPostId:
+        typeof entry.assignmentPostId === "string" && LEGEND_ASSIGNMENT_POST_BY_ID[entry.assignmentPostId]
+          ? entry.assignmentPostId
+          : null,
       bonuses: structuredClone(entry.bonuses ?? {}),
       expeditionTags: Array.isArray(entry.expeditionTags) ? [...entry.expeditionTags] : [],
       joinedDayOffset: Number(entry.joinedDayOffset ?? 0) || 0,
       joinedAt: String(entry.joinedAt ?? formatDate(Number(entry.joinedDayOffset ?? 0) || 0)),
       status: UNIQUE_STATUS_LABELS[entry.status] ? entry.status : "inCity",
-      sourceTypeId: entry.sourceTypeId ?? null
+      sourceTypeId: entry.sourceTypeId ?? null,
+      originLabel:
+        typeof entry.originLabel === "string" && entry.originLabel.trim()
+          ? entry.originLabel.trim()
+          : (EXPEDITION_TYPES[entry.sourceTypeId]?.label ?? "Unrecorded Route"),
+      originMemory:
+        typeof entry.originMemory === "string" && entry.originMemory.trim()
+          ? entry.originMemory.trim()
+          : `Reached the Drift by way of ${EXPEDITION_TYPES[entry.sourceTypeId]?.label ?? "an unrecorded road"} and stayed.`,
+      arrivalLine:
+        typeof entry.arrivalLine === "string" && entry.arrivalLine.trim()
+          ? entry.arrivalLine.trim()
+          : `Entered the city on ${String(entry.joinedAt ?? formatDate(Number(entry.joinedDayOffset ?? 0) || 0))}.`,
+      sigilSeed:
+        typeof entry.sigilSeed === "string" && entry.sigilSeed.trim()
+          ? entry.sigilSeed.trim()
+          : `${String(entry.fullName ?? "Unknown Notable")}|${String(entry.title ?? "Unique Citizen")}|${String(entry.sourceTypeId ?? "unknown")}`
     }));
+}
+
+function getPositiveRecord(source, template) {
+  return Object.fromEntries(
+    Object.keys(template).map((key) => [key, Math.max(0, Number(source?.[key] ?? 0) || 0)])
+  );
+}
+
+function scalePositiveRecord(source, template, factor, decimals = 0) {
+  return Object.fromEntries(
+    Object.keys(template).map((key) => {
+      const value = Math.max(0, Number(source?.[key] ?? 0) || 0);
+      return [key, value > 0 ? roundTo(value * factor, decimals) : 0];
+    })
+  );
+}
+
+function pickStrongestPositiveBonus(record) {
+  return Object.entries(record ?? {})
+    .filter(([, amount]) => Number(amount) > 0)
+    .sort((left, right) => Number(right[1]) - Number(left[1]))[0] ?? null;
+}
+
+function formatLegendBonusPart(key, amount) {
+  const numericAmount = Number(amount ?? 0) || 0;
+  if (numericAmount <= 0) {
+    return "";
+  }
+  if (EXPEDITION_RESOURCE_REWARD_KEYS.includes(key)) {
+    return `+${roundTo(numericAmount, 1)} ${key}/day`;
+  }
+  return `+${roundTo(numericAmount, 0)} ${key}`;
+}
+
+function joinLegendBonusParts(parts = []) {
+  const filtered = parts.filter(Boolean);
+  if (!filtered.length) {
+    return "No active specialty bonus.";
+  }
+  if (filtered.length === 1) {
+    return filtered[0];
+  }
+  if (filtered.length === 2) {
+    return `${filtered[0]} and ${filtered[1]}`;
+  }
+  return `${filtered.slice(0, -1).join(", ")}, and ${filtered[filtered.length - 1]}`;
+}
+
+export function getLegendAssignmentPosts() {
+  return LEGEND_ASSIGNMENT_POSTS.map((post) => ({ ...post }));
+}
+
+export function getLegendAssignmentDetails(uniqueCitizen) {
+  const assignmentPost = LEGEND_ASSIGNMENT_POST_BY_ID[uniqueCitizen?.assignmentPostId] ?? null;
+  const resourceBonuses = createEmptyResourceRecord();
+  const statBonuses = createEmptyLegendStatRecord();
+  const expeditionTags = Array.isArray(uniqueCitizen?.expeditionTags) ? [...uniqueCitizen.expeditionTags] : [];
+  let expeditionPowerPercent = 0;
+
+  if (!assignmentPost) {
+    return {
+      post: null,
+      iconKey: "citizens",
+      summary: "At large in the city. This legend is only contributing their innate bonuses right now.",
+      resourceBonuses,
+      statBonuses,
+      expeditionPowerPercent,
+      expeditionTags,
+      bonusSummary: "No active assignment bonus."
+    };
+  }
+
+  const baseResources = getPositiveRecord(uniqueCitizen?.bonuses?.resources, createEmptyResourceRecord());
+  const baseStats = getPositiveRecord(uniqueCitizen?.bonuses?.stats, createEmptyLegendStatRecord());
+
+  if (assignmentPost.id === "district") {
+    Object.assign(resourceBonuses, scalePositiveRecord(baseResources, createEmptyResourceRecord(), 0.55, 1));
+    const strongestStat = pickStrongestPositiveBonus(baseStats);
+    if (strongestStat) {
+      statBonuses[strongestStat[0]] = Math.max(2, roundTo(Number(strongestStat[1]) * 0.22, 0));
+    } else if (!Object.values(resourceBonuses).some((amount) => amount > 0)) {
+      statBonuses.prosperity = 2;
+    }
+  } else if (assignmentPost.id === "council") {
+    Object.assign(statBonuses, scalePositiveRecord(baseStats, createEmptyLegendStatRecord(), 0.45, 0));
+    if (!Object.values(statBonuses).some((amount) => amount > 0)) {
+      statBonuses.prestige = 2;
+    }
+  } else if (assignmentPost.id === "expedition") {
+    expeditionPowerPercent = Math.max(6, roundTo(Math.max(0, Number(uniqueCitizen?.bonuses?.expeditionPowerPercent ?? 0) || 0) * 0.85, 0));
+  }
+
+  const resourceParts = Object.entries(resourceBonuses)
+    .filter(([, amount]) => Number(amount) > 0)
+    .slice(0, 2)
+    .map(([key, amount]) => formatLegendBonusPart(key, amount));
+  const statParts = Object.entries(statBonuses)
+    .filter(([, amount]) => Number(amount) > 0)
+    .slice(0, 2)
+    .map(([key, amount]) => formatLegendBonusPart(key, amount));
+  const expeditionPart =
+    expeditionPowerPercent > 0
+      ? `+${roundTo(expeditionPowerPercent, 0)}% expedition power${expeditionTags.length ? ` on ${expeditionTags.map((tag) => EXPEDITION_TYPES[tag]?.label ?? tag).join(", ")}` : ""}`
+      : "";
+
+  return {
+    post: assignmentPost,
+    iconKey: assignmentPost.iconKey,
+    summary: assignmentPost.summary,
+    resourceBonuses,
+    statBonuses,
+    expeditionPowerPercent,
+    expeditionTags,
+    bonusSummary: joinLegendBonusParts([...resourceParts, ...statParts, expeditionPart])
+  };
+}
+
+export function setUniqueCitizenAssignment(state, citizenId, assignmentPostId = null) {
+  const uniqueCitizen = (state.uniqueCitizens ?? []).find((entry) => entry.id === citizenId);
+  if (!uniqueCitizen) {
+    return { ok: false, reason: "Legend not found." };
+  }
+
+  const normalizedAssignmentId =
+    typeof assignmentPostId === "string" && LEGEND_ASSIGNMENT_POST_BY_ID[assignmentPostId] ? assignmentPostId : null;
+  uniqueCitizen.assignmentPostId = normalizedAssignmentId;
+  return {
+    ok: true,
+    citizen: uniqueCitizen,
+    assignment: getLegendAssignmentDetails(uniqueCitizen)
+  };
+}
+
+export function getExpeditionRelicSlots() {
+  return EXPEDITION_RELIC_SLOTS.map((slot) => ({ ...slot }));
+}
+
+export function getEquippedExpeditionRelics(state) {
+  const expeditionState = normalizeExpeditionState(state.expeditions);
+  return (expeditionState.relics ?? []).filter((relic) => relic.equippedSlotId && EXPEDITION_RELIC_SLOT_BY_ID[relic.equippedSlotId]);
+}
+
+function getRelicSynergyRequirementStatus(state, requirement) {
+  if (requirement.type === "legendPost") {
+    const match = (state.uniqueCitizens ?? []).find(
+      (citizen) => citizen?.status === "inCity" && citizen?.assignmentPostId === requirement.value
+    );
+    return {
+      ...requirement,
+      met: Boolean(match),
+      context: match ? `${match.fullName ?? match.title ?? "A legend"} is covering this post.` : "No legend is holding this post yet."
+    };
+  }
+
+  if (requirement.type === "townFocus") {
+    const focus = getCurrentTownFocus(state);
+    const met = focus?.id === requirement.value;
+    return {
+      ...requirement,
+      met,
+      context: met ? `${focus?.name ?? "Current focus"} is active.` : `${requirement.label} is not active right now.`
+    };
+  }
+
+  if (requirement.type === "buildingTag") {
+    const activeBuildings = (state.buildings ?? []).filter(
+      (building) => building?.isComplete && !building?.isRuined && Array.isArray(building.tags) && building.tags.includes(requirement.value)
+    );
+    return {
+      ...requirement,
+      met: activeBuildings.length > 0,
+      context:
+        activeBuildings.length > 0
+          ? `${activeBuildings[0].displayName ?? activeBuildings[0].name ?? "An active building"} satisfies this link.`
+          : `${requirement.label} is still missing.`
+    };
+  }
+
+  return {
+    ...requirement,
+    met: false,
+    context: "This synergy requirement is not recognized."
+  };
+}
+
+export function getExpeditionRelicSynergyStatus(state, relic) {
+  const synergy = normalizeExpeditionRelicSynergy(relic?.synergy);
+  if (!synergy) {
+    return null;
+  }
+
+  const requirementStatuses = synergy.requirements.map((requirement) => getRelicSynergyRequirementStatus(state, requirement));
+  return {
+    ...synergy,
+    requirementStatuses,
+    active: requirementStatuses.every((requirement) => requirement.met),
+    missingLabels: requirementStatuses.filter((requirement) => !requirement.met).map((requirement) => requirement.label),
+    metLabels: requirementStatuses.filter((requirement) => requirement.met).map((requirement) => requirement.label)
+  };
+}
+
+export function getExpeditionRelicActiveBonuses(state, relic) {
+  const bonuses = createRelicBonusRecord(relic?.bonuses);
+  const synergy = getExpeditionRelicSynergyStatus(state, relic);
+  const synergyBonuses = synergy?.active ? createRelicBonusRecord(synergy.bonuses) : createRelicBonusRecord();
+  if (synergy?.active) {
+    addRelicBonuses(bonuses, synergy.bonuses);
+  }
+  return {
+    bonuses,
+    synergy,
+    synergyBonuses
+  };
+}
+
+export function getEquippedExpeditionRelicBonuses(state) {
+  return getEquippedExpeditionRelics(state).reduce(
+    (record, relic) => {
+      const activeBonuses = getExpeditionRelicActiveBonuses(state, relic).bonuses;
+      addRelicBonuses(record, activeBonuses);
+      return record;
+    },
+    {
+      resources: createEmptyResourceRecord(),
+      stats: createEmptyLegendStatRecord(),
+      expeditionPowerPercent: 0,
+      expeditionTags: []
+    }
+  );
+}
+
+function getExpeditionRelicExpeditionPowerPercent(state, expeditionTypeId) {
+  return getEquippedExpeditionRelics(state).reduce((sum, relic) => {
+    const activeBonuses = getExpeditionRelicActiveBonuses(state, relic).bonuses;
+    const tags = activeBonuses.expeditionTags ?? [];
+    if (Array.isArray(tags) && tags.length && expeditionTypeId && !tags.includes(expeditionTypeId)) {
+      return sum;
+    }
+    return sum + (Number(activeBonuses.expeditionPowerPercent ?? 0) || 0);
+  }, 0);
+}
+
+export function getExpeditionRelicOverview(state) {
+  const expeditionState = normalizeExpeditionState(state.expeditions);
+  const relics = expeditionState.relics ?? [];
+  const equippedBySlot = Object.fromEntries(EXPEDITION_RELIC_SLOTS.map((slot) => [slot.id, null]));
+  for (const relic of relics) {
+    if (relic.equippedSlotId && equippedBySlot[relic.equippedSlotId] === null) {
+      equippedBySlot[relic.equippedSlotId] = relic;
+    }
+  }
+
+  const equippedRelics = Object.values(equippedBySlot).filter(Boolean);
+  const storedRelics = relics.filter((relic) => !relic.equippedSlotId);
+  return {
+    totalRelics: relics.length,
+    equippedCount: equippedRelics.length,
+    activeSynergies: equippedRelics.filter((relic) => getExpeditionRelicSynergyStatus(state, relic)?.active).length,
+    storedRelics: storedRelics.length,
+    emptySlots: EXPEDITION_RELIC_SLOTS.filter((slot) => !equippedBySlot[slot.id]).length,
+    equippedBySlot,
+    equippedRelics,
+    storedRelicsList: storedRelics
+  };
+}
+
+export function setExpeditionRelicSlot(state, relicId, slotId = null) {
+  state.expeditions = normalizeExpeditionState(state.expeditions);
+  const relics = state.expeditions.relics ?? [];
+  const relic = relics.find((entry) => entry.id === relicId);
+  if (!relic) {
+    return { ok: false, reason: "Relic not found." };
+  }
+
+  if (!slotId) {
+    relic.equippedSlotId = null;
+    return { ok: true, relic, slot: null };
+  }
+
+  const slot = EXPEDITION_RELIC_SLOT_BY_ID[slotId] ?? null;
+  if (!slot) {
+    return { ok: false, reason: "Relic slot not found." };
+  }
+
+  const currentOccupant = relics.find((entry) => entry.equippedSlotId === slot.id);
+  if (currentOccupant) {
+    currentOccupant.equippedSlotId = null;
+  }
+  relic.equippedSlotId = slot.id;
+
+  return {
+    ok: true,
+    relic,
+    slot,
+    replacedRelic: currentOccupant && currentOccupant.id !== relic.id ? currentOccupant : null
+  };
 }
 
 export function normalizeExpeditionState(sourceState) {
   const base = createDefaultExpeditionState();
+  const relics = Array.isArray(sourceState?.relics)
+    ? sourceState.relics.filter((entry) => entry && typeof entry === "object").map((entry) => normalizeExpeditionRelic(entry))
+    : base.relics;
+  const claimedRelicSlots = new Set();
+  for (const relic of relics) {
+    if (!relic.equippedSlotId) {
+      continue;
+    }
+    if (claimedRelicSlots.has(relic.equippedSlotId)) {
+      relic.equippedSlotId = null;
+      continue;
+    }
+    claimedRelicSlots.add(relic.equippedSlotId);
+  }
   return {
     board: Array.isArray(sourceState?.board) ? sourceState.board.map((entry) => normalizeMissionCard(entry)) : base.board,
     active: Array.isArray(sourceState?.active)
@@ -291,6 +1171,7 @@ export function normalizeExpeditionState(sourceState) {
     recent: Array.isArray(sourceState?.recent)
       ? sourceState.recent.map((entry) => createExpeditionRecentRecord(entry)).slice(0, MAX_RECENT_RETURNS)
       : base.recent,
+    relics,
     lastRefreshDayOffset:
       sourceState?.lastRefreshDayOffset === null || sourceState?.lastRefreshDayOffset === undefined
         ? base.lastRefreshDayOffset
@@ -476,26 +1357,41 @@ export function getUniqueCitizenResourceBonuses(state) {
     if (uniqueCitizen.status !== "inCity") {
       continue;
     }
+    const assignment = getLegendAssignmentDetails(uniqueCitizen);
     for (const key of EXPEDITION_RESOURCE_REWARD_KEYS) {
       total[key] += Number(uniqueCitizen.bonuses?.resources?.[key] ?? 0) || 0;
+      total[key] += Number(assignment.resourceBonuses?.[key] ?? 0) || 0;
     }
+  }
+  const relicBonuses = getEquippedExpeditionRelicBonuses(state);
+  for (const key of EXPEDITION_RESOURCE_REWARD_KEYS) {
+    total[key] += Number(relicBonuses.resources?.[key] ?? 0) || 0;
   }
   return total;
 }
 
 export function getUniqueCitizenStatBonuses(state) {
-  return (state.uniqueCitizens ?? []).reduce(
+  const totals = (state.uniqueCitizens ?? []).reduce(
     (record, uniqueCitizen) => {
       if (uniqueCitizen.status !== "inCity") {
         return record;
       }
+      const assignment = getLegendAssignmentDetails(uniqueCitizen);
       for (const [key, amount] of Object.entries(uniqueCitizen.bonuses?.stats ?? {})) {
+        record[key] = (record[key] ?? 0) + (Number(amount) || 0);
+      }
+      for (const [key, amount] of Object.entries(assignment.statBonuses ?? {})) {
         record[key] = (record[key] ?? 0) + (Number(amount) || 0);
       }
       return record;
     },
     { prosperity: 0, defense: 0, security: 0, prestige: 0, morale: 0, health: 0 }
   );
+  const relicBonuses = getEquippedExpeditionRelicBonuses(state);
+  for (const [key, amount] of Object.entries(relicBonuses.stats ?? {})) {
+    totals[key] = (totals[key] ?? 0) + (Number(amount) || 0);
+  }
+  return totals;
 }
 
 function getUniqueCitizenExpeditionPowerPercent(state, expeditionTypeId) {
@@ -508,8 +1404,11 @@ function getUniqueCitizenExpeditionPowerPercent(state, expeditionTypeId) {
     if (Array.isArray(tags) && tags.length && !tags.includes(expeditionTypeId)) {
       continue;
     }
+    const assignment = getLegendAssignmentDetails(uniqueCitizen);
     percent += Number(uniqueCitizen.bonuses?.expeditionPowerPercent ?? 0) || 0;
+    percent += Number(assignment.expeditionPowerPercent ?? 0) || 0;
   }
+  percent += getExpeditionRelicExpeditionPowerPercent(state, expeditionTypeId);
   return percent;
 }
 
@@ -779,6 +1678,37 @@ function buildCrystalRewards(expeditionType, rewardScore) {
   return { crystals, shards };
 }
 
+function buildExpeditionRelicReward(state, expedition, rewardScore) {
+  const expeditionState = normalizeExpeditionState(state.expeditions);
+  const ownedTemplateIds = new Set((expeditionState.relics ?? []).map((relic) => relic.templateId).filter(Boolean));
+  const availableTemplates = EXPEDITION_RELIC_TEMPLATES.filter((template) => !ownedTemplateIds.has(template.id));
+  if (!availableTemplates.length) {
+    return null;
+  }
+
+  const baseChance = Number(EXPEDITION_RELIC_TYPE_CHANCE[expedition?.typeId] ?? 0.14) || 0.14;
+  const riskBonus = expedition?.missionRisk === "High" ? 0.14 : expedition?.missionRisk === "Medium" ? 0.06 : 0.02;
+  const qualityBonus = clamp((Number(rewardScore ?? 0) - 8) * 0.015, 0, 0.16);
+  const specialBonus = expedition?.missionIsSpecial ? 0.08 : 0;
+  const successBonus = clamp((Number(expedition?.successScore ?? 0) - 1) * 0.12, 0, 0.08);
+  const relicChance = clamp(baseChance + riskBonus + qualityBonus + specialBonus + successBonus, 0.08, 0.78);
+  if (Math.random() > relicChance) {
+    return null;
+  }
+
+  const selectedTemplateId = getWeightedRandomChoice(
+    Object.fromEntries(
+      availableTemplates.map((template) => [
+        template.id,
+        (template.sourceTypeIds?.includes(expedition?.typeId) ? 3.5 : 1) +
+          (template.kindLabel === "Trophy" && expedition?.typeId === "monsterHunt" ? 1.5 : 0)
+      ])
+    )
+  );
+  const template = availableTemplates.find((entry) => entry.id === selectedTemplateId) ?? availableTemplates[0];
+  return createExpeditionRelicRecord(template, expedition, Number(state.calendar?.dayOffset ?? 0) || 0);
+}
+
 function summarizeRecruitRewards(recruits) {
   const segments = [];
   for (const [citizenClass, bundle] of Object.entries(recruits ?? {})) {
@@ -814,7 +1744,68 @@ function summarizeCrystalRewards(crystals, shards) {
   return parts.join(", ");
 }
 
-function createUniqueCitizen(state, expeditionTypeId) {
+function summarizeRelicReward(relic) {
+  if (!relic) {
+    return "";
+  }
+  return `${relic.name} (${relic.kindLabel})`;
+}
+
+function hashLegendSeed(value = "") {
+  let hash = 0;
+  for (const character of String(value)) {
+    hash = (hash * 31 + character.charCodeAt(0)) % 2147483647;
+  }
+  return Math.abs(hash);
+}
+
+function pickLegendPattern(options, seedValue, fallback) {
+  if (!Array.isArray(options) || !options.length) {
+    return fallback;
+  }
+  return options[seedValue % options.length] ?? fallback;
+}
+
+function applyLegendPattern(template, replacements) {
+  return Object.entries(replacements).reduce(
+    (result, [token, value]) => result.replaceAll(token, value),
+    String(template ?? "")
+  );
+}
+
+function buildUniqueCitizenIdentity(expedition, archetype, fullName, joinedAt) {
+  const expeditionType = EXPEDITION_TYPES[expedition?.typeId] ?? null;
+  const missionLabel = String(expedition?.missionName ?? expeditionType?.label ?? "the frontier road").trim() || "the frontier road";
+  const vehicleClause = expedition?.vehicleName ? ` aboard the ${String(expedition.vehicleName).trim()}` : "";
+  const seedValue = hashLegendSeed(`${fullName}|${archetype?.id ?? "legend"}|${expedition?.typeId ?? "unknown"}|${missionLabel}`);
+  const originTemplate = pickLegendPattern(
+    LEGEND_ORIGIN_PATTERNS[expedition?.typeId],
+    seedValue,
+    "Reached the Drift by way of %mission% and chose to remain%vehicle%."
+  );
+  const arrivalTemplate = pickLegendPattern(
+    LEGEND_ARRIVAL_PATTERNS[archetype?.id],
+    seedValue,
+    "Entered the Drift on %joinedAt% and immediately drew notice from the city."
+  );
+
+  return {
+    originLabel: expeditionType?.label ?? "Unrecorded Route",
+    originMemory: applyLegendPattern(originTemplate, {
+      "%mission%": missionLabel,
+      "%vehicle%": vehicleClause,
+      "%type%": expeditionType?.label ?? "Expedition"
+    }),
+    arrivalLine: applyLegendPattern(arrivalTemplate, {
+      "%joinedAt%": joinedAt,
+      "%mission%": missionLabel
+    }),
+    sigilSeed: `${fullName}|${archetype?.id ?? "legend"}|${expedition?.typeId ?? "unknown"}|${missionLabel}`
+  };
+}
+
+function createUniqueCitizen(state, expedition) {
+  const expeditionTypeId = expedition?.typeId ?? null;
   const availableArchetypes = UNIQUE_CITIZEN_ARCHETYPES.filter((entry) => entry.expeditionTags?.includes(expeditionTypeId));
   const archetypePool = availableArchetypes.length ? availableArchetypes : UNIQUE_CITIZEN_ARCHETYPES;
   const archetype = archetypePool[Math.floor(Math.random() * archetypePool.length)];
@@ -826,18 +1817,24 @@ function createUniqueCitizen(state, expeditionTypeId) {
     guard += 1;
   }
 
+  const joinedAt = formatDate(state.calendar.dayOffset);
+  const identity = buildUniqueCitizenIdentity(expedition, archetype, fullName, joinedAt);
+
   const uniqueCitizen = {
     id: createId("unique-citizen"),
     fullName,
     title: archetype.title,
     className: archetype.className,
     effectText: archetype.effectText,
+    archetypeId: archetype.id,
+    assignmentPostId: null,
     bonuses: structuredClone(archetype.bonuses ?? {}),
     expeditionTags: [...(archetype.expeditionTags ?? [])],
     joinedDayOffset: state.calendar.dayOffset,
-    joinedAt: formatDate(state.calendar.dayOffset),
+    joinedAt,
     status: "inCity",
-    sourceTypeId: expeditionTypeId
+    sourceTypeId: expeditionTypeId,
+    ...identity
   };
 
   state.uniqueCitizens = [...(state.uniqueCitizens ?? []), uniqueCitizen];
@@ -861,6 +1858,10 @@ function grantRewardCollections(state, rewards) {
   }
   for (const [citizenClass, bundle] of Object.entries(rewards.recruits ?? {})) {
     addCitizenRarityBundle(state, citizenClass, bundle);
+  }
+  if (rewards.relic) {
+    state.expeditions = normalizeExpeditionState(state.expeditions);
+    state.expeditions.relics = [normalizeExpeditionRelic(rewards.relic), ...(state.expeditions.relics ?? [])];
   }
 }
 
@@ -944,10 +1945,12 @@ function buildExpeditionRewards(state, expedition, journeyProjection = null) {
 
   let uniqueCitizen = null;
   if (state.expeditions.uniqueProgress >= state.expeditions.nextUniqueThreshold && expedition.successScore >= 0.9) {
-    uniqueCitizen = createUniqueCitizen(state, expedition.typeId);
+    uniqueCitizen = createUniqueCitizen(state, expedition);
     state.expeditions.uniqueProgress -= state.expeditions.nextUniqueThreshold;
     state.expeditions.nextUniqueThreshold = Math.round(state.expeditions.nextUniqueThreshold * 1.28 + 30);
   }
+
+  const relic = buildExpeditionRelicReward(state, expedition, rewardScore);
 
   const modifiers = applyExpeditionOutcomeModifiers(expedition, {
     resources,
@@ -962,6 +1965,7 @@ function buildExpeditionRewards(state, expedition, journeyProjection = null) {
   return {
     resources,
     recruits,
+    relic,
     uniqueCitizen,
     modifiers,
     ...crystalRewards
@@ -1554,6 +2558,24 @@ export function getExpeditionJourneyProjection(journey) {
   };
 }
 
+export function getExpeditionJourneyOptionPreview(journey, optionId) {
+  const previewJourney = normalizePendingJourney(structuredClone(journey ?? {}));
+  const currentStage = previewJourney.stages?.[previewJourney.currentStageIndex] ?? null;
+  if (!currentStage) {
+    return null;
+  }
+
+  const selectedOption = (currentStage.options ?? []).find((option) => option.id === optionId) ?? null;
+  if (!selectedOption) {
+    return null;
+  }
+
+  currentStage.chosenOptionId = selectedOption.id;
+  currentStage.chosenLabel = selectedOption.label;
+  currentStage.chosenSummary = selectedOption.summary;
+  return getExpeditionJourneyProjection(previewJourney);
+}
+
 export function getCurrentPendingExpeditionJourney(state) {
   const pending = normalizeExpeditionState(state.expeditions).pending ?? [];
   return pending[0] ?? null;
@@ -1579,6 +2601,7 @@ function resolveExpeditionReturn(state, expedition, returnDayOffset = state.cale
     summarizeRecruitRewards(rewards.recruits),
     summarizeResourceRewards(rewards.resources),
     summarizeCrystalRewards(rewards.crystals, rewards.shards),
+    rewards.relic ? `Recovered ${rewards.relic.name}, ${rewards.relic.kindLabel.toLowerCase()}.` : "",
     rewards.uniqueCitizen ? `${rewards.uniqueCitizen.fullName}, ${rewards.uniqueCitizen.title}, joined the Drift.` : ""
   ].filter(Boolean);
   const narrative =
@@ -1598,6 +2621,7 @@ function resolveExpeditionReturn(state, expedition, returnDayOffset = state.cale
     ...stageHighlights,
     ...((rewards.modifiers ?? []).map((modifier) => `Outcome modifier: ${modifier}`)),
     ...rewardSummaryParts,
+    ...(rewards.relic ? [`Relic effect: ${rewards.relic.bonusSummary}`] : []),
     ...(expedition.buildingSynergySummary ?? []).slice(0, 2)
   ].filter(Boolean);
 
@@ -1612,6 +2636,14 @@ function resolveExpeditionReturn(state, expedition, returnDayOffset = state.cale
       category: "Unique Citizen",
       title: rewards.uniqueCitizen.fullName,
       details: `${rewards.uniqueCitizen.fullName}, ${rewards.uniqueCitizen.title}, joined the Drift. ${rewards.uniqueCitizen.effectText}`
+    });
+  }
+
+  if (rewards.relic) {
+    addHistoryEntry(state, {
+      category: rewards.relic.kindLabel,
+      title: rewards.relic.name,
+      details: `${rewards.relic.name} was recovered from ${expedition.missionName ?? expedition.typeLabel}. ${rewards.relic.effectText} ${rewards.relic.bonusSummary}`
     });
   }
 
@@ -1966,6 +2998,7 @@ export function getExpeditionOverview(state) {
   const availableVehicles = getAvailableVehicleCounts({ ...state, expeditions: expeditionState, vehicles });
   const totalVehicles = Object.values(vehicles).reduce((sum, value) => sum + value, 0);
   const freeVehicles = Object.values(availableVehicles).reduce((sum, value) => sum + value, 0);
+  const relicOverview = getExpeditionRelicOverview({ ...state, expeditions: expeditionState });
 
   return {
     totalVehicles,
@@ -1973,6 +3006,8 @@ export function getExpeditionOverview(state) {
     boardMissions: expeditionState.board.length,
     activeExpeditions: expeditionState.active.length,
     pendingJourneys: expeditionState.pending.length,
+    relics: relicOverview.totalRelics,
+    slottedRelics: relicOverview.equippedCount,
     uniqueProgress: expeditionState.uniqueProgress,
     nextUniqueThreshold: expeditionState.nextUniqueThreshold,
     uniqueCitizens: (state.uniqueCitizens ?? []).length

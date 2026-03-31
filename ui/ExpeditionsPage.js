@@ -11,9 +11,13 @@ import {
   getAvailableVehicleCounts,
   getCurrentPendingExpeditionJourney,
   getExpeditionJourneyProjection,
+  getExpeditionRelicSynergyStatus,
+  getExpeditionRelicOverview,
+  getExpeditionRelicSlots,
   getExpeditionOverview
 } from "../systems/ExpeditionSystem.js";
 import { formatDate } from "../systems/CalendarSystem.js";
+import { renderUiIcon } from "./UiIcons.js";
 
 const RESOURCE_LABELS = {
   food: "Food",
@@ -407,6 +411,166 @@ function renderPendingJourneyPanel(state) {
   `;
 }
 
+function renderRelicSynergy(state, relic, mode = "inventory") {
+  const synergy = getExpeditionRelicSynergyStatus(state, relic);
+  if (!synergy) {
+    return "";
+  }
+
+  const statusLine = synergy.active
+    ? `Unlocked: ${synergy.bonusSummary}`
+    : `Needs ${synergy.missingLabels.join(" • ")}.`;
+  const requirementTags = synergy.requirementStatuses
+    .map(
+      (requirement) => `
+        <em class="${requirement.met ? "is-active" : "is-muted"}">${escapeHtml(requirement.label)}</em>
+      `
+    )
+    .join("");
+
+  if (mode === "slot") {
+    return `
+      <small class="expedition-relic-slot__synergy ${synergy.active ? "is-active" : ""}">
+        ${escapeHtml(synergy.active ? `Synergy active: ${synergy.bonusSummary}` : statusLine)}
+      </small>
+    `;
+  }
+
+  return `
+    <div class="expedition-relic-synergy ${synergy.active ? "is-active" : ""}">
+      <div class="expedition-relic-synergy__head">
+        <span>Synergy</span>
+        <strong>${escapeHtml(synergy.active ? "Awakened" : "Dormant")}</strong>
+      </div>
+      <p>${escapeHtml(synergy.summary)}</p>
+      <div class="expedition-card__tags expedition-relic-synergy__tags">
+        ${requirementTags}
+      </div>
+      <small>${escapeHtml(statusLine)}</small>
+    </div>
+  `;
+}
+
+function renderExpeditionRelicRack(state) {
+  const overview = getExpeditionRelicOverview(state);
+  const slots = getExpeditionRelicSlots();
+  const relics = [...(state.expeditions?.relics ?? [])].sort(
+    (left, right) => Number(right.discoveredDayOffset ?? 0) - Number(left.discoveredDayOffset ?? 0)
+  );
+
+  return `
+    <section class="panel expedition-relic-panel">
+      <div class="panel__header">
+        <div>
+          <h3>Relic Rack</h3>
+          <span class="panel__subtle">Recovered relics and trophies can be slotted into the Drift for persistent city and expedition bonuses.</span>
+        </div>
+      </div>
+      <div class="expedition-preview-grid">
+        <article><span>Recovered</span><strong>${formatNumber(overview.totalRelics ?? 0, 0)}</strong></article>
+        <article><span>Slotted</span><strong>${formatNumber(overview.equippedCount ?? 0, 0)} / ${formatNumber(slots.length, 0)}</strong></article>
+        <article><span>Awakened</span><strong>${formatNumber(overview.activeSynergies ?? 0, 0)}</strong></article>
+        <article><span>Stored</span><strong>${formatNumber(overview.storedRelics ?? 0, 0)}</strong></article>
+        <article><span>Open Slots</span><strong>${formatNumber(overview.emptySlots ?? 0, 0)}</strong></article>
+      </div>
+      <div class="expedition-relic-panel__slots">
+        ${slots
+          .map((slot) => {
+            const relic = overview.equippedBySlot?.[slot.id] ?? null;
+            return `
+              <article class="expedition-relic-slot ${relic ? "is-filled" : ""}">
+                <div class="expedition-relic-slot__head">
+                  <span>${renderUiIcon(relic?.iconKey ?? "relic", slot.label)}${escapeHtml(slot.label)}</span>
+                  <strong>${escapeHtml(relic?.kindLabel ?? "Empty")}</strong>
+                </div>
+                ${
+                  relic
+                    ? `
+                        <div class="expedition-relic-slot__body">
+                          <strong>${escapeHtml(relic.name)}</strong>
+                          <p>${escapeHtml(relic.summary)}</p>
+                          <small>${escapeHtml(relic.bonusSummary)}</small>
+                          ${renderRelicSynergy(state, relic, "slot")}
+                        </div>
+                      `
+                    : `
+                        <div class="expedition-relic-slot__body is-empty">
+                          <strong>Open Socket</strong>
+                          <p>${escapeHtml(slot.summary)}</p>
+                        </div>
+                      `
+                }
+              </article>
+            `;
+          })
+          .join("")}
+      </div>
+      ${
+        relics.length
+          ? `
+              <div class="expedition-relic-panel__inventory">
+                ${relics
+                  .map(
+                    (relic) => `
+                      <article class="expedition-relic-card ${relic.equippedSlotId ? "is-equipped" : ""}">
+                        <div class="expedition-relic-card__head">
+                          <div>
+                            <span>${renderUiIcon(relic.iconKey ?? "relic", relic.kindLabel)}${escapeHtml(relic.kindLabel ?? "Relic")}</span>
+                            <strong>${escapeHtml(relic.name)}</strong>
+                          </div>
+                          <em>${escapeHtml(relic.sourceMissionName ?? relic.sourceLabel ?? "Expedition")}</em>
+                        </div>
+                        <p>${escapeHtml(relic.summary)}</p>
+                        <small>${escapeHtml(relic.bonusSummary)}</small>
+                        ${renderRelicSynergy(state, relic)}
+                        <div class="expedition-card__tags">
+                          <em>${escapeHtml(relic.discoveredAt ?? "")}</em>
+                          <em>${escapeHtml(relic.equippedSlotId ? `Slotted: ${slots.find((slot) => slot.id === relic.equippedSlotId)?.label ?? relic.equippedSlotId}` : "In Storage")}</em>
+                        </div>
+                        <div class="expedition-relic-card__actions">
+                          ${slots
+                            .map(
+                              (slot) => `
+                                <button
+                                  class="button ${relic.equippedSlotId === slot.id ? "" : "button--ghost"}"
+                                  type="button"
+                                  data-action="set-expedition-relic-slot"
+                                  data-relic-id="${relic.id}"
+                                  data-slot-id="${slot.id}"
+                                >
+                                  ${escapeHtml(slot.label)}
+                                </button>
+                              `
+                            )
+                            .join("")}
+                          ${
+                            relic.equippedSlotId
+                              ? `
+                                  <button
+                                    class="button button--ghost"
+                                    type="button"
+                                    data-action="set-expedition-relic-slot"
+                                    data-relic-id="${relic.id}"
+                                    data-slot-id=""
+                                  >
+                                    Store
+                                  </button>
+                                `
+                              : ""
+                          }
+                        </div>
+                      </article>
+                    `
+                  )
+                  .join("")}
+              </div>
+            `
+          : `<p class="panel__empty">Recovered relics and trophies will start appearing on stronger frontier returns, especially relic recoveries, crystal hunts, and monster hunts.</p>`
+      }
+    </section>
+  `;
+}
+
 function renderExpeditionSummary(state) {
   const overview = getExpeditionOverview(state);
   return `
@@ -420,6 +584,8 @@ function renderExpeditionSummary(state) {
         <article><span>Active</span><strong>${formatNumber(overview.activeExpeditions)}</strong></article>
         <article><span>Debriefs</span><strong>${formatNumber(overview.pendingJourneys ?? 0, 0)}</strong></article>
         <article><span>Vehicles Free</span><strong>${formatNumber(overview.freeVehicles)} / ${formatNumber(overview.totalVehicles)}</strong></article>
+        <article><span>Relics</span><strong>${formatNumber(overview.relics ?? 0, 0)}</strong></article>
+        <article><span>Slotted Relics</span><strong>${formatNumber(overview.slottedRelics ?? 0, 0)}</strong></article>
         <article><span>Unique Progress</span><strong>${formatNumber(overview.uniqueProgress, 0)} / ${formatNumber(overview.nextUniqueThreshold, 0)}</strong></article>
         <article><span>Unique Citizens</span><strong>${formatNumber(overview.uniqueCitizens)}</strong></article>
       </div>
@@ -431,6 +597,7 @@ function renderExpeditionSummary(state) {
             <li>Each expedition needs exactly one free vehicle.</li>
             <li>Better vehicles shorten travel time by different amounts.</li>
             <li>Returned expeditions open journey debriefs every 4 travel days, up to 5 stages.</li>
+            <li>Stronger frontier returns can recover relics or trophies for the city's relic rack.</li>
             <li>Long success fills the Unique Citizen meter.</li>
           </ul>
         </article>
@@ -474,6 +641,7 @@ export function renderExpeditionsPage(state) {
     subtitle: "Send crews beyond the Drift, then debrief their trip stage by stage before the final haul is settled.",
     content: `
       ${renderExpeditionSummary(state)}
+      ${renderExpeditionRelicRack(state)}
       ${renderPendingJourneyPanel(state)}
       <section class="panel expedition-launch-panel">
         <div class="panel__header">
