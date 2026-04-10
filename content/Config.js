@@ -8,7 +8,7 @@ import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
 // APP_VERSION must stay monotonic because Firebase publish safety compares builds numerically.
-export const APP_VERSION = "v1.6.14";
+export const APP_VERSION = "v1.6.15";
 // Release maturity is tracked separately so unreleased builds do not need to pretend they are public/stable.
 export const APP_RELEASE_STAGE = "preview";
 const RELEASE_STAGE_LABELS = {
@@ -57,6 +57,7 @@ export const PAGE_ROUTES = [
   { key: "help", label: "Help", href: "./help.html" }
 ];
 export const BUILD_NOTES = [
+  "Expedition transport tuning is much sharper now: every vehicle has an explicit crew cap, heavy craft haul more but scout less, land crews can now travel on foot, and the number-row page-jump shortcuts are disabled so typing is less disruptive.",
   "Vehicles are easier to scan now: the fleet and expedition picker both separate land and air craft, and vehicle art can now load from assets/images/vehicles with stable per-vehicle filenames.",
   "Mission board variety grew again with fresh named expedition templates across rescue, recruit, resource runs, crystal hunts, monster hunts, diplomacy, pilgrimage, and relic recovery.",
   "Expedition callsign pools are broader again, so repeated launches stay flavorful longer before falling back to generated overflow names.",

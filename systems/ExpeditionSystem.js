@@ -1054,10 +1054,13 @@ export function normalizeVehicleFleet(sourceFleet) {
   const migratedFleet = { ...baseFleet };
   for (const [rawVehicleId, amount] of Object.entries(sourceFleet ?? {})) {
     const vehicleId = normalizeVehicleId(rawVehicleId);
+    if (VEHICLE_DEFINITIONS[vehicleId]?.requiresFleet === false) {
+      continue;
+    }
     migratedFleet[vehicleId] = (migratedFleet[vehicleId] ?? 0) + (Math.max(0, Number(amount) || 0));
   }
   return Object.fromEntries(
-    VEHICLE_ORDER.map((vehicleId) => [
+    VEHICLE_ORDER.filter((vehicleId) => VEHICLE_DEFINITIONS[vehicleId]?.requiresFleet !== false).map((vehicleId) => [
       vehicleId,
       Math.max(0, Number(migratedFleet?.[vehicleId] ?? baseFleet[vehicleId] ?? 0) || 0)
     ])
@@ -1650,6 +1653,9 @@ export function getAvailableExpeditionCitizenCount(state, citizenClass) {
 export function getVehicleAssignments(state) {
   const assignments = Object.fromEntries(VEHICLE_ORDER.map((vehicleId) => [vehicleId, 0]));
   for (const expedition of state.expeditions?.active ?? []) {
+    if (VEHICLE_DEFINITIONS[expedition.vehicleId]?.requiresFleet === false) {
+      continue;
+    }
     if (assignments[expedition.vehicleId] === undefined) {
       assignments[expedition.vehicleId] = 0;
     }
@@ -1662,7 +1668,13 @@ export function getAvailableVehicleCounts(state) {
   const vehicles = normalizeVehicleFleet(state.vehicles);
   const assignments = getVehicleAssignments(state);
   return Object.fromEntries(
-    VEHICLE_ORDER.map((vehicleId) => [vehicleId, Math.max(0, vehicles[vehicleId] - (assignments[vehicleId] ?? 0))])
+    VEHICLE_ORDER.map((vehicleId) => {
+      const definition = VEHICLE_DEFINITIONS[vehicleId];
+      if (definition?.requiresFleet === false) {
+        return [vehicleId, 1];
+      }
+      return [vehicleId, Math.max(0, (vehicles[vehicleId] ?? 0) - (assignments[vehicleId] ?? 0))];
+    })
   );
 }
 
@@ -1672,7 +1684,7 @@ export function getExpeditionCalendarEntries(state) {
     dayOffset: expedition.expectedReturnDayOffset,
     name: `Expected Return: ${expedition.missionName ?? expedition.typeLabel}`,
     type: "Expedition",
-    description: `${expedition.missionName ?? expedition.typeLabel} is expected to return aboard the ${expedition.vehicleName}.`
+    description: `${expedition.missionName ?? expedition.typeLabel} is expected to return ${getExpeditionTravelLabel(expedition)}.`
   }));
 }
 
@@ -1753,6 +1765,21 @@ function createTeamRequest(input) {
       .map(([citizenClass, amount]) => [citizenClass, Math.max(0, Math.floor(Number(amount) || 0))])
       .filter(([, amount]) => amount > 0)
   );
+}
+
+function getTeamRequestSize(teamRequest) {
+  return Object.values(teamRequest ?? {}).reduce((sum, amount) => sum + (Number(amount) || 0), 0);
+}
+
+function getVehicleCapacity(vehicle) {
+  return Math.max(0, Math.floor(Number(vehicle?.maxPeople ?? 0) || 0));
+}
+
+function getExpeditionTravelLabel(expedition) {
+  if (VEHICLE_DEFINITIONS[expedition?.vehicleId]?.requiresFleet === false) {
+    return "on foot";
+  }
+  return `aboard the ${expedition?.vehicleName ?? "assigned vehicle"}`;
 }
 
 function getBuildingIdentitySet(building) {
@@ -2101,7 +2128,7 @@ function applyLegendPattern(template, replacements) {
 function buildUniqueCitizenIdentity(expedition, archetype, fullName, joinedAt) {
   const expeditionType = EXPEDITION_TYPES[expedition?.typeId] ?? null;
   const missionLabel = String(expedition?.missionName ?? expeditionType?.label ?? "the frontier road").trim() || "the frontier road";
-  const vehicleClause = expedition?.vehicleName ? ` aboard the ${String(expedition.vehicleName).trim()}` : "";
+  const vehicleClause = expedition?.vehicleName ? ` ${getExpeditionTravelLabel(expedition)}` : "";
   const seedValue = hashLegendSeed(`${fullName}|${archetype?.id ?? "legend"}|${expedition?.typeId ?? "unknown"}|${missionLabel}`);
   const originTemplate = pickLegendPattern(
     LEGEND_ORIGIN_PATTERNS[expedition?.typeId],
@@ -2641,7 +2668,7 @@ function buildSupplyJourneyStage(expedition, index, dayMarker) {
     dayMarker,
     kind: "supply",
     title: "Supply Strain",
-    prompt: `By day ${dayMarker}, the crew aboard the ${expedition.vehicleName} is burning through stores faster than planned and needs to decide how to steady the route.`,
+    prompt: `By day ${dayMarker}, the crew traveling ${getExpeditionTravelLabel(expedition)} is burning through stores faster than planned and needs to decide how to steady the route.`,
     options: [
       createJourneyOption({
         id: "salvage-stores",
@@ -3250,6 +3277,9 @@ function buildPreviewInsights(preview) {
   if ((preview.vehicle.favoredMissionTags ?? []).includes(mission.typeId)) {
     strengths.push(`${preview.vehicle.name} is well suited to this mission.`);
   }
+  if (preview.vehicle.requiresFleet === false) {
+    risks.push("Traveling without a vehicle slows the route and leaves less room for supplies.");
+  }
   if ((preview.buildingSynergy.summary ?? []).length) {
     strengths.push(...preview.buildingSynergy.summary.slice(0, 3));
   } else {
@@ -3270,6 +3300,11 @@ function buildPreviewInsights(preview) {
   }
   if (preview.teamSize < 2) {
     risks.push("The crew is extremely small.");
+  }
+  if (preview.vehicleCapacity > 0 && preview.teamSize > preview.vehicleCapacity) {
+    risks.push(`${preview.vehicle.name} is over capacity by ${preview.teamSize - preview.vehicleCapacity} people.`);
+  } else if (preview.vehicleCapacity > 0 && preview.teamSize >= Math.max(1, preview.vehicleCapacity - 2)) {
+    strengths.push(`${preview.vehicle.name} is being used close to full capacity.`);
   }
   if (preview.successScore >= 1.2) {
     strengths.push("Current setup points to a strong return.");
@@ -3323,7 +3358,9 @@ export function createExpeditionLaunchPreview(state, draft = {}) {
     durationDays,
     committedResources,
     teamRequest,
-    teamSize: Object.values(teamRequest).reduce((sum, amount) => sum + amount, 0),
+    teamSize: getTeamRequestSize(teamRequest),
+    vehicleCapacity: getVehicleCapacity(vehicle),
+    seatsRemaining: getVehicleCapacity(vehicle) - getTeamRequestSize(teamRequest),
     powerScore,
     difficultyScore,
     successScore,
@@ -3352,11 +3389,14 @@ export function startExpedition(state, payload) {
 
   const preview = createExpeditionLaunchPreview(state, payload);
   const availableVehicles = getAvailableVehicleCounts(state);
-  if ((availableVehicles[preview.vehicle.id] ?? 0) <= 0) {
+  if (preview.vehicle.requiresFleet !== false && (availableVehicles[preview.vehicle.id] ?? 0) <= 0) {
     return { ok: false, reason: `No free ${preview.vehicle.name} is available.` };
   }
   if (preview.teamSize <= 0) {
     return { ok: false, reason: "Assign at least one citizen to the expedition." };
+  }
+  if (preview.vehicleCapacity > 0 && preview.teamSize > preview.vehicleCapacity) {
+    return { ok: false, reason: `${preview.vehicle.name} can carry at most ${preview.vehicleCapacity} people.` };
   }
 
   for (const [citizenClass, amount] of Object.entries(preview.teamRequest)) {
@@ -3437,7 +3477,10 @@ export function startExpedition(state, payload) {
     uniquePercent: preview.buildingSynergy.uniquePercent,
     buildingSynergySummary: [...(preview.buildingSynergy.summary ?? [])],
     delayCount: 0,
-    notes: `${preview.teamSize} personnel aboard the ${preview.vehicle.name} for a ${preview.mission.risk.toLowerCase()}-risk route.`
+    notes:
+      preview.vehicle.requiresFleet === false
+        ? `${preview.teamSize} personnel departed on foot for a ${preview.mission.risk.toLowerCase()}-risk route.`
+        : `${preview.teamSize} personnel aboard the ${preview.vehicle.name} for a ${preview.mission.risk.toLowerCase()}-risk route.`
   };
 
   state.expeditions.active = [...state.expeditions.active, expedition];
@@ -3446,7 +3489,7 @@ export function startExpedition(state, payload) {
   addHistoryEntry(state, {
     category: "Expedition",
     title: `Departure: ${expedition.expeditionLabel}`,
-    details: `${expedition.expeditionLabel} departed for ${expedition.missionName} on ${expedition.departedAt} aboard the ${expedition.vehicleName}. Expected return ${expedition.expectedReturnAt}.`
+    details: `${expedition.expeditionLabel} departed for ${expedition.missionName} on ${expedition.departedAt} ${getExpeditionTravelLabel(expedition)}. Expected return ${expedition.expectedReturnAt}.`
   });
 
   return { ok: true, expedition, preview };

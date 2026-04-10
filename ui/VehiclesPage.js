@@ -39,6 +39,7 @@ function renderVehicleCard(state, vehicleId) {
         <div class="vehicle-card__stats">
           <article><span>Free</span><strong>${formatNumber(available)}</strong></article>
           <article><span>Assigned</span><strong>${formatNumber(assigned)}</strong></article>
+          <article><span>Capacity</span><strong>${formatNumber(definition.maxPeople ?? 0)}</strong></article>
           <article><span>Time</span><strong>x${formatNumber(definition.timeMultiplier ?? 1, 2)}</strong></article>
           <article><span>Cargo</span><strong>x${formatNumber(definition.cargoMultiplier, 2)}</strong></article>
           <article><span>Safety</span><strong>x${formatNumber(definition.safety ?? 1, 2)}</strong></article>
@@ -61,7 +62,9 @@ function renderVehicleCard(state, vehicleId) {
 }
 
 function renderVehicleGroup(state, section) {
-  const vehicleIds = VEHICLE_ORDER.filter((vehicleId) => VEHICLE_DEFINITIONS[vehicleId].type === section.type);
+  const vehicleIds = VEHICLE_ORDER.filter(
+    (vehicleId) => VEHICLE_DEFINITIONS[vehicleId].type === section.type && VEHICLE_DEFINITIONS[vehicleId].showInFleetRoster !== false
+  );
   const total = vehicleIds.reduce((sum, vehicleId) => sum + (Number(state.vehicles?.[vehicleId] ?? 0) || 0), 0);
   const available = vehicleIds.reduce((sum, vehicleId) => sum + (Number(getAvailableVehicleCounts(state)?.[vehicleId] ?? 0) || 0), 0);
 
@@ -85,20 +88,21 @@ function renderVehicleGroup(state, section) {
 }
 
 export function renderVehiclesPage(state) {
-  const totalVehicles = VEHICLE_ORDER.reduce((sum, vehicleId) => sum + (Number(state.vehicles?.[vehicleId] ?? 0) || 0), 0);
-  const availableVehicles = VEHICLE_ORDER.reduce((sum, vehicleId) => sum + (Number(getAvailableVehicleCounts(state)?.[vehicleId] ?? 0) || 0), 0);
-  const landVehicles = VEHICLE_ORDER.filter((vehicleId) => VEHICLE_DEFINITIONS[vehicleId].type === "land").reduce(
+  const rosterVehicleIds = VEHICLE_ORDER.filter((vehicleId) => VEHICLE_DEFINITIONS[vehicleId].showInFleetRoster !== false);
+  const totalVehicles = rosterVehicleIds.reduce((sum, vehicleId) => sum + (Number(state.vehicles?.[vehicleId] ?? 0) || 0), 0);
+  const availableVehicles = rosterVehicleIds.reduce((sum, vehicleId) => sum + (Number(getAvailableVehicleCounts(state)?.[vehicleId] ?? 0) || 0), 0);
+  const landVehicles = rosterVehicleIds.filter((vehicleId) => VEHICLE_DEFINITIONS[vehicleId].type === "land").reduce(
     (sum, vehicleId) => sum + (Number(state.vehicles?.[vehicleId] ?? 0) || 0),
     0
   );
-  const airVehicles = VEHICLE_ORDER.filter((vehicleId) => VEHICLE_DEFINITIONS[vehicleId].type === "air").reduce(
+  const airVehicles = rosterVehicleIds.filter((vehicleId) => VEHICLE_DEFINITIONS[vehicleId].type === "air").reduce(
     (sum, vehicleId) => sum + (Number(state.vehicles?.[vehicleId] ?? 0) || 0),
     0
   );
 
   return {
     title: "Vehicles",
-    subtitle: "Each expedition needs a vehicle, and stronger buggies or airships shorten the journey by different amounts.",
+    subtitle: "Fleet vehicles set expedition throughput and crew limits, while land crews can also choose to travel on foot.",
     content: `
       <section class="panel vehicle-summary-panel">
         <div class="panel__header">
@@ -110,7 +114,7 @@ export function renderVehiclesPage(state) {
           <article><span>Free Vehicles</span><strong>${formatNumber(availableVehicles)}</strong></article>
           <article><span>Land Vehicles</span><strong>${formatNumber(landVehicles)}</strong></article>
           <article><span>Air Vehicles</span><strong>${formatNumber(airVehicles)}</strong></article>
-          <article><span>Rule</span><strong>1 vehicle = 1 expedition</strong></article>
+          <article><span>Rule</span><strong>1 fleet vehicle = 1 expedition</strong></article>
         </div>
       </section>
       <div class="vehicle-groups">

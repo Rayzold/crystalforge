@@ -2997,18 +2997,6 @@ document.addEventListener("keydown", (event) => {
   }
 
   const key = event.key;
-  const shortcuts = {
-    "1": "./gm.html",
-    "2": "./forge.html",
-    "3": "./economy.html",
-    "4": "./city.html",
-    "5": "./citizens.html",
-    "6": "./chronicle.html",
-    "7": "./expeditions.html",
-    "8": "./vehicles.html",
-    "9": "./uniques.html",
-    "0": "./help.html"
-  };
   const isAdminCodeKey = key.length === 1 && /[0-9!]/.test(key);
 
   if (isAdminCodeKey) {
@@ -3020,35 +3008,15 @@ document.addEventListener("keydown", (event) => {
 
   const adminUnlockPrefix = getAdminUnlockPrefix(navigationShortcutBuffer);
 
-  if (!shortcuts[key]) {
-    if (navigationShortcutBuffer === "432!") {
-      clearNavigationShortcutTimer();
-      navigationShortcutBuffer = "";
-    } else if (!adminUnlockPrefix) {
-      clearNavigationShortcutTimer();
-    }
-    return;
-  }
-
-  if (["2", "3", "4"].includes(key) && adminUnlockPrefix) {
-    event.preventDefault();
+  if (navigationShortcutBuffer === "432!") {
     clearNavigationShortcutTimer();
-    const pendingKey = key;
-    const pendingPrefix = adminUnlockPrefix;
-    navigationShortcutTimer = window.setTimeout(() => {
-      if (navigationShortcutBuffer === pendingPrefix) {
-        navigationShortcutBuffer = "";
-        navigateWithTransition(shortcuts[pendingKey]);
-      }
-      clearNavigationShortcutTimer();
-    }, 360);
+    navigationShortcutBuffer = "";
     return;
   }
 
-  event.preventDefault();
-  clearNavigationShortcutTimer();
-  navigationShortcutBuffer = "";
-  navigateWithTransition(shortcuts[key]);
+  if (!adminUnlockPrefix) {
+    clearNavigationShortcutTimer();
+  }
 });
 
 root.addEventListener("click", async (event) => {

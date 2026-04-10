@@ -105,8 +105,9 @@ function renderVehicleOptions(state, draft) {
     <div class="expedition-vehicle-groups">
       ${VEHICLE_TYPE_SECTIONS.map((section) => {
         const vehicleIds = VEHICLE_ORDER.filter((vehicleId) => VEHICLE_DEFINITIONS[vehicleId]?.type === section.type);
-        const total = vehicleIds.reduce((sum, vehicleId) => sum + (Number(totalVehicles[vehicleId] ?? 0) || 0), 0);
-        const available = vehicleIds.reduce((sum, vehicleId) => sum + (Number(availableVehicles[vehicleId] ?? 0) || 0), 0);
+        const rosterVehicleIds = vehicleIds.filter((vehicleId) => VEHICLE_DEFINITIONS[vehicleId]?.requiresFleet !== false);
+        const total = rosterVehicleIds.reduce((sum, vehicleId) => sum + (Number(totalVehicles[vehicleId] ?? 0) || 0), 0);
+        const available = rosterVehicleIds.reduce((sum, vehicleId) => sum + (Number(availableVehicles[vehicleId] ?? 0) || 0), 0);
 
         return `
           <section class="expedition-vehicle-group">
@@ -123,6 +124,11 @@ function renderVehicleOptions(state, draft) {
                 const definition = VEHICLE_DEFINITIONS[vehicleId];
                 const available = availableVehicles[vehicleId] ?? 0;
                 const isSelected = draft.vehicleId === vehicleId;
+                const capacity = Number(definition?.maxPeople ?? 0) || 0;
+                const footerLabel =
+                  definition?.requiresFleet === false
+                    ? "Always available"
+                    : `${formatNumber(available)} free / ${formatNumber(total)} total`;
 
                 return `
                   <button
@@ -142,11 +148,12 @@ function renderVehicleOptions(state, draft) {
                       <small>${escapeHtml(definition?.summary ?? "")}</small>
                       <div class="expedition-card__tags">
                         <em>${escapeHtml(definition?.sizeLabel ?? (definition?.type === "air" ? "Air Vehicle" : "Land Vehicle"))}</em>
+                        <em>Cap ${formatNumber(capacity, 0)}</em>
                         <em>Travel x${formatNumber(definition?.timeMultiplier ?? 1, 2)}</em>
                         <em>Cargo x${formatNumber(definition?.cargoMultiplier ?? 1, 2)}</em>
                         <em>Scout x${formatNumber(definition?.scouting ?? 1, 2)}</em>
                       </div>
-                      <span class="expedition-card__footer">${formatNumber(available)} free / ${formatNumber(total)} total</span>
+                      <span class="expedition-card__footer">${escapeHtml(footerLabel)}</span>
                     </div>
                   </button>
                 `;
@@ -227,23 +234,27 @@ function renderDurationOptions(draft) {
 }
 
 function renderTeamInputs(state, draft, expeditionType) {
+  const preview = createExpeditionLaunchPreview(state, draft);
   return `
     <div class="expedition-grid expedition-grid--team">
       ${expeditionType.allowedClasses.map((citizenClass) => {
         const definition = CITIZEN_DEFINITIONS[citizenClass];
         const available = getAvailableExpeditionCitizenCount(state, citizenClass);
+        const currentValue = Math.max(0, Number(draft.team?.[citizenClass] ?? 0) || 0);
+        const remainingCapacity = Math.max(0, (preview.vehicleCapacity ?? 0) - (preview.teamSize - currentValue));
+        const inputMax = Math.max(currentValue, Math.min(available, remainingCapacity));
         return `
           <label class="expedition-team-card">
             <div class="expedition-team-card__head">
               <strong>${escapeHtml(`${definition?.emoji ?? "•"} ${citizenClass}`)}</strong>
-              <span>${formatNumber(available)} free</span>
+              <span>${formatNumber(inputMax)} ready</span>
             </div>
             <input
               type="number"
               min="0"
-              max="${available}"
+              max="${inputMax}"
               step="1"
-              value="${Math.max(0, Number(draft.team?.[citizenClass] ?? 0) || 0)}"
+              value="${currentValue}"
               data-action="set-expedition-team-count"
               data-citizen-class="${citizenClass}"
             />
@@ -311,6 +322,7 @@ function renderPreviewPanel(state, draft) {
         <article><span>Risk</span><strong>${escapeHtml(preview.mission.risk)}</strong></article>
         <article><span>Travel</span><strong>${formatNumber(preview.durationDays, 0)}d</strong></article>
         <article><span>Return</span><strong>${escapeHtml(formatDate(preview.expectedReturnDayOffset))}</strong></article>
+        <article><span>Crew</span><strong>${formatNumber(preview.teamSize, 0)} / ${formatNumber(preview.vehicleCapacity, 0)}</strong></article>
         <article><span>Power</span><strong>${formatNumber(preview.powerScore, 1)}</strong></article>
       </div>
       <p class="expedition-launch-preview__outlook">${escapeHtml(outcomeText)}</p>
@@ -664,8 +676,8 @@ function renderExpeditionSummary(state) {
           <strong>Quick Start</strong>
           <ul>
             <li>Pick a mission card from the Mission Board.</li>
-            <li>Each expedition needs exactly one free vehicle.</li>
-            <li>Better vehicles shorten travel time by different amounts.</li>
+            <li>Each expedition can use one free vehicle or travel on foot for land routes.</li>
+            <li>Vehicle choice sets travel speed, cargo, and maximum crew size.</li>
             <li>Returned expeditions open journey debriefs every 4 travel days, up to 5 stages.</li>
             <li>Stronger frontier returns can recover relics or trophies for the city's relic rack.</li>
             <li>Long success fills the Unique Citizen meter.</li>
