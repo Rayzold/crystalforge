@@ -6,8 +6,10 @@ import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "..
 import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER, getCitizenHelpText } from "../content/CitizenConfig.js";
 import { GM_QUICK_CRYSTAL_PACKS, GM_QUICK_EVENT_IDS, SPEED_MULTIPLIERS } from "../content/Config.js";
 import { EVENT_POOLS } from "../content/EventPools.js";
+import { EXPEDITION_ORDER, EXPEDITION_TYPES } from "../content/ExpeditionConfig.js";
 import { RARITY_ORDER } from "../content/Rarities.js";
 import { TOWN_FOCUS_DEFINITIONS } from "../content/TownFocusConfig.js";
+import { UNIQUE_CITIZEN_ARCHETYPES } from "../content/UniqueCitizenConfig.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { attachHelpBubbles, createHelpBubble } from "../ui/HelpBubbles.js";
 import { renderModal } from "../ui/Modal.js";
@@ -108,6 +110,23 @@ function townFocusOptions(selectedValue) {
         `<option value="${escapeHtml(focus.id)}" ${focus.id === selectedValue ? "selected" : ""}>${escapeHtml(focus.name)}</option>`
     )
     .join("");
+}
+
+function legendArchetypeOptions(selectedValue = UNIQUE_CITIZEN_ARCHETYPES[0]?.id ?? "") {
+  return UNIQUE_CITIZEN_ARCHETYPES.map(
+    (archetype) =>
+      `<option value="${escapeHtml(archetype.id)}" ${archetype.id === selectedValue ? "selected" : ""}>${escapeHtml(`${archetype.title} (${archetype.className})`)}</option>`
+  ).join("");
+}
+
+function expeditionTypeOptions(selectedValue = EXPEDITION_ORDER[0] ?? "") {
+  return EXPEDITION_ORDER.map((typeId) => {
+    const definition = EXPEDITION_TYPES[typeId];
+    if (!definition) {
+      return "";
+    }
+    return `<option value="${escapeHtml(typeId)}" ${typeId === selectedValue ? "selected" : ""}>${escapeHtml(definition.label)}</option>`;
+  }).join("");
 }
 
 function renderRollTableListEditor(state) {
@@ -497,6 +516,18 @@ export class AdminConsole {
         case "bulk-citizens":
           this.actions.bulkCitizens(this.getJson("bulk-citizens"));
           break;
+        case "add-manual-legend":
+          this.actions.addManualLegend({
+            fullName: this.getValue("legend-name"),
+            archetypeId: this.getValue("legend-archetype"),
+            sourceTypeId: this.getValue("legend-source-type"),
+            originLabel: this.getValue("legend-origin-label"),
+            title: this.getValue("legend-title"),
+            effectText: this.getValue("legend-effect"),
+            originMemory: this.getValue("legend-origin-memory"),
+            arrivalLine: this.getValue("legend-arrival-line")
+          });
+          break;
         case "spawn-building":
           this.actions.spawnBuilding({
             name: this.getValue("spawn-name"),
@@ -811,6 +842,30 @@ export class AdminConsole {
             <div class="admin-actions">
               <button class="button button--ghost" data-admin-action="bulk-citizens">Apply Bulk</button>
               <button class="button button--ghost" data-admin-action="reset-citizens">Reset Citizens</button>
+            </div>
+          </section>
+        `
+      },
+      {
+        tab: "population",
+        title: "Manual Legend",
+        keywords: "legend unique citizen manual notable named hero admin",
+        content: `
+          <section class="admin-section">
+            <h3>Manual Legend</h3>
+            <p>Current Legends: <strong>${formatNumber(state.uniqueCitizens?.length ?? 0, 0)}</strong></p>
+            <div class="admin-grid">
+              <label>Name<input id="legend-name" placeholder="Draw a name if blank" /></label>
+              <label>Archetype<select id="legend-archetype">${legendArchetypeOptions("wallMarshal")}</select></label>
+              <label>Route Source<select id="legend-source-type">${expeditionTypeOptions("rescue")}</select></label>
+              <label>Origin Label<input id="legend-origin-label" placeholder="Use route source if blank" /></label>
+              <label>Custom Title<input id="legend-title" placeholder="Use archetype title if blank" /></label>
+              <label>Custom Effect<input id="legend-effect" placeholder="Use archetype effect if blank" /></label>
+            </div>
+            <label>Origin Memory<textarea id="legend-origin-memory" rows="3" placeholder="Use generated route memory if blank"></textarea></label>
+            <label>Arrival Line<textarea id="legend-arrival-line" rows="2" placeholder="Use generated arrival line if blank"></textarea></label>
+            <div class="admin-actions">
+              <button class="button" data-admin-action="add-manual-legend">Add Manual Legend</button>
             </div>
           </section>
         `

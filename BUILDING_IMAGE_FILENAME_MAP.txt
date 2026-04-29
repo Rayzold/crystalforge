@@ -25,11 +25,11 @@ Beast Pens -> Beast Pens.png
 Blacksmith -> Blacksmith.png
 Butcher -> Butcher.png
 Cider Press -> Cider Press.png
-Crystal Upgrade -> Crystal Upgrade.png
+Crystal Upgrade -> Crystal Upgrade__Common.png
 Farmlands -> Farmlands.png
 Fishery -> Fishery.png
 Gardens -> Gardens.png
-Trade Center -> General Store.png
+Trade Center -> Trade Center.png
 Grain Silo -> Grain Silo.png
 Graveyard -> Graveyard.png
 Housing: Commoner -> Housing Commoner.png
@@ -57,7 +57,7 @@ Brewery -> Brewery.png
 Carpenter Shop -> Carpenter Shop.png
 Clocktower -> Clocktower.png
 Community Oven -> Community Oven.png
-Crystal Upgrade -> Crystal Upgrade Uncommon.png
+Crystal Upgrade -> Crystal Upgrade__Uncommon.png
 Distillery -> Distillery.png
 Dock -> Dock.png
 Grove -> Grove.png
@@ -88,8 +88,8 @@ Armory -> Armory.png
 Bank -> Bank.png
 Bathhouse -> Bathhouse.png
 Courthouse -> Courthouse.png
-Crystal Upgrade -> Crystal Upgrade Rare.png
-Workshop Quarter -> Distillation House.png
+Crystal Upgrade -> Crystal Upgrade__Rare.png
+Workshop Quarter -> Workshop Quarter.png
 Embassy Annex -> Embassy Annex.png
 Engineers' Guild -> Engineers' Guild.png
 Explosive Ballistas -> Explosive Ballistas.png
@@ -116,7 +116,7 @@ Cannons -> Cannons.png
 Caravan Outpost -> Caravan Outpost.png
 Castle -> Castle.png
 Communications Core -> Communications Core.png
-Crystal Upgrade -> Crystal Upgrade Epic.png
+Crystal Upgrade -> Crystal Upgrade__Epic.png
 Fey Crossing -> Fey Crossing.png
 Foreign Affairs Ministry -> Foreign Affairs Ministry.png
 Grand Shrine -> Grand Shrine.png
@@ -138,7 +138,7 @@ LEGENDARY
 Arcana Tower -> Arcana Tower.png
 Arcane Walls -> Arcane Walls.png
 Captain's Quarters -> Captain's Quarters.png
-Crystal Upgrade -> Crystal Upgrade Legendary.png
+Crystal Upgrade -> Crystal Upgrade__Legendary.png
 Deathless Grounds -> Deathless Grounds.png
 Doomsday Cannon -> Doomsday Cannon.png
 Dragonforge -> Dragonforge.png

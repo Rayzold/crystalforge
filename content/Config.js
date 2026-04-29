@@ -8,7 +8,7 @@ import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
 // APP_VERSION must stay monotonic because Firebase publish safety compares builds numerically.
-export const APP_VERSION = "v1.6.15";
+export const APP_VERSION = "v1.7.0";
 // Release maturity is tracked separately so unreleased builds do not need to pretend they are public/stable.
 export const APP_RELEASE_STAGE = "preview";
 const RELEASE_STAGE_LABELS = {
@@ -57,6 +57,9 @@ export const PAGE_ROUTES = [
   { key: "help", label: "Help", href: "./help.html" }
 ];
 export const BUILD_NOTES = [
+  "Admin can now add a Legend manually from the Population tab, choosing the archetype, route source, name, title, effect text, and origin notes while keeping the same roster, history, and assignment behavior as expedition-earned Legends.",
+  "Town Map placement is lighter for large cities now: hexes use fast icon markers instead of embedded artwork, expensive map glow filters are gone, and map counters do less repeated lookup work during placement.",
+  "Expedition launch now has an Instant Results toggle that sends the crew, calculates the return immediately, and opens the debrief without moving the calendar date; building growth speed now supports 0.5x and tops out at 10x.",
   "Expedition transport tuning is much sharper now: every vehicle has an explicit crew cap, heavy craft haul more but scout less, land crews can now travel on foot, and the number-row page-jump shortcuts are disabled so typing is less disruptive.",
   "Vehicles are easier to scan now: the fleet and expedition picker both separate land and air craft, and vehicle art can now load from assets/images/vehicles with stable per-vehicle filenames.",
   "Mission board variety grew again with fresh named expedition templates across rescue, recruit, resource runs, crystal hunts, monster hunts, diplomacy, pilgrimage, and relic recovery.",
@@ -122,7 +125,7 @@ export const BUILDING_ACTIVE_THRESHOLD = 100;
 export const BUILDING_GRID_LIMIT = 12;
 export const MAX_HISTORY_ENTRIES = 250;
 export const MAX_RECENT_EVENTS = 12;
-export const SPEED_MULTIPLIERS = [1, 2, 3, 5, 10, 20, 50, 100];
+export const SPEED_MULTIPLIERS = [0.5, 1, 2, 3, 5, 10];
 export const RESOURCE_MINIMUMS = {
   gold: 0,
   food: 0,

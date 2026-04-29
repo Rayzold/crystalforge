@@ -2,7 +2,7 @@
 
 ## 1. Purpose Of This File
 
-This document is the project save point for Crystal Forge at build `v1.6.10`.
+This document is the project save point for Crystal Forge at build `v1.7.0`.
 
 It exists for one reason: if this repository is ever lost, partially damaged, or needs to be rebuilt from scratch, a future developer should be able to recreate the product, architecture, systems, and deployment workflow without reverse-engineering the entire codebase first.
 
@@ -157,7 +157,7 @@ Top-level root files:
 
 Current save point version:
 
-- `APP_VERSION = "v1.6.10"`
+- `APP_VERSION = "v1.7.0"`
 - Release stage: `preview`
 - `APP_VERSION` is monotonic and is used as the Firebase publish-safety build number.
 

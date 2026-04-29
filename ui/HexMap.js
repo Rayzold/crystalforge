@@ -2,7 +2,6 @@ import { getBuildingEconomySummary, getBuildingEmoji } from "../content/Building
 import { MAP_CONFIG, MAP_TERRAIN_THEMES } from "../content/MapConfig.js";
 import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
-import { getBuildingArtCandidates, getBuildingArtFallbackAttribute } from "./BuildingArt.js";
 import { getConstructionEtaDetails } from "../systems/ConstructionSystem.js";
 import { getBuildingMultiplier } from "../systems/BuildingSystem.js";
 import {
@@ -67,51 +66,18 @@ function getMapBounds(cells, size) {
   };
 }
 
-function renderCellLabel(building, cx, cy) {
-  if (!building || building.imagePath) {
-    return "";
-  }
-  const emoji = getBuildingEmoji(building);
-  return `
-    <text x="${cx}" y="${cy + 7}" text-anchor="middle" class="hex-map__label" aria-hidden="true">
-      ${escapeHtml(emoji)}
-    </text>
-  `;
-}
-
-function safeSvgId(value) {
-  return String(value).replace(/[^a-zA-Z0-9_-]/g, "-");
-}
-
 function renderBuildingThumb(building, cx, cy, size) {
-  if (!building.imagePath) {
+  if (!building) {
     return "";
   }
-  const clipId = `hex-clip-${safeSvgId(building.id)}`;
   const emoji = getBuildingEmoji(building);
-  const [primaryCandidate] = getBuildingArtCandidates(building.imagePath);
-  const fallbackAttribute = getBuildingArtFallbackAttribute(building.imagePath);
   return `
-    <defs>
-      <clipPath id="${clipId}">
-        <polygon points="${hexPoints(cx, cy, size * 0.72)}"></polygon>
-      </clipPath>
-    </defs>
-    <image
-      href="${escapeHtml(primaryCandidate)}"
-      data-fallback-srcs="${fallbackAttribute}"
-      x="${cx - size * 0.72}"
-      y="${cy - size * 0.62}"
-      width="${size * 1.44}"
-      height="${size * 1.24}"
-      preserveAspectRatio="xMidYMid slice"
-      clip-path="url(#${clipId})"
-      opacity="0.9"
-      onerror="const paths=(this.dataset.fallbackSrcs||'').split('|').filter(Boolean); if (paths.length) { const next=paths.shift(); this.dataset.fallbackSrcs=paths.join('|'); this.setAttribute('href', next); return; } this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='block';"
-    ></image>
-    <text x="${cx}" y="${cy + 7}" text-anchor="middle" class="hex-map__label" aria-hidden="true" style="display:none">
-      ${escapeHtml(emoji)}
-    </text>
+    <g class="hex-map__building-token" aria-hidden="true">
+      <circle cx="${cx}" cy="${cy}" r="${size * 0.36}"></circle>
+      <text x="${cx}" y="${cy + 7}" text-anchor="middle" class="hex-map__label">
+        ${escapeHtml(emoji)}
+      </text>
+    </g>
   `;
 }
 
@@ -1070,6 +1036,7 @@ export function renderHexMap(state) {
   const cells = state.map.cells;
   const size = MAP_CONFIG.hexSize;
   const bounds = getMapBounds(cells, size);
+  const cellByKey = new Map(cells.map((cell) => [getCellKey(cell.q, cell.r), cell]));
   const mapOverlay = state.transientUi?.mapOverlay ?? "District";
   const mapLegendOpen = state.transientUi?.mapLegendOpen ?? true;
   const mapZoom = Number(state.transientUi?.mapZoom ?? 1);
@@ -1081,37 +1048,38 @@ export function renderHexMap(state) {
     state.buildings.find((building) => building.id === state.transientUi?.mapPlannerBuildingId) ?? null;
   const selectedPosition = selectedBuilding?.mapPosition ?? null;
   const hoveredMapCell = state.transientUi?.hoveredMapCell ?? null;
-  const unplacedCount = state.buildings.filter((building) => !building.mapPosition).length;
+  let unplacedCount = 0;
+  let placedCityPlotCount = 0;
+  let occupiedBastionCount = 0;
+  let defensiveBacklogCount = 0;
+  for (const building of state.buildings) {
+    if (!building.mapPosition) {
+      unplacedCount += 1;
+      if (isFortificationBuilding(building)) {
+        defensiveBacklogCount += 1;
+      }
+      continue;
+    }
+    const cell = cellByKey.get(getCellKey(building.mapPosition.q, building.mapPosition.r));
+    if (cell?.isFortificationRing) {
+      occupiedBastionCount += 1;
+    } else if (cell && !cell.isReserved) {
+      placedCityPlotCount += 1;
+    }
+  }
   const selectedDistrictColor =
     selectedBuilding && state.districts.definitions[selectedBuilding.district]
       ? state.districts.definitions[selectedBuilding.district].color
       : null;
   const selectedBuildingCanUseBastion = selectedBuilding ? isFortificationBuilding(selectedBuilding) : false;
   const focalCell = hoveredMapCell ?? state.ui.selectedMapCell ?? selectedPosition ?? null;
-  const focalMapCell = focalCell ? state.map.cells.find((cell) => cell.q === focalCell.q && cell.r === focalCell.r) ?? null : null;
+  const focalMapCell = focalCell ? cellByKey.get(getCellKey(focalCell.q, focalCell.r)) ?? null : null;
   const selectedMapCell = state.ui.selectedMapCell
-    ? state.map.cells.find((cell) => cell.q === state.ui.selectedMapCell.q && cell.r === state.ui.selectedMapCell.r) ?? null
+    ? cellByKey.get(getCellKey(state.ui.selectedMapCell.q, state.ui.selectedMapCell.r)) ?? null
     : null;
   const adjacencyPulse = state.transientUi?.adjacencyPulse ?? null;
   const bastionPlotCount = cells.filter((cell) => cell.isFortificationRing).length;
   const cityPlotCount = cells.filter((cell) => !cell.isReserved && !cell.isFortificationRing).length;
-  const placedCityPlotCount = state.buildings.filter((building) => {
-    if (!building.mapPosition) {
-      return false;
-    }
-    const cell = state.map.cells.find((entry) => entry.q === building.mapPosition.q && entry.r === building.mapPosition.r);
-    return Boolean(cell && !cell.isReserved && !cell.isFortificationRing);
-  }).length;
-  const occupiedBastionCount = state.buildings.filter((building) => {
-    if (!building.mapPosition) {
-      return false;
-    }
-    const cell = state.map.cells.find((entry) => entry.q === building.mapPosition.q && entry.r === building.mapPosition.r);
-    return Boolean(cell?.isFortificationRing);
-  }).length;
-  const defensiveBacklogCount = state.buildings.filter(
-    (building) => !building.mapPosition && isFortificationBuilding(building)
-  ).length;
   const defenseSummary = getBastionDefenseSummary(state, cells);
   const adjacentKeys = new Set(
     focalCell ? getNeighborCoords(focalCell.q, focalCell.r).map((cell) => getCellKey(cell.q, cell.r)) : []
@@ -1342,7 +1310,7 @@ export function renderHexMap(state) {
                   ${
                     cell.isReserved
                       ? `<text x="${center.x}" y="${center.y + 5}" text-anchor="middle" class="hex-map__core-text">${cell.q === 0 && cell.r === 0 ? "FORGE" : ""}</text>`
-                      : renderCellLabel(building, center.x, center.y)
+                      : ""
                   }
                    ${
                      isPulseCell

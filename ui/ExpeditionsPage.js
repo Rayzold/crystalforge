@@ -47,6 +47,7 @@ function getDefaultDraft(state) {
     vehicleId: state.transientUi?.expeditionDraft?.vehicleId ?? "trailBuggy",
     approachId: state.transientUi?.expeditionDraft?.approachId ?? "balanced",
     durationDays,
+    instantResults: state.transientUi?.expeditionDraft?.instantResults === true,
     team: structuredClone(state.transientUi?.expeditionDraft?.team ?? {}),
     resources: structuredClone(state.transientUi?.expeditionDraft?.resources ?? {})
   };
@@ -311,6 +312,8 @@ function renderPreviewPanel(state, draft) {
         : preview.successScore >= 0.8
           ? "Risky but workable"
           : "Thin odds";
+  const instantResults = draft.instantResults === true;
+  const returnLabel = instantResults ? "Now" : formatDate(preview.expectedReturnDayOffset);
 
   return `
     <section class="panel expedition-launch-preview">
@@ -321,7 +324,7 @@ function renderPreviewPanel(state, draft) {
       <div class="expedition-preview-grid">
         <article><span>Risk</span><strong>${escapeHtml(preview.mission.risk)}</strong></article>
         <article><span>Travel</span><strong>${formatNumber(preview.durationDays, 0)}d</strong></article>
-        <article><span>Return</span><strong>${escapeHtml(formatDate(preview.expectedReturnDayOffset))}</strong></article>
+        <article><span>Return</span><strong>${escapeHtml(returnLabel)}</strong></article>
         <article><span>Crew</span><strong>${formatNumber(preview.teamSize, 0)} / ${formatNumber(preview.vehicleCapacity, 0)}</strong></article>
         <article><span>Power</span><strong>${formatNumber(preview.powerScore, 1)}</strong></article>
       </div>
@@ -344,8 +347,13 @@ function renderPreviewPanel(state, draft) {
           }
         </div>
       </div>
+      <div class="expedition-button-row">
+        <button class="button ${instantResults ? "" : "button--ghost"}" type="button" data-action="toggle-expedition-instant-results" aria-pressed="${instantResults ? "true" : "false"}">
+          ${instantResults ? "Instant Results On" : "Instant Results Off"}
+        </button>
+      </div>
       <button class="button expedition-launch-preview__launch" type="button" data-action="launch-expedition">
-        Launch Expedition
+        ${instantResults ? "Launch & Resolve" : "Launch Expedition"}
       </button>
     </section>
   `;

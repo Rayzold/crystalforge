@@ -9363,6 +9363,23 @@ body:-webkit-full-screen #app {
   opacity: 0.92;
 }
 
+.hex-map__building-token {
+  pointer-events: none;
+}
+
+.hex-map__building-token circle {
+  fill: rgba(241, 247, 255, 0.86);
+  stroke: rgba(4, 12, 20, 0.46);
+  stroke-width: 1.4;
+}
+
+.hex-map__building-token text {
+  font-size: 18px;
+  paint-order: stroke;
+  stroke: rgba(241, 247, 255, 0.7);
+  stroke-width: 2px;
+}
+
 .hex-map__cell.is-resonance-pulse polygon:first-of-type {
   animation: resonancePulse 1.4s ease;
 }
@@ -9460,8 +9477,21 @@ body:-webkit-full-screen #app {
   pointer-events: none;
   opacity: 0.55;
   stroke-linejoin: round;
-  filter: drop-shadow(0 0 7px color-mix(in srgb, var(--district-color) 44%, transparent));
-  animation: districtPulse 3.2s ease-in-out infinite;
+  filter: none;
+}
+
+.hex-map .hex-map__cell-face,
+.hex-map .hex-map__cell.is-hovered polygon:first-of-type,
+.hex-map .hex-map__cell.is-selected polygon,
+.hex-map .hex-map__cell.is-focused polygon,
+.hex-map .hex-map__cell.is-city-plot .hex-map__cell-face,
+.hex-map .hex-map__cell.is-fortification-ring .hex-map__cell-face,
+.hex-map .hex-map__cell.is-fortification-ring.is-hovered .hex-map__cell-face,
+.hex-map .hex-map__cell.is-fortification-ring.is-focused .hex-map__cell-face,
+.hex-map .hex-map__cell.is-fortification-ring.is-selected .hex-map__cell-face,
+.hex-map.is-placement-mode .hex-map__cell.is-placement-valid .hex-map__cell-face,
+.hex-map__crest-badge {
+  filter: none;
 }
 
 .hex-map__pulse-tag {

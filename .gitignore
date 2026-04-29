@@ -1,0 +1,11 @@
+.chrome-headless/
+.edge-headless/
+
+node_modules/
+.cache/
+dist/
+coverage/
+
+*.log
+.DS_Store
+Thumbs.db

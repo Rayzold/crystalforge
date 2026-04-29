@@ -6,6 +6,7 @@ import {
   DEFAULT_START_STATE,
   MANUAL_SAVE_KEY,
   SAVE_VERSION,
+  SPEED_MULTIPLIERS,
   START_STATE_PRESETS,
   createEmptyCitizenCollection,
   createEmptyCollection,
@@ -42,6 +43,21 @@ import { createDefaultVehicleFleet } from "../content/VehicleConfig.js";
 
 const SESSION_STATE_KEY = "crystal-forge-session-state-v1";
 const BUILD_NOTES_SEEN_KEY = "crystal-forge-build-notes-seen-v1";
+
+function normalizeConstructionSpeedMultiplier(value, fallback = 1) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) {
+    return fallback;
+  }
+  if (SPEED_MULTIPLIERS.includes(numeric)) {
+    return numeric;
+  }
+
+  return SPEED_MULTIPLIERS.reduce(
+    (closest, option) => (Math.abs(option - numeric) < Math.abs(closest - numeric) ? option : closest),
+    SPEED_MULTIPLIERS[0] ?? fallback
+  );
+}
 
 function getStartPreset(preset = DEFAULT_START_PRESET) {
   return structuredClone(START_STATE_PRESETS[preset] ?? DEFAULT_START_STATE);
@@ -481,6 +497,10 @@ export function validateAndMigrateSave(rawSave) {
     ...base,
     ...rawSave,
     version: SAVE_VERSION,
+    constructionSpeedMultiplier: normalizeConstructionSpeedMultiplier(
+      rawSave.constructionSpeedMultiplier,
+      base.constructionSpeedMultiplier
+    ),
     crystals: normalizeCrystalCollection(rawSave.crystals ?? base.crystals),
     shards: normalizeShardCollection(rawSave.shards ?? base.shards),
     resources: { ...base.resources, ...(rawSave.resources ?? {}) },

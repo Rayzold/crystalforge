@@ -15,11 +15,11 @@ Beast Pens -> ./assets/images/buildings/Beast Pens.png
 Blacksmith -> ./assets/images/buildings/Blacksmith.png
 Butcher -> ./assets/images/buildings/Butcher.png
 Cider Press -> ./assets/images/buildings/Cider Press.png
-Crystal Upgrade -> ./assets/images/buildings/Crystal Upgrade.png
+Crystal Upgrade -> ./assets/images/buildings/Crystal Upgrade__Common.png
 Farmlands -> ./assets/images/buildings/Farmlands.png
 Fishery -> ./assets/images/buildings/Fishery.png
 Gardens -> ./assets/images/buildings/Gardens.png
-Trade Center -> ./assets/images/buildings/General Store.png
+Trade Center -> ./assets/images/buildings/Trade Center.png
 Grain Silo -> ./assets/images/buildings/Grain Silo.png
 Graveyard -> ./assets/images/buildings/Graveyard.png
 Housing: Commoner -> ./assets/images/buildings/Housing Commoner.png
@@ -47,7 +47,7 @@ Brewery -> ./assets/images/buildings/Brewery.png
 Carpenter Shop -> ./assets/images/buildings/Carpenter Shop.png
 Clocktower -> ./assets/images/buildings/Clocktower.png
 Community Oven -> ./assets/images/buildings/Community Oven.png
-Crystal Upgrade -> ./assets/images/buildings/Crystal Upgrade Uncommon.png
+Crystal Upgrade -> ./assets/images/buildings/Crystal Upgrade__Uncommon.png
 Distillery -> ./assets/images/buildings/Distillery.png
 Dock -> ./assets/images/buildings/Dock.png
 Grove -> ./assets/images/buildings/Grove.png
@@ -78,8 +78,8 @@ Armory -> ./assets/images/buildings/Armory.png
 Bank -> ./assets/images/buildings/Bank.png
 Bathhouse -> ./assets/images/buildings/Bathhouse.png
 Courthouse -> ./assets/images/buildings/Courthouse.png
-Crystal Upgrade -> ./assets/images/buildings/Crystal Upgrade Rare.png
-Workshop Quarter -> ./assets/images/buildings/Distillation House.png
+Crystal Upgrade -> ./assets/images/buildings/Crystal Upgrade__Rare.png
+Workshop Quarter -> ./assets/images/buildings/Workshop Quarter.png
 Embassy Annex -> ./assets/images/buildings/Embassy Annex.png
 Engineers' Guild -> ./assets/images/buildings/Engineers' Guild.png
 Explosive Ballistas -> ./assets/images/buildings/Explosive Ballistas.png
@@ -106,7 +106,7 @@ Cannons -> ./assets/images/buildings/Cannons.png
 Caravan Outpost -> ./assets/images/buildings/Caravan Outpost.png
 Castle -> ./assets/images/buildings/Castle.png
 Communications Core -> ./assets/images/buildings/Communications Core.png
-Crystal Upgrade -> ./assets/images/buildings/Crystal Upgrade Epic.png
+Crystal Upgrade -> ./assets/images/buildings/Crystal Upgrade__Epic.png
 Fey Crossing -> ./assets/images/buildings/Fey Crossing.png
 Foreign Affairs Ministry -> ./assets/images/buildings/Foreign Affairs Ministry.png
 Grand Shrine -> ./assets/images/buildings/Grand Shrine.png
@@ -128,7 +128,7 @@ LEGENDARY
 Arcana Tower -> ./assets/images/buildings/Arcana Tower.png
 Arcane Walls -> ./assets/images/buildings/Arcane Walls.png
 Captain's Quarters -> ./assets/images/buildings/Captain's Quarters.png
-Crystal Upgrade -> ./assets/images/buildings/Crystal Upgrade Legendary.png
+Crystal Upgrade -> ./assets/images/buildings/Crystal Upgrade__Legendary.png
 Deathless Grounds -> ./assets/images/buildings/Deathless Grounds.png
 Doomsday Cannon -> ./assets/images/buildings/Doomsday Cannon.png
 Dragonforge -> ./assets/images/buildings/Dragonforge.png

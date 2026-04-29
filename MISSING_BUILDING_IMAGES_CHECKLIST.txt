@@ -12,6 +12,6 @@ Missing exact filenames
 
 Notes
 - 27 files that were previously missing are now present, including Graveyard, Mine, Quarry, Stables, Tailor, Aqueduct System, Engineers' Guild, Red Light District, Dragonforge, Elemental Cannons, Planar Tentacles, Crystal Upgrade__Common, and Crystal Upgrade__Epic.
-- Crystal Upgrade is rarity-specific and currently has committed art for Uncommon, Rare, and Legendary only.
+- Crystal Upgrade is rarity-specific and currently has committed art for Common, Uncommon, Rare, Epic, and Legendary.
 - Housing filenames drop the colon to match the app's image lookup, for example Housing: Royal -> Housing Royal.png.
 - assets/images/buildings also contains one non-image file: README.md.

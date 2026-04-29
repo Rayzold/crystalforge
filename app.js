@@ -8,7 +8,8 @@ import {
   APP_VERSION,
   BUILDING_ACTIVE_THRESHOLD,
   FIREBASE_DEFAULT_REALM_ID,
-  GM_QUICK_CRYSTAL_PACKS
+  GM_QUICK_CRYSTAL_PACKS,
+  SPEED_MULTIPLIERS
 } from "./content/Config.js";
 import { EVENT_POOLS } from "./content/EventPools.js";
 import { RARITY_ORDER } from "./content/Rarities.js";
@@ -62,6 +63,7 @@ import {
 import { setDriftEvolutionStageOverride, syncDriftEvolutionState } from "./systems/DriftEvolutionSystem.js";
 import { clearActiveEvents, triggerEvent } from "./systems/EventSystem.js";
 import {
+  addManualUniqueCitizen,
   formatExpeditionDisplayName,
   forceReturnExpedition,
   getAvailableVehicleCounts,
@@ -161,6 +163,21 @@ syncDerivedState(gameState.getState());
 // Rewrite the loaded session immediately so migration fixes are not lost while
 // moving between pages in an already-open browser session.
 saveGameState(gameState.getState());
+
+function normalizeSpeedMultiplier(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) {
+    return 1;
+  }
+  if (SPEED_MULTIPLIERS.includes(numeric)) {
+    return numeric;
+  }
+
+  return SPEED_MULTIPLIERS.reduce(
+    (closest, option) => (Math.abs(option - numeric) < Math.abs(closest - numeric) ? option : closest),
+    SPEED_MULTIPLIERS[0] ?? 1
+  );
+}
 
 function clearChronicleJumpHighlightTimer() {
   if (chronicleJumpHighlightTimer) {
@@ -2217,13 +2234,20 @@ function launchExpeditionFromDraft() {
         vehicleId: result.expedition.vehicleId,
         approachId: result.expedition.approachId,
         durationDays: result.expedition.durationDaysBase,
+        instantResults: expeditionDraft.instantResults === true,
         team: {},
         resources: {}
-      }
+      },
+      expeditionJourneyOpen: result.resolvedImmediately ? true : renderer.transientUi.expeditionJourneyOpen,
+      turnSummaryModal: result.resolvedImmediately ? null : renderer.transientUi.turnSummaryModal
     },
     getCurrentState()
   );
-  reportSuccess(`${formatExpeditionDisplayName(result.expedition)} launched. Expected back ${result.expedition.expectedReturnAt}.`, "confirm");
+  if (result.resolvedImmediately) {
+    reportSuccess(`${formatExpeditionDisplayName(result.expedition)} launched and returned for immediate debrief.`, "confirm");
+  } else {
+    reportSuccess(`${formatExpeditionDisplayName(result.expedition)} launched. Expected back ${result.expedition.expectedReturnAt}.`, "confirm");
+  }
 }
 
 function refreshExpeditionBoardManually() {
@@ -2668,6 +2692,15 @@ const actions = {
     reportSuccess("Citizens reset.");
   },
   bulkCitizens,
+  addManualLegend(payload) {
+    const result = commit((draft) => addManualUniqueCitizen(draft, payload));
+    if (!result?.ok) {
+      reportError(result?.reason ?? "Legend could not be added.");
+      return;
+    }
+    markRecentCitizenChanges([result.citizen.className]);
+    reportSuccess(`${result.citizen.fullName} joined the Drift as a Legend.`, "confirm");
+  },
   spawnBuilding,
   manifestUnmanifestedBuilding,
   editBuilding(payload) {
@@ -2738,7 +2771,7 @@ const actions = {
   },
   setSpeedMultiplier(value) {
     commit((draft) => {
-      draft.constructionSpeedMultiplier = Number(value);
+      draft.constructionSpeedMultiplier = normalizeSpeedMultiplier(value);
     });
     reportSuccess("Construction speed updated.");
   },
@@ -3396,6 +3429,18 @@ root.addEventListener("click", async (event) => {
         getCurrentState()
       );
       break;
+    case "toggle-expedition-instant-results":
+      void audioEngine.playUiAccent("soft");
+      renderer.setTransientUi(
+        {
+          expeditionDraft: {
+            ...(renderer.transientUi.expeditionDraft ?? {}),
+            instantResults: renderer.transientUi.expeditionDraft?.instantResults !== true
+          }
+        },
+        getCurrentState()
+      );
+      break;
     case "launch-expedition":
       void audioEngine.playUiAccent("confirm");
       actions.launchExpedition();
@@ -3902,7 +3947,7 @@ root.addEventListener("change", (event) => {
 
   if (target.dataset.action === "set-speed-multiplier") {
     commit((draft) => {
-      draft.constructionSpeedMultiplier = Number(target.value);
+      draft.constructionSpeedMultiplier = normalizeSpeedMultiplier(target.value);
     });
   }
 

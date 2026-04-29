@@ -1,7 +1,7 @@
 // Incubation and build-progress rules.
 // This system converts building points per day into quality gain, applies
 // support-bpd from completed structures, and computes ETA/stall information.
-import { BUILDING_ACTIVE_THRESHOLD } from "../content/Config.js";
+import { BUILDING_ACTIVE_THRESHOLD, SPEED_MULTIPLIERS } from "../content/Config.js";
 import { getBuildingConstructionSupportBpd } from "../content/BuildingCatalog.js";
 import { RARITY_BUILD_POINTS_PER_PERCENT, RARITY_RANKS } from "../content/Rarities.js";
 import { roundTo } from "../engine/Utils.js";
@@ -47,7 +47,12 @@ function getDefaultConstructionQueue(state) {
 }
 
 function clampConstructionSpeedMultiplier(multiplier) {
-  return Math.max(0, Number(multiplier ?? 1) || 0);
+  const numeric = Number(multiplier ?? 1);
+  if (!Number.isFinite(numeric)) {
+    return 1;
+  }
+
+  return Math.min(Math.max(...SPEED_MULTIPLIERS), Math.max(Math.min(...SPEED_MULTIPLIERS), numeric));
 }
 
 function createResourcePool(resources = {}) {

@@ -2204,6 +2204,99 @@ function createUniqueCitizen(state, expedition) {
   return uniqueCitizen;
 }
 
+export function addManualUniqueCitizen(state, payload = {}) {
+  state.uniqueCitizens = normalizeUniqueCitizens(state.uniqueCitizens);
+
+  const archetype =
+    UNIQUE_CITIZEN_ARCHETYPES.find((entry) => entry.id === String(payload.archetypeId ?? "").trim()) ??
+    UNIQUE_CITIZEN_ARCHETYPES[0];
+  if (!archetype) {
+    return { ok: false, reason: "No Legend archetypes are available." };
+  }
+
+  const existingNames = new Set((state.uniqueCitizens ?? []).map((entry) => String(entry.fullName ?? "").trim().toLowerCase()).filter(Boolean));
+  let fullName = String(payload.fullName ?? "").trim();
+  if (fullName && existingNames.has(fullName.toLowerCase())) {
+    return { ok: false, reason: "A Legend with that name already exists." };
+  }
+
+  let guard = 0;
+  while (!fullName && guard < 24) {
+    const candidateName = drawUniqueCitizenFullName(Math.random());
+    if (!existingNames.has(candidateName.toLowerCase())) {
+      fullName = candidateName;
+      break;
+    }
+    guard += 1;
+  }
+  if (!fullName) {
+    fullName = `Manual Legend ${state.uniqueCitizens.length + 1}`;
+  }
+
+  const sourceTypeId =
+    EXPEDITION_TYPES[String(payload.sourceTypeId ?? "").trim()]?.id ??
+    archetype.expeditionTags?.find((typeId) => EXPEDITION_TYPES[typeId]) ??
+    EXPEDITION_ORDER[0] ??
+    null;
+  const joinedDayOffset = Number(state.calendar?.dayOffset ?? 0) || 0;
+  const joinedAt = formatDate(joinedDayOffset);
+  const originLabel = String(payload.originLabel ?? "").trim();
+  const sourceLabel = EXPEDITION_TYPES[sourceTypeId]?.label ?? "Manual Addition";
+  const manualExpedition = {
+    typeId: sourceTypeId,
+    typeLabel: sourceLabel,
+    missionName: originLabel || sourceLabel
+  };
+  const identity = buildUniqueCitizenIdentity(manualExpedition, archetype, fullName, joinedAt);
+  const title = String(payload.title ?? "").trim() || archetype.title;
+  const effectText = String(payload.effectText ?? "").trim() || archetype.effectText;
+  const originMemory = String(payload.originMemory ?? "").trim() || identity.originMemory;
+  const arrivalLine = String(payload.arrivalLine ?? "").trim() || identity.arrivalLine;
+
+  const uniqueCitizen = normalizeUniqueCitizens([
+    {
+      id: createId("unique-citizen"),
+      fullName,
+      title,
+      className: archetype.className,
+      effectText,
+      archetypeId: archetype.id,
+      assignmentPostId: null,
+      bonuses: structuredClone(archetype.bonuses ?? {}),
+      expeditionTags: [...(archetype.expeditionTags ?? [])],
+      joinedDayOffset,
+      joinedAt,
+      status: "inCity",
+      sourceTypeId,
+      originLabel: originLabel || identity.originLabel,
+      originMemory,
+      arrivalLine,
+      sigilSeed: identity.sigilSeed,
+      routeHistory: [
+        {
+          id: createId("legend-route"),
+          kind: "manual",
+          label: originLabel || identity.originLabel,
+          detail: originMemory,
+          date: joinedAt,
+          dayOffset: joinedDayOffset
+        }
+      ]
+    }
+  ])[0];
+
+  state.uniqueCitizens = [...(state.uniqueCitizens ?? []), uniqueCitizen];
+  addCitizensByRarity(state, uniqueCitizen.className, "Epic", 1, "Manual Legend");
+  state.historyLog = Array.isArray(state.historyLog) ? state.historyLog : [];
+  addHistoryEntry(state, {
+    category: "Legend",
+    title: uniqueCitizen.fullName,
+    details: `${uniqueCitizen.fullName} was added manually as ${uniqueCitizen.title}.`
+  });
+
+  return { ok: true, citizen: uniqueCitizen };
+}
+
 function grantRewardCollections(state, rewards) {
   for (const [resource, amount] of Object.entries(rewards.resources ?? {})) {
     state.resources[resource] = Math.max(0, Number(state.resources?.[resource] ?? 0) + (Number(amount) || 0));
@@ -2551,7 +2644,12 @@ function createJourneyOption({ id, label, summary, effects = {} }) {
   });
 }
 
-function getJourneyTravelDays(expedition, returnDayOffset) {
+function getJourneyTravelDays(expedition, returnDayOffset, travelDaysOverride = null) {
+  const overrideDays = Number(travelDaysOverride);
+  if (Number.isFinite(overrideDays) && overrideDays > 0) {
+    return Math.max(1, Math.round(overrideDays));
+  }
+
   return Math.max(1, Number(returnDayOffset ?? expedition.expectedReturnDayOffset ?? 0) - Number(expedition.departedDayOffset ?? 0));
 }
 
@@ -3016,8 +3114,8 @@ function buildJourneyStage(kind, expedition, index, dayMarker) {
   }
 }
 
-function createPendingExpeditionJourney(state, expedition, returnDayOffset = state.calendar.dayOffset) {
-  const travelDays = getJourneyTravelDays(expedition, returnDayOffset);
+function createPendingExpeditionJourney(state, expedition, returnDayOffset = state.calendar.dayOffset, options = {}) {
+  const travelDays = getJourneyTravelDays(expedition, returnDayOffset, options.travelDaysOverride);
   const stageCount = Math.max(1, Math.min(MAX_JOURNEY_STAGES, Math.ceil(travelDays / JOURNEY_STAGE_DAY_SPAN)));
   const stageKinds = pickJourneyStageKinds(expedition, stageCount);
   const stages = stageKinds.map((kind, index) =>
@@ -3483,9 +3581,33 @@ export function startExpedition(state, payload) {
         : `${preview.teamSize} personnel aboard the ${preview.vehicle.name} for a ${preview.mission.risk.toLowerCase()}-risk route.`
   };
 
-  state.expeditions.active = [...state.expeditions.active, expedition];
   state.expeditions.nextExpeditionNumber = expeditionNumber + 1;
   state.expeditions.board = (state.expeditions.board ?? []).filter((mission) => mission.id !== preview.mission.id);
+
+  if (payload?.instantResults === true || payload?.resolveImmediately === true) {
+    const currentDayOffset = Number(state.calendar?.dayOffset ?? 0) || 0;
+    const instantExpedition = {
+      ...expedition,
+      expectedReturnDayOffset: currentDayOffset,
+      expectedReturnAt: formatDate(currentDayOffset),
+      scheduledExpectedReturnDayOffset: expedition.expectedReturnDayOffset,
+      scheduledExpectedReturnAt: expedition.expectedReturnAt,
+      instantResults: true,
+      notes: `${expedition.notes} Results were resolved immediately without advancing the calendar.`
+    };
+    addHistoryEntry(state, {
+      category: "Expedition",
+      title: `Departure: ${instantExpedition.expeditionLabel}`,
+      details: `${instantExpedition.expeditionLabel} departed for ${instantExpedition.missionName} on ${instantExpedition.departedAt} ${getExpeditionTravelLabel(instantExpedition)} and resolved immediately. Route math used the ${preview.durationDays} day plan; the calendar stayed on ${instantExpedition.departedAt}.`
+    });
+    const journey = createPendingExpeditionJourney(state, instantExpedition, currentDayOffset, {
+      travelDaysOverride: preview.durationDays
+    });
+    state.expeditions.pending = [journey, ...(state.expeditions.pending ?? [])];
+    return { ok: true, expedition: instantExpedition, preview, journey, resolvedImmediately: true };
+  }
+
+  state.expeditions.active = [...state.expeditions.active, expedition];
   addHistoryEntry(state, {
     category: "Expedition",
     title: `Departure: ${expedition.expeditionLabel}`,
