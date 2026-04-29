@@ -73,8 +73,8 @@ function renderBuildingThumb(building, cx, cy, size) {
   const emoji = getBuildingEmoji(building);
   return `
     <g class="hex-map__building-token" aria-hidden="true">
-      <circle cx="${cx}" cy="${cy}" r="${size * 0.36}"></circle>
-      <text x="${cx}" y="${cy + 7}" text-anchor="middle" class="hex-map__label">
+      <circle cx="${cx}" cy="${cy}" r="${size * 0.43}"></circle>
+      <text x="${cx}" y="${cy + 8}" text-anchor="middle" class="hex-map__label">
         ${escapeHtml(emoji)}
       </text>
     </g>
@@ -384,7 +384,7 @@ function renderPlacementPreview(selectedBuilding, cell, center, size, previewVal
 
 function renderCellInspector(state, cell, selectedBuilding) {
   if (!cell) {
-    return `<p class="empty-state">Hover a hex to scout its terrain, district pull, and resonance before you claim it.</p>`;
+    return `<p class="empty-state">Select a hex to scout its terrain, district pull, and resonance before you claim it.</p>`;
   }
 
   const occupant = getBuildingAtCell(state, cell.q, cell.r);
@@ -685,61 +685,6 @@ function renderBuildingMapBadges(building, state, cx, cy, size) {
       `;
     })
     .join("");
-}
-
-function renderHoverReadout(state, cell, selectedBuilding, size) {
-  if (!cell) {
-    return "";
-  }
-
-  const occupant = getBuildingAtCell(state, cell.q, cell.r);
-  if (occupant) {
-    return "";
-  }
-
-  const center = axialToPixel(cell.q, cell.r, size);
-  const candidates = getPlacementCandidates(state, cell);
-  const zoneLabel = cell.isReserved ? "Core" : cell.isFortificationRing ? "Bastion" : "City";
-  const terrainLabel = formatTerrainLabel(cell.terrain);
-  const lines = [`${zoneLabel} / ${terrainLabel}`];
-
-  if (selectedBuilding) {
-    const validation = canPlaceBuildingAt(state, selectedBuilding.id, cell.q, cell.r);
-    if (validation.ok) {
-      const previewTarget = { ...selectedBuilding, mapPosition: { q: cell.q, r: cell.r } };
-      const bonus = getBuildingPlacementBonuses(state, previewTarget);
-      lines.push(`+${formatNumber(bonus.totalPercent * 100, 1)}% resonance`);
-      if (bonus.sameDistrictNeighbors || bonus.relatedTagNeighbors) {
-        lines.push(`${bonus.sameDistrictNeighbors} district / ${bonus.relatedTagNeighbors} linked`);
-      } else if (bonus.terrainPercent > 0) {
-        lines.push("Terrain affinity only");
-      } else {
-        lines.push("No nearby resonance yet");
-      }
-    } else {
-      lines.push(cell.isFortificationRing ? "Defense only" : "Placement blocked");
-    }
-  } else {
-    lines.push(`${candidates.length} option${candidates.length === 1 ? "" : "s"} ready to claim`);
-  }
-
-  const width = Math.max(122, ...lines.map((line) => 34 + line.length * 5.4));
-  const height = 18 + lines.length * 13;
-  const x = center.x - width / 2;
-  const y = center.y - size * 1.82 - height / 2;
-
-  return `
-    <g class="hex-map__hover-readout" aria-hidden="true">
-      <rect x="${x}" y="${y}" width="${width}" height="${height}" rx="10"></rect>
-      ${lines
-        .map(
-          (line, index) => `
-            <text x="${center.x}" y="${y + 16 + index * 13}" text-anchor="middle">${escapeHtml(line)}</text>
-          `
-        )
-        .join("")}
-    </g>
-  `;
 }
 
 function renderPlacementCelebration(pulseCell, center, size) {
@@ -1047,7 +992,8 @@ export function renderHexMap(state) {
   const plannerBuilding =
     state.buildings.find((building) => building.id === state.transientUi?.mapPlannerBuildingId) ?? null;
   const selectedPosition = selectedBuilding?.mapPosition ?? null;
-  const hoveredMapCell = state.transientUi?.hoveredMapCell ?? null;
+  const isPlacementPlannerActive = Boolean(plannerBuilding);
+  const renderMapDecor = !isPlacementPlannerActive;
   let unplacedCount = 0;
   let placedCityPlotCount = 0;
   let occupiedBastionCount = 0;
@@ -1072,11 +1018,16 @@ export function renderHexMap(state) {
       ? state.districts.definitions[selectedBuilding.district].color
       : null;
   const selectedBuildingCanUseBastion = selectedBuilding ? isFortificationBuilding(selectedBuilding) : false;
-  const focalCell = hoveredMapCell ?? state.ui.selectedMapCell ?? selectedPosition ?? null;
+  const focalCell = state.ui.selectedMapCell ?? selectedPosition ?? null;
   const focalMapCell = focalCell ? cellByKey.get(getCellKey(focalCell.q, focalCell.r)) ?? null : null;
   const selectedMapCell = state.ui.selectedMapCell
     ? cellByKey.get(getCellKey(state.ui.selectedMapCell.q, state.ui.selectedMapCell.r)) ?? null
     : null;
+  const selectedMapBuilding = selectedMapCell ? getBuildingAtCell(state, selectedMapCell.q, selectedMapCell.r) : null;
+  const selectedPreviewValidation =
+    selectedMapCell && selectedBuilding && !selectedMapBuilding
+      ? canPlaceBuildingAt(state, selectedBuilding.id, selectedMapCell.q, selectedMapCell.r)
+      : null;
   const adjacencyPulse = state.transientUi?.adjacencyPulse ?? null;
   const bastionPlotCount = cells.filter((cell) => cell.isFortificationRing).length;
   const cityPlotCount = cells.filter((cell) => !cell.isReserved && !cell.isFortificationRing).length;
@@ -1084,17 +1035,19 @@ export function renderHexMap(state) {
   const adjacentKeys = new Set(
     focalCell ? getNeighborCoords(focalCell.q, focalCell.r).map((cell) => getCellKey(cell.q, cell.r)) : []
   );
-  const previewValidation =
-    hoveredMapCell && selectedBuilding ? canPlaceBuildingAt(state, selectedBuilding.id, hoveredMapCell.q, hoveredMapCell.r) : null;
   const placementModeActive = Boolean(selectedBuilding && state.transientUi?.validPlacementMode);
-  const previewMessage = hoveredMapCell
-    ? previewValidation?.ok
-      ? `Previewing ${selectedBuilding?.displayName ?? "placement"} at hex ${hoveredMapCell.q}, ${hoveredMapCell.r}`
-      : previewValidation?.reason ?? `Hex ${hoveredMapCell.q}, ${hoveredMapCell.r}`
+  const previewMessage = selectedMapCell
+    ? selectedMapBuilding
+      ? `${selectedMapBuilding.displayName} occupies selected hex ${selectedMapCell.q}, ${selectedMapCell.r}.`
+      : selectedBuilding
+        ? selectedPreviewValidation?.ok
+          ? `Selected hex ${selectedMapCell.q}, ${selectedMapCell.r} can hold ${selectedBuilding.displayName}.`
+          : selectedPreviewValidation?.reason ?? `Hex ${selectedMapCell.q}, ${selectedMapCell.r}`
+        : `Selected hex ${selectedMapCell.q}, ${selectedMapCell.r}.`
     : selectedBuilding
       ? selectedBuildingCanUseBastion
-        ? "Hover a city plot or bastion hex to preview placement."
-        : "Hover a city plot to preview placement. The bastion ring is defense-only."
+        ? "Select a city plot or bastion hex to preview placement."
+        : "Select a city plot to preview placement. The bastion ring is defense-only."
       : "Select a building from the stream or click an occupied hex to inspect it.";
   const selectionStrength = selectedBuilding
     ? selectedBuildingCanUseBastion
@@ -1190,7 +1143,7 @@ export function renderHexMap(state) {
       </div>
       <div class="hex-map-wrap">
         <svg
-          class="hex-map ${placementModeActive ? "is-placement-mode" : ""} is-overlay-${overlaySlug}"
+          class="hex-map ${placementModeActive ? "is-placement-mode" : ""} ${isPlacementPlannerActive ? "is-placement-lite" : ""} is-overlay-${overlaySlug}"
           style="transform: translate(${mapPanX}px, ${mapPanY}px) scale(${mapZoom}); transform-origin: 50% 50%;"
           viewBox="${bounds.minX} ${bounds.minY} ${bounds.width} ${bounds.height}"
           role="img"
@@ -1200,21 +1153,27 @@ export function renderHexMap(state) {
             ${renderZoneField(cells, size, "hex-map__zone-field hex-map__zone-field--city", (cell) => !cell.isReserved && !cell.isFortificationRing)}
             ${renderZoneField(cells, size, "hex-map__zone-field hex-map__zone-field--bastion", (cell) => cell.isFortificationRing, 1.06)}
           </g>
-          <g class="hex-map__bastion-links">
-            ${renderBastionLinks(cells, size)}
-          </g>
-          <g class="hex-map__district-fields">
-            ${renderDistrictInfluenceField(state, cells, size)}
-          </g>
-          <g class="hex-map__district-labels">
-            ${renderDistrictLabels(state, size)}
-          </g>
-          <g class="hex-map__roads">
-            ${renderRoads(state, size)}
-          </g>
-          <g class="hex-map__overlay-tags">
-            ${renderResonanceOverlay(state, cells, size, selectedBuilding, mapOverlay)}
-          </g>
+          ${
+            renderMapDecor
+              ? `
+                <g class="hex-map__bastion-links">
+                  ${renderBastionLinks(cells, size)}
+                </g>
+                <g class="hex-map__district-fields">
+                  ${renderDistrictInfluenceField(state, cells, size)}
+                </g>
+                <g class="hex-map__district-labels">
+                  ${renderDistrictLabels(state, size)}
+                </g>
+                <g class="hex-map__roads">
+                  ${renderRoads(state, size)}
+                </g>
+                <g class="hex-map__overlay-tags">
+                  ${renderResonanceOverlay(state, cells, size, selectedBuilding, mapOverlay)}
+                </g>
+              `
+              : ""
+          }
           ${cells
             .map((cell) => {
               const center = axialToPixel(cell.q, cell.r, size);
@@ -1243,20 +1202,30 @@ export function renderHexMap(state) {
                 adjacencyPulse.q === cell.q &&
                 adjacencyPulse.r === cell.r &&
                 adjacencyPulse.buildingId === building?.id;
+              const isSelectedEmptyCell =
+                selectedMapCell &&
+                selectedMapCell.q === cell.q &&
+                selectedMapCell.r === cell.r &&
+                !building;
+              const canTargetCell =
+                selectedBuilding &&
+                !cell.isReserved &&
+                (!cell.isFortificationRing || selectedBuildingCanUseBastion) &&
+                (!building || building.id === selectedBuilding.id);
               const placementState =
-                placementModeActive && !cell.isReserved
-                  ? canPlaceBuildingAt(state, selectedBuilding.id, cell.q, cell.r).ok
+                placementModeActive && selectedBuilding
+                  ? canTargetCell
                     ? "is-placement-valid"
                     : "is-placement-dim"
                   : "";
-              const overlayState = getOverlayCellClass(state, mapOverlay, cell, building, selectedBuilding);
+              const overlayState = renderMapDecor ? getOverlayCellClass(state, mapOverlay, cell, building, selectedBuilding) : "";
               const isPlacementFlash =
                 state.transientUi?.mapPlacementPulseCell?.q === cell.q &&
                 state.transientUi?.mapPlacementPulseCell?.r === cell.r;
 
               return `
                 <g
-                  class="hex-map__cell ${cell.isReserved ? "is-reserved" : ""} ${cell.isFortificationRing ? "is-fortification-ring" : "is-city-plot"} ${building ? "is-occupied" : ""} ${isSelected ? "is-selected" : ""} ${isFocusedCell ? "is-focused" : ""} ${hoveredMapCell && hoveredMapCell.q === cell.q && hoveredMapCell.r === cell.r ? "is-hovered" : ""} ${adjacentKeys.has(cell.key) ? "is-adjacent" : ""} ${isPulseCell ? "is-resonance-pulse" : ""} ${selectedBuilding && hoveredMapCell && hoveredMapCell.q === cell.q && hoveredMapCell.r === cell.r && !building && !cell.isReserved ? (previewValidation?.ok ? "is-preview-valid" : "is-preview-invalid") : ""} ${placementState} ${overlayState} ${isPlacementFlash ? "is-placement-flash" : ""}"
+                  class="hex-map__cell ${cell.isReserved ? "is-reserved" : ""} ${cell.isFortificationRing ? "is-fortification-ring" : "is-city-plot"} ${building ? "is-occupied" : ""} ${isSelected ? "is-selected" : ""} ${isFocusedCell ? "is-focused" : ""} ${adjacentKeys.has(cell.key) ? "is-adjacent" : ""} ${isPulseCell ? "is-resonance-pulse" : ""} ${isSelectedEmptyCell && selectedBuilding ? (selectedPreviewValidation?.ok ? "is-preview-valid" : "is-preview-invalid") : ""} ${placementState} ${overlayState} ${isPlacementFlash ? "is-placement-flash" : ""}"
                   data-action="select-map-cell"
                   data-q="${cell.q}"
                   data-r="${cell.r}"
@@ -1275,38 +1244,37 @@ export function renderHexMap(state) {
                     points="${hexPoints(center.x, center.y, size * 0.86)}"
                     fill="none"
                   ></polygon>
-                  ${renderWaterOverlay(cell, center.x, center.y)}
+                  ${renderMapDecor && mapOverlay === "Water" ? renderWaterOverlay(cell, center.x, center.y) : ""}
                   ${
-                    hoveredMapCell &&
-                    hoveredMapCell.q === cell.q &&
-                    hoveredMapCell.r === cell.r &&
-                    !building
-                      ? renderPlacementPreview(selectedBuilding, cell, center, size, Boolean(previewValidation?.ok))
+                    isSelectedEmptyCell && selectedBuilding
+                      ? renderPlacementPreview(selectedBuilding, cell, center, size, Boolean(selectedPreviewValidation?.ok))
                       : ""
                   }
                   ${building ? renderBuildingThumb(building, center.x, center.y, size) : ""}
-                  ${building ? renderDistrictCrest(building, districtColor, center.x, center.y, size) : ""}
+                  ${building && renderMapDecor ? renderDistrictCrest(building, districtColor, center.x, center.y, size) : ""}
                   ${
-                    building && districtColor
-                      ? `
-                        <polygon
-                          class="hex-map__district-aura"
-                          points="${hexPoints(center.x, center.y, size * 0.92)}"
-                          fill="none"
-                          stroke="${districtColor}"
-                          stroke-width="5"
-                          style="--district-color:${districtColor}"
-                        ></polygon>
-                        <polygon
-                          points="${hexPoints(center.x, center.y, size * 0.8)}"
-                          fill="none"
-                          stroke="${districtColor}"
-                          stroke-width="3"
-                        ></polygon>
-                      `
+                    building
+                      ? renderMapDecor && districtColor
+                        ? `
+                          <polygon
+                            class="hex-map__district-aura"
+                            points="${hexPoints(center.x, center.y, size * 0.92)}"
+                            fill="none"
+                            stroke="${districtColor}"
+                            stroke-width="5"
+                            style="--district-color:${districtColor}"
+                          ></polygon>
+                          <polygon
+                            points="${hexPoints(center.x, center.y, size * 0.8)}"
+                            fill="none"
+                            stroke="${districtColor}"
+                            stroke-width="3"
+                          ></polygon>
+                        `
+                        : ""
                       : renderTerrainGlyph(cell, center.x, center.y)
                   }
-                  ${renderBuildingMapBadges(building, state, center.x, center.y, size)}
+                  ${renderMapDecor ? renderBuildingMapBadges(building, state, center.x, center.y, size) : ""}
                   ${
                     cell.isReserved
                       ? `<text x="${center.x}" y="${center.y + 5}" text-anchor="middle" class="hex-map__core-text">${cell.q === 0 && cell.r === 0 ? "FORGE" : ""}</text>`
@@ -1325,7 +1293,6 @@ export function renderHexMap(state) {
               `;
             })
             .join("")}
-          ${renderHoverReadout(state, hoveredMapCell, selectedBuilding, size)}
         </svg>
         ${renderPlacementPicker(state, selectedMapCell)}
       </div>
@@ -1346,7 +1313,7 @@ export function renderHexMap(state) {
       <div class="hex-map-panel__tooltip">
         ${renderCellInspector(state, focalMapCell, selectedBuilding)}
       </div>
-      ${renderMapPresets(state)}
+      ${renderMapDecor ? renderMapPresets(state) : ""}
       <div class="hex-map-panel__actions">
         <button class="button" data-action="auto-place-buildings">Auto Place Unplaced</button>
         <button class="button button--ghost" data-action="clear-building-placement">Clear Selected Placement</button>

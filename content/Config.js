@@ -8,7 +8,7 @@ import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
 // APP_VERSION must stay monotonic because Firebase publish safety compares builds numerically.
-export const APP_VERSION = "v1.7.0";
+export const APP_VERSION = "v1.7.1";
 // Release maturity is tracked separately so unreleased builds do not need to pretend they are public/stable.
 export const APP_RELEASE_STAGE = "preview";
 const RELEASE_STAGE_LABELS = {
@@ -57,6 +57,7 @@ export const PAGE_ROUTES = [
   { key: "help", label: "Help", href: "./help.html" }
 ];
 export const BUILD_NOTES = [
+  "Readable text pass across the app: small labels, chips, badges, sidebars, admin readouts, player panels, expedition cards, chronicle details, and Legend routes now use a higher type floor while City placement also avoids hover re-renders and uses a lighter armed-placement map.",
   "Admin can now add a Legend manually from the Population tab, choosing the archetype, route source, name, title, effect text, and origin notes while keeping the same roster, history, and assignment behavior as expedition-earned Legends.",
   "Town Map placement is lighter for large cities now: hexes use fast icon markers instead of embedded artwork, expensive map glow filters are gone, and map counters do less repeated lookup work during placement.",
   "Expedition launch now has an Instant Results toggle that sends the crew, calculates the return immediately, and opens the debrief without moving the calendar date; building growth speed now supports 0.5x and tops out at 10x.",

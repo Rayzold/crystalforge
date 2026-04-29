@@ -167,7 +167,7 @@ textarea {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  font-size: 0.78rem;
+  font-size: 0.88rem;
 }
 
 .boot-panel__title {
@@ -505,7 +505,7 @@ textarea {
 .rolltable-review__card small,
 .rolltable-editor__header span {
   display: block;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   color: var(--muted);
   font-family: var(--label-font);
   letter-spacing: 0.05em;
@@ -561,7 +561,7 @@ textarea {
 }
 
 .city-admin-view__grid--readouts .resource-chip__label {
-  font-size: 0.72rem;
+  font-size: 0.84rem;
 }
 
 .city-admin-view__grid--readouts .resource-chip__value {
@@ -653,7 +653,7 @@ textarea {
 .sidebar-manifest-list__item em,
 .sidebar-manifest-list__empty {
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.88rem;
 }
 
 .sidebar-manifest-list__items {
@@ -699,7 +699,7 @@ textarea {
 
 .sidebar-manifest-list__meta small {
   color: rgba(207, 216, 236, 0.68);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
 }
 
 .sidebar-manifest-list__eta {
@@ -720,7 +720,7 @@ textarea {
   border: 1px solid rgba(141, 214, 255, 0.2);
   background: rgba(9, 13, 24, 0.96);
   color: var(--muted);
-  font-size: 0.73rem;
+  font-size: 0.84rem;
   line-height: 1.25;
   letter-spacing: 0.01em;
   opacity: 0;
@@ -873,7 +873,7 @@ textarea {
   border: 1px solid rgba(141, 214, 255, 0.3);
   background: linear-gradient(135deg, rgba(141, 214, 255, 0.18), rgba(120, 241, 194, 0.14));
   color: rgba(225, 244, 255, 0.98);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -882,7 +882,7 @@ textarea {
 .citizen-tile .help-bubble {
   width: 24px;
   height: 24px;
-  font-size: 0.74rem;
+  font-size: 0.84rem;
 }
 
 .app-grid {
@@ -1155,7 +1155,7 @@ textarea {
 .building-card__district {
   padding: 6px 9px;
   border-radius: 999px;
-  font-size: 0.7rem;
+  font-size: 0.82rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -1214,7 +1214,7 @@ textarea {
 .building-card__signature span {
   display: block;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -1232,7 +1232,7 @@ textarea {
   display: block;
   margin-top: 4px;
   color: rgba(201, 212, 233, 0.7);
-  font-size: 0.7rem;
+  font-size: 0.82rem;
   letter-spacing: 0.09em;
   text-transform: uppercase;
 }
@@ -1305,7 +1305,7 @@ textarea {
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.05);
   color: rgba(241, 247, 255, 0.9);
-  font-size: 0.68rem;
+  font-size: 0.8rem;
   letter-spacing: 0.04em;
   line-height: 1.2;
   text-transform: uppercase;
@@ -1328,7 +1328,7 @@ textarea {
 .building-card__spotlight span {
   display: block;
   color: var(--muted);
-  font-size: 0.68rem;
+  font-size: 0.8rem;
 }
 
 .building-card__spotlight strong {
@@ -1476,7 +1476,7 @@ textarea {
 
 .admin-debug-table th {
   color: var(--muted);
-  font-size: 0.76rem;
+  font-size: 0.86rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -1557,7 +1557,7 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1571,7 +1571,7 @@ textarea {
   height: 18px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.08);
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   line-height: 1;
 }
 
@@ -1611,12 +1611,12 @@ textarea {
 }
 
 .admin-contributor-pill strong {
-  font-size: 0.78rem;
+  font-size: 0.88rem;
 }
 
 .admin-contributor-pill em {
   color: var(--muted);
-  font-size: 0.74rem;
+  font-size: 0.84rem;
   font-style: normal;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -1662,7 +1662,7 @@ textarea {
   border: 1px solid rgba(255, 255, 255, 0.06);
   background: rgba(255, 255, 255, 0.03);
   color: rgba(241, 247, 255, 0.78);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   font-family: var(--label-font);
   letter-spacing: 0.04em;
 }
@@ -1685,7 +1685,7 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   color: var(--muted);
 }
 
@@ -1708,7 +1708,7 @@ textarea {
 .gm-quality-stepper__button {
   min-width: 46px;
   padding: 8px 10px;
-  font-size: 0.74rem;
+  font-size: 0.84rem;
 }
 
 .button--danger-icon {
@@ -1783,7 +1783,7 @@ textarea {
   align-items: center;
   gap: 6px;
   color: rgba(255, 244, 220, 0.78);
-  font-size: 0.68rem;
+  font-size: 0.8rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -1806,7 +1806,7 @@ textarea {
   border: 1px solid rgba(255, 255, 255, 0.16);
   background: rgba(8, 12, 24, 0.34);
   color: rgba(244, 247, 255, 0.92);
-  font-size: 0.66rem;
+  font-size: 0.88rem;
   font-style: normal;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1856,7 +1856,7 @@ textarea {
 }
 
 .town-statistics--command-strip .town-statistics__section-title {
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -1873,7 +1873,7 @@ textarea {
 }
 
 .town-statistics--command-strip .town-statistics__card span {
-  font-size: 0.68rem;
+  font-size: 0.8rem;
 }
 
 .town-statistics--command-strip .town-statistics__card-head {
@@ -1961,7 +1961,7 @@ textarea {
 .town-statistics__card span {
   display: block;
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: 0.85rem;
 }
 
 .town-statistics__card strong {
@@ -2165,7 +2165,86 @@ textarea {
   display: block;
   margin-top: 6px;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.88rem;
+}
+
+.game-shell--page-city {
+  grid-template-columns: 236px minmax(0, 1fr);
+  gap: 14px;
+  max-width: min(99vw, 1760px);
+}
+
+.game-shell--page-city .sidebar-nav {
+  gap: 10px;
+  padding: 12px;
+  border-radius: 18px;
+}
+
+.game-shell--page-city .page-stage,
+.game-shell--page-city .page-layout,
+.game-shell--page-city .page-layout__content,
+.game-shell--page-city .page-layout__aside {
+  gap: 10px;
+}
+
+.game-shell--page-city .page-hero {
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 16px;
+}
+
+.game-shell--page-city .page-hero h1 {
+  font-size: clamp(1.35rem, 1.35vw + 0.85rem, 1.9rem);
+  line-height: 1;
+}
+
+.game-shell--page-city .page-hero__subtitle {
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.game-shell--page-city .city-workspace {
+  padding: 12px;
+}
+
+.game-shell--page-city .city-workspace__top,
+.game-shell--page-city .city-workspace__toolbar,
+.game-shell--page-city .city-workspace__top-actions {
+  gap: 8px;
+}
+
+.game-shell--page-city .city-workspace__tabs .button,
+.game-shell--page-city .city-filter {
+  min-height: 34px;
+  padding: 7px 10px;
+  font-size: 0.84rem;
+}
+
+.game-shell--page-city .city-workspace__map-shortcut {
+  min-width: 132px;
+  min-height: 36px;
+  font-size: 0.86rem;
+}
+
+.game-shell--page-city .city-workspace__footer {
+  gap: 8px;
+  margin-top: 6px;
+  padding-top: 10px;
+}
+
+.game-shell--page-city .city-workspace__footer article {
+  padding: 9px 10px;
+  border-radius: 11px;
+}
+
+.game-shell--page-city .city-workspace__footer strong {
+  font-size: 1.18rem;
+}
+
+.game-shell--page-city .city-workspace__footer span {
+  margin-top: 3px;
+  font-size: 0.82rem;
+  line-height: 1.25;
 }
 
 .workforce-panel {
@@ -2209,7 +2288,7 @@ textarea {
 .workforce-panel__role-card span {
   display: block;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -2293,7 +2372,7 @@ textarea {
   border: 1px solid rgba(141, 214, 255, 0.16);
   background: rgba(255, 255, 255, 0.04);
   color: rgba(236, 244, 255, 0.86);
-  font-size: 0.74rem;
+  font-size: 0.84rem;
   font-style: normal;
   line-height: 1.3;
 }
@@ -2471,7 +2550,7 @@ textarea {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  font-size: 0.74rem;
+  font-size: 0.84rem;
 }
 
 .chronicle-intro__feature strong {
@@ -2555,7 +2634,7 @@ textarea {
 
 .event-chain-card span {
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -3008,7 +3087,7 @@ textarea {
 .drift-evolution-panel__abilities > span {
   display: block;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -3143,7 +3222,7 @@ textarea {
 .manifest-shrine__meta span,
 .hex-map-tooltip span {
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -3172,7 +3251,7 @@ textarea {
 .building-detail__flow-grid h5 {
   margin: 0;
   color: rgba(241, 246, 255, 0.92);
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -3270,7 +3349,7 @@ textarea {
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   color: var(--muted);
 }
 
@@ -3290,7 +3369,7 @@ textarea {
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.05);
   color: rgba(241, 247, 255, 0.86);
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   letter-spacing: 0.03em;
   line-height: 1.2;
 }
@@ -3414,7 +3493,7 @@ textarea {
 
 .catalog-modal__filters span {
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -3546,7 +3625,7 @@ textarea {
 
 .admin-search span {
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -3644,7 +3723,7 @@ textarea {
   display: block;
   margin-top: 8px;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   line-height: 1.45;
 }
 
@@ -3700,7 +3779,7 @@ textarea {
 }
 
 .admin-active-building-card__quality span {
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   color: var(--muted);
 }
 
@@ -3809,7 +3888,7 @@ textarea {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  font-size: 0.76rem;
+  font-size: 0.86rem;
 }
 
 .focus-ceremony__card .town-focus-badge {
@@ -4289,7 +4368,7 @@ textarea {
   justify-self: start;
   min-width: 86px;
   padding: 8px 12px;
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -4316,7 +4395,7 @@ textarea {
   box-shadow: 0 14px 28px rgba(4, 9, 18, 0.28);
   color: rgba(232, 240, 255, 0.74);
   font-family: var(--label-font);
-  font-size: 0.64rem;
+  font-size: 0.86rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   user-select: none;
@@ -4351,7 +4430,7 @@ textarea {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
 }
 
 .sidebar-nav__brand strong {
@@ -4376,7 +4455,7 @@ textarea {
 
 .sidebar-link-group__label {
   color: rgba(223, 232, 247, 0.64);
-  font-size: 0.66rem;
+  font-size: 0.88rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
   font-family: var(--label-font);
@@ -4427,7 +4506,7 @@ textarea {
   background: linear-gradient(135deg, rgba(255, 88, 88, 0.98), rgba(255, 132, 132, 0.92));
   color: #fff;
   font-style: normal;
-  font-size: 0.68rem;
+  font-size: 0.8rem;
   font-weight: 700;
   line-height: 1;
   box-shadow: 0 10px 22px rgba(255, 70, 70, 0.28);
@@ -4502,7 +4581,7 @@ textarea {
 
 .sidebar-gm-tools__summary span {
   color: var(--muted);
-  font-size: 0.68rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -4535,7 +4614,7 @@ textarea {
 
 .sidebar-density-picker__copy span {
   color: var(--muted);
-  font-size: 0.68rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -4554,7 +4633,7 @@ textarea {
 .sidebar-density-picker__button {
   min-height: 34px;
   padding: 7px 8px;
-  font-size: 0.66rem;
+  font-size: 0.88rem;
 }
 
 .sidebar-density-picker__button.is-active {
@@ -4594,7 +4673,7 @@ textarea {
   color: rgba(243, 214, 255, 0.88);
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
 }
 
 .sidebar-mode-link strong {
@@ -4636,7 +4715,7 @@ textarea {
 
 .sidebar-publish-status span {
   color: rgba(219, 228, 244, 0.76);
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   line-height: 1.45;
 }
 
@@ -4656,7 +4735,7 @@ textarea {
 .sidebar-nav__save-slot {
   display: grid;
   gap: 4px;
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   color: rgba(207, 219, 245, 0.72);
 }
 
@@ -4677,7 +4756,7 @@ textarea {
 
 .sidebar-nav__build span {
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -4706,7 +4785,7 @@ textarea {
 .sidebar-dice__header span,
 .sidebar-dice__controls span {
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -4844,7 +4923,7 @@ textarea {
 .game-shell--density-dense .icon-button {
   padding: 7px 10px;
   border-radius: 10px;
-  font-size: 0.76rem;
+  font-size: 0.86rem;
 }
 
 .game-shell--density-dense .panel,
@@ -4868,9 +4947,9 @@ textarea {
 .game-shell--density-dense .sidebar-link__badge {
   top: 6px;
   right: 6px;
-  min-width: 16px;
-  height: 16px;
-  font-size: 0.62rem;
+  min-width: 18px;
+  height: 18px;
+  font-size: 0.8rem;
 }
 
 .game-shell--density-dense .sidebar-nav__build,
@@ -4896,7 +4975,7 @@ textarea {
 }
 
 .game-shell--density-dense .page-hero__subtitle {
-  font-size: 0.76rem;
+  font-size: 0.86rem;
 }
 
 .game-shell--density-dense .page-delta-strip__item,
@@ -4915,13 +4994,60 @@ textarea {
 .game-shell--density-dense .resource-chip__label,
 .game-shell--density-dense .hud-ribbon__item span,
 .game-shell--density-dense .page-delta-strip__item span {
-  font-size: 0.65rem;
+  font-size: 0.82rem;
 }
 
 .game-shell--density-dense .resource-chip__value,
 .game-shell--density-dense .hud-ribbon__item strong,
 .game-shell--density-dense .page-delta-strip__item strong {
   font-size: 0.86rem;
+}
+
+.game-shell--page-city.game-shell--density-comfort .sidebar-nav,
+.game-shell--page-city.game-shell--density-dense .sidebar-nav {
+  gap: 10px;
+  padding: 12px;
+  border-radius: 18px;
+}
+
+.game-shell--page-city.game-shell--density-comfort .page-stage,
+.game-shell--page-city.game-shell--density-comfort .page-layout,
+.game-shell--page-city.game-shell--density-dense .page-stage,
+.game-shell--page-city.game-shell--density-dense .page-layout {
+  gap: 10px;
+}
+
+.game-shell--page-city.game-shell--density-comfort .page-hero,
+.game-shell--page-city.game-shell--density-dense .page-hero {
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 16px;
+}
+
+.game-shell--page-city.game-shell--density-comfort .page-hero h1,
+.game-shell--page-city.game-shell--density-dense .page-hero h1 {
+  font-size: clamp(1.35rem, 1.35vw + 0.85rem, 1.9rem);
+  line-height: 1;
+}
+
+.game-shell--page-city.game-shell--density-comfort .page-hero__subtitle,
+.game-shell--page-city.game-shell--density-dense .page-hero__subtitle {
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.game-shell--page-city.game-shell--density-comfort .city-workspace,
+.game-shell--page-city.game-shell--density-dense .city-workspace {
+  padding: 12px;
+}
+
+.game-shell--page-city.game-shell--density-comfort .city-workspace__tabs .button,
+.game-shell--page-city.game-shell--density-comfort .city-filter,
+.game-shell--page-city.game-shell--density-dense .city-workspace__tabs .button,
+.game-shell--page-city.game-shell--density-dense .city-filter {
+  min-height: 34px;
+  padding: 7px 10px;
+  font-size: 0.84rem;
 }
 
 .game-shell--player {
@@ -4959,7 +5085,7 @@ textarea {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  font-size: 0.68rem;
+  font-size: 0.8rem;
 }
 
 .player-stage__brand strong {
@@ -5030,7 +5156,7 @@ textarea {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  font-size: 0.68rem;
+  font-size: 0.8rem;
 }
 
 .player-hero__meta strong {
@@ -5105,7 +5231,7 @@ textarea {
 
 .player-session-banner__grid span {
   color: var(--muted);
-  font-size: 0.68rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -5145,7 +5271,7 @@ textarea {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  font-size: 0.7rem;
+  font-size: 0.82rem;
 }
 
 .player-citizens-summary__meta strong {
@@ -5308,7 +5434,7 @@ textarea {
 .city-trend-panel__item span,
 .resource-chain-panel__item small {
   color: var(--text-muted);
-  font-size: 0.74rem;
+  font-size: 0.84rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -5573,7 +5699,7 @@ textarea {
   border: 1px solid rgba(255, 184, 112, 0.24);
   background: linear-gradient(180deg, rgba(255, 184, 112, 0.14), rgba(255, 124, 157, 0.08));
   color: rgba(255, 228, 196, 0.9);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -5819,7 +5945,7 @@ body:-webkit-full-screen #app {
   min-height: 56px;
   padding: 0;
   text-align: center;
-  font-size: 0.76rem;
+  font-size: 0.86rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   display: grid;
@@ -5839,7 +5965,7 @@ body:-webkit-full-screen #app {
 }
 
 .game-shell--page-forge.game-shell--forge-collapsed .sidebar-nav__footer .button::before {
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -5935,7 +6061,7 @@ body:-webkit-full-screen #app {
   color: rgba(255, 211, 220, 0.82);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-size: 0.76rem;
+  font-size: 0.86rem;
 }
 
 .crisis-banner__item {
@@ -6103,7 +6229,7 @@ body:-webkit-full-screen #app {
   align-items: center;
   gap: 0.45rem;
   color: rgba(191, 205, 235, 0.76);
-  font-size: 0.7rem;
+  font-size: 0.82rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -6160,7 +6286,7 @@ body:-webkit-full-screen #app {
 
 .page-command-strip__action em {
   color: rgba(225, 234, 251, 0.84);
-  font-size: 0.76rem;
+  font-size: 0.86rem;
   font-style: normal;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -6251,7 +6377,7 @@ body:-webkit-full-screen #app {
   background: rgba(18, 26, 46, 0.78);
   color: rgba(226, 233, 249, 0.84);
   font-style: normal;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -6285,7 +6411,7 @@ body:-webkit-full-screen #app {
   align-items: center;
   gap: 0.4rem;
   color: rgba(191, 205, 235, 0.72);
-  font-size: 0.68rem;
+  font-size: 0.8rem;
   letter-spacing: 0.11em;
   text-transform: uppercase;
 }
@@ -6317,7 +6443,7 @@ body:-webkit-full-screen #app {
 .page-command-strip__history-item em {
   margin: 0;
   color: rgba(208, 219, 242, 0.72);
-  font-size: 0.76rem;
+  font-size: 0.86rem;
   line-height: 1.45;
   font-style: normal;
 }
@@ -6359,7 +6485,7 @@ body:-webkit-full-screen #app {
 
 .page-delta-strip__item span {
   color: var(--text-muted);
-  font-size: 0.66rem;
+  font-size: 0.88rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -6372,7 +6498,7 @@ body:-webkit-full-screen #app {
 
 .page-delta-strip__item small {
   color: rgba(223, 232, 247, 0.76);
-  font-size: 0.74rem;
+  font-size: 0.84rem;
 }
 
 .page-delta-strip__item--positive strong {
@@ -6428,7 +6554,7 @@ body:-webkit-full-screen #app {
   display: block;
   color: var(--muted);
   font-family: var(--label-font);
-  font-size: 0.68rem;
+  font-size: 0.8rem;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -6452,7 +6578,7 @@ body:-webkit-full-screen #app {
   display: block;
   margin-top: 4px;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   line-height: 1.28;
 }
 
@@ -6666,7 +6792,7 @@ body:-webkit-full-screen #app {
 .city-aside__summary-grid span {
   display: block;
   color: var(--muted);
-  font-size: 0.76rem;
+  font-size: 0.86rem;
 }
 
 .city-aside__summary-grid strong {
@@ -6825,7 +6951,7 @@ body:-webkit-full-screen #app {
 
 .crystal-card__level {
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
 }
@@ -6849,7 +6975,7 @@ body:-webkit-full-screen #app {
 
 .crystal-card__rolls {
   color: var(--muted);
-  font-size: 0.76rem;
+  font-size: 0.86rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -6948,7 +7074,7 @@ body:-webkit-full-screen #app {
   color: rgba(195, 201, 220, 0.78);
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  font-size: 0.74rem;
+  font-size: 0.84rem;
 }
 
 .manifest-panel__hero h3 {
@@ -7115,7 +7241,7 @@ body:-webkit-full-screen #app {
 
 .manifest-result__panel h4 {
   margin: 0;
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -7187,7 +7313,7 @@ body:-webkit-full-screen #app {
 
 .city-incubation-queue__slot-label {
   color: rgba(212, 221, 236, 0.68);
-  font-size: 0.74rem;
+  font-size: 0.84rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -7500,7 +7626,7 @@ body:-webkit-full-screen #app {
 
 .home-route-group__label {
   color: rgba(223, 232, 247, 0.68);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   text-transform: uppercase;
   letter-spacing: 0.16em;
   font-family: var(--label-font);
@@ -7534,7 +7660,7 @@ body:-webkit-full-screen #app {
 
 .home-route-card span {
   color: #d58dff;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
 }
@@ -7579,7 +7705,7 @@ body:-webkit-full-screen #app {
 .citizen-command-panel__metrics span {
   display: block;
   color: var(--muted);
-  font-size: 0.76rem;
+  font-size: 0.86rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -7742,7 +7868,7 @@ body:-webkit-full-screen #app {
 .landing-hero__facts span {
   display: block;
   color: var(--muted);
-  font-size: 0.76rem;
+  font-size: 0.86rem;
 }
 
 .landing-hero__facts strong {
@@ -7838,7 +7964,7 @@ body:-webkit-full-screen #app {
 .landing-command-center__resources span {
   display: block;
   color: var(--muted);
-  font-size: 0.74rem;
+  font-size: 0.84rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -7855,7 +7981,7 @@ body:-webkit-full-screen #app {
   display: block;
   margin-top: 6px;
   color: rgba(223, 232, 247, 0.76);
-  font-size: 0.78rem;
+  font-size: 0.88rem;
 }
 
 .landing-command-center__resource-card--positive small {
@@ -7900,7 +8026,7 @@ body:-webkit-full-screen #app {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-size: 0.76rem;
+  font-size: 0.86rem;
 }
 
 .landing-hero__badge strong {
@@ -8007,7 +8133,7 @@ body:-webkit-full-screen #app {
 
 .onboarding-panel__current > div > span {
   color: rgba(191, 205, 235, 0.76);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -8034,7 +8160,7 @@ body:-webkit-full-screen #app {
   font-style: normal;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
 }
 
 .goal-reward-pill {
@@ -8048,7 +8174,7 @@ body:-webkit-full-screen #app {
   border: 1px solid rgba(141, 214, 255, 0.16);
   background: rgba(141, 214, 255, 0.08);
   color: rgba(232, 240, 255, 0.88);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   letter-spacing: 0.03em;
   line-height: 1.35;
 }
@@ -8087,7 +8213,7 @@ body:-webkit-full-screen #app {
   color: var(--muted);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-size: 0.78rem;
+  font-size: 0.88rem;
 }
 
 .onboarding-card__status,
@@ -8096,7 +8222,7 @@ body:-webkit-full-screen #app {
 }
 
 .onboarding-card__status {
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -8175,7 +8301,7 @@ body:-webkit-full-screen #app {
 
 .town-focus-badge span {
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -8194,7 +8320,7 @@ body:-webkit-full-screen #app {
 .town-focus-card__top span {
   display: block;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -8308,7 +8434,7 @@ body:-webkit-full-screen #app {
 .town-focus-modal__runway span {
   display: block;
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -8636,7 +8762,7 @@ body:-webkit-full-screen #app {
 
 .forge-stage__ritual-notes span {
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -8723,7 +8849,7 @@ body:-webkit-full-screen #app {
   border: 1px solid rgba(141, 214, 255, 0.16);
   background: rgba(255, 255, 255, 0.04);
   color: var(--muted);
-  font-size: 0.76rem;
+  font-size: 0.86rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   line-height: 1.2;
@@ -8790,7 +8916,7 @@ body:-webkit-full-screen #app {
 
 .hex-map-panel__toolbar-label {
   color: var(--muted);
-  font-size: 0.76rem;
+  font-size: 0.86rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -8952,7 +9078,7 @@ body:-webkit-full-screen #app {
   align-items: center;
   padding: 4px 8px;
   border-radius: 999px;
-  font-size: 0.7rem;
+  font-size: 0.82rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -8993,7 +9119,7 @@ body:-webkit-full-screen #app {
   border: 1px solid rgba(255, 228, 143, 0.16);
   background: rgba(255, 228, 143, 0.08);
   color: var(--text);
-  font-size: 0.76rem;
+  font-size: 0.86rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -9142,7 +9268,7 @@ body:-webkit-full-screen #app {
 
 .hex-map__district-label text {
   fill: rgba(241, 247, 255, 0.94);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -9156,7 +9282,7 @@ body:-webkit-full-screen #app {
 
 .hex-map__resonance-tag text {
   fill: rgba(220, 255, 242, 0.94);
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 800;
 }
 
@@ -9506,7 +9632,7 @@ body:-webkit-full-screen #app {
 
 .hex-map__pulse-tag text {
   fill: #091117;
-  font-size: 0.42rem;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
@@ -9521,7 +9647,7 @@ body:-webkit-full-screen #app {
 
 .hex-map__building-badge text {
   fill: #061019;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.04em;
 }
@@ -9587,6 +9713,154 @@ body:-webkit-full-screen #app {
   stroke-linecap: round;
   stroke-linejoin: round;
   pointer-events: none;
+}
+
+.hex-map-panel .panel__header {
+  margin-bottom: 8px;
+}
+
+.hex-map-panel__toolbar {
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.hex-map-panel__toolbar-group {
+  flex: 1 1 220px;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 12px;
+}
+
+.hex-map-panel__toolbar-group--planner {
+  gap: 3px;
+}
+
+.hex-map-panel__toolbar-label {
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+}
+
+.hex-map-panel__status {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+  align-items: stretch;
+  margin-bottom: 8px;
+}
+
+.hex-map-panel__status-card {
+  padding: 8px 10px;
+  border-radius: 12px;
+}
+
+.hex-map-panel__status strong {
+  font-size: 1rem;
+  line-height: 1.15;
+}
+
+.hex-map-panel__status span {
+  font-size: 0.82rem;
+  line-height: 1.25;
+}
+
+.hex-map-wrap {
+  padding: 8px;
+  margin-bottom: 8px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(4, 8, 14, 0.99), rgba(10, 16, 25, 0.98));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+.hex-map-wrap::before,
+.hex-map-wrap::after {
+  display: none;
+}
+
+.hex-map-panel__legend,
+.hex-map-panel__actions {
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+.hex-map-panel__legend {
+  font-size: 0.88rem;
+}
+
+.hex-map-panel__actions .button,
+.hex-map-panel__toolbar .button,
+.hex-map-panel__picker .button {
+  min-height: 32px;
+  padding: 7px 9px;
+  font-size: 0.83rem;
+}
+
+.hex-map-panel__tooltip {
+  margin-top: 8px;
+}
+
+.hex-map-tooltip {
+  gap: 8px;
+}
+
+.hex-map-tooltip article {
+  padding: 9px 10px;
+  border-radius: 12px;
+}
+
+.hex-map-tooltip span {
+  font-size: 0.82rem;
+}
+
+.hex-map-tooltip small {
+  margin-top: 4px;
+  line-height: 1.35;
+}
+
+.hex-map-panel__presets {
+  margin-top: 8px;
+}
+
+.hex-map-panel__presets-head,
+.hex-map-panel__preset-list {
+  gap: 8px;
+}
+
+.hex-map-panel__preset-item {
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 12px;
+}
+
+.hex-map__district-label text {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.hex-map__resonance-tag text,
+.hex-map__building-badge text {
+  font-size: 10px;
+}
+
+.hex-map__building-token text,
+.hex-map__label {
+  font-size: 23px;
+}
+
+.hex-map__core-text {
+  font-size: 13px;
+  letter-spacing: 0.06em;
+}
+
+.hex-map__preview-label {
+  font-size: 12px;
+}
+
+.hex-map.is-placement-lite .hex-map__zone-field,
+.hex-map.is-placement-lite .hex-map__cell,
+.hex-map.is-placement-lite .hex-map__cell-face {
+  transition: none;
+  animation: none;
+  filter: none;
 }
 
 .legend-swatch {
@@ -9687,6 +9961,25 @@ body:-webkit-full-screen #app {
   display: inline-flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.hex-map-panel__presets {
+  margin-top: 8px;
+}
+
+.hex-map-panel__presets-head {
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.hex-map-panel__preset-list {
+  gap: 8px;
+}
+
+.hex-map-panel__preset-item {
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 12px;
 }
 
 @keyframes districtPulse {
@@ -10453,7 +10746,7 @@ body:-webkit-full-screen #app {
   }
 
   .game-shell--density-dense .page-hero__subtitle {
-    font-size: 0.78rem;
+    font-size: 0.88rem;
   }
 
   .game-shell--density-dense .panel,
@@ -10745,7 +11038,7 @@ body:-webkit-full-screen #app {
   .sidebar-nav__footer p,
   .page-hero__eyebrow,
   .world-summary__eyebrow {
-    font-size: 0.68rem;
+    font-size: 0.8rem;
     letter-spacing: 0.14em;
   }
 
@@ -11104,7 +11397,7 @@ body:-webkit-full-screen #app {
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(7, 11, 20, 0.34);
   color: rgba(244, 247, 255, 0.92);
-  font-size: 0.64rem;
+  font-size: 0.86rem;
   font-style: normal;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -11124,7 +11417,7 @@ body:-webkit-full-screen #app {
 .chronicle-calendar__weekdays span {
   padding: 0 0.25rem;
   text-align: center;
-  font-size: 0.74rem;
+  font-size: 0.84rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted);
@@ -11260,7 +11553,7 @@ body:-webkit-full-screen #app {
 }
 
 .chronicle-calendar__day-weekday {
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -11269,7 +11562,7 @@ body:-webkit-full-screen #app {
 .chronicle-calendar__day-holiday {
   display: block;
   min-height: 2.1em;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   line-height: 1.3;
   color: rgba(242, 232, 255, 0.92);
 }
@@ -11279,7 +11572,7 @@ body:-webkit-full-screen #app {
   align-items: center;
   gap: 0.28rem;
   margin-top: 0.18rem;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   color: rgba(214, 222, 246, 0.88);
 }
 
@@ -11324,7 +11617,7 @@ body:-webkit-full-screen #app {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
-  font-size: 0.78rem;
+  font-size: 0.88rem;
 }
 
 .chronicle-calendar__day-meta em,
@@ -11361,7 +11654,7 @@ body:-webkit-full-screen #app {
 .chronicle-calendar__detail-label {
   display: block;
   margin-bottom: 0.35rem;
-  font-size: 0.74rem;
+  font-size: 0.84rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -11383,7 +11676,7 @@ body:-webkit-full-screen #app {
   border-radius: 999px;
   border: 1px solid rgba(125, 152, 214, 0.16);
   background: rgba(255, 255, 255, 0.04);
-  font-size: 0.74rem;
+  font-size: 0.84rem;
   line-height: 1.2;
 }
 
@@ -11407,7 +11700,7 @@ body:-webkit-full-screen #app {
 }
 
 .chronicle-calendar__detail-condition span {
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -11443,7 +11736,7 @@ body:-webkit-full-screen #app {
 }
 
 .chronicle-calendar__city-snapshot-grid span {
-  font-size: 0.7rem;
+  font-size: 0.82rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -11615,7 +11908,7 @@ body:-webkit-full-screen #app {
 
 .turn-summary-modal__header span {
   color: rgba(205, 216, 244, 0.68);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -11721,7 +12014,7 @@ body:-webkit-full-screen #app {
 
 .turn-summary-modal__risk-head span {
   color: rgba(191, 205, 235, 0.76);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -11751,7 +12044,7 @@ body:-webkit-full-screen #app {
   border: 1px solid rgba(141, 214, 255, 0.16);
   background: rgba(255, 255, 255, 0.04);
   color: rgba(236, 244, 255, 0.86);
-  font-size: 0.74rem;
+  font-size: 0.84rem;
   font-style: normal;
   line-height: 1.3;
 }
@@ -11776,14 +12069,14 @@ body:-webkit-full-screen #app {
 
 .turn-summary-modal__attention span {
   color: rgba(191, 205, 235, 0.76);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
 .turn-summary-modal__attention em {
   color: rgba(225, 234, 251, 0.84);
-  font-size: 0.76rem;
+  font-size: 0.86rem;
   font-style: normal;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -11887,7 +12180,7 @@ body:-webkit-full-screen #app {
 .vehicle-card__stats article span {
   display: block;
   color: rgba(184, 200, 233, 0.76);
-  font-size: 0.76rem;
+  font-size: 0.86rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -12044,7 +12337,7 @@ body:-webkit-full-screen #app {
 .expedition-card__tags em,
 .expedition-card__footer {
   color: rgba(190, 205, 239, 0.76);
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   font-style: normal;
 }
 
@@ -12241,7 +12534,7 @@ body:-webkit-full-screen #app {
   align-items: center;
   gap: 0.45rem;
   color: rgba(191, 205, 235, 0.76);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -12258,7 +12551,7 @@ body:-webkit-full-screen #app {
 
 .expedition-relic-card__head em {
   color: rgba(191, 205, 235, 0.76);
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   font-style: normal;
   text-align: right;
 }
@@ -12317,7 +12610,7 @@ body:-webkit-full-screen #app {
 
 .expedition-relic-synergy__head span {
   color: rgba(191, 205, 235, 0.74);
-  font-size: 0.7rem;
+  font-size: 0.82rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -12409,7 +12702,7 @@ body:-webkit-full-screen #app {
 .expedition-journey-modal__stage-copy > span {
   display: block;
   color: rgba(182, 197, 233, 0.78);
-  font-size: 0.76rem;
+  font-size: 0.86rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -12439,7 +12732,7 @@ body:-webkit-full-screen #app {
 
 .expedition-journey-modal__pillbox span {
   color: rgba(182, 197, 233, 0.76);
-  font-size: 0.78rem;
+  font-size: 0.88rem;
 }
 
 .expedition-journey-modal__stage {
@@ -12538,7 +12831,7 @@ body:-webkit-full-screen #app {
 
 .expedition-journey-choice__head em {
   color: rgba(184, 200, 233, 0.76);
-  font-size: 0.74rem;
+  font-size: 0.84rem;
   font-style: normal;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -12565,7 +12858,7 @@ body:-webkit-full-screen #app {
   border: 1px solid rgba(149, 168, 219, 0.18);
   background: rgba(31, 41, 67, 0.7);
   color: rgba(214, 224, 249, 0.82);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   font-style: normal;
   line-height: 1.3;
 }
@@ -12637,7 +12930,7 @@ body:-webkit-full-screen #app {
 
 .expedition-journey-modal__history-item span {
   color: rgba(182, 197, 233, 0.78);
-  font-size: 0.76rem;
+  font-size: 0.86rem;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -12647,7 +12940,7 @@ body:-webkit-full-screen #app {
   margin: 0 0 0.25rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-size: 0.7rem;
+  font-size: 0.82rem;
 }
 
 .vehicle-card__head h3,
@@ -12741,7 +13034,7 @@ body:-webkit-full-screen #app {
 .resource-breakdown-modal__section-head span {
   display: block;
   color: rgba(182, 197, 233, 0.78);
-  font-size: 0.76rem;
+  font-size: 0.86rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -12923,7 +13216,7 @@ body:-webkit-full-screen #app {
 .build-notes-modal__header span,
 .build-notes-modal__section-head span {
   color: rgba(191, 205, 235, 0.76);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -12991,7 +13284,7 @@ body:-webkit-full-screen #app {
 .legends-summary-grid article span {
   display: block;
   color: rgba(184, 200, 233, 0.76);
-  font-size: 0.76rem;
+  font-size: 0.86rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -13074,7 +13367,7 @@ body:-webkit-full-screen #app {
 .legend-card__memory span {
   display: block;
   color: rgba(191, 205, 235, 0.76);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -13112,7 +13405,7 @@ body:-webkit-full-screen #app {
 .legend-card__assignment-head span {
   display: block;
   color: rgba(191, 205, 235, 0.76);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -13147,7 +13440,7 @@ body:-webkit-full-screen #app {
   border: 1px solid rgba(141, 214, 255, 0.16);
   background: rgba(20, 31, 55, 0.82);
   color: rgba(228, 236, 251, 0.88);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }

@@ -154,8 +154,6 @@ let mapPlacementFxTimer = null;
 let chronicleJumpHighlightTimer = null;
 let manifestInProgress = false;
 let mapDragState = null;
-let mapHoverFrame = null;
-let pendingHoveredMapCell = null;
 let suppressNextMapClick = false;
 let navigationShortcutTimer = null;
 let navigationShortcutBuffer = "";
@@ -879,37 +877,9 @@ function navigateWithTransition(href) {
 }
 
 function clearHoveredMapCell() {
-  pendingHoveredMapCell = null;
-  if (mapHoverFrame) {
-    cancelAnimationFrame(mapHoverFrame);
-    mapHoverFrame = null;
-  }
   if (renderer.transientUi.hoveredMapCell) {
     renderer.setTransientUi({ hoveredMapCell: null }, getCurrentState());
   }
-}
-
-function queueHoveredMapCell(nextHoveredMapCell) {
-  pendingHoveredMapCell = nextHoveredMapCell;
-  if (mapHoverFrame) {
-    return;
-  }
-
-  mapHoverFrame = requestAnimationFrame(() => {
-    mapHoverFrame = null;
-    const currentHovered = renderer.transientUi.hoveredMapCell;
-    const nextHovered = pendingHoveredMapCell;
-    pendingHoveredMapCell = null;
-
-    if (
-      (currentHovered?.q ?? null) === (nextHovered?.q ?? null) &&
-      (currentHovered?.r ?? null) === (nextHovered?.r ?? null)
-    ) {
-      return;
-    }
-
-    renderer.setTransientUi({ hoveredMapCell: nextHovered }, getCurrentState());
-  });
 }
 
 function getMapViewState() {
@@ -1195,7 +1165,7 @@ function setMapPlannerBuilding(buildingId, mode = "chain", successMessage = null
     {
       mapPlannerBuildingId: building.id,
       mapPlannerMode: mode,
-      validPlacementMode: true
+      validPlacementMode: false
     },
     getCurrentState()
   );
@@ -3801,47 +3771,6 @@ root.addEventListener("click", async (event) => {
     default:
       break;
   }
-});
-
-root.addEventListener("mouseover", (event) => {
-  if (mapDragState) {
-    return;
-  }
-  const cell = event.target.closest(".hex-map__cell");
-  if (!cell) {
-    return;
-  }
-
-  const q = Number(cell.dataset.q);
-  const r = Number(cell.dataset.r);
-  const hovered = renderer.transientUi.hoveredMapCell;
-  if (hovered && hovered.q === q && hovered.r === r) {
-    return;
-  }
-
-  queueHoveredMapCell({ q, r });
-});
-
-root.addEventListener("mouseout", (event) => {
-  if (mapDragState) {
-    return;
-  }
-  const cell = event.target.closest(".hex-map__cell");
-  if (!cell) {
-    return;
-  }
-
-  const nextCell = event.relatedTarget?.closest?.(".hex-map__cell");
-  if (nextCell) {
-    return;
-  }
-
-  window.setTimeout(() => {
-    if (root.querySelector(".hex-map-wrap:hover")) {
-      return;
-    }
-    clearHoveredMapCell();
-  }, 0);
 });
 
 root.addEventListener(
