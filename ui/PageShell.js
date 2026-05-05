@@ -1,7 +1,7 @@
 import { APP_DISPLAY_VERSION, MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js";
 import { getBuildingEmoji } from "../content/BuildingCatalog.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
-import { formatDate } from "../systems/CalendarSystem.js";
+import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js";
 import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js";
 import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js";
 import { getDecisionHistory, getDecisionInboxItems } from "../systems/DecisionInboxSystem.js";
@@ -58,6 +58,28 @@ const UI_DENSITY_OPTIONS = [
   { id: "compact", label: "Compact" },
   { id: "dense", label: "Dense" }
 ];
+
+function formatNumericDate(dayOffset = 0) {
+  const date = getStructuredDate(dayOffset);
+  const day = String(date.day).padStart(2, "0");
+  const month = String(date.monthIndex + 1).padStart(2, "0");
+  return `${day}/${month}/${date.year}`;
+}
+
+function renderCornerDateChip(state, className = "") {
+  const rawDayOffset = Number(state.calendar?.dayOffset ?? 0);
+  const dayOffset = Number.isFinite(rawDayOffset) ? rawDayOffset : 0;
+  const fullDate = formatDate(dayOffset);
+  const numericDate = formatNumericDate(dayOffset);
+  const classSuffix = className ? ` ${className}` : "";
+
+  return `
+    <div class="page-date-chip${classSuffix}" aria-label="Current date: ${escapeHtml(fullDate)} (${escapeHtml(numericDate)})">
+      <span>${escapeHtml(fullDate)}</span>
+      <strong>${escapeHtml(numericDate)}</strong>
+    </div>
+  `;
+}
 
 function formatSidebarEtaDays(daysRemaining) {
   if (!Number.isFinite(daysRemaining)) {
@@ -485,6 +507,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
               <strong>Shared Table Screen</strong>
             </div>
             <div class="player-stage__actions">
+              ${renderCornerDateChip(state, "page-date-chip--player")}
               <button class="player-stage__return ${state.transientUi?.projectorMode ? "is-active" : ""}" type="button" data-action="toggle-projector-mode">Projector Mode</button>
               <button class="player-stage__return" type="button" data-action="enter-fullscreen">Fullscreen</button>
               <a class="player-stage__return" href="./gm.html">Return to GM Mode</a>
@@ -668,17 +691,20 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
             <h1>${title}</h1>
             <p class="page-hero__subtitle">${subtitle}</p>
           </div>
-          ${
-            currentFocus && pageKey !== "forge"
-              ? `
-                  <div class="page-hero__focus">
-                    <span>Town Focus</span>
-                    ${renderTownFocusBadge(currentFocus)}
-                    <small>${currentFocus.mayorLine}</small>
-                  </div>
-                `
-              : ""
-          }
+          <div class="page-hero__side">
+            ${renderCornerDateChip(state, "page-date-chip--hero")}
+            ${
+              currentFocus && pageKey !== "forge"
+                ? `
+                    <div class="page-hero__focus">
+                      <span>Town Focus</span>
+                      ${renderTownFocusBadge(currentFocus)}
+                      <small>${currentFocus.mayorLine}</small>
+                    </div>
+                  `
+                : ""
+            }
+          </div>
         </header>
 
         ${showResourceChrome ? renderResourceDeltaStrip(state) : ""}

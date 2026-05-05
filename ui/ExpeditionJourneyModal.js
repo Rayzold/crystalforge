@@ -62,6 +62,32 @@ function renderResolvedStages(journey) {
   `;
 }
 
+function renderJourneyTransition(transition, journey) {
+  const isFinalStage = transition?.isFinalStage === true;
+  const stageLabel = isFinalStage
+    ? "Settling final haul"
+    : `Preparing stage ${formatNumber(transition?.nextStageNumber ?? journey.currentStageIndex + 2, 0)} / ${formatNumber(
+        transition?.totalStages ?? journey.stages.length,
+        0
+      )}`;
+  const lockedChoice = String(transition?.label ?? "Route choice").trim() || "Route choice";
+
+  return `
+    <div class="expedition-journey-modal__transition" role="status" aria-live="polite">
+      <div class="expedition-journey-modal__transition-card">
+        <div class="expedition-journey-modal__route-loader" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <strong>${escapeHtml(stageLabel)}</strong>
+        <p>${escapeHtml(lockedChoice)} is being woven into the expedition route.</p>
+      </div>
+    </div>
+  `;
+}
+
 export function renderExpeditionJourneyModal(state) {
   const open = Boolean(state.transientUi?.expeditionJourneyOpen);
   const journey = getCurrentPendingExpeditionJourney(state);
@@ -76,11 +102,13 @@ export function renderExpeditionJourneyModal(state) {
 
   const projection = getExpeditionJourneyProjection(journey);
   const queueCount = state.expeditions?.pending?.length ?? 0;
+  const transition = state.transientUi?.expeditionJourneyTransition ?? null;
+  const isResolving = transition?.journeyId === journey.id;
 
   return `
     <div class="modal-overlay expedition-journey-modal">
       <button class="modal-overlay__dismiss" type="button" data-action="close-expedition-journey" aria-label="Close expedition journey"></button>
-      <section class="modal-card expedition-journey-modal__card" role="dialog" aria-modal="true" aria-labelledby="expedition-journey-title">
+      <section class="modal-card expedition-journey-modal__card ${isResolving ? "is-resolving" : ""}" role="dialog" aria-modal="true" aria-labelledby="expedition-journey-title" aria-busy="${isResolving ? "true" : "false"}">
         <button class="modal-card__close" type="button" data-action="close-expedition-journey" aria-label="Close expedition journey">x</button>
         <div class="expedition-journey-modal__header">
           <div>
@@ -125,6 +153,7 @@ export function renderExpeditionJourneyModal(state) {
                     data-action="choose-expedition-journey-option"
                     data-journey-id="${journey.id}"
                     data-option-id="${option.id}"
+                    ${isResolving ? "disabled" : ""}
                   >
                     <div class="expedition-journey-choice__head">
                       <strong>${escapeHtml(option.label)}</strong>
@@ -157,6 +186,7 @@ export function renderExpeditionJourneyModal(state) {
           </div>
           ${renderResolvedStages(journey)}
         </div>
+        ${isResolving ? renderJourneyTransition(transition, journey) : ""}
       </section>
     </div>
   `;

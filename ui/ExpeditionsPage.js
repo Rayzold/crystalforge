@@ -18,6 +18,7 @@ import {
   getExpeditionOverview
 } from "../systems/ExpeditionSystem.js";
 import { formatDate } from "../systems/CalendarSystem.js";
+import { createHelpBubble } from "./HelpBubbles.js";
 import { renderVehicleArt } from "./VehicleArt.js";
 import { renderUiIcon } from "./UiIcons.js";
 
@@ -26,6 +27,20 @@ const RESOURCE_LABELS = {
   gold: "Gold",
   materials: "Materials",
   mana: "Mana"
+};
+
+const RESOURCE_POWER_VALUES = {
+  food: 0.06,
+  gold: 0.05,
+  materials: 0.04,
+  mana: 0.08
+};
+
+const RESOURCE_EXPEDITION_HELP = {
+  food: "Food keeps the crew supplied and lowers the chance of a supply-strain journey event.",
+  gold: "Gold buys guides, safe passage, bribes, and trade openings while the crew is outside the Drift.",
+  materials: "Materials cover repairs, tools, barricades, and field logistics when the route gets rough.",
+  mana: "Mana powers wards, sensing, rituals, and arcane problem-solving during the expedition."
 };
 
 function getDefaultDraft(state) {
@@ -51,6 +66,59 @@ function getDefaultDraft(state) {
     team: structuredClone(state.transientUi?.expeditionDraft?.team ?? {}),
     resources: structuredClone(state.transientUi?.expeditionDraft?.resources ?? {})
   };
+}
+
+function formatPositiveDelta(value, decimals = 2) {
+  const amount = Math.max(0, Number(value) || 0);
+  return `+${formatNumber(amount, amount >= 1 ? Math.min(decimals, 1) : decimals)}`;
+}
+
+function getPreviewDelta(state, draft, nextDraft, baselinePreview) {
+  const nextPreview = createExpeditionLaunchPreview(state, nextDraft);
+  return {
+    power: Math.max(0, Number(nextPreview.powerScore ?? 0) - Number(baselinePreview.powerScore ?? 0)),
+    success: Math.max(0, Number(nextPreview.successScore ?? 0) - Number(baselinePreview.successScore ?? 0))
+  };
+}
+
+function getCrewValueHelpText(state, draft, preview, expeditionType, citizenClass, inputMax, currentValue) {
+  const nextDraft = {
+    ...draft,
+    team: {
+      ...(draft.team ?? {}),
+      [citizenClass]: currentValue + 1
+    }
+  };
+  const delta = getPreviewDelta(state, draft, nextDraft, preview);
+  const classWeight = Number(expeditionType.favoredClasses?.[citizenClass] ?? 1) || 1;
+  const classFit =
+    classWeight > 1
+      ? `This is a favored crew type for ${expeditionType.label} and counts x${formatNumber(classWeight, 2)} before other route bonuses.`
+      : classWeight < 1
+        ? `This crew type is less specialized for ${expeditionType.label} and counts x${formatNumber(classWeight, 2)} before other route bonuses.`
+        : `This crew type has normal fit for ${expeditionType.label}.`;
+  const availabilityNote =
+    inputMax <= currentValue
+      ? "No additional ready crew or vehicle seats are available right now. "
+      : "";
+
+  return `${availabilityNote}Sending one more ${citizenClass} currently adds about ${formatPositiveDelta(delta.power)} Power and ${formatPositiveDelta(delta.success * 100, 1)} success points. ${classFit} Crew are unavailable in the city until the expedition returns; Rare and Epic citizens can be worth more if the roster has to pull them.`;
+}
+
+function getResourceValueHelpText(state, draft, preview, resource, label, currentValue) {
+  const nextDraft = {
+    ...draft,
+    resources: {
+      ...(draft.resources ?? {}),
+      [resource]: currentValue + 1
+    }
+  };
+  const delta = getPreviewDelta(state, draft, nextDraft, preview);
+  const basePower = RESOURCE_POWER_VALUES[resource] ?? 0;
+  const strongFoodTarget = Math.max(6, preview.teamSize * 2);
+  const foodNote = resource === "food" ? ` For this crew, ${formatNumber(strongFoodTarget, 0)} Food is the strong-supply target.` : "";
+
+  return `${RESOURCE_EXPEDITION_HELP[resource] ?? "Committed supplies strengthen the expedition."} Each ${label} is spent on launch and currently adds about ${formatPositiveDelta(delta.power)} Power (${formatPositiveDelta(basePower, 2)} base before route bonuses) plus ${formatPositiveDelta(delta.success * 100, 1)} success points. Better success improves the final haul and reduces thin-return pressure.${foodNote}`;
 }
 
 function renderMissionBoard(state, draft) {
@@ -244,14 +312,19 @@ function renderTeamInputs(state, draft, expeditionType) {
         const currentValue = Math.max(0, Number(draft.team?.[citizenClass] ?? 0) || 0);
         const remainingCapacity = Math.max(0, (preview.vehicleCapacity ?? 0) - (preview.teamSize - currentValue));
         const inputMax = Math.max(currentValue, Math.min(available, remainingCapacity));
+        const helpText = getCrewValueHelpText(state, draft, preview, expeditionType, citizenClass, inputMax, currentValue);
         return `
-          <label class="expedition-team-card">
+          <div class="expedition-team-card">
             <div class="expedition-team-card__head">
-              <strong>${escapeHtml(`${definition?.emoji ?? "•"} ${citizenClass}`)}</strong>
+              <div class="expedition-team-card__title">
+                <strong>${escapeHtml(`${definition?.emoji ?? "•"} ${citizenClass}`)}</strong>
+                ${createHelpBubble(helpText)}
+              </div>
               <span>${formatNumber(inputMax)} ready</span>
             </div>
             <input
               type="number"
+              aria-label="${escapeHtml(`${citizenClass} assigned to expedition`)}"
               min="0"
               max="${inputMax}"
               step="1"
@@ -259,7 +332,7 @@ function renderTeamInputs(state, draft, expeditionType) {
               data-action="set-expedition-team-count"
               data-citizen-class="${citizenClass}"
             />
-          </label>
+          </div>
         `;
       }).join("")}
     </div>
@@ -267,25 +340,34 @@ function renderTeamInputs(state, draft, expeditionType) {
 }
 
 function renderSupplyInputs(state, draft) {
+  const preview = createExpeditionLaunchPreview(state, draft);
   return `
     <div class="expedition-grid expedition-grid--supplies">
-      ${Object.entries(RESOURCE_LABELS).map(([resource, label]) => `
-        <label class="expedition-team-card">
-          <div class="expedition-team-card__head">
-            <strong>${escapeHtml(label)}</strong>
-            <span>${formatNumber(state.resources?.[resource] ?? 0)} on hand</span>
+      ${Object.entries(RESOURCE_LABELS).map(([resource, label]) => {
+        const currentValue = Math.max(0, Number(draft.resources?.[resource] ?? 0) || 0);
+        const helpText = getResourceValueHelpText(state, draft, preview, resource, label, currentValue);
+        return `
+          <div class="expedition-team-card">
+            <div class="expedition-team-card__head">
+              <div class="expedition-team-card__title">
+                <strong>${escapeHtml(label)}</strong>
+                ${createHelpBubble(helpText)}
+              </div>
+              <span>${formatNumber(state.resources?.[resource] ?? 0)} on hand</span>
+            </div>
+            <input
+              type="number"
+              aria-label="${escapeHtml(`${label} committed to expedition`)}"
+              min="0"
+              max="${Math.max(0, Number(state.resources?.[resource] ?? 0) || 0)}"
+              step="1"
+              value="${currentValue}"
+              data-action="set-expedition-resource"
+              data-resource-key="${resource}"
+            />
           </div>
-          <input
-            type="number"
-            min="0"
-            max="${Math.max(0, Number(state.resources?.[resource] ?? 0) || 0)}"
-            step="1"
-            value="${Math.max(0, Number(draft.resources?.[resource] ?? 0) || 0)}"
-            data-action="set-expedition-resource"
-            data-resource-key="${resource}"
-          />
-        </label>
-      `).join("")}
+        `;
+      }).join("")}
     </div>
   `;
 }

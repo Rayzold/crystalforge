@@ -70,6 +70,7 @@ export class UIRenderer {
       focusCeremony: null,
       manifestCompleteModal: null,
       expeditionJourneyOpen: false,
+      expeditionJourneyTransition: null,
       buildNotesOpen: false,
       buildNotesPromptedVersion: null,
       decisionInboxShowSnoozed: false,

@@ -125,6 +125,7 @@ const renderer = new UIRenderer(root, pageKey);
 const toasts = new Toasts();
 const animationEngine = new AnimationEngine();
 const audioEngine = new AudioEngine();
+const EXPEDITION_JOURNEY_TRANSITION_MS = 560;
 audioEngine.setPage(pageKey);
 const gameState = new GameState(loadGameState());
 const firebaseClientId = (() => {
@@ -152,6 +153,7 @@ let recentBuildingChangeTimer = null;
 let recentStateChangeTimer = null;
 let mapPlacementFxTimer = null;
 let chronicleJumpHighlightTimer = null;
+let expeditionJourneyTransitionTimer = null;
 let manifestInProgress = false;
 let mapDragState = null;
 let suppressNextMapClick = false;
@@ -1285,6 +1287,7 @@ function createMapPresetRecord(state, name) {
 }
 
 function resetTransientUi() {
+  clearExpeditionJourneyTransitionTimer();
   renderer.setTransientUi(
     {
       hoveredMapCell: null,
@@ -1292,6 +1295,7 @@ function resetTransientUi() {
       catalogOpen: false,
       manifestCompleteModal: null,
       expeditionJourneyOpen: false,
+      expeditionJourneyTransition: null,
       buildNotesOpen: false,
       decisionInboxShowSnoozed: false,
       deferredTurnSummary: null,
@@ -2257,10 +2261,10 @@ function highlightResolvedExpeditionJourney(record) {
 function openPendingExpeditionJourney() {
   const currentJourney = getCurrentPendingExpeditionJourney(getCurrentState());
   if (!currentJourney) {
-    renderer.setTransientUi({ expeditionJourneyOpen: false }, getCurrentState());
+    renderer.setTransientUi({ expeditionJourneyOpen: false, expeditionJourneyTransition: null }, getCurrentState());
     return false;
   }
-  renderer.setTransientUi({ expeditionJourneyOpen: true, turnSummaryModal: null }, getCurrentState());
+  renderer.setTransientUi({ expeditionJourneyOpen: true, expeditionJourneyTransition: null, turnSummaryModal: null }, getCurrentState());
   return true;
 }
 
@@ -2298,6 +2302,60 @@ function resolveDecisionInboxItem(decisionId) {
   reportError("That decision does not have a destination yet.");
 }
 
+function clearExpeditionJourneyTransitionTimer() {
+  if (expeditionJourneyTransitionTimer) {
+    window.clearTimeout(expeditionJourneyTransitionTimer);
+    expeditionJourneyTransitionTimer = null;
+  }
+}
+
+function cancelExpeditionJourneyTransition(shouldRender = true) {
+  clearExpeditionJourneyTransitionTimer();
+  if (shouldRender && renderer.transientUi.expeditionJourneyTransition) {
+    renderer.setTransientUi({ expeditionJourneyTransition: null }, getCurrentState());
+  }
+}
+
+function beginExpeditionJourneyResolution(journeyId, optionId) {
+  if (renderer.transientUi.expeditionJourneyTransition) {
+    return;
+  }
+
+  const state = getCurrentState();
+  const journey = getCurrentPendingExpeditionJourney(state);
+  const currentStage = journey?.id === journeyId ? journey.stages?.[journey.currentStageIndex] ?? null : null;
+  const selectedOption = (currentStage?.options ?? []).find((entry) => entry.id === optionId) ?? null;
+
+  if (!journey || !currentStage || !selectedOption) {
+    resolveExpeditionJourneyOption(journeyId, optionId);
+    return;
+  }
+
+  clearExpeditionJourneyTransitionTimer();
+  renderer.setTransientUi(
+    {
+      expeditionJourneyOpen: true,
+      expeditionJourneyTransition: {
+        journeyId,
+        optionId,
+        label: selectedOption.label,
+        stageTitle: currentStage.title,
+        isFinalStage: journey.currentStageIndex >= (journey.stages?.length ?? 1) - 1,
+        nextStageNumber: Math.min((journey.stages?.length ?? 1), journey.currentStageIndex + 2),
+        totalStages: journey.stages?.length ?? 1,
+        startedAt: Date.now()
+      },
+      turnSummaryModal: null
+    },
+    state
+  );
+
+  expeditionJourneyTransitionTimer = window.setTimeout(() => {
+    expeditionJourneyTransitionTimer = null;
+    resolveExpeditionJourneyOption(journeyId, optionId);
+  }, EXPEDITION_JOURNEY_TRANSITION_MS);
+}
+
 function resolveExpeditionJourneyOption(journeyId, optionId) {
   const result = commit((draft) => {
     const nextResult = resolveExpeditionJourneyChoice(draft, journeyId, optionId);
@@ -2313,6 +2371,7 @@ function resolveExpeditionJourneyOption(journeyId, optionId) {
     return nextResult;
   });
   if (!result?.ok) {
+    renderer.setTransientUi({ expeditionJourneyTransition: null }, getCurrentState());
     reportError(result?.reason ?? "That expedition choice could not be resolved.");
     return;
   }
@@ -2325,6 +2384,7 @@ function resolveExpeditionJourneyOption(journeyId, optionId) {
     renderer.setTransientUi(
       {
         expeditionJourneyOpen: journeysStillPending,
+        expeditionJourneyTransition: null,
         turnSummaryModal: !journeysStillPending ? deferredTurnSummary : null,
         deferredTurnSummary: journeysStillPending ? deferredTurnSummary : null
       },
@@ -2343,7 +2403,7 @@ function resolveExpeditionJourneyOption(journeyId, optionId) {
     return;
   }
 
-  renderer.setTransientUi({ expeditionJourneyOpen: true, turnSummaryModal: null }, nextState);
+  renderer.setTransientUi({ expeditionJourneyOpen: true, expeditionJourneyTransition: null, turnSummaryModal: null }, nextState);
   reportSuccess(`${result.stage?.chosenLabel ?? "Decision"} locked in for ${formatExpeditionDisplayName(result.journey?.expedition)}.`);
 }
 
@@ -3421,11 +3481,12 @@ root.addEventListener("click", async (event) => {
       break;
     case "choose-expedition-journey-option":
       void audioEngine.playUiAccent("confirm");
-      resolveExpeditionJourneyOption(target.dataset.journeyId, target.dataset.optionId);
+      beginExpeditionJourneyResolution(target.dataset.journeyId, target.dataset.optionId);
       break;
     case "close-expedition-journey":
       void audioEngine.playUiAccent("soft");
-      renderer.setTransientUi({ expeditionJourneyOpen: false }, getCurrentState());
+      cancelExpeditionJourneyTransition(false);
+      renderer.setTransientUi({ expeditionJourneyOpen: false, expeditionJourneyTransition: null }, getCurrentState());
       break;
     case "open-resource-breakdown":
       void audioEngine.playUiAccent("soft");
@@ -3562,7 +3623,8 @@ root.addEventListener("click", async (event) => {
       } else if (target.dataset.modal === "town-focus-council-modal") {
         renderer.setTransientUi({ councilModalOpen: false }, getCurrentState());
       } else if (target.dataset.modal === "expedition-journey-modal") {
-        renderer.setTransientUi({ expeditionJourneyOpen: false }, getCurrentState());
+        cancelExpeditionJourneyTransition(false);
+        renderer.setTransientUi({ expeditionJourneyOpen: false, expeditionJourneyTransition: null }, getCurrentState());
       }
       break;
     case "close-manifest-complete":

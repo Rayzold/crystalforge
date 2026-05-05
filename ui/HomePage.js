@@ -65,14 +65,20 @@ function renderCommandCenterBubble(state) {
         ${resources
           .map(
             ([label, value, iconKey]) => `
-              <article class="landing-command-center__resource-card landing-command-center__resource-card--${(trends[iconKey]?.delta ?? 0) > 0 ? "positive" : (trends[iconKey]?.delta ?? 0) < 0 ? "negative" : "neutral"}">
+              <button
+                class="landing-command-center__resource-card landing-command-center__resource-card--${(trends[iconKey]?.delta ?? 0) > 0 ? "positive" : (trends[iconKey]?.delta ?? 0) < 0 ? "negative" : "neutral"}"
+                type="button"
+                data-action="open-resource-breakdown"
+                data-resource-key="${iconKey}"
+                aria-label="Open ${escapeHtml(label)} daily breakdown"
+              >
                 <div class="landing-command-center__resource-head">
                   ${renderUiIcon(iconKey, label)}
                   <span>${escapeHtml(label)}</span>
                 </div>
                 <strong>${formatNumber(value, 0)}</strong>
                 <small>${(trends[iconKey]?.delta ?? 0) >= 0 ? "+" : ""}${formatNumber(trends[iconKey]?.delta ?? 0, 2)} / day</small>
-              </article>
+              </button>
             `
           )
           .join("")}

@@ -4422,6 +4422,52 @@ textarea {
   flex: 0 0 auto;
 }
 
+.page-date-chip {
+  display: grid;
+  gap: 2px;
+  min-width: 220px;
+  max-width: min(330px, calc(100vw - 36px));
+  padding: 7px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(182, 212, 255, 0.2);
+  background: linear-gradient(180deg, rgba(11, 17, 29, 0.92), rgba(18, 28, 45, 0.84));
+  box-shadow: 0 14px 28px rgba(4, 9, 18, 0.24);
+  color: rgba(232, 240, 255, 0.84);
+  font-family: var(--label-font);
+  pointer-events: none;
+}
+
+.page-date-chip span {
+  overflow: hidden;
+  color: rgba(232, 240, 255, 0.78);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page-date-chip strong {
+  color: rgba(244, 248, 255, 0.96);
+  font-size: 0.92rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.page-date-chip--player {
+  position: static;
+  top: auto;
+  right: auto;
+  z-index: auto;
+  min-width: 190px;
+  max-width: 280px;
+  flex: 1 1 220px;
+}
+
+.game-shell--density-dense .page-date-chip {
+  padding: 6px 9px;
+}
+
 .sidebar-nav__brand p,
 .sidebar-nav__footer p,
 .page-hero__eyebrow,
@@ -6146,6 +6192,21 @@ body:-webkit-full-screen #app {
   color: var(--muted);
   font-size: 0.8rem;
   line-height: 1.38;
+}
+
+.page-hero__side {
+  display: grid;
+  flex: 0 1 320px;
+  gap: 8px;
+  justify-items: end;
+  min-width: min(260px, 100%);
+  max-width: 320px;
+}
+
+.page-hero__side .page-date-chip,
+.page-hero__side .page-hero__focus {
+  width: 100%;
+  max-width: none;
 }
 
 .page-hero__focus {
@@ -7945,11 +8006,33 @@ body:-webkit-full-screen #app {
 }
 
 .landing-command-center__facts article,
-.landing-command-center__resources article {
+.landing-command-center__resource-card {
   padding: 12px 14px;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.06);
   background: rgba(255, 255, 255, 0.035);
+}
+
+.landing-command-center__resource-card {
+  appearance: none;
+  width: 100%;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.landing-command-center__resource-card:hover,
+.landing-command-center__resource-card:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(141, 214, 255, 0.26);
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.landing-command-center__resource-card:focus-visible {
+  outline: 2px solid rgba(141, 214, 255, 0.36);
+  outline-offset: 2px;
 }
 
 .landing-command-center__resource-card--positive {
@@ -10547,6 +10630,28 @@ body:-webkit-full-screen #app {
     padding: 10px;
   }
 
+  .page-build-tag,
+  .page-date-chip {
+    position: static;
+  }
+
+  .page-build-tag {
+    justify-self: end;
+  }
+
+  .page-date-chip {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    justify-self: stretch;
+  }
+
+  .page-date-chip--player {
+    width: auto;
+    max-width: 100%;
+    flex-basis: 100%;
+  }
+
   .hud-ribbon,
   .featured-building-grid,
   .lore-grid,
@@ -10651,9 +10756,11 @@ body:-webkit-full-screen #app {
     padding: 16px;
   }
 
+  .page-hero__side,
   .page-hero__focus,
   .town-focus-panel__header-actions {
     width: 100%;
+    max-width: 100%;
   }
 
   .page-hero h1 {
@@ -12371,6 +12478,35 @@ body:-webkit-full-screen #app {
   gap: 0.8rem;
 }
 
+.expedition-team-card__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.expedition-team-card__title strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.expedition-team-card__title .help-bubble-wrap {
+  flex: 0 0 auto;
+  margin-left: 0;
+}
+
+.expedition-team-card__title .help-bubble {
+  width: 22px;
+  height: 22px;
+  font-size: 0.72rem;
+}
+
+.expedition-team-card__title .help-bubble__tooltip {
+  width: min(300px, 74vw);
+}
+
 .expedition-card small,
 .vehicle-card p,
 .notable-card p,
@@ -12683,12 +12819,22 @@ body:-webkit-full-screen #app {
 }
 
 .expedition-journey-modal__card {
+  position: relative;
   width: min(960px, 100%);
   max-height: min(92vh, 880px);
   overflow: auto;
   display: grid;
   gap: 1rem;
   padding: 1.3rem;
+}
+
+.expedition-journey-modal__card.is-resolving .expedition-journey-choice {
+  opacity: 0.52;
+  pointer-events: none;
+}
+
+.expedition-journey-choice:disabled {
+  cursor: progress;
 }
 
 .expedition-journey-modal__header {
@@ -12933,6 +13079,137 @@ body:-webkit-full-screen #app {
   font-size: 0.86rem;
   letter-spacing: 0.07em;
   text-transform: uppercase;
+}
+
+.expedition-journey-modal__transition {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  display: grid;
+  place-items: center;
+  padding: 1.4rem;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(141, 214, 255, 0.14), transparent 24%),
+    linear-gradient(180deg, rgba(5, 9, 18, 0.62), rgba(5, 9, 18, 0.78));
+  backdrop-filter: blur(5px);
+  animation: expeditionJourneyTransitionIn 160ms ease both;
+}
+
+.expedition-journey-modal__transition-card {
+  display: grid;
+  gap: 0.65rem;
+  justify-items: center;
+  width: min(360px, 100%);
+  padding: 1rem 1.1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(141, 214, 255, 0.22);
+  background:
+    linear-gradient(180deg, rgba(18, 26, 43, 0.96), rgba(8, 12, 22, 0.98)),
+    radial-gradient(circle at top left, rgba(255, 209, 138, 0.12), transparent 28%);
+  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.36);
+  text-align: center;
+}
+
+.expedition-journey-modal__transition-card strong {
+  font-family: var(--display-font);
+  font-size: 1rem;
+}
+
+.expedition-journey-modal__transition-card p {
+  max-width: 30ch;
+  margin: 0;
+  color: rgba(214, 224, 249, 0.78);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.expedition-journey-modal__route-loader {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 18px);
+  gap: 14px;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+}
+
+.expedition-journey-modal__route-loader::before {
+  content: "";
+  position: absolute;
+  left: 9px;
+  right: 9px;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(141, 214, 255, 0.18), rgba(255, 209, 138, 0.7), rgba(190, 163, 255, 0.2));
+  background-size: 180% 100%;
+  animation: expeditionRouteLine 640ms ease-in-out infinite;
+}
+
+.expedition-journey-modal__route-loader span {
+  position: relative;
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  border: 1px solid rgba(141, 214, 255, 0.34);
+  background: rgba(10, 16, 30, 0.94);
+  transform: rotate(45deg) scale(0.82);
+  animation: expeditionRouteStep 640ms ease-in-out infinite;
+}
+
+.expedition-journey-modal__route-loader span:nth-child(2) {
+  animation-delay: 120ms;
+}
+
+.expedition-journey-modal__route-loader span:nth-child(3) {
+  animation-delay: 240ms;
+}
+
+.expedition-journey-modal__route-loader span:nth-child(4) {
+  animation-delay: 360ms;
+}
+
+@keyframes expeditionJourneyTransitionIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes expeditionRouteLine {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes expeditionRouteStep {
+  0%,
+  100% {
+    border-color: rgba(141, 214, 255, 0.24);
+    box-shadow: 0 0 0 rgba(141, 214, 255, 0);
+    transform: rotate(45deg) scale(0.78);
+  }
+  48% {
+    border-color: rgba(255, 209, 138, 0.68);
+    box-shadow: 0 0 18px rgba(255, 209, 138, 0.24);
+    transform: rotate(45deg) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .expedition-journey-modal__transition,
+  .expedition-journey-modal__route-loader::before,
+  .expedition-journey-modal__route-loader span {
+    animation: none;
+  }
 }
 
 .vehicle-card__eyebrow,

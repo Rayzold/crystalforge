@@ -1,4 +1,5 @@
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
+import { getActiveConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js";
 import { getBasePopulationSupport } from "../systems/DriftEvolutionSystem.js";
 import { getHousingStrainPenalty } from "../systems/CityConditionSystem.js";
 import { getEconomyContributionBreakdown, getEconomyDebugSummary } from "../systems/ResourceSystem.js";
@@ -53,9 +54,35 @@ const COMPONENT_LABELS = [
   ["focusProduction", "Town Focus"]
 ];
 
+const CONSTRUCTION_DRAIN_KEYS = new Set(["materials", "salvage", "mana"]);
+
 function formatSignedAmount(value, decimals = 2) {
   const numericValue = Number(value ?? 0) || 0;
   return `${numericValue >= 0 ? "+" : ""}${formatNumber(numericValue, decimals)}`;
+}
+
+function getConstructionDailyDrain(state, resourceKey) {
+  if (!CONSTRUCTION_DRAIN_KEYS.has(resourceKey)) {
+    return { total: 0, rows: [] };
+  }
+
+  const rows = getActiveConstructionQueue(state)
+    .map((building) => {
+      const details = getConstructionEtaDetails(building, state, { assumeActive: true });
+      const amount = Number(details.dailyCosts?.[resourceKey] ?? 0) || 0;
+      return {
+        label: building.displayName ?? "Incubating Building",
+        channel: "Active Construction",
+        amount: amount > 0 ? -amount : 0
+      };
+    })
+    .filter((entry) => Math.abs(entry.amount) > 0.005)
+    .sort((left, right) => left.amount - right.amount);
+
+  return {
+    total: rows.reduce((sum, entry) => sum + entry.amount, 0),
+    rows: rows.slice(0, 5)
+  };
 }
 
 function renderFlowRows(entries, emptyLabel) {
@@ -125,6 +152,8 @@ function renderResourcePanel(state, resourceKey) {
   const contributionBreakdown = getEconomyContributionBreakdown(state);
   const row = debugSummary.rows.find((entry) => entry.resource === resourceKey) ?? null;
   const contributionEntry = contributionBreakdown[resourceKey] ?? { sources: [], drains: [] };
+  const constructionDrain = getConstructionDailyDrain(state, resourceKey);
+  const drainRows = [...(contributionEntry.drains ?? []), ...constructionDrain.rows].sort((left, right) => left.amount - right.amount);
   if (!row) {
     return "";
   }
@@ -135,17 +164,38 @@ function renderResourcePanel(state, resourceKey) {
       label,
       amount: Number(row[key] ?? 0)
     }))
+    .concat(
+      constructionDrain.total
+        ? [
+            {
+              key: "activeConstruction",
+              label: "Active construction",
+              amount: constructionDrain.total
+            }
+          ]
+        : []
+    )
     .filter((entry) => Math.abs(entry.amount) > 0.005);
+  const afterConstructionNet = Number(row.net ?? 0) + constructionDrain.total;
 
   return `
     <div class="resource-breakdown-modal__grid">
       <section class="resource-breakdown-modal__section">
         <div class="resource-breakdown-modal__metrics expedition-preview-grid">
           <article><span>Current Stock</span><strong>${formatNumber(row.stock, 2)}</strong></article>
-          <article><span>Net / Day</span><strong>${formatSignedAmount(row.net)}</strong></article>
+          <article><span>${constructionDrain.total ? "Economy Net / Day" : "Net / Day"}</span><strong>${formatSignedAmount(row.net)}</strong></article>
+          ${constructionDrain.total ? `<article><span>After Active Builds</span><strong>${formatSignedAmount(afterConstructionNet)}</strong></article>` : ""}
           <article><span>Top Source</span><strong>${escapeHtml(contributionEntry.sources[0]?.label ?? "None")}</strong></article>
-          <article><span>Top Drain</span><strong>${escapeHtml(contributionEntry.drains[0]?.label ?? "None")}</strong></article>
+          <article><span>Top Drain</span><strong>${escapeHtml(drainRows[0]?.label ?? "None")}</strong></article>
         </div>
+        ${
+          constructionDrain.total
+            ? `<div class="resource-breakdown-modal__callout">
+                <strong>Active construction is spending ${formatNumber(Math.abs(constructionDrain.total), 2)} ${escapeHtml(RESOURCE_META[resourceKey]?.label ?? "resource")} per day.</strong>
+                <p>These build costs are charged when days advance, after the normal economy production and upkeep flow is calculated.</p>
+              </div>`
+            : ""
+        }
         <div class="resource-breakdown-modal__components">
           ${components.length
             ? components
@@ -175,7 +225,7 @@ function renderResourcePanel(state, resourceKey) {
               <span>Top Drains</span>
               <strong>${escapeHtml(RESOURCE_META[resourceKey]?.label ?? "Resource")} drains</strong>
             </div>
-            ${renderFlowRows(contributionEntry.drains ?? [], "No meaningful drains are pulling on this resource.")}
+            ${renderFlowRows(drainRows, "No meaningful drains are pulling on this resource.")}
           </div>
         </div>
       </section>
