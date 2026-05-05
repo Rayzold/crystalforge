@@ -14,6 +14,7 @@ import {
 import { EVENT_POOLS } from "./content/EventPools.js";
 import { RARITY_ORDER } from "./content/Rarities.js";
 import { GameState } from "./engine/GameState.js";
+import { formatNumber } from "./engine/Utils.js";
 import { AnimationEngine, getManifestRevealTotalDuration } from "./fx/AnimationEngine.js";
 import { AudioEngine } from "./fx/AudioEngine.js";
 import { ensureFirebaseAuth, getFirebaseUserId } from "./firebase/FirebaseConfig.js";
@@ -25,6 +26,7 @@ import {
 } from "./firebase/FirebaseSharedState.js";
 import {
   formatBuildingExactQualityDisplay,
+  empowerBuildingWithShards,
   getBuildingCatalogStatusLabel,
   manifestIntoBuilding,
   removeBuilding,
@@ -93,7 +95,7 @@ import {
   isFortificationBuilding,
   setBuildingPlacement
 } from "./systems/MapSystem.js";
-import { addShards, setShards } from "./systems/ShardSystem.js";
+import { addShards, convertShardsToCrystals, setShards } from "./systems/ShardSystem.js";
 import {
   createLiveSessionResetState,
   createSessionSnapshot as createSessionSnapshotRecord,
@@ -416,9 +418,9 @@ function syncDerivedState(state) {
   state.expeditions = normalizeExpeditionState(state.expeditions);
   state.uniqueCitizens = normalizeUniqueCitizens(state.uniqueCitizens);
   refreshExpeditionBoardIfNeeded(state);
-  if ((state.crystals[state.selectedRarity] ?? 0) <= 0) {
+  if ((state.crystals[state.selectedRarity] ?? 0) <= 0 && (state.shards[state.selectedRarity] ?? 0) <= 0) {
     state.selectedRarity =
-      RARITY_ORDER.find((rarity) => (state.crystals[rarity] ?? 0) > 0) ?? state.selectedRarity;
+      RARITY_ORDER.find((rarity) => (state.crystals[rarity] ?? 0) > 0 || (state.shards[rarity] ?? 0) > 0) ?? state.selectedRarity;
   }
   state.settings.currentPage = pageKey;
   state.settings.theme = "dark";
@@ -2164,6 +2166,81 @@ function setIncubatorSupportState(buildingId, supportKey, enabled) {
   reportSuccess(`${label} ${enabled ? "enabled" : "disabled"} for ${result.name}.`);
 }
 
+function convertShardStack(rarity, amount = 1) {
+  if (!RARITY_ORDER.includes(rarity)) {
+    reportError("Shard rarity not found.");
+    return;
+  }
+
+  const result = commit((draft) => {
+    const conversion = convertShardsToCrystals(draft, rarity, amount);
+    if (conversion.ok) {
+      draft.selectedRarity = rarity;
+    }
+    return conversion;
+  });
+
+  if (!result.ok) {
+    reportError(result.reason);
+    return;
+  }
+
+  reportSuccess(
+    `Converted ${formatNumber(result.spentShards, 0)} ${rarity} shards into ${formatNumber(result.convertedCrystals, 0)} ${rarity} crystal${result.convertedCrystals === 1 ? "" : "s"}.`,
+    "confirm"
+  );
+}
+
+function setEmpowermentSlot(buildingId) {
+  const result = commit((draft) => {
+    if (!buildingId) {
+      draft.ui.empowermentSlotBuildingId = null;
+      return { ok: true, cleared: true };
+    }
+
+    const building = draft.buildings.find((entry) => entry.id === buildingId);
+    if (!building) {
+      return { ok: false, reason: "Building not found." };
+    }
+    if (!building.isComplete || Number(building.quality ?? 0) < BUILDING_ACTIVE_THRESHOLD) {
+      return { ok: false, reason: `${building.displayName} must reach 100% before entering the empowerment slot.` };
+    }
+    if (building.isRuined) {
+      return { ok: false, reason: `${building.displayName} is ruined and cannot enter the empowerment slot.` };
+    }
+
+    draft.ui.empowermentSlotBuildingId = building.id;
+    return { ok: true, name: building.displayName };
+  });
+
+  if (!result.ok) {
+    reportError(result.reason);
+    return;
+  }
+  reportSuccess(result.cleared ? "Empowerment slot cleared." : `${result.name} loaded into the empowerment slot.`);
+}
+
+function empowerBuildingFromSlot(buildingId, amount) {
+  const result = commit((draft) => {
+    const activeBuildingId = buildingId || draft.ui.empowermentSlotBuildingId;
+    if (!activeBuildingId) {
+      return { ok: false, reason: "Load a completed building into the empowerment slot first." };
+    }
+    return empowerBuildingWithShards(draft, activeBuildingId, amount);
+  });
+
+  if (!result.ok) {
+    reportError(result.reason);
+    return;
+  }
+
+  markRecentBuildingChanges([result.buildingId]);
+  reportSuccess(
+    `${result.name} absorbed ${formatNumber(result.spentShards, 0)} ${result.rarity} shard${result.spentShards === 1 ? "" : "s"} and rose to ${formatNumber(result.finalQuality, 1)}% quality${result.capped ? " (fully empowered)" : ""}.`,
+    "confirm"
+  );
+}
+
 function adjustVehicleCount(vehicleId, delta) {
   const definition = normalizeVehicleFleet(getCurrentState().vehicles)[vehicleId];
   if (definition === undefined) {
@@ -3100,6 +3177,9 @@ root.addEventListener("click", async (event) => {
         draft.selectedRarity = target.dataset.rarity;
       });
       break;
+    case "convert-shards":
+      convertShardStack(target.dataset.rarity, target.dataset.amount ?? 1);
+      break;
     case "manifest":
       await handleManifest();
       break;
@@ -3740,6 +3820,15 @@ root.addEventListener("click", async (event) => {
       break;
     case "pause-construction":
       setConstructionActiveState(target.dataset.buildingId, false);
+      break;
+    case "assign-empowerment-slot":
+      setEmpowermentSlot(target.dataset.buildingId);
+      break;
+    case "clear-empowerment-slot":
+      setEmpowermentSlot(null);
+      break;
+    case "empower-building":
+      empowerBuildingFromSlot(target.dataset.buildingId, target.dataset.amount ?? 1);
       break;
     case "pause-all-construction":
       actions.pauseAllConstruction();

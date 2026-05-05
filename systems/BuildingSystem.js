@@ -24,6 +24,28 @@ export function getBuildingLevel(quality) {
   return Math.max(1, getBuildingMultiplier(quality));
 }
 
+export function canEmpowerBuilding(building) {
+  return Boolean(
+    building &&
+      building.isComplete &&
+      !building.isRuined &&
+      Number(building.quality ?? 0) >= BUILDING_ACTIVE_THRESHOLD &&
+      Number(building.quality ?? 0) < BUILDING_QUALITY_CAP
+  );
+}
+
+export function getEmpowermentCandidates(state) {
+  return [...(state.buildings ?? [])]
+    .filter(canEmpowerBuilding)
+    .sort((left, right) => {
+      const qualityDelta = Number(left.quality ?? 0) - Number(right.quality ?? 0);
+      if (qualityDelta !== 0) {
+        return qualityDelta;
+      }
+      return left.displayName.localeCompare(right.displayName);
+    });
+}
+
 export function formatBuildingQualityDisplay(building) {
   const quality = Number(building?.quality ?? 0);
   if (quality >= 300) {
@@ -176,6 +198,64 @@ export function setBuildingQuality(building, quality) {
       details: `${building.displayName} completed after an admin quality update.`
     });
   }
+}
+
+export function empowerBuildingWithShards(state, buildingId, requestedAmount = 1) {
+  const building = state.buildings.find((entry) => entry.id === buildingId);
+  if (!building) {
+    return { ok: false, reason: "Building not found." };
+  }
+  if (!building.isComplete || Number(building.quality ?? 0) < BUILDING_ACTIVE_THRESHOLD) {
+    return { ok: false, reason: `${building.displayName} must be manifested at 100% before it can be empowered.` };
+  }
+  if (building.isRuined) {
+    return { ok: false, reason: `${building.displayName} is ruined and cannot be empowered right now.` };
+  }
+
+  const previousQuality = Number(building.quality ?? 0) || 0;
+  const remainingQuality = Math.max(0, BUILDING_QUALITY_CAP - previousQuality);
+  if (remainingQuality <= 0) {
+    return { ok: false, reason: `${building.displayName} is already empowered to ${BUILDING_QUALITY_CAP}%.` };
+  }
+
+  const availableShards = Math.max(0, Math.floor(Number(state.shards?.[building.rarity] ?? 0) || 0));
+  if (availableShards <= 0) {
+    return { ok: false, reason: `No ${building.rarity} shards are available.` };
+  }
+
+  const requestedShards =
+    requestedAmount === "max"
+      ? Number.POSITIVE_INFINITY
+      : Math.max(1, Math.floor(Number(requestedAmount) || 1));
+  const spentShards = Math.min(availableShards, requestedShards, Math.ceil(remainingQuality));
+  const appliedQuality = Math.min(remainingQuality, spentShards);
+
+  if (spentShards <= 0 || appliedQuality <= 0) {
+    return { ok: false, reason: `${building.displayName} cannot absorb more shards right now.` };
+  }
+
+  state.shards[building.rarity] = availableShards - spentShards;
+  setBuildingQuality(building, previousQuality + appliedQuality);
+  building.lastEmpoweredAt = state.calendar?.dayOffset !== undefined ? state.calendar.dayOffset : null;
+  building.history = Array.isArray(building.history) ? building.history : [];
+  building.history.push({
+    type: "empowerment",
+    at: state.calendar?.dayOffset !== undefined ? `Day ${state.calendar.dayOffset}` : "Unknown",
+    details: `Empowered with ${spentShards} ${building.rarity} shard${spentShards === 1 ? "" : "s"} to ${Math.round(building.quality)}% quality.`
+  });
+
+  return {
+    ok: true,
+    buildingId: building.id,
+    name: building.displayName,
+    rarity: building.rarity,
+    previousQuality,
+    finalQuality: building.quality,
+    spentShards,
+    appliedQuality,
+    remainingShards: state.shards[building.rarity],
+    capped: building.quality >= BUILDING_QUALITY_CAP
+  };
 }
 
 export function setBuildingRuinState(building, isRuined, source = "Admin") {

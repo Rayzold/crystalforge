@@ -2,7 +2,7 @@
 
 Last updated: 2026-05-04
 
-Current build: `Preview v1.7.5`
+Current build: `Preview v1.7.6`
 
 Current save version: `12`
 
@@ -351,7 +351,7 @@ Storage keys and versioning live in:
 
 Important constants:
 
-- `APP_VERSION = "v1.7.5"`
+- `APP_VERSION = "v1.7.6"`
 - `APP_RELEASE_STAGE = "preview"`
 - `MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3"`
 - `FIREBASE_DEFAULT_REALM_ID = "main"`
@@ -675,16 +675,29 @@ Important rules:
 Current cache-buster pattern:
 
 ```html
-<script src="./boot.js?v=1.7.5"></script>
+<script src="./boot.js?v=1.7.6"></script>
 ```
 
 Current boot entry:
 
 ```js
-const APP_ENTRY = "./app.js?v=1.7.5";
+const APP_ENTRY = "./app.js?v=1.7.6";
 ```
 
 ## Recent History To Know
+
+### v1.7.6
+
+Primary purpose:
+
+- Post-manifest empowerment and manual shard conversion.
+
+Important changes:
+
+- The City page now has one separate empowerment slot for completed buildings.
+- Empowerment spends same-rarity shards to raise manifested buildings from 100% toward the 350% quality cap without using the five incubator slots.
+- Shards no longer auto-convert at 100; Forge now exposes explicit buttons to convert 100 matching shards into one crystal.
+- Version/cache-busters updated to `1.7.6`.
 
 ### v1.7.5
 

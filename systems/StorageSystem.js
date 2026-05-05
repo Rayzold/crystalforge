@@ -144,6 +144,7 @@ export function createInitialState(preset = DEFAULT_START_PRESET) {
     ui: {
       selectedBuildingId: null,
       selectedMapCell: null,
+      empowermentSlotBuildingId: null,
       adminUnlocked: false,
       adminOpen: false,
       lastManifestResult: null
@@ -483,6 +484,19 @@ function repairLikelyCitizenInflation(rawSave, nextState, base) {
   ];
 }
 
+function normalizeEmpowermentSlot(state) {
+  const slotBuildingId = state.ui?.empowermentSlotBuildingId ?? null;
+  if (!slotBuildingId) {
+    state.ui.empowermentSlotBuildingId = null;
+    return;
+  }
+
+  const building = state.buildings.find((entry) => entry.id === slotBuildingId);
+  if (!building || !building.isComplete || building.isRuined) {
+    state.ui.empowermentSlotBuildingId = null;
+  }
+}
+
 export function validateAndMigrateSave(rawSave) {
   const base = createInitialState();
   if (!rawSave || typeof rawSave !== "object") {
@@ -557,6 +571,7 @@ export function validateAndMigrateSave(rawSave) {
   migrateLegacyCrystalUpgradeBuildings(nextState);
   syncDriftEvolutionState(nextState);
   normalizeConstructionPriority(nextState);
+  normalizeEmpowermentSlot(nextState);
   nextState.districtSummary = getDistrictSummary(nextState);
   recalculateCityStats(nextState);
   captureDailyCitySnapshot(nextState);

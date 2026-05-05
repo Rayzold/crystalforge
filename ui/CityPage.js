@@ -2,9 +2,10 @@
 // This page combines the building stream, map access, incubation controls,
 // filters, and city-side summaries used during active management play.
 import { getBuildingEmoji } from "../content/BuildingCatalog.js";
-import { SPEED_MULTIPLIERS } from "../content/Config.js";
+import { BUILDING_QUALITY_CAP, SPEED_MULTIPLIERS } from "../content/Config.js";
 import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
+import { formatBuildingExactQualityDisplay, getBuildingMultiplier, getEmpowermentCandidates } from "../systems/BuildingSystem.js";
 import { formatDate, getNextHoliday } from "../systems/CalendarSystem.js";
 import {
   getActiveConstructionQueue,
@@ -68,6 +69,107 @@ function compareAvailableConstructionEntries(left, right) {
   }
 
   return left.building.displayName.localeCompare(right.building.displayName);
+}
+
+function renderEmpowermentSlot(state) {
+  const slotBuildingId = state.ui?.empowermentSlotBuildingId ?? null;
+  const assignedBuilding = state.buildings.find(
+    (building) => building.id === slotBuildingId && building.isComplete && !building.isRuined
+  );
+  const candidates = getEmpowermentCandidates(state);
+  const candidateRows = candidates.filter((building) => building.id !== assignedBuilding?.id).slice(0, 6);
+  const activeRarity = assignedBuilding?.rarity ?? null;
+  const availableShards = activeRarity ? Math.max(0, Math.floor(Number(state.shards?.[activeRarity] ?? 0) || 0)) : 0;
+  const remainingQuality = assignedBuilding ? Math.max(0, BUILDING_QUALITY_CAP - Number(assignedBuilding.quality ?? 0)) : 0;
+  const spendTen = Math.min(10, availableShards, Math.ceil(remainingQuality));
+  const spendMax = Math.min(availableShards, Math.ceil(remainingQuality));
+  const progressPercent = assignedBuilding
+    ? Math.max(
+        0,
+        Math.min(
+          100,
+          ((Number(assignedBuilding.quality ?? 0) - 100) / (BUILDING_QUALITY_CAP - 100)) * 100
+        )
+      )
+    : 0;
+  const canEmpowerAssigned = Boolean(assignedBuilding && availableShards > 0 && remainingQuality > 0);
+
+  return `
+    <section class="city-empowerment-slot">
+      <div class="city-empowerment-slot__head">
+        <div>
+          <h4>Empowerment Slot</h4>
+          <span>1 post-manifest lane / ${BUILDING_QUALITY_CAP}% cap</span>
+        </div>
+        <small>Completed buildings use matching rarity shards here. The five incubator slots still stop at 100%.</small>
+      </div>
+      <div class="city-empowerment-slot__body">
+        <article class="city-empowerment-slot__active ${assignedBuilding ? "is-filled" : "is-empty"}" style="${assignedBuilding ? `--rarity-color:${RARITY_COLORS[assignedBuilding.rarity]}; --empowerment-progress:${progressPercent}%;` : ""}">
+          ${
+            assignedBuilding
+              ? `
+                  <div class="city-empowerment-slot__active-head">
+                    <div>
+                      <span>Loaded Building</span>
+                      <strong>${escapeHtml(`${getBuildingEmoji(assignedBuilding)} ${assignedBuilding.displayName}`)}</strong>
+                    </div>
+                    <em>${escapeHtml(assignedBuilding.rarity)}</em>
+                  </div>
+                  <div class="city-empowerment-slot__meter" aria-hidden="true"><span></span></div>
+                  <div class="city-empowerment-slot__stats">
+                    <article><span>Quality</span><strong>${escapeHtml(formatBuildingExactQualityDisplay(assignedBuilding))}</strong></article>
+                    <article><span>Power</span><strong>x${formatNumber(getBuildingMultiplier(assignedBuilding.quality), 0)}</strong></article>
+                    <article><span>Shards</span><strong>${formatNumber(availableShards, 0)}</strong></article>
+                    <article><span>To Cap</span><strong>${formatNumber(Math.ceil(remainingQuality), 0)}</strong></article>
+                  </div>
+                  <div class="city-empowerment-slot__actions">
+                    <button class="button button--ghost" type="button" data-action="empower-building" data-building-id="${assignedBuilding.id}" data-amount="1" ${!canEmpowerAssigned ? "disabled" : ""}>+1%</button>
+                    <button class="button button--ghost" type="button" data-action="empower-building" data-building-id="${assignedBuilding.id}" data-amount="10" ${spendTen <= 0 ? "disabled" : ""}>+${formatNumber(spendTen, 0)}%</button>
+                    <button class="button" type="button" data-action="empower-building" data-building-id="${assignedBuilding.id}" data-amount="max" ${spendMax <= 0 ? "disabled" : ""}>Use Max</button>
+                    <button class="button button--ghost" type="button" data-action="inspect-building" data-building-id="${assignedBuilding.id}">Open Details</button>
+                    <button class="button button--ghost" type="button" data-action="clear-empowerment-slot">Clear Slot</button>
+                  </div>
+                  ${
+                    remainingQuality <= 0
+                      ? `<p class="city-empowerment-slot__note">This building is fully empowered.</p>`
+                      : availableShards <= 0
+                        ? `<p class="city-empowerment-slot__note">Bring ${escapeHtml(assignedBuilding.rarity)} shards to raise this building further.</p>`
+                        : `<p class="city-empowerment-slot__note">1 ${escapeHtml(assignedBuilding.rarity)} shard adds 1% quality until ${BUILDING_QUALITY_CAP}%.</p>`
+                  }
+                `
+              : renderActionEmptyState(
+                  "No building loaded",
+                  "Choose a completed building below to empower it beyond 100% without using the normal incubator slots.",
+                  candidateRows[0]
+                    ? `<button class="button button--ghost" type="button" data-action="assign-empowerment-slot" data-building-id="${candidateRows[0].id}">Load ${escapeHtml(candidateRows[0].displayName)}</button>`
+                    : `<a class="button button--ghost" href="./forge.html">Create A Building</a>`
+                )
+          }
+        </article>
+        <div class="city-empowerment-slot__candidate-list">
+          <h5>Eligible Buildings</h5>
+          ${
+            candidateRows.length
+              ? candidateRows
+                  .map((building) => {
+                    const shardCount = Math.max(0, Math.floor(Number(state.shards?.[building.rarity] ?? 0) || 0));
+                    return `
+                      <article class="city-empowerment-slot__candidate" style="--rarity-color:${RARITY_COLORS[building.rarity]}">
+                        <div>
+                          <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
+                          <small>${escapeHtml(`${building.rarity} / ${formatBuildingExactQualityDisplay(building)} / ${formatNumber(shardCount, 0)} shards`)}</small>
+                        </div>
+                        <button class="button button--ghost" type="button" data-action="assign-empowerment-slot" data-building-id="${building.id}">Load</button>
+                      </article>
+                    `;
+                  })
+                  .join("")
+              : `<p class="panel__empty">${assignedBuilding ? "No other completed buildings are waiting for empowerment." : "No completed buildings below 350% are available yet."}</p>`
+          }
+        </div>
+      </div>
+    </section>
+  `;
 }
 
 function renderCitySessionControls(state) {
@@ -503,6 +605,8 @@ function renderBuildingsView(state) {
           }
         </div>
       </section>
+
+      ${renderEmpowermentSlot(state)}
 
       ${
         currentView === "map"

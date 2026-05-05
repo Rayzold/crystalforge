@@ -1,5 +1,6 @@
 import { CRYSTAL_LEVEL_LABELS, RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js";
 import { formatNumber } from "../engine/Utils.js";
+import { SHARDS_PER_CRYSTAL } from "../systems/ShardSystem.js";
 
 function renderCrystalIcon(rarity) {
   const outlines = {
@@ -41,8 +42,11 @@ function renderCrystalIcon(rarity) {
 }
 
 export function renderCrystalSelector(state) {
-  const visibleRarities = RARITY_ORDER.filter((rarity) => (state.crystals[rarity] ?? 0) > 0);
+  const visibleRarities = RARITY_ORDER.filter((rarity) => (state.crystals[rarity] ?? 0) > 0 || (state.shards[rarity] ?? 0) > 0);
+  const conversionRarities = RARITY_ORDER.filter((rarity) => (state.shards[rarity] ?? 0) >= SHARDS_PER_CRYSTAL);
   const selectedRarity = state.selectedRarity;
+  const selectedShards = Number(state.shards[selectedRarity] ?? 0) || 0;
+  const selectedConversions = Math.floor(selectedShards / SHARDS_PER_CRYSTAL);
   const lastManifest = state.ui.lastManifestResult;
   const totalVisible = visibleRarities.reduce((sum, rarity) => sum + (state.crystals[rarity] ?? 0), 0);
 
@@ -61,6 +65,12 @@ export function renderCrystalSelector(state) {
           <strong>${CRYSTAL_LEVEL_LABELS[selectedRarity]} / ${selectedRarity}</strong>
           <small>${formatNumber(state.crystals[selectedRarity] ?? 0)} crystals remaining</small>
           <small>${formatNumber(state.shards[selectedRarity] ?? 0)} shards stored</small>
+        </article>
+        <article>
+          <span>Shard Conversion</span>
+          <strong>${formatNumber(selectedConversions, 0)} ready</strong>
+          <small>${SHARDS_PER_CRYSTAL} shards become 1 matching crystal only when you choose to convert them.</small>
+          <button class="button button--ghost crystal-panel__convert-button" type="button" data-action="convert-shards" data-rarity="${selectedRarity}" ${selectedConversions <= 0 ? "disabled" : ""}>Convert 100 ${selectedRarity} Shards</button>
         </article>
       </div>
       ${
@@ -88,6 +98,23 @@ export function renderCrystalSelector(state) {
             </div>
           `
           : `<p class="empty-state">No crystal levels are currently available.</p>`
+      }
+      ${
+        conversionRarities.length
+          ? `
+              <div class="crystal-conversion-row" aria-label="Ready shard conversions">
+                ${conversionRarities
+                  .map(
+                    (rarity) => `
+                      <button class="button button--ghost" type="button" data-action="convert-shards" data-rarity="${rarity}">
+                        Convert ${SHARDS_PER_CRYSTAL} ${rarity} Shards
+                      </button>
+                    `
+                  )
+                  .join("")}
+              </div>
+            `
+          : `<p class="crystal-conversion-note">Shard stacks stay as shards until a stack reaches ${SHARDS_PER_CRYSTAL} and you convert it here.</p>`
       }
     </section>
   `;

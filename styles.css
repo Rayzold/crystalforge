@@ -797,6 +797,161 @@ textarea {
   margin-top: 6px;
 }
 
+.city-empowerment-slot {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(190, 163, 255, 0.16);
+  background:
+    linear-gradient(135deg, rgba(190, 163, 255, 0.08), rgba(141, 214, 255, 0.05)),
+    rgba(255, 255, 255, 0.025);
+}
+
+.city-empowerment-slot__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.city-empowerment-slot__head h4,
+.city-empowerment-slot__candidate-list h5 {
+  margin: 0 0 4px;
+  font-family: var(--display-font);
+}
+
+.city-empowerment-slot__head span,
+.city-empowerment-slot__head small,
+.city-empowerment-slot__candidate small,
+.city-empowerment-slot__note {
+  color: var(--muted);
+}
+
+.city-empowerment-slot__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.85fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.city-empowerment-slot__active,
+.city-empowerment-slot__candidate {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(15, 18, 29, 0.92), rgba(10, 13, 22, 0.98));
+}
+
+.city-empowerment-slot__active {
+  display: grid;
+  gap: 12px;
+  min-height: 100%;
+  padding: 14px 16px;
+  border-radius: 18px;
+}
+
+.city-empowerment-slot__active.is-filled {
+  border-color: color-mix(in srgb, var(--rarity-color) 38%, rgba(255, 255, 255, 0.12));
+}
+
+.city-empowerment-slot__active-head,
+.city-empowerment-slot__candidate {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.city-empowerment-slot__active-head span,
+.city-empowerment-slot__stats span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.84rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.city-empowerment-slot__active-head strong,
+.city-empowerment-slot__candidate strong {
+  display: block;
+  min-width: 0;
+  font-size: 1rem;
+}
+
+.city-empowerment-slot__active-head em {
+  flex: 0 0 auto;
+  color: var(--rarity-color);
+  font-style: normal;
+  font-weight: 700;
+}
+
+.city-empowerment-slot__meter {
+  overflow: hidden;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.city-empowerment-slot__meter span {
+  display: block;
+  width: var(--empowerment-progress, 0%);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--rarity-color) 78%, white), rgba(141, 214, 255, 0.88));
+}
+
+.city-empowerment-slot__stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.city-empowerment-slot__stats article {
+  padding: 9px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.city-empowerment-slot__stats strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1rem;
+}
+
+.city-empowerment-slot__actions,
+.city-empowerment-slot__candidate-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.city-empowerment-slot__candidate-list {
+  display: grid;
+}
+
+.city-empowerment-slot__candidate {
+  padding: 12px;
+  border-radius: 14px;
+}
+
+.city-empowerment-slot__candidate div {
+  min-width: 0;
+}
+
+.city-empowerment-slot__candidate strong,
+.city-empowerment-slot__candidate small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.city-empowerment-slot__note {
+  margin: 0;
+  line-height: 1.45;
+}
+
 .incubator-support-toggles {
   display: flex;
   flex-wrap: wrap;
@@ -931,6 +1086,24 @@ textarea {
 .crystal-panel__status small {
   margin-top: 8px;
   line-height: 1.5;
+}
+
+.crystal-panel__convert-button {
+  margin-top: 10px;
+}
+
+.crystal-conversion-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.crystal-conversion-note {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
 }
 
 .crystal-table__head {
@@ -7439,6 +7612,19 @@ body:-webkit-full-screen #app {
   .manifest-result__facts,
   .manifest-result__grid {
     grid-template-columns: 1fr;
+  }
+
+  .city-empowerment-slot__body {
+    grid-template-columns: 1fr;
+  }
+
+  .city-empowerment-slot__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .city-empowerment-slot__candidate {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .city-available-buildings__item {
