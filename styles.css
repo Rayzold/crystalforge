@@ -12835,6 +12835,35 @@ body:-webkit-full-screen #app {
   margin-top: 1rem;
 }
 
+.expedition-supply-meter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding: 0.62rem 0.78rem;
+  border-radius: 0.8rem;
+  border: 1px solid rgba(132, 160, 220, 0.14);
+  background: rgba(10, 15, 28, 0.64);
+  color: rgba(214, 224, 249, 0.8);
+}
+
+.expedition-supply-meter strong {
+  color: rgba(244, 248, 255, 0.96);
+}
+
+.expedition-supply-meter.is-over {
+  border-color: rgba(255, 143, 118, 0.42);
+  color: rgba(255, 201, 190, 0.9);
+}
+
+.expedition-supply-input-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
 .expedition-team-card input {
   width: 100%;
   border-radius: 0.9rem;
@@ -12843,6 +12872,11 @@ body:-webkit-full-screen #app {
   color: inherit;
   padding: 0.7rem 0.85rem;
   font: inherit;
+}
+
+.expedition-resource-max-button {
+  min-height: 42px;
+  padding-inline: 0.8rem;
 }
 
 .expedition-launch-preview__launch {

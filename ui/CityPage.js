@@ -5,7 +5,12 @@ import { getBuildingEmoji } from "../content/BuildingCatalog.js";
 import { BUILDING_QUALITY_CAP, SPEED_MULTIPLIERS } from "../content/Config.js";
 import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
-import { formatBuildingExactQualityDisplay, getBuildingMultiplier, getEmpowermentCandidates } from "../systems/BuildingSystem.js";
+import {
+  formatBuildingExactQualityDisplay,
+  getBuildingMultiplier,
+  getEmpowermentCandidates,
+  getEmpowermentShardProjection
+} from "../systems/BuildingSystem.js";
 import { formatDate, getNextHoliday } from "../systems/CalendarSystem.js";
 import {
   getActiveConstructionQueue,
@@ -92,8 +97,10 @@ function renderEmpowermentSlot(state) {
   const activeRarity = assignedBuilding?.rarity ?? null;
   const availableShards = activeRarity ? Math.max(0, Math.floor(Number(state.shards?.[activeRarity] ?? 0) || 0)) : 0;
   const remainingQuality = assignedBuilding ? Math.max(0, BUILDING_QUALITY_CAP - Number(assignedBuilding.quality ?? 0)) : 0;
-  const spendTen = Math.min(10, availableShards, Math.ceil(remainingQuality));
-  const spendMax = Math.min(availableShards, Math.ceil(remainingQuality));
+  const empowerOne = assignedBuilding ? getEmpowermentShardProjection(assignedBuilding.quality, availableShards, 1) : null;
+  const empowerTen = assignedBuilding ? getEmpowermentShardProjection(assignedBuilding.quality, availableShards, 10) : null;
+  const empowerMax = assignedBuilding ? getEmpowermentShardProjection(assignedBuilding.quality, availableShards, "max") : null;
+  const costToCap = assignedBuilding ? getEmpowermentShardProjection(assignedBuilding.quality, Number.POSITIVE_INFINITY, "max").spentShards : 0;
   const progressPercent = assignedBuilding
     ? Math.max(
         0,
@@ -131,12 +138,12 @@ function renderEmpowermentSlot(state) {
                     <article><span>Quality</span><strong>${escapeHtml(formatBuildingExactQualityDisplay(assignedBuilding))}</strong></article>
                     <article><span>Power</span><strong>x${formatNumber(getBuildingMultiplier(assignedBuilding.quality), 0)}</strong></article>
                     <article><span>Shards</span><strong>${formatNumber(availableShards, 0)}</strong></article>
-                    <article><span>To Cap</span><strong>${formatNumber(Math.ceil(remainingQuality), 0)}</strong></article>
+                    <article><span>To Cap</span><strong>${formatNumber(Math.ceil(remainingQuality), 0)}% / ${formatNumber(costToCap, 0)} shards</strong></article>
                   </div>
                   <div class="city-empowerment-slot__actions">
-                    <button class="button button--ghost" type="button" data-action="empower-building" data-building-id="${assignedBuilding.id}" data-amount="1" ${!canEmpowerAssigned ? "disabled" : ""}>+1%</button>
-                    <button class="button button--ghost" type="button" data-action="empower-building" data-building-id="${assignedBuilding.id}" data-amount="10" ${spendTen <= 0 ? "disabled" : ""}>+${formatNumber(spendTen, 0)}%</button>
-                    <button class="button" type="button" data-action="empower-building" data-building-id="${assignedBuilding.id}" data-amount="max" ${spendMax <= 0 ? "disabled" : ""}>Use Max</button>
+                    <button class="button button--ghost" type="button" data-action="empower-building" data-building-id="${assignedBuilding.id}" data-amount="1" ${!canEmpowerAssigned || (empowerOne?.spentShards ?? 0) <= 0 ? "disabled" : ""}>+1% / ${formatNumber(empowerOne?.spentShards ?? 0, 0)} shards</button>
+                    <button class="button button--ghost" type="button" data-action="empower-building" data-building-id="${assignedBuilding.id}" data-amount="10" ${(empowerTen?.spentShards ?? 0) <= 0 ? "disabled" : ""}>+${formatNumber(empowerTen?.appliedQuality ?? 0, 0)}% / ${formatNumber(empowerTen?.spentShards ?? 0, 0)} shards</button>
+                    <button class="button" type="button" data-action="empower-building" data-building-id="${assignedBuilding.id}" data-amount="max" ${(empowerMax?.spentShards ?? 0) <= 0 ? "disabled" : ""}>Use Max / +${formatNumber(empowerMax?.appliedQuality ?? 0, 0)}%</button>
                     <button class="button button--ghost" type="button" data-action="inspect-building" data-building-id="${assignedBuilding.id}">Open Details</button>
                     <button class="button button--ghost" type="button" data-action="clear-empowerment-slot">Clear Slot</button>
                   </div>
@@ -145,7 +152,9 @@ function renderEmpowermentSlot(state) {
                       ? `<p class="city-empowerment-slot__note">This building is fully empowered.</p>`
                       : availableShards <= 0
                         ? `<p class="city-empowerment-slot__note">Bring ${escapeHtml(assignedBuilding.rarity)} shards to raise this building further.</p>`
-                        : `<p class="city-empowerment-slot__note">1 ${escapeHtml(assignedBuilding.rarity)} shard adds 1% quality until ${BUILDING_QUALITY_CAP}%.</p>`
+                        : availableShards < (empowerOne?.nextPercentCost ?? 0)
+                          ? `<p class="city-empowerment-slot__note">The next 1% needs ${formatNumber(empowerOne?.nextPercentCost ?? 0, 0)} ${escapeHtml(assignedBuilding.rarity)} shards. Cost rises by band: 2 shards/% from 100%-199%, 3 from 200%-299%, 4 from 300%-${BUILDING_QUALITY_CAP}%.</p>`
+                          : `<p class="city-empowerment-slot__note">Shard cost rises by band: 2 shards per 1% from 100%-199%, 3 from 200%-299%, and 4 from 300%-${BUILDING_QUALITY_CAP}%.</p>`
                   }
                 `
               : renderActionEmptyState(

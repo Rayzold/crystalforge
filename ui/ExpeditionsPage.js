@@ -81,6 +81,10 @@ function getPreviewDelta(state, draft, nextDraft, baselinePreview) {
   };
 }
 
+function getCommittedSupplyTotal(resources) {
+  return Object.values(resources ?? {}).reduce((sum, amount) => sum + Math.max(0, Number(amount) || 0), 0);
+}
+
 function getCrewValueHelpText(state, draft, preview, expeditionType, citizenClass, inputMax, currentValue) {
   const nextDraft = {
     ...draft,
@@ -105,7 +109,7 @@ function getCrewValueHelpText(state, draft, preview, expeditionType, citizenClas
   return `${availabilityNote}Sending one more ${citizenClass} currently adds about ${formatPositiveDelta(delta.power)} Power and ${formatPositiveDelta(delta.success * 100, 1)} success points. ${classFit} Crew are unavailable in the city until the expedition returns; Rare and Epic citizens can be worth more if the roster has to pull them.`;
 }
 
-function getResourceValueHelpText(state, draft, preview, resource, label, currentValue) {
+function getResourceValueHelpText(state, draft, preview, resource, label, currentValue, inputMax) {
   const nextDraft = {
     ...draft,
     resources: {
@@ -117,8 +121,12 @@ function getResourceValueHelpText(state, draft, preview, resource, label, curren
   const basePower = RESOURCE_POWER_VALUES[resource] ?? 0;
   const strongFoodTarget = Math.max(6, preview.teamSize * 2);
   const foodNote = resource === "food" ? ` For this crew, ${formatNumber(strongFoodTarget, 0)} Food is the strong-supply target.` : "";
+  const capacityNote =
+    preview.vehicleSupplyCapacity > 0
+      ? ` This vehicle can carry ${formatNumber(preview.vehicleSupplyCapacity, 0)} total committed supplies; this field can currently go up to ${formatNumber(inputMax, 0)}.`
+      : "";
 
-  return `${RESOURCE_EXPEDITION_HELP[resource] ?? "Committed supplies strengthen the expedition."} Each ${label} is spent on launch and currently adds about ${formatPositiveDelta(delta.power)} Power (${formatPositiveDelta(basePower, 2)} base before route bonuses) plus ${formatPositiveDelta(delta.success * 100, 1)} success points. Better success improves the final haul and reduces thin-return pressure.${foodNote}`;
+  return `${RESOURCE_EXPEDITION_HELP[resource] ?? "Committed supplies strengthen the expedition."} Each ${label} is spent on launch and currently adds about ${formatPositiveDelta(delta.power)} Power (${formatPositiveDelta(basePower, 2)} base before route bonuses) plus ${formatPositiveDelta(delta.success * 100, 1)} success points. Better success improves the final haul and reduces thin-return pressure.${foodNote}${capacityNote}`;
 }
 
 function renderMissionBoard(state, draft) {
@@ -194,6 +202,7 @@ function renderVehicleOptions(state, draft) {
                 const available = availableVehicles[vehicleId] ?? 0;
                 const isSelected = draft.vehicleId === vehicleId;
                 const capacity = Number(definition?.maxPeople ?? 0) || 0;
+                const supplyCapacity = Number(definition?.supplyCapacity ?? 0) || 0;
                 const footerLabel =
                   definition?.requiresFleet === false
                     ? "Always available"
@@ -218,6 +227,7 @@ function renderVehicleOptions(state, draft) {
                       <div class="expedition-card__tags">
                         <em>${escapeHtml(definition?.sizeLabel ?? (definition?.type === "air" ? "Air Vehicle" : "Land Vehicle"))}</em>
                         <em>Cap ${formatNumber(capacity, 0)}</em>
+                        <em>Supply ${formatNumber(supplyCapacity, 0)}</em>
                         <em>Travel x${formatNumber(definition?.timeMultiplier ?? 1, 2)}</em>
                         <em>Cargo x${formatNumber(definition?.cargoMultiplier ?? 1, 2)}</em>
                         <em>Scout x${formatNumber(definition?.scouting ?? 1, 2)}</em>
@@ -341,11 +351,22 @@ function renderTeamInputs(state, draft, expeditionType) {
 
 function renderSupplyInputs(state, draft) {
   const preview = createExpeditionLaunchPreview(state, draft);
+  const committedTotal = getCommittedSupplyTotal(preview.committedResources);
+  const supplyCapacity = Math.max(0, Number(preview.vehicleSupplyCapacity ?? 0) || 0);
+  const isOverCapacity = supplyCapacity > 0 && committedTotal > supplyCapacity;
   return `
+    <div class="expedition-supply-meter ${isOverCapacity ? "is-over" : ""}">
+      <span>${escapeHtml(preview.vehicle.name)} supply hold</span>
+      <strong>${formatNumber(committedTotal, 0)} / ${formatNumber(supplyCapacity, 0)}</strong>
+    </div>
     <div class="expedition-grid expedition-grid--supplies">
       ${Object.entries(RESOURCE_LABELS).map(([resource, label]) => {
         const currentValue = Math.max(0, Number(draft.resources?.[resource] ?? 0) || 0);
-        const helpText = getResourceValueHelpText(state, draft, preview, resource, label, currentValue);
+        const onHand = Math.max(0, Number(state.resources?.[resource] ?? 0) || 0);
+        const committedWithoutResource = Math.max(0, committedTotal - currentValue);
+        const remainingForResource = supplyCapacity > 0 ? Math.max(0, supplyCapacity - committedWithoutResource) : onHand;
+        const inputMax = Math.max(0, Math.floor(Math.min(onHand, remainingForResource)));
+        const helpText = getResourceValueHelpText(state, draft, preview, resource, label, currentValue, inputMax);
         return `
           <div class="expedition-team-card">
             <div class="expedition-team-card__head">
@@ -353,18 +374,29 @@ function renderSupplyInputs(state, draft) {
                 <strong>${escapeHtml(label)}</strong>
                 ${createHelpBubble(helpText)}
               </div>
-              <span>${formatNumber(state.resources?.[resource] ?? 0)} on hand</span>
+              <span>${formatNumber(onHand, 0)} on hand</span>
             </div>
-            <input
-              type="number"
-              aria-label="${escapeHtml(`${label} committed to expedition`)}"
-              min="0"
-              max="${Math.max(0, Number(state.resources?.[resource] ?? 0) || 0)}"
-              step="1"
-              value="${currentValue}"
-              data-action="set-expedition-resource"
-              data-resource-key="${resource}"
-            />
+            <div class="expedition-supply-input-row">
+              <input
+                type="number"
+                aria-label="${escapeHtml(`${label} committed to expedition`)}"
+                min="0"
+                max="${inputMax}"
+                step="1"
+                value="${currentValue}"
+                data-action="set-expedition-resource"
+                data-resource-key="${resource}"
+              />
+              <button
+                class="button button--ghost expedition-resource-max-button"
+                type="button"
+                data-action="max-expedition-resource"
+                data-resource-key="${resource}"
+                data-resource-max="${inputMax}"
+              >
+                Max
+              </button>
+            </div>
           </div>
         `;
       }).join("")}
@@ -408,6 +440,7 @@ function renderPreviewPanel(state, draft) {
         <article><span>Travel</span><strong>${formatNumber(preview.durationDays, 0)}d</strong></article>
         <article><span>Return</span><strong>${escapeHtml(returnLabel)}</strong></article>
         <article><span>Crew</span><strong>${formatNumber(preview.teamSize, 0)} / ${formatNumber(preview.vehicleCapacity, 0)}</strong></article>
+        <article><span>Supplies</span><strong>${formatNumber(preview.committedSupplyTotal, 0)} / ${formatNumber(preview.vehicleSupplyCapacity, 0)}</strong></article>
         <article><span>Power</span><strong>${formatNumber(preview.powerScore, 1)}</strong></article>
       </div>
       <p class="expedition-launch-preview__outlook">${escapeHtml(outcomeText)}</p>

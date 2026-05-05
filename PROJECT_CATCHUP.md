@@ -1,12 +1,12 @@
 # Crystal Forge Project Catchup
 
-Last updated: 2026-05-04
+Last updated: 2026-05-05
 
-Current build: `Preview v1.7.7`
+Current build: `Preview v1.7.9`
 
 Current save version: `12`
 
-Current pushed commit at time of writing: `df7e4ed Release v1.7.1`
+Current pushed commit at time of writing: `defb463 Release v1.7.7`
 
 Primary companion document: [SAVEPOINT_RECREATION_SPEC.md](SAVEPOINT_RECREATION_SPEC.md)
 
@@ -351,7 +351,7 @@ Storage keys and versioning live in:
 
 Important constants:
 
-- `APP_VERSION = "v1.7.7"`
+- `APP_VERSION = "v1.7.9"`
 - `APP_RELEASE_STAGE = "preview"`
 - `MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3"`
 - `FIREBASE_DEFAULT_REALM_ID = "main"`
@@ -675,16 +675,46 @@ Important rules:
 Current cache-buster pattern:
 
 ```html
-<script src="./boot.js?v=1.7.7"></script>
+<link rel="stylesheet" href="./styles.css?v=1.7.9" />
+<script src="./boot.js?v=1.7.9"></script>
 ```
 
 Current boot entry:
 
 ```js
-const APP_ENTRY = "./app.js?v=1.7.7";
+const APP_ENTRY = "./app.js?v=1.7.9";
 ```
 
 ## Recent History To Know
+
+### v1.7.9
+
+Primary purpose:
+
+- Tiered building empowerment shard costs.
+
+Important changes:
+
+- Empowerment now treats button amounts as requested quality gain instead of raw shard spend.
+- Raising buildings from 100%-199% costs 2 same-rarity shards per 1% quality.
+- Raising buildings from 200%-299% costs 3 same-rarity shards per 1% quality.
+- Raising buildings from 300%-350% costs 4 same-rarity shards per 1% quality.
+- City empowerment buttons and the cap readout now show the computed shard cost for the active building.
+- Version/cache-busters updated to `1.7.9`.
+
+### v1.7.8
+
+Primary purpose:
+
+- Expedition supply limits and smoother expedition number entry.
+
+Important changes:
+
+- Each expedition vehicle now has an explicit committed-supply hold.
+- Expedition launch validation blocks supply commitments above the selected vehicle's supply capacity.
+- Committed supply cards show the selected vehicle's supply hold and each resource has a Max button that fills that resource up to the remaining legal capacity.
+- Expedition crew and committed supply inputs now commit on change instead of rerendering after every typed digit, so the field stays focused while someone enters a multi-digit amount.
+- Version/cache-busters updated to `1.7.8`.
 
 ### v1.7.7
 

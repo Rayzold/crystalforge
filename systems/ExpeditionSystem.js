@@ -1775,6 +1775,15 @@ function getVehicleCapacity(vehicle) {
   return Math.max(0, Math.floor(Number(vehicle?.maxPeople ?? 0) || 0));
 }
 
+export function getVehicleSupplyCapacity(vehicleOrId) {
+  const vehicle = typeof vehicleOrId === "string" ? getVehicleDefinition(vehicleOrId) : vehicleOrId;
+  return Math.max(0, Math.floor(Number(vehicle?.supplyCapacity ?? 0) || 0));
+}
+
+function getCommittedSupplyTotal(resources) {
+  return Object.values(resources ?? {}).reduce((sum, amount) => sum + Math.max(0, Number(amount) || 0), 0);
+}
+
 function getExpeditionTravelLabel(expedition) {
   if (VEHICLE_DEFINITIONS[expedition?.vehicleId]?.requiresFleet === false) {
     return "on foot";
@@ -3389,6 +3398,11 @@ function buildPreviewInsights(preview) {
   } else if ((preview.committedResources.food ?? 0) >= Math.max(6, preview.teamSize * 2)) {
     strengths.push("Food stores are strong enough for the journey.");
   }
+  if (preview.vehicleSupplyCapacity > 0 && preview.committedSupplyTotal > preview.vehicleSupplyCapacity) {
+    risks.push(`${preview.vehicle.name} is over its supply hold by ${Math.round(preview.committedSupplyTotal - preview.vehicleSupplyCapacity)}.`);
+  } else if (preview.vehicleSupplyCapacity > 0 && preview.committedSupplyTotal >= Math.max(1, preview.vehicleSupplyCapacity * 0.8)) {
+    strengths.push(`${preview.vehicle.name} is carrying a heavy supply load.`);
+  }
 
   if (mission.risk === "High" && (teamRequest.Medics ?? 0) <= 0 && (teamRequest.Defenders ?? 0) <= 0) {
     risks.push("High-risk mission without Medics or Defenders.");
@@ -3426,6 +3440,7 @@ export function createExpeditionLaunchPreview(state, draft = {}) {
     : Number(mission.suggestedDurationDays ?? EXPEDITION_DURATION_OPTIONS[1]);
   const durationDays = getEffectiveDurationDays(durationDaysBase, vehicle);
   const committedResources = createExpeditionResourceCommitment(draft.resources);
+  const committedSupplyTotal = getCommittedSupplyTotal(committedResources);
   const teamRequest = createTeamRequest(draft.team);
   const removedTeam = Object.fromEntries(
     Object.entries(teamRequest).map(([citizenClass, amount]) => [
@@ -3455,10 +3470,13 @@ export function createExpeditionLaunchPreview(state, draft = {}) {
     durationDaysBase,
     durationDays,
     committedResources,
+    committedSupplyTotal,
     teamRequest,
     teamSize: getTeamRequestSize(teamRequest),
     vehicleCapacity: getVehicleCapacity(vehicle),
     seatsRemaining: getVehicleCapacity(vehicle) - getTeamRequestSize(teamRequest),
+    vehicleSupplyCapacity: getVehicleSupplyCapacity(vehicle),
+    suppliesRemaining: getVehicleSupplyCapacity(vehicle) - committedSupplyTotal,
     powerScore,
     difficultyScore,
     successScore,
@@ -3495,6 +3513,9 @@ export function startExpedition(state, payload) {
   }
   if (preview.vehicleCapacity > 0 && preview.teamSize > preview.vehicleCapacity) {
     return { ok: false, reason: `${preview.vehicle.name} can carry at most ${preview.vehicleCapacity} people.` };
+  }
+  if (preview.vehicleSupplyCapacity > 0 && preview.committedSupplyTotal > preview.vehicleSupplyCapacity) {
+    return { ok: false, reason: `${preview.vehicle.name} can carry at most ${preview.vehicleSupplyCapacity} committed supplies.` };
   }
 
   for (const [citizenClass, amount] of Object.entries(preview.teamRequest)) {

@@ -200,6 +200,47 @@ export function setBuildingQuality(building, quality) {
   }
 }
 
+export function getEmpowermentShardCostAtQuality(quality) {
+  const normalizedQuality = Math.max(BUILDING_ACTIVE_THRESHOLD, Number(quality) || 0);
+  if (normalizedQuality >= 300) {
+    return 4;
+  }
+  if (normalizedQuality >= 200) {
+    return 3;
+  }
+  return 2;
+}
+
+export function getEmpowermentShardProjection(startQuality, availableShards, requestedAmount = 1) {
+  const previousQuality = Math.max(BUILDING_ACTIVE_THRESHOLD, Number(startQuality) || BUILDING_ACTIVE_THRESHOLD);
+  const remainingQuality = Math.max(0, BUILDING_QUALITY_CAP - previousQuality);
+  const shardBudget = Math.max(0, Math.floor(Number(availableShards) || 0));
+  const requestedQuality =
+    requestedAmount === "max"
+      ? Math.ceil(remainingQuality)
+      : Math.max(1, Math.floor(Number(requestedAmount) || 1));
+  const maxQualitySteps = Math.min(Math.ceil(remainingQuality), requestedQuality);
+  let spentShards = 0;
+  let appliedSteps = 0;
+
+  for (let index = 0; index < maxQualitySteps; index += 1) {
+    const stepCost = getEmpowermentShardCostAtQuality(previousQuality + appliedSteps);
+    if (spentShards + stepCost > shardBudget) {
+      break;
+    }
+    spentShards += stepCost;
+    appliedSteps += 1;
+  }
+
+  return {
+    requestedQuality,
+    appliedQuality: Math.min(remainingQuality, appliedSteps),
+    spentShards,
+    remainingQuality,
+    nextPercentCost: remainingQuality > 0 ? getEmpowermentShardCostAtQuality(previousQuality) : 0
+  };
+}
+
 export function empowerBuildingWithShards(state, buildingId, requestedAmount = 1) {
   const building = state.buildings.find((entry) => entry.id === buildingId);
   if (!building) {
@@ -223,15 +264,11 @@ export function empowerBuildingWithShards(state, buildingId, requestedAmount = 1
     return { ok: false, reason: `No ${building.rarity} shards are available.` };
   }
 
-  const requestedShards =
-    requestedAmount === "max"
-      ? Number.POSITIVE_INFINITY
-      : Math.max(1, Math.floor(Number(requestedAmount) || 1));
-  const spentShards = Math.min(availableShards, requestedShards, Math.ceil(remainingQuality));
-  const appliedQuality = Math.min(remainingQuality, spentShards);
+  const projection = getEmpowermentShardProjection(previousQuality, availableShards, requestedAmount);
+  const { spentShards, appliedQuality, requestedQuality, nextPercentCost } = projection;
 
   if (spentShards <= 0 || appliedQuality <= 0) {
-    return { ok: false, reason: `${building.displayName} cannot absorb more shards right now.` };
+    return { ok: false, reason: `${building.displayName} needs ${nextPercentCost} ${building.rarity} shards for the next 1% quality.` };
   }
 
   state.shards[building.rarity] = availableShards - spentShards;
@@ -253,6 +290,7 @@ export function empowerBuildingWithShards(state, buildingId, requestedAmount = 1
     finalQuality: building.quality,
     spentShards,
     appliedQuality,
+    requestedQuality,
     remainingShards: state.shards[building.rarity],
     capped: building.quality >= BUILDING_QUALITY_CAP
   };

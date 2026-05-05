@@ -181,6 +181,36 @@ function normalizeSpeedMultiplier(value) {
   );
 }
 
+function setExpeditionTeamDraftValue(citizenClass, value) {
+  renderer.setTransientUi(
+    {
+      expeditionDraft: {
+        ...(renderer.transientUi.expeditionDraft ?? {}),
+        team: {
+          ...(renderer.transientUi.expeditionDraft?.team ?? {}),
+          [citizenClass]: Math.max(0, Math.floor(Number(value) || 0))
+        }
+      }
+    },
+    getCurrentState()
+  );
+}
+
+function setExpeditionResourceDraftValue(resourceKey, value) {
+  renderer.setTransientUi(
+    {
+      expeditionDraft: {
+        ...(renderer.transientUi.expeditionDraft ?? {}),
+        resources: {
+          ...(renderer.transientUi.expeditionDraft?.resources ?? {}),
+          [resourceKey]: Math.max(0, Math.floor(Number(value) || 0))
+        }
+      }
+    },
+    getCurrentState()
+  );
+}
+
 function clearChronicleJumpHighlightTimer() {
   if (chronicleJumpHighlightTimer) {
     clearTimeout(chronicleJumpHighlightTimer);
@@ -3551,6 +3581,10 @@ root.addEventListener("click", async (event) => {
         getCurrentState()
       );
       break;
+    case "max-expedition-resource":
+      void audioEngine.playUiAccent("soft");
+      setExpeditionResourceDraftValue(target.dataset.resourceKey, target.dataset.resourceMax);
+      break;
     case "launch-expedition":
       void audioEngine.playUiAccent("confirm");
       actions.launchExpedition();
@@ -4056,6 +4090,18 @@ root.addEventListener("change", (event) => {
     });
   }
 
+  if (target.dataset.action === "set-expedition-team-count") {
+    const inputMax = Number(target.max);
+    const nextValue = Number.isFinite(inputMax) ? Math.min(inputMax, Number(target.value) || 0) : target.value;
+    setExpeditionTeamDraftValue(target.dataset.citizenClass, nextValue);
+  }
+
+  if (target.dataset.action === "set-expedition-resource") {
+    const inputMax = Number(target.max);
+    const nextValue = Number.isFinite(inputMax) ? Math.min(inputMax, Number(target.value) || 0) : target.value;
+    setExpeditionResourceDraftValue(target.dataset.resourceKey, nextValue);
+  }
+
 });
 
 root.addEventListener("input", (event) => {
@@ -4070,35 +4116,6 @@ root.addEventListener("input", (event) => {
     });
   }
 
-  if (target.dataset.action === "set-expedition-team-count") {
-    renderer.setTransientUi(
-      {
-        expeditionDraft: {
-          ...(renderer.transientUi.expeditionDraft ?? {}),
-          team: {
-            ...(renderer.transientUi.expeditionDraft?.team ?? {}),
-            [target.dataset.citizenClass]: Math.max(0, Math.floor(Number(target.value) || 0))
-          }
-        }
-      },
-      getCurrentState()
-    );
-  }
-
-  if (target.dataset.action === "set-expedition-resource") {
-    renderer.setTransientUi(
-      {
-        expeditionDraft: {
-          ...(renderer.transientUi.expeditionDraft ?? {}),
-          resources: {
-            ...(renderer.transientUi.expeditionDraft?.resources ?? {}),
-            [target.dataset.resourceKey]: Math.max(0, Math.floor(Number(target.value) || 0))
-          }
-        }
-      },
-      getCurrentState()
-    );
-  }
 });
 
 audioEngine.setMuted(getCurrentState().settings.muted);

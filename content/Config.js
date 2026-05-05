@@ -8,7 +8,7 @@ import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
 // APP_VERSION must stay monotonic because Firebase publish safety compares builds numerically.
-export const APP_VERSION = "v1.7.7";
+export const APP_VERSION = "v1.7.9";
 // Release maturity is tracked separately so unreleased builds do not need to pretend they are public/stable.
 export const APP_RELEASE_STAGE = "preview";
 const RELEASE_STAGE_LABELS = {
@@ -57,6 +57,8 @@ export const PAGE_ROUTES = [
   { key: "help", label: "Help", href: "./help.html" }
 ];
 export const BUILD_NOTES = [
+  "Building empowerment shard costs now scale by quality band: 2 shards per 1% from 100%-199%, 3 from 200%-299%, and 4 from 300%-350%.",
+  "Expedition supply commitments now respect each vehicle's supply hold, committed supply fields include Max buttons, and crew/supply number inputs no longer drop focus after every typed digit.",
   "The City empowerment slot now starts with a rarity picker and shows the full 100%-349% eligible building list for that rarity in a scrollable roster instead of only previewing six buildings.",
   "Completed buildings now have a separate City empowerment slot that spends matching rarity shards to raise quality beyond 100% toward the 350% cap, while shard stacks no longer auto-convert into crystals.",
   "Home resource cards now open the daily breakdown modal too, and the popup includes active construction spending for Materials, Salvage, and Mana alongside producers, drains, and net flow.",
