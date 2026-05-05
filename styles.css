@@ -929,11 +929,71 @@ textarea {
 
 .city-empowerment-slot__candidate-list {
   display: grid;
+  align-content: start;
+  min-height: 0;
+}
+
+.city-empowerment-slot__candidate-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.city-empowerment-slot__candidate-head small {
+  display: block;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.city-empowerment-slot__rarity-picker {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.city-empowerment-slot__rarity {
+  justify-content: space-between;
+  min-width: 0;
+  padding: 7px 8px;
+  border-color: color-mix(in srgb, var(--rarity-color) 22%, rgba(255, 255, 255, 0.1));
+}
+
+.city-empowerment-slot__rarity span,
+.city-empowerment-slot__rarity strong {
+  min-width: 0;
+}
+
+.city-empowerment-slot__rarity span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.city-empowerment-slot__rarity.is-active {
+  border-color: color-mix(in srgb, var(--rarity-color) 58%, rgba(255, 255, 255, 0.2));
+  background: color-mix(in srgb, var(--rarity-color) 16%, rgba(255, 255, 255, 0.05));
+}
+
+.city-empowerment-slot__candidate-scroll {
+  display: grid;
+  gap: 8px;
+  max-height: 430px;
+  overflow-y: auto;
+  padding-right: 6px;
+  scrollbar-color: rgba(141, 214, 255, 0.42) rgba(255, 255, 255, 0.08);
+  scrollbar-width: thin;
 }
 
 .city-empowerment-slot__candidate {
   padding: 12px;
   border-radius: 14px;
+}
+
+.city-empowerment-slot__candidate.is-loaded {
+  border-color: color-mix(in srgb, var(--rarity-color) 46%, rgba(255, 255, 255, 0.14));
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--rarity-color) 12%, transparent), transparent),
+    linear-gradient(180deg, rgba(15, 18, 29, 0.94), rgba(10, 13, 22, 0.98));
 }
 
 .city-empowerment-slot__candidate div {
@@ -7619,6 +7679,10 @@ body:-webkit-full-screen #app {
   }
 
   .city-empowerment-slot__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .city-empowerment-slot__rarity-picker {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 

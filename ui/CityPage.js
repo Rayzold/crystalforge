@@ -77,7 +77,18 @@ function renderEmpowermentSlot(state) {
     (building) => building.id === slotBuildingId && building.isComplete && !building.isRuined
   );
   const candidates = getEmpowermentCandidates(state);
-  const candidateRows = candidates.filter((building) => building.id !== assignedBuilding?.id).slice(0, 6);
+  const candidateCounts = Object.fromEntries(
+    RARITY_ORDER.map((rarity) => [rarity, candidates.filter((building) => building.rarity === rarity).length])
+  );
+  const firstAvailableRarity = RARITY_ORDER.find((rarity) => candidateCounts[rarity] > 0) ?? RARITY_ORDER[0];
+  const requestedRarity = state.transientUi?.empowermentRarityFilter;
+  const selectedCandidateRarity =
+    RARITY_ORDER.includes(requestedRarity) && candidateCounts[requestedRarity] > 0
+      ? requestedRarity
+      : assignedBuilding && candidateCounts[assignedBuilding.rarity] > 0
+        ? assignedBuilding.rarity
+        : firstAvailableRarity;
+  const candidateRows = candidates.filter((building) => building.rarity === selectedCandidateRarity);
   const activeRarity = assignedBuilding?.rarity ?? null;
   const availableShards = activeRarity ? Math.max(0, Math.floor(Number(state.shards?.[activeRarity] ?? 0) || 0)) : 0;
   const remainingQuality = assignedBuilding ? Math.max(0, BUILDING_QUALITY_CAP - Number(assignedBuilding.quality ?? 0)) : 0;
@@ -147,24 +158,52 @@ function renderEmpowermentSlot(state) {
           }
         </article>
         <div class="city-empowerment-slot__candidate-list">
-          <h5>Eligible Buildings</h5>
+          <div class="city-empowerment-slot__candidate-head">
+            <div>
+              <h5>Eligible Buildings</h5>
+              <small>${formatNumber(candidateRows.length, 0)} ${escapeHtml(selectedCandidateRarity)} building${candidateRows.length === 1 ? "" : "s"} from 100%-349%</small>
+            </div>
+          </div>
+          <div class="city-empowerment-slot__rarity-picker" aria-label="Filter empowerment candidates by rarity">
+            ${RARITY_ORDER.map((rarity) => {
+              const count = candidateCounts[rarity] ?? 0;
+              return `
+                <button
+                  class="button button--ghost city-empowerment-slot__rarity ${selectedCandidateRarity === rarity ? "is-active" : ""}"
+                  type="button"
+                  data-action="set-empowerment-rarity"
+                  data-rarity="${rarity}"
+                  style="--rarity-color:${RARITY_COLORS[rarity]}"
+                  ${count <= 0 ? "disabled" : ""}
+                >
+                  <span>${escapeHtml(rarity)}</span>
+                  <strong>${formatNumber(count, 0)}</strong>
+                </button>
+              `;
+            }).join("")}
+          </div>
           ${
             candidateRows.length
-              ? candidateRows
-                  .map((building) => {
-                    const shardCount = Math.max(0, Math.floor(Number(state.shards?.[building.rarity] ?? 0) || 0));
-                    return `
-                      <article class="city-empowerment-slot__candidate" style="--rarity-color:${RARITY_COLORS[building.rarity]}">
-                        <div>
-                          <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
-                          <small>${escapeHtml(`${building.rarity} / ${formatBuildingExactQualityDisplay(building)} / ${formatNumber(shardCount, 0)} shards`)}</small>
-                        </div>
-                        <button class="button button--ghost" type="button" data-action="assign-empowerment-slot" data-building-id="${building.id}">Load</button>
-                      </article>
-                    `;
-                  })
-                  .join("")
-              : `<p class="panel__empty">${assignedBuilding ? "No other completed buildings are waiting for empowerment." : "No completed buildings below 350% are available yet."}</p>`
+              ? `
+                  <div class="city-empowerment-slot__candidate-scroll">
+                    ${candidateRows
+                      .map((building) => {
+                        const shardCount = Math.max(0, Math.floor(Number(state.shards?.[building.rarity] ?? 0) || 0));
+                        const isLoaded = building.id === assignedBuilding?.id;
+                        return `
+                          <article class="city-empowerment-slot__candidate ${isLoaded ? "is-loaded" : ""}" style="--rarity-color:${RARITY_COLORS[building.rarity]}">
+                            <div>
+                              <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
+                              <small>${escapeHtml(`${building.rarity} / ${formatBuildingExactQualityDisplay(building)} / ${formatNumber(shardCount, 0)} shards`)}</small>
+                            </div>
+                            <button class="button button--ghost" type="button" data-action="assign-empowerment-slot" data-building-id="${building.id}" ${isLoaded ? "disabled" : ""}>${isLoaded ? "Loaded" : "Load"}</button>
+                          </article>
+                        `;
+                      })
+                      .join("")}
+                  </div>
+                `
+              : `<p class="panel__empty">No ${escapeHtml(selectedCandidateRarity)} buildings between 100% and 349% are available yet.</p>`
           }
         </div>
       </div>

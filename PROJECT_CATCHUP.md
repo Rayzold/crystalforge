@@ -2,7 +2,7 @@
 
 Last updated: 2026-05-04
 
-Current build: `Preview v1.7.6`
+Current build: `Preview v1.7.7`
 
 Current save version: `12`
 
@@ -351,7 +351,7 @@ Storage keys and versioning live in:
 
 Important constants:
 
-- `APP_VERSION = "v1.7.6"`
+- `APP_VERSION = "v1.7.7"`
 - `APP_RELEASE_STAGE = "preview"`
 - `MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3"`
 - `FIREBASE_DEFAULT_REALM_ID = "main"`
@@ -675,16 +675,28 @@ Important rules:
 Current cache-buster pattern:
 
 ```html
-<script src="./boot.js?v=1.7.6"></script>
+<script src="./boot.js?v=1.7.7"></script>
 ```
 
 Current boot entry:
 
 ```js
-const APP_ENTRY = "./app.js?v=1.7.6";
+const APP_ENTRY = "./app.js?v=1.7.7";
 ```
 
 ## Recent History To Know
+
+### v1.7.7
+
+Primary purpose:
+
+- Empowerment roster usability.
+
+Important changes:
+
+- The City empowerment slot now asks for rarity first.
+- Eligible buildings now list every 100%-349% building for the selected rarity inside a scrollable roster instead of showing only six.
+- Version/cache-busters updated to `1.7.7`.
 
 ### v1.7.6
 

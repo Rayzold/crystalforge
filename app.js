@@ -3821,6 +3821,9 @@ root.addEventListener("click", async (event) => {
     case "pause-construction":
       setConstructionActiveState(target.dataset.buildingId, false);
       break;
+    case "set-empowerment-rarity":
+      renderer.setTransientUi({ empowermentRarityFilter: target.dataset.rarity }, getCurrentState());
+      break;
     case "assign-empowerment-slot":
       setEmpowermentSlot(target.dataset.buildingId);
       break;
