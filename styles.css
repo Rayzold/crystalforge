@@ -6494,6 +6494,8 @@ body:-webkit-full-screen #app {
   justify-items: end;
   min-width: min(260px, 100%);
   max-width: 320px;
+  /* Reserve clear space for the floating .page-build-tag in the same corner. */
+  margin-right: 180px;
 }
 
 .page-hero__side .page-date-chip,
@@ -10845,6 +10847,10 @@ body:-webkit-full-screen #app {
     position: static;
     justify-self: end;
     align-self: flex-end;
+  }
+
+  .page-hero__side {
+    margin-right: 0;
   }
 }
 
