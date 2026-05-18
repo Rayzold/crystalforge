@@ -9,10 +9,49 @@ import {
   BEHEMOTH_STAT_KEYS,
   BEHEMOTH_TEMPERAMENTS,
   BEHEMOTH_UPKEEP_RESOURCES,
-  getBehemothStatusDetail
+  getBehemothSizeLabel,
+  getBehemothStatusDetail,
+  getBehemothStatusLabel
 } from "../content/BehemothConfig.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
+
+function renderBehemothSummaryThumb(behemoth) {
+  const src = getBehemothImageSrc(behemoth);
+  if (src) {
+    return `<img class="roster-row__thumb" src="${escapeHtml(src)}" alt="" loading="lazy" />`;
+  }
+  return `<div class="roster-row__thumb roster-row__thumb--placeholder" aria-hidden="true">\u{1F409}</div>`;
+}
+
+function renderBehemothCollapsedRow(behemoth) {
+  return `
+    <article class="panel behemoth-card behemoth-card--collapsed roster-row" data-behemoth-id="${escapeHtml(behemoth.id)}">
+      <button
+        class="roster-row__expand"
+        type="button"
+        data-action="toggle-behemoth-expanded"
+        data-behemoth-id="${escapeHtml(behemoth.id)}"
+        aria-expanded="false"
+        title="Expand sheet"
+      >
+        ${renderBehemothSummaryThumb(behemoth)}
+        <div class="roster-row__meta">
+          <strong>${escapeHtml(behemoth.name || "Unnamed Behemoth")}</strong>
+          <span>${escapeHtml(behemoth.kind || getBehemothSizeLabel(behemoth.size))} · ${escapeHtml(getBehemothStatusLabel(behemoth.status))}</span>
+        </div>
+        <span class="roster-row__chevron" aria-hidden="true">▼</span>
+      </button>
+      <button
+        class="button button--ghost button--small roster-row__delete"
+        type="button"
+        data-action="delete-behemoth"
+        data-behemoth-id="${escapeHtml(behemoth.id)}"
+        title="Delete behemoth"
+      >Delete</button>
+    </article>
+  `;
+}
 
 function getBehemothImageSrc(behemoth) {
   if (behemoth.imageData && behemoth.imageData.startsWith("data:image/")) {
@@ -271,6 +310,14 @@ function renderBehemothCard(behemoth) {
             placeholder="Name this behemoth"
           />
           <button
+            class="button button--ghost button--small"
+            type="button"
+            data-action="toggle-behemoth-expanded"
+            data-behemoth-id="${escapeHtml(behemoth.id)}"
+            aria-expanded="true"
+            title="Collapse sheet"
+          >Collapse</button>
+          <button
             class="button button--ghost button--small behemoth-card__delete"
             type="button"
             data-action="delete-behemoth"
@@ -389,9 +436,69 @@ function summarizeRoster(behemoths) {
   return counts;
 }
 
+function renderBehemothFilterRow(state, behemoths) {
+  const filter = state.transientUi?.behemothFilter ?? { query: "", statuses: [] };
+  const activeStatuses = new Set(filter.statuses ?? []);
+  const query = filter.query ?? "";
+  if (!behemoths.length) {
+    return "";
+  }
+  return `
+    <div class="roster-filter">
+      <label class="roster-filter__search">
+        <span class="behemoth-card__field-label">Search</span>
+        <input
+          type="search"
+          data-action="set-behemoth-filter-query"
+          value="${escapeHtml(query)}"
+          placeholder="Search by name or kind"
+        />
+      </label>
+      <div class="roster-filter__chips" role="group" aria-label="Filter by status">
+        ${BEHEMOTH_STATUSES.map(
+          (status) => `
+            <button
+              class="button button--ghost button--small roster-filter__chip ${activeStatuses.has(status.id) ? "is-active" : ""}"
+              type="button"
+              data-action="toggle-behemoth-filter-status"
+              data-status-id="${escapeHtml(status.id)}"
+              aria-pressed="${activeStatuses.has(status.id) ? "true" : "false"}"
+            >${escapeHtml(status.label)}</button>
+          `
+        ).join("")}
+        ${
+          activeStatuses.size || query
+            ? `<button class="button button--ghost button--small" type="button" data-action="clear-behemoth-filter">Clear</button>`
+            : ""
+        }
+      </div>
+    </div>
+  `;
+}
+
+function filterBehemoths(state, behemoths) {
+  const filter = state.transientUi?.behemothFilter ?? { query: "", statuses: [] };
+  const query = (filter.query ?? "").trim().toLowerCase();
+  const statuses = new Set(filter.statuses ?? []);
+  return behemoths.filter((entry) => {
+    if (statuses.size && !statuses.has(entry.status)) {
+      return false;
+    }
+    if (query) {
+      const haystack = `${entry.name ?? ""} ${entry.kind ?? ""}`.toLowerCase();
+      if (!haystack.includes(query)) {
+        return false;
+      }
+    }
+    return true;
+  });
+}
+
 export function renderBehemothsPage(state) {
   const behemoths = Array.isArray(state.behemoths) ? state.behemoths : [];
   const counts = summarizeRoster(behemoths);
+  const expanded = new Set(state.transientUi?.behemothExpandedIds ?? []);
+  const visible = filterBehemoths(state, behemoths);
 
   const content = `
     <section class="panel behemoth-intro-panel">
@@ -409,11 +516,21 @@ export function renderBehemothsPage(state) {
         <article><span>Bonded</span><strong>${formatNumber(counts.bonded)}</strong></article>
         <article><span>Released</span><strong>${formatNumber(counts.released)}</strong></article>
       </div>
+      ${renderBehemothFilterRow(state, behemoths)}
     </section>
 
     ${
       behemoths.length
-        ? `<div class="behemoth-grid">${behemoths.map(renderBehemothCard).join("")}</div>`
+        ? visible.length
+          ? `<div class="behemoth-grid">${visible
+              .map((entry) => (expanded.has(entry.id) ? renderBehemothCard(entry) : renderBehemothCollapsedRow(entry)))
+              .join("")}</div>`
+          : `
+              <section class="panel behemoth-empty">
+                <h3>No matches</h3>
+                <p>Nothing matches the current search or status filter. Adjust the filter row above to see more.</p>
+              </section>
+            `
         : `
             <section class="panel behemoth-empty">
               <h3>No behemoths recorded yet</h3>

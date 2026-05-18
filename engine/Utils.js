@@ -63,3 +63,40 @@ export function escapeHtml(value) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
 }
+
+// Downscale and re-encode an image File into a JPEG dataURL, keeping the
+// long edge under `maxEdge`. Prevents large phone photos from filling
+// localStorage. PNG inputs lose transparency (acceptable for portraits).
+export function downscaleImageFile(file, { maxEdge = 400, quality = 0.85 } = {}) {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type?.startsWith("image/")) {
+      reject(new Error("File is not an image."));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Could not read image file."));
+    reader.onload = () => {
+      const image = new Image();
+      image.onerror = () => reject(new Error("Could not decode image."));
+      image.onload = () => {
+        const longEdge = Math.max(image.width, image.height);
+        const scale = longEdge > maxEdge ? maxEdge / longEdge : 1;
+        const width = Math.max(1, Math.round(image.width * scale));
+        const height = Math.max(1, Math.round(image.height * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Canvas context unavailable."));
+          return;
+        }
+        ctx.drawImage(image, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL("image/jpeg", quality);
+        resolve(dataUrl);
+      };
+      image.src = String(reader.result);
+    };
+    reader.readAsDataURL(file);
+  });
+}

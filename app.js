@@ -15,7 +15,7 @@ import { EVENT_POOLS } from "./content/EventPools.js";
 import { RARITY_ORDER } from "./content/Rarities.js";
 import { GameState } from "./engine/GameState.js";
 import { installModalKeyboardHandlers } from "./engine/ModalFocus.js";
-import { formatNumber } from "./engine/Utils.js";
+import { downscaleImageFile, formatNumber } from "./engine/Utils.js";
 import { AnimationEngine, getManifestRevealTotalDuration } from "./fx/AnimationEngine.js";
 import { AudioEngine } from "./fx/AudioEngine.js";
 import { ensureFirebaseAuth, getFirebaseUserId } from "./firebase/FirebaseConfig.js";
@@ -3033,21 +3033,22 @@ const actions = {
     }
     applyProblemFocus(problemKey);
   },
-  saveManualState() {
+  saveManualState(slotId = 1) {
     try {
-      saveManualState(getCurrentState());
-      reportSuccess("Local save updated.", "save");
+      saveManualState(getCurrentState(), slotId);
+      reportSuccess(`Local save updated (Slot ${slotId}).`, "save");
+      renderer.render(getCurrentState());
     } catch (error) {
       reportError(error.message);
     }
   },
-  loadManualState() {
+  loadManualState(slotId = 1) {
     try {
-      gameState.replace(loadManualState());
+      gameState.replace(loadManualState(slotId));
       resetTransientUi();
       markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
       markRecentCitizenChanges(Object.keys(getCurrentState().citizens ?? {}));
-      reportSuccess("Local save loaded.", "load");
+      reportSuccess(`Local save loaded (Slot ${slotId}).`, "load");
     } catch (error) {
       reportError(error.message);
     }
@@ -3699,15 +3700,56 @@ root.addEventListener("click", async (event) => {
     case "add-behemoth": {
       void audioEngine.playUiAccent("soft");
       let createdName = "New Behemoth";
+      let createdId = null;
       commit((draft) => {
         const created = addBehemoth(draft);
         if (created) {
           createdName = created.name;
+          createdId = created.id;
         }
       });
+      if (createdId) {
+        const expanded = Array.from(new Set([...(renderer.transientUi.behemothExpandedIds ?? []), createdId]));
+        renderer.setTransientUi({ behemothExpandedIds: expanded }, getCurrentState());
+      }
       reportSuccess(`${createdName} added to the bestiary.`);
       break;
     }
+    case "toggle-behemoth-expanded": {
+      const behemothId = target.dataset.behemothId ?? "";
+      if (!behemothId) {
+        break;
+      }
+      const current = new Set(renderer.transientUi.behemothExpandedIds ?? []);
+      if (current.has(behemothId)) {
+        current.delete(behemothId);
+      } else {
+        current.add(behemothId);
+      }
+      renderer.setTransientUi({ behemothExpandedIds: Array.from(current) }, getCurrentState());
+      break;
+    }
+    case "toggle-behemoth-filter-status": {
+      const statusId = target.dataset.statusId ?? "";
+      if (!statusId) {
+        break;
+      }
+      const filter = renderer.transientUi.behemothFilter ?? { query: "", statuses: [] };
+      const current = new Set(filter.statuses ?? []);
+      if (current.has(statusId)) {
+        current.delete(statusId);
+      } else {
+        current.add(statusId);
+      }
+      renderer.setTransientUi(
+        { behemothFilter: { ...filter, statuses: Array.from(current) } },
+        getCurrentState()
+      );
+      break;
+    }
+    case "clear-behemoth-filter":
+      renderer.setTransientUi({ behemothFilter: { query: "", statuses: [] } }, getCurrentState());
+      break;
     case "delete-behemoth": {
       const behemothId = target.dataset.behemothId ?? "";
       if (!behemothId) {
@@ -3766,15 +3808,56 @@ root.addEventListener("click", async (event) => {
     case "add-npc": {
       void audioEngine.playUiAccent("soft");
       let createdName = "New NPC";
+      let createdId = null;
       commit((draft) => {
         const created = addNpc(draft);
         if (created) {
           createdName = created.name;
+          createdId = created.id;
         }
       });
+      if (createdId) {
+        const expanded = Array.from(new Set([...(renderer.transientUi.npcExpandedIds ?? []), createdId]));
+        renderer.setTransientUi({ npcExpandedIds: expanded }, getCurrentState());
+      }
       reportSuccess(`${createdName} added to the NPC roster.`);
       break;
     }
+    case "toggle-npc-expanded": {
+      const npcId = target.dataset.npcId ?? "";
+      if (!npcId) {
+        break;
+      }
+      const current = new Set(renderer.transientUi.npcExpandedIds ?? []);
+      if (current.has(npcId)) {
+        current.delete(npcId);
+      } else {
+        current.add(npcId);
+      }
+      renderer.setTransientUi({ npcExpandedIds: Array.from(current) }, getCurrentState());
+      break;
+    }
+    case "toggle-npc-filter-status": {
+      const statusId = target.dataset.statusId ?? "";
+      if (!statusId) {
+        break;
+      }
+      const filter = renderer.transientUi.npcFilter ?? { query: "", statuses: [] };
+      const current = new Set(filter.statuses ?? []);
+      if (current.has(statusId)) {
+        current.delete(statusId);
+      } else {
+        current.add(statusId);
+      }
+      renderer.setTransientUi(
+        { npcFilter: { ...filter, statuses: Array.from(current) } },
+        getCurrentState()
+      );
+      break;
+    }
+    case "clear-npc-filter":
+      renderer.setTransientUi({ npcFilter: { query: "", statuses: [] } }, getCurrentState());
+      break;
     case "delete-npc": {
       const npcId = target.dataset.npcId ?? "";
       if (!npcId) {
@@ -3854,12 +3937,16 @@ root.addEventListener("click", async (event) => {
       void audioEngine.playUiAccent("soft");
       renderer.setTransientUi({ homeHelpOpen: true }, getCurrentState());
       break;
-    case "save-manual-state":
-      actions.saveManualState();
+    case "save-manual-state": {
+      const slot = Number(target.dataset.slot) || 1;
+      actions.saveManualState(slot);
       break;
-    case "load-manual-state":
-      actions.loadManualState();
+    }
+    case "load-manual-state": {
+      const slot = Number(target.dataset.slot) || 1;
+      actions.loadManualState(slot);
       break;
+    }
     case "save-firebase-realm":
       await actions.saveFirebaseRealm();
       break;
@@ -4306,6 +4393,22 @@ root.addEventListener("change", (event) => {
     setExpeditionResourceDraftValue(target.dataset.resourceKey, nextValue);
   }
 
+  if (target.dataset.action === "set-behemoth-filter-query") {
+    const filter = renderer.transientUi.behemothFilter ?? { query: "", statuses: [] };
+    renderer.setTransientUi(
+      { behemothFilter: { ...filter, query: String(target.value ?? "") } },
+      getCurrentState()
+    );
+  }
+
+  if (target.dataset.action === "set-npc-filter-query") {
+    const filter = renderer.transientUi.npcFilter ?? { query: "", statuses: [] };
+    renderer.setTransientUi(
+      { npcFilter: { ...filter, query: String(target.value ?? "") } },
+      getCurrentState()
+    );
+  }
+
   if (target.dataset.action === "set-behemoth-field") {
     const behemothId = target.dataset.behemothId ?? "";
     const field = target.dataset.field ?? "";
@@ -4359,24 +4462,18 @@ root.addEventListener("change", (event) => {
       target.value = "";
       return;
     }
-    if (file.size > 2 * 1024 * 1024) {
-      reportError("Image is too large. Choose an image under 2 MB.");
-      target.value = "";
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result;
-      if (typeof dataUrl === "string") {
+    downscaleImageFile(file, { maxEdge: 400 })
+      .then((dataUrl) => {
         commit((draft) => {
           setBehemothImageData(draft, behemothId, dataUrl);
         });
-      }
-    };
-    reader.onerror = () => {
-      reportError("Could not read that image. Try a different file.");
-    };
-    reader.readAsDataURL(file);
+      })
+      .catch((error) => {
+        reportError(error?.message ?? "Could not read that image. Try a different file.");
+      })
+      .finally(() => {
+        target.value = "";
+      });
   }
 
   if (target.dataset.action === "set-npc-field") {
@@ -4421,24 +4518,18 @@ root.addEventListener("change", (event) => {
       target.value = "";
       return;
     }
-    if (file.size > 2 * 1024 * 1024) {
-      reportError("Image is too large. Choose an image under 2 MB.");
-      target.value = "";
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result;
-      if (typeof dataUrl === "string") {
+    downscaleImageFile(file, { maxEdge: 400 })
+      .then((dataUrl) => {
         commit((draft) => {
           setNpcImageData(draft, npcId, dataUrl);
         });
-      }
-    };
-    reader.onerror = () => {
-      reportError("Could not read that image. Try a different file.");
-    };
-    reader.readAsDataURL(file);
+      })
+      .catch((error) => {
+        reportError(error?.message ?? "Could not read that image. Try a different file.");
+      })
+      .finally(() => {
+        target.value = "";
+      });
   }
 
 });
@@ -4453,6 +4544,22 @@ root.addEventListener("input", (event) => {
     commit((draft) => {
       draft.settings.diceAmount = Math.max(1, Math.min(20, Number(target.value) || 1));
     });
+  }
+
+  if (target.dataset.action === "set-behemoth-filter-query") {
+    const filter = renderer.transientUi.behemothFilter ?? { query: "", statuses: [] };
+    renderer.setTransientUi(
+      { behemothFilter: { ...filter, query: String(target.value ?? "") } },
+      getCurrentState()
+    );
+  }
+
+  if (target.dataset.action === "set-npc-filter-query") {
+    const filter = renderer.transientUi.npcFilter ?? { query: "", statuses: [] };
+    renderer.setTransientUi(
+      { npcFilter: { ...filter, query: String(target.value ?? "") } },
+      getCurrentState()
+    );
   }
 
 });

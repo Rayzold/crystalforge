@@ -97,7 +97,11 @@ export class UIRenderer {
         durationDays: 7,
         team: {},
         resources: {}
-      }
+      },
+      behemothExpandedIds: [],
+      behemothFilter: { query: "", statuses: [] },
+      npcExpandedIds: [],
+      npcFilter: { query: "", statuses: [] }
     };
   }
 

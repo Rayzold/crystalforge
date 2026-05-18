@@ -7,10 +7,49 @@ import {
   NPC_STATUSES,
   NPC_STAT_KEYS,
   NPC_DISPOSITIONS,
-  getNpcStatusDetail
+  getNpcRoleLabel,
+  getNpcStatusDetail,
+  getNpcStatusLabel
 } from "../content/NpcConfig.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
+
+function renderNpcSummaryThumb(npc) {
+  const src = getNpcImageSrc(npc);
+  if (src) {
+    return `<img class="roster-row__thumb" src="${escapeHtml(src)}" alt="" loading="lazy" />`;
+  }
+  return `<div class="roster-row__thumb roster-row__thumb--placeholder" aria-hidden="true">\u{1F3AD}</div>`;
+}
+
+function renderNpcCollapsedRow(npc) {
+  return `
+    <article class="panel behemoth-card behemoth-card--collapsed roster-row" data-npc-id="${escapeHtml(npc.id)}">
+      <button
+        class="roster-row__expand"
+        type="button"
+        data-action="toggle-npc-expanded"
+        data-npc-id="${escapeHtml(npc.id)}"
+        aria-expanded="false"
+        title="Expand sheet"
+      >
+        ${renderNpcSummaryThumb(npc)}
+        <div class="roster-row__meta">
+          <strong>${escapeHtml(npc.name || "Unnamed NPC")}</strong>
+          <span>${escapeHtml(npc.kind || getNpcRoleLabel(npc.role))} · ${escapeHtml(getNpcStatusLabel(npc.status))}</span>
+        </div>
+        <span class="roster-row__chevron" aria-hidden="true">▼</span>
+      </button>
+      <button
+        class="button button--ghost button--small roster-row__delete"
+        type="button"
+        data-action="delete-npc"
+        data-npc-id="${escapeHtml(npc.id)}"
+        title="Delete NPC"
+      >Delete</button>
+    </article>
+  `;
+}
 
 function getNpcImageSrc(npc) {
   if (npc.imageData && npc.imageData.startsWith("data:image/")) {
@@ -207,6 +246,14 @@ function renderNpcCard(npc) {
             placeholder="Name this NPC"
           />
           <button
+            class="button button--ghost button--small"
+            type="button"
+            data-action="toggle-npc-expanded"
+            data-npc-id="${escapeHtml(npc.id)}"
+            aria-expanded="true"
+            title="Collapse sheet"
+          >Collapse</button>
+          <button
             class="button button--ghost button--small behemoth-card__delete"
             type="button"
             data-action="delete-npc"
@@ -312,9 +359,69 @@ function summarizeRoster(npcs) {
   return counts;
 }
 
+function renderNpcFilterRow(state, npcs) {
+  const filter = state.transientUi?.npcFilter ?? { query: "", statuses: [] };
+  const activeStatuses = new Set(filter.statuses ?? []);
+  const query = filter.query ?? "";
+  if (!npcs.length) {
+    return "";
+  }
+  return `
+    <div class="roster-filter">
+      <label class="roster-filter__search">
+        <span class="behemoth-card__field-label">Search</span>
+        <input
+          type="search"
+          data-action="set-npc-filter-query"
+          value="${escapeHtml(query)}"
+          placeholder="Search by name or kind"
+        />
+      </label>
+      <div class="roster-filter__chips" role="group" aria-label="Filter by status">
+        ${NPC_STATUSES.map(
+          (status) => `
+            <button
+              class="button button--ghost button--small roster-filter__chip ${activeStatuses.has(status.id) ? "is-active" : ""}"
+              type="button"
+              data-action="toggle-npc-filter-status"
+              data-status-id="${escapeHtml(status.id)}"
+              aria-pressed="${activeStatuses.has(status.id) ? "true" : "false"}"
+            >${escapeHtml(status.label)}</button>
+          `
+        ).join("")}
+        ${
+          activeStatuses.size || query
+            ? `<button class="button button--ghost button--small" type="button" data-action="clear-npc-filter">Clear</button>`
+            : ""
+        }
+      </div>
+    </div>
+  `;
+}
+
+function filterNpcs(state, npcs) {
+  const filter = state.transientUi?.npcFilter ?? { query: "", statuses: [] };
+  const query = (filter.query ?? "").trim().toLowerCase();
+  const statuses = new Set(filter.statuses ?? []);
+  return npcs.filter((entry) => {
+    if (statuses.size && !statuses.has(entry.status)) {
+      return false;
+    }
+    if (query) {
+      const haystack = `${entry.name ?? ""} ${entry.kind ?? ""}`.toLowerCase();
+      if (!haystack.includes(query)) {
+        return false;
+      }
+    }
+    return true;
+  });
+}
+
 export function renderNpcsPage(state) {
   const npcs = Array.isArray(state.npcs) ? state.npcs : [];
   const counts = summarizeRoster(npcs);
+  const expanded = new Set(state.transientUi?.npcExpandedIds ?? []);
+  const visible = filterNpcs(state, npcs);
 
   const content = `
     <section class="panel behemoth-intro-panel">
@@ -333,11 +440,21 @@ export function renderNpcsPage(state) {
         <article><span>Hostile</span><strong>${formatNumber(counts.hostile)}</strong></article>
         <article><span>Departed</span><strong>${formatNumber(counts.departed)}</strong></article>
       </div>
+      ${renderNpcFilterRow(state, npcs)}
     </section>
 
     ${
       npcs.length
-        ? `<div class="behemoth-grid">${npcs.map(renderNpcCard).join("")}</div>`
+        ? visible.length
+          ? `<div class="behemoth-grid">${visible
+              .map((entry) => (expanded.has(entry.id) ? renderNpcCard(entry) : renderNpcCollapsedRow(entry)))
+              .join("")}</div>`
+          : `
+              <section class="panel behemoth-empty">
+                <h3>No matches</h3>
+                <p>Nothing matches the current search or status filter. Adjust the filter row above to see more.</p>
+              </section>
+            `
         : `
             <section class="panel behemoth-empty">
               <h3>No NPCs recorded yet</h3>

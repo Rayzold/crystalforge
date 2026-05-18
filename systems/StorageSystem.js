@@ -46,6 +46,19 @@ import { normalizeNpcs } from "./NpcSystem.js";
 const SESSION_STATE_KEY = "crystal-forge-session-state-v1";
 const BUILD_NOTES_SEEN_KEY = "crystal-forge-build-notes-seen-v1";
 
+// Three local save slots. Slot 1 reuses the original MANUAL_SAVE_KEY so
+// existing local saves keep loading; slots 2 and 3 use parallel keys.
+export const MANUAL_SAVE_SLOTS = [
+  { id: 1, label: "Slot 1", key: MANUAL_SAVE_KEY },
+  { id: 2, label: "Slot 2", key: `${MANUAL_SAVE_KEY}-2` },
+  { id: 3, label: "Slot 3", key: `${MANUAL_SAVE_KEY}-3` }
+];
+
+function getManualSaveStorageKey(slotId = 1) {
+  const slot = MANUAL_SAVE_SLOTS.find((entry) => entry.id === Number(slotId)) ?? MANUAL_SAVE_SLOTS[0];
+  return slot.key;
+}
+
 function normalizeConstructionSpeedMultiplier(value, fallback = 1) {
   const numeric = Number(value);
   if (!Number.isFinite(numeric)) {
@@ -65,8 +78,8 @@ function getStartPreset(preset = DEFAULT_START_PRESET) {
   return structuredClone(START_STATE_PRESETS[preset] ?? DEFAULT_START_STATE);
 }
 
-function getManualSaveRawText() {
-  return localStorage.getItem(MANUAL_SAVE_KEY);
+function getManualSaveRawText(slotId = 1) {
+  return localStorage.getItem(getManualSaveStorageKey(slotId));
 }
 
 function getSessionSaveRawText() {
@@ -629,30 +642,31 @@ export function clearSessionState() {
   }
 }
 
-export function saveManualState(state) {
+export function saveManualState(state, slotId = 1) {
   const serializable = createSerializableState(state, {
     manualSavedAt: Date.now()
   });
-  localStorage.setItem(MANUAL_SAVE_KEY, JSON.stringify(serializable));
+  localStorage.setItem(getManualSaveStorageKey(slotId), JSON.stringify(serializable));
   return serializable.manualSavedAt;
 }
 
-export function loadManualState() {
-  const rawText = getManualSaveRawText();
+export function loadManualState(slotId = 1) {
+  const rawText = getManualSaveRawText(slotId);
   const parsed = safeJsonParse(rawText);
   if (!parsed) {
-    throw new Error("No local save found yet.");
+    throw new Error("This slot has no local save yet.");
   }
   return validateAndMigrateSave(parsed);
 }
 
-export function getManualSaveMeta() {
-  const rawText = getManualSaveRawText();
+export function getManualSaveMeta(slotId = 1) {
+  const rawText = getManualSaveRawText(slotId);
   const parsed = safeJsonParse(rawText);
   if (!parsed) {
     return null;
   }
   return {
+    slotId: Number(slotId),
     manualSavedAt: Number(parsed.manualSavedAt ?? 0) || null,
     buildingCount: Array.isArray(parsed.buildings) ? parsed.buildings.length : 0,
     population: Number(parsed.resources?.population ?? 0) || 0
@@ -660,13 +674,20 @@ export function getManualSaveMeta() {
 }
 
 export function getAllManualSaveMeta() {
-  return [
-    getManualSaveMeta() ?? {
-      manualSavedAt: null,
-      buildingCount: 0,
-      population: 0
-    }
-  ];
+  return MANUAL_SAVE_SLOTS.map((slot) => {
+    return (
+      getManualSaveMeta(slot.id) ?? {
+        slotId: slot.id,
+        manualSavedAt: null,
+        buildingCount: 0,
+        population: 0
+      }
+    );
+  });
+}
+
+export function deleteManualSave(slotId = 1) {
+  localStorage.removeItem(getManualSaveStorageKey(slotId));
 }
 
 export function exportSave(state) {
@@ -682,6 +703,8 @@ export function importSave(saveText) {
 }
 
 export function resetSave() {
-  localStorage.removeItem(MANUAL_SAVE_KEY);
+  for (const slot of MANUAL_SAVE_SLOTS) {
+    localStorage.removeItem(slot.key);
+  }
   return createInitialState();
 }

@@ -6,7 +6,7 @@ import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBui
 import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js";
 import { getDecisionHistory, getDecisionInboxItems } from "../systems/DecisionInboxSystem.js";
 import { getCityTrendSummary } from "../systems/ResourceSystem.js";
-import { getManualSaveMeta } from "../systems/StorageSystem.js";
+import { getAllManualSaveMeta } from "../systems/StorageSystem.js";
 import { getCurrentTownFocus, getMayorAdvice, getTownFocusAvailability } from "../systems/TownFocusSystem.js";
 import { getCriticalAlerts, renderCrisisBanner } from "./CrisisBanner.js";
 import { renderTownFocusBadge } from "./TownFocusShared.js";
@@ -557,7 +557,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
     `;
   }
 
-  const manualSaveMeta = getManualSaveMeta();
+  const manualSaveSlots = getAllManualSaveMeta();
   const townFocusAvailability = getTownFocusAvailability(state);
   const currentFocus = getCurrentTownFocus(state);
   const showResourceChrome = RESOURCE_CHROME_PAGES.has(pageKey);
@@ -565,8 +565,13 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
   const showBuildingStatus = BUILDING_STATUS_PAGES.has(pageKey);
   const cityAlertCount = getCriticalAlerts(state).length;
   const availableCrystalCount = Object.values(state.crystals ?? {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
-  const expeditionCount = (state.expeditions?.active?.length ?? 0) + (state.expeditions?.pending?.length ?? 0);
-  const uniqueCitizenCount = state.uniqueCitizens?.length ?? 0;
+  // Sidebar badges should reflect attention items, not inventory counts.
+  // Expeditions: pending journeys waiting on a GM debrief decision.
+  // Legends: Legends without an assignment post (real call to action).
+  const expeditionCount = state.expeditions?.pending?.length ?? 0;
+  const uniqueCitizenCount = (state.uniqueCitizens ?? []).filter(
+    (entry) => !entry?.assignmentPostId
+  ).length;
   const coreRoutes = PAGE_ROUTES.filter((route) => ["home", "forge", "economy", "city"].includes(route.key));
   const managementRoutes = PAGE_ROUTES.filter((route) => ["citizens", "expeditions", "vehicles", "uniques", "behemoths", "npcs", "chronicle", "help"].includes(route.key));
   const manifestedBuildings = orderSidebarBuildings(state, state.buildings.filter((building) => building.isComplete));
@@ -654,32 +659,43 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
             <div class="sidebar-gm-tools__body">
               <button class="button button--ghost" data-action="open-admin">${state.settings.liveSessionView ? "GM Console" : "Admin Console"}</button>
               ${renderDensityControls(uiDensity, conciseMode, state.settings?.textSize ?? "medium")}
-              <div class="sidebar-nav__save-actions">
-                <button class="button button--ghost" data-action="save-firebase-realm">Save</button>
-                <button class="button button--ghost" data-action="load-firebase-realm">Load</button>
-                <button class="button button--ghost" data-action="save-manual-state">Local Save</button>
-                <button class="button button--ghost" data-action="load-manual-state">Local Load</button>
+              <div class="sidebar-nav__save-actions sidebar-nav__save-actions--firebase">
+                <button class="button button--ghost" data-action="save-firebase-realm">Cloud Save</button>
+                <button class="button button--ghost" data-action="load-firebase-realm">Cloud Load</button>
               </div>
               ${
                 firebaseMeta?.updatedAtMs
                   ? `
                     <div class="sidebar-nav__build">
-                      <span>Firebase Save</span>
+                      <span>Cloud Save</span>
                       <strong>${new Date(firebaseMeta.updatedAtMs).toLocaleString()}</strong>
                     </div>
                   `
                   : ""
               }
-              ${
-                manualSaveMeta?.manualSavedAt
-                  ? `
-                    <div class="sidebar-nav__build">
-                      <span>Local Save</span>
-                      <strong>${new Date(manualSaveMeta.manualSavedAt).toLocaleString()}</strong>
-                    </div>
-                  `
-                  : ""
-              }
+              <div class="sidebar-save-slots" role="group" aria-label="Local save slots">
+                <span class="sidebar-save-slots__label">Local Slots</span>
+                ${manualSaveSlots
+                  .map(
+                    (slot) => `
+                      <div class="sidebar-save-slot">
+                        <div class="sidebar-save-slot__meta">
+                          <strong>Slot ${slot.slotId}</strong>
+                          <small>${
+                            slot.manualSavedAt
+                              ? new Date(slot.manualSavedAt).toLocaleString()
+                              : "Empty"
+                          }</small>
+                        </div>
+                        <div class="sidebar-save-slot__actions">
+                          <button class="button button--ghost button--small" data-action="save-manual-state" data-slot="${slot.slotId}">Save</button>
+                          <button class="button button--ghost button--small" data-action="load-manual-state" data-slot="${slot.slotId}" ${slot.manualSavedAt ? "" : "disabled"}>Load</button>
+                        </div>
+                      </div>
+                    `
+                  )
+                  .join("")}
+              </div>
               <button class="sidebar-nav__build sidebar-nav__build--mode" data-action="toggle-session-view">
                 <span>View Mode</span>
                 <strong>${state.settings.liveSessionView ? "Live Session" : "Deep Review"}</strong>

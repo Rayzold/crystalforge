@@ -5071,6 +5071,59 @@ textarea {
   gap: 10px;
 }
 
+.sidebar-nav__save-actions--firebase {
+  grid-template-columns: 1fr 1fr;
+}
+
+.sidebar-save-slots {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.7rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid rgba(134, 167, 230, 0.12);
+}
+
+.sidebar-save-slots__label {
+  font-size: 0.84rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(184, 200, 233, 0.76);
+}
+
+.sidebar-save-slot {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.45rem 0.55rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(134, 167, 230, 0.14);
+  background: rgba(10, 15, 28, 0.55);
+}
+
+.sidebar-save-slot__meta {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.sidebar-save-slot__meta strong {
+  font-size: 0.92rem;
+}
+
+.sidebar-save-slot__meta small {
+  font-size: 0.84rem;
+  color: rgba(184, 200, 233, 0.72);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-save-slot__actions {
+  display: flex;
+  gap: 0.3rem;
+}
+
 .sidebar-nav__save-slot {
   display: grid;
   gap: 4px;
@@ -14553,6 +14606,125 @@ body:-webkit-full-screen #app {
 .behemoth-card__upkeep-remove {
   align-self: end;
   white-space: nowrap;
+}
+
+/* ---- Roster collapsed row + filter bar (shared by Behemoths + NPCs) ---- */
+.behemoth-card--collapsed.roster-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.7rem;
+}
+
+.roster-row__expand {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  padding: 0.25rem 0.4rem;
+  border-radius: 0.6rem;
+  min-width: 0;
+}
+
+.roster-row__expand:hover,
+.roster-row__expand:focus-visible {
+  background: rgba(141, 214, 255, 0.08);
+}
+
+.roster-row__thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 0.55rem;
+  object-fit: cover;
+  border: 1px solid rgba(134, 167, 230, 0.18);
+  background: rgba(8, 13, 24, 0.7);
+  flex: 0 0 auto;
+}
+
+.roster-row__thumb--placeholder {
+  display: grid;
+  place-content: center;
+  font-size: 1.4rem;
+}
+
+.roster-row__meta {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.roster-row__meta strong {
+  font-size: 1rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.roster-row__meta span {
+  font-size: 0.86rem;
+  color: rgba(184, 200, 233, 0.78);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.roster-row__chevron {
+  margin-left: auto;
+  color: rgba(184, 200, 233, 0.6);
+  font-size: 0.85rem;
+}
+
+.roster-row__delete {
+  flex: 0 0 auto;
+}
+
+.roster-filter {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  gap: 0.7rem;
+  align-items: end;
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(134, 167, 230, 0.12);
+}
+
+.roster-filter__search {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.roster-filter__search input {
+  padding: 0.5rem 0.6rem;
+  border-radius: 0.55rem;
+  border: 1px solid rgba(134, 167, 230, 0.18);
+  background: rgba(8, 13, 24, 0.6);
+  color: inherit;
+  font: inherit;
+}
+
+.roster-filter__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.roster-filter__chip.is-active {
+  background: rgba(141, 214, 255, 0.18);
+  border-color: rgba(141, 214, 255, 0.45);
+  color: rgba(244, 248, 255, 0.96);
+}
+
+@media (max-width: 768px) {
+  .roster-filter {
+    grid-template-columns: 1fr;
+  }
 }
 
 .admin-random-citizens__group {
