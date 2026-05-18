@@ -236,6 +236,42 @@ export function resetCitizens(state, source = "Admin") {
   });
 }
 
+export function generateRandomCitizens(state, total, excludedClasses = [], source = "Random Generator") {
+  const count = Math.max(0, Math.floor(Number(total) || 0));
+  if (count <= 0) {
+    return { totalAdded: 0, distribution: {} };
+  }
+  const excluded = new Set(Array.isArray(excludedClasses) ? excludedClasses : []);
+  const pool = CITIZEN_CLASSES.filter((citizenClass) => !excluded.has(citizenClass));
+  if (!pool.length) {
+    return { totalAdded: 0, distribution: {} };
+  }
+
+  const distribution = Object.fromEntries(pool.map((citizenClass) => [citizenClass, 0]));
+  for (let i = 0; i < count; i += 1) {
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    distribution[pick] += 1;
+  }
+
+  for (const [citizenClass, amount] of Object.entries(distribution)) {
+    if (amount > 0) {
+      applyCitizenDelta(state, citizenClass, amount);
+    }
+  }
+
+  const filledClasses = Object.entries(distribution).filter(([, amount]) => amount > 0);
+  const summary = filledClasses.length
+    ? filledClasses.map(([citizenClass, amount]) => `${amount} ${citizenClass}`).join(", ")
+    : "no citizens";
+  addHistoryEntry(state, {
+    category: "Citizens",
+    title: `${source} added ${count} random citizens`,
+    details: `${source} spread ${count} citizens across ${pool.length} eligible class${pool.length === 1 ? "" : "es"}: ${summary}.`
+  });
+
+  return { totalAdded: count, distribution };
+}
+
 export function applyCitizenBulkSet(state, bulkValues, source = "Admin") {
   ensureCitizenRarityRoster(state);
   for (const citizenClass of CITIZEN_CLASSES) {

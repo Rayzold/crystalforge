@@ -25,6 +25,7 @@ import { renderTurnSummaryModal } from "./TurnSummaryModal.js";
 import { renderUniqueCitizensPage } from "./UniqueCitizensPage.js";
 import { renderVehiclesPage } from "./VehiclesPage.js";
 import { renderBehemothsPage } from "./BehemothsPage.js";
+import { renderNpcsPage } from "./NpcsPage.js";
 import { getMayorSuggestions } from "../systems/TownFocusSystem.js";
 import { getDefaultTownFocusPreviewId } from "./TownFocusShared.js";
 import { renderTownFocusCeremonyOverlay } from "./TownFocusCeremonyOverlay.js";
@@ -147,6 +148,8 @@ export class UIRenderer {
         return renderVehiclesPage(state);
       case "behemoths":
         return renderBehemothsPage(state);
+      case "npcs":
+        return renderNpcsPage(state);
       case "uniques":
         return renderUniqueCitizensPage(state);
       case "chronicle":

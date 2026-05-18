@@ -77,10 +77,25 @@ body[data-theme="silver"] {
   box-sizing: border-box;
 }
 
+html {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+html[data-text-size="small"] {
+  font-size: 15px;
+}
+
+html[data-text-size="large"] {
+  font-size: 18px;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
   color: var(--text);
+  font-size: 1rem;
+  line-height: 1.5;
   background:
     radial-gradient(circle at 10% 0%, var(--bg-radial-a), transparent 28%),
     radial-gradient(circle at 82% 14%, var(--bg-radial-b), transparent 20%),
@@ -1204,7 +1219,7 @@ button[aria-disabled="true"]:hover,
 .crystal-table__head {
   padding: 0 6px 6px;
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -1573,7 +1588,7 @@ button[aria-disabled="true"]:hover,
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.05);
   color: rgba(241, 247, 255, 0.9);
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   letter-spacing: 0.04em;
   line-height: 1.2;
   text-transform: uppercase;
@@ -1596,7 +1611,7 @@ button[aria-disabled="true"]:hover,
 .building-card__spotlight span {
   display: block;
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.84rem;
 }
 
 .building-card__spotlight strong {
@@ -1794,7 +1809,7 @@ button[aria-disabled="true"]:hover,
   align-items: center;
   gap: 8px;
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.84rem;
 }
 
 .admin-contributor-row__glyph {
@@ -2051,7 +2066,7 @@ button[aria-disabled="true"]:hover,
   align-items: center;
   gap: 6px;
   color: rgba(255, 244, 220, 0.78);
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -2141,7 +2156,7 @@ button[aria-disabled="true"]:hover,
 }
 
 .town-statistics--command-strip .town-statistics__card span {
-  font-size: 0.8rem;
+  font-size: 0.84rem;
 }
 
 .town-statistics--command-strip .town-statistics__card-head {
@@ -2390,7 +2405,7 @@ button[aria-disabled="true"]:hover,
 
 .city-workspace__sort span {
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.84rem;
 }
 
 .city-workspace__stream .building-grid-panel {
@@ -2695,7 +2710,7 @@ button[aria-disabled="true"]:hover,
 
 .history-entry__title-wrap span {
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.84rem;
 }
 
 .history-entry--codex p {
@@ -4718,7 +4733,7 @@ textarea {
 .page-date-chip span {
   overflow: hidden;
   color: rgba(232, 240, 255, 0.78);
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   letter-spacing: 0.04em;
   line-height: 1.25;
   text-overflow: ellipsis;
@@ -4830,7 +4845,7 @@ textarea {
   background: linear-gradient(135deg, rgba(255, 88, 88, 0.98), rgba(255, 132, 132, 0.92));
   color: #fff;
   font-style: normal;
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   font-weight: 700;
   line-height: 1;
   box-shadow: 0 10px 22px rgba(255, 70, 70, 0.28);
@@ -4905,7 +4920,7 @@ textarea {
 
 .sidebar-gm-tools__summary span {
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -4938,7 +4953,7 @@ textarea {
 
 .sidebar-density-picker__copy span {
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -5265,7 +5280,7 @@ textarea {
 .game-shell--density-dense .sidebar-link {
   padding: 7px 8px;
   border-radius: 11px;
-  font-size: 0.8rem;
+  font-size: 0.84rem;
 }
 
 .game-shell--density-dense .sidebar-link__badge {
@@ -5273,7 +5288,7 @@ textarea {
   right: 6px;
   min-width: 18px;
   height: 18px;
-  font-size: 0.8rem;
+  font-size: 0.84rem;
 }
 
 .game-shell--density-dense .sidebar-nav__build,
@@ -5409,7 +5424,7 @@ textarea {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  font-size: 0.8rem;
+  font-size: 0.84rem;
 }
 
 .player-stage__brand strong {
@@ -5427,7 +5442,7 @@ textarea {
   font-family: var(--label-font);
   font-weight: 700;
   letter-spacing: 0.05em;
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   text-transform: uppercase;
 }
 
@@ -5480,7 +5495,7 @@ textarea {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  font-size: 0.8rem;
+  font-size: 0.84rem;
 }
 
 .player-hero__meta strong {
@@ -5555,7 +5570,7 @@ textarea {
 
 .player-session-banner__grid span {
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -5695,7 +5710,7 @@ textarea {
   margin-top: 10px;
   padding: 10px 14px 4px;
   color: rgba(207, 216, 236, 0.66);
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   text-align: center;
 }
 
@@ -6420,7 +6435,7 @@ body:-webkit-full-screen #app {
 
 .crisis-banner__link {
   margin-top: 2px;
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   color: rgba(255, 228, 234, 0.9);
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -6468,7 +6483,7 @@ body:-webkit-full-screen #app {
   max-width: 62ch;
   margin: 6px 0 0;
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   line-height: 1.38;
 }
 
@@ -6510,7 +6525,7 @@ body:-webkit-full-screen #app {
 
 .page-hero__focus small {
   margin-top: 6px;
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   line-height: 1.42;
 }
 
@@ -6585,7 +6600,7 @@ body:-webkit-full-screen #app {
 .page-command-strip__status p {
   margin: 0;
   color: rgba(210, 220, 243, 0.72);
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   line-height: 1.45;
 }
 
@@ -6685,7 +6700,7 @@ body:-webkit-full-screen #app {
   align-items: center;
   gap: 0.45rem;
   color: rgba(191, 205, 235, 0.9);
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   letter-spacing: 0.02em;
 }
 
@@ -6750,7 +6765,7 @@ body:-webkit-full-screen #app {
   align-items: center;
   gap: 0.4rem;
   color: rgba(191, 205, 235, 0.72);
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   letter-spacing: 0.11em;
   text-transform: uppercase;
 }
@@ -6893,7 +6908,7 @@ body:-webkit-full-screen #app {
   display: block;
   color: var(--muted);
   font-family: var(--label-font);
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -7809,7 +7824,7 @@ body:-webkit-full-screen #app {
 .world-summary__stats span {
   display: block;
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.84rem;
 }
 
 .world-summary__stats strong {
@@ -11465,7 +11480,7 @@ body:-webkit-full-screen #app {
   .sidebar-nav__footer p,
   .page-hero__eyebrow,
   .world-summary__eyebrow {
-    font-size: 0.8rem;
+    font-size: 0.84rem;
     letter-spacing: 0.14em;
   }
 
@@ -12820,7 +12835,7 @@ body:-webkit-full-screen #app {
 .expedition-team-card__title .help-bubble {
   width: 22px;
   height: 22px;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
 }
 
 .expedition-team-card__title .help-bubble__tooltip {
@@ -13107,7 +13122,7 @@ body:-webkit-full-screen #app {
 
 .expedition-relic-synergy__head strong {
   color: rgba(244, 248, 255, 0.94);
-  font-size: 0.8rem;
+  font-size: 0.84rem;
 }
 
 .expedition-relic-synergy p,
@@ -14305,7 +14320,7 @@ body:-webkit-full-screen #app {
 
 .behemoth-card__image-placeholder small {
   color: rgba(184, 200, 233, 0.72);
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -14365,7 +14380,7 @@ body:-webkit-full-screen #app {
 }
 
 .behemoth-card__field-label {
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: rgba(184, 200, 233, 0.76);
@@ -14418,7 +14433,7 @@ body:-webkit-full-screen #app {
 
 .behemoth-card__section-head small {
   color: rgba(184, 200, 233, 0.65);
-  font-size: 0.78rem;
+  font-size: 0.84rem;
 }
 
 .behemoth-card__stats {
@@ -14437,7 +14452,7 @@ body:-webkit-full-screen #app {
 }
 
 .behemoth-card__stat-label {
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: rgba(184, 200, 233, 0.78);
@@ -14532,6 +14547,85 @@ body:-webkit-full-screen #app {
 .behemoth-card__upkeep-remove {
   align-self: end;
   white-space: nowrap;
+}
+
+.admin-random-citizens__group {
+  margin-top: 0.9rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid rgba(134, 167, 230, 0.12);
+}
+
+.admin-random-citizens__group h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.92rem;
+  letter-spacing: 0.04em;
+}
+
+.admin-random-citizens__class-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.45rem;
+}
+
+.admin-random-citizens__class {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 0.55rem;
+  border: 1px solid rgba(134, 167, 230, 0.16);
+  background: rgba(10, 15, 28, 0.55);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.admin-random-citizens__class input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+}
+
+.admin-random-citizens__toggle-cell {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.admin-random-citizens__toggle-row {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.admin-random-citizens__generate {
+  align-self: end;
+}
+
+.sidebar-density-picker__concise {
+  margin-top: 0.5rem;
+  width: 100%;
+  text-align: center;
+}
+
+.sidebar-density-picker__concise.is-active {
+  background: rgba(147, 204, 255, 0.18);
+  border-color: rgba(147, 204, 255, 0.45);
+  color: rgba(244, 248, 255, 0.96);
+}
+
+/* Concise mode: hide subtitles, helper text, and empty-state explainers. */
+.game-shell--concise .page-hero__subtitle,
+.game-shell--concise .page-hero__focus small,
+.game-shell--concise .panel__subtle,
+.game-shell--concise .behemoth-card__status-detail,
+.game-shell--concise .behemoth-card__abilities-empty,
+.game-shell--concise .behemoth-card__section-head small,
+.game-shell--concise .page-command-strip__decision small,
+.game-shell--concise .page-command-strip__section-head small,
+.game-shell--concise .page-command-strip__status,
+.game-shell--concise .page-command-strip__history,
+.game-shell--concise .behemoth-card__caption,
+.game-shell--concise .sidebar-manifest-list__empty,
+.game-shell--concise .sidebar-manifest-list__empty-state {
+  display: none !important;
 }
 
 .button--small {

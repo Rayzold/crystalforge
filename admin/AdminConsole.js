@@ -513,6 +513,25 @@ export class AdminConsole {
         case "reset-citizens":
           this.actions.resetCitizens();
           break;
+        case "generate-random-citizens": {
+          const amount = this.getNumberInput("random-citizen-amount", 0);
+          const excludedClasses = [
+            ...this.root.querySelectorAll('input[data-random-citizen-class]')
+          ]
+            .filter((input) => !input.checked)
+            .map((input) => input.dataset.randomCitizenClass)
+            .filter(Boolean);
+          this.actions.generateRandomCitizens({ amount, excludedClasses });
+          break;
+        }
+        case "random-citizens-all":
+        case "random-citizens-none": {
+          const checked = action === "random-citizens-all";
+          this.root.querySelectorAll('input[data-random-citizen-class]').forEach((input) => {
+            input.checked = checked;
+          });
+          break;
+        }
         case "bulk-citizens":
           this.actions.bulkCitizens(this.getJson("bulk-citizens"));
           break;
@@ -843,6 +862,58 @@ export class AdminConsole {
               <button class="button button--ghost" data-admin-action="bulk-citizens">Apply Bulk</button>
               <button class="button button--ghost" data-admin-action="reset-citizens">Reset Citizens</button>
             </div>
+          </section>
+        `
+      },
+      {
+        tab: "population",
+        title: "Random Citizen Generator",
+        keywords: "random citizens generate roll bulk population spawn farmers druids exclude",
+        content: `
+          <section class="admin-section admin-random-citizens">
+            <h3>Random Citizen Generator</h3>
+            <p>Choose a count and uncheck any classes that should not appear in this batch. Citizens are picked one at a time from the eligible pool.</p>
+            <div class="admin-grid admin-grid--three">
+              <label>Amount<input id="random-citizen-amount" type="number" value="10" min="1" /></label>
+              <label class="admin-random-citizens__toggle-cell">
+                <span>Eligible Classes</span>
+                <div class="admin-random-citizens__toggle-row">
+                  <button class="button button--ghost button--small" type="button" data-admin-action="random-citizens-all">Enable All</button>
+                  <button class="button button--ghost button--small" type="button" data-admin-action="random-citizens-none">Disable All</button>
+                </div>
+              </label>
+              <div class="admin-actions admin-random-citizens__generate">
+                <button class="button" data-admin-action="generate-random-citizens">Generate Citizens</button>
+              </div>
+            </div>
+            ${CITIZEN_GROUP_ORDER.map((groupTitle) => {
+              const classes = CITIZEN_CLASSES.filter((citizenClass) => CITIZEN_DEFINITIONS[citizenClass]?.group === groupTitle);
+              if (!classes.length) {
+                return "";
+              }
+              return `
+                <section class="admin-random-citizens__group">
+                  <h4>${escapeHtml(groupTitle)}</h4>
+                  <div class="admin-random-citizens__class-grid">
+                    ${classes
+                      .map((citizenClass) => {
+                        const emoji = CITIZEN_DEFINITIONS[citizenClass]?.emoji ?? "*";
+                        return `
+                          <label class="admin-random-citizens__class">
+                            <input
+                              type="checkbox"
+                              data-random-citizen-class="${escapeHtml(citizenClass)}"
+                              checked
+                            />
+                            <span><span aria-hidden="true">${escapeHtml(emoji)}</span> ${escapeHtml(citizenClass)}</span>
+                          </label>
+                        `;
+                      })
+                      .join("")}
+                  </div>
+                </section>
+              `;
+            }).join("")}
           </section>
         `
       },

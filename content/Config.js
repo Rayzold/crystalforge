@@ -8,7 +8,7 @@ import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
 // APP_VERSION must stay monotonic because Firebase publish safety compares builds numerically.
-export const APP_VERSION = "v1.7.11";
+export const APP_VERSION = "v1.7.12";
 // Release maturity is tracked separately so unreleased builds do not need to pretend they are public/stable.
 export const APP_RELEASE_STAGE = "preview";
 const RELEASE_STAGE_LABELS = {
@@ -54,10 +54,13 @@ export const PAGE_ROUTES = [
   { key: "vehicles", label: "Vehicles", href: "./vehicles.html" },
   { key: "uniques", label: "Legends", href: "./uniques.html" },
   { key: "behemoths", label: "Behemoths", href: "./behemoths.html" },
+  { key: "npcs", label: "NPCs", href: "./npcs.html" },
   { key: "chronicle", label: "Chronicle", href: "./chronicle.html" },
   { key: "help", label: "Help", href: "./help.html" }
 ];
 export const BUILD_NOTES = [
+  "A new Special NPCs page joins the management routes: GMs can author notable people as character sheets with image, role, status, core stats, abilities, and lore — without the daily resource upkeep that behemoths use.",
+  "Press the backtick (`) key anywhere to open the Admin Console instantly, and the Population tab now includes a Random Citizen Generator with per-class checkboxes for exclusions.",
   "A new Behemoths page joins the management routes: GMs can author huge captured monsters as simple character sheets with image, status, core stats, ability lists, and lore.",
   "Building empowerment shard costs now scale by quality band: 2 shards per 1% from 100%-199%, 3 from 200%-299%, and 4 from 300%-350%.",
   "Expedition supply commitments now respect each vehicle's supply hold, committed supply fields include Max buttons, and crew/supply number inputs no longer drop focus after every typed digit.",

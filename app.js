@@ -38,6 +38,7 @@ import { addMonthsToOffset, dateFromParts, formatDate, getMonthStartOffset, getS
 import {
   addCitizens,
   applyCitizenBulkSet,
+  generateRandomCitizens,
   promoteCitizens,
   removeCitizens,
   resetCitizens,
@@ -97,6 +98,17 @@ import {
   updateBehemothStat,
   updateBehemothUpkeep
 } from "./systems/BehemothSystem.js";
+import {
+  addNpc,
+  addNpcAbility,
+  clearNpcImage,
+  removeNpc,
+  removeNpcAbility,
+  setNpcImageData,
+  updateNpcAbility,
+  updateNpcField,
+  updateNpcStat
+} from "./systems/NpcSystem.js";
 import { getDailyCitySnapshot } from "./systems/CitySnapshotSystem.js";
 import { manifestSelectedRarity } from "./systems/GachaSystem.js";
 import { addHistoryEntry } from "./systems/HistoryLogSystem.js";
@@ -1681,6 +1693,28 @@ function bulkCitizens(nextBulk) {
   reportSuccess("Bulk citizen update applied.");
 }
 
+function generateRandomCitizensAction({ amount, excludedClasses } = {}) {
+  const total = Math.max(0, Math.floor(Number(amount) || 0));
+  if (total <= 0) {
+    reportError("Set an amount greater than zero to generate random citizens.");
+    return;
+  }
+  let result = { totalAdded: 0, distribution: {} };
+  commit((draft) => {
+    result = generateRandomCitizens(draft, total, excludedClasses ?? []);
+  });
+  if (!result.totalAdded) {
+    reportError("No eligible classes are enabled. Toggle at least one before generating.");
+    return;
+  }
+  markRecentCitizenChanges(Object.keys(result.distribution).filter((key) => result.distribution[key] > 0));
+  const filled = Object.entries(result.distribution).filter(([, count]) => count > 0);
+  const breakdown = filled.length
+    ? filled.map(([citizenClass, count]) => `${count} ${citizenClass}`).join(", ")
+    : "no citizens";
+  reportSuccess(`Added ${result.totalAdded} random citizens: ${breakdown}.`);
+}
+
 function spawnBuilding({ name, rarity, quality, catalogEntry }) {
   if (!name.trim()) {
     reportError("Building name is required.");
@@ -2844,6 +2878,7 @@ const actions = {
     reportSuccess("Citizens reset.");
   },
   bulkCitizens,
+  generateRandomCitizens: generateRandomCitizensAction,
   addManualLegend(payload) {
     const result = commit((draft) => addManualUniqueCitizen(draft, payload));
     if (!result?.ok) {
@@ -3105,6 +3140,7 @@ gameState.subscribe((state) => {
   audioEngine.setMuted(state.settings.muted);
   audioEngine.setPage(pageKey);
   document.body.dataset.theme = state.settings.theme ?? "dark";
+  document.documentElement.dataset.textSize = state.settings.textSize ?? "medium";
   renderer.render(state);
   applyMapViewPreview();
   adminConsole.render(state);
@@ -3184,6 +3220,13 @@ document.addEventListener("keydown", (event) => {
   }
 
   const key = event.key;
+
+  if (key === "`") {
+    event.preventDefault();
+    actions.openAdmin();
+    return;
+  }
+
   const isAdminCodeKey = key.length === 1 && /[0-9!]/.test(key);
 
   if (isAdminCodeKey) {
@@ -3238,6 +3281,17 @@ root.addEventListener("click", async (event) => {
     case "set-ui-density":
       commit((draft) => {
         draft.settings.uiDensity = ["comfort", "compact", "dense"].includes(target.dataset.density) ? target.dataset.density : "compact";
+      });
+      break;
+    case "toggle-concise-mode":
+      commit((draft) => {
+        draft.settings.conciseMode = draft.settings.conciseMode !== true;
+      });
+      reportSuccess(`Concise mode ${getCurrentState().settings.conciseMode ? "on" : "off"}.`);
+      break;
+    case "set-text-size":
+      commit((draft) => {
+        draft.settings.textSize = ["small", "medium", "large"].includes(target.dataset.textSize) ? target.dataset.textSize : "medium";
       });
       break;
     case "open-build-notes":
@@ -3706,6 +3760,62 @@ root.addEventListener("click", async (event) => {
       }
       commit((draft) => {
         removeBehemothUpkeep(draft, behemothId, entryId);
+      });
+      break;
+    }
+    case "add-npc": {
+      void audioEngine.playUiAccent("soft");
+      let createdName = "New NPC";
+      commit((draft) => {
+        const created = addNpc(draft);
+        if (created) {
+          createdName = created.name;
+        }
+      });
+      reportSuccess(`${createdName} added to the NPC roster.`);
+      break;
+    }
+    case "delete-npc": {
+      const npcId = target.dataset.npcId ?? "";
+      if (!npcId) {
+        break;
+      }
+      const removedName = getCurrentState().npcs?.find((entry) => entry.id === npcId)?.name ?? "NPC";
+      void audioEngine.playUiAccent("soft");
+      commit((draft) => {
+        removeNpc(draft, npcId);
+      });
+      reportSuccess(`${removedName} removed from the NPC roster.`);
+      break;
+    }
+    case "add-npc-ability": {
+      const npcId = target.dataset.npcId ?? "";
+      if (!npcId) {
+        break;
+      }
+      commit((draft) => {
+        addNpcAbility(draft, npcId);
+      });
+      break;
+    }
+    case "remove-npc-ability": {
+      const npcId = target.dataset.npcId ?? "";
+      const abilityId = target.dataset.abilityId ?? "";
+      if (!npcId || !abilityId) {
+        break;
+      }
+      commit((draft) => {
+        removeNpcAbility(draft, npcId, abilityId);
+      });
+      break;
+    }
+    case "clear-npc-image": {
+      const npcId = target.dataset.npcId ?? "";
+      if (!npcId) {
+        break;
+      }
+      commit((draft) => {
+        clearNpcImage(draft, npcId);
       });
       break;
     }
@@ -4269,6 +4379,68 @@ root.addEventListener("change", (event) => {
     reader.readAsDataURL(file);
   }
 
+  if (target.dataset.action === "set-npc-field") {
+    const npcId = target.dataset.npcId ?? "";
+    const field = target.dataset.field ?? "";
+    if (npcId && field) {
+      commit((draft) => {
+        updateNpcField(draft, npcId, field, target.value);
+      });
+    }
+  }
+
+  if (target.dataset.action === "set-npc-stat") {
+    const npcId = target.dataset.npcId ?? "";
+    const statId = target.dataset.statId ?? "";
+    if (npcId && statId) {
+      commit((draft) => {
+        updateNpcStat(draft, npcId, statId, target.value);
+      });
+    }
+  }
+
+  if (target.dataset.action === "set-npc-ability-field") {
+    const npcId = target.dataset.npcId ?? "";
+    const abilityId = target.dataset.abilityId ?? "";
+    const field = target.dataset.field ?? "";
+    if (npcId && abilityId && field) {
+      commit((draft) => {
+        updateNpcAbility(draft, npcId, abilityId, field, target.value);
+      });
+    }
+  }
+
+  if (target.dataset.action === "upload-npc-image") {
+    const npcId = target.dataset.npcId ?? "";
+    const file = target.files?.[0];
+    if (!npcId || !file) {
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      reportError("Please choose an image file.");
+      target.value = "";
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      reportError("Image is too large. Choose an image under 2 MB.");
+      target.value = "";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result;
+      if (typeof dataUrl === "string") {
+        commit((draft) => {
+          setNpcImageData(draft, npcId, dataUrl);
+        });
+      }
+    };
+    reader.onerror = () => {
+      reportError("Could not read that image. Try a different file.");
+    };
+    reader.readAsDataURL(file);
+  }
+
 });
 
 root.addEventListener("input", (event) => {
@@ -4287,6 +4459,7 @@ root.addEventListener("input", (event) => {
 
 audioEngine.setMuted(getCurrentState().settings.muted);
 document.body.dataset.theme = "dark";
+document.documentElement.dataset.textSize = getCurrentState().settings.textSize ?? "medium";
 
 function applyUrlFocusTargets() {
   const params = new URLSearchParams(window.location.search);

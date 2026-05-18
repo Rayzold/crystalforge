@@ -33,6 +33,7 @@ const ROUTE_GLYPHS = {
   vehicles: "\u{1F69A}",
   uniques: "\u2728",
   behemoths: "\u{1F409}",
+  npcs: "\u{1F3AD}",
   chronicle: "\u{1F4DC}",
   help: "\u2754"
 };
@@ -58,6 +59,12 @@ const UI_DENSITY_OPTIONS = [
   { id: "comfort", label: "Comfort" },
   { id: "compact", label: "Compact" },
   { id: "dense", label: "Dense" }
+];
+
+const TEXT_SIZE_OPTIONS = [
+  { id: "small", label: "Small" },
+  { id: "medium", label: "Medium" },
+  { id: "large", label: "Large" }
 ];
 
 function formatNumericDate(dayOffset = 0) {
@@ -237,7 +244,7 @@ function renderResourceDeltaStrip(state) {
   `;
 }
 
-function renderDensityControls(currentDensity = "compact") {
+function renderDensityControls(currentDensity = "compact", conciseMode = false, currentTextSize = "medium") {
   return `
     <div class="sidebar-density-picker">
       <div class="sidebar-density-picker__copy">
@@ -259,6 +266,34 @@ function renderDensityControls(currentDensity = "compact") {
           `
         ).join("")}
       </div>
+      <div class="sidebar-density-picker__copy sidebar-density-picker__copy--secondary">
+        <span>Text Size</span>
+        <strong>${escapeHtml(TEXT_SIZE_OPTIONS.find((option) => option.id === currentTextSize)?.label ?? "Medium")}</strong>
+      </div>
+      <div class="sidebar-density-picker__buttons" role="group" aria-label="Text size">
+        ${TEXT_SIZE_OPTIONS.map(
+          (option) => `
+            <button
+              class="button button--ghost sidebar-density-picker__button ${currentTextSize === option.id ? "is-active" : ""}"
+              type="button"
+              data-action="set-text-size"
+              data-text-size="${option.id}"
+              aria-pressed="${currentTextSize === option.id ? "true" : "false"}"
+            >
+              ${escapeHtml(option.label)}
+            </button>
+          `
+        ).join("")}
+      </div>
+      <button
+        class="button button--ghost sidebar-density-picker__concise ${conciseMode ? "is-active" : ""}"
+        type="button"
+        data-action="toggle-concise-mode"
+        aria-pressed="${conciseMode ? "true" : "false"}"
+        title="Hide subtitles, helper text, and empty-state explainers"
+      >
+        Concise Mode: ${conciseMode ? "On" : "Off"}
+      </button>
     </div>
   `;
 }
@@ -526,14 +561,14 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
   const townFocusAvailability = getTownFocusAvailability(state);
   const currentFocus = getCurrentTownFocus(state);
   const showResourceChrome = RESOURCE_CHROME_PAGES.has(pageKey);
-  const showGlobalCommandStrip = !["city", "forge", "expeditions", "vehicles", "uniques", "behemoths", "chronicle", "help"].includes(pageKey);
+  const showGlobalCommandStrip = !["city", "forge", "expeditions", "vehicles", "uniques", "behemoths", "npcs", "chronicle", "help"].includes(pageKey);
   const showBuildingStatus = BUILDING_STATUS_PAGES.has(pageKey);
   const cityAlertCount = getCriticalAlerts(state).length;
   const availableCrystalCount = Object.values(state.crystals ?? {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
   const expeditionCount = (state.expeditions?.active?.length ?? 0) + (state.expeditions?.pending?.length ?? 0);
   const uniqueCitizenCount = state.uniqueCitizens?.length ?? 0;
   const coreRoutes = PAGE_ROUTES.filter((route) => ["home", "forge", "economy", "city"].includes(route.key));
-  const managementRoutes = PAGE_ROUTES.filter((route) => ["citizens", "expeditions", "vehicles", "uniques", "behemoths", "chronicle", "help"].includes(route.key));
+  const managementRoutes = PAGE_ROUTES.filter((route) => ["citizens", "expeditions", "vehicles", "uniques", "behemoths", "npcs", "chronicle", "help"].includes(route.key));
   const manifestedBuildings = orderSidebarBuildings(state, state.buildings.filter((building) => building.isComplete));
   const incubatingBuildings = orderSidebarBuildings(state, getActiveConstructionQueue(state));
   const availableBuildings = orderSidebarBuildings(state, getAvailableConstructionQueue(state));
@@ -564,8 +599,9 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
   const diceType = DICE_TYPES.includes(state.settings.diceType) ? state.settings.diceType : "d20";
   const lastDiceRoll = state.settings.lastDiceRoll ?? null;
   const uiDensity = UI_DENSITY_OPTIONS.some((option) => option.id === state.settings?.uiDensity) ? state.settings.uiDensity : "compact";
+  const conciseMode = state.settings?.conciseMode === true;
   return `
-    <div class="game-shell game-shell--density-${uiDensity} game-shell--page-${pageKey} ${currentFocus ? `game-shell--focus-${currentFocus.id}` : ""} ${state.settings.liveSessionView ? "game-shell--live-session" : ""} game-shell--theme-${state.settings.theme ?? "dark"}">
+    <div class="game-shell game-shell--density-${uiDensity} game-shell--page-${pageKey} ${currentFocus ? `game-shell--focus-${currentFocus.id}` : ""} ${state.settings.liveSessionView ? "game-shell--live-session" : ""} ${conciseMode ? "game-shell--concise" : ""} game-shell--theme-${state.settings.theme ?? "dark"}">
       ${
         MASCOT_MEDIA?.enabled
           ? `
@@ -617,7 +653,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
             </summary>
             <div class="sidebar-gm-tools__body">
               <button class="button button--ghost" data-action="open-admin">${state.settings.liveSessionView ? "GM Console" : "Admin Console"}</button>
-              ${renderDensityControls(uiDensity)}
+              ${renderDensityControls(uiDensity, conciseMode, state.settings?.textSize ?? "medium")}
               <div class="sidebar-nav__save-actions">
                 <button class="button button--ghost" data-action="save-firebase-realm">Save</button>
                 <button class="button button--ghost" data-action="load-firebase-realm">Load</button>

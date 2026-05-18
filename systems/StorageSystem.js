@@ -41,6 +41,7 @@ import {
 } from "./ExpeditionSystem.js";
 import { createDefaultVehicleFleet } from "../content/VehicleConfig.js";
 import { normalizeBehemoths } from "./BehemothSystem.js";
+import { normalizeNpcs } from "./NpcSystem.js";
 
 const SESSION_STATE_KEY = "crystal-forge-session-state-v1";
 const BUILD_NOTES_SEEN_KEY = "crystal-forge-build-notes-seen-v1";
@@ -119,6 +120,7 @@ export function createInitialState(preset = DEFAULT_START_PRESET) {
     expeditions: createDefaultExpeditionState(),
     uniqueCitizens: [],
     behemoths: [],
+    npcs: [],
     buildings: [],
     rollTables: createDefaultRollTables(),
     buildingCatalog: structuredClone(BASE_BUILDING_CATALOG),
@@ -183,6 +185,7 @@ export function createSingleCommonCrystalResetState() {
   state.expeditions = createDefaultExpeditionState();
   state.uniqueCitizens = [];
   state.behemoths = [];
+  state.npcs = [];
   state.buildings = [];
   state.constructionPriority = [];
   state.activeConstructionIds = [];
@@ -342,6 +345,9 @@ function normalizeSettings(sourceSettings, baseSettings) {
   normalized.onboardingDismissed = normalized.onboardingDismissed === true;
   normalized.liveSessionView = normalized.liveSessionView === true;
   normalized.uiDensity = allowedDensities.has(normalized.uiDensity) ? normalized.uiDensity : (baseSettings?.uiDensity ?? "compact");
+  normalized.conciseMode = normalized.conciseMode === true;
+  const allowedTextSizes = new Set(["small", "medium", "large"]);
+  normalized.textSize = allowedTextSizes.has(normalized.textSize) ? normalized.textSize : (baseSettings?.textSize ?? "medium");
   normalized.decisionSnoozes =
     normalized.decisionSnoozes && typeof normalized.decisionSnoozes === "object"
       ? Object.fromEntries(
@@ -528,6 +534,7 @@ export function validateAndMigrateSave(rawSave) {
     expeditions: normalizeExpeditionState(rawSave.expeditions ?? base.expeditions),
     uniqueCitizens: normalizeUniqueCitizens(rawSave.uniqueCitizens ?? base.uniqueCitizens),
     behemoths: normalizeBehemoths(rawSave.behemoths ?? base.behemoths),
+    npcs: normalizeNpcs(rawSave.npcs ?? base.npcs),
     rollTables: normalizeRollTables(rawSave.rollTables),
     buildingCatalog: normalizedCatalog,
     districts: normalizeDistrictState(rawSave.districts),
