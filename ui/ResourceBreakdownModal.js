@@ -242,7 +242,7 @@ export function renderResourceBreakdownModal(state) {
 
   return `
     <div class="modal-overlay resource-breakdown-modal">
-      <button class="modal-overlay__dismiss" type="button" data-action="close-resource-breakdown" aria-label="Close resource breakdown"></button>
+      <button class="modal-overlay__dismiss" type="button" data-action="close-resource-breakdown" aria-label="Close resource breakdown" tabindex="-1"></button>
       <section class="modal-card resource-breakdown-modal__card" role="dialog" aria-modal="true" aria-labelledby="resource-breakdown-title">
         <button class="modal-card__close" type="button" data-action="close-resource-breakdown" aria-label="Close resource breakdown">x</button>
         <header class="resource-breakdown-modal__header">

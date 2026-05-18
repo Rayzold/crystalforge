@@ -14,6 +14,7 @@ import {
 import { EVENT_POOLS } from "./content/EventPools.js";
 import { RARITY_ORDER } from "./content/Rarities.js";
 import { GameState } from "./engine/GameState.js";
+import { installModalKeyboardHandlers } from "./engine/ModalFocus.js";
 import { formatNumber } from "./engine/Utils.js";
 import { AnimationEngine, getManifestRevealTotalDuration } from "./fx/AnimationEngine.js";
 import { AudioEngine } from "./fx/AudioEngine.js";
@@ -82,6 +83,17 @@ import {
   startExpedition
 } from "./systems/ExpeditionSystem.js";
 import { VEHICLE_DEFINITIONS } from "./content/VehicleConfig.js";
+import {
+  addBehemoth,
+  addBehemothAbility,
+  clearBehemothImage,
+  removeBehemoth,
+  removeBehemothAbility,
+  setBehemothImageData,
+  updateBehemothAbility,
+  updateBehemothField,
+  updateBehemothStat
+} from "./systems/BehemothSystem.js";
 import { getDailyCitySnapshot } from "./systems/CitySnapshotSystem.js";
 import { manifestSelectedRarity } from "./systems/GachaSystem.js";
 import { addHistoryEntry } from "./systems/HistoryLogSystem.js";
@@ -3158,6 +3170,8 @@ function getAdminUnlockPrefix(buffer) {
   return "";
 }
 
+installModalKeyboardHandlers(document);
+
 document.addEventListener("keydown", (event) => {
   if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) {
     return;
@@ -3625,6 +3639,62 @@ root.addEventListener("click", async (event) => {
         delta: Number(target.dataset.delta ?? 0)
       });
       break;
+    case "add-behemoth": {
+      void audioEngine.playUiAccent("soft");
+      let createdName = "New Behemoth";
+      commit((draft) => {
+        const created = addBehemoth(draft);
+        if (created) {
+          createdName = created.name;
+        }
+      });
+      reportSuccess(`${createdName} added to the bestiary.`);
+      break;
+    }
+    case "delete-behemoth": {
+      const behemothId = target.dataset.behemothId ?? "";
+      if (!behemothId) {
+        break;
+      }
+      const removedName = getCurrentState().behemoths?.find((entry) => entry.id === behemothId)?.name ?? "Behemoth";
+      void audioEngine.playUiAccent("soft");
+      commit((draft) => {
+        removeBehemoth(draft, behemothId);
+      });
+      reportSuccess(`${removedName} removed from the bestiary.`);
+      break;
+    }
+    case "add-behemoth-ability": {
+      const behemothId = target.dataset.behemothId ?? "";
+      if (!behemothId) {
+        break;
+      }
+      commit((draft) => {
+        addBehemothAbility(draft, behemothId);
+      });
+      break;
+    }
+    case "remove-behemoth-ability": {
+      const behemothId = target.dataset.behemothId ?? "";
+      const abilityId = target.dataset.abilityId ?? "";
+      if (!behemothId || !abilityId) {
+        break;
+      }
+      commit((draft) => {
+        removeBehemothAbility(draft, behemothId, abilityId);
+      });
+      break;
+    }
+    case "clear-behemoth-image": {
+      const behemothId = target.dataset.behemothId ?? "";
+      if (!behemothId) {
+        break;
+      }
+      commit((draft) => {
+        clearBehemothImage(draft, behemothId);
+      });
+      break;
+    }
     case "toggle-incubator-support":
       setIncubatorSupportState(target.dataset.buildingId, target.dataset.supportKey, target.dataset.enabled !== "true");
       break;
@@ -4100,6 +4170,68 @@ root.addEventListener("change", (event) => {
     const inputMax = Number(target.max);
     const nextValue = Number.isFinite(inputMax) ? Math.min(inputMax, Number(target.value) || 0) : target.value;
     setExpeditionResourceDraftValue(target.dataset.resourceKey, nextValue);
+  }
+
+  if (target.dataset.action === "set-behemoth-field") {
+    const behemothId = target.dataset.behemothId ?? "";
+    const field = target.dataset.field ?? "";
+    if (behemothId && field) {
+      commit((draft) => {
+        updateBehemothField(draft, behemothId, field, target.value);
+      });
+    }
+  }
+
+  if (target.dataset.action === "set-behemoth-stat") {
+    const behemothId = target.dataset.behemothId ?? "";
+    const statId = target.dataset.statId ?? "";
+    if (behemothId && statId) {
+      commit((draft) => {
+        updateBehemothStat(draft, behemothId, statId, target.value);
+      });
+    }
+  }
+
+  if (target.dataset.action === "set-behemoth-ability-field") {
+    const behemothId = target.dataset.behemothId ?? "";
+    const abilityId = target.dataset.abilityId ?? "";
+    const field = target.dataset.field ?? "";
+    if (behemothId && abilityId && field) {
+      commit((draft) => {
+        updateBehemothAbility(draft, behemothId, abilityId, field, target.value);
+      });
+    }
+  }
+
+  if (target.dataset.action === "upload-behemoth-image") {
+    const behemothId = target.dataset.behemothId ?? "";
+    const file = target.files?.[0];
+    if (!behemothId || !file) {
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      reportError("Please choose an image file.");
+      target.value = "";
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      reportError("Image is too large. Choose an image under 2 MB.");
+      target.value = "";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result;
+      if (typeof dataUrl === "string") {
+        commit((draft) => {
+          setBehemothImageData(draft, behemothId, dataUrl);
+        });
+      }
+    };
+    reader.onerror = () => {
+      reportError("Could not read that image. Try a different file.");
+    };
+    reader.readAsDataURL(file);
   }
 
 });

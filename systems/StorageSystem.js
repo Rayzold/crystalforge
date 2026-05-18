@@ -40,6 +40,7 @@ import {
   normalizeVehicleFleet
 } from "./ExpeditionSystem.js";
 import { createDefaultVehicleFleet } from "../content/VehicleConfig.js";
+import { normalizeBehemoths } from "./BehemothSystem.js";
 
 const SESSION_STATE_KEY = "crystal-forge-session-state-v1";
 const BUILD_NOTES_SEEN_KEY = "crystal-forge-build-notes-seen-v1";
@@ -117,6 +118,7 @@ export function createInitialState(preset = DEFAULT_START_PRESET) {
     vehicles: initialVehicles,
     expeditions: createDefaultExpeditionState(),
     uniqueCitizens: [],
+    behemoths: [],
     buildings: [],
     rollTables: createDefaultRollTables(),
     buildingCatalog: structuredClone(BASE_BUILDING_CATALOG),
@@ -180,6 +182,7 @@ export function createSingleCommonCrystalResetState() {
   state.vehicles = createDefaultVehicleFleet({ scoutBuggy: 1, trailBuggy: 1, siegeBuggy: 0, elementalSkiff: 0, elementalFrigate: 0, grandElementalAirship: 0 });
   state.expeditions = createDefaultExpeditionState();
   state.uniqueCitizens = [];
+  state.behemoths = [];
   state.buildings = [];
   state.constructionPriority = [];
   state.activeConstructionIds = [];
@@ -524,6 +527,7 @@ export function validateAndMigrateSave(rawSave) {
     vehicles: normalizeVehicleFleet(rawSave.vehicles ?? base.vehicles),
     expeditions: normalizeExpeditionState(rawSave.expeditions ?? base.expeditions),
     uniqueCitizens: normalizeUniqueCitizens(rawSave.uniqueCitizens ?? base.uniqueCitizens),
+    behemoths: normalizeBehemoths(rawSave.behemoths ?? base.behemoths),
     rollTables: normalizeRollTables(rawSave.rollTables),
     buildingCatalog: normalizedCatalog,
     districts: normalizeDistrictState(rawSave.districts),

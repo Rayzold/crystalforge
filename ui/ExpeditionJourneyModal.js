@@ -107,7 +107,7 @@ export function renderExpeditionJourneyModal(state) {
 
   return `
     <div class="modal-overlay expedition-journey-modal">
-      <button class="modal-overlay__dismiss" type="button" data-action="close-expedition-journey" aria-label="Close expedition journey"></button>
+      <button class="modal-overlay__dismiss" type="button" data-action="close-expedition-journey" aria-label="Close expedition journey" tabindex="-1"></button>
       <section class="modal-card expedition-journey-modal__card ${isResolving ? "is-resolving" : ""}" role="dialog" aria-modal="true" aria-labelledby="expedition-journey-title" aria-busy="${isResolving ? "true" : "false"}">
         <button class="modal-card__close" type="button" data-action="close-expedition-journey" aria-label="Close expedition journey">x</button>
         <div class="expedition-journey-modal__header">

@@ -42,8 +42,8 @@ export function renderManifestCompleteModal(state) {
 
     return `
     <div class="modal manifest-complete-modal is-open" id="manifest-complete-modal">
-      <div class="modal__backdrop" data-action="close-manifest-complete"></div>
-      <div class="modal__dialog manifest-complete-modal__dialog">
+      <div class="modal__backdrop" data-action="close-manifest-complete" aria-hidden="true"></div>
+      <div class="modal__dialog manifest-complete-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="manifest-complete-modal__title">
         <button class="icon-button manifest-complete-modal__close" data-action="close-manifest-complete" aria-label="Close manifest completion modal">x</button>
         <div class="manifest-complete-modal__body">
           <div class="manifest-complete-modal__visual ${isCrystalUpgrade ? "manifest-complete-modal__visual--upgrade" : ""} ${shouldAnimate ? "manifest-complete-modal__visual--reveal" : ""}">
@@ -54,7 +54,7 @@ export function renderManifestCompleteModal(state) {
             }
           </div>
           <span class="manifest-complete-modal__eyebrow">${isCrystalUpgrade ? "Rarity Elevated" : "Manifestation Complete"}</span>
-          <h2>${escapeHtml(manifestModal.rolledName)}</h2>
+          <h2 id="manifest-complete-modal__title">${escapeHtml(manifestModal.rolledName)}</h2>
           <p>${manifestSentence}</p>
           ${
             isCrystalUpgrade
@@ -135,12 +135,12 @@ export function renderManifestCompleteModal(state) {
   } catch (error) {
     return `
       <div class="modal manifest-complete-modal is-open" id="manifest-complete-modal">
-        <div class="modal__backdrop" data-action="close-manifest-complete"></div>
-        <div class="modal__dialog manifest-complete-modal__dialog">
+        <div class="modal__backdrop" data-action="close-manifest-complete" aria-hidden="true"></div>
+        <div class="modal__dialog manifest-complete-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="manifest-complete-modal__title">
           <button class="icon-button manifest-complete-modal__close" data-action="close-manifest-complete" aria-label="Close manifest completion modal">x</button>
           <div class="manifest-complete-modal__body">
             <span class="manifest-complete-modal__eyebrow">Manifestation Complete</span>
-            <h2>${escapeHtml(String(manifestModal.rolledName ?? "Manifest Result"))}</h2>
+            <h2 id="manifest-complete-modal__title">${escapeHtml(String(manifestModal.rolledName ?? "Manifest Result"))}</h2>
             <p>Fallback manifest popup rendered because the full result view failed to build.</p>
             <div class="manifest-complete-modal__quality">
               <span>Quality</span>

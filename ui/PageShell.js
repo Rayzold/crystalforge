@@ -32,6 +32,7 @@ const ROUTE_GLYPHS = {
   expeditions: "\u{1F9ED}",
   vehicles: "\u{1F69A}",
   uniques: "\u2728",
+  behemoths: "\u{1F409}",
   chronicle: "\u{1F4DC}",
   help: "\u2754"
 };
@@ -525,14 +526,14 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
   const townFocusAvailability = getTownFocusAvailability(state);
   const currentFocus = getCurrentTownFocus(state);
   const showResourceChrome = RESOURCE_CHROME_PAGES.has(pageKey);
-  const showGlobalCommandStrip = !["city", "forge", "expeditions", "vehicles", "uniques", "chronicle", "help"].includes(pageKey);
+  const showGlobalCommandStrip = !["city", "forge", "expeditions", "vehicles", "uniques", "behemoths", "chronicle", "help"].includes(pageKey);
   const showBuildingStatus = BUILDING_STATUS_PAGES.has(pageKey);
   const cityAlertCount = getCriticalAlerts(state).length;
   const availableCrystalCount = Object.values(state.crystals ?? {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
   const expeditionCount = (state.expeditions?.active?.length ?? 0) + (state.expeditions?.pending?.length ?? 0);
   const uniqueCitizenCount = state.uniqueCitizens?.length ?? 0;
   const coreRoutes = PAGE_ROUTES.filter((route) => ["home", "forge", "economy", "city"].includes(route.key));
-  const managementRoutes = PAGE_ROUTES.filter((route) => ["citizens", "expeditions", "vehicles", "uniques", "chronicle", "help"].includes(route.key));
+  const managementRoutes = PAGE_ROUTES.filter((route) => ["citizens", "expeditions", "vehicles", "uniques", "behemoths", "chronicle", "help"].includes(route.key));
   const manifestedBuildings = orderSidebarBuildings(state, state.buildings.filter((building) => building.isComplete));
   const incubatingBuildings = orderSidebarBuildings(state, getActiveConstructionQueue(state));
   const availableBuildings = orderSidebarBuildings(state, getAvailableConstructionQueue(state));

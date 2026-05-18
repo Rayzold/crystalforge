@@ -14,7 +14,7 @@ export const EXPEDITION_APPROACHES = {
     id: "cautious",
     label: "Cautious",
     riskModifier: 0.8,
-    rewardModifier: 0.92,
+    rewardModifier: 0.85,
     summary: "Lower risk, lighter rewards."
   },
   balanced: {
@@ -28,7 +28,7 @@ export const EXPEDITION_APPROACHES = {
     id: "bold",
     label: "Bold",
     riskModifier: 1.25,
-    rewardModifier: 1.2,
+    rewardModifier: 1.35,
     summary: "Higher danger, but better odds of rare results."
   }
 };

@@ -30,10 +30,10 @@ const RESOURCE_LABELS = {
 };
 
 const RESOURCE_POWER_VALUES = {
-  food: 0.06,
-  gold: 0.05,
-  materials: 0.04,
-  mana: 0.08
+  food: 0.14,
+  gold: 0.12,
+  materials: 0.1,
+  mana: 0.2
 };
 
 const RESOURCE_EXPEDITION_HELP = {
@@ -816,22 +816,22 @@ function renderExpeditionSummary(state) {
           </ul>
         </article>
       </div>
-      ${
-        state.ui?.adminUnlocked
-          ? `
-            <div class="expedition-gm-strip">
-              <strong>GM Expedition Tools</strong>
-              <div class="expedition-button-row">
-                <button class="button button--ghost" type="button" data-action="refresh-expedition-board">Refresh Board</button>
+      <div class="expedition-gm-strip">
+        <strong>GM Expedition Tools</strong>
+        <div class="expedition-button-row">
+          <button class="button" type="button" data-action="refresh-expedition-board" title="Discard the current mission cards and draw a fresh board.">Refresh Mission Board</button>
+          ${
+            state.ui?.adminUnlocked
+              ? `
                 <button class="button button--ghost" type="button" data-action="force-return-expedition" ${overview.activeExpeditions ? "" : "disabled"}>Force Soonest Return</button>
                 <button class="button button--ghost" type="button" data-action="advance-time" data-step="day">+1 Day</button>
                 <button class="button button--ghost" type="button" data-action="adjust-vehicle-count" data-vehicle-id="trailBuggy" data-delta="1">+ Trail Buggy</button>
                 <button class="button button--ghost" type="button" data-action="adjust-vehicle-count" data-vehicle-id="elementalSkiff" data-delta="1">+ Elemental Skiff</button>
-              </div>
-            </div>
-          `
-          : ""
-      }
+              `
+              : ""
+          }
+        </div>
+      </div>
     </section>
   `;
 }

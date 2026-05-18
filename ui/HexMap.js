@@ -91,7 +91,7 @@ function renderDistrictCrest(building, districtColor, cx, cy, size) {
   const crestPath = DISTRICT_CRESTS[building.district] ?? DISTRICT_CRESTS["Residential District"];
 
   return `
-    <g class="hex-map__crest" transform="translate(${crestX} ${crestY})">
+    <g class="hex-map__crest" aria-hidden="true" transform="translate(${crestX} ${crestY})">
       <circle class="hex-map__crest-badge" r="${size * 0.18}" fill="${districtColor}" style="--crest-color:${districtColor}"></circle>
       <g class="hex-map__crest-icon" transform="translate(-5.7 -5.7) scale(0.18)">
         ${crestPath}
@@ -1282,7 +1282,7 @@ export function renderHexMap(state) {
                   }
                    ${
                      isPulseCell
-                       ? `<g class="hex-map__pulse-tag">
+                       ? `<g class="hex-map__pulse-tag" aria-hidden="true">
                            <circle cx="${center.x}" cy="${center.y - size * 0.48}" r="${size * 0.3}"></circle>
                            <text x="${center.x}" y="${center.y - size * 0.42}" text-anchor="middle">+${formatNumber((adjacencyPulse.gain ?? 0) * 100, 1)}%</text>
                          </g>`

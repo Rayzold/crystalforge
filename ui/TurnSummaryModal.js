@@ -135,7 +135,7 @@ export function renderTurnSummaryModal(state) {
 
   return `
     <div class="modal-overlay">
-      <button class="modal-overlay__dismiss" type="button" data-action="close-turn-summary" aria-label="Close turn summary"></button>
+      <button class="modal-overlay__dismiss" type="button" data-action="close-turn-summary" aria-label="Close turn summary" tabindex="-1"></button>
       <section class="modal-card turn-summary-modal" role="dialog" aria-modal="true" aria-labelledby="turn-summary-title">
         <button class="modal-card__close" type="button" data-action="close-turn-summary" aria-label="Close turn summary">x</button>
         <div class="turn-summary-modal__header">

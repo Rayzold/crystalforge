@@ -12,7 +12,7 @@ export function renderBuildNotesModal(state) {
 
   return `
     <div class="modal-overlay build-notes-modal">
-      <button class="modal-overlay__dismiss" type="button" data-action="close-build-notes" aria-label="Close build notes"></button>
+      <button class="modal-overlay__dismiss" type="button" data-action="close-build-notes" aria-label="Close build notes" tabindex="-1"></button>
       <section class="modal-card build-notes-modal__card" role="dialog" aria-modal="true" aria-labelledby="build-notes-title">
         <button class="modal-card__close" type="button" data-action="close-build-notes" aria-label="Close build notes">x</button>
         <header class="build-notes-modal__header">

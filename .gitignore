@@ -1,5 +1,6 @@
 .chrome-headless/
 .edge-headless/
+.claude/
 
 node_modules/
 .cache/

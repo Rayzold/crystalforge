@@ -24,14 +24,17 @@ import { renderTownFocusCouncilModal } from "./TownFocusCouncilModal.js";
 import { renderTurnSummaryModal } from "./TurnSummaryModal.js";
 import { renderUniqueCitizensPage } from "./UniqueCitizensPage.js";
 import { renderVehiclesPage } from "./VehiclesPage.js";
+import { renderBehemothsPage } from "./BehemothsPage.js";
 import { getMayorSuggestions } from "../systems/TownFocusSystem.js";
 import { getDefaultTownFocusPreviewId } from "./TownFocusShared.js";
 import { renderTownFocusCeremonyOverlay } from "./TownFocusCeremonyOverlay.js";
+import { ModalFocusManager } from "../engine/ModalFocus.js";
 
 export class UIRenderer {
   constructor(root, pageKey = "home") {
     this.root = root;
     this.pageKey = pageKey;
+    this.modalFocus = new ModalFocusManager();
     this.transientUi = {
       hoveredMapCell: null,
       inspectedBuildingId: null,
@@ -142,6 +145,8 @@ export class UIRenderer {
         return renderExpeditionsPage(state);
       case "vehicles":
         return renderVehiclesPage(state);
+      case "behemoths":
+        return renderBehemothsPage(state);
       case "uniques":
         return renderUniqueCitizensPage(state);
       case "chronicle":
@@ -159,6 +164,7 @@ export class UIRenderer {
   render(state) {
     this.syncCouncilModal(state);
     this.syncBuildNotesModal();
+    this.modalFocus.capturePreRender();
     const viewState = {
       ...state,
       transientUi: this.transientUi
@@ -178,6 +184,7 @@ export class UIRenderer {
     ].join("");
     this.root.innerHTML = renderPageShell(viewState, this.pageKey, page, overlays);
     attachHelpBubbles(this.root);
+    this.modalFocus.applyPostRender();
   }
 
   setTransientUi(patch, state) {

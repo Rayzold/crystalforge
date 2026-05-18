@@ -227,8 +227,8 @@ const LEGACY_VEHICLE_ID_MAP = {
 
 const MISSION_RISK_SETTINGS = {
   Low: { difficulty: 0.88, reward: 0.92, unique: 0.45, label: "Low Risk" },
-  Medium: { difficulty: 1, reward: 1, unique: 1, label: "Medium Risk" },
-  High: { difficulty: 1.18, reward: 1.15, unique: 1.18, label: "High Risk" }
+  Medium: { difficulty: 1, reward: 1.05, unique: 1, label: "Medium Risk" },
+  High: { difficulty: 1.18, reward: 1.4, unique: 1.18, label: "High Risk" }
 };
 
 const MISSION_DISTANCE_SETTINGS = {
@@ -1910,10 +1910,10 @@ function computeExpeditionPowerScore(state, expeditionType, mission, approach, v
   }, 0);
 
   const supplyScore =
-    committedResources.food * 0.06 +
-    committedResources.gold * 0.05 +
-    committedResources.materials * 0.04 +
-    committedResources.mana * 0.08;
+    committedResources.food * 0.14 +
+    committedResources.gold * 0.12 +
+    committedResources.materials * 0.1 +
+    committedResources.mana * 0.2;
   const durationFactor = 1 + durationDays / 14;
   const uniqueBonus = 1 + getUniqueCitizenExpeditionPowerPercent(state, expeditionType.id) / 100;
   const missionRisk = getMissionRiskSettings(mission?.risk);
@@ -2384,7 +2384,7 @@ function buildExpeditionRewards(state, expedition, journeyProjection = null) {
     0.75,
     expedition.successScore *
       qualityNoise *
-      4 *
+      6 *
       missionRisk.reward *
       rewardSynergy *
       (Number(journeyProjection?.rewardMultiplier ?? 1) || 1)
