@@ -86,13 +86,16 @@ import { VEHICLE_DEFINITIONS } from "./content/VehicleConfig.js";
 import {
   addBehemoth,
   addBehemothAbility,
+  addBehemothUpkeep,
   clearBehemothImage,
   removeBehemoth,
   removeBehemothAbility,
+  removeBehemothUpkeep,
   setBehemothImageData,
   updateBehemothAbility,
   updateBehemothField,
-  updateBehemothStat
+  updateBehemothStat,
+  updateBehemothUpkeep
 } from "./systems/BehemothSystem.js";
 import { getDailyCitySnapshot } from "./systems/CitySnapshotSystem.js";
 import { manifestSelectedRarity } from "./systems/GachaSystem.js";
@@ -3685,6 +3688,27 @@ root.addEventListener("click", async (event) => {
       });
       break;
     }
+    case "add-behemoth-upkeep": {
+      const behemothId = target.dataset.behemothId ?? "";
+      if (!behemothId) {
+        break;
+      }
+      commit((draft) => {
+        addBehemothUpkeep(draft, behemothId);
+      });
+      break;
+    }
+    case "remove-behemoth-upkeep": {
+      const behemothId = target.dataset.behemothId ?? "";
+      const entryId = target.dataset.entryId ?? "";
+      if (!behemothId || !entryId) {
+        break;
+      }
+      commit((draft) => {
+        removeBehemothUpkeep(draft, behemothId, entryId);
+      });
+      break;
+    }
     case "clear-behemoth-image": {
       const behemothId = target.dataset.behemothId ?? "";
       if (!behemothId) {
@@ -4199,6 +4223,17 @@ root.addEventListener("change", (event) => {
     if (behemothId && abilityId && field) {
       commit((draft) => {
         updateBehemothAbility(draft, behemothId, abilityId, field, target.value);
+      });
+    }
+  }
+
+  if (target.dataset.action === "set-behemoth-upkeep-field") {
+    const behemothId = target.dataset.behemothId ?? "";
+    const entryId = target.dataset.entryId ?? "";
+    const field = target.dataset.field ?? "";
+    if (behemothId && entryId && field) {
+      commit((draft) => {
+        updateBehemothUpkeep(draft, behemothId, entryId, field, target.value);
       });
     }
   }

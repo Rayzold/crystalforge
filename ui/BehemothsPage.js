@@ -8,6 +8,7 @@ import {
   BEHEMOTH_STATUSES,
   BEHEMOTH_STAT_KEYS,
   BEHEMOTH_TEMPERAMENTS,
+  BEHEMOTH_UPKEEP_RESOURCES,
   getBehemothStatusDetail
 } from "../content/BehemothConfig.js";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
@@ -159,6 +160,68 @@ function renderAbilities(behemoth) {
   `;
 }
 
+function renderUpkeep(behemoth) {
+  const upkeep = Array.isArray(behemoth.upkeep) ? behemoth.upkeep : [];
+  if (!upkeep.length) {
+    return `
+      <div class="behemoth-card__abilities-empty">
+        <p>No upkeep set. Use <em>Add Upkeep</em> if this behemoth needs daily resources to stay fed and kept.</p>
+      </div>
+    `;
+  }
+  return `
+    <div class="behemoth-card__upkeep-list">
+      ${upkeep
+        .map(
+          (entry) => `
+            <div class="behemoth-card__upkeep-row">
+              <label class="behemoth-card__field">
+                <span class="behemoth-card__field-label">Resource</span>
+                <select
+                  data-action="set-behemoth-upkeep-field"
+                  data-behemoth-id="${escapeHtml(behemoth.id)}"
+                  data-entry-id="${escapeHtml(entry.id)}"
+                  data-field="resource"
+                >
+                  ${BEHEMOTH_UPKEEP_RESOURCES.map(
+                    (option) => `
+                      <option value="${escapeHtml(option.id)}" ${option.id === entry.resource ? "selected" : ""}>
+                        ${escapeHtml(option.label)}
+                      </option>
+                    `
+                  ).join("")}
+                </select>
+              </label>
+              <label class="behemoth-card__field">
+                <span class="behemoth-card__field-label">Per Day</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  data-action="set-behemoth-upkeep-field"
+                  data-behemoth-id="${escapeHtml(behemoth.id)}"
+                  data-entry-id="${escapeHtml(entry.id)}"
+                  data-field="amount"
+                  value="${formatNumber(Number(entry.amount ?? 0) || 0, 2)}"
+                />
+              </label>
+              <button
+                class="button button--ghost button--small behemoth-card__upkeep-remove"
+                type="button"
+                data-action="remove-behemoth-upkeep"
+                data-behemoth-id="${escapeHtml(behemoth.id)}"
+                data-entry-id="${escapeHtml(entry.id)}"
+                title="Remove upkeep entry"
+                aria-label="Remove upkeep entry"
+              >Remove</button>
+            </div>
+          `
+        )
+        .join("")}
+    </div>
+  `;
+}
+
 function renderCapturedLine(behemoth) {
   if (!Number.isFinite(behemoth.capturedDayOffset)) {
     return "Captured date not set";
@@ -270,6 +333,19 @@ function renderBehemothCard(behemoth) {
             >+ Add Ability</button>
           </div>
           ${renderAbilities(behemoth)}
+        </section>
+
+        <section class="behemoth-card__section">
+          <div class="behemoth-card__section-head">
+            <h4>Daily Upkeep</h4>
+            <button
+              class="button button--ghost button--small"
+              type="button"
+              data-action="add-behemoth-upkeep"
+              data-behemoth-id="${escapeHtml(behemoth.id)}"
+            >+ Add Upkeep</button>
+          </div>
+          ${renderUpkeep(behemoth)}
         </section>
 
         <section class="behemoth-card__section">

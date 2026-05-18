@@ -25,10 +25,18 @@ export const BEHEMOTH_TEMPERAMENTS = [
 ];
 
 export const BEHEMOTH_STAT_KEYS = [
-  { id: "vigor", label: "Vigor", hint: "HP / staying power" },
+  { id: "health", label: "Health", hint: "HP / staying power" },
   { id: "power", label: "Power", hint: "Raw offensive force" },
   { id: "speed", label: "Speed", hint: "Movement and reflex" },
   { id: "defense", label: "Defense", hint: "Hide, ward, resistance" }
+];
+
+export const BEHEMOTH_UPKEEP_RESOURCES = [
+  { id: "food", label: "Food" },
+  { id: "gold", label: "Gold" },
+  { id: "materials", label: "Materials" },
+  { id: "salvage", label: "Salvage" },
+  { id: "mana", label: "Mana" }
 ];
 
 export function getBehemothSizeLabel(id) {

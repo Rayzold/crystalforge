@@ -7,6 +7,7 @@ import {
   BEHEMOTH_STATUSES,
   BEHEMOTH_STAT_KEYS,
   BEHEMOTH_TEMPERAMENTS,
+  BEHEMOTH_UPKEEP_RESOURCES,
   createDefaultBehemothStats
 } from "../content/BehemothConfig.js";
 
@@ -14,6 +15,7 @@ const VALID_SIZE_IDS = new Set(BEHEMOTH_SIZES.map((entry) => entry.id));
 const VALID_STATUS_IDS = new Set(BEHEMOTH_STATUSES.map((entry) => entry.id));
 const VALID_TEMPERAMENT_IDS = new Set(BEHEMOTH_TEMPERAMENTS.map((entry) => entry.id));
 const VALID_STAT_IDS = new Set(BEHEMOTH_STAT_KEYS.map((entry) => entry.id));
+const VALID_UPKEEP_RESOURCE_IDS = new Set(BEHEMOTH_UPKEEP_RESOURCES.map((entry) => entry.id));
 
 const EDITABLE_TEXT_FIELDS = new Set(["name", "kind", "lore", "origin", "imagePath"]);
 const EDITABLE_CHOICE_FIELDS = {
@@ -31,8 +33,29 @@ function normalizeStats(rawStats) {
         stats[key] = Math.max(0, Math.round(raw));
       }
     }
+    // Legacy: pre-rename "vigor" carries over into "health" if health was not set.
+    if (
+      VALID_STAT_IDS.has("health") &&
+      !Number.isFinite(Number(rawStats.health)) &&
+      Number.isFinite(Number(rawStats.vigor))
+    ) {
+      stats.health = Math.max(0, Math.round(Number(rawStats.vigor)));
+    }
   }
   return stats;
+}
+
+function normalizeUpkeepEntry(raw) {
+  if (!raw || typeof raw !== "object") {
+    return null;
+  }
+  const resourceId = VALID_UPKEEP_RESOURCE_IDS.has(raw.resource) ? raw.resource : "food";
+  const amount = Number(raw.amount);
+  return {
+    id: typeof raw.id === "string" && raw.id ? raw.id : createId("upkeep"),
+    resource: resourceId,
+    amount: Number.isFinite(amount) ? Math.max(0, Math.round(amount * 100) / 100) : 0
+  };
 }
 
 function normalizeAbility(raw) {
@@ -76,6 +99,9 @@ function normalizeBehemoth(raw) {
     abilities: Array.isArray(raw.abilities)
       ? raw.abilities.map(normalizeAbility).filter(Boolean)
       : [],
+    upkeep: Array.isArray(raw.upkeep)
+      ? raw.upkeep.map(normalizeUpkeepEntry).filter(Boolean)
+      : [],
     capturedDayOffset: Number.isFinite(Number(raw.capturedDayOffset)) ? Number(raw.capturedDayOffset) : null,
     createdAt: Number.isFinite(Number(raw.createdAt)) ? Number(raw.createdAt) : Date.now()
   };
@@ -102,6 +128,7 @@ export function createBlankBehemoth(state) {
     imageData: "",
     stats: createDefaultBehemothStats(),
     abilities: [],
+    upkeep: [],
     capturedDayOffset: Number(state?.calendar?.dayOffset ?? 0) || 0,
     createdAt: Date.now()
   };
@@ -245,4 +272,57 @@ export function removeBehemothAbility(state, behemothId, abilityId) {
   const startLength = behemoth.abilities.length;
   behemoth.abilities = behemoth.abilities.filter((entry) => entry.id !== abilityId);
   return behemoth.abilities.length !== startLength;
+}
+
+export function addBehemothUpkeep(state, behemothId) {
+  const behemoth = findBehemoth(state, behemothId);
+  if (!behemoth) {
+    return null;
+  }
+  if (!Array.isArray(behemoth.upkeep)) {
+    behemoth.upkeep = [];
+  }
+  const usedResources = new Set(behemoth.upkeep.map((entry) => entry.resource));
+  const nextResource = BEHEMOTH_UPKEEP_RESOURCES.find((entry) => !usedResources.has(entry.id))?.id ?? "food";
+  const entry = {
+    id: createId("upkeep"),
+    resource: nextResource,
+    amount: 1
+  };
+  behemoth.upkeep.push(entry);
+  return entry;
+}
+
+export function updateBehemothUpkeep(state, behemothId, entryId, field, value) {
+  const behemoth = findBehemoth(state, behemothId);
+  if (!behemoth || !Array.isArray(behemoth.upkeep)) {
+    return false;
+  }
+  const entry = behemoth.upkeep.find((item) => item.id === entryId);
+  if (!entry) {
+    return false;
+  }
+  if (field === "resource") {
+    if (VALID_UPKEEP_RESOURCE_IDS.has(value)) {
+      entry.resource = value;
+      return true;
+    }
+    return false;
+  }
+  if (field === "amount") {
+    const numeric = Number(value);
+    entry.amount = Number.isFinite(numeric) ? Math.max(0, Math.round(numeric * 100) / 100) : 0;
+    return true;
+  }
+  return false;
+}
+
+export function removeBehemothUpkeep(state, behemothId, entryId) {
+  const behemoth = findBehemoth(state, behemothId);
+  if (!behemoth || !Array.isArray(behemoth.upkeep)) {
+    return false;
+  }
+  const startLength = behemoth.upkeep.length;
+  behemoth.upkeep = behemoth.upkeep.filter((entry) => entry.id !== entryId);
+  return behemoth.upkeep.length !== startLength;
 }

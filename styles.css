@@ -14513,6 +14513,27 @@ body:-webkit-full-screen #app {
   font-size: 0.9rem;
 }
 
+.behemoth-card__upkeep-list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.behemoth-card__upkeep-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr auto;
+  align-items: end;
+  gap: 0.55rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(134, 167, 230, 0.14);
+  background: rgba(10, 15, 28, 0.55);
+}
+
+.behemoth-card__upkeep-remove {
+  align-self: end;
+  white-space: nowrap;
+}
+
 .button--small {
   padding: 0.35rem 0.7rem;
   font-size: 0.82rem;
@@ -14542,5 +14563,13 @@ body:-webkit-full-screen #app {
 
   .behemoth-card__media-tools {
     align-content: start;
+  }
+
+  .behemoth-card__upkeep-row {
+    grid-template-columns: 1fr;
+  }
+
+  .behemoth-card__upkeep-remove {
+    justify-self: start;
   }
 }
