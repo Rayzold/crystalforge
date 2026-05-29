@@ -8,6 +8,7 @@ import {
 import { RESOURCE_MINIMUMS } from "../content/Config.js";
 import { clamp } from "../engine/Utils.js";
 import { getDistrictSummary } from "./DistrictSystem.js";
+import { getBuildingTierResourceRate } from "./BuildingSystem.js";
 import {
   getEquippedExpeditionRelics,
   getExpeditionRelicActiveBonuses,
@@ -83,7 +84,7 @@ function getBuildingProductionDelta(state, workforceSummary, tradeGoodsGoldMulti
     const placementMultiplier = 1 + placementBonus.totalPercent;
     const workforceMultiplier = getBuildingWorkforceMultiplier(building, workforceSummary);
 
-    let goldDelta = applyBuildingWorkforceToResource(building.resourceRates.gold, workforceMultiplier) * building.multiplier * placementMultiplier;
+    let goldDelta = applyBuildingWorkforceToResource(getBuildingTierResourceRate(building, "gold"), workforceMultiplier) * placementMultiplier;
     if (goldDelta > 0 && building.tags?.includes("trade")) {
       goldDelta *= tradeGoodsGoldMultiplier;
     }
@@ -93,15 +94,15 @@ function getBuildingProductionDelta(state, workforceSummary, tradeGoodsGoldMulti
 
     deltas.gold += goldDelta;
 
-    let foodDelta = applyBuildingWorkforceToResource(building.resourceRates.food, workforceMultiplier) * building.multiplier * placementMultiplier;
+    let foodDelta = applyBuildingWorkforceToResource(getBuildingTierResourceRate(building, "food"), workforceMultiplier) * placementMultiplier;
     if (foodDelta > 0) {
       foodDelta *= foodOutputMultiplier;
     }
 
     deltas.food += foodDelta;
-    deltas.materials += applyBuildingWorkforceToResource(building.resourceRates.materials, workforceMultiplier) * building.multiplier * placementMultiplier;
-    deltas.salvage += applyBuildingWorkforceToResource(building.resourceRates.salvage ?? 0, workforceMultiplier) * building.multiplier * placementMultiplier;
-    deltas.mana += applyBuildingWorkforceToResource(building.resourceRates.mana, workforceMultiplier) * building.multiplier * placementMultiplier;
+    deltas.materials += applyBuildingWorkforceToResource(getBuildingTierResourceRate(building, "materials"), workforceMultiplier) * placementMultiplier;
+    deltas.salvage += applyBuildingWorkforceToResource(getBuildingTierResourceRate(building, "salvage"), workforceMultiplier) * placementMultiplier;
+    deltas.mana += applyBuildingWorkforceToResource(getBuildingTierResourceRate(building, "mana"), workforceMultiplier) * placementMultiplier;
     deltas.prosperity +=
       applyBuildingWorkforceToResource((building.stats.prosperity ?? 0) * 0.02, workforceMultiplier) * building.multiplier * placementMultiplier;
   }
@@ -285,6 +286,13 @@ export function calculateDailyResourceDelta(state) {
     deltas.prosperity += focus.resourceDaily.prosperity ?? 0;
   }
 
+  // GM manual daily adjustments (good harvest, strong trade, etc.) — flat and
+  // applied after event multipliers so they read as a clean bonus/penalty.
+  const manualModifiers = state.dailyResourceModifiers ?? {};
+  for (const key of Object.keys(deltas)) {
+    deltas[key] += Number(manualModifiers[key] ?? 0);
+  }
+
   return deltas;
 }
 
@@ -411,7 +419,7 @@ export function getEconomyContributionBreakdown(state) {
     const placementMultiplier = 1 + placementBonus.totalPercent;
     const workforceMultiplier = getBuildingWorkforceMultiplier(building, workforceSummary);
 
-    let goldAmount = applyBuildingWorkforceToResource(building.resourceRates.gold, workforceMultiplier) * building.multiplier * placementMultiplier;
+    let goldAmount = applyBuildingWorkforceToResource(getBuildingTierResourceRate(building, "gold"), workforceMultiplier) * placementMultiplier;
     if (goldAmount > 0 && building.tags?.includes("trade")) {
       goldAmount *= tradeGoodsGoldMultiplier;
     }
@@ -420,19 +428,19 @@ export function getEconomyContributionBreakdown(state) {
     }
     addContribution(contributions, "gold", building.displayName, "Building", goldAmount);
 
-    let foodAmount = applyBuildingWorkforceToResource(building.resourceRates.food, workforceMultiplier) * building.multiplier * placementMultiplier;
+    let foodAmount = applyBuildingWorkforceToResource(getBuildingTierResourceRate(building, "food"), workforceMultiplier) * placementMultiplier;
     if (foodAmount > 0) {
       foodAmount *= foodOutputMultiplier;
     }
     addContribution(contributions, "food", building.displayName, "Building", foodAmount);
 
-    const materialsAmount = applyBuildingWorkforceToResource(building.resourceRates.materials, workforceMultiplier) * building.multiplier * placementMultiplier;
+    const materialsAmount = applyBuildingWorkforceToResource(getBuildingTierResourceRate(building, "materials"), workforceMultiplier) * placementMultiplier;
     addContribution(contributions, "materials", building.displayName, "Building", materialsAmount);
 
-    const salvageAmount = applyBuildingWorkforceToResource(building.resourceRates.salvage ?? 0, workforceMultiplier) * building.multiplier * placementMultiplier;
+    const salvageAmount = applyBuildingWorkforceToResource(getBuildingTierResourceRate(building, "salvage"), workforceMultiplier) * placementMultiplier;
     addContribution(contributions, "salvage", building.displayName, "Building", salvageAmount);
 
-    const manaAmount = applyBuildingWorkforceToResource(building.resourceRates.mana, workforceMultiplier) * building.multiplier * placementMultiplier;
+    const manaAmount = applyBuildingWorkforceToResource(getBuildingTierResourceRate(building, "mana"), workforceMultiplier) * placementMultiplier;
     addContribution(contributions, "mana", building.displayName, "Building", manaAmount);
 
     const prosperityAmount =
@@ -559,6 +567,11 @@ export function getEconomyContributionBreakdown(state) {
     addContribution(contributions, "salvage", focusLabel, "Focus", salvageAmount);
     addContribution(contributions, "mana", focusLabel, "Focus", manaAmount);
     addContribution(contributions, "prosperity", focusLabel, "Focus", prosperityAmount);
+  }
+
+  const manualModifiers = state.dailyResourceModifiers ?? {};
+  for (const resource of ECONOMY_RESOURCE_KEYS) {
+    addContribution(contributions, resource, "GM Daily Adjustment", "GM Adjustment", Number(manualModifiers[resource] ?? 0));
   }
 
   return Object.fromEntries(

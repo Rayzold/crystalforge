@@ -157,6 +157,7 @@ export function createInitialState(preset = DEFAULT_START_PRESET) {
     adminOverrides: {
       goods: 0
     },
+    dailyResourceModifiers: createDefaultDailyResourceModifiers(),
     settings: structuredClone(startState.settings),
     ui: {
       selectedBuildingId: null,
@@ -419,6 +420,25 @@ function normalizeAdminOverrides(sourceOverrides, baseOverrides) {
   return normalized;
 }
 
+const DAILY_RESOURCE_MODIFIER_KEYS = ["gold", "food", "materials", "salvage", "mana", "prosperity"];
+
+export function createDefaultDailyResourceModifiers() {
+  return Object.fromEntries(DAILY_RESOURCE_MODIFIER_KEYS.map((key) => [key, 0]));
+}
+
+function normalizeDailyResourceModifiers(source) {
+  const normalized = createDefaultDailyResourceModifiers();
+  if (source && typeof source === "object") {
+    for (const key of DAILY_RESOURCE_MODIFIER_KEYS) {
+      const numeric = Number(source[key]);
+      if (Number.isFinite(numeric)) {
+        normalized[key] = Math.round(numeric * 100) / 100;
+      }
+    }
+  }
+  return normalized;
+}
+
 function migrateLegacyCrystalUpgradeBuildings(state) {
   const legacyUpgradeBuildings = state.buildings.filter((building) => building.name === "Crystal Upgrade");
   if (!legacyUpgradeBuildings.length) {
@@ -573,6 +593,7 @@ export function validateAndMigrateSave(rawSave) {
     townFocus: normalizeTownFocusState(rawSave.townFocus),
     sessionSnapshots: Array.isArray(rawSave.sessionSnapshots) ? rawSave.sessionSnapshots : [],
     adminOverrides: normalizeAdminOverrides(rawSave.adminOverrides, base.adminOverrides),
+    dailyResourceModifiers: normalizeDailyResourceModifiers(rawSave.dailyResourceModifiers),
     settings: normalizeSettings(rawSave.settings, base.settings),
     ui: {
       ...base.ui,

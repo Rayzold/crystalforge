@@ -14,7 +14,7 @@ import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { attachHelpBubbles, createHelpBubble } from "../ui/HelpBubbles.js";
 import { renderModal } from "../ui/Modal.js";
 import { formatDate } from "../systems/CalendarSystem.js";
-import { formatBuildingQualityDisplay } from "../systems/BuildingSystem.js";
+import { formatBuildingQualityDisplay, getBuildingOutputTypes, BUILDING_OUTPUT_RESOURCE_KEYS } from "../systems/BuildingSystem.js";
 import { getDriftEvolutionStages } from "../systems/DriftEvolutionSystem.js";
 import { getEconomyDebugSummary, getEconomyTopContributorsSummary } from "../systems/ResourceSystem.js";
 import { getManualSaveMeta } from "../systems/StorageSystem.js";
@@ -241,6 +241,87 @@ function renderManifestedBuildingAdminList(state) {
               <button class="button button--ghost" data-admin-action="remove-active-building" data-building-id="${building.id}">
                 Unmanifest
               </button>
+            </article>
+          `
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+const OUTPUT_RESOURCE_LABELS = {
+  gold: "Gold",
+  food: "Food",
+  materials: "Materials",
+  salvage: "Salvage",
+  mana: "Mana"
+};
+
+function getEffectiveTierRates(type, tier) {
+  const override = type.tierOverrides?.[tier];
+  const rates = {};
+  for (const key of BUILDING_OUTPUT_RESOURCE_KEYS) {
+    const overrideValue = override?.[key];
+    rates[key] =
+      overrideValue !== undefined && overrideValue !== null && Number.isFinite(Number(overrideValue))
+        ? Number(overrideValue)
+        : Number(type.rates[key] ?? 0) * tier;
+  }
+  return rates;
+}
+
+function renderOutputRateRow(label, tierKey, rates, { custom = null } = {}) {
+  const toggle =
+    custom === null
+      ? ""
+      : `
+        <label class="admin-output-row__toggle">
+          <input type="checkbox" data-tier-toggle="${tierKey}" ${custom ? "checked" : ""} />
+          <span>Custom</span>
+        </label>
+      `;
+  return `
+    <div class="admin-output-row">
+      <div class="admin-output-row__label">
+        <strong>${escapeHtml(label)}</strong>
+        ${toggle}
+      </div>
+      <div class="admin-output-card__rates">
+        ${BUILDING_OUTPUT_RESOURCE_KEYS.map(
+          (key) => `
+            <label class="admin-output-rate">
+              <span>${escapeHtml(OUTPUT_RESOURCE_LABELS[key])}</span>
+              <input type="number" step="0.05" data-tier="${tierKey}" data-resource="${key}" value="${formatNumber(Number(rates[key] ?? 0), 2)}" />
+            </label>
+          `
+        ).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderBuildingOutputEditor(state) {
+  const types = getBuildingOutputTypes(state);
+  if (!types.length) {
+    return `<p class="empty-state">No buildings are in play yet. Manifest a building first, then tune its output here.</p>`;
+  }
+  return `
+    <div class="admin-output-editor">
+      ${types
+        .map(
+          (type) => `
+            <article class="admin-output-card" data-output-key="${escapeHtml(type.key)}">
+              <div class="admin-output-card__head">
+                <strong>${escapeHtml(type.name)}</strong>
+                <span>${escapeHtml(type.rarity)}</span>
+              </div>
+              ${renderOutputRateRow("Base (x1) / day", "base", type.rates)}
+              ${renderOutputRateRow("Tier x2", "2", getEffectiveTierRates(type, 2), { custom: Boolean(type.tierOverrides?.[2]) })}
+              ${renderOutputRateRow("Tier x3", "3", getEffectiveTierRates(type, 3), { custom: Boolean(type.tierOverrides?.[3]) })}
+              <p class="admin-output-card__hint">x2 and x3 default to the base doubled and tripled. Tick <em>Custom</em> on a tier to hijack its exact values.</p>
+              <div class="admin-actions">
+                <button class="button button--ghost" data-admin-action="save-building-output" data-building-key="${escapeHtml(type.key)}">Save Output</button>
+              </div>
             </article>
           `
         )
@@ -487,6 +568,19 @@ export class AdminConsole {
         case "reset-goods-override":
           this.actions.resetGoodsOverride();
           break;
+        case "apply-daily-modifiers":
+          this.actions.setDailyResourceModifiers({
+            gold: this.getNumberInput("daily-mod-gold", 0),
+            food: this.getNumberInput("daily-mod-food", 0),
+            materials: this.getNumberInput("daily-mod-materials", 0),
+            salvage: this.getNumberInput("daily-mod-salvage", 0),
+            mana: this.getNumberInput("daily-mod-mana", 0),
+            prosperity: this.getNumberInput("daily-mod-prosperity", 0)
+          });
+          break;
+        case "clear-daily-modifiers":
+          this.actions.setDailyResourceModifiers({ gold: 0, food: 0, materials: 0, salvage: 0, mana: 0, prosperity: 0 });
+          break;
         case "citizen-add":
         case "citizen-remove":
         case "citizen-set":
@@ -565,6 +659,29 @@ export class AdminConsole {
             })
           });
           break;
+        case "save-building-output": {
+          const card = target.closest("[data-output-key]");
+          if (!card) {
+            break;
+          }
+          const key = card.dataset.outputKey;
+          const readRow = (tierKey) => {
+            const rates = {};
+            card.querySelectorAll(`input[data-tier="${tierKey}"][data-resource]`).forEach((input) => {
+              rates[input.dataset.resource] = Number(input.value) || 0;
+            });
+            return rates;
+          };
+          const base = readRow("base");
+          const tierOverrides = {};
+          card.querySelectorAll("input[data-tier-toggle]").forEach((toggle) => {
+            if (toggle.checked) {
+              tierOverrides[toggle.dataset.tierToggle] = readRow(toggle.dataset.tierToggle);
+            }
+          });
+          this.actions.setBuildingOutput({ key, base, tierOverrides });
+          break;
+        }
         case "manifest-unmanifested-building":
           this.actions.manifestUnmanifestedBuilding({
             selection: this.getValue("manifest-building-select"),
@@ -839,6 +956,29 @@ export class AdminConsole {
         `
       },
       {
+        tab: "economy",
+        title: "Daily Resource Adjustments",
+        keywords: "daily resource adjustment modifier harvest trade bonus penalty per day flat gold food materials salvage mana prosperity",
+        content: `
+          <section class="admin-section">
+            <h3>Daily Resource Adjustments</h3>
+            <p>Add or remove a flat amount of each resource every day. Use positive numbers for bonuses (a good harvest, strong trade season) and negative numbers for ongoing drains. These stack on top of buildings, citizens, and other production.</p>
+            <div class="admin-grid">
+              <label>Gold / day<input id="daily-mod-gold" type="number" step="0.5" value="${formatNumber(Number(state.dailyResourceModifiers?.gold ?? 0), 2)}" /></label>
+              <label>Food / day<input id="daily-mod-food" type="number" step="0.5" value="${formatNumber(Number(state.dailyResourceModifiers?.food ?? 0), 2)}" /></label>
+              <label>Materials / day<input id="daily-mod-materials" type="number" step="0.5" value="${formatNumber(Number(state.dailyResourceModifiers?.materials ?? 0), 2)}" /></label>
+              <label>Salvage / day<input id="daily-mod-salvage" type="number" step="0.5" value="${formatNumber(Number(state.dailyResourceModifiers?.salvage ?? 0), 2)}" /></label>
+              <label>Mana / day<input id="daily-mod-mana" type="number" step="0.5" value="${formatNumber(Number(state.dailyResourceModifiers?.mana ?? 0), 2)}" /></label>
+              <label>Prosperity / day<input id="daily-mod-prosperity" type="number" step="0.5" value="${formatNumber(Number(state.dailyResourceModifiers?.prosperity ?? 0), 2)}" /></label>
+            </div>
+            <div class="admin-actions">
+              <button class="button" data-admin-action="apply-daily-modifiers">Apply Daily Adjustments</button>
+              <button class="button button--ghost" data-admin-action="clear-daily-modifiers">Clear All</button>
+            </div>
+          </section>
+        `
+      },
+      {
         tab: "population",
         title: "Citizen Management",
         keywords: "citizens farmers hunters fishermen scavengers laborers crafters techwrights merchants skycrew scouts defenders soldiers arcanists medics scribes nobles priests entertainers children elderly population",
@@ -1032,6 +1172,18 @@ export class AdminConsole {
               <button class="button button--ghost" data-admin-action="clear-building-placement">Clear Placement</button>
               <button class="button button--ghost" data-admin-action="remove-building">Remove Building</button>
             </div>
+          </section>
+        `
+      },
+      {
+        tab: "world",
+        title: "Building Output Rates",
+        keywords: "building output resources gold food materials salvage mana tier x2 x3 production economy adjust per day",
+        content: `
+          <section class="admin-section">
+            <h3>Building Output Rates</h3>
+            <p>Set the base per-day resources each building type produces (negative values consume). The x2 and x3 tiers are these values doubled and tripled — buildings reach x2 at 220% quality and x3 at the 350% cap. Saving updates every building of that type and all future copies.</p>
+            ${renderBuildingOutputEditor(state)}
           </section>
         `
       },

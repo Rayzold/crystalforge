@@ -14785,6 +14785,118 @@ body:-webkit-full-screen #app {
   align-self: end;
 }
 
+.admin-output-editor {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 0.7rem;
+  margin-top: 0.7rem;
+}
+
+.admin-output-card {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(134, 167, 230, 0.16);
+  background: rgba(10, 15, 28, 0.55);
+}
+
+.admin-output-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.admin-output-card__head strong {
+  font-size: 0.98rem;
+}
+
+.admin-output-card__head span {
+  font-size: 0.84rem;
+  color: rgba(184, 200, 233, 0.72);
+}
+
+.admin-output-row {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(134, 167, 230, 0.1);
+  background: rgba(8, 13, 24, 0.4);
+}
+
+.admin-output-row__label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.admin-output-row__label strong {
+  font-size: 0.86rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(184, 200, 233, 0.82);
+}
+
+.admin-output-row__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.84rem;
+  color: rgba(184, 200, 233, 0.78);
+  cursor: pointer;
+}
+
+.admin-output-card__rates {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 0.4rem;
+}
+
+.admin-output-card__hint {
+  margin: 0;
+  font-size: 0.84rem;
+  color: rgba(184, 200, 233, 0.7);
+}
+
+.admin-output-rate {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.admin-output-rate span {
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(184, 200, 233, 0.72);
+}
+
+.admin-output-rate input {
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(134, 167, 230, 0.18);
+  background: rgba(8, 13, 24, 0.7);
+  color: inherit;
+  font: inherit;
+  text-align: center;
+}
+
+.admin-output-card__tiers {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.84rem;
+  color: rgba(207, 219, 245, 0.82);
+}
+
+.admin-output-card__tiers strong {
+  display: inline-block;
+  min-width: 1.8rem;
+  color: var(--accent);
+}
+
 .sidebar-density-picker__concise {
   margin-top: 0.5rem;
   width: 100%;

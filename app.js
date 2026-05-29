@@ -31,6 +31,7 @@ import {
   getBuildingCatalogStatusLabel,
   manifestIntoBuilding,
   removeBuilding,
+  setBuildingOutputRates,
   setBuildingQuality,
   setBuildingRuinState
 } from "./systems/BuildingSystem.js";
@@ -1667,6 +1668,21 @@ function setResources(nextResources) {
   reportSuccess("Resources updated.");
 }
 
+function setDailyResourceModifiers(nextModifiers) {
+  const keys = ["gold", "food", "materials", "salvage", "mana", "prosperity"];
+  commit((draft) => {
+    if (!draft.dailyResourceModifiers || typeof draft.dailyResourceModifiers !== "object") {
+      draft.dailyResourceModifiers = {};
+    }
+    for (const key of keys) {
+      const numeric = Number(nextModifiers?.[key]);
+      draft.dailyResourceModifiers[key] = Number.isFinite(numeric) ? Math.round(numeric * 100) / 100 : 0;
+    }
+  });
+  markRecentResourceChanges(keys);
+  reportSuccess("Daily resource adjustments updated.", "save");
+}
+
 function citizenCommand({ mode, citizenClass, amount }) {
   if (mode === "add") {
     commit((draft) => addCitizens(draft, citizenClass, amount));
@@ -2870,6 +2886,7 @@ const actions = {
   },
   adjustShard,
   setResources,
+  setDailyResourceModifiers,
   citizenCommand,
   moveCitizens,
   resetCitizens() {
@@ -2890,6 +2907,14 @@ const actions = {
   },
   spawnBuilding,
   manifestUnmanifestedBuilding,
+  setBuildingOutput({ key, base, tierOverrides }) {
+    const applied = commit((draft) => setBuildingOutputRates(draft, key, { base, tierOverrides }));
+    if (!applied) {
+      reportError("No buildings of that type to update.");
+      return;
+    }
+    reportSuccess("Building output updated.", "save");
+  },
   editBuilding(payload) {
     editBuilding(payload);
   },

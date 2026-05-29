@@ -122,6 +122,10 @@ export function createBuildingInstance(state, catalogEntry, quality, timestamps)
     tags: catalogEntry.tags,
     stats: profile.stats,
     resourceRates: profile.resourceRates,
+    tierOverrides:
+      catalogEntry.tierOverrides && typeof catalogEntry.tierOverrides === "object"
+        ? structuredClone(catalogEntry.tierOverrides)
+        : {},
     citizenEffects: profile.citizenEffects,
     specialEffect: catalogEntry.specialEffect,
     createdAt: timestamps.date,
@@ -315,4 +319,97 @@ export function updateBuildingMetadata(state, buildingId, updates) {
   Object.assign(building, updates);
   setBuildingQuality(building, building.quality);
   return building;
+}
+
+export const BUILDING_OUTPUT_RESOURCE_KEYS = ["gold", "food", "materials", "salvage", "mana"];
+const BUILDING_OUTPUT_TIERS = [2, 3];
+
+function normalizeOutputRates(rawRates) {
+  const rates = {};
+  for (const key of BUILDING_OUTPUT_RESOURCE_KEYS) {
+    const numeric = Number(rawRates?.[key]);
+    rates[key] = Number.isFinite(numeric) ? Math.round(numeric * 100) / 100 : 0;
+  }
+  return rates;
+}
+
+function normalizeTierOverrides(rawTierOverrides) {
+  if (!rawTierOverrides || typeof rawTierOverrides !== "object") {
+    return {};
+  }
+  const normalized = {};
+  for (const tier of BUILDING_OUTPUT_TIERS) {
+    const source = rawTierOverrides[tier] ?? rawTierOverrides[String(tier)];
+    if (source && typeof source === "object") {
+      normalized[tier] = normalizeOutputRates(source);
+    }
+  }
+  return normalized;
+}
+
+// Resolve the effective per-day rate for a single resource at the building's
+// current quality tier. Tiers default to base x multiplier, but an explicit
+// per-tier override (set in the Building Output editor) takes precedence.
+export function getBuildingTierResourceRate(building, resource) {
+  const multiplier = Number(building?.multiplier ?? 0);
+  if (multiplier <= 0) {
+    return 0;
+  }
+  const base = Number(building?.resourceRates?.[resource] ?? 0) || 0;
+  if (multiplier === 1) {
+    return base;
+  }
+  const override = building?.tierOverrides?.[multiplier]?.[resource];
+  if (override !== undefined && override !== null && Number.isFinite(Number(override))) {
+    return Number(override);
+  }
+  return base * multiplier;
+}
+
+// List one editable row per distinct building TYPE currently in play, including
+// base rates and any per-tier overrides from a representative instance.
+export function getBuildingOutputTypes(state) {
+  const byKey = new Map();
+  for (const building of state.buildings ?? []) {
+    if (!building?.key || byKey.has(building.key)) {
+      continue;
+    }
+    byKey.set(building.key, {
+      key: building.key,
+      name: building.displayName ?? building.name ?? building.key,
+      rarity: building.rarity ?? "",
+      rates: normalizeOutputRates(building.resourceRates),
+      tierOverrides: normalizeTierOverrides(building.tierOverrides)
+    });
+  }
+  return [...byKey.values()].sort((left, right) => left.name.localeCompare(right.name));
+}
+
+// Apply new base output rates (and optional per-tier overrides) to every
+// instance of a building type, and store catalog overrides so future manifests
+// of that type inherit the same configuration.
+// payload: { base: {...}, tierOverrides: { 2?: {...}, 3?: {...} } }
+export function setBuildingOutputRates(state, key, payload = {}) {
+  if (!key) {
+    return false;
+  }
+  const base = normalizeOutputRates(payload.base ?? payload);
+  const tierOverrides = normalizeTierOverrides(payload.tierOverrides);
+  let touched = 0;
+  for (const building of state.buildings ?? []) {
+    if (building.key !== key) {
+      continue;
+    }
+    building.resourceRates = { ...building.resourceRates, ...base };
+    building.tierOverrides = tierOverrides;
+    touched += 1;
+  }
+  if (state.buildingCatalog?.[key]) {
+    state.buildingCatalog[key].resourceOverrides = {
+      ...(state.buildingCatalog[key].resourceOverrides ?? {}),
+      ...base
+    };
+    state.buildingCatalog[key].tierOverrides = tierOverrides;
+  }
+  return touched > 0;
 }
