@@ -229,7 +229,7 @@ Player-facing shared screen. Stripped chrome, big visuals, no GM controls. Use f
 ### Behemoths
 
 - Author your own roster. No automatic effects — the GM uses the sheet as a reference during play.
-- **Daily Upkeep** is informational: the GM remembers to deduct it. (Not currently automated against the resource ticker.)
+- **Daily Upkeep** is automated: each day you advance, held behemoths (status **Captured** or **Bonded**) subtract their listed resources from the city stockpiles. Wild and Released behemoths don't consume anything. The drain shows up as a "Behemoth Upkeep" line in the resource breakdown modal and a Behemoths column in the admin Economy Debug table.
 - Image uploads downscale to ≤400px JPEG.
 
 ### Special NPCs

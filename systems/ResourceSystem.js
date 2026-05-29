@@ -144,6 +144,30 @@ function getCitizenConsumptionDelta(state) {
   return deltas;
 }
 
+// Behemoths that are actually held at the Drift eat their daily upkeep from
+// the city's stockpiles. Wild (not yet captured) and released behemoths do not.
+const BEHEMOTH_UPKEEP_STATUSES = new Set(["captured", "bonded"]);
+
+function getBehemothUpkeepDelta(state) {
+  const deltas = createDeltaRecord();
+  const behemoths = Array.isArray(state.behemoths) ? state.behemoths : [];
+  for (const behemoth of behemoths) {
+    if (!BEHEMOTH_UPKEEP_STATUSES.has(behemoth?.status)) {
+      continue;
+    }
+    const upkeep = Array.isArray(behemoth.upkeep) ? behemoth.upkeep : [];
+    for (const entry of upkeep) {
+      const resource = entry?.resource;
+      const amount = Number(entry?.amount ?? 0);
+      if (!resource || !(resource in deltas) || !Number.isFinite(amount) || amount <= 0) {
+        continue;
+      }
+      deltas[resource] -= amount;
+    }
+  }
+  return deltas;
+}
+
 function applyDistrictProductionBonuses(deltas, districtSummary) {
   for (const district of districtSummary) {
     if (district.level <= 0) {
@@ -217,11 +241,13 @@ export function calculateDailyResourceDelta(state) {
   );
   const citizenProduction = getCitizenProductionDelta(state, goldOutputMultiplier, foodOutputMultiplier);
   const citizenConsumption = getCitizenConsumptionDelta(state);
+  const behemothUpkeep = getBehemothUpkeepDelta(state);
   const uniqueCitizenBonuses = getUniqueCitizenResourceBonuses(state);
 
   addDeltaInto(deltas, buildingProduction);
   addDeltaInto(deltas, citizenProduction);
   addDeltaInto(deltas, citizenConsumption);
+  addDeltaInto(deltas, behemothUpkeep);
   addDeltaInto(deltas, uniqueCitizenBonuses);
 
   for (const event of state.events.active) {
@@ -268,6 +294,7 @@ export function getEconomyDebugSummary(state) {
   const districtBonus = createDeltaRecord();
   const citizenProduction = createDeltaRecord();
   const citizenConsumption = createDeltaRecord();
+  const behemothUpkeep = createDeltaRecord();
   const uniqueCitizenProduction = createDeltaRecord();
   const relicProduction = createDeltaRecord();
   const eventProduction = createDeltaRecord();
@@ -292,6 +319,7 @@ export function getEconomyDebugSummary(state) {
   }
   addDeltaInto(citizenProduction, getCitizenProductionDelta(state, goldOutputMultiplier, foodOutputMultiplier));
   addDeltaInto(citizenConsumption, getCitizenConsumptionDelta(state));
+  addDeltaInto(behemothUpkeep, getBehemothUpkeepDelta(state));
   const uniqueCitizenBonuses = createDeltaRecord();
   for (const uniqueCitizen of state.uniqueCitizens ?? []) {
     if (uniqueCitizen.status !== "inCity") {
@@ -351,6 +379,7 @@ export function getEconomyDebugSummary(state) {
       districtBonus: Number(districtBonus[resource] ?? 0),
       citizenProduction: Number(citizenProduction[resource] ?? 0),
       citizenConsumption: Number(citizenConsumption[resource] ?? 0),
+      behemothUpkeep: Number(behemothUpkeep[resource] ?? 0),
       uniqueCitizenProduction: Number(uniqueCitizenProduction[resource] ?? 0),
       relicProduction: Number(relicProduction[resource] ?? 0),
       eventProduction: Number(eventProduction[resource] ?? 0),
@@ -481,6 +510,21 @@ export function getEconomyContributionBreakdown(state) {
         "Relic Synergy",
         activeBonuses.synergy?.active ? activeBonuses.synergyBonuses?.resources?.[resource] ?? 0 : 0
       );
+    }
+  }
+
+  for (const behemoth of state.behemoths ?? []) {
+    if (!BEHEMOTH_UPKEEP_STATUSES.has(behemoth?.status)) {
+      continue;
+    }
+    const behemothLabel = behemoth.name ?? "Behemoth";
+    for (const entry of Array.isArray(behemoth.upkeep) ? behemoth.upkeep : []) {
+      const resource = entry?.resource;
+      const amount = Number(entry?.amount ?? 0);
+      if (!resource || !(resource in contributions) || !Number.isFinite(amount) || amount <= 0) {
+        continue;
+      }
+      addContribution(contributions, resource, behemothLabel, "Behemoth Upkeep", -amount);
     }
   }
 

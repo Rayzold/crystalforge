@@ -8,7 +8,7 @@ import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
 // APP_VERSION must stay monotonic because Firebase publish safety compares builds numerically.
-export const APP_VERSION = "v1.7.15";
+export const APP_VERSION = "v1.7.16";
 // Release maturity is tracked separately so unreleased builds do not need to pretend they are public/stable.
 export const APP_RELEASE_STAGE = "preview";
 const RELEASE_STAGE_LABELS = {
@@ -59,6 +59,9 @@ export const PAGE_ROUTES = [
   { key: "help", label: "Help", href: "./help.html" }
 ];
 export const BUILD_NOTES = [
+  "Behemoth daily upkeep is now live: held behemoths (Captured or Bonded) subtract their listed food, gold, materials, salvage, or mana from the city every day, shown as a Behemoth Upkeep line in resource breakdowns and a Behemoths column in the economy debug table.",
+  "Roster pages scale better: Behemoth and NPC sheets collapse into compact rows with search and status filters, expanded sheets span the full width so fields stay readable, and uploaded portraits are auto-downscaled to keep saves small.",
+  "Local saves now have three slots, the Legends sidebar badge only flags unassigned Legends, and a Text Size picker plus Concise Mode help tune how much each page shows.",
   "A new Special NPCs page joins the management routes: GMs can author notable people as character sheets with image, role, status, core stats, abilities, and lore — without the daily resource upkeep that behemoths use.",
   "Press the backtick (`) key anywhere to open the Admin Console instantly, and the Population tab now includes a Random Citizen Generator with per-class checkboxes for exclusions.",
   "A new Behemoths page joins the management routes: GMs can author huge captured monsters as simple character sheets with image, status, core stats, ability lists, and lore.",

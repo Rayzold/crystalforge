@@ -317,6 +317,7 @@ function renderEconomyDebugTable(state) {
               <th>District</th>
               <th>Citizens +</th>
               <th>Citizens -</th>
+              <th>Behemoths</th>
               <th>Events</th>
               <th>Focus</th>
               <th>Net / Day</th>
@@ -333,6 +334,7 @@ function renderEconomyDebugTable(state) {
                     <td>${formatNumber(row.districtBonus, 2)}</td>
                     <td>${formatNumber(row.citizenProduction, 2)}</td>
                     <td>${formatNumber(row.citizenConsumption, 2)}</td>
+                    <td>${formatNumber(row.behemothUpkeep, 2)}</td>
                     <td>${formatNumber(row.eventProduction, 2)}</td>
                     <td>${formatNumber(row.focusProduction, 2)}</td>
                     <td class="${row.net > 0.005 ? "is-positive" : row.net < -0.005 ? "is-negative" : "is-neutral"}">${formatNumber(row.net, 2)}</td>
