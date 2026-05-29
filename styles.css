@@ -14319,9 +14319,17 @@ body:-webkit-full-screen #app {
 
 .behemoth-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  /* Collapsed roster rows pack several per line; expanded sheets span the
+     full width (see grid-column rule below) so their body never gets crushed. */
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1.1rem;
   margin-top: 1rem;
+  align-items: start;
+}
+
+/* Expanded behemoth/NPC sheets always take the whole row. */
+.behemoth-grid > .behemoth-card:not(.behemoth-card--collapsed) {
+  grid-column: 1 / -1;
 }
 
 .behemoth-empty {
