@@ -327,11 +327,28 @@ function normalizeRollTables(sourceTables) {
   if (!sourceTables || typeof sourceTables !== "object") {
     return baseTables;
   }
+  // Every building name the saved tables already reference, across all rarities.
+  // Used so genuinely-new buildings get merged into old saves while GM removals
+  // and moves are preserved (a building the GM pulled won't reappear).
+  const knownNames = new Set();
+  for (const list of Object.values(sourceTables)) {
+    if (Array.isArray(list)) {
+      for (const name of list) {
+        knownNames.add(name);
+      }
+    }
+  }
   return Object.fromEntries(
-    Object.entries(baseTables).map(([rarity, buildings]) => [
-      rarity,
-      Array.isArray(sourceTables[rarity]) ? sourceTables[rarity] : buildings
-    ])
+    Object.entries(baseTables).map(([rarity, defaultBuildings]) => {
+      const saved = Array.isArray(sourceTables[rarity]) ? [...sourceTables[rarity]] : null;
+      if (!saved) {
+        return [rarity, defaultBuildings];
+      }
+      // Append default-pool entries that are brand new (not present in any saved
+      // table yet), so newly shipped buildings become rollable in existing saves.
+      const additions = defaultBuildings.filter((name) => !knownNames.has(name));
+      return [rarity, [...saved, ...additions]];
+    })
   );
 }
 

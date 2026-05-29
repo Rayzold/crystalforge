@@ -3,7 +3,7 @@ import { RARITY_COLORS } from "../content/Rarities.js";
 import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
 import { getFoodOutputMultiplier, getGoldOutputMultiplier } from "../systems/CityConditionSystem.js";
-import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js";
+import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier, isBuildingAtApex } from "../systems/BuildingSystem.js";
 import {
   getConstructionEtaDetails,
   getConstructionQueuePosition,
@@ -206,6 +206,22 @@ export function renderBuildingDetailModal(state, pageKey) {
       </div>
 
       <div class="building-detail__grid">
+        <section class="building-detail__panel building-detail__panel--apex ${isBuildingAtApex(building) ? "is-apex-active" : ""}">
+          <h4>350% Apex Bonus</h4>
+          <p class="building-detail__status-note">${
+            isBuildingAtApex(building)
+              ? "This building has reached 350% — its apex bonus is active."
+              : `Reached at 350% quality (currently ${formatBuildingExactQualityDisplay(building)}). Note the bonus here so it is ready when it caps.`
+          }</p>
+          <textarea
+            class="building-detail__apex-input"
+            data-action="set-building-apex-note"
+            data-building-id="${building.id}"
+            rows="3"
+            placeholder="Describe the special bonus this building grants at 350% (e.g. doubles adjacent district output, unlocks a unique action)..."
+          >${escapeHtml(building.apexNote ?? "")}</textarea>
+        </section>
+
         <section class="building-detail__panel">
           <h4>Building Role</h4>
           <p class="building-detail__role-line">${escapeHtml(`${economySummary.role.emoji} ${economySummary.role.label} - ${economySummary.role.detail}`)}</p>

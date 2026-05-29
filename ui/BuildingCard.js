@@ -8,7 +8,7 @@ import {
   getDriftConstructionSlots,
   isBuildingActivelyConstructed
 } from "../systems/ConstructionSystem.js";
-import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js";
+import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier, isBuildingAtApex } from "../systems/BuildingSystem.js";
 import { getBuildingWorkforceStatus } from "../systems/WorkforceSystem.js";
 import { renderBuildingArt } from "./BuildingArt.js";
 import { renderUiIcon } from "./UiIcons.js";
@@ -234,6 +234,14 @@ export function renderBuildingCard(building, state, workforceSummary = null) {
         </div>
         <p class="building-card__effect">${escapeHtml(building.specialEffect)}</p>
         <p class="building-card__flavor">${escapeHtml(building.flavorText ?? "A newly etched structure waits to define its place in Drift.")}</p>
+        ${
+          building.apexNote && building.apexNote.trim()
+            ? `<div class="building-card__apex ${isBuildingAtApex(building) ? "is-apex-active" : ""}">
+                <span class="building-card__apex-label">350% Apex${isBuildingAtApex(building) ? " · Active" : ""}</span>
+                <p>${escapeHtml(building.apexNote)}</p>
+              </div>`
+            : ""
+        }
         ${
           inputWarnings.length
             ? `<div class="building-card__warning-strip">${inputWarnings

@@ -8,7 +8,7 @@ import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js";
 
 export const APP_NAME = "Crystal Forge";
 // APP_VERSION must stay monotonic because Firebase publish safety compares builds numerically.
-export const APP_VERSION = "v1.7.18";
+export const APP_VERSION = "v1.7.19";
 // Release maturity is tracked separately so unreleased builds do not need to pretend they are public/stable.
 export const APP_RELEASE_STAGE = "preview";
 const RELEASE_STAGE_LABELS = {
@@ -60,6 +60,7 @@ export const PAGE_ROUTES = [
   { key: "help", label: "Help", href: "./help.html" }
 ];
 export const BUILD_NOTES = [
+  "Three new anti-scrying defense buildings join the catalog — Prohibition Tower (Rare), Brain Fog Tower (Epic), and Privacy Mantle (Legendary) — and buildings can now carry a GM note describing the special bonus they gain at 350%, shown on building cards and the dossier. Newly shipped buildings now also merge into existing saves' roll tables so they become rollable.",
   "A new Awakened page joins the management routes: track the superhumans of the Scarred Lands with power grades F through S, ability archetypes from the world bible, six attributes, recruitment status, portraits, and lore.",
   "Two new economy knobs in the Admin Console: a Building Output Rates editor (set each building's per-day resources, with x2/x3 tiers that default to doubled/tripled but can be individually hijacked) and Daily Resource Adjustments for flat city-wide bonuses or drains like a good harvest or strong trade season.",
   "Behemoth daily upkeep is now live: held behemoths (Captured or Bonded) subtract their listed food, gold, materials, salvage, or mana from the city every day, shown as a Behemoth Upkeep line in resource breakdowns and a Behemoths column in the economy debug table.",

@@ -31,6 +31,7 @@ import {
   getBuildingCatalogStatusLabel,
   manifestIntoBuilding,
   removeBuilding,
+  setBuildingApexNote,
   setBuildingOutputRates,
   setBuildingQuality,
   setBuildingRuinState
@@ -4651,6 +4652,15 @@ root.addEventListener("change", (event) => {
       .finally(() => {
         target.value = "";
       });
+  }
+
+  if (target.dataset.action === "set-building-apex-note") {
+    const buildingId = target.dataset.buildingId ?? "";
+    if (buildingId) {
+      commit((draft) => {
+        setBuildingApexNote(draft, buildingId, target.value);
+      });
+    }
   }
 
   if (target.dataset.action === "set-awakened-field") {

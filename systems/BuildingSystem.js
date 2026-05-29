@@ -126,6 +126,7 @@ export function createBuildingInstance(state, catalogEntry, quality, timestamps)
       catalogEntry.tierOverrides && typeof catalogEntry.tierOverrides === "object"
         ? structuredClone(catalogEntry.tierOverrides)
         : {},
+    apexNote: typeof catalogEntry.apexNote === "string" ? catalogEntry.apexNote : "",
     citizenEffects: profile.citizenEffects,
     specialEffect: catalogEntry.specialEffect,
     createdAt: timestamps.date,
@@ -412,4 +413,31 @@ export function setBuildingOutputRates(state, key, payload = {}) {
     state.buildingCatalog[key].tierOverrides = tierOverrides;
   }
   return touched > 0;
+}
+
+// True once a building has reached the 350% quality cap (its x3 apex), where
+// the DM-noted apex bonus comes online.
+export function isBuildingAtApex(building) {
+  return Number(building?.quality ?? 0) >= BUILDING_QUALITY_CAP;
+}
+
+// The DM's note describing the bonus a building gains at 350%. Applied to every
+// instance of the building type plus the catalog, so all copies and future
+// manifests share the same apex bonus description.
+export function setBuildingApexNote(state, buildingId, note) {
+  const target = (state.buildings ?? []).find((entry) => entry.id === buildingId);
+  if (!target) {
+    return false;
+  }
+  const cleanNote = String(note ?? "").slice(0, 600);
+  const key = target.key;
+  for (const building of state.buildings ?? []) {
+    if (building.key === key) {
+      building.apexNote = cleanNote;
+    }
+  }
+  if (state.buildingCatalog?.[key]) {
+    state.buildingCatalog[key].apexNote = cleanNote;
+  }
+  return true;
 }
