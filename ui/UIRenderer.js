@@ -26,6 +26,7 @@ import { renderUniqueCitizensPage } from "./UniqueCitizensPage.js";
 import { renderVehiclesPage } from "./VehiclesPage.js";
 import { renderBehemothsPage } from "./BehemothsPage.js";
 import { renderNpcsPage } from "./NpcsPage.js";
+import { renderAwakenedPage } from "./AwakenedPage.js";
 import { getMayorSuggestions } from "../systems/TownFocusSystem.js";
 import { getDefaultTownFocusPreviewId } from "./TownFocusShared.js";
 import { renderTownFocusCeremonyOverlay } from "./TownFocusCeremonyOverlay.js";
@@ -101,7 +102,9 @@ export class UIRenderer {
       behemothExpandedIds: [],
       behemothFilter: { query: "", statuses: [] },
       npcExpandedIds: [],
-      npcFilter: { query: "", statuses: [] }
+      npcFilter: { query: "", statuses: [] },
+      awakenedExpandedIds: [],
+      awakenedFilter: { query: "", grades: [], statuses: [] }
     };
   }
 
@@ -154,6 +157,8 @@ export class UIRenderer {
         return renderBehemothsPage(state);
       case "npcs":
         return renderNpcsPage(state);
+      case "awakened":
+        return renderAwakenedPage(state);
       case "uniques":
         return renderUniqueCitizensPage(state);
       case "chronicle":

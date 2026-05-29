@@ -110,6 +110,14 @@ import {
   updateNpcField,
   updateNpcStat
 } from "./systems/NpcSystem.js";
+import {
+  addAwakened,
+  clearAwakenedImage,
+  removeAwakened,
+  setAwakenedImageData,
+  updateAwakenedAttribute,
+  updateAwakenedField
+} from "./systems/AwakenedSystem.js";
 import { getDailyCitySnapshot } from "./systems/CitySnapshotSystem.js";
 import { manifestSelectedRarity } from "./systems/GachaSystem.js";
 import { addHistoryEntry } from "./systems/HistoryLogSystem.js";
@@ -3927,6 +3935,94 @@ root.addEventListener("click", async (event) => {
       });
       break;
     }
+    case "add-awakened": {
+      void audioEngine.playUiAccent("soft");
+      let createdName = "New Awakened";
+      let createdId = null;
+      commit((draft) => {
+        const created = addAwakened(draft);
+        if (created) {
+          createdName = created.name;
+          createdId = created.id;
+        }
+      });
+      if (createdId) {
+        const expanded = Array.from(new Set([...(renderer.transientUi.awakenedExpandedIds ?? []), createdId]));
+        renderer.setTransientUi({ awakenedExpandedIds: expanded }, getCurrentState());
+      }
+      reportSuccess(`${createdName} added to the Awakened roster.`);
+      break;
+    }
+    case "delete-awakened": {
+      const awakenedId = target.dataset.awakenedId ?? "";
+      if (!awakenedId) {
+        break;
+      }
+      const removedName = getCurrentState().awakened?.find((entry) => entry.id === awakenedId)?.name ?? "Awakened";
+      void audioEngine.playUiAccent("soft");
+      commit((draft) => {
+        removeAwakened(draft, awakenedId);
+      });
+      reportSuccess(`${removedName} removed from the Awakened roster.`);
+      break;
+    }
+    case "toggle-awakened-expanded": {
+      const awakenedId = target.dataset.awakenedId ?? "";
+      if (!awakenedId) {
+        break;
+      }
+      const current = new Set(renderer.transientUi.awakenedExpandedIds ?? []);
+      if (current.has(awakenedId)) {
+        current.delete(awakenedId);
+      } else {
+        current.add(awakenedId);
+      }
+      renderer.setTransientUi({ awakenedExpandedIds: Array.from(current) }, getCurrentState());
+      break;
+    }
+    case "toggle-awakened-filter-grade": {
+      const gradeId = target.dataset.gradeId ?? "";
+      if (!gradeId) {
+        break;
+      }
+      const filter = renderer.transientUi.awakenedFilter ?? { query: "", grades: [], statuses: [] };
+      const current = new Set(filter.grades ?? []);
+      if (current.has(gradeId)) {
+        current.delete(gradeId);
+      } else {
+        current.add(gradeId);
+      }
+      renderer.setTransientUi({ awakenedFilter: { ...filter, grades: Array.from(current) } }, getCurrentState());
+      break;
+    }
+    case "toggle-awakened-filter-status": {
+      const statusId = target.dataset.statusId ?? "";
+      if (!statusId) {
+        break;
+      }
+      const filter = renderer.transientUi.awakenedFilter ?? { query: "", grades: [], statuses: [] };
+      const current = new Set(filter.statuses ?? []);
+      if (current.has(statusId)) {
+        current.delete(statusId);
+      } else {
+        current.add(statusId);
+      }
+      renderer.setTransientUi({ awakenedFilter: { ...filter, statuses: Array.from(current) } }, getCurrentState());
+      break;
+    }
+    case "clear-awakened-filter":
+      renderer.setTransientUi({ awakenedFilter: { query: "", grades: [], statuses: [] } }, getCurrentState());
+      break;
+    case "clear-awakened-image": {
+      const awakenedId = target.dataset.awakenedId ?? "";
+      if (!awakenedId) {
+        break;
+      }
+      commit((draft) => {
+        clearAwakenedImage(draft, awakenedId);
+      });
+      break;
+    }
     case "clear-behemoth-image": {
       const behemothId = target.dataset.behemothId ?? "";
       if (!behemothId) {
@@ -4557,6 +4653,51 @@ root.addEventListener("change", (event) => {
       });
   }
 
+  if (target.dataset.action === "set-awakened-field") {
+    const awakenedId = target.dataset.awakenedId ?? "";
+    const field = target.dataset.field ?? "";
+    if (awakenedId && field) {
+      commit((draft) => {
+        updateAwakenedField(draft, awakenedId, field, target.value);
+      });
+    }
+  }
+
+  if (target.dataset.action === "set-awakened-attr") {
+    const awakenedId = target.dataset.awakenedId ?? "";
+    const attrId = target.dataset.attrId ?? "";
+    if (awakenedId && attrId) {
+      commit((draft) => {
+        updateAwakenedAttribute(draft, awakenedId, attrId, target.value);
+      });
+    }
+  }
+
+  if (target.dataset.action === "upload-awakened-image") {
+    const awakenedId = target.dataset.awakenedId ?? "";
+    const file = target.files?.[0];
+    if (!awakenedId || !file) {
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      reportError("Please choose an image file.");
+      target.value = "";
+      return;
+    }
+    downscaleImageFile(file, { maxEdge: 400 })
+      .then((dataUrl) => {
+        commit((draft) => {
+          setAwakenedImageData(draft, awakenedId, dataUrl);
+        });
+      })
+      .catch((error) => {
+        reportError(error?.message ?? "Could not read that image. Try a different file.");
+      })
+      .finally(() => {
+        target.value = "";
+      });
+  }
+
 });
 
 root.addEventListener("input", (event) => {
@@ -4583,6 +4724,14 @@ root.addEventListener("input", (event) => {
     const filter = renderer.transientUi.npcFilter ?? { query: "", statuses: [] };
     renderer.setTransientUi(
       { npcFilter: { ...filter, query: String(target.value ?? "") } },
+      getCurrentState()
+    );
+  }
+
+  if (target.dataset.action === "set-awakened-filter-query") {
+    const filter = renderer.transientUi.awakenedFilter ?? { query: "", grades: [], statuses: [] };
+    renderer.setTransientUi(
+      { awakenedFilter: { ...filter, query: String(target.value ?? "") } },
       getCurrentState()
     );
   }

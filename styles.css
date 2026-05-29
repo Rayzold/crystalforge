@@ -14735,6 +14735,111 @@ body:-webkit-full-screen #app {
   }
 }
 
+/* ---- Awakened roster ---- */
+.awakened-grade {
+  display: inline-grid;
+  place-content: center;
+  min-width: 1.9rem;
+  height: 1.9rem;
+  padding: 0 0.35rem;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  color: #08101f;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  flex: 0 0 auto;
+}
+
+.awakened-grade--F { background: #6b7689; color: #f2f6ff; }
+.awakened-grade--D { background: #5fb9a6; }
+.awakened-grade--C { background: #58b8ff; }
+.awakened-grade--B { background: #8b7dff; color: #f2f6ff; }
+.awakened-grade--A { background: #ff8f5e; }
+.awakened-grade--S {
+  background: linear-gradient(135deg, #ffd27a, #f0a23c);
+  box-shadow: 0 0 10px rgba(240, 196, 130, 0.5);
+}
+
+.awakened-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.awakened-type-hint {
+  margin: 0;
+  font-size: 0.84rem;
+  font-style: italic;
+  color: rgba(184, 200, 233, 0.78);
+}
+
+.awakened-attrs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(74px, 1fr));
+  gap: 0.5rem;
+}
+
+.awakened-attr {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.45rem 0.5rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(134, 167, 230, 0.14);
+  background: rgba(10, 15, 28, 0.55);
+}
+
+.awakened-attr--primary {
+  border-color: rgba(240, 196, 130, 0.5);
+  background: rgba(240, 196, 130, 0.08);
+}
+
+.awakened-attr--secondary {
+  border-color: rgba(141, 214, 255, 0.4);
+  background: rgba(141, 214, 255, 0.06);
+}
+
+.awakened-attr__label {
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(184, 200, 233, 0.82);
+  text-align: center;
+}
+
+.awakened-attr input {
+  width: 100%;
+  padding: 0.35rem 0.4rem;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(134, 167, 230, 0.18);
+  background: rgba(8, 13, 24, 0.7);
+  color: inherit;
+  font: inherit;
+  font-size: 1.02rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.roster-filter--awakened {
+  grid-template-columns: 1fr;
+}
+
+.roster-filter__chip-groups {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.awakened-grade-chip {
+  min-width: 2rem;
+  font-weight: 700;
+}
+
+.awakened-grade-chip.is-active {
+  background: rgba(240, 196, 130, 0.2);
+  border-color: rgba(240, 196, 130, 0.55);
+  color: rgba(255, 248, 234, 0.98);
+}
+
 .admin-random-citizens__group {
   margin-top: 0.9rem;
   padding-top: 0.7rem;
