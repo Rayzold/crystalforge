@@ -14840,6 +14840,136 @@ body:-webkit-full-screen #app {
   color: rgba(255, 248, 234, 0.98);
 }
 
+/* ---- Army muster page ---- */
+.army-panel {
+  margin-top: 1rem;
+}
+
+.army-panel .panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.army-summary {
+  margin-top: 1rem;
+}
+
+.army-forces-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.9rem;
+  margin-top: 0.8rem;
+}
+
+.army-group {
+  border: 1px solid rgba(134, 167, 230, 0.14);
+  background: rgba(10, 15, 28, 0.5);
+  border-radius: 0.8rem;
+  padding: 0.7rem 0.8rem;
+}
+
+.army-group__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.army-group h4 {
+  margin: 0;
+  font-size: 0.96rem;
+  letter-spacing: 0.04em;
+}
+
+.army-group__head strong {
+  color: var(--accent);
+  font-size: 0.9rem;
+}
+
+.army-unit-list,
+.army-structure-list,
+.army-awakened-list {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.army-unit-row,
+.army-structure-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.6rem;
+  align-items: center;
+  padding: 0.4rem 0.55rem;
+  border-radius: 0.55rem;
+  background: rgba(8, 13, 24, 0.45);
+  font-size: 0.9rem;
+}
+
+.army-unit-row.is-empty {
+  opacity: 0.5;
+}
+
+.army-unit-row__name,
+.army-structure-row__name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.army-unit-row__count {
+  font-weight: 700;
+  color: rgba(244, 248, 255, 0.96);
+  font-variant-numeric: tabular-nums;
+}
+
+.army-unit-row__stat,
+.army-structure-row__stat {
+  font-size: 0.82rem;
+  color: rgba(184, 200, 233, 0.78);
+  white-space: nowrap;
+}
+
+.army-awakened-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 0.55rem;
+  background: rgba(8, 13, 24, 0.45);
+}
+
+.army-awakened-row__meta {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.army-awakened-row__meta strong {
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.army-awakened-row__meta span {
+  font-size: 0.84rem;
+  color: rgba(184, 200, 233, 0.78);
+}
+
+@media (max-width: 600px) {
+  .army-unit-row,
+  .army-structure-row {
+    grid-template-columns: 1fr auto;
+  }
+  .army-unit-row__stat,
+  .army-structure-row__stat:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
 /* ---- Building 350% apex bonus note ---- */
 .building-detail__panel--apex {
   border: 1px solid rgba(240, 196, 130, 0.3);

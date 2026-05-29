@@ -27,6 +27,7 @@ import { renderVehiclesPage } from "./VehiclesPage.js";
 import { renderBehemothsPage } from "./BehemothsPage.js";
 import { renderNpcsPage } from "./NpcsPage.js";
 import { renderAwakenedPage } from "./AwakenedPage.js";
+import { renderArmyPage } from "./ArmyPage.js";
 import { getMayorSuggestions } from "../systems/TownFocusSystem.js";
 import { getDefaultTownFocusPreviewId } from "./TownFocusShared.js";
 import { renderTownFocusCeremonyOverlay } from "./TownFocusCeremonyOverlay.js";
@@ -159,6 +160,8 @@ export class UIRenderer {
         return renderNpcsPage(state);
       case "awakened":
         return renderAwakenedPage(state);
+      case "army":
+        return renderArmyPage(state);
       case "uniques":
         return renderUniqueCitizensPage(state);
       case "chronicle":
