@@ -7510,7 +7510,7 @@ body:-webkit-full-screen #app {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  animation: manifestButtonPulse 2.8s ease-in-out infinite;
+  animation: manifestButtonPulse 1.4s ease-in-out infinite;
 }
 
 .manifest-panel__button:hover {
@@ -15433,4 +15433,39 @@ html.session-mode .sidebar-density-picker__session-mode {
   margin-top: 10px;
   display: grid;
   gap: 10px;
+}
+
+.city-session-controls__more:not([open]) .city-session-controls__more-body {
+  display: none;
+}
+
+
+/* ─── Building card hex coordinate label (secondary/muted) ─── */
+.building-card__hex-label {
+  font-size: 0.8rem;
+  opacity: 0.5;
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+
+/* ─── City workspace — building name search in toolbar ─── */
+.city-workspace__building-search {
+  width: 100%;
+  background: var(--bg-2, rgba(255,255,255,0.05));
+  border: 1px solid var(--panel-border, rgba(255,255,255,0.1));
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.9rem;
+  padding: 6px 12px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.city-workspace__building-search::placeholder {
+  color: var(--muted);
+}
+
+.city-workspace__building-search:focus {
+  border-color: var(--accent, #6b9aff);
 }

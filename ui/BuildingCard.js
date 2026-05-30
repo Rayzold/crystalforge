@@ -185,7 +185,7 @@ export function renderBuildingCard(building, state, workforceSummary = null) {
         </div>
         <div class="building-card__header">
           <div>
-            <h4>${building.mapPosition ? `Hex ${building.mapPosition.q}, ${building.mapPosition.r}` : "Awaiting placement"}</h4>
+            <h4>${building.mapPosition ? `${escapeHtml(building.displayName)} <span class="building-card__hex-label">Hex ${building.mapPosition.q}, ${building.mapPosition.r}</span>` : "Awaiting placement"}</h4>
             <p>${escapeHtml(compactStatus)}</p>
           </div>
           <strong class="building-card__multiplier">${building.isComplete ? getQualityMultiplierReadout(building) : "--"}</strong>

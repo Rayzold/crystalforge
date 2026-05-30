@@ -501,6 +501,15 @@ function renderBuildingsView(state) {
             <option value="impact-security" ${sortKey === "impact-security" ? "selected" : ""}>Security Impact</option>
           </select>
         </label>
+        <input
+          type="text"
+          class="city-workspace__building-search"
+          placeholder="Search buildings…"
+          value="${(state.transientUi?.buildingTextQuery ?? "").replace(/"/g, "&quot;")}"
+          data-action="set-building-text-query"
+          autocomplete="off"
+          spellcheck="false"
+        />
       </div>
 
       <section class="city-incubation-strip">
