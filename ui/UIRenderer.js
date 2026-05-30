@@ -106,7 +106,8 @@ export class UIRenderer {
       npcFilter: { query: "", statuses: [] },
       awakenedExpandedIds: [],
       awakenedFilter: { query: "", grades: [], statuses: [] },
-      sidebarBuildingQuery: ""
+      sidebarBuildingQuery: "",
+      sidebarBuildingListExpanded: false
     };
   }
 

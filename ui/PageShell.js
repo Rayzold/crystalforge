@@ -165,15 +165,27 @@ function renderSidebarBuildingList(state, title, items, emptyLabel, variant = "a
   };
 
   const query = variant === "active" ? (state.transientUi?.sidebarBuildingQuery ?? "").toLowerCase().trim() : "";
+  const isExpanded = variant === "active" ? Boolean(state.transientUi?.sidebarBuildingListExpanded) : true;
   const visibleItems = query
     ? items.filter((building) => building.displayName.toLowerCase().includes(query))
     : items;
 
   return `
-    <section class="sidebar-manifest-list sidebar-manifest-list--${variant}">
+    <section class="sidebar-manifest-list sidebar-manifest-list--${variant} ${variant === "active" && !isExpanded ? "is-collapsed" : ""}">
       <div class="sidebar-manifest-list__head">
         <strong>${escapeHtml(title)}</strong>
-        <span>${formatNumber(items.length, 0)}</span>
+        <div class="sidebar-manifest-list__head-right">
+          <span>${formatNumber(items.length, 0)}</span>
+          ${variant === "active" ? `
+            <button
+              class="button button--ghost sidebar-manifest-list__toggle"
+              type="button"
+              data-action="toggle-sidebar-building-list"
+              title="${isExpanded ? "Collapse building list" : "Expand building list"}"
+              aria-expanded="${isExpanded ? "true" : "false"}"
+            >${isExpanded ? "▲" : "▼"}</button>
+          ` : ""}
+        </div>
       </div>
       ${variant === "active" ? `
         <div class="sidebar-manifest-list__search">

@@ -4759,6 +4759,13 @@ root.addEventListener("input", (event) => {
     );
   }
 
+  if (target.dataset.action === "toggle-sidebar-building-list") {
+    renderer.setTransientUi(
+      { sidebarBuildingListExpanded: !renderer.transientUi.sidebarBuildingListExpanded },
+      getCurrentState()
+    );
+  }
+
 });
 
 audioEngine.setMuted(getCurrentState().settings.muted);

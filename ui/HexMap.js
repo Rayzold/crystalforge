@@ -898,7 +898,7 @@ function renderPlacementPicker(state, cell) {
       <div class="panel__header hex-map-panel__picker-head">
         <div>
           <h4>${escapeHtml(pickerTitle)}</h4>
-          <span class="panel__subtle">Hex ${cell.q}, ${cell.r}. ${escapeHtml(zoneDetail)}</span>
+          <span class="panel__subtle">${escapeHtml(zoneDetail)}</span>
         </div>
         <button class="button button--ghost hex-map-panel__picker-close" data-action="clear-map-cell-selection" aria-label="Close placement drawer">Close</button>
       </div>
@@ -1038,12 +1038,12 @@ export function renderHexMap(state) {
   const placementModeActive = Boolean(selectedBuilding && state.transientUi?.validPlacementMode);
   const previewMessage = selectedMapCell
     ? selectedMapBuilding
-      ? `${selectedMapBuilding.displayName} occupies selected hex ${selectedMapCell.q}, ${selectedMapCell.r}.`
+      ? `${selectedMapBuilding.displayName} occupies this plot.`
       : selectedBuilding
         ? selectedPreviewValidation?.ok
-          ? `Selected hex ${selectedMapCell.q}, ${selectedMapCell.r} can hold ${selectedBuilding.displayName}.`
-          : selectedPreviewValidation?.reason ?? `Hex ${selectedMapCell.q}, ${selectedMapCell.r}`
-        : `Selected hex ${selectedMapCell.q}, ${selectedMapCell.r}.`
+          ? `${selectedBuilding.displayName} can be placed here.`
+          : selectedPreviewValidation?.reason ?? `Selected plot`
+        : `Empty plot selected.`
     : selectedBuilding
       ? selectedBuildingCanUseBastion
         ? "Select a city plot or bastion hex to preview placement."
@@ -1105,7 +1105,7 @@ export function renderHexMap(state) {
           <strong>${selectedBuilding ? escapeHtml(selectedBuilding.displayName) : "No building selected"}</strong>
           <span>${
             selectedPosition
-              ? `Currently at hex ${selectedPosition.q}, ${selectedPosition.r}`
+              ? `Currently placed on the map`
               : selectedBuilding
                 ? selectedBuildingCanUseBastion
                   ? "Click a city plot or bastion hex to place it"

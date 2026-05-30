@@ -15314,3 +15314,40 @@ html.session-mode .sidebar-density-picker__session-mode {
   padding-bottom: 8px;
   margin-bottom: 4px;
 }
+
+
+/* ─── Sidebar building list — collapse by default ─── */
+.sidebar-manifest-list__head-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sidebar-manifest-list__toggle {
+  padding: 0 5px;
+  min-height: 20px;
+  font-size: 0.7rem;
+  opacity: 0.6;
+  line-height: 1;
+}
+
+.sidebar-manifest-list__toggle:hover {
+  opacity: 1;
+}
+
+.sidebar-manifest-list--active.is-collapsed .sidebar-manifest-list__search,
+.sidebar-manifest-list--active.is-collapsed .sidebar-manifest-list__items,
+.sidebar-manifest-list--active.is-collapsed .sidebar-manifest-list__empty,
+.sidebar-manifest-list--active.is-collapsed .sidebar-manifest-list__empty-state {
+  display: none;
+}
+
+
+/* ─── Citizens page — C/R/E rarity legend ─── */
+.citizen-panel__rarity-legend {
+  margin: -4px 0 12px;
+  padding: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+}

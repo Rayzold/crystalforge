@@ -78,6 +78,7 @@ export function renderCitizenPanel(state) {
         <h3>Citizens</h3>
         <span class="panel__subtle">Population ${formatNumber(state.resources.population)} / settlement support ${formatNumber(support)} / ${formatNumber(supportUsage, 1)}% used</span>
       </div>
+      <p class="citizen-panel__rarity-legend">C = Common &nbsp;·&nbsp; R = Rare &nbsp;·&nbsp; E = Epic</p>
       <div class="citizen-panel__groups">
         ${CITIZEN_GROUPS.map((group) => {
           const total = group.classes.reduce((sum, citizenClass) => sum + (state.citizens[citizenClass] ?? 0), 0);
