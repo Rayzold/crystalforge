@@ -1,4 +1,4 @@
-/* ---------------------------------------------------------------------------
+﻿/* ---------------------------------------------------------------------------
  * Responsive breakpoint scale (max-width, desktop-first):
  *   xs   <= 480px   small phone
  *   sm   <= 640px   large phone / phablet
@@ -102,7 +102,7 @@ body {
     radial-gradient(circle at 52% 120%, var(--bg-radial-c), transparent 30%),
     radial-gradient(circle at 68% 82%, var(--bg-radial-d), transparent 18%),
     linear-gradient(180deg, var(--bg-start), var(--bg-mid) 54%, var(--bg-end));
-  transition: background 420ms ease, color 260ms ease;
+  transition: background 180ms ease, color 100ms ease;
 }
 
 body::before {
@@ -132,7 +132,7 @@ body::after {
 }
 
 body.is-page-entering .game-shell {
-  animation: pageShellIn 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: pageShellIn 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 body.is-page-entering .sidebar-nav,
@@ -141,7 +141,7 @@ body.is-page-entering .hud-ribbon,
 body.is-page-entering .page-command-strip,
 body.is-page-entering .page-layout,
 body.is-page-entering .crisis-banner {
-  animation: pageLayerRise 580ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: pageLayerRise 160ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 body.is-page-entering .page-hero {
@@ -160,7 +160,7 @@ body.is-page-leaving .game-shell {
   opacity: 0;
   transform: translateY(8px) scale(0.994);
   filter: saturate(0.94);
-  transition: opacity 240ms ease, transform 240ms ease, filter 240ms ease;
+  transition: opacity 100ms ease, transform 100ms ease, filter 100ms ease;
 }
 
 button,
@@ -194,7 +194,7 @@ textarea {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 .boot-panel__title {
@@ -299,11 +299,11 @@ textarea {
   cursor: pointer;
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition:
-    transform 220ms ease,
-    box-shadow 220ms ease,
-    border-color 220ms ease,
-    background 220ms ease,
-    filter 220ms ease;
+    transform 100ms ease,
+    box-shadow 100ms ease,
+    border-color 100ms ease,
+    background 100ms ease,
+    filter 100ms ease;
 }
 
 .button,
@@ -319,7 +319,7 @@ textarea {
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   background:
     linear-gradient(135deg, rgba(229, 140, 255, 0.24), rgba(88, 184, 255, 0.18) 52%, rgba(240, 196, 130, 0.12)),
     rgba(12, 18, 30, 0.92);
@@ -402,12 +402,12 @@ button[aria-disabled="true"]:hover,
 .modal__dialog {
   position: relative;
   transition:
-    transform 260ms ease,
-    border-color 260ms ease,
-    background 260ms ease,
-    box-shadow 260ms ease,
-    opacity 260ms ease,
-    filter 260ms ease;
+    transform 120ms ease,
+    border-color 120ms ease,
+    background 120ms ease,
+    box-shadow 120ms ease,
+    opacity 120ms ease,
+    filter 120ms ease;
 }
 
 .panel__header h3,
@@ -440,7 +440,7 @@ button[aria-disabled="true"]:hover,
   background: rgba(255, 255, 255, 0.05);
   color: var(--text);
   font-family: var(--display-font);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   line-height: 1;
   cursor: help;
   transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
@@ -464,7 +464,7 @@ button[aria-disabled="true"]:hover,
   border: 1px solid rgba(141, 214, 255, 0.2);
   background: rgba(9, 13, 24, 0.96);
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   line-height: 1.5;
   box-shadow: 0 18px 36px rgba(8, 12, 24, 0.32);
   z-index: 12;
@@ -555,7 +555,7 @@ button[aria-disabled="true"]:hover,
 .rolltable-review__card small,
 .rolltable-editor__header span {
   display: block;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   color: var(--muted);
   font-family: var(--label-font);
   letter-spacing: 0.05em;
@@ -611,7 +611,7 @@ button[aria-disabled="true"]:hover,
 }
 
 .city-admin-view__grid--readouts .resource-chip__label {
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .city-admin-view__grid--readouts .resource-chip__value {
@@ -696,14 +696,14 @@ button[aria-disabled="true"]:hover,
 
 .sidebar-manifest-list__head strong {
   font-family: var(--display-font);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 .sidebar-manifest-list__head span,
 .sidebar-manifest-list__item em,
 .sidebar-manifest-list__empty {
   color: var(--muted);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 .sidebar-manifest-list__items {
@@ -727,7 +727,7 @@ button[aria-disabled="true"]:hover,
 
 .sidebar-manifest-list__item span {
   min-width: 0;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   line-height: 1.25;
 }
 
@@ -749,7 +749,7 @@ button[aria-disabled="true"]:hover,
 
 .sidebar-manifest-list__meta small {
   color: rgba(207, 216, 236, 0.68);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .sidebar-manifest-list__eta {
@@ -770,7 +770,7 @@ button[aria-disabled="true"]:hover,
   border: 1px solid rgba(141, 214, 255, 0.2);
   background: rgba(9, 13, 24, 0.96);
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   line-height: 1.25;
   letter-spacing: 0.01em;
   opacity: 0;
@@ -917,7 +917,7 @@ button[aria-disabled="true"]:hover,
 .city-empowerment-slot__stats span {
   display: block;
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -1081,7 +1081,7 @@ button[aria-disabled="true"]:hover,
   border: 1px solid rgba(141, 214, 255, 0.18);
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   line-height: 1.2;
   cursor: pointer;
   user-select: none;
@@ -1138,7 +1138,7 @@ button[aria-disabled="true"]:hover,
   border: 1px solid rgba(141, 214, 255, 0.3);
   background: linear-gradient(135deg, rgba(141, 214, 255, 0.18), rgba(120, 241, 194, 0.14));
   color: rgba(225, 244, 255, 0.98);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -1147,7 +1147,7 @@ button[aria-disabled="true"]:hover,
 .citizen-tile .help-bubble {
   width: 24px;
   height: 24px;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .app-grid {
@@ -1219,7 +1219,7 @@ button[aria-disabled="true"]:hover,
 .crystal-table__head {
   padding: 0 6px 6px;
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -1438,7 +1438,7 @@ button[aria-disabled="true"]:hover,
 .building-card__district {
   padding: 6px 9px;
   border-radius: 999px;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -1497,7 +1497,7 @@ button[aria-disabled="true"]:hover,
 .building-card__signature span {
   display: block;
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -1515,7 +1515,7 @@ button[aria-disabled="true"]:hover,
   display: block;
   margin-top: 4px;
   color: rgba(201, 212, 233, 0.7);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   letter-spacing: 0.09em;
   text-transform: uppercase;
 }
@@ -1544,7 +1544,7 @@ button[aria-disabled="true"]:hover,
 .building-card__footer,
 .district-row__meta,
 .event-line {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   color: var(--muted);
   line-height: 1.45;
 }
@@ -1588,7 +1588,7 @@ button[aria-disabled="true"]:hover,
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.05);
   color: rgba(241, 247, 255, 0.9);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.04em;
   line-height: 1.2;
   text-transform: uppercase;
@@ -1611,13 +1611,13 @@ button[aria-disabled="true"]:hover,
 .building-card__spotlight span {
   display: block;
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .building-card__spotlight strong {
   display: block;
   margin-top: 4px;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 .building-card__quality,
@@ -1697,7 +1697,7 @@ button[aria-disabled="true"]:hover,
   font-family: var(--display-font);
   color: #07111c;
   background: color-mix(in srgb, var(--rarity-color) 80%, white 20%);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 .building-card__effect {
@@ -1712,7 +1712,7 @@ button[aria-disabled="true"]:hover,
   color: rgba(236, 244, 255, 0.68);
   font-style: italic;
   line-height: 1.58;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .building-card__header p,
@@ -1733,7 +1733,7 @@ button[aria-disabled="true"]:hover,
   gap: 10px;
   margin: 0 0 12px;
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 
@@ -1747,7 +1747,7 @@ button[aria-disabled="true"]:hover,
 .admin-debug-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .admin-debug-table th,
@@ -1759,7 +1759,7 @@ button[aria-disabled="true"]:hover,
 
 .admin-debug-table th {
   color: var(--muted);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -1809,7 +1809,7 @@ button[aria-disabled="true"]:hover,
   align-items: center;
   gap: 8px;
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .admin-contributor-row__glyph {
@@ -1822,7 +1822,7 @@ button[aria-disabled="true"]:hover,
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
   color: var(--text);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   line-height: 1;
 }
 
@@ -1840,7 +1840,7 @@ button[aria-disabled="true"]:hover,
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1854,7 +1854,7 @@ button[aria-disabled="true"]:hover,
   height: 18px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.08);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   line-height: 1;
 }
 
@@ -1894,12 +1894,12 @@ button[aria-disabled="true"]:hover,
 }
 
 .admin-contributor-pill strong {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 .admin-contributor-pill em {
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   font-style: normal;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -1945,7 +1945,7 @@ button[aria-disabled="true"]:hover,
   border: 1px solid rgba(255, 255, 255, 0.06);
   background: rgba(255, 255, 255, 0.03);
   color: rgba(241, 247, 255, 0.78);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   font-family: var(--label-font);
   letter-spacing: 0.04em;
 }
@@ -1968,7 +1968,7 @@ button[aria-disabled="true"]:hover,
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   color: var(--muted);
 }
 
@@ -1991,7 +1991,7 @@ button[aria-disabled="true"]:hover,
 .gm-quality-stepper__button {
   min-width: 46px;
   padding: 8px 10px;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .button--danger-icon {
@@ -2066,13 +2066,13 @@ button[aria-disabled="true"]:hover,
   align-items: center;
   gap: 6px;
   color: rgba(255, 244, 220, 0.78);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
 .town-statistics__holiday-badge strong {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 .town-statistics__holiday-badge small {
@@ -2089,7 +2089,7 @@ button[aria-disabled="true"]:hover,
   border: 1px solid rgba(255, 255, 255, 0.16);
   background: rgba(8, 12, 24, 0.34);
   color: rgba(244, 247, 255, 0.92);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-style: normal;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -2139,7 +2139,7 @@ button[aria-disabled="true"]:hover,
 }
 
 .town-statistics--command-strip .town-statistics__section-title {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -2156,7 +2156,7 @@ button[aria-disabled="true"]:hover,
 }
 
 .town-statistics--command-strip .town-statistics__card span {
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .town-statistics--command-strip .town-statistics__card-head {
@@ -2174,7 +2174,7 @@ button[aria-disabled="true"]:hover,
 
 .town-statistics__section-title {
   color: #d18cff;
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   font-weight: 700;
 }
 
@@ -2244,7 +2244,7 @@ button[aria-disabled="true"]:hover,
 .town-statistics__card span {
   display: block;
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
 .town-statistics__card strong {
@@ -2405,7 +2405,7 @@ button[aria-disabled="true"]:hover,
 
 .city-workspace__sort span {
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .city-workspace__stream .building-grid-panel {
@@ -2448,7 +2448,7 @@ button[aria-disabled="true"]:hover,
   display: block;
   margin-top: 6px;
   color: var(--muted);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 .game-shell--page-city {
@@ -2500,13 +2500,13 @@ button[aria-disabled="true"]:hover,
 .game-shell--page-city .city-filter {
   min-height: 34px;
   padding: 7px 10px;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .game-shell--page-city .city-workspace__map-shortcut {
   min-width: 132px;
   min-height: 36px;
-  font-size: 0.86rem;
+  font-size: 0.9rem;
 }
 
 .game-shell--page-city .city-workspace__footer {
@@ -2526,7 +2526,7 @@ button[aria-disabled="true"]:hover,
 
 .game-shell--page-city .city-workspace__footer span {
   margin-top: 3px;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   line-height: 1.25;
 }
 
@@ -2571,7 +2571,7 @@ button[aria-disabled="true"]:hover,
 .workforce-panel__role-card span {
   display: block;
   color: var(--muted);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -2655,7 +2655,7 @@ button[aria-disabled="true"]:hover,
   border: 1px solid rgba(141, 214, 255, 0.16);
   background: rgba(255, 255, 255, 0.04);
   color: rgba(236, 244, 255, 0.86);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   font-style: normal;
   line-height: 1.3;
 }
@@ -2688,7 +2688,7 @@ button[aria-disabled="true"]:hover,
 
 .event-card__top span {
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
 }
 
 .history-entry--codex {
@@ -2710,7 +2710,7 @@ button[aria-disabled="true"]:hover,
 
 .history-entry__title-wrap span {
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .history-entry--codex p {
@@ -2833,7 +2833,7 @@ button[aria-disabled="true"]:hover,
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .chronicle-intro__feature strong {
@@ -2917,7 +2917,7 @@ button[aria-disabled="true"]:hover,
 
 .event-chain-card span {
   color: var(--muted);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -3380,7 +3380,7 @@ button[aria-disabled="true"]:hover,
 .drift-evolution-panel__abilities > span {
   display: block;
   color: var(--muted);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -3515,7 +3515,7 @@ button[aria-disabled="true"]:hover,
 .manifest-shrine__meta span,
 .hex-map-tooltip span {
   color: var(--muted);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -3544,7 +3544,7 @@ button[aria-disabled="true"]:hover,
 .building-detail__flow-grid h5 {
   margin: 0;
   color: rgba(241, 246, 255, 0.92);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -3642,7 +3642,7 @@ button[aria-disabled="true"]:hover,
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: var(--muted);
 }
 
@@ -3662,7 +3662,7 @@ button[aria-disabled="true"]:hover,
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.05);
   color: rgba(241, 247, 255, 0.86);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   letter-spacing: 0.03em;
   line-height: 1.2;
 }
@@ -3786,7 +3786,7 @@ button[aria-disabled="true"]:hover,
 
 .catalog-modal__filters span {
   color: var(--muted);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -3918,7 +3918,7 @@ button[aria-disabled="true"]:hover,
 
 .admin-search span {
   color: var(--muted);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -3969,7 +3969,7 @@ button[aria-disabled="true"]:hover,
 .admin-citizen-group__header p {
   margin: 4px 0 0;
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .admin-citizen-group__rows {
@@ -4016,7 +4016,7 @@ button[aria-disabled="true"]:hover,
   display: block;
   margin-top: 8px;
   color: var(--muted);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   line-height: 1.45;
 }
 
@@ -4072,7 +4072,7 @@ button[aria-disabled="true"]:hover,
 }
 
 .admin-active-building-card__quality span {
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   color: var(--muted);
 }
 
@@ -4181,7 +4181,7 @@ textarea {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  font-size: 0.86rem;
+  font-size: 0.9rem;
 }
 
 .focus-ceremony__card .town-focus-badge {
@@ -4208,7 +4208,7 @@ textarea {
   pointer-events: none;
   background: rgba(0, 0, 0, 0.96);
   opacity: 0;
-  transition: opacity 220ms ease;
+  transition: opacity 100ms ease;
   z-index: 7;
 }
 
@@ -4661,7 +4661,7 @@ textarea {
   justify-self: start;
   min-width: 86px;
   padding: 8px 12px;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -4688,7 +4688,7 @@ textarea {
   box-shadow: 0 14px 28px rgba(4, 9, 18, 0.28);
   color: rgba(232, 240, 255, 0.74);
   font-family: var(--label-font);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   user-select: none;
@@ -4733,7 +4733,7 @@ textarea {
 .page-date-chip span {
   overflow: hidden;
   color: rgba(232, 240, 255, 0.78);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.04em;
   line-height: 1.25;
   text-overflow: ellipsis;
@@ -4769,7 +4769,7 @@ textarea {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
 .sidebar-nav__brand strong {
@@ -4794,7 +4794,7 @@ textarea {
 
 .sidebar-link-group__label {
   color: rgba(223, 232, 247, 0.64);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
   font-family: var(--label-font);
@@ -4811,13 +4811,13 @@ textarea {
   font-family: var(--label-font);
   font-weight: 700;
   letter-spacing: 0.03em;
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.012)),
     rgba(8, 12, 19, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: transform 220ms ease, border-color 220ms ease, background 220ms ease, box-shadow 220ms ease;
+  transition: transform 100ms ease, border-color 100ms ease, background 100ms ease, box-shadow 100ms ease;
 }
 
 .sidebar-link__label {
@@ -4828,7 +4828,7 @@ textarea {
 }
 
 .sidebar-link__emoji {
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   line-height: 1;
 }
 
@@ -4845,7 +4845,7 @@ textarea {
   background: linear-gradient(135deg, rgba(255, 88, 88, 0.98), rgba(255, 132, 132, 0.92));
   color: #fff;
   font-style: normal;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   font-weight: 700;
   line-height: 1;
   box-shadow: 0 10px 22px rgba(255, 70, 70, 0.28);
@@ -4920,7 +4920,7 @@ textarea {
 
 .sidebar-gm-tools__summary span {
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -4953,7 +4953,7 @@ textarea {
 
 .sidebar-density-picker__copy span {
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -4972,7 +4972,7 @@ textarea {
 .sidebar-density-picker__button {
   min-height: 34px;
   padding: 7px 8px;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 .sidebar-density-picker__button.is-active {
@@ -5012,7 +5012,7 @@ textarea {
   color: rgba(243, 214, 255, 0.88);
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .sidebar-mode-link strong {
@@ -5054,7 +5054,7 @@ textarea {
 
 .sidebar-publish-status span {
   color: rgba(219, 228, 244, 0.76);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   line-height: 1.45;
 }
 
@@ -5084,7 +5084,7 @@ textarea {
 }
 
 .sidebar-save-slots__label {
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: rgba(184, 200, 233, 0.76);
@@ -5112,7 +5112,7 @@ textarea {
 }
 
 .sidebar-save-slot__meta small {
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   color: rgba(184, 200, 233, 0.72);
   white-space: nowrap;
   overflow: hidden;
@@ -5127,7 +5127,7 @@ textarea {
 .sidebar-nav__save-slot {
   display: grid;
   gap: 4px;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: rgba(207, 219, 245, 0.72);
 }
 
@@ -5148,7 +5148,7 @@ textarea {
 
 .sidebar-nav__build span {
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -5177,7 +5177,7 @@ textarea {
 .sidebar-dice__header span,
 .sidebar-dice__controls span {
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -5250,7 +5250,7 @@ textarea {
 .game-shell--density-comfort .icon-button {
   padding: 10px 14px;
   border-radius: 13px;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .game-shell--density-comfort .panel,
@@ -5268,7 +5268,7 @@ textarea {
 .game-shell--density-comfort .sidebar-link {
   padding: 10px 12px;
   border-radius: 15px;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 .game-shell--density-comfort .sidebar-nav__build,
@@ -5315,7 +5315,7 @@ textarea {
 .game-shell--density-dense .icon-button {
   padding: 7px 10px;
   border-radius: 10px;
-  font-size: 0.86rem;
+  font-size: 0.9rem;
 }
 
 .game-shell--density-dense .panel,
@@ -5333,7 +5333,7 @@ textarea {
 .game-shell--density-dense .sidebar-link {
   padding: 7px 8px;
   border-radius: 11px;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .game-shell--density-dense .sidebar-link__badge {
@@ -5341,7 +5341,7 @@ textarea {
   right: 6px;
   min-width: 18px;
   height: 18px;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .game-shell--density-dense .sidebar-nav__build,
@@ -5367,7 +5367,7 @@ textarea {
 }
 
 .game-shell--density-dense .page-hero__subtitle {
-  font-size: 0.86rem;
+  font-size: 0.9rem;
 }
 
 .game-shell--density-dense .page-delta-strip__item,
@@ -5386,13 +5386,13 @@ textarea {
 .game-shell--density-dense .resource-chip__label,
 .game-shell--density-dense .hud-ribbon__item span,
 .game-shell--density-dense .page-delta-strip__item span {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
 }
 
 .game-shell--density-dense .resource-chip__value,
 .game-shell--density-dense .hud-ribbon__item strong,
 .game-shell--density-dense .page-delta-strip__item strong {
-  font-size: 0.86rem;
+  font-size: 0.9rem;
 }
 
 .game-shell--page-city.game-shell--density-comfort .sidebar-nav,
@@ -5439,7 +5439,7 @@ textarea {
 .game-shell--page-city.game-shell--density-dense .city-filter {
   min-height: 34px;
   padding: 7px 10px;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .game-shell--player {
@@ -5477,7 +5477,7 @@ textarea {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .player-stage__brand strong {
@@ -5495,7 +5495,7 @@ textarea {
   font-family: var(--label-font);
   font-weight: 700;
   letter-spacing: 0.05em;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
 }
 
@@ -5548,7 +5548,7 @@ textarea {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .player-hero__meta strong {
@@ -5623,7 +5623,7 @@ textarea {
 
 .player-session-banner__grid span {
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -5663,7 +5663,7 @@ textarea {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
 }
 
 .player-citizens-summary__meta strong {
@@ -5763,7 +5763,7 @@ textarea {
   margin-top: 10px;
   padding: 10px 14px 4px;
   color: rgba(207, 216, 236, 0.66);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   text-align: center;
 }
 
@@ -5826,7 +5826,7 @@ textarea {
 .city-trend-panel__item span,
 .resource-chain-panel__item small {
   color: var(--text-muted);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -5856,7 +5856,7 @@ textarea {
 
 .resource-chain-panel__item p,
 .glossary-panel__item p {
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .building-role-chip {
@@ -5875,7 +5875,7 @@ textarea {
 
 .building-role-chip span {
   color: var(--text-soft);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   line-height: 1.45;
 }
 
@@ -5919,7 +5919,7 @@ textarea {
   margin: 0;
   color: var(--text-soft);
   line-height: 1.45;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .help-page {
@@ -6026,7 +6026,7 @@ textarea {
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-soft);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   line-height: 1.35;
 }
 
@@ -6091,7 +6091,7 @@ textarea {
   border: 1px solid rgba(255, 184, 112, 0.24);
   background: linear-gradient(180deg, rgba(255, 184, 112, 0.14), rgba(255, 124, 157, 0.08));
   color: rgba(255, 228, 196, 0.9);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -6209,7 +6209,7 @@ textarea {
 }
 
 .page-stage--player .panel__header .panel__subtle {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
 }
 
 body:fullscreen #app,
@@ -6228,7 +6228,7 @@ body:-webkit-full-screen #app {
 }
 
 .game-shell--projector .player-stage__header {
-  transition: opacity 220ms ease, transform 220ms ease;
+  transition: opacity 100ms ease, transform 100ms ease;
 }
 
 .game-shell--projector-hidden .player-stage__header {
@@ -6337,7 +6337,7 @@ body:-webkit-full-screen #app {
   min-height: 56px;
   padding: 0;
   text-align: center;
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   display: grid;
@@ -6357,7 +6357,7 @@ body:-webkit-full-screen #app {
 }
 
 .game-shell--page-forge.game-shell--forge-collapsed .sidebar-nav__footer .button::before {
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -6453,7 +6453,7 @@ body:-webkit-full-screen #app {
   color: rgba(255, 211, 220, 0.82);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-size: 0.86rem;
+  font-size: 0.9rem;
 }
 
 .crisis-banner__item {
@@ -6488,7 +6488,7 @@ body:-webkit-full-screen #app {
 
 .crisis-banner__link {
   margin-top: 2px;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   color: rgba(255, 228, 234, 0.9);
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -6536,7 +6536,7 @@ body:-webkit-full-screen #app {
   max-width: 62ch;
   margin: 6px 0 0;
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   line-height: 1.38;
 }
 
@@ -6580,7 +6580,7 @@ body:-webkit-full-screen #app {
 
 .page-hero__focus small {
   margin-top: 6px;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   line-height: 1.42;
 }
 
@@ -6638,7 +6638,7 @@ body:-webkit-full-screen #app {
   align-items: center;
   gap: 0.45rem;
   color: rgba(191, 205, 235, 0.76);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -6655,7 +6655,7 @@ body:-webkit-full-screen #app {
 .page-command-strip__status p {
   margin: 0;
   color: rgba(210, 220, 243, 0.72);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   line-height: 1.45;
 }
 
@@ -6695,7 +6695,7 @@ body:-webkit-full-screen #app {
 
 .page-command-strip__action em {
   color: rgba(225, 234, 251, 0.84);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   font-style: normal;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -6755,13 +6755,13 @@ body:-webkit-full-screen #app {
   align-items: center;
   gap: 0.45rem;
   color: rgba(191, 205, 235, 0.9);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.02em;
 }
 
 .page-command-strip__decision > strong {
   color: rgba(244, 248, 255, 0.96);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   line-height: 1.4;
 }
 
@@ -6786,7 +6786,7 @@ body:-webkit-full-screen #app {
   background: rgba(18, 26, 46, 0.78);
   color: rgba(226, 233, 249, 0.84);
   font-style: normal;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -6820,7 +6820,7 @@ body:-webkit-full-screen #app {
   align-items: center;
   gap: 0.4rem;
   color: rgba(191, 205, 235, 0.72);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.11em;
   text-transform: uppercase;
 }
@@ -6828,7 +6828,7 @@ body:-webkit-full-screen #app {
 .page-command-strip__history-head strong,
 .page-command-strip__history-copy strong {
   color: rgba(241, 247, 255, 0.94);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   line-height: 1.35;
 }
 
@@ -6852,7 +6852,7 @@ body:-webkit-full-screen #app {
 .page-command-strip__history-item em {
   margin: 0;
   color: rgba(208, 219, 242, 0.72);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   line-height: 1.45;
   font-style: normal;
 }
@@ -6894,7 +6894,7 @@ body:-webkit-full-screen #app {
 
 .page-delta-strip__item span {
   color: var(--text-muted);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -6907,7 +6907,7 @@ body:-webkit-full-screen #app {
 
 .page-delta-strip__item small {
   color: rgba(223, 232, 247, 0.76);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .page-delta-strip__item--positive strong {
@@ -6963,7 +6963,7 @@ body:-webkit-full-screen #app {
   display: block;
   color: var(--muted);
   font-family: var(--label-font);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -6987,7 +6987,7 @@ body:-webkit-full-screen #app {
   display: block;
   margin-top: 4px;
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   line-height: 1.28;
 }
 
@@ -7201,7 +7201,7 @@ body:-webkit-full-screen #app {
 .city-aside__summary-grid span {
   display: block;
   color: var(--muted);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
 }
 
 .city-aside__summary-grid strong {
@@ -7360,7 +7360,7 @@ body:-webkit-full-screen #app {
 
 .crystal-card__level {
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
 }
@@ -7384,7 +7384,7 @@ body:-webkit-full-screen #app {
 
 .crystal-card__rolls {
   color: var(--muted);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -7483,7 +7483,7 @@ body:-webkit-full-screen #app {
   color: rgba(195, 201, 220, 0.78);
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .manifest-panel__hero h3 {
@@ -7650,7 +7650,7 @@ body:-webkit-full-screen #app {
 
 .manifest-result__panel h4 {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -7722,7 +7722,7 @@ body:-webkit-full-screen #app {
 
 .city-incubation-queue__slot-label {
   color: rgba(212, 221, 236, 0.68);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -7879,7 +7879,7 @@ body:-webkit-full-screen #app {
 .world-summary__stats span {
   display: block;
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .world-summary__stats strong {
@@ -8052,7 +8052,7 @@ body:-webkit-full-screen #app {
 
 .home-route-group__label {
   color: rgba(223, 232, 247, 0.68);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.16em;
   font-family: var(--label-font);
@@ -8086,7 +8086,7 @@ body:-webkit-full-screen #app {
 
 .home-route-card span {
   color: #d58dff;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
 }
@@ -8131,7 +8131,7 @@ body:-webkit-full-screen #app {
 .citizen-command-panel__metrics span {
   display: block;
   color: var(--muted);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -8283,7 +8283,7 @@ body:-webkit-full-screen #app {
 .admin-slot-summary__item span,
 .admin-slot-summary__item em {
   color: rgba(207, 219, 245, 0.72);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
 }
 
 .landing-hero__facts article {
@@ -8294,7 +8294,7 @@ body:-webkit-full-screen #app {
 .landing-hero__facts span {
   display: block;
   color: var(--muted);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
 }
 
 .landing-hero__facts strong {
@@ -8412,7 +8412,7 @@ body:-webkit-full-screen #app {
 .landing-command-center__resources span {
   display: block;
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -8429,7 +8429,7 @@ body:-webkit-full-screen #app {
   display: block;
   margin-top: 6px;
   color: rgba(223, 232, 247, 0.76);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 .landing-command-center__resource-card--positive small {
@@ -8474,7 +8474,7 @@ body:-webkit-full-screen #app {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-size: 0.86rem;
+  font-size: 0.9rem;
 }
 
 .landing-hero__badge strong {
@@ -8581,7 +8581,7 @@ body:-webkit-full-screen #app {
 
 .onboarding-panel__current > div > span {
   color: rgba(191, 205, 235, 0.76);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -8608,7 +8608,7 @@ body:-webkit-full-screen #app {
   font-style: normal;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .goal-reward-pill {
@@ -8622,7 +8622,7 @@ body:-webkit-full-screen #app {
   border: 1px solid rgba(141, 214, 255, 0.16);
   background: rgba(141, 214, 255, 0.08);
   color: rgba(232, 240, 255, 0.88);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.03em;
   line-height: 1.35;
 }
@@ -8661,7 +8661,7 @@ body:-webkit-full-screen #app {
   color: var(--muted);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 .onboarding-card__status,
@@ -8670,7 +8670,7 @@ body:-webkit-full-screen #app {
 }
 
 .onboarding-card__status {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -8749,7 +8749,7 @@ body:-webkit-full-screen #app {
 
 .town-focus-badge span {
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -8768,7 +8768,7 @@ body:-webkit-full-screen #app {
 .town-focus-card__top span {
   display: block;
   color: var(--muted);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -8882,7 +8882,7 @@ body:-webkit-full-screen #app {
 .town-focus-modal__runway span {
   display: block;
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -9210,7 +9210,7 @@ body:-webkit-full-screen #app {
 
 .forge-stage__ritual-notes span {
   color: var(--muted);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -9297,7 +9297,7 @@ body:-webkit-full-screen #app {
   border: 1px solid rgba(141, 214, 255, 0.16);
   background: rgba(255, 255, 255, 0.04);
   color: var(--muted);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   line-height: 1.2;
@@ -9364,7 +9364,7 @@ body:-webkit-full-screen #app {
 
 .hex-map-panel__toolbar-label {
   color: var(--muted);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -9526,7 +9526,7 @@ body:-webkit-full-screen #app {
   align-items: center;
   padding: 4px 8px;
   border-radius: 999px;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -9567,7 +9567,7 @@ body:-webkit-full-screen #app {
   border: 1px solid rgba(255, 228, 143, 0.16);
   background: rgba(255, 228, 143, 0.08);
   color: var(--text);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -10184,7 +10184,7 @@ body:-webkit-full-screen #app {
 }
 
 .hex-map-panel__toolbar-label {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   letter-spacing: 0.06em;
 }
 
@@ -10207,7 +10207,7 @@ body:-webkit-full-screen #app {
 }
 
 .hex-map-panel__status span {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   line-height: 1.25;
 }
 
@@ -10231,7 +10231,7 @@ body:-webkit-full-screen #app {
 }
 
 .hex-map-panel__legend {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 .hex-map-panel__actions .button,
@@ -10239,7 +10239,7 @@ body:-webkit-full-screen #app {
 .hex-map-panel__picker .button {
   min-height: 32px;
   padding: 7px 9px;
-  font-size: 0.83rem;
+  font-size: 0.9rem;
 }
 
 .hex-map-panel__tooltip {
@@ -10256,7 +10256,7 @@ body:-webkit-full-screen #app {
 }
 
 .hex-map-tooltip span {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
 }
 
 .hex-map-tooltip small {
@@ -10402,7 +10402,7 @@ body:-webkit-full-screen #app {
 
 .hex-map-panel__preset-copy span {
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .hex-map-panel__preset-actions {
@@ -11162,7 +11162,7 @@ body:-webkit-full-screen #app {
   }
 
   .page-hero__subtitle {
-    font-size: 0.86rem;
+    font-size: 0.9rem;
   }
 
   .hud-ribbon {
@@ -11247,7 +11247,7 @@ body:-webkit-full-screen #app {
   }
 
   .game-shell--density-dense .page-hero__subtitle {
-    font-size: 0.88rem;
+    font-size: 0.9rem;
   }
 
   .game-shell--density-dense .panel,
@@ -11414,7 +11414,7 @@ body:-webkit-full-screen #app {
   .hex-map-panel__legend {
     grid-auto-flow: row;
     gap: 8px;
-    font-size: 0.88rem;
+    font-size: 0.9rem;
   }
 
   .hex-map-panel__actions .button {
@@ -11539,7 +11539,7 @@ body:-webkit-full-screen #app {
   .sidebar-nav__footer p,
   .page-hero__eyebrow,
   .world-summary__eyebrow {
-    font-size: 0.84rem;
+    font-size: 0.9rem;
     letter-spacing: 0.14em;
   }
 
@@ -11898,7 +11898,7 @@ body:-webkit-full-screen #app {
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(7, 11, 20, 0.34);
   color: rgba(244, 247, 255, 0.92);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   font-style: normal;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -11918,7 +11918,7 @@ body:-webkit-full-screen #app {
 .chronicle-calendar__weekdays span {
   padding: 0 0.25rem;
   text-align: center;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted);
@@ -12054,7 +12054,7 @@ body:-webkit-full-screen #app {
 }
 
 .chronicle-calendar__day-weekday {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -12063,7 +12063,7 @@ body:-webkit-full-screen #app {
 .chronicle-calendar__day-holiday {
   display: block;
   min-height: 2.1em;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   line-height: 1.3;
   color: rgba(242, 232, 255, 0.92);
 }
@@ -12073,7 +12073,7 @@ body:-webkit-full-screen #app {
   align-items: center;
   gap: 0.28rem;
   margin-top: 0.18rem;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   color: rgba(214, 222, 246, 0.88);
 }
 
@@ -12118,7 +12118,7 @@ body:-webkit-full-screen #app {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 .chronicle-calendar__day-meta em,
@@ -12155,7 +12155,7 @@ body:-webkit-full-screen #app {
 .chronicle-calendar__detail-label {
   display: block;
   margin-bottom: 0.35rem;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -12177,7 +12177,7 @@ body:-webkit-full-screen #app {
   border-radius: 999px;
   border: 1px solid rgba(125, 152, 214, 0.16);
   background: rgba(255, 255, 255, 0.04);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   line-height: 1.2;
 }
 
@@ -12201,7 +12201,7 @@ body:-webkit-full-screen #app {
 }
 
 .chronicle-calendar__detail-condition span {
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -12237,7 +12237,7 @@ body:-webkit-full-screen #app {
 }
 
 .chronicle-calendar__city-snapshot-grid span {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -12259,7 +12259,7 @@ body:-webkit-full-screen #app {
   align-items: center;
   gap: 0.55rem;
   margin-bottom: 0.75rem;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -12409,7 +12409,7 @@ body:-webkit-full-screen #app {
 
 .turn-summary-modal__header span {
   color: rgba(205, 216, 244, 0.68);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -12515,7 +12515,7 @@ body:-webkit-full-screen #app {
 
 .turn-summary-modal__risk-head span {
   color: rgba(191, 205, 235, 0.76);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -12545,7 +12545,7 @@ body:-webkit-full-screen #app {
   border: 1px solid rgba(141, 214, 255, 0.16);
   background: rgba(255, 255, 255, 0.04);
   color: rgba(236, 244, 255, 0.86);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   font-style: normal;
   line-height: 1.3;
 }
@@ -12570,14 +12570,14 @@ body:-webkit-full-screen #app {
 
 .turn-summary-modal__attention span {
   color: rgba(191, 205, 235, 0.76);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
 .turn-summary-modal__attention em {
   color: rgba(225, 234, 251, 0.84);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   font-style: normal;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -12681,7 +12681,7 @@ body:-webkit-full-screen #app {
 .vehicle-card__stats article span {
   display: block;
   color: rgba(184, 200, 233, 0.76);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -12838,7 +12838,7 @@ body:-webkit-full-screen #app {
 .expedition-card__tags em,
 .expedition-card__footer {
   color: rgba(190, 205, 239, 0.76);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-style: normal;
 }
 
@@ -12894,7 +12894,7 @@ body:-webkit-full-screen #app {
 .expedition-team-card__title .help-bubble {
   width: 22px;
   height: 22px;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .expedition-team-card__title .help-bubble__tooltip {
@@ -12935,7 +12935,7 @@ body:-webkit-full-screen #app {
   gap: 0.1rem;
   justify-items: end;
   color: rgba(188, 204, 238, 0.78);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
 }
 
 .vehicle-roster-panel__counts strong,
@@ -13098,7 +13098,7 @@ body:-webkit-full-screen #app {
   align-items: center;
   gap: 0.45rem;
   color: rgba(191, 205, 235, 0.76);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -13115,7 +13115,7 @@ body:-webkit-full-screen #app {
 
 .expedition-relic-card__head em {
   color: rgba(191, 205, 235, 0.76);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-style: normal;
   text-align: right;
 }
@@ -13174,14 +13174,14 @@ body:-webkit-full-screen #app {
 
 .expedition-relic-synergy__head span {
   color: rgba(191, 205, 235, 0.74);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
 .expedition-relic-synergy__head strong {
   color: rgba(244, 248, 255, 0.94);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .expedition-relic-synergy p,
@@ -13231,7 +13231,7 @@ body:-webkit-full-screen #app {
 .notable-card__meta,
 .vehicle-card__eyebrow {
   color: rgba(184, 200, 233, 0.76);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .expedition-return-card__details {
@@ -13276,7 +13276,7 @@ body:-webkit-full-screen #app {
 .expedition-journey-modal__stage-copy > span {
   display: block;
   color: rgba(182, 197, 233, 0.78);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -13306,7 +13306,7 @@ body:-webkit-full-screen #app {
 
 .expedition-journey-modal__pillbox span {
   color: rgba(182, 197, 233, 0.76);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 .expedition-journey-modal__stage {
@@ -13405,7 +13405,7 @@ body:-webkit-full-screen #app {
 
 .expedition-journey-choice__head em {
   color: rgba(184, 200, 233, 0.76);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   font-style: normal;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -13432,7 +13432,7 @@ body:-webkit-full-screen #app {
   border: 1px solid rgba(149, 168, 219, 0.18);
   background: rgba(31, 41, 67, 0.7);
   color: rgba(214, 224, 249, 0.82);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   font-style: normal;
   line-height: 1.3;
 }
@@ -13504,7 +13504,7 @@ body:-webkit-full-screen #app {
 
 .expedition-journey-modal__history-item span {
   color: rgba(182, 197, 233, 0.78);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -13645,7 +13645,7 @@ body:-webkit-full-screen #app {
   margin: 0 0 0.25rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
 }
 
 .vehicle-card__head h3,
@@ -13739,7 +13739,7 @@ body:-webkit-full-screen #app {
 .resource-breakdown-modal__section-head span {
   display: block;
   color: rgba(182, 197, 233, 0.78);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -13921,7 +13921,7 @@ body:-webkit-full-screen #app {
 .build-notes-modal__header span,
 .build-notes-modal__section-head span {
   color: rgba(191, 205, 235, 0.76);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -13989,7 +13989,7 @@ body:-webkit-full-screen #app {
 .legends-summary-grid article span {
   display: block;
   color: rgba(184, 200, 233, 0.76);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -14072,7 +14072,7 @@ body:-webkit-full-screen #app {
 .legend-card__memory span {
   display: block;
   color: rgba(191, 205, 235, 0.76);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -14110,7 +14110,7 @@ body:-webkit-full-screen #app {
 .legend-card__assignment-head span {
   display: block;
   color: rgba(191, 205, 235, 0.76);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -14145,7 +14145,7 @@ body:-webkit-full-screen #app {
   border: 1px solid rgba(141, 214, 255, 0.16);
   background: rgba(20, 31, 55, 0.82);
   color: rgba(228, 236, 251, 0.88);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -14175,7 +14175,7 @@ body:-webkit-full-screen #app {
   position: relative;
   z-index: 2;
   color: rgba(246, 249, 255, 0.94);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   letter-spacing: 0.18em;
   text-indent: 0.18em;
 }
@@ -14241,7 +14241,7 @@ body:-webkit-full-screen #app {
   background: rgba(18, 26, 46, 0.78);
   color: rgba(226, 233, 249, 0.84);
   font-style: normal;
-  font-size: 0.86rem;
+  font-size: 0.9rem;
 }
 
 @media (max-width: 1024px) {
@@ -14305,7 +14305,7 @@ body:-webkit-full-screen #app {
 .behemoth-summary article span {
   display: block;
   color: rgba(184, 200, 233, 0.76);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -14387,7 +14387,7 @@ body:-webkit-full-screen #app {
 
 .behemoth-card__image-placeholder small {
   color: rgba(184, 200, 233, 0.72);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -14432,7 +14432,7 @@ body:-webkit-full-screen #app {
 .behemoth-card__caption {
   margin: 0;
   color: rgba(184, 200, 233, 0.72);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
 }
 
 .behemoth-card__grid {
@@ -14447,7 +14447,7 @@ body:-webkit-full-screen #app {
 }
 
 .behemoth-card__field-label {
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: rgba(184, 200, 233, 0.76);
@@ -14473,7 +14473,7 @@ body:-webkit-full-screen #app {
 
 .behemoth-card__status-detail {
   margin: 0;
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   color: rgba(184, 200, 233, 0.78);
   font-style: italic;
 }
@@ -14500,7 +14500,7 @@ body:-webkit-full-screen #app {
 
 .behemoth-card__section-head small {
   color: rgba(184, 200, 233, 0.65);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 .behemoth-card__stats {
@@ -14519,7 +14519,7 @@ body:-webkit-full-screen #app {
 }
 
 .behemoth-card__stat-label {
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: rgba(184, 200, 233, 0.78);
@@ -14675,7 +14675,7 @@ body:-webkit-full-screen #app {
 }
 
 .roster-row__meta span {
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   color: rgba(184, 200, 233, 0.78);
   white-space: nowrap;
   overflow: hidden;
@@ -14685,7 +14685,7 @@ body:-webkit-full-screen #app {
 .roster-row__chevron {
   margin-left: auto;
   color: rgba(184, 200, 233, 0.6);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
 .roster-row__delete {
@@ -14769,7 +14769,7 @@ body:-webkit-full-screen #app {
 
 .awakened-type-hint {
   margin: 0;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   font-style: italic;
   color: rgba(184, 200, 233, 0.78);
 }
@@ -14927,7 +14927,7 @@ body:-webkit-full-screen #app {
 
 .army-unit-row__stat,
 .army-structure-row__stat {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   color: rgba(184, 200, 233, 0.78);
   white-space: nowrap;
 }
@@ -14955,7 +14955,7 @@ body:-webkit-full-screen #app {
 }
 
 .army-awakened-row__meta span {
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   color: rgba(184, 200, 233, 0.78);
 }
 
@@ -15011,7 +15011,7 @@ body:-webkit-full-screen #app {
 
 .building-card__apex-label {
   display: block;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -15021,7 +15021,7 @@ body:-webkit-full-screen #app {
 
 .building-card__apex p {
   margin: 0;
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   line-height: 1.4;
   color: rgba(232, 240, 255, 0.86);
 }
@@ -15104,7 +15104,7 @@ body:-webkit-full-screen #app {
 }
 
 .admin-output-card__head span {
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   color: rgba(184, 200, 233, 0.72);
 }
 
@@ -15125,7 +15125,7 @@ body:-webkit-full-screen #app {
 }
 
 .admin-output-row__label strong {
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: rgba(184, 200, 233, 0.82);
@@ -15135,7 +15135,7 @@ body:-webkit-full-screen #app {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   color: rgba(184, 200, 233, 0.78);
   cursor: pointer;
 }
@@ -15148,7 +15148,7 @@ body:-webkit-full-screen #app {
 
 .admin-output-card__hint {
   margin: 0;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   color: rgba(184, 200, 233, 0.7);
 }
 
@@ -15158,7 +15158,7 @@ body:-webkit-full-screen #app {
 }
 
 .admin-output-rate span {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: rgba(184, 200, 233, 0.72);
@@ -15178,7 +15178,7 @@ body:-webkit-full-screen #app {
 .admin-output-card__tiers {
   display: grid;
   gap: 0.2rem;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   color: rgba(207, 219, 245, 0.82);
 }
 
@@ -15219,7 +15219,7 @@ body:-webkit-full-screen #app {
 
 .button--small {
   padding: 0.35rem 0.7rem;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   border-radius: 0.55rem;
 }
 
@@ -15255,4 +15255,62 @@ body:-webkit-full-screen #app {
   .behemoth-card__upkeep-remove {
     justify-self: start;
   }
+}
+
+
+/* ─── Session Mode — kills all animations for live play ─── */
+html.session-mode *,
+html.session-mode *::before,
+html.session-mode *::after {
+  transition-duration: 80ms !important;
+  animation-duration: 80ms !important;
+  animation-delay: 0ms !important;
+}
+
+.sidebar-density-picker__session-mode {
+  width: 100%;
+  margin-top: 6px;
+}
+
+html.session-mode .sidebar-density-picker__session-mode {
+  background: rgba(251, 191, 36, 0.15);
+  border-color: rgba(251, 191, 36, 0.4);
+  color: #fbbf24;
+}
+
+
+/* ─── Sidebar building search filter ─── */
+.sidebar-manifest-list__search {
+  padding: 4px 8px 2px;
+}
+
+.sidebar-manifest-list__search-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--bg-2, rgba(255,255,255,0.04));
+  border: 1px solid var(--panel-border, rgba(255,255,255,0.1));
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 0.9rem;
+  padding: 4px 8px;
+  outline: none;
+}
+
+.sidebar-manifest-list__search-input::placeholder {
+  color: var(--muted);
+}
+
+.sidebar-manifest-list__search-input:focus {
+  border-color: var(--accent, #6b9aff);
+}
+
+
+/* ─── Forge page — pin Manifest button controls so they stay visible ─── */
+.page-stage--forge .manifest-panel__controls {
+  position: sticky;
+  top: 10px;
+  z-index: 5;
+  background: linear-gradient(180deg, var(--bg-start, #090d16) 60%, transparent 100%);
+  padding-bottom: 8px;
+  margin-bottom: 4px;
 }

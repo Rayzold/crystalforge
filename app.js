@@ -3175,7 +3175,7 @@ gameState.subscribe((state) => {
   audioEngine.setMuted(state.settings.muted);
   audioEngine.setPage(pageKey);
   document.body.dataset.theme = state.settings.theme ?? "dark";
-  document.documentElement.dataset.textSize = state.settings.textSize ?? "medium";
+  document.documentElement.dataset.textSize = state.settings.textSize ?? "large";
   renderer.render(state);
   applyMapViewPreview();
   adminConsole.render(state);
@@ -3324,6 +3324,12 @@ root.addEventListener("click", async (event) => {
       });
       reportSuccess(`Concise mode ${getCurrentState().settings.conciseMode ? "on" : "off"}.`);
       break;
+    case "toggle-session-mode": {
+      const isOn = document.documentElement.classList.toggle("session-mode");
+      localStorage.setItem("cf-session-mode", isOn ? "1" : "0");
+      reportSuccess(`Session mode ${isOn ? "on — animations killed" : "off"}.`);
+      break;
+    }
     case "set-text-size":
       commit((draft) => {
         draft.settings.textSize = ["small", "medium", "large"].includes(target.dataset.textSize) ? target.dataset.textSize : "medium";
@@ -4746,11 +4752,23 @@ root.addEventListener("input", (event) => {
     );
   }
 
+  if (target.dataset.action === "set-sidebar-building-query") {
+    renderer.setTransientUi(
+      { sidebarBuildingQuery: String(target.value ?? "") },
+      getCurrentState()
+    );
+  }
+
 });
 
 audioEngine.setMuted(getCurrentState().settings.muted);
 document.body.dataset.theme = "dark";
-document.documentElement.dataset.textSize = getCurrentState().settings.textSize ?? "medium";
+document.documentElement.dataset.textSize = getCurrentState().settings.textSize ?? "large";
+
+// Restore session mode across page loads
+if (localStorage.getItem("cf-session-mode") === "1") {
+  document.documentElement.classList.add("session-mode");
+}
 
 function applyUrlFocusTargets() {
   const params = new URLSearchParams(window.location.search);

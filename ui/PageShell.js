@@ -164,17 +164,35 @@ function renderSidebarBuildingList(state, title, items, emptyLabel, variant = "a
     )
   };
 
+  const query = variant === "active" ? (state.transientUi?.sidebarBuildingQuery ?? "").toLowerCase().trim() : "";
+  const visibleItems = query
+    ? items.filter((building) => building.displayName.toLowerCase().includes(query))
+    : items;
+
   return `
     <section class="sidebar-manifest-list sidebar-manifest-list--${variant}">
       <div class="sidebar-manifest-list__head">
         <strong>${escapeHtml(title)}</strong>
         <span>${formatNumber(items.length, 0)}</span>
       </div>
+      ${variant === "active" ? `
+        <div class="sidebar-manifest-list__search">
+          <input
+            type="text"
+            class="sidebar-manifest-list__search-input"
+            placeholder="Filter buildings…"
+            value="${escapeHtml(state.transientUi?.sidebarBuildingQuery ?? "")}"
+            data-action="set-sidebar-building-query"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+      ` : ""}
       ${
-        items.length
+        visibleItems.length
           ? `
               <div class="sidebar-manifest-list__items">
-                ${items
+                ${visibleItems
                   .map(
                     (building) => {
                       const etaDetails = variant === "incubating" ? getConstructionEtaDetails(building, state) : null;
@@ -206,7 +224,9 @@ function renderSidebarBuildingList(state, title, items, emptyLabel, variant = "a
                   .join("")}
               </div>
             `
-          : emptyStateByVariant[variant] ?? `<p class="sidebar-manifest-list__empty">${escapeHtml(emptyLabel)}</p>`
+          : (query
+              ? `<p class="sidebar-manifest-list__empty">No buildings match "${escapeHtml(query)}"</p>`
+              : emptyStateByVariant[variant] ?? `<p class="sidebar-manifest-list__empty">${escapeHtml(emptyLabel)}</p>`)
       }
     </section>
   `;
@@ -295,6 +315,14 @@ function renderDensityControls(currentDensity = "compact", conciseMode = false, 
         title="Hide subtitles, helper text, and empty-state explainers"
       >
         Concise Mode: ${conciseMode ? "On" : "Off"}
+      </button>
+      <button
+        class="button button--ghost sidebar-density-picker__session-mode"
+        type="button"
+        data-action="toggle-session-mode"
+        title="Kill all animations for faster navigation during live sessions"
+      >
+        ⚡ Session Mode
       </button>
     </div>
   `;

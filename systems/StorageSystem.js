@@ -381,7 +381,7 @@ function normalizeSettings(sourceSettings, baseSettings) {
   normalized.uiDensity = allowedDensities.has(normalized.uiDensity) ? normalized.uiDensity : (baseSettings?.uiDensity ?? "compact");
   normalized.conciseMode = normalized.conciseMode === true;
   const allowedTextSizes = new Set(["small", "medium", "large"]);
-  normalized.textSize = allowedTextSizes.has(normalized.textSize) ? normalized.textSize : (baseSettings?.textSize ?? "medium");
+  normalized.textSize = allowedTextSizes.has(normalized.textSize) ? normalized.textSize : (baseSettings?.textSize ?? "large");
   normalized.decisionSnoozes =
     normalized.decisionSnoozes && typeof normalized.decisionSnoozes === "object"
       ? Object.fromEntries(
