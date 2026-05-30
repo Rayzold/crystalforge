@@ -4849,7 +4849,7 @@ textarea {
   font-weight: 700;
   line-height: 1;
   box-shadow: 0 10px 22px rgba(255, 70, 70, 0.28);
-  animation: sidebarBadgePulse 1.9s ease-in-out infinite;
+  animation: sidebarBadgePulse 1.0s ease-in-out infinite;
 }
 
 .sidebar-link:hover,
