@@ -695,49 +695,11 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
           <button class="button button--ghost" data-action="open-catalog">Building Catalog</button>
           <details class="sidebar-gm-tools">
             <summary class="sidebar-gm-tools__summary">
-              <span>GM Tools</span>
-              <strong>Admin, saves, view mode, and dice</strong>
+              <span>⚙ Session Settings</span>
+              <strong>Density, text size, view mode, dice</strong>
             </summary>
             <div class="sidebar-gm-tools__body">
-              <button class="button button--ghost" data-action="open-admin">${state.settings.liveSessionView ? "GM Console" : "Admin Console"}</button>
               ${renderDensityControls(uiDensity, conciseMode, state.settings?.textSize ?? "medium")}
-              <div class="sidebar-nav__save-actions sidebar-nav__save-actions--firebase">
-                <button class="button button--ghost" data-action="save-firebase-realm">Cloud Save</button>
-                <button class="button button--ghost" data-action="load-firebase-realm">Cloud Load</button>
-              </div>
-              ${
-                firebaseMeta?.updatedAtMs
-                  ? `
-                    <div class="sidebar-nav__build">
-                      <span>Cloud Save</span>
-                      <strong>${new Date(firebaseMeta.updatedAtMs).toLocaleString()}</strong>
-                    </div>
-                  `
-                  : ""
-              }
-              <div class="sidebar-save-slots" role="group" aria-label="Local save slots">
-                <span class="sidebar-save-slots__label">Local Slots</span>
-                ${manualSaveSlots
-                  .map(
-                    (slot) => `
-                      <div class="sidebar-save-slot">
-                        <div class="sidebar-save-slot__meta">
-                          <strong>Slot ${slot.slotId}</strong>
-                          <small>${
-                            slot.manualSavedAt
-                              ? new Date(slot.manualSavedAt).toLocaleString()
-                              : "Empty"
-                          }</small>
-                        </div>
-                        <div class="sidebar-save-slot__actions">
-                          <button class="button button--ghost button--small" data-action="save-manual-state" data-slot="${slot.slotId}">Save</button>
-                          <button class="button button--ghost button--small" data-action="load-manual-state" data-slot="${slot.slotId}" ${slot.manualSavedAt ? "" : "disabled"}>Load</button>
-                        </div>
-                      </div>
-                    `
-                  )
-                  .join("")}
-              </div>
               <button class="sidebar-nav__build sidebar-nav__build--mode" data-action="toggle-session-view">
                 <span>View Mode</span>
                 <strong>${state.settings.liveSessionView ? "Live Session" : "Deep Review"}</strong>
@@ -770,6 +732,52 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
                     ? `<div class="sidebar-dice__history">${renderDiceHistory(state.settings.diceHistory ?? [])}</div>`
                     : ""
                 }
+              </div>
+            </div>
+          </details>
+          <details class="sidebar-gm-tools">
+            <summary class="sidebar-gm-tools__summary">
+              <span>💾 Save &amp; Load</span>
+              <strong>Cloud and local save slots</strong>
+            </summary>
+            <div class="sidebar-gm-tools__body">
+              <button class="button button--ghost" data-action="open-admin">${state.settings.liveSessionView ? "GM Console" : "Admin Console"}</button>
+              <div class="sidebar-nav__save-actions sidebar-nav__save-actions--firebase">
+                <button class="button button--ghost" data-action="save-firebase-realm">Cloud Save</button>
+                <button class="button button--ghost" data-action="load-firebase-realm">Cloud Load</button>
+              </div>
+              ${
+                firebaseMeta?.updatedAtMs
+                  ? `
+                    <div class="sidebar-nav__build">
+                      <span>Last cloud save</span>
+                      <strong>${new Date(firebaseMeta.updatedAtMs).toLocaleString()}</strong>
+                    </div>
+                  `
+                  : ""
+              }
+              <div class="sidebar-save-slots" role="group" aria-label="Local save slots">
+                <span class="sidebar-save-slots__label">Local Slots</span>
+                ${manualSaveSlots
+                  .map(
+                    (slot) => `
+                      <div class="sidebar-save-slot">
+                        <div class="sidebar-save-slot__meta">
+                          <strong>Slot ${slot.slotId}</strong>
+                          <small>${
+                            slot.manualSavedAt
+                              ? new Date(slot.manualSavedAt).toLocaleString()
+                              : "Empty"
+                          }</small>
+                        </div>
+                        <div class="sidebar-save-slot__actions">
+                          <button class="button button--ghost button--small" data-action="save-manual-state" data-slot="${slot.slotId}">Save</button>
+                          <button class="button button--ghost button--small" data-action="load-manual-state" data-slot="${slot.slotId}" ${slot.manualSavedAt ? "" : "disabled"}>Load</button>
+                        </div>
+                      </div>
+                    `
+                  )
+                  .join("")}
               </div>
               <p>Type <code>432!</code> anywhere to open admin instantly.</p>
             </div>

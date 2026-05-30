@@ -107,7 +107,8 @@ export class UIRenderer {
       awakenedExpandedIds: [],
       awakenedFilter: { query: "", grades: [], statuses: [] },
       sidebarBuildingQuery: "",
-      sidebarBuildingListExpanded: false
+      sidebarBuildingListExpanded: false,
+      expeditionTab: "board"
     };
   }
 

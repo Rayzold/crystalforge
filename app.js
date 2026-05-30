@@ -3246,6 +3246,20 @@ function getAdminUnlockPrefix(buffer) {
 
 installModalKeyboardHandlers(document);
 
+// Page navigation shortcuts — match ROUTE_SHORTCUTS in PageShell.js
+const PAGE_NAV_SHORTCUTS = {
+  "1": "./gm.html",
+  "2": "./forge.html",
+  "3": "./economy.html",
+  "4": "./city.html",
+  "5": "./citizens.html",
+  "6": "./chronicle.html",
+  "7": "./expeditions.html",
+  "8": "./vehicles.html",
+  "9": "./uniques.html",
+  "0": "./help.html"
+};
+
 document.addEventListener("keydown", (event) => {
   if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) {
     return;
@@ -3281,6 +3295,25 @@ document.addEventListener("keydown", (event) => {
 
   if (!adminUnlockPrefix) {
     clearNavigationShortcutTimer();
+  }
+
+  // Navigation shortcuts: digit keys 0-9 navigate to pages.
+  // Delay slightly when the key could be the start of the 432! admin code.
+  const navHref = PAGE_NAV_SHORTCUTS[key];
+  if (navHref && key.length === 1 && /[0-9]/.test(key)) {
+    clearNavigationShortcutTimer();
+    if (adminUnlockPrefix) {
+      // Could be part of 432! — wait 380ms before navigating
+      navigationShortcutTimer = window.setTimeout(() => {
+        navigationShortcutTimer = null;
+        if (navigationShortcutBuffer !== "432!") {
+          navigationShortcutBuffer = "";
+          navigateWithTransition(navHref);
+        }
+      }, 380);
+    } else {
+      navigateWithTransition(navHref);
+    }
   }
 });
 
@@ -4762,6 +4795,13 @@ root.addEventListener("input", (event) => {
   if (target.dataset.action === "toggle-sidebar-building-list") {
     renderer.setTransientUi(
       { sidebarBuildingListExpanded: !renderer.transientUi.sidebarBuildingListExpanded },
+      getCurrentState()
+    );
+  }
+
+  if (target.dataset.action === "set-expedition-tab") {
+    renderer.setTransientUi(
+      { expeditionTab: target.dataset.tab ?? "board" },
       getCurrentState()
     );
   }

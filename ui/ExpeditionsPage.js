@@ -840,51 +840,87 @@ export function renderExpeditionsPage(state) {
   const draft = getDefaultDraft(state);
   const selectedMission = (state.expeditions?.board ?? []).find((mission) => mission.id === draft.missionId) ?? (state.expeditions?.board ?? [])[0] ?? null;
   const expeditionType = EXPEDITION_TYPES[selectedMission?.typeId ?? draft.typeId] ?? EXPEDITION_TYPES[EXPEDITION_ORDER[0]];
+  const activeTab = state.transientUi?.expeditionTab ?? "board";
+
+  const activeCount = (state.expeditions?.active ?? []).length;
+  const relicCount = (state.expeditions?.relicRack ?? []).filter(Boolean).length;
+
+  const tabs = [
+    { id: "board", label: "Mission Board" },
+    { id: "active", label: `Active${activeCount ? ` (${activeCount})` : ""}` },
+    { id: "relics", label: `Relics${relicCount ? ` (${relicCount})` : ""}` }
+  ];
+
+  const tabBar = `
+    <div class="expedition-tabs">
+      ${tabs.map((tab) => `
+        <button
+          class="button button--ghost expedition-tabs__tab ${activeTab === tab.id ? "is-active" : ""}"
+          type="button"
+          data-action="set-expedition-tab"
+          data-tab="${tab.id}"
+        >${tab.label}</button>
+      `).join("")}
+    </div>
+  `;
+
+  const boardContent = `
+    <section class="panel expedition-launch-panel">
+      <div class="panel__header">
+        <h3>Mission Board</h3>
+        <span class="panel__subtle">The board refreshes with fresh opportunities, including a random number of special missions.</span>
+      </div>
+      ${renderMissionBoard(state, draft)}
+    </section>
+    <section class="panel expedition-launch-panel">
+      <div class="panel__header">
+        <h3>Prepare Mission</h3>
+        <span class="panel__subtle">Choose the vehicle, approach, crew, and supplies for the selected card.</span>
+      </div>
+      <div class="expedition-launch-panel__stack">
+        <div>
+          <div class="panel__subtle">Vehicle</div>
+          ${renderVehicleOptions(state, draft)}
+        </div>
+        <div>
+          <div class="panel__subtle">Approach</div>
+          ${renderApproachOptions(draft)}
+        </div>
+        <div>
+          <div class="panel__subtle">Duration</div>
+          ${renderDurationOptions(draft)}
+        </div>
+        <div>
+          <div class="panel__subtle">Crew Assignment</div>
+          ${renderTeamInputs(state, draft, expeditionType)}
+        </div>
+        <div>
+          <div class="panel__subtle">Committed Supplies</div>
+          ${renderSupplyInputs(state, draft)}
+        </div>
+      </div>
+    </section>
+  `;
+
+  const activeContent = `
+    ${renderExpeditionSummary(state)}
+    ${renderPendingJourneyPanel(state)}
+    ${renderActiveExpeditions(state)}
+    ${renderRecentReturns(state)}
+  `;
+
+  const relicsContent = `
+    ${renderExpeditionRelicRack(state)}
+  `;
 
   return {
     title: "Expeditions",
     subtitle: "Send crews beyond the Drift, then debrief their trip stage by stage before the final haul is settled.",
     content: `
-      ${renderExpeditionSummary(state)}
-      ${renderExpeditionRelicRack(state)}
-      ${renderPendingJourneyPanel(state)}
-      <section class="panel expedition-launch-panel">
-        <div class="panel__header">
-          <h3>Mission Board</h3>
-          <span class="panel__subtle">The board refreshes with fresh opportunities, including a random number of special missions.</span>
-        </div>
-        ${renderMissionBoard(state, draft)}
-      </section>
-      <section class="panel expedition-launch-panel">
-        <div class="panel__header">
-          <h3>Prepare Mission</h3>
-          <span class="panel__subtle">Choose the vehicle, approach, crew, and supplies for the selected card.</span>
-        </div>
-        <div class="expedition-launch-panel__stack">
-          <div>
-            <div class="panel__subtle">Vehicle</div>
-            ${renderVehicleOptions(state, draft)}
-          </div>
-          <div>
-            <div class="panel__subtle">Approach</div>
-            ${renderApproachOptions(draft)}
-          </div>
-          <div>
-            <div class="panel__subtle">Duration</div>
-            ${renderDurationOptions(draft)}
-          </div>
-          <div>
-            <div class="panel__subtle">Crew Assignment</div>
-            ${renderTeamInputs(state, draft, expeditionType)}
-          </div>
-          <div>
-            <div class="panel__subtle">Committed Supplies</div>
-            ${renderSupplyInputs(state, draft)}
-          </div>
-        </div>
-      </section>
-      ${renderActiveExpeditions(state)}
-      ${renderRecentReturns(state)}
+      ${tabBar}
+      ${activeTab === "board" ? boardContent : ""}
+      ${activeTab === "active" ? activeContent : ""}
+      ${activeTab === "relics" ? relicsContent : ""}
     `,
     aside: `
       ${renderPreviewPanel(state, draft)}

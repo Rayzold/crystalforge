@@ -15351,3 +15351,24 @@ html.session-mode .sidebar-density-picker__session-mode {
   font-size: 0.9rem;
   letter-spacing: 0.02em;
 }
+
+
+/* ─── Expedition page tabs ─── */
+.expedition-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--panel-border, rgba(255,255,255,0.08));
+}
+
+.expedition-tabs__tab {
+  flex: 1;
+  justify-content: center;
+}
+
+.expedition-tabs__tab.is-active {
+  background: rgba(107, 154, 255, 0.15);
+  border-color: rgba(107, 154, 255, 0.4);
+  color: #a5c0ff;
+}
