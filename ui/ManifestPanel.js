@@ -88,15 +88,15 @@ export function renderManifestPanel(state) {
 
   return `
     <section class="panel manifest-panel">
-      <div class="manifest-panel__hero">
-        <span class="manifest-panel__eyebrow">Manifest Chamber</span>
-        <h3>Call forth a ${escapeHtml(state.selectedRarity)} reality.</h3>
-      </div>
-      <div class="manifest-panel__controls manifest-panel__controls--centered">
+      <div class="manifest-panel__controls manifest-panel__controls--centered manifest-panel__controls--pinned">
         <button class="button manifest-panel__button" data-action="manifest" ${canManifest ? "" : "disabled"}>
           ${manifestInProgress ? "Manifesting..." : "Manifest"}
         </button>
         <button class="button button--ghost manifest-panel__audio" data-action="toggle-mute">${state.settings.muted ? "Audio Off" : "Audio On"}</button>
+      </div>
+      <div class="manifest-panel__hero">
+        <span class="manifest-panel__eyebrow">Manifest Chamber</span>
+        <h3>Call forth a ${escapeHtml(state.selectedRarity)} reality.</h3>
       </div>
       <button class="manifest-panel__switch ${quickManifestationsEnabled ? "is-active" : ""}" type="button" data-action="toggle-quick-manifest" aria-pressed="${quickManifestationsEnabled ? "true" : "false"}">
         <span class="manifest-panel__switch-track"><span class="manifest-panel__switch-thumb"></span></span>

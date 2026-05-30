@@ -231,43 +231,50 @@ function renderCitySessionControls(state) {
       </div>
       <div class="city-session-controls__actions">
         <div class="time-controls">
-          <button class="button button--ghost" data-action="advance-time" data-step="day">Advance Day</button>
-          <button class="button button--ghost" data-action="advance-time" data-step="3days">Advance 3 Days</button>
-          <button class="button button--ghost" data-action="advance-time" data-step="week">Advance Week</button>
-          <button class="button button--ghost" data-action="advance-time" data-step="month">Advance Month</button>
-          <button class="button button--ghost" data-action="advance-time" data-step="year">Advance Year</button>
+          <button class="button" data-action="advance-time" data-step="day">Advance Day</button>
         </div>
-        <div class="city-session-controls__advanced">
-          <div class="city-workspace__preset-time">
-            <label class="calendar-panel__custom-days">
-              Advance Multiple Days
-              <select data-role="advance-days-preset">
-                <option value="3">3 Days</option>
-                <option value="7">7 Days</option>
-                <option value="14" selected>14 Days</option>
-                <option value="28">28 Days</option>
-                <option value="56">56 Days</option>
-                <option value="112">112 Days</option>
-              </select>
-            </label>
-            <button class="button button--ghost" data-action="advance-selected-time">Advance Selected Span</button>
+        <details class="city-session-controls__more">
+          <summary class="button button--ghost city-session-controls__more-toggle">More time options</summary>
+          <div class="city-session-controls__more-body">
+            <div class="time-controls">
+              <button class="button button--ghost" data-action="advance-time" data-step="3days">Advance 3 Days</button>
+              <button class="button button--ghost" data-action="advance-time" data-step="week">Advance Week</button>
+              <button class="button button--ghost" data-action="advance-time" data-step="month">Advance Month</button>
+              <button class="button button--ghost" data-action="advance-time" data-step="year">Advance Year</button>
+            </div>
+            <div class="city-session-controls__advanced">
+              <div class="city-workspace__preset-time">
+                <label class="calendar-panel__custom-days">
+                  Advance Multiple Days
+                  <select data-role="advance-days-preset">
+                    <option value="3">3 Days</option>
+                    <option value="7">7 Days</option>
+                    <option value="14" selected>14 Days</option>
+                    <option value="28">28 Days</option>
+                    <option value="56">56 Days</option>
+                    <option value="112">112 Days</option>
+                  </select>
+                </label>
+                <button class="button button--ghost" data-action="advance-selected-time">Advance Selected Span</button>
+              </div>
+              <div class="city-workspace__custom-time">
+                <label class="calendar-panel__custom-days">
+                  Advance by Days
+                  <input type="number" min="1" step="1" value="14" data-role="custom-days" />
+                </label>
+                <button class="button button--ghost" data-action="advance-custom-time">Advance Custom Span</button>
+              </div>
+              <label class="speed-selector">
+                Raising Speed
+                <select data-action="set-speed-multiplier">
+                  ${SPEED_MULTIPLIERS.map(
+                    (value) => `<option value="${value}" ${state.constructionSpeedMultiplier === value ? "selected" : ""}>${value}x</option>`
+                  ).join("")}
+                </select>
+              </label>
+            </div>
           </div>
-          <div class="city-workspace__custom-time">
-            <label class="calendar-panel__custom-days">
-              Advance by Days
-              <input type="number" min="1" step="1" value="14" data-role="custom-days" />
-            </label>
-            <button class="button button--ghost" data-action="advance-custom-time">Advance Custom Span</button>
-          </div>
-          <label class="speed-selector">
-            Raising Speed
-            <select data-action="set-speed-multiplier">
-              ${SPEED_MULTIPLIERS.map(
-                (value) => `<option value="${value}" ${state.constructionSpeedMultiplier === value ? "selected" : ""}>${value}x</option>`
-              ).join("")}
-            </select>
-          </label>
-        </div>
+        </details>
       </div>
     </section>
   `;

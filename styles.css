@@ -722,7 +722,7 @@ button[aria-disabled="true"]:hover,
   margin: 0 -6px;
   border-radius: 12px;
   background: linear-gradient(135deg, rgba(141, 214, 255, 0.12), rgba(229, 140, 255, 0.08));
-  animation: recentBuildingPulse 1.8s ease-out;
+  animation: recentBuildingPulse 800ms ease-out;
 }
 
 .sidebar-manifest-list__item span {
@@ -3117,13 +3117,13 @@ button[aria-disabled="true"]:hover,
 }
 
 .manifest-complete-modal__visual--reveal {
-  animation: manifestVisualReveal 900ms ease-out both;
+  animation: manifestVisualReveal 450ms ease-out both;
 }
 
 .manifest-complete-modal__visual--reveal .building-art__image,
 .manifest-complete-modal__visual--reveal .building-art__fallback,
 .manifest-complete-modal__visual--reveal .manifest-complete-modal__fallback {
-  animation: manifestArtworkReveal 1400ms cubic-bezier(0.19, 1, 0.22, 1) both;
+  animation: manifestArtworkReveal 650ms cubic-bezier(0.19, 1, 0.22, 1) both;
 }
 
 .manifest-complete-modal__visual .building-art,
@@ -5820,7 +5820,7 @@ textarea {
 .city-trend-panel__item.is-recently-changed {
   border-color: rgba(141, 214, 255, 0.34);
   box-shadow: 0 0 0 1px rgba(141, 214, 255, 0.08), 0 0 20px rgba(141, 214, 255, 0.12);
-  animation: recentBuildingPulse 1.8s ease-out;
+  animation: recentBuildingPulse 800ms ease-out;
 }
 
 .city-trend-panel__item span,
@@ -6049,7 +6049,7 @@ textarea {
 .player-list__item.is-recently-changed {
   border-color: rgba(141, 214, 255, 0.34);
   box-shadow: 0 0 0 1px rgba(141, 214, 255, 0.08), 0 0 24px rgba(141, 214, 255, 0.14);
-  animation: recentBuildingPulse 1.8s ease-out;
+  animation: recentBuildingPulse 800ms ease-out;
 }
 
 .player-list--manifested {
@@ -6158,7 +6158,7 @@ textarea {
     0 22px 40px rgba(0, 0, 0, 0.2),
     0 0 0 1px rgba(141, 214, 255, 0.12),
     0 0 28px color-mix(in srgb, var(--rarity-color) 24%, rgba(141, 214, 255, 0.28));
-  animation: recentBuildingPulse 1.8s ease-out;
+  animation: recentBuildingPulse 800ms ease-out;
 }
 
 .sidebar-manifest-list--manifested {
@@ -6889,7 +6889,7 @@ body:-webkit-full-screen #app {
 .page-delta-strip__item.is-recently-changed {
   border-color: rgba(141, 214, 255, 0.34);
   box-shadow: 0 0 0 1px rgba(141, 214, 255, 0.08), 0 0 18px rgba(141, 214, 255, 0.12);
-  animation: recentBuildingPulse 1.8s ease-out;
+  animation: recentBuildingPulse 800ms ease-out;
 }
 
 .page-delta-strip__item span {
@@ -9716,7 +9716,7 @@ body:-webkit-full-screen #app {
 
 .hex-map__district-label text {
   fill: rgba(241, 247, 255, 0.94);
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -9730,7 +9730,7 @@ body:-webkit-full-screen #app {
 
 .hex-map__resonance-tag text {
   fill: rgba(220, 255, 242, 0.94);
-  font-size: 10px;
+  font-size: 15px;
   font-weight: 800;
 }
 
@@ -9747,7 +9747,7 @@ body:-webkit-full-screen #app {
 
 .hex-map__hover-readout text {
   fill: rgba(241, 247, 255, 0.92);
-  font-size: 10px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.02em;
 }
@@ -10080,7 +10080,7 @@ body:-webkit-full-screen #app {
 
 .hex-map__pulse-tag text {
   fill: #091117;
-  font-size: 10px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
@@ -10095,7 +10095,7 @@ body:-webkit-full-screen #app {
 
 .hex-map__building-badge text {
   fill: #061019;
-  font-size: 10px;
+  font-size: 15px;
   font-weight: 800;
   letter-spacing: 0.04em;
 }
@@ -10127,7 +10127,7 @@ body:-webkit-full-screen #app {
 
 .hex-map__core-text {
   fill: #ecf4ff;
-  font-size: 10px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.08em;
 }
@@ -10149,7 +10149,7 @@ body:-webkit-full-screen #app {
 
 .hex-map__preview-label {
   fill: rgba(5, 10, 18, 0.92);
-  font-size: 10px;
+  font-size: 15px;
   font-weight: 800;
   letter-spacing: 0.08em;
 }
@@ -10280,13 +10280,13 @@ body:-webkit-full-screen #app {
 }
 
 .hex-map__district-label text {
-  font-size: 11px;
+  font-size: 14px;
   letter-spacing: 0.04em;
 }
 
 .hex-map__resonance-tag text,
 .hex-map__building-badge text {
-  font-size: 10px;
+  font-size: 15px;
 }
 
 .hex-map__building-token text,
@@ -10295,12 +10295,12 @@ body:-webkit-full-screen #app {
 }
 
 .hex-map__core-text {
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 0.06em;
 }
 
 .hex-map__preview-label {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .hex-map.is-placement-lite .hex-map__zone-field,
@@ -14800,7 +14800,7 @@ body:-webkit-full-screen #app {
 }
 
 .awakened-attr__label {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: rgba(184, 200, 233, 0.82);
@@ -15305,14 +15305,15 @@ html.session-mode .sidebar-density-picker__session-mode {
 }
 
 
-/* ─── Forge page — pin Manifest button controls so they stay visible ─── */
-.page-stage--forge .manifest-panel__controls {
+/* ─── Forge page — Manifest button always visible at top of panel ─── */
+.manifest-panel__controls--pinned {
   position: sticky;
-  top: 10px;
-  z-index: 5;
-  background: linear-gradient(180deg, var(--bg-start, #090d16) 60%, transparent 100%);
-  padding-bottom: 8px;
-  margin-bottom: 4px;
+  top: 8px;
+  z-index: 6;
+  background: linear-gradient(180deg, var(--bg-1, #0d1117) 70%, transparent 100%);
+  padding-bottom: 10px;
+  margin-bottom: 2px;
+  border-radius: 8px;
 }
 
 
@@ -15326,7 +15327,7 @@ html.session-mode .sidebar-density-picker__session-mode {
 .sidebar-manifest-list__toggle {
   padding: 0 5px;
   min-height: 20px;
-  font-size: 0.7rem;
+  font-size: 0.85rem;
   opacity: 0.6;
   line-height: 1;
 }
@@ -15371,4 +15372,65 @@ html.session-mode .sidebar-density-picker__session-mode {
   background: rgba(107, 154, 255, 0.15);
   border-color: rgba(107, 154, 255, 0.4);
   color: #a5c0ff;
+}
+
+
+/* ─── City building grid — text search input ─── */
+.building-grid-panel__search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 0 10px;
+}
+
+.building-grid-panel__search-input {
+  flex: 1;
+  background: var(--bg-2, rgba(255,255,255,0.04));
+  border: 1px solid var(--panel-border, rgba(255,255,255,0.1));
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.9rem;
+  padding: 6px 12px;
+  outline: none;
+}
+
+.building-grid-panel__search-input::placeholder {
+  color: var(--muted);
+}
+
+.building-grid-panel__search-input:focus {
+  border-color: var(--accent, #6b9aff);
+}
+
+.building-grid-panel__search-count {
+  color: var(--muted);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+/* ─── City Session Controls — collapse extra time options ─── */
+.city-session-controls__more {
+  margin-top: 8px;
+}
+
+.city-session-controls__more-toggle {
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.city-session-controls__more-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.city-session-controls__more[open] .city-session-controls__more-toggle {
+  opacity: 0.7;
+}
+
+.city-session-controls__more-body {
+  margin-top: 10px;
+  display: grid;
+  gap: 10px;
 }

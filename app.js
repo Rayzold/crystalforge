@@ -4806,6 +4806,13 @@ root.addEventListener("input", (event) => {
     );
   }
 
+  if (target.dataset.action === "set-building-text-query") {
+    renderer.setTransientUi(
+      { buildingTextQuery: String(target.value ?? "") },
+      getCurrentState()
+    );
+  }
+
 });
 
 audioEngine.setMuted(getCurrentState().settings.muted);

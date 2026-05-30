@@ -118,7 +118,11 @@ export function getVisibleBuildings(state) {
 
 export function renderBuildingGrid(state, options = {}) {
   const { limit = BUILDING_GRID_LIMIT, showHeader = true, className = "" } = options;
-  const visibleBuildings = getVisibleBuildings(state);
+  const textQuery = (state.transientUi?.buildingTextQuery ?? "").toLowerCase().trim();
+  const allVisible = getVisibleBuildings(state);
+  const visibleBuildings = textQuery
+    ? allVisible.filter((b) => b.displayName.toLowerCase().includes(textQuery))
+    : allVisible;
   const mainGrid = limit == null ? visibleBuildings : visibleBuildings.slice(0, limit);
   const activeConstruction = getActiveConstructionQueue(state);
   const constructionSlots = getDriftConstructionSlots(state);
@@ -147,8 +151,20 @@ export function renderBuildingGrid(state, options = {}) {
           `
           : ""
       }
+      <div class="building-grid-panel__search">
+        <input
+          type="text"
+          class="building-grid-panel__search-input"
+          placeholder="Search buildings…"
+          value="${(state.transientUi?.buildingTextQuery ?? "").replace(/"/g, "&quot;")}"
+          data-action="set-building-text-query"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        ${textQuery ? `<span class="building-grid-panel__search-count">${visibleBuildings.length} / ${allVisible.length}</span>` : ""}
+      </div>
       <div class="building-grid ${className ? `${className}__grid` : ""}">
-        ${mainGrid.length ? mainGrid.map((building) => renderBuildingCard(building, state, workforceSummary)).join("") : `<p class="empty-state">No buildings yet. Manifest your first structure.</p>`}
+        ${mainGrid.length ? mainGrid.map((building) => renderBuildingCard(building, state, workforceSummary)).join("") : `<p class="empty-state">${textQuery ? `No buildings match "${textQuery}"` : "No buildings yet. Manifest your first structure."}</p>`}
       </div>
     </section>
   `;
