@@ -9,6 +9,7 @@ import { addMonthlyChronicleIfNeeded } from "./MonthlyChronicleSystem.js";
 import { applyDailyResources } from "./ResourceSystem.js";
 import { captureDailyCitySnapshot } from "./CitySnapshotSystem.js";
 import { applyTownFocusDailyEffects, updateTownFocusAvailability } from "./TownFocusSystem.js";
+import { getNewlyCompletedCraftingItems } from "./CraftingSystem.js";
 
 function runTimeAdvance(state, days, stepKey = null) {
   const completions = [];
@@ -38,6 +39,15 @@ function runTimeAdvance(state, days, stepKey = null) {
         category: "Completion",
         title: building.displayName,
         details: `${building.displayName} completed on ${building.completedAt}.`
+      });
+    }
+    // Check crafting completions before applying resources (so costs stop on completion day)
+    const craftingCompletedToday = getNewlyCompletedCraftingItems(state, state.calendar.dayOffset);
+    for (const item of craftingCompletedToday) {
+      addHistoryEntry(state, {
+        category: "Crafting",
+        title: item.name,
+        details: `${item.name} finished crafting on ${currentDate}.`
       });
     }
     applyDailyResources(state);

@@ -169,6 +169,24 @@ function getBehemothUpkeepDelta(state) {
   return deltas;
 }
 
+function getCraftingUpkeepDelta(state) {
+  const deltas  = createDeltaRecord();
+  const items   = Array.isArray(state.craftingItems) ? state.craftingItems : [];
+  const day     = state.calendar?.dayOffset ?? 0;
+  for (const item of items) {
+    if (item.status !== "active") continue;
+    const completionDay = item.startDayOffset + item.durationDays;
+    if (day >= completionDay) continue; // already complete, no longer costing
+    const costs = item.costs ?? {};
+    deltas.gold      -= Number(costs.gold      ?? 0);
+    deltas.mana      -= Number(costs.mana      ?? 0);
+    deltas.materials -= Number(costs.materials ?? 0);
+    deltas.salvage   -= Number(costs.salvage   ?? 0);
+    deltas.food      -= Number(costs.food      ?? 0);
+  }
+  return deltas;
+}
+
 function applyDistrictProductionBonuses(deltas, districtSummary) {
   for (const district of districtSummary) {
     if (district.level <= 0) {
@@ -243,12 +261,14 @@ export function calculateDailyResourceDelta(state) {
   const citizenProduction = getCitizenProductionDelta(state, goldOutputMultiplier, foodOutputMultiplier);
   const citizenConsumption = getCitizenConsumptionDelta(state);
   const behemothUpkeep = getBehemothUpkeepDelta(state);
+  const craftingUpkeep = getCraftingUpkeepDelta(state);
   const uniqueCitizenBonuses = getUniqueCitizenResourceBonuses(state);
 
   addDeltaInto(deltas, buildingProduction);
   addDeltaInto(deltas, citizenProduction);
   addDeltaInto(deltas, citizenConsumption);
   addDeltaInto(deltas, behemothUpkeep);
+  addDeltaInto(deltas, craftingUpkeep);
   addDeltaInto(deltas, uniqueCitizenBonuses);
 
   for (const event of state.events.active) {

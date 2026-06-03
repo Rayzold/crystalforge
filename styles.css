@@ -15473,3 +15473,282 @@ html.session-mode .sidebar-density-picker__session-mode {
 .city-workspace__building-search:focus {
   border-color: var(--accent, #6b9aff);
 }
+
+
+/* ═══ Crafting Page ══════════════════════════════════════════════════════════ */
+
+.crafting-header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+/* Section layout */
+.crafting-section {
+  margin-bottom: 28px;
+}
+
+.crafting-section__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.crafting-section__title {
+  font-size: 0.9rem;
+  font-family: var(--display-font);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.crafting-section__title--ready {
+  color: rgba(74, 222, 128, 0.9);
+}
+
+.crafting-section__count {
+  font-size: 0.72rem;
+  font-style: normal;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--muted);
+}
+
+.crafting-section__count--ready {
+  background: rgba(74, 222, 128, 0.12);
+  border-color: rgba(74, 222, 128, 0.3);
+  color: rgba(74, 222, 128, 0.9);
+}
+
+.crafting-empty {
+  color: var(--muted);
+  font-size: 0.85rem;
+  padding: 20px;
+  text-align: center;
+  border: 1px dashed rgba(255,255,255,0.08);
+  border-radius: 14px;
+}
+
+/* Cards */
+.crafting-card {
+  margin-bottom: 10px;
+}
+
+.crafting-card--ready {
+  border-left: 3px solid rgba(74, 222, 128, 0.8);
+  animation: craftingReadyGlow 2.4s ease-in-out infinite;
+}
+
+@keyframes craftingReadyGlow {
+  0%, 100% { box-shadow: none; }
+  50%       { box-shadow: 0 0 20px rgba(74, 222, 128, 0.18); }
+}
+
+.crafting-card--active {
+  border-left: 3px solid var(--accent, #6b9aff);
+}
+
+.crafting-card--queued {
+  border-left: 3px solid rgba(167, 139, 250, 0.7);
+  opacity: 0.88;
+}
+
+.crafting-card--collected {
+  border-left: 3px solid rgba(100, 116, 139, 0.4);
+  opacity: 0.6;
+}
+
+.crafting-card__header {
+  margin-bottom: 10px;
+}
+
+.crafting-card__title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.crafting-card__name {
+  font-size: 0.96rem;
+}
+
+.crafting-card__desc {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.crafting-card__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.crafting-card__costs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.crafting-cost-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.crafting-cost-label {
+  font-size: 0.68rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  min-width: 50px;
+}
+
+.crafting-card__progress-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+/* Progress bar */
+.crafting-bar {
+  height: 6px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.crafting-bar__fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.crafting-bar__fill--low  { background: linear-gradient(90deg, var(--accent, #6b9aff), #93c5fd); }
+.crafting-bar__fill--mid  { background: linear-gradient(90deg, #fbbf24, #fde047); }
+.crafting-bar__fill--high { background: linear-gradient(90deg, #4ade80, #86efac); }
+.crafting-bar__fill--done { background: #4ade80; }
+
+/* Days badge */
+.crafting-days {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.crafting-days--soon   { color: #fbbf24; }
+.crafting-days--urgent { color: #f87171; }
+
+/* Resource chips */
+.crafting-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+.crafting-chip--gold      { color: #fbbf24; border-color: rgba(251,191,36,.35); background: rgba(251,191,36,.08); }
+.crafting-chip--mana      { color: #a78bfa; border-color: rgba(167,139,250,.35); background: rgba(167,139,250,.08); }
+.crafting-chip--materials { color: #86efac; border-color: rgba(134,239,172,.35); background: rgba(134,239,172,.08); }
+.crafting-chip--salvage   { color: #94a3b8; border-color: rgba(148,163,184,.3);  background: rgba(148,163,184,.06); }
+.crafting-chip--food      { color: #fb923c; border-color: rgba(251,146,60,.35);  background: rgba(251,146,60,.08); }
+.crafting-chip--time      { color: #64748b; border-color: rgba(100,116,139,.3);  background: rgba(100,116,139,.06); }
+.crafting-chip--ready     { color: #4ade80; border-color: rgba(74,222,128,.35);  background: rgba(74,222,128,.1); }
+.crafting-chip--none      { color: var(--muted); border-color: transparent; background: transparent; }
+
+/* Upkeep banner */
+.crafting-upkeep-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  margin-bottom: 20px;
+  border-color: rgba(249,115,22,0.2);
+  background: rgba(249,115,22,0.04);
+}
+
+.crafting-upkeep-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* Queue controls */
+.crafting-queue-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.crafting-queue-pos {
+  font-size: 0.7rem;
+  color: rgba(167,139,250,0.8);
+  font-weight: bold;
+  min-width: 20px;
+}
+
+/* Add/Edit form */
+.crafting-form {
+  margin-bottom: 24px;
+}
+
+.crafting-form__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.crafting-form__field { display: grid; gap: 6px; }
+.crafting-form__field--full { grid-column: 1 / -1; }
+
+.crafting-form__label {
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.crafting-form__input {
+  padding: 7px 10px;
+  font-size: 0.88rem;
+}
+
+.crafting-form__costs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.crafting-form__cost-field {
+  display: grid;
+  gap: 5px;
+  font-size: 0.78rem;
+}
+
+.crafting-form__footer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--panel-border);
+}

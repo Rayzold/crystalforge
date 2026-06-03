@@ -28,6 +28,7 @@ import { renderBehemothsPage } from "./BehemothsPage.js";
 import { renderNpcsPage } from "./NpcsPage.js";
 import { renderAwakenedPage } from "./AwakenedPage.js";
 import { renderArmyPage } from "./ArmyPage.js";
+import { renderCraftingPage } from "./CraftingPage.js";
 import { getMayorSuggestions } from "../systems/TownFocusSystem.js";
 import { getDefaultTownFocusPreviewId } from "./TownFocusShared.js";
 import { renderTownFocusCeremonyOverlay } from "./TownFocusCeremonyOverlay.js";
@@ -109,7 +110,9 @@ export class UIRenderer {
       sidebarBuildingQuery: "",
       sidebarBuildingListExpanded: false,
       expeditionTab: "board",
-      buildingTextQuery: ""
+      buildingTextQuery: "",
+      craftingFormOpen: false,
+      craftingEditItem: null
     };
   }
 
@@ -168,6 +171,8 @@ export class UIRenderer {
         return renderArmyPage(state);
       case "uniques":
         return renderUniqueCitizensPage(state);
+      case "crafting":
+        return renderCraftingPage(state);
       case "chronicle":
         return renderChroniclePage(state);
       case "help":

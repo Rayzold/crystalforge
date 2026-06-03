@@ -36,6 +36,7 @@ const ROUTE_GLYPHS = {
   npcs: "\u{1F3AD}",
   awakened: "⚡",
   army: "⚔️",
+  crafting: "\u2692",
   chronicle: "\u{1F4DC}",
   help: "\u2754"
 };
@@ -553,6 +554,12 @@ function renderSidebarRouteGroup(routes, pageKey, cityAlertCount, availableCryst
         badge = `<em class="sidebar-link__badge">${expeditionCount}</em>`;
       } else if (route.key === "uniques" && uniqueCitizenCount > 0) {
         badge = `<em class="sidebar-link__badge">${uniqueCitizenCount}</em>`;
+      } else if (route.key === "crafting") {
+        const day   = state.calendar?.dayOffset ?? 0;
+        const ready = (state.craftingItems ?? []).filter(
+          it => it.status === "active" && day >= it.startDayOffset + it.durationDays
+        ).length;
+        if (ready > 0) badge = `<em class="sidebar-link__badge">${ready}</em>`;
       }
 
       return `

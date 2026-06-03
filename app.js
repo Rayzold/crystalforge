@@ -112,6 +112,16 @@ import {
   updateNpcStat
 } from "./systems/NpcSystem.js";
 import {
+  createCraftingItem,
+  collectCraftingItem,
+  deleteCraftingItem,
+  startCraftingItem,
+  queueCraftingItem,
+  moveCraftingQueueItem,
+  startNextQueuedCraftingItem,
+  clearCollectedCraftingItems,
+} from "./systems/CraftingSystem.js";
+import {
   addAwakened,
   clearAwakenedImage,
   removeAwakened,
@@ -3931,6 +3941,94 @@ root.addEventListener("click", async (event) => {
     case "clear-npc-filter":
       renderer.setTransientUi({ npcFilter: { query: "", statuses: [] } }, getCurrentState());
       break;
+    // ─── Crafting ──────────────────────────────────────────────────────────────
+    case "open-crafting-form":
+      renderer.setTransientUi({ craftingFormOpen: true, craftingEditItem: null }, getCurrentState());
+      break;
+    case "close-crafting-form":
+      renderer.setTransientUi({ craftingFormOpen: false, craftingEditItem: null }, getCurrentState());
+      break;
+    case "edit-crafting-item": {
+      const editId = target.dataset.itemId ?? "";
+      const editTarget = getCurrentState().craftingItems?.find(x => x.id === editId) ?? null;
+      if (editTarget) renderer.setTransientUi({ craftingFormOpen: true, craftingEditItem: editTarget }, getCurrentState());
+      break;
+    }
+    case "save-crafting-item": {
+      const form = document.getElementById("crafting-form");
+      if (!form) break;
+      const get = (field) => form.querySelector(`[data-crafting-field="${field}"]`)?.value?.trim() ?? "";
+      const name = get("name");
+      if (!name) { reportError("Item name is required."); break; }
+      const dur   = Math.max(1, Number(get("durationDays")) || 1);
+      const start = Math.max(0, Number(get("startDayOffset")) || getCurrentState().calendar.dayOffset);
+      const queued = form.querySelector('[data-crafting-field="queued"]')?.checked ?? false;
+      const costs = {
+        gold:      Math.max(0, Number(get("costs.gold"))      || 0),
+        mana:      Math.max(0, Number(get("costs.mana"))      || 0),
+        materials: Math.max(0, Number(get("costs.materials")) || 0),
+        salvage:   Math.max(0, Number(get("costs.salvage"))   || 0),
+        food:      Math.max(0, Number(get("costs.food"))      || 0),
+      };
+      const existingId = target.dataset.itemId ?? "";
+      commit((draft) => {
+        if (existingId) {
+          const idx = draft.craftingItems.findIndex(x => x.id === existingId);
+          if (idx !== -1) {
+            draft.craftingItems[idx] = { ...draft.craftingItems[idx], name, desc: get("desc"), startDayOffset: start, durationDays: dur, costs, status: queued ? "queued" : "active" };
+          }
+        } else {
+          if (!Array.isArray(draft.craftingItems)) draft.craftingItems = [];
+          draft.craftingItems.push(createCraftingItem({ name, desc: get("desc"), startDayOffset: start, durationDays: dur, costs, queued }));
+        }
+      });
+      renderer.setTransientUi({ craftingFormOpen: false, craftingEditItem: null }, getCurrentState());
+      reportSuccess(`${existingId ? "Updated" : "Added"} "${name}".`);
+      break;
+    }
+    case "collect-crafting-item": {
+      const collectId = target.dataset.itemId ?? "";
+      const itemName  = getCurrentState().craftingItems?.find(x => x.id === collectId)?.name ?? "Item";
+      commit((draft) => { collectCraftingItem(draft, collectId); });
+      reportSuccess(`📦 "${itemName}" collected!`);
+      break;
+    }
+    case "delete-crafting-item": {
+      const delId   = target.dataset.itemId ?? "";
+      const delName = getCurrentState().craftingItems?.find(x => x.id === delId)?.name ?? "Item";
+      commit((draft) => { deleteCraftingItem(draft, delId); });
+      reportSuccess(`"${delName}" removed.`);
+      break;
+    }
+    case "start-crafting-item": {
+      const startId = target.dataset.itemId ?? "";
+      commit((draft) => { startCraftingItem(draft, startId); });
+      reportSuccess("Item started.");
+      break;
+    }
+    case "queue-crafting-item": {
+      const qId = target.dataset.itemId ?? "";
+      commit((draft) => { queueCraftingItem(draft, qId); });
+      reportSuccess("Moved to queue.");
+      break;
+    }
+    case "move-crafting-queue": {
+      const mqId  = target.dataset.itemId ?? "";
+      const mqDir = Number(target.dataset.dir ?? 0);
+      commit((draft) => { moveCraftingQueueItem(draft, mqId, mqDir); });
+      break;
+    }
+    case "start-next-crafting": {
+      commit((draft) => { startNextQueuedCraftingItem(draft); });
+      reportSuccess("Next item started.");
+      break;
+    }
+    case "clear-collected-crafting": {
+      commit((draft) => { clearCollectedCraftingItems(draft); });
+      reportSuccess("Collected items cleared.");
+      break;
+    }
+    // ─── End Crafting ──────────────────────────────────────────────────────────
     case "delete-npc": {
       const npcId = target.dataset.npcId ?? "";
       if (!npcId) {
