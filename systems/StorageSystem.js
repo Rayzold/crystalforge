@@ -41,7 +41,7 @@ import {
 } from "./ExpeditionSystem.js";
 import { createDefaultVehicleFleet } from "../content/VehicleConfig.js";
 import { normalizeBehemoths } from "./BehemothSystem.js";
-import { normalizeNpcs } from "./NpcSystem.js?v=1.8.9";
+import { normalizeNpcs } from "./NpcSystem.js?v=1.9.1";
 import { normalizeAwakenedRoster } from "./AwakenedSystem.js";
 import { normalizeCraftingItems } from "./CraftingSystem.js";
 

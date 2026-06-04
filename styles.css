@@ -15881,6 +15881,17 @@ html.session-mode .sidebar-density-picker__session-mode {
 .crafting-chip--crafter-experienced  { background: rgba(190, 140, 255, 0.20); }
 .crafting-chip--crafter-master       { background: rgba(240, 196, 130, 0.20); }
 
+.crafting-chip--station {
+  background: rgba(120, 200, 255, 0.14);
+  border-color: rgba(141, 214, 255, 0.34);
+}
+
+/* Disabled station options (already in use) get a struck-through look in the
+   native dropdown wherever the browser styling allows it. */
+select[data-action="apply-crafting-station"] option:disabled {
+  color: rgba(167, 184, 216, 0.55);
+}
+
 .crafting-chip--crafter.is-full {
   border-color: rgba(255, 124, 157, 0.55);
   background: rgba(255, 124, 157, 0.18);

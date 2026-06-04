@@ -2,7 +2,7 @@
 // This file wires together state, actions, routing, save/load, manifestation,
 // admin commands, and top-level UI events. Most game-wide behavior eventually
 // passes through here, while lower-level systems keep the domain rules isolated.
-import { AdminConsole } from "./admin/AdminConsole.js?v=1.8.9";
+import { AdminConsole } from "./admin/AdminConsole.js?v=1.9.1";
 import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js";
 import {
   APP_VERSION,
@@ -111,7 +111,7 @@ import {
   updateNpcField,
   updateNpcStat,
   getCrafterCapacity
-} from "./systems/NpcSystem.js?v=1.8.9";
+} from "./systems/NpcSystem.js?v=1.9.1";
 import {
   createCraftingItem,
   collectCraftingItem,
@@ -123,8 +123,8 @@ import {
   clearCollectedCraftingItems,
   pauseCraftingItem,
   resumeCraftingItem,
-} from "./systems/CraftingSystem.js?v=1.8.9";
-import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=1.8.9";
+} from "./systems/CraftingSystem.js?v=1.9.1";
+import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=1.9.1";
 import {
   addAwakened,
   clearAwakenedImage,
@@ -163,14 +163,14 @@ import {
   saveGameState,
   saveManualState,
   validateAndMigrateSave
-} from "./systems/StorageSystem.js?v=1.8.9";
+} from "./systems/StorageSystem.js?v=1.9.1";
 import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js";
 import { applyCompletedGoalRewards } from "./systems/GoalSystem.js";
 import { forceTownFocus, getMayorAdvice, reopenTownFocusSelection, selectTownFocus, updateTownFocusAvailability } from "./systems/TownFocusSystem.js";
 import { getEmergencyStatus, getCityTrendSummary } from "./systems/ResourceSystem.js";
 import { Toasts } from "./ui/Toasts.js";
 import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js";
-import { UIRenderer } from "./ui/UIRenderer.js?v=1.8.9";
+import { UIRenderer } from "./ui/UIRenderer.js?v=1.9.1";
 
 const root = document.querySelector("#app");
 const pageKey = document.body.dataset.page ?? "home";
@@ -4006,15 +4006,27 @@ root.addEventListener("click", async (event) => {
       const crafterLevel = form.dataset.crafterLevel || null;
       const crafterMult = crafterLevel === "advanced" ? 1.5 : crafterLevel === "experienced" ? 2 : crafterLevel === "master" ? 4 : 1;
       const existingIdForCheck = target.dataset.itemId ?? "";
+      const craftingStation = get("craftingStation");
+      const goingActive = !(form.querySelector('[data-crafting-field="queued"]')?.checked);
       if (crafterLevel) {
         const stateSnap = getCurrentState();
         const cap = getCrafterCapacity(stateSnap)[crafterLevel] || 0;
         const used = (stateSnap.craftingItems ?? []).filter(
           (it) => it.status === "active" && it.crafterLevel === crafterLevel && it.id !== existingIdForCheck
         ).length;
-        const goingActive = !(form.querySelector('[data-crafting-field="queued"]')?.checked);
         if (goingActive && used + 1 > cap) {
           reportError(`No ${crafterLevel} crafter available (${used}/${cap} in use). Assign an NPC as ${crafterLevel} crafter or pick a different level.`);
+          break;
+        }
+      }
+      // A crafting building can host only one active item at a time.
+      if (craftingStation && goingActive) {
+        const stateSnap = getCurrentState();
+        const occupant = (stateSnap.craftingItems ?? []).find(
+          (it) => it.status === "active" && it.craftingStation === craftingStation && it.id !== existingIdForCheck
+        );
+        if (occupant) {
+          reportError(`${craftingStation} is already crafting "${occupant.name}". Pause it first or pick a different building.`);
           break;
         }
       }
@@ -4041,11 +4053,11 @@ root.addEventListener("click", async (event) => {
         if (existingId) {
           const idx = draft.craftingItems.findIndex(x => x.id === existingId);
           if (idx !== -1) {
-            draft.craftingItems[idx] = { ...draft.craftingItems[idx], name, desc: get("desc"), startDayOffset: start, durationDays: dur, costs, crafterLevel, status: queued ? "queued" : "active" };
+            draft.craftingItems[idx] = { ...draft.craftingItems[idx], name, desc: get("desc"), startDayOffset: start, durationDays: dur, costs, crafterLevel, craftingStation, status: queued ? "queued" : "active" };
           }
         } else {
           if (!Array.isArray(draft.craftingItems)) draft.craftingItems = [];
-          draft.craftingItems.push(createCraftingItem({ name, desc: get("desc"), startDayOffset: start, durationDays: dur, costs, queued, crafterLevel }));
+          draft.craftingItems.push(createCraftingItem({ name, desc: get("desc"), startDayOffset: start, durationDays: dur, costs, queued, crafterLevel, craftingStation }));
         }
       });
       renderer.setTransientUi({ craftingFormOpen: false, craftingEditItem: null }, getCurrentState());
@@ -4095,6 +4107,15 @@ root.addEventListener("click", async (event) => {
         ).length;
         if (used + 1 > cap) {
           reportError(`No ${target_.crafterLevel} crafter available (${used}/${cap} in use). Pause another job first.`);
+          break;
+        }
+      }
+      if (target_?.craftingStation) {
+        const occupant = (snap.craftingItems ?? []).find(
+          (it) => it.status === "active" && it.craftingStation === target_.craftingStation && it.id !== rId
+        );
+        if (occupant) {
+          reportError(`${target_.craftingStation} is already crafting "${occupant.name}". Pause it first to free the building.`);
           break;
         }
       }

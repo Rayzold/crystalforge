@@ -12,7 +12,7 @@ function makeCosts(raw = {}) {
 
 const CRAFTER_LEVELS = ["advanced", "experienced", "master"];
 
-export function createCraftingItem({ name, desc = "", startDayOffset, durationDays, costs = {}, queued = false, crafterLevel = null }) {
+export function createCraftingItem({ name, desc = "", startDayOffset, durationDays, costs = {}, queued = false, crafterLevel = null, craftingStation = "" }) {
   return {
     id:                 createId("crafting"),
     name:               String(name ?? "Unnamed").trim(),
@@ -22,6 +22,7 @@ export function createCraftingItem({ name, desc = "", startDayOffset, durationDa
     status:             queued ? "queued" : "active",
     costs:              makeCosts(costs),
     crafterLevel:       CRAFTER_LEVELS.includes(crafterLevel) ? crafterLevel : null,
+    craftingStation:    String(craftingStation ?? "").trim().slice(0, 80),
     pausedElapsedDays:  null,
   };
 }
@@ -37,6 +38,7 @@ export function normalizeCraftingItems(raw) {
     status:            ["active", "queued", "paused", "collected"].includes(item.status) ? item.status : "active",
     costs:             makeCosts(item.costs),
     crafterLevel:      CRAFTER_LEVELS.includes(item.crafterLevel) ? item.crafterLevel : null,
+    craftingStation:   String(item.craftingStation ?? "").trim().slice(0, 80),
     pausedElapsedDays: Number.isFinite(Number(item.pausedElapsedDays)) ? Number(item.pausedElapsedDays) : null,
   }));
 }

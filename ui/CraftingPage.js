@@ -2,7 +2,7 @@ import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { dateFromParts, formatDate, getStructuredDate } from "../systems/CalendarSystem.js";
 import { MONTHS, DAYS_PER_MONTH } from "../content/CalendarConfig.js";
 import { getActiveCraftingUpkeep } from "../systems/CraftingSystem.js";
-import { getCrafterCapacity } from "../systems/NpcSystem.js?v=1.8.9";
+import { getCrafterCapacity } from "../systems/NpcSystem.js?v=1.9.1";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function craftingCompletionDay(item) {
@@ -95,12 +95,16 @@ function renderActiveCard(item, dayOffset) {
   const crafterBadge = item.crafterLevel
     ? `<span class="crafting-chip crafting-chip--crafter">${CRAFTER_LEVEL_LABEL[item.crafterLevel]} Crafter</span>`
     : "";
+  const stationBadge = item.craftingStation
+    ? `<span class="crafting-chip crafting-chip--station">🏛 ${escapeHtml(item.craftingStation)}</span>`
+    : "";
   return `
     <article class="panel crafting-card crafting-card--active ${paused ? "crafting-card--paused" : ""}">
       <div class="crafting-card__header">
         <div class="crafting-card__title-row">
           <strong class="crafting-card__name">${escapeHtml(item.name)}</strong>
           ${crafterBadge}
+          ${stationBadge}
           <span class="crafting-days ${urgentClass}">
             ${paused ? `⏸ Paused (${left}d remaining)` : (left === 0 ? "Due today" : left === 1 ? "1 day left" : `${left} days left`)}
           </span>
@@ -240,20 +244,39 @@ function getAvailableCraftingStations(buildings = []) {
   return stations;
 }
 
-function renderStationPicker(stations) {
+/**
+ * Returns a map { stationName -> item } of stations currently occupied by an
+ * active crafting item. Paused / queued / completed items free their station.
+ */
+function getStationOccupants(items = [], excludeItemId = "") {
+  const occ = {};
+  for (const it of items) {
+    if (it.status !== "active") continue;
+    if (!it.craftingStation) continue;
+    if (it.id === excludeItemId) continue;
+    occ[it.craftingStation] = it;
+  }
+  return occ;
+}
+
+function renderStationPicker(stations, currentStation = "", occupants = {}) {
   if (!stations.length) {
     return `<p class="crafting-form__station-empty">No crafting buildings available yet — once you finish an Alchemist, Arcana Tower, Techcrafter, etc., it'll appear here and grant cost reductions.</p>`;
   }
   const opts = stations.map((s) => {
     const bonusText = describeCraftingStationBonuses(s.key);
-    return `<option value="${escapeHtml(s.key)}" data-bonus="${escapeHtml(bonusText)}">${escapeHtml(s.label)} — ${escapeHtml(bonusText)}</option>`;
+    const occ = occupants[s.key];
+    const isSelected = currentStation === s.key;
+    const isOccupied = !!occ && !isSelected;
+    const suffix = isOccupied ? ` — in use by "${occ.name}"` : ` — ${bonusText}`;
+    return `<option value="${escapeHtml(s.key)}" ${isSelected ? "selected" : ""} ${isOccupied ? "disabled" : ""}>${escapeHtml(s.label)}${escapeHtml(suffix)}</option>`;
   }).join("");
   return `
     <select class="crafting-form__input" data-action="apply-crafting-station" data-crafting-field="craftingStation" aria-label="Crafted At">
-      <option value="">— Anywhere (no bonus) —</option>
+      <option value="" ${currentStation ? "" : "selected"}>— Anywhere (no bonus) —</option>
       ${opts}
     </select>
-    <p class="crafting-form__station-hint" data-crafting-station-hint>Pick a building to discount cost and time for the matching template category.</p>
+    <p class="crafting-form__station-hint" data-crafting-station-hint>Pick a building to discount cost and time for the matching template category. Each building can host only one active craft at a time.</p>
   `;
 }
 
@@ -351,11 +374,13 @@ function renderStartDateSelector(startDayOffset) {
 }
 
 // ─── Add / Edit form (rendered as inline panel) ───────────────────────────────
-function renderCraftingForm(editItem, dayOffset, buildings = [], crafterCapacity = { advanced: 0, experienced: 0, master: 0 }, crafterCounts = { advanced: 0, experienced: 0, master: 0 }) {
+function renderCraftingForm(editItem, dayOffset, buildings = [], crafterCapacity = { advanced: 0, experienced: 0, master: 0 }, crafterCounts = { advanced: 0, experienced: 0, master: 0 }, allItems = []) {
   const isEdit  = Boolean(editItem);
   const v       = editItem ?? {};
   const startDay = v.startDayOffset ?? dayOffset;
   const stations = getAvailableCraftingStations(buildings);
+  const stationOccupants = getStationOccupants(allItems, v.id);
+  const currentStation = v.craftingStation ?? "";
   // For each level, the user can still PICK it if they're editing an item that
   // already uses it (since saving the same level keeps the same count).
   const crafterDisabled = (level) => {
@@ -379,8 +404,8 @@ function renderCraftingForm(editItem, dayOffset, buildings = [], crafterCapacity
       <div class="crafting-form__grid">
         ${isEdit ? "" : `
         <div class="crafting-form__field crafting-form__field--full">
-          <label class="crafting-form__label">Crafted At <span style="font-weight:400;color:var(--muted);font-size:0.8em;">(discounts cost and time for matching items)</span></label>
-          ${renderStationPicker(stations)}
+          <label class="crafting-form__label">Crafted At <span style="font-weight:400;color:var(--muted);font-size:0.8em;">(discounts cost and time for matching items — only one active craft per building)</span></label>
+          ${renderStationPicker(stations, currentStation, stationOccupants)}
         </div>
         <div class="crafting-form__field crafting-form__field--full">
           <label class="crafting-form__label">Template <span style="font-weight:400;color:var(--muted);font-size:0.8em;">(fills name, duration and per-day costs)</span></label>
@@ -527,7 +552,7 @@ export function renderCraftingPage(state) {
         </div>
       </section>
 
-      ${showForm ? renderCraftingForm(editItem, dayOffset, state.buildings ?? [], crafterCapacity, crafterCounts) : `
+      ${showForm ? renderCraftingForm(editItem, dayOffset, state.buildings ?? [], crafterCapacity, crafterCounts, items) : `
         <div class="crafting-header-actions">
           <button class="button" data-action="open-crafting-form">+ New Item</button>
           ${queued.length ? `<button class="button button--ghost" data-action="start-next-crafting">▶ Start Next in Queue</button>` : ""}
