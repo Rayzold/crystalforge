@@ -42,13 +42,6 @@ function renderBehemothCollapsedRow(behemoth) {
         </div>
         <span class="roster-row__chevron" aria-hidden="true">▼</span>
       </button>
-      <button
-        class="button button--ghost button--small roster-row__delete"
-        type="button"
-        data-action="delete-behemoth"
-        data-behemoth-id="${escapeHtml(behemoth.id)}"
-        title="Delete behemoth"
-      >Delete</button>
     </article>
   `;
 }

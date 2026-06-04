@@ -80,13 +80,6 @@ function renderAwakenedCollapsedRow(entry) {
         </div>
         <span class="roster-row__chevron" aria-hidden="true">▼</span>
       </button>
-      <button
-        class="button button--ghost button--small roster-row__delete"
-        type="button"
-        data-action="delete-awakened"
-        data-awakened-id="${escapeHtml(entry.id)}"
-        title="Delete Awakened"
-      >Delete</button>
     </article>
   `;
 }

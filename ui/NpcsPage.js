@@ -40,13 +40,6 @@ function renderNpcCollapsedRow(npc) {
         </div>
         <span class="roster-row__chevron" aria-hidden="true">▼</span>
       </button>
-      <button
-        class="button button--ghost button--small roster-row__delete"
-        type="button"
-        data-action="delete-npc"
-        data-npc-id="${escapeHtml(npc.id)}"
-        title="Delete NPC"
-      >Delete</button>
     </article>
   `;
 }
