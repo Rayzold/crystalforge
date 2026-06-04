@@ -43,6 +43,36 @@ function renderIcon(iconKey) {
   `;
 }
 
+function renderBuildingCardQualityRing(building, isIncomplete, etaDetails) {
+  // Show a small ring with the building's current quality. The arc length
+  // tracks `building.quality` clamped to [0, 100]; >100 quality shows a full
+  // ring with the actual % beneath. Days-left only renders when incubating.
+  const pct = Math.min(100, Math.max(0, Number(building.quality) || 0));
+  const radius = 16;
+  const circumference = 2 * Math.PI * radius;
+  const dashOffset = circumference * (1 - pct / 100);
+  const displayPct = Math.round(Number(building.quality) || 0);
+  const daysLeft = isIncomplete && etaDetails && Number.isFinite(etaDetails.daysRemaining)
+    ? etaDetails.daysRemaining
+    : null;
+  const daysLabel = daysLeft === null
+    ? ""
+    : daysLeft < 1
+      ? `<1d`
+      : `${Math.round(daysLeft)}d`;
+  return `
+    <div class="building-card__ring" aria-hidden="true">
+      <svg viewBox="0 0 40 40" class="building-card__ring-svg">
+        <circle cx="20" cy="20" r="${radius}" class="building-card__ring-track" />
+        <circle cx="20" cy="20" r="${radius}" class="building-card__ring-fill"
+          stroke-dasharray="${circumference}" stroke-dashoffset="${dashOffset}" />
+      </svg>
+      <span class="building-card__ring-value">${displayPct}%</span>
+      ${daysLabel ? `<span class="building-card__ring-days">${daysLabel}</span>` : ""}
+    </div>
+  `;
+}
+
 function renderMedia(building) {
   return `
     <div class="building-card__banner ${building.imagePath ? "" : "building-card__banner--fallback"}">
@@ -172,6 +202,7 @@ export function renderBuildingCard(building, state, workforceSummary = null) {
             <span class="building-card__rarity">${escapeHtml(building.rarity)}</span>
             <span class="building-card__district">${escapeHtml(building.district)}</span>
           </div>
+          ${renderBuildingCardQualityRing(building, isIncomplete, etaDetails)}
         </div>
         <div class="building-card__signature">
           <div class="building-card__signature-mark">

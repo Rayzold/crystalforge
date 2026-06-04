@@ -16475,6 +16475,235 @@ body[data-theme="silver"] .collapse-toggle {
   pointer-events: none;
 }
 
+/* Quality ring badge on building cards */
+
+.building-card__ring {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.building-card__ring-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.building-card__ring-track {
+  fill: rgba(0, 0, 0, 0.4);
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-width: 3;
+}
+
+.building-card__ring-fill {
+  fill: none;
+  stroke: var(--rarity-color, var(--accent));
+  stroke-width: 3;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 4px var(--rarity-color, var(--accent)));
+  transition: stroke-dashoffset 250ms ease;
+}
+
+.building-card__ring-value {
+  position: relative;
+  z-index: 1;
+  color: var(--text);
+  font-family: var(--display-font);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.building-card__ring-days {
+  position: absolute;
+  left: 50%;
+  bottom: -14px;
+  transform: translateX(-50%);
+  padding: 1px 5px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--success);
+  font-size: 0.58rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ─── Right incubator sidebar (Change 6) ─────────────────────────────────── */
+
+.incubator-sidebar {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  width: 100%;
+  max-width: 280px;
+  padding: 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  position: sticky;
+  top: 12px;
+}
+
+.incubator-sidebar__section {
+  display: grid;
+  gap: 8px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(182, 212, 255, 0.10);
+}
+
+.incubator-sidebar__section:last-child { border-bottom: 0; padding-bottom: 0; }
+
+.incubator-sidebar__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.incubator-sidebar__head h4 {
+  margin: 0;
+  font-family: var(--label-font);
+  font-size: 0.78rem;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.incubator-sidebar__head small {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.incubator-sidebar__head-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.incubator-sidebar__head-actions .button {
+  padding: 2px 8px;
+  font-size: 0.72rem;
+}
+
+.incubator-sidebar__slot,
+.incubator-sidebar__queued,
+.incubator-sidebar__available {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  background: rgba(141, 214, 255, 0.04);
+  border: 1px solid rgba(141, 214, 255, 0.12);
+  border-radius: 10px;
+}
+
+.incubator-sidebar__slot.is-active {
+  border-color: rgba(141, 214, 255, 0.28);
+  background: rgba(141, 214, 255, 0.08);
+}
+
+.incubator-sidebar__slot-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.incubator-sidebar__slot-head strong {
+  font-size: 0.84rem;
+  color: var(--text);
+}
+
+.incubator-sidebar__slot-pos {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.incubator-sidebar__slot-metrics {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.incubator-sidebar__slot-metrics span {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.incubator-sidebar__slot-metrics small {
+  color: var(--success);
+  font-size: 0.72rem;
+}
+
+.incubator-sidebar__bar {
+  position: relative;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.incubator-sidebar__bar span {
+  display: block;
+  height: 100%;
+  background: var(--accent-violet);
+  border-radius: 999px;
+}
+
+.incubator-sidebar__queued strong,
+.incubator-sidebar__available strong {
+  font-size: 0.82rem;
+}
+
+.incubator-sidebar__queued small,
+.incubator-sidebar__available small {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.incubator-sidebar__queued-actions,
+.incubator-sidebar__available-actions {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.incubator-sidebar__queued-actions .button,
+.incubator-sidebar__available-actions .button,
+.incubator-sidebar__section > .button {
+  padding: 3px 8px;
+  font-size: 0.72rem;
+}
+
+.incubator-sidebar__empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-style: italic;
+}
+
+.incubator-sidebar__more {
+  display: block;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+/* Update the page-layout aside width specifically for the city page */
+.page-stage--city .page-layout--with-aside {
+  grid-template-columns: minmax(0, 1fr) 280px;
+}
+
+/* Hide the legacy inline incubation strip — the right sidebar now owns this UI. */
+.city-incubation-strip[hidden] { display: none !important; }
+
 @media (max-width: 720px) {
   .top-nav__brand-city { display: none; }
   .top-nav__group-button { padding: 0 10px; font-size: 0.74rem; }

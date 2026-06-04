@@ -25,7 +25,7 @@ import {
 } from "../systems/ConstructionSystem.js";
 import { getEmergencyStatus, getGoodsSummary } from "../systems/ResourceSystem.js";
 import { getWorkforceCategoryLabel, getWorkforceSummary } from "../systems/WorkforceSystem.js";
-import { getVisibleBuildings, renderBuildingGrid } from "./BuildingGrid.js";
+import { getVisibleBuildings, renderBuildingGrid } from "./BuildingGrid.js?v=1.9.4";
 import { renderCalendarPanel } from "./CalendarPanel.js";
 import { renderDistrictPanel } from "./DistrictPanel.js";
 import { renderDriftEvolutionPanel } from "./DriftEvolutionPanel.js";
@@ -421,6 +421,114 @@ function renderWorkforcePanel(state) {
   `;
 }
 
+// ─── Right-side incubator sidebar (Change 6 — extracted from renderBuildingsView) ──
+function renderIncubatorSidebar(state) {
+  const incubating = getActiveConstructionQueue(state);
+  const queued = getIncubatorQueuedBuildings(state);
+  const constructionQueue = getConstructionQueue(state);
+  const queuedIds = new Set(queued.map((b) => b.id));
+  const waitingEntries = getAvailableConstructionQueue(state)
+    .filter((b) => !queuedIds.has(b.id))
+    .map((b) => ({ building: b, etaDetails: getConstructionEtaDetails(b, state) }))
+    .sort(compareAvailableConstructionEntries);
+  const waiting = waitingEntries.map((e) => e.building);
+  const slots = getDriftConstructionSlots(state);
+
+  return `
+    <aside class="incubator-sidebar">
+      <section class="incubator-sidebar__section incubator-sidebar__section--slots">
+        <header class="incubator-sidebar__head">
+          <div>
+            <h4>Incubating</h4>
+            <small>${formatNumber(incubating.length, 0)} active / ${formatNumber(slots, 0)} slots</small>
+          </div>
+          <div class="incubator-sidebar__head-actions">
+            <button class="button button--ghost button--small" data-action="pause-all-construction" title="Pause all incubating buildings">⏸</button>
+            <button class="button button--ghost button--small" data-action="resume-all-construction" title="Resume all incubating buildings">▶</button>
+          </div>
+        </header>
+        ${incubating.length ? incubating.map((building, index) => {
+          const etaDetails = getConstructionEtaDetails(building, state);
+          const supportBonusLabel = building.heroSupport && building.expertSupport
+            ? "+150% Support"
+            : building.heroSupport ? "+100% Support" : building.expertSupport ? "+50% Support" : "";
+          return `
+            <article class="incubator-sidebar__slot ${isBuildingActivelyConstructed(state, building.id) ? "is-active" : ""}">
+              <div class="incubator-sidebar__slot-head">
+                <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
+                <span class="incubator-sidebar__slot-pos">Slot ${index + 1}</span>
+              </div>
+              <div class="incubator-sidebar__slot-metrics">
+                <span>${formatNumber(building.quality, 1)}%</span>
+                <small>${etaDetails.daysRemaining === null
+                  ? escapeHtml(etaDetails.stallReasons.join(", ") || "stalled")
+                  : `${formatNumber(etaDetails.daysRemaining, 1)}d left`}</small>
+              </div>
+              <div class="incubator-sidebar__bar"><span style="width:${Math.min(100, Math.max(0, building.quality)).toFixed(1)}%"></span></div>
+              ${supportBonusLabel ? `<div class="incubator-support-badge">${escapeHtml(supportBonusLabel)}</div>` : ""}
+              <div class="incubator-support-toggles">
+                <button class="incubator-support-toggle ${building.heroSupport ? "is-active" : ""}" type="button" data-action="toggle-incubator-support" data-building-id="${building.id}" data-support-key="heroSupport" data-enabled="${building.heroSupport ? "true" : "false"}" aria-pressed="${building.heroSupport ? "true" : "false"}">
+                  <span class="incubator-support-toggle__indicator" aria-hidden="true"></span>
+                  <span>Hero</span>
+                </button>
+                <button class="incubator-support-toggle ${building.expertSupport ? "is-active" : ""}" type="button" data-action="toggle-incubator-support" data-building-id="${building.id}" data-support-key="expertSupport" data-enabled="${building.expertSupport ? "true" : "false"}" aria-pressed="${building.expertSupport ? "true" : "false"}">
+                  <span class="incubator-support-toggle__indicator" aria-hidden="true"></span>
+                  <span>Expert</span>
+                </button>
+              </div>
+              <button class="button button--ghost button--small" data-action="pause-construction" data-building-id="${building.id}">Cancel</button>
+            </article>
+          `;
+        }).join("") : `<p class="incubator-sidebar__empty">No buildings are incubating right now.</p>`}
+      </section>
+
+      <section class="incubator-sidebar__section">
+        <header class="incubator-sidebar__head">
+          <div>
+            <h4>Incubator Queue</h4>
+            <small>${formatNumber(queued.length, 0)} / ${INCUBATOR_QUEUE_LIMIT}</small>
+          </div>
+        </header>
+        ${queued.length ? queued.map((building) => {
+          const queueIndex = getConstructionQueuePosition(state, building.id);
+          return `
+            <article class="incubator-sidebar__queued">
+              <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
+              <small>#${queueIndex + 1} — fills next open slot</small>
+              <div class="incubator-sidebar__queued-actions">
+                <button class="button button--ghost button--small" data-action="prioritize-construction" data-direction="top" data-building-id="${building.id}">Top</button>
+                <button class="button button--ghost button--small" data-action="prioritize-construction" data-direction="up" data-building-id="${building.id}" ${queueIndex <= 0 ? "disabled" : ""}>▲</button>
+                <button class="button button--ghost button--small" data-action="prioritize-construction" data-direction="down" data-building-id="${building.id}" ${queueIndex === constructionQueue.length - 1 ? "disabled" : ""}>▼</button>
+              </div>
+            </article>
+          `;
+        }).join("") : `<p class="incubator-sidebar__empty">No buildings reserved.</p>`}
+      </section>
+
+      <section class="incubator-sidebar__section">
+        <header class="incubator-sidebar__head">
+          <div>
+            <h4>Available</h4>
+            <small>${formatNumber(waiting.length, 0)} ready</small>
+          </div>
+        </header>
+        ${waiting.length ? waitingEntries.slice(0, 8).map(({ building, etaDetails }) => `
+          <article class="incubator-sidebar__available">
+            <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
+            <small>${etaDetails.daysRemaining === null ? "Queue ETA unavailable" : `If queued now: ${formatNumber(etaDetails.daysRemaining, 1)}d`}</small>
+            <div class="incubator-sidebar__available-actions">
+              <button class="button button--ghost button--small" data-action="activate-construction" data-building-id="${building.id}">Queue</button>
+              <button class="button button--ghost button--small" data-action="inspect-building" data-building-id="${building.id}">Open</button>
+            </div>
+          </article>
+        `).join("") : `<p class="incubator-sidebar__empty">No extra buildings waiting.</p>`}
+        ${waiting.length > 8 ? `<small class="incubator-sidebar__more">+${waiting.length - 8} more</small>` : ""}
+        <button class="button button--ghost" data-action="open-catalog">📚 Building Catalog</button>
+      </section>
+    </aside>
+  `;
+}
+
 function renderBuildingsView(state) {
   const currentView = state.transientUi?.cityBuildingView ?? "stream";
   const sortKey = state.transientUi?.buildingSort ?? "newest";
@@ -512,7 +620,7 @@ function renderBuildingsView(state) {
         />
       </div>
 
-      <section class="city-incubation-strip">
+      <section class="city-incubation-strip" hidden>
         <div class="city-incubation-strip__head">
           <div>
             <h4>Incubating</h4>
@@ -790,9 +898,12 @@ export function renderEconomyPage(state) {
 }
 
 export function renderCityPage(state) {
+  const cityMode = state.transientUi?.cityMode ?? "buildings";
   return {
     title: "City",
     subtitle: "Incubation, buildings, and administration.",
+    // Show the incubator sidebar only when looking at buildings (not Administration).
+    aside: cityMode === "buildings" ? renderIncubatorSidebar(state) : "",
     heroActions: `
       <div class="page-hero__time-controls">
         <button class="button" data-action="advance-time" data-step="day">▶ Advance Day</button>
