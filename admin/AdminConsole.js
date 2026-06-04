@@ -1162,18 +1162,25 @@ export class AdminConsole {
           <section class="admin-section">
             <h3>Citizen Management</h3>
             ${(() => {
-              // Issue 10: summary bar with total / provisioned / unassigned counts.
-              const total = totalPopulation;
-              const provisioned = Math.max(0, Number(state.cityStats?.provision ?? state.cityStats?.provisioned ?? 0));
-              const unassigned = Math.max(0, total - provisioned);
-              const pct = total > 0 ? Math.min(100, Math.round((provisioned / total) * 100)) : 0;
+              // Round 3 Fix 3: derive Assigned/Unassigned from actual citizen
+              // counts, not a separate "provision" field that is always 0.
+              // "Population" is the realm's headcount; the sum of typed citizens
+              // is what's actively assigned to a role. Anything beyond that is
+              // un-roled population.
+              const totalAssigned = Object.values(state.citizens ?? {})
+                .reduce((sum, value) => sum + (Number(value) || 0), 0);
+              const realmTotal = Math.max(totalAssigned, Number(state.resources?.population ?? 0));
+              const unassigned = Math.max(0, realmTotal - totalAssigned);
+              const pct = realmTotal > 0
+                ? Math.min(100, Math.round((totalAssigned / realmTotal) * 100))
+                : 0;
               return `
                 <div class="admin-pop-summary">
                   <div class="admin-pop-summary__totals">
-                    <span>Total: <strong>${formatNumber(total, 0)}</strong></span>
-                    <span>Provisioned: <strong>${formatNumber(provisioned, 0)}</strong></span>
+                    <span>Total: <strong>${formatNumber(realmTotal, 0)}</strong></span>
+                    <span>Assigned: <strong>${formatNumber(totalAssigned, 0)}</strong></span>
                     <span>Unassigned: <strong>${formatNumber(unassigned, 0)}</strong></span>
-                    <span>${pct}% provisioned</span>
+                    <span>${pct}% assigned</span>
                   </div>
                   <div class="admin-pop-summary__bar"><span style="width:${pct}%"></span></div>
                 </div>
