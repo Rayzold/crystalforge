@@ -5265,6 +5265,10 @@ textarea {
 .page-stage {
   display: grid;
   gap: 14px;
+  /* Force rows to size to their content. Without this, Chromium's auto-row
+     sizing inflates rows containing flex layouts (e.g. .page-hero) to a
+     large max-content height, leaving huge empty space below the title. */
+  grid-auto-rows: min-content;
 }
 
 .game-shell--density-comfort .button,
@@ -6520,8 +6524,8 @@ body:-webkit-full-screen #app {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  align-items: flex-start;
-  padding: 16px 18px;
+  align-items: center;
+  padding: 14px 18px;
   border-radius: 20px;
   border: 1px solid var(--focus-border);
   background:
@@ -6565,12 +6569,12 @@ body:-webkit-full-screen #app {
 .page-hero__side {
   display: grid;
   flex: 0 1 320px;
-  gap: 8px;
+  gap: 6px;
   justify-items: end;
   min-width: min(260px, 100%);
   max-width: 320px;
   /* Reserve clear space for the floating .page-build-tag in the same corner. */
-  margin-right: 180px;
+  margin-right: 132px;
 }
 
 .page-hero__side .page-date-chip,
