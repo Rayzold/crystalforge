@@ -25,19 +25,35 @@ function options(values, selectedValue) {
     .join("");
 }
 
+// Rarity color map for spinner-row accent (Issue 7's left bar applied here too).
+const RARITY_COLOR_MAP = {
+  Common:    "#94a3b8",
+  Uncommon:  "#4ade80",
+  Rare:      "#60a5fa",
+  Epic:      "#c084fc",
+  Legendary: "#f0c482",
+  Beyond:    "#ff7c9d"
+};
+
 function rarityControls(state, kind) {
-  return RARITY_ORDER.map(
-    (rarity) => `
-      <div class="admin-row">
-        <span>${rarity}</span>
+  // Compact inline spinner: [-] [input] [+] [Apply]. Apply increments by the
+  // input value when positive, decrements when negative; "Set" is reachable by
+  // typing the exact value and using the per-row "=" action.
+  return RARITY_ORDER.map((rarity) => {
+    const current = kind === "crystal" ? state.crystals[rarity] : state.shards[rarity];
+    return `
+      <div class="admin-spin-row" style="--rarity-color:${RARITY_COLOR_MAP[rarity] ?? "var(--accent)"};">
+        <div class="admin-spin-row__label">
+          <strong>${escapeHtml(rarity)}</strong>
+        </div>
+        <span class="admin-spin-row__value">${formatNumber(current ?? 0, 0)}</span>
+        <button class="button button--ghost admin-spin-row__step" type="button" data-admin-action="${kind}-step" data-rarity="${rarity}" data-amount="-1" title="−1">−</button>
         <input type="number" id="${kind}-${rarity}" value="1" min="0" />
-        <button class="button button--ghost" data-admin-action="${kind}-add" data-rarity="${rarity}">Add</button>
-        <button class="button button--ghost" data-admin-action="${kind}-remove" data-rarity="${rarity}">Remove</button>
-        <button class="button button--ghost" data-admin-action="${kind}-set" data-rarity="${rarity}">Set</button>
-        <strong>${kind === "crystal" ? state.crystals[rarity] : state.shards[rarity]}</strong>
+        <button class="button button--ghost admin-spin-row__step" type="button" data-admin-action="${kind}-step" data-rarity="${rarity}" data-amount="1" title="+1">+</button>
+        <button class="button admin-spin-row__apply" type="button" data-admin-action="${kind}-set" data-rarity="${rarity}" title="Set to input value">Set</button>
       </div>
-    `
-  ).join("");
+    `;
+  }).join("");
 }
 
 function citizenControls(state) {
@@ -153,16 +169,33 @@ function renderRollTableListEditor(state) {
 }
 
 function renderQuickCrystalPacks() {
+  // Issue 7: lowercase labels, replace redundant subtitle with an effect line,
+  // add a rarity-colored left accent based on the pack's headline rarity.
+  const dominantRarity = (pack) => {
+    const entries = Object.entries(pack.crystals ?? {});
+    if (!entries.length) return "Common";
+    // Highest-rarity key wins for the accent color.
+    return entries
+      .map(([rarity]) => rarity)
+      .sort((a, b) => RARITY_ORDER.indexOf(b) - RARITY_ORDER.indexOf(a))[0] ?? "Common";
+  };
+  const formatEffect = (pack) => {
+    const parts = Object.entries(pack.crystals ?? {}).map(([rarity, count]) => `${count} ${rarity}`);
+    if (parts.length === 1) return `${parts[0]} crystal · tap to apply`;
+    if (parts.length > 1) return `${parts.join(", ")} · tap to apply`;
+    return "Tap to apply";
+  };
   return `
     <div class="admin-quick-grid">
-      ${GM_QUICK_CRYSTAL_PACKS.map(
-        (pack) => `
-          <button class="button button--ghost admin-quick-card" data-admin-action="grant-crystal-pack" data-pack-id="${pack.id}">
+      ${GM_QUICK_CRYSTAL_PACKS.map((pack) => {
+        const rarity = dominantRarity(pack);
+        return `
+          <button class="button button--ghost admin-quick-card" data-admin-action="grant-crystal-pack" data-pack-id="${pack.id}" style="--rarity-color:${RARITY_COLOR_MAP[rarity] ?? "var(--accent)"};">
             <strong>${escapeHtml(pack.label)}</strong>
-            <span>${escapeHtml(pack.summary)}</span>
+            <span>${escapeHtml(formatEffect(pack))}</span>
           </button>
-        `
-      ).join("")}
+        `;
+      }).join("")}
     </div>
   `;
 }
@@ -401,7 +434,7 @@ function renderEconomyDebugTable(state) {
               <th>Behemoths</th>
               <th>Events</th>
               <th>Focus</th>
-              <th>Net / Day</th>
+              <th class="admin-debug-table__net">Net / Day</th>
             </tr>
           </thead>
           <tbody>
@@ -418,7 +451,7 @@ function renderEconomyDebugTable(state) {
                     <td>${formatNumber(row.behemothUpkeep, 2)}</td>
                     <td>${formatNumber(row.eventProduction, 2)}</td>
                     <td>${formatNumber(row.focusProduction, 2)}</td>
-                    <td class="${row.net > 0.005 ? "is-positive" : row.net < -0.005 ? "is-negative" : "is-neutral"}">${formatNumber(row.net, 2)}</td>
+                    <td class="admin-debug-table__net ${row.net > 0.005 ? "is-positive" : row.net < -0.005 ? "is-negative" : "is-neutral"}">${formatNumber(row.net, 2)}</td>
                   </tr>
                 `
               )
@@ -451,10 +484,34 @@ export class AdminConsole {
     this.activeTab = "economy";
     this.searchQuery = "";
     this.selectedDriftStageId = "";
+    this.currencyMode = "crystal"; // Issue 3: Crystals / Shards toggle
+    this.armedConfirms = new Set(); // Issue 8: two-step confirms by id
     this.lastState = null;
     document.body.append(this.root);
 
     document.addEventListener("keydown", (event) => {
+      // Shortcuts that only fire while the console is open.
+      if (this.lastState?.ui?.adminOpen) {
+        if (event.key === "Escape") {
+          this.actions.closeAdmin();
+          return;
+        }
+        if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+          event.preventDefault();
+          this.root.querySelector("#admin-search")?.focus();
+          return;
+        }
+        if (event.key === "Enter" && event.target instanceof HTMLInputElement && event.target.type === "number") {
+          // Issue 2: Enter on a spinner row applies that row.
+          const row = event.target.closest(".admin-spin-row, .admin-resource-row");
+          const applyBtn = row?.querySelector("[data-admin-action]");
+          if (applyBtn) {
+            event.preventDefault();
+            applyBtn.click();
+          }
+          return;
+        }
+      }
       if (event.key.length !== 1 || !/[0-9!]/.test(event.key)) {
         return;
       }
@@ -473,9 +530,16 @@ export class AdminConsole {
 
       if (target.dataset.adminUi === "tab") {
         this.activeTab = target.dataset.tab;
+        this.armedConfirms.clear();
         if (this.lastState) {
           this.render(this.lastState);
         }
+        return;
+      }
+
+      if (target.dataset.adminUi === "currency-mode") {
+        this.currencyMode = target.dataset.mode === "shard" ? "shard" : "crystal";
+        if (this.lastState) this.render(this.lastState);
         return;
       }
 
@@ -487,6 +551,34 @@ export class AdminConsole {
       const action = target.dataset.adminAction;
       if (!action) {
         return;
+      }
+
+      // Issue 8: two-step confirm. Buttons with [data-admin-confirm] require
+      // a second click within 3s; first click "arms" the button visually.
+      if (target.dataset.adminConfirm) {
+        const id = target.dataset.adminConfirm;
+        if (!this.armedConfirms.has(id)) {
+          this.armedConfirms.add(id);
+          target.classList.add("is-armed");
+          const originalLabel = target.dataset.adminConfirmOriginal ?? target.textContent;
+          target.dataset.adminConfirmOriginal = originalLabel;
+          target.textContent = "Confirm ✓";
+          setTimeout(() => {
+            if (this.armedConfirms.has(id)) {
+              this.armedConfirms.delete(id);
+              target.classList.remove("is-armed");
+              if (target.dataset.adminConfirmOriginal) {
+                target.textContent = target.dataset.adminConfirmOriginal;
+              }
+            }
+          }, 3000);
+          return;
+        }
+        this.armedConfirms.delete(id);
+        target.classList.remove("is-armed");
+        if (target.dataset.adminConfirmOriginal) {
+          target.textContent = target.dataset.adminConfirmOriginal;
+        }
       }
 
       this.handleAdminAction(action, target);
@@ -554,6 +646,28 @@ export class AdminConsole {
             amount: this.getNumberInput(`shard-${target.dataset.rarity}`, 0)
           });
           break;
+        case "crystal-step":
+        case "shard-step": {
+          // Issue 2: ± stepper. Adjusts by data-amount (±1 by default).
+          const adjust = action === "crystal-step" ? this.actions.adjustCrystal : this.actions.adjustShard;
+          const amount = Math.abs(Number(target.dataset.amount) || 1);
+          adjust({
+            mode: Number(target.dataset.amount) < 0 ? "remove" : "add",
+            rarity: target.dataset.rarity,
+            amount
+          });
+          break;
+        }
+        case "apply-resource": {
+          // Issue 4: per-resource Apply. Reads the matching input and applies
+          // only that key — never overwrites neighbouring fields.
+          const key = target.dataset.resourceKey;
+          if (!key) break;
+          const value = this.getNumberInput(`resource-${key}`, 0);
+          const patch = { [key]: value };
+          this.actions.setResources(patch);
+          break;
+        }
         case "apply-resources":
           this.actions.setResources({
             gold: this.getNumberInput("resource-gold"),
@@ -909,50 +1023,56 @@ export class AdminConsole {
       },
       {
         tab: "economy",
-        title: "Crystals",
-        keywords: "crystals shards rarity economy",
+        title: "Currencies",
+        keywords: "currencies crystals shards rarity economy",
         content: `
           <section class="admin-section">
-            <h3>Crystals</h3>
-            ${rarityControls(state, "crystal")}
-          </section>
-        `
-      },
-      {
-        tab: "economy",
-        title: "Shards",
-        keywords: "shards crystals rarity economy",
-        content: `
-          <section class="admin-section">
-            <h3>Shards</h3>
-            ${rarityControls(state, "shard")}
+            <div class="panel__header" style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+              <h3 style="margin:0;">Currencies</h3>
+              <div class="admin-currency-toggle" role="tablist" aria-label="Currency type">
+                <button type="button" class="${this.currencyMode === "crystal" ? "is-active" : ""}" data-admin-ui="currency-mode" data-mode="crystal" role="tab" aria-selected="${this.currencyMode === "crystal"}">Crystals</button>
+                <button type="button" class="${this.currencyMode === "shard" ? "is-active" : ""}" data-admin-ui="currency-mode" data-mode="shard" role="tab" aria-selected="${this.currencyMode === "shard"}">Shards</button>
+              </div>
+            </div>
+            ${rarityControls(state, this.currencyMode)}
           </section>
         `
       },
       {
         tab: "economy",
         title: "Resources",
-        keywords: "resources gold food materials salvage mana prosperity",
+        keywords: "resources gold food materials salvage mana prosperity goods population",
         content: `
           <section class="admin-section">
             <h3>Resources</h3>
-            <div class="admin-grid">
-              <label>Gold<input id="resource-gold" type="number" value="${Math.round(state.resources.gold ?? 0)}" /></label>
-              <label>Food<input id="resource-food" type="number" value="${Math.round(state.resources.food ?? 0)}" /></label>
-              <label>Materials<input id="resource-materials" type="number" value="${Math.round(state.resources.materials ?? 0)}" /></label>
-              <label>Salvage<input id="resource-salvage" type="number" value="${Math.round(state.resources.salvage ?? 0)}" /></label>
-              <label>Mana<input id="resource-mana" type="number" value="${Math.round(state.resources.mana ?? 0)}" /></label>
-              <label>Prosperity<input id="resource-prosperity" type="number" value="${Math.round(state.resources.prosperity ?? 0)}" /></label>
-              <label>Goods<input id="resource-goods" type="number" value="${Math.round(state.cityStats?.goods ?? 0)}" step="1" /></label>
-              <label>Population<input id="resource-population" type="number" value="${Math.round(state.resources.population ?? 0)}" disabled /></label>
-            </div>
-            <p class="admin-debug-note">Saving Goods applies a GM override on top of normal goods production.</p>
+            ${[
+              { key: "gold", label: "Gold", icon: "💰", value: state.resources?.gold },
+              { key: "food", label: "Food", icon: "🌾", value: state.resources?.food },
+              { key: "materials", label: "Materials", icon: "🪵", value: state.resources?.materials },
+              { key: "salvage", label: "Salvage", icon: "⚙", value: state.resources?.salvage },
+              { key: "mana", label: "Mana", icon: "✨", value: state.resources?.mana },
+              { key: "prosperity", label: "Prosperity", icon: "🌟", value: state.resources?.prosperity },
+              { key: "goods", label: "Goods", icon: "📦", value: state.cityStats?.goods },
+              { key: "population", label: "Population", icon: "👥", value: state.resources?.population, disabled: true }
+            ].map((r) => `
+              <div class="admin-resource-row">
+                <div class="admin-spin-row__label">
+                  <strong>${r.icon} ${escapeHtml(r.label)}</strong>
+                  <span class="admin-resource-row__current">current: ${formatNumber(Math.round(r.value ?? 0), 0)}</span>
+                </div>
+                <input id="resource-${r.key}" type="number" value="${Math.round(r.value ?? 0)}" ${r.disabled ? "disabled" : ""} />
+                <button class="button admin-resource-row__apply" type="button" data-admin-action="apply-resource" data-resource-key="${r.key}" data-admin-confirm="apply-resource-${r.key}" ${r.disabled ? "disabled" : ""}>Apply</button>
+              </div>
+            `).join("")}
+            <p class="admin-debug-note">Goods writes apply a GM override on top of normal production. Population is read-only.</p>
             <div class="admin-actions">
-              <button class="button" data-admin-action="apply-resources">Apply Resources</button>
-              <button class="button button--ghost" data-admin-action="reset-goods-override">Reset GM Goods Override</button>
+              <button class="button button--ghost" type="button" data-admin-action="reset-goods-override" data-admin-confirm="reset-goods">Reset GM Goods Override</button>
             </div>
           </section>
-          ${renderEconomyDebugTable(state)}
+          <details class="admin-debug-collapsible">
+            <summary>▶ Economy Debug</summary>
+            ${renderEconomyDebugTable(state)}
+          </details>
         `
       },
       {
@@ -985,7 +1105,24 @@ export class AdminConsole {
         content: `
           <section class="admin-section">
             <h3>Citizen Management</h3>
-            <p>Live total population: <strong>${totalPopulation}</strong></p>
+            ${(() => {
+              // Issue 10: summary bar with total / provisioned / unassigned counts.
+              const total = totalPopulation;
+              const provisioned = Math.max(0, Number(state.cityStats?.provision ?? state.cityStats?.provisioned ?? 0));
+              const unassigned = Math.max(0, total - provisioned);
+              const pct = total > 0 ? Math.min(100, Math.round((provisioned / total) * 100)) : 0;
+              return `
+                <div class="admin-pop-summary">
+                  <div class="admin-pop-summary__totals">
+                    <span>Total: <strong>${formatNumber(total, 0)}</strong></span>
+                    <span>Provisioned: <strong>${formatNumber(provisioned, 0)}</strong></span>
+                    <span>Unassigned: <strong>${formatNumber(unassigned, 0)}</strong></span>
+                    <span>${pct}% provisioned</span>
+                  </div>
+                  <div class="admin-pop-summary__bar"><span style="width:${pct}%"></span></div>
+                </div>
+              `;
+            })()}
             ${citizenControls(state)}
             <div class="admin-grid admin-grid--three">
               <label>From Class<select id="promote-from">${citizenOptions("Laborers")}</select></label>
@@ -1249,22 +1386,7 @@ export class AdminConsole {
           </section>
         `
       },
-      {
-        tab: "system",
-        title: "Session Mode",
-        keywords: "session live gm mode compact companion",
-        content: `
-          <section class="admin-section">
-            <h3>Session Mode</h3>
-            <p>Use the cleaner session-facing layout during live play, then switch back for deeper review.</p>
-            <div class="admin-actions">
-              <button class="button button--ghost" data-admin-action="toggle-session-view">
-                ${state.settings.liveSessionView ? "Disable Live Session View" : "Enable Live Session View"}
-              </button>
-            </div>
-          </section>
-        `
-      },
+      // Session Mode toggle moved to the admin drawer header (Issue 6).
       {
         tab: "system",
         title: "Drift Evolution",
@@ -1272,6 +1394,7 @@ export class AdminConsole {
         content: `
           <section class="admin-section">
             <h3>Drift Evolution</h3>
+            <div class="admin-drift-warning"><span aria-hidden="true">⚠</span><span>Advanced — changes affect core game progression. Press Save Drift Stage to commit; nothing auto-saves.</span></div>
             <p>Edit stage definitions for this save if you need to tune the Drift live.</p>
             <div class="admin-grid">
               <label>Stage<select id="drift-stage-id">${driftStages
@@ -1376,17 +1499,22 @@ export class AdminConsole {
 
     const content = `
       <div class="admin-console">
-        <div class="admin-toolbar">
-          <div class="admin-tabs">
-            <button class="button button--ghost ${this.activeTab === "economy" ? "is-active" : ""}" data-admin-ui="tab" data-tab="economy">Economy</button>
-            <button class="button button--ghost ${this.activeTab === "population" ? "is-active" : ""}" data-admin-ui="tab" data-tab="population">Population</button>
-            <button class="button button--ghost ${this.activeTab === "world" ? "is-active" : ""}" data-admin-ui="tab" data-tab="world">World</button>
-            <button class="button button--ghost ${this.activeTab === "system" ? "is-active" : ""}" data-admin-ui="tab" data-tab="system">System</button>
-          </div>
-          <label class="admin-search">
-            <span>Search</span>
-            <input id="admin-search" value="${escapeHtml(this.searchQuery)}" placeholder="Filter this tab" />
+        <header class="admin-drawer-header">
+          <h2 class="admin-drawer-header__title">Admin Console</h2>
+          <label class="admin-drawer-search">
+            <span class="visually-hidden">Search</span>
+            <input id="admin-search" value="${escapeHtml(this.searchQuery)}" placeholder="Search panels… (Ctrl+K)" autocomplete="off" />
           </label>
+          <button type="button" class="admin-drawer-session-toggle ${state.settings?.liveSessionView ? "is-active" : ""}" data-admin-action="toggle-session-view" title="Toggle Live Session view">
+            ${state.settings?.liveSessionView ? "● Session" : "Session"}
+          </button>
+          <button type="button" class="modal__close" data-action="close-modal" aria-label="Close console" title="Close (Esc)">✕</button>
+        </header>
+        <div class="admin-tabs">
+          <button class="button button--ghost ${this.activeTab === "economy" ? "is-active" : ""}" data-admin-ui="tab" data-tab="economy">Economy</button>
+          <button class="button button--ghost ${this.activeTab === "population" ? "is-active" : ""}" data-admin-ui="tab" data-tab="population">Population</button>
+          <button class="button button--ghost ${this.activeTab === "world" ? "is-active" : ""}" data-admin-ui="tab" data-tab="world">World</button>
+          <button class="button button--ghost ${this.activeTab === "system" ? "is-active" : ""}" data-admin-ui="tab" data-tab="system">System</button>
         </div>
         ${
           visibleSections.length

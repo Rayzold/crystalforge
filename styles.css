@@ -2988,6 +2988,340 @@ button[aria-disabled="true"]:hover,
   pointer-events: auto;
 }
 
+/* ─── Admin console is a right-side drawer, not a full-screen modal ───── */
+.admin-root .modal__backdrop {
+  background: rgba(0, 0, 0, 0.32) !important;
+  backdrop-filter: blur(4px);
+}
+
+.admin-root .modal__dialog {
+  position: fixed !important;
+  right: 0 !important;
+  top: 0 !important;
+  left: auto !important;
+  width: min(560px, 96vw) !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  border-left: 1px solid var(--panel-border);
+  background: var(--bg-1);
+  box-shadow: -24px 0 64px rgba(0, 0, 0, 0.6);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-root .modal__dialog::after { display: none; }
+
+/* Admin drawer header — title + persistent search + session toggle + close */
+.admin-drawer-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.admin-drawer-header__title {
+  margin: 0;
+  font-family: var(--display-font);
+  font-size: 0.92rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-drawer-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.admin-drawer-search input {
+  width: 100%;
+  height: 28px;
+  padding: 4px 10px 4px 28px;
+  border-radius: 999px;
+  border: 1px solid rgba(141, 214, 255, 0.24);
+  background: rgba(141, 214, 255, 0.06);
+  color: var(--text);
+  font-size: 0.82rem;
+}
+
+.admin-drawer-search::before {
+  content: "🔍";
+  position: absolute;
+  left: 8px;
+  font-size: 0.78rem;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.admin-drawer-session-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(141, 214, 255, 0.24);
+  background: rgba(141, 214, 255, 0.06);
+  color: var(--text);
+  font-family: var(--label-font);
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.admin-drawer-session-toggle.is-active {
+  background: rgba(141, 214, 255, 0.22);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.admin-drawer-header .modal__close {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+}
+
+/* Hide the legacy modal title bar inside the admin drawer (replaced by our header) */
+.admin-root .modal__header {
+  display: none !important;
+}
+
+/* Tab bar pinned right under header */
+.admin-tabs {
+  position: sticky;
+  top: 50px;
+  z-index: 4;
+  background: var(--bg-1);
+  border-bottom: 1px solid rgba(182, 212, 255, 0.10);
+}
+
+/* ─── Inline spinner row (Issue 2) ───────────────────────────────────────── */
+.admin-spin-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto auto auto;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(182, 212, 255, 0.06);
+}
+
+.admin-spin-row__label {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-spin-row__label strong { font-size: 0.84rem; }
+.admin-spin-row__label small { color: var(--muted); font-size: 0.7rem; }
+
+.admin-spin-row__value {
+  min-width: 56px;
+  text-align: right;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-spin-row__step {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 8px;
+  font-size: 0.92rem;
+}
+
+.admin-spin-row input[type="number"] {
+  width: 64px;
+  height: 26px;
+  padding: 2px 6px;
+  text-align: center;
+  font-size: 0.82rem;
+  border-radius: 6px;
+}
+
+.admin-spin-row__apply {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 0.74rem;
+}
+
+/* ─── Currencies tab pills (Issue 3) ─────────────────────────────────────── */
+.admin-currency-toggle {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(141, 214, 255, 0.06);
+  border: 1px solid rgba(141, 214, 255, 0.18);
+}
+
+.admin-currency-toggle button {
+  height: 24px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  font-family: var(--label-font);
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.admin-currency-toggle button.is-active {
+  background: var(--accent);
+  color: var(--bg-0);
+}
+
+/* ─── Quick Grants restyle (Issue 7) ─────────────────────────────────────── */
+.admin-quick-card {
+  position: relative;
+  padding-left: 14px !important;
+  text-transform: none !important;
+  text-align: left;
+}
+
+.admin-quick-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--rarity-color, var(--accent));
+  border-radius: 3px 0 0 3px;
+}
+
+.admin-quick-card strong {
+  font-size: 0.86rem;
+  letter-spacing: 0.01em;
+}
+
+.admin-quick-card span {
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+/* ─── Population summary bar (Issue 10) ──────────────────────────────────── */
+.admin-pop-summary {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  background: rgba(141, 214, 255, 0.05);
+  border: 1px solid rgba(141, 214, 255, 0.15);
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.admin-pop-summary__totals {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.84rem;
+}
+
+.admin-pop-summary__totals strong { color: var(--text); }
+
+.admin-pop-summary__bar {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.admin-pop-summary__bar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+}
+
+/* ─── Per-resource row (Issue 4) ─────────────────────────────────────────── */
+.admin-resource-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.admin-resource-row__current {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-resource-row input {
+  width: 90px;
+  height: 26px;
+  padding: 2px 6px;
+  font-size: 0.82rem;
+  border-radius: 6px;
+}
+
+.admin-resource-row__apply {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 0.74rem;
+}
+
+/* Confirm-then-commit (Issue 8) */
+button[data-admin-confirm].is-armed {
+  background: rgba(241, 91, 121, 0.22) !important;
+  border-color: var(--danger) !important;
+  color: var(--danger) !important;
+}
+
+/* Drift evolution warning (Issue 11) */
+.admin-drift-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  background: rgba(241, 91, 121, 0.14);
+  border: 1px solid rgba(241, 91, 121, 0.32);
+  color: var(--danger);
+  font-size: 0.78rem;
+}
+
+/* Collapsed economy debug (Issue 5) */
+.admin-debug-collapsible {
+  margin-top: 8px;
+}
+.admin-debug-collapsible > summary {
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(141, 214, 255, 0.06);
+  border: 1px solid rgba(141, 214, 255, 0.12);
+  font-family: var(--label-font);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  list-style: none;
+}
+.admin-debug-collapsible > summary::-webkit-details-marker { display: none; }
+.admin-debug-collapsible[open] > summary { background: rgba(141, 214, 255, 0.14); }
+.admin-debug-table-wrap { overflow-x: auto; }
+.admin-debug-table th.admin-debug-table__net,
+.admin-debug-table td.admin-debug-table__net {
+  background: rgba(141, 214, 255, 0.10);
+  font-weight: 700;
+}
+.admin-debug-table .is-positive { color: var(--success); }
+.admin-debug-table .is-negative { color: var(--danger); }
+
 .rolltable-editor-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
