@@ -36,17 +36,19 @@ const RARITY_COLOR_MAP = {
 };
 
 function rarityControls(state, kind) {
-  // Compact spinner: [−] [input] [+]. The input field is the current value
-  // (typed values commit on blur or Enter — no separate Set button).
+  // Compact spinner: [label] [current count] [−] [input] [+]. The static
+  // count gives at-a-glance state; the input is the editable value (commits
+  // on blur/Enter via data-admin-direct-set).
   return RARITY_ORDER.map((rarity) => {
-    const current = kind === "crystal" ? state.crystals[rarity] : state.shards[rarity];
+    const current = Math.round((kind === "crystal" ? state.crystals[rarity] : state.shards[rarity]) ?? 0);
     return `
       <div class="admin-spin-row admin-spin-row--no-apply" style="--rarity-color:${RARITY_COLOR_MAP[rarity] ?? "var(--accent)"};">
         <div class="admin-spin-row__label">
           <strong>${escapeHtml(rarity)}</strong>
         </div>
+        <span class="admin-spin-row__value">${formatNumber(current, 0)}</span>
         <button class="button button--ghost admin-spin-row__step" type="button" data-admin-action="${kind}-step" data-rarity="${rarity}" data-amount="-1" title="−1">−</button>
-        <input type="number" data-admin-direct-set="${kind}" id="${kind}-${rarity}" data-rarity="${rarity}" value="${Math.round(current ?? 0)}" min="0" />
+        <input type="number" data-admin-direct-set="${kind}" id="${kind}-${rarity}" data-rarity="${rarity}" value="${current}" min="0" />
         <button class="button button--ghost admin-spin-row__step" type="button" data-admin-action="${kind}-step" data-rarity="${rarity}" data-amount="1" title="+1">+</button>
       </div>
     `;
@@ -84,6 +86,7 @@ function citizenControls(state) {
                     <strong><span aria-hidden="true">${escapeHtml(emoji)}</span> ${escapeHtml(citizenClass)}</strong>
                   </div>
                   ${createHelpBubble(getCitizenHelpText(citizenClass))}
+                  <span class="admin-spin-row__value">${formatNumber(Math.round(count), 0)}</span>
                   <button class="button button--ghost admin-spin-row__step" type="button" data-admin-action="citizen-step" data-citizen-class="${citizenClass}" data-amount="-1" title="−1">−</button>
                   <input type="number" data-admin-direct-set="citizen" id="citizen-${citizenClass}" data-citizen-class="${citizenClass}" value="${Math.round(count)}" min="0" />
                   <button class="button button--ghost admin-spin-row__step" type="button" data-admin-action="citizen-step" data-citizen-class="${citizenClass}" data-amount="1" title="+1">+</button>
@@ -552,11 +555,13 @@ export class AdminConsole {
 
       // Issue 8: two-step confirm. Buttons with [data-admin-confirm] require
       // a second click within 3s; first click "arms" the button visually.
+      // Sets BOTH `is-armed` class and the spec's [data-confirming="1"] attr.
       if (target.dataset.adminConfirm) {
         const id = target.dataset.adminConfirm;
         if (!this.armedConfirms.has(id)) {
           this.armedConfirms.add(id);
           target.classList.add("is-armed");
+          target.setAttribute("data-confirming", "1");
           const originalLabel = target.dataset.adminConfirmOriginal ?? target.textContent;
           target.dataset.adminConfirmOriginal = originalLabel;
           target.textContent = "Confirm ✓";
@@ -564,6 +569,7 @@ export class AdminConsole {
             if (this.armedConfirms.has(id)) {
               this.armedConfirms.delete(id);
               target.classList.remove("is-armed");
+              target.removeAttribute("data-confirming");
               if (target.dataset.adminConfirmOriginal) {
                 target.textContent = target.dataset.adminConfirmOriginal;
               }
@@ -573,6 +579,7 @@ export class AdminConsole {
         }
         this.armedConfirms.delete(id);
         target.classList.remove("is-armed");
+        target.removeAttribute("data-confirming");
         if (target.dataset.adminConfirmOriginal) {
           target.textContent = target.dataset.adminConfirmOriginal;
         }
