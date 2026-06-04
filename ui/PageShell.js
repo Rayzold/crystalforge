@@ -622,7 +622,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
     (entry) => !entry?.assignmentPostId
   ).length;
   const coreRoutes = PAGE_ROUTES.filter((route) => ["home", "forge", "economy", "city"].includes(route.key));
-  const managementRoutes = PAGE_ROUTES.filter((route) => ["citizens", "expeditions", "vehicles", "uniques", "behemoths", "npcs", "awakened", "army", "chronicle", "help"].includes(route.key));
+  const managementRoutes = PAGE_ROUTES.filter((route) => ["citizens", "expeditions", "vehicles", "uniques", "behemoths", "npcs", "awakened", "army", "crafting", "chronicle", "help"].includes(route.key));
   const manifestedBuildings = orderSidebarBuildings(state, state.buildings.filter((building) => building.isComplete));
   const incubatingBuildings = orderSidebarBuildings(state, getActiveConstructionQueue(state));
   const availableBuildings = orderSidebarBuildings(state, getAvailableConstructionQueue(state));
