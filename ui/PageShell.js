@@ -542,7 +542,7 @@ function renderGlobalCommandStrip(state, townFocusAvailability, pageKey) {
   `;
 }
 
-function renderSidebarRouteGroup(routes, pageKey, cityAlertCount, availableCrystalCount, expeditionCount, uniqueCitizenCount) {
+function renderSidebarRouteGroup(routes, pageKey, cityAlertCount, availableCrystalCount, expeditionCount, uniqueCitizenCount, craftingReadyCount) {
   return routes
     .map((route) => {
       let badge = "";
@@ -554,12 +554,8 @@ function renderSidebarRouteGroup(routes, pageKey, cityAlertCount, availableCryst
         badge = `<em class="sidebar-link__badge">${expeditionCount}</em>`;
       } else if (route.key === "uniques" && uniqueCitizenCount > 0) {
         badge = `<em class="sidebar-link__badge">${uniqueCitizenCount}</em>`;
-      } else if (route.key === "crafting") {
-        const day   = state.calendar?.dayOffset ?? 0;
-        const ready = (state.craftingItems ?? []).filter(
-          it => it.status === "active" && day >= it.startDayOffset + it.durationDays
-        ).length;
-        if (ready > 0) badge = `<em class="sidebar-link__badge">${ready}</em>`;
+      } else if (route.key === "crafting" && craftingReadyCount > 0) {
+        badge = `<em class="sidebar-link__badge">${craftingReadyCount}</em>`;
       }
 
       return `
@@ -621,6 +617,12 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
   const uniqueCitizenCount = (state.uniqueCitizens ?? []).filter(
     (entry) => !entry?.assignmentPostId
   ).length;
+  const craftingReadyCount = (() => {
+    const day = state.calendar?.dayOffset ?? 0;
+    return (state.craftingItems ?? []).filter(
+      it => it.status === "active" && day >= it.startDayOffset + it.durationDays
+    ).length;
+  })();
   const coreRoutes = PAGE_ROUTES.filter((route) => ["home", "forge", "economy", "city"].includes(route.key));
   const managementRoutes = PAGE_ROUTES.filter((route) => ["citizens", "expeditions", "vehicles", "uniques", "behemoths", "npcs", "awakened", "army", "crafting", "chronicle", "help"].includes(route.key));
   const manifestedBuildings = orderSidebarBuildings(state, state.buildings.filter((building) => building.isComplete));
@@ -676,7 +678,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
         <nav class="sidebar-nav__links">
           <div class="sidebar-link-group">
             <span class="sidebar-link-group__label">Core</span>
-            ${renderSidebarRouteGroup(coreRoutes, pageKey, cityAlertCount, availableCrystalCount, expeditionCount, uniqueCitizenCount)}
+            ${renderSidebarRouteGroup(coreRoutes, pageKey, cityAlertCount, availableCrystalCount, expeditionCount, uniqueCitizenCount, craftingReadyCount)}
           </div>
           <div class="sidebar-link-group">
             <span class="sidebar-link-group__label">Management</span>
