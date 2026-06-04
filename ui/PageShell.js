@@ -698,6 +698,7 @@ function renderTopNav(state, pageKey, badges, manualSaveSlots, uiDensity, concis
         ${TOP_NAV_GROUPS.map((g) => renderTopNavGroup(g, pageKey, badges)).join("")}
       </div>
       <div class="top-nav__spacer"></div>
+      <button class="top-nav__icon-button" type="button" data-action="open-admin" title="${state.settings?.liveSessionView ? "GM Console" : "Admin Console"}" aria-label="GM Console">🛠</button>
       <button class="top-nav__icon-button" type="button" data-action="save-firebase-realm" title="Cloud Save (publish current state)" aria-label="Cloud Save">☁⤴</button>
       <button class="top-nav__icon-button" type="button" data-action="load-firebase-realm" title="Cloud Load (pull latest published state)" aria-label="Cloud Load">☁⤵</button>
       <button class="top-nav__icon-button" type="button" data-action="roll-dice" title="Roll Dice (${diceAmount}${diceType})" aria-label="Roll dice">🎲</button>

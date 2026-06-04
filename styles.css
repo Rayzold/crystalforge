@@ -5273,6 +5273,13 @@ textarea {
   grid-auto-rows: min-content;
 }
 
+/* Per-density base font sizes — every rem/em inside the shell scales from
+   these. Compact is the project default; comfort gives slightly larger text
+   for readability, and dense/small are for high-information sessions. */
+.game-shell--density-comfort { font-size: 15px; }
+.game-shell--density-compact { font-size: 13px; }
+.game-shell--density-dense   { font-size: 12px; }
+
 .game-shell--density-comfort .button,
 .game-shell--density-comfort .icon-button {
   padding: 10px 14px;
