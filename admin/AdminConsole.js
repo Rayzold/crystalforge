@@ -36,27 +36,26 @@ const RARITY_COLOR_MAP = {
 };
 
 function rarityControls(state, kind) {
-  // Compact inline spinner: [-] [input] [+] [Apply]. Apply increments by the
-  // input value when positive, decrements when negative; "Set" is reachable by
-  // typing the exact value and using the per-row "=" action.
+  // Compact spinner: [−] [input] [+]. The input field is the current value
+  // (typed values commit on blur or Enter — no separate Set button).
   return RARITY_ORDER.map((rarity) => {
     const current = kind === "crystal" ? state.crystals[rarity] : state.shards[rarity];
     return `
-      <div class="admin-spin-row" style="--rarity-color:${RARITY_COLOR_MAP[rarity] ?? "var(--accent)"};">
+      <div class="admin-spin-row admin-spin-row--no-apply" style="--rarity-color:${RARITY_COLOR_MAP[rarity] ?? "var(--accent)"};">
         <div class="admin-spin-row__label">
           <strong>${escapeHtml(rarity)}</strong>
         </div>
-        <span class="admin-spin-row__value">${formatNumber(current ?? 0, 0)}</span>
         <button class="button button--ghost admin-spin-row__step" type="button" data-admin-action="${kind}-step" data-rarity="${rarity}" data-amount="-1" title="−1">−</button>
-        <input type="number" id="${kind}-${rarity}" value="1" min="0" />
+        <input type="number" data-admin-direct-set="${kind}" id="${kind}-${rarity}" data-rarity="${rarity}" value="${Math.round(current ?? 0)}" min="0" />
         <button class="button button--ghost admin-spin-row__step" type="button" data-admin-action="${kind}-step" data-rarity="${rarity}" data-amount="1" title="+1">+</button>
-        <button class="button admin-spin-row__apply" type="button" data-admin-action="${kind}-set" data-rarity="${rarity}" title="Set to input value">Set</button>
       </div>
     `;
   }).join("");
 }
 
 function citizenControls(state) {
+  // Round 2 Fix 2: each citizen class is now a spinner row matching the
+  // Currencies layout. ± steps by 1; typed value commits on blur.
   return CITIZEN_GROUP_ORDER.map((groupTitle) => {
     const classes = CITIZEN_CLASSES.filter((citizenClass) => CITIZEN_DEFINITIONS[citizenClass]?.group === groupTitle);
     if (!classes.length) {
@@ -78,18 +77,16 @@ function citizenControls(state) {
               const count = Number(state.citizens?.[citizenClass] ?? 0);
               const definition = CITIZEN_DEFINITIONS[citizenClass] ?? {};
               const emoji = definition.emoji ?? "*";
+              const isUnmanned = count === 0;
               return `
-                <div class="admin-row admin-row--citizen">
-                  <span class="admin-citizen-label">
-                    <span class="admin-citizen-label__emoji" aria-hidden="true">${escapeHtml(emoji)}</span>
-                    <span>${escapeHtml(citizenClass)}</span>
-                  </span>
+                <div class="admin-spin-row admin-spin-row--no-apply admin-spin-row--citizen ${isUnmanned ? "is-unmanned" : ""}">
+                  <div class="admin-spin-row__label">
+                    <strong><span aria-hidden="true">${escapeHtml(emoji)}</span> ${escapeHtml(citizenClass)}</strong>
+                  </div>
                   ${createHelpBubble(getCitizenHelpText(citizenClass))}
-                  <input type="number" id="citizen-${citizenClass}" value="1" min="0" />
-                  <button class="button button--ghost" data-admin-action="citizen-add" data-citizen-class="${citizenClass}">Add</button>
-                  <button class="button button--ghost" data-admin-action="citizen-remove" data-citizen-class="${citizenClass}">Remove</button>
-                  <button class="button button--ghost" data-admin-action="citizen-set" data-citizen-class="${citizenClass}">Set</button>
-                  <strong>${formatNumber(count, 0)}</strong>
+                  <button class="button button--ghost admin-spin-row__step" type="button" data-admin-action="citizen-step" data-citizen-class="${citizenClass}" data-amount="-1" title="−1">−</button>
+                  <input type="number" data-admin-direct-set="citizen" id="citizen-${citizenClass}" data-citizen-class="${citizenClass}" value="${Math.round(count)}" min="0" />
+                  <button class="button button--ghost admin-spin-row__step" type="button" data-admin-action="citizen-step" data-citizen-class="${citizenClass}" data-amount="1" title="+1">+</button>
                 </div>
               `;
             })
@@ -593,6 +590,24 @@ export class AdminConsole {
         if (this.lastState) {
           this.render(this.lastState);
         }
+      } else if (target instanceof HTMLInputElement && target.dataset.adminDirectSet) {
+        // Round 2 Fix 1: typed values in spinner / citizen rows commit on blur.
+        const kind = target.dataset.adminDirectSet;
+        const value = Math.max(0, Number(target.value) || 0);
+        if (kind === "crystal" || kind === "shard") {
+          (kind === "crystal" ? this.actions.adjustCrystal : this.actions.adjustShard)({
+            mode: "set",
+            rarity: target.dataset.rarity,
+            amount: value
+          });
+        } else if (kind === "citizen") {
+          this.actions.citizenCommand({
+            mode: "set",
+            citizenClass: target.dataset.citizenClass,
+            amount: value
+          });
+          this.showCitizenToast(`Set ${target.dataset.citizenClass} to ${formatNumber(value, 0)}`);
+        }
       }
     });
 
@@ -605,6 +620,36 @@ export class AdminConsole {
         }
       }
     });
+  }
+
+  showCitizenToast(message, { undo = null, durationMs = 5000 } = {}) {
+    // Round 2 Fix 4: floating toast at the bottom of the admin drawer with an
+    // optional Undo button. Replaces any in-flight toast.
+    if (this._toastTimer) clearTimeout(this._toastTimer);
+    const dialog = this.root.querySelector(".modal__dialog");
+    if (!dialog) return;
+    let toast = dialog.querySelector(".admin-toast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.className = "admin-toast";
+      dialog.append(toast);
+    }
+    toast.innerHTML = `
+      <span class="admin-toast__icon" aria-hidden="true">✓</span>
+      <span class="admin-toast__msg">${message}</span>
+      ${undo ? `<button class="admin-toast__undo" type="button">Undo</button>` : ""}
+    `;
+    toast.classList.add("is-visible");
+    if (undo) {
+      toast.querySelector(".admin-toast__undo").addEventListener("click", () => {
+        undo();
+        toast.classList.remove("is-visible");
+        if (this._toastTimer) clearTimeout(this._toastTimer);
+      }, { once: true });
+    }
+    this._toastTimer = setTimeout(() => {
+      toast.classList.remove("is-visible");
+    }, durationMs);
   }
 
   getNumberInput(id, fallback = 0) {
@@ -704,6 +749,17 @@ export class AdminConsole {
             amount: this.getNumberInput(`citizen-${target.dataset.citizenClass}`, 0)
           });
           break;
+        case "citizen-step": {
+          // Round 2 Fix 2: ± stepper for citizen rows. ±1 by data-amount.
+          const klass = target.dataset.citizenClass;
+          const amount = Math.abs(Number(target.dataset.amount) || 1);
+          const mode = Number(target.dataset.amount) < 0 ? "remove" : "add";
+          this.actions.citizenCommand({ mode, citizenClass: klass, amount });
+          this.showCitizenToast(`${mode === "add" ? "Added" : "Removed"} ${amount} ${klass}`, {
+            undo: () => this.actions.citizenCommand({ mode: mode === "add" ? "remove" : "add", citizenClass: klass, amount })
+          });
+          break;
+        }
         case "promote-citizens":
           this.actions.moveCitizens({
             mode: "promote",
@@ -1138,8 +1194,8 @@ export class AdminConsole {
             <button class="button button--ghost" data-admin-action="demote-citizens">Demote</button>
             <label>Bulk JSON<textarea id="bulk-citizens" rows="4" placeholder='{"Farmers":52,"Soldiers":12,"Children":28}'></textarea></label>
             <div class="admin-actions">
-              <button class="button button--ghost" data-admin-action="bulk-citizens">Apply Bulk</button>
-              <button class="button button--ghost" data-admin-action="reset-citizens">Reset Citizens</button>
+              <button class="button button--ghost" data-admin-action="bulk-citizens" data-admin-confirm="bulk-citizens">Apply Bulk</button>
+              <button class="button button--ghost" data-admin-action="reset-citizens" data-admin-confirm="reset-citizens">Reset Citizens</button>
             </div>
           </section>
         `

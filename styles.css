@@ -3116,6 +3116,63 @@ button[aria-disabled="true"]:hover,
   border-bottom: 1px solid rgba(182, 212, 255, 0.06);
 }
 
+/* Round 2 Fix 1: no Set button — five columns (label, −, input, +, then a
+   1ch spacer that keeps the layout aligned with rows that DO have an Apply). */
+.admin-spin-row--no-apply {
+  grid-template-columns: 1fr auto 70px auto;
+}
+
+.admin-spin-row--no-apply.admin-spin-row--citizen {
+  grid-template-columns: 1fr auto auto 70px auto;
+}
+
+/* Citizens at 0 — visual flag */
+.admin-spin-row--citizen.is-unmanned strong {
+  color: rgba(255, 124, 157, 0.78);
+}
+
+/* Floating toast inside the admin drawer (Round 2 Fix 4) */
+.admin-toast {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--bg-1);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 160ms ease, transform 160ms ease;
+  pointer-events: none;
+  z-index: 12;
+  font-size: 0.84rem;
+}
+
+.admin-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.admin-toast__icon {
+  color: var(--success);
+}
+
+.admin-toast__undo {
+  height: 22px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(141, 214, 255, 0.32);
+  background: rgba(141, 214, 255, 0.10);
+  color: var(--accent);
+  font-size: 0.74rem;
+  cursor: pointer;
+}
+
 .admin-spin-row__label {
   display: flex;
   flex-direction: column;
