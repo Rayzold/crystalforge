@@ -4,7 +4,7 @@ import { RARITY_ORDER } from "../content/Rarities.js";
 import { sortBuildings } from "../engine/Utils.js";
 import { getActiveConstructionQueue, getConstructionEtaDetails, getDriftConstructionSlots, isBuildingActivelyConstructed } from "../systems/ConstructionSystem.js";
 import { getBuildingWorkforceStatus, getWorkforceSummary } from "../systems/WorkforceSystem.js";
-import { renderBuildingCard } from "./BuildingCard.js?v=1.9.4";
+import { renderBuildingCard } from "./BuildingCard.js?v=1.9.5";
 
 function getPinnedBuildingIds(state) {
   return new Set(state.settings?.pinnedBuildingIds ?? []);

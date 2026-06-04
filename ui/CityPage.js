@@ -25,7 +25,7 @@ import {
 } from "../systems/ConstructionSystem.js";
 import { getEmergencyStatus, getGoodsSummary } from "../systems/ResourceSystem.js";
 import { getWorkforceCategoryLabel, getWorkforceSummary } from "../systems/WorkforceSystem.js";
-import { getVisibleBuildings, renderBuildingGrid } from "./BuildingGrid.js?v=1.9.4";
+import { getVisibleBuildings, renderBuildingGrid } from "./BuildingGrid.js?v=1.9.5";
 import { renderCalendarPanel } from "./CalendarPanel.js";
 import { renderDistrictPanel } from "./DistrictPanel.js";
 import { renderDriftEvolutionPanel } from "./DriftEvolutionPanel.js";
@@ -452,19 +452,33 @@ function renderIncubatorSidebar(state) {
           const supportBonusLabel = building.heroSupport && building.expertSupport
             ? "+150% Support"
             : building.heroSupport ? "+100% Support" : building.expertSupport ? "+50% Support" : "";
+          const pct = Math.min(100, Math.max(0, Number(building.quality) || 0));
+          const dashFill = (pct / 100) * 100.53;
+          const daysRemaining = etaDetails.daysRemaining;
+          const isUrgent = Number.isFinite(daysRemaining) && daysRemaining < 7;
           return `
-            <article class="incubator-sidebar__slot ${isBuildingActivelyConstructed(state, building.id) ? "is-active" : ""}">
+            <article class="incubator-sidebar__slot ${isBuildingActivelyConstructed(state, building.id) ? "is-active" : ""}" style="--rarity-color:${RARITY_COLORS[building.rarity] ?? "var(--accent)"};">
               <div class="incubator-sidebar__slot-head">
                 <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
                 <span class="incubator-sidebar__slot-pos">Slot ${index + 1}</span>
               </div>
-              <div class="incubator-sidebar__slot-metrics">
-                <span>${formatNumber(building.quality, 1)}%</span>
-                <small>${etaDetails.daysRemaining === null
-                  ? escapeHtml(etaDetails.stallReasons.join(", ") || "stalled")
-                  : `${formatNumber(etaDetails.daysRemaining, 1)}d left`}</small>
+              <div class="incubator-sidebar__slot-body">
+                <div class="incubator-sidebar__slot-metrics">
+                  <span>${formatNumber(building.quality, 1)}%</span>
+                  <small class="${isUrgent ? "is-urgent" : ""}">${daysRemaining === null
+                    ? escapeHtml(etaDetails.stallReasons.join(", ") || "stalled")
+                    : `${formatNumber(daysRemaining, 1)}d left`}</small>
+                </div>
+                <div class="incubator-sidebar__ring" aria-hidden="true">
+                  <svg viewBox="0 0 40 40">
+                    <circle cx="20" cy="20" r="16" class="incubator-sidebar__ring-track" />
+                    <circle cx="20" cy="20" r="16" class="incubator-sidebar__ring-fill"
+                      stroke-dasharray="${dashFill.toFixed(2)} 100.53" />
+                  </svg>
+                  <span class="incubator-sidebar__ring-value">${Math.round(pct)}%</span>
+                </div>
               </div>
-              <div class="incubator-sidebar__bar"><span style="width:${Math.min(100, Math.max(0, building.quality)).toFixed(1)}%"></span></div>
+              <div class="incubator-sidebar__bar"><span style="width:${pct.toFixed(1)}%"></span></div>
               ${supportBonusLabel ? `<div class="incubator-support-badge">${escapeHtml(supportBonusLabel)}</div>` : ""}
               <div class="incubator-support-toggles">
                 <button class="incubator-support-toggle ${building.heroSupport ? "is-active" : ""}" type="button" data-action="toggle-incubator-support" data-building-id="${building.id}" data-support-key="heroSupport" data-enabled="${building.heroSupport ? "true" : "false"}" aria-pressed="${building.heroSupport ? "true" : "false"}">
@@ -552,15 +566,8 @@ function renderBuildingsView(state) {
 
   return `
     <section class="panel city-workspace">
-      <div class="city-workspace__top">
-        <div class="city-workspace__tabs">
-          <button class="button button--ghost ${currentView === "stream" ? "is-active" : ""}" data-action="set-city-building-view" data-view="stream">The Stream</button>
-          <button class="button button--ghost ${currentView === "map" ? "is-active" : ""}" data-action="set-city-building-view" data-view="map">Town Map</button>
-        </div>
-        <div class="city-workspace__top-actions">
-          <button class="button city-workspace__map-shortcut ${currentView === "map" ? "is-active" : ""}" data-action="set-city-building-view" data-view="map">Open Map</button>
-          <span class="city-workspace__total">Total Rolls: ${formatNumber(totalRolls, 0)}</span>
-        </div>
+      <div class="city-workspace__top city-workspace__top--rolls-only">
+        <span class="city-workspace__total">Total Rolls: ${formatNumber(totalRolls, 0)}</span>
       </div>
 
       <div class="city-workspace__toolbar">
@@ -866,10 +873,15 @@ function renderCityModes(state) {
   if (cityMode === "administration") activeKey = "administration";
   else if (buildingView === "map") activeKey = "map";
   else activeKey = "stream";
+  // Buildings = card grid; The Stream = chronological roll log (we treat it as
+  // a stream-style view inside the workspace using buildingView "stream"); both
+  // currently surface the same content but the spec keeps the labels distinct
+  // for user-facing clarity. Town Map and Administration are unchanged.
   const tabs = [
-    { key: "stream",         label: "Buildings",     onClick: `data-action="set-city-mode" data-view="buildings" data-building-view="stream"` },
-    { key: "map",            label: "Town Map",      onClick: `data-action="set-city-mode" data-view="buildings" data-building-view="map"` },
-    { key: "administration", label: "Administration", onClick: `data-action="set-city-mode" data-view="administration"` }
+    { key: "stream",         label: "Buildings",      onClick: `data-action="set-city-mode" data-view="buildings" data-building-view="stream"` },
+    { key: "administration", label: "Administration", onClick: `data-action="set-city-mode" data-view="administration"` },
+    { key: "stream",         label: "The Stream",     onClick: `data-action="set-city-mode" data-view="buildings" data-building-view="stream"` },
+    { key: "map",            label: "Town Map",       onClick: `data-action="set-city-mode" data-view="buildings" data-building-view="map"` }
   ];
   return `
     <section class="city-tabs">
@@ -906,9 +918,9 @@ export function renderCityPage(state) {
     aside: cityMode === "buildings" ? renderIncubatorSidebar(state) : "",
     heroActions: `
       <div class="page-hero__time-controls">
-        <button class="button" data-action="advance-time" data-step="day">▶ Advance Day</button>
+        <button class="button" data-action="advance-time" data-step="day" title="Advance Day">▶ Advance Day</button>
         <details class="page-hero__time-more">
-          <summary class="button button--ghost button--small">More ▾</summary>
+          <summary class="button button--ghost button--small" title="More time options">More ▾</summary>
           <div class="page-hero__time-more-body">
             <button class="button button--ghost button--small" data-action="advance-time" data-step="3days">+3d</button>
             <button class="button button--ghost button--small" data-action="advance-time" data-step="week">+Week</button>

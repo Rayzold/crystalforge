@@ -6527,8 +6527,9 @@ body:-webkit-full-screen #app {
   justify-content: space-between;
   gap: 12px;
   align-items: center;
-  padding: 14px 18px;
-  border-radius: 20px;
+  min-height: 60px;
+  padding: 6px 18px;
+  border-radius: 14px;
   border: 1px solid var(--focus-border);
   background:
     radial-gradient(circle at top left, var(--focus-tint-a), transparent 32%),
@@ -6553,30 +6554,67 @@ body:-webkit-full-screen #app {
 
 .page-hero h1 {
   font-family: var(--display-font);
-  font-size: clamp(1.4rem, 1.8vw + 0.9rem, 2.15rem);
-  line-height: 0.94;
-  margin: 8px 0 0;
-  letter-spacing: 0.02em;
+  font-size: 1.15rem;
+  line-height: 1;
+  margin: 0;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
+.page-hero__eyebrow {
+  /* Eyebrow is redundant with the visible page title in the compact hero */
+  display: none;
+}
+
 .page-hero__subtitle {
-  max-width: 62ch;
-  margin: 6px 0 0;
-  color: var(--muted);
-  font-size: 0.9rem;
-  line-height: 1.38;
+  display: none;
+}
+
+.page-hero > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .page-hero__side {
-  display: grid;
-  flex: 0 1 320px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  justify-content: flex-end;
+  margin-right: 0;
+}
+
+.page-hero__focus {
+  display: inline-flex;
+  align-items: center;
   gap: 6px;
-  justify-items: end;
-  min-width: min(260px, 100%);
-  max-width: 320px;
-  /* Reserve clear space for the floating .page-build-tag in the same corner. */
-  margin-right: 132px;
+  padding: 2px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(141, 214, 255, 0.25);
+  background: rgba(141, 214, 255, 0.10);
+  min-width: 0;
+  max-width: none;
+  margin: 0;
+}
+
+.page-hero__focus span,
+.page-hero__focus small {
+  display: inline;
+  font-size: 0.72rem;
+  color: var(--accent-mint, var(--accent));
+  margin: 0;
+}
+
+.page-hero__focus small {
+  display: none;
+}
+
+.page-hero__focus .town-focus-badge {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  gap: 4px;
 }
 
 .page-hero__side .page-date-chip,
@@ -15922,6 +15960,34 @@ select[data-action="apply-crafting-station"] option:disabled {
   min-width: 0;
 }
 
+/* Compact date chip pill — used inside the slim page-hero */
+.page-hero .page-date-chip--hero {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: none;
+  padding: 2px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(141, 214, 255, 0.25);
+  background: rgba(141, 214, 255, 0.10);
+  box-shadow: none;
+  color: var(--accent);
+  font-size: 0.72rem;
+}
+
+.page-hero .page-date-chip--hero span,
+.page-hero .page-date-chip--hero strong {
+  font-size: 0.72rem;
+  color: var(--accent);
+  line-height: 1.2;
+}
+
+.page-hero .page-date-chip--hero strong {
+  font-weight: 700;
+  margin-left: 4px;
+}
+
 /* ---- Generic collapsible-list (auto-applied to long lists) -------------- */
 
 [data-collapse-state="collapsed"] > .collapse-hidden-item {
@@ -15988,13 +16054,14 @@ body[data-theme="silver"] .collapse-toggle {
  * ========================================================================== */
 
 .top-nav {
-  position: relative;
-  z-index: 30;
+  position: sticky;
+  top: 0;
+  z-index: 100;
   display: flex;
   align-items: stretch;
   height: 44px;
   padding: 0 12px;
-  background: linear-gradient(180deg, rgba(32, 46, 74, 0.94), rgba(18, 26, 46, 0.96));
+  background: linear-gradient(180deg, rgba(32, 46, 74, 0.98), rgba(18, 26, 46, 0.98));
   border: 1px solid var(--panel-border);
   border-radius: 14px;
   backdrop-filter: blur(12px);
@@ -16232,6 +16299,9 @@ body[data-theme="silver"] .collapse-toggle {
 /* Resource bar */
 
 .resource-bar {
+  position: sticky;
+  top: 58px; /* top-nav height (44px) + grid gap (14px) */
+  z-index: 90;
   display: flex;
   align-items: stretch;
   height: 40px;
@@ -16239,6 +16309,7 @@ body[data-theme="silver"] .collapse-toggle {
   background: var(--bg-2);
   border: 1px solid var(--panel-border);
   border-radius: 12px;
+  backdrop-filter: blur(8px);
 }
 
 .resource-bar__slot {
@@ -16398,7 +16469,7 @@ body[data-theme="silver"] .collapse-toggle {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 6px;
+  margin: 0;
 }
 
 .page-hero__time-controls {
@@ -16441,14 +16512,60 @@ body[data-theme="silver"] .collapse-toggle {
 /* ─── Compact filter bar (Change 4c) ───────────────────────────────────── */
 
 .city-workspace__toolbar {
+  display: flex !important;
+  align-items: center;
   gap: 6px !important;
+  padding: 6px 12px;
+  overflow-x: auto;
+  flex-wrap: nowrap !important;
+  min-height: 44px;
+  scrollbar-width: thin;
+  position: sticky;
+  top: 112px; /* top-nav 44 + gap 14 + resource-bar 40 + gap 14 */
+  z-index: 80;
+  background: var(--bg-0);
+  border-bottom: 1px solid rgba(182, 212, 255, 0.10);
 }
 
 .city-workspace__filters {
+  display: flex !important;
   flex-wrap: nowrap !important;
-  overflow-x: auto;
-  scrollbar-width: thin;
-  padding-bottom: 2px;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px 0 0;
+  margin: 0 6px 0 0;
+  border-right: 1px solid rgba(182, 212, 255, 0.12);
+}
+
+.city-workspace__filters:last-of-type {
+  border-right: 0;
+  margin-right: 0;
+}
+
+/* Hide the quick-filter row (Pinned, Understaffed, Gold, Food…) — these are
+   sort-style criteria and have been folded into the Sort dropdown elsewhere. */
+.city-workspace__filters.city-workspace__filters--quick {
+  display: none !important;
+}
+
+.city-workspace__sort {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.city-workspace__sort select {
+  height: 28px;
+  font-size: 0.78rem;
+}
+
+.city-workspace__building-search {
+  flex: 0 1 220px;
+  height: 28px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
 }
 
 .city-workspace__filters .button.city-filter {
@@ -16550,7 +16667,10 @@ body[data-theme="silver"] .collapse-toggle {
   border: 1px solid var(--panel-border);
   border-radius: 14px;
   position: sticky;
-  top: 12px;
+  top: 112px; /* same baseline as the sticky toolbar */
+  max-height: calc(100vh - 124px);
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 
 .incubator-sidebar__section {
@@ -16596,12 +16716,78 @@ body[data-theme="silver"] .collapse-toggle {
 .incubator-sidebar__slot,
 .incubator-sidebar__queued,
 .incubator-sidebar__available {
+  position: relative;
   display: grid;
   gap: 4px;
-  padding: 8px;
+  padding: 8px 8px 8px 14px;
   background: rgba(141, 214, 255, 0.04);
   border: 1px solid rgba(141, 214, 255, 0.12);
   border-radius: 10px;
+  overflow: hidden;
+}
+
+.incubator-sidebar__slot::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--rarity-color, var(--accent));
+  border-radius: 2px 0 0 2px;
+}
+
+.incubator-sidebar__slot-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.incubator-sidebar__slot-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.incubator-sidebar__slot-metrics small.is-urgent {
+  color: var(--success);
+  font-weight: 700;
+}
+
+.incubator-sidebar__ring {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.incubator-sidebar__ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.incubator-sidebar__ring-track {
+  fill: none;
+  stroke: rgba(182, 212, 255, 0.12);
+  stroke-width: 3;
+}
+
+.incubator-sidebar__ring-fill {
+  fill: none;
+  stroke: var(--rarity-color, var(--accent));
+  stroke-width: 3;
+  stroke-linecap: round;
+  transition: stroke-dasharray 250ms ease;
+}
+
+.incubator-sidebar__ring-value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: var(--text);
 }
 
 .incubator-sidebar__slot.is-active {
@@ -16699,6 +16885,22 @@ body[data-theme="silver"] .collapse-toggle {
 /* Update the page-layout aside width specifically for the city page */
 .page-stage--city .page-layout--with-aside {
   grid-template-columns: minmax(0, 1fr) 280px;
+  align-items: start;
+}
+
+/* Make the aside wrapper itself sticky so the inner incubator sidebar pins
+   to the top while the workspace scrolls. Putting position:sticky directly on
+   the wrapper avoids the "inner stretches to parent height" problem that
+   stops the inner .incubator-sidebar from sticking inside a grid row. */
+.page-stage--city .page-layout__aside {
+  position: sticky;
+  top: 112px;
+  align-self: start;
+}
+
+.page-stage--city .incubator-sidebar {
+  position: static;
+  max-height: calc(100vh - 124px);
 }
 
 /* Hide the legacy inline incubation strip — the right sidebar now owns this UI. */

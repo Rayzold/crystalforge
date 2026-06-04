@@ -617,7 +617,7 @@ function renderTopNavSettings(state, manualSaveSlots, uiDensity, conciseMode, di
   const textSize = state.settings?.textSize ?? "medium";
   return `
     <div class="top-nav__settings" data-top-nav-settings>
-      <button class="top-nav__icon-button" type="button" data-action="toggle-top-nav-settings" aria-label="Settings" title="Settings">⚙</button>
+      <button class="top-nav__icon-button" type="button" data-action="toggle-top-nav-settings" aria-label="Settings" title="Session Settings (density, dice, saves)">⚙</button>
       <div class="top-nav__settings-panel" data-top-nav-settings-panel hidden>
         <div class="top-nav__settings-section">
           <a class="top-nav__settings-link" href="./index.html"><strong>🎬 Player Mode</strong><small>Open shared player screen</small></a>
@@ -698,9 +698,9 @@ function renderTopNav(state, pageKey, badges, manualSaveSlots, uiDensity, concis
         ${TOP_NAV_GROUPS.map((g) => renderTopNavGroup(g, pageKey, badges)).join("")}
       </div>
       <div class="top-nav__spacer"></div>
-      <button class="top-nav__icon-button" type="button" data-action="save-firebase-realm" title="Cloud Save" aria-label="Cloud Save">☁⤴</button>
-      <button class="top-nav__icon-button" type="button" data-action="load-firebase-realm" title="Cloud Load" aria-label="Cloud Load">☁⤵</button>
-      <button class="top-nav__icon-button" type="button" data-action="roll-dice" title="Roll ${diceAmount}${diceType}" aria-label="Roll dice">🎲</button>
+      <button class="top-nav__icon-button" type="button" data-action="save-firebase-realm" title="Cloud Save (publish current state)" aria-label="Cloud Save">☁⤴</button>
+      <button class="top-nav__icon-button" type="button" data-action="load-firebase-realm" title="Cloud Load (pull latest published state)" aria-label="Cloud Load">☁⤵</button>
+      <button class="top-nav__icon-button" type="button" data-action="roll-dice" title="Roll Dice (${diceAmount}${diceType})" aria-label="Roll dice">🎲</button>
       ${renderTopNavSettings(state, manualSaveSlots, uiDensity, conciseMode, diceAmount, diceType, lastDiceRoll, firebaseMeta)}
     </nav>
   `;
@@ -716,6 +716,7 @@ function renderResourceBar(state) {
     { key: "materials", label: "Materials", icon: "🪵", color: "var(--accent)"        },
     { key: "mana",      label: "Mana",      icon: "✨", color: "var(--accent-violet)" }
   ];
+  const defenseValue = Number(state.cityStats?.defense ?? 0);
   return `
     <div class="resource-bar" aria-label="City resources">
       ${slots.map((slot) => {
@@ -732,6 +733,12 @@ function renderResourceBar(state) {
           </button>
         `;
       }).join("")}
+      <a class="resource-bar__slot resource-bar__slot--defense" href="./city.html#defense" style="--slot-color: #f97316;" title="Defense readiness">
+        <span class="resource-bar__icon" aria-hidden="true">🛡</span>
+        <span class="resource-bar__value">${formatNumber(defenseValue, 0)}%</span>
+        <span class="resource-bar__delta is-neutral">&nbsp;</span>
+        <span class="resource-bar__label">Defense</span>
+      </a>
     </div>
   `;
 }
