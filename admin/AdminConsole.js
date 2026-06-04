@@ -937,14 +937,14 @@ export class AdminConsole {
           <section class="admin-section">
             <h3>Resources</h3>
             <div class="admin-grid">
-              <label>Gold<input id="resource-gold" type="number" value="${state.resources.gold}" /></label>
-              <label>Food<input id="resource-food" type="number" value="${state.resources.food}" /></label>
-              <label>Materials<input id="resource-materials" type="number" value="${state.resources.materials}" /></label>
-              <label>Salvage<input id="resource-salvage" type="number" value="${state.resources.salvage ?? 0}" /></label>
-              <label>Mana<input id="resource-mana" type="number" value="${state.resources.mana}" /></label>
-              <label>Prosperity<input id="resource-prosperity" type="number" value="${state.resources.prosperity}" /></label>
-              <label>Goods<input id="resource-goods" type="number" value="${formatNumber(state.cityStats?.goods ?? 0, 2)}" step="0.1" /></label>
-              <label>Population<input id="resource-population" type="number" value="${state.resources.population}" disabled /></label>
+              <label>Gold<input id="resource-gold" type="number" value="${Math.round(state.resources.gold ?? 0)}" /></label>
+              <label>Food<input id="resource-food" type="number" value="${Math.round(state.resources.food ?? 0)}" /></label>
+              <label>Materials<input id="resource-materials" type="number" value="${Math.round(state.resources.materials ?? 0)}" /></label>
+              <label>Salvage<input id="resource-salvage" type="number" value="${Math.round(state.resources.salvage ?? 0)}" /></label>
+              <label>Mana<input id="resource-mana" type="number" value="${Math.round(state.resources.mana ?? 0)}" /></label>
+              <label>Prosperity<input id="resource-prosperity" type="number" value="${Math.round(state.resources.prosperity ?? 0)}" /></label>
+              <label>Goods<input id="resource-goods" type="number" value="${Math.round(state.cityStats?.goods ?? 0)}" step="1" /></label>
+              <label>Population<input id="resource-population" type="number" value="${Math.round(state.resources.population ?? 0)}" disabled /></label>
             </div>
             <p class="admin-debug-note">Saving Goods applies a GM override on top of normal goods production.</p>
             <div class="admin-actions">

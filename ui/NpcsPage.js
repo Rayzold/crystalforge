@@ -11,6 +11,7 @@ import {
   getNpcStatusDetail,
   getNpcStatusLabel
 } from "../content/NpcConfig.js";
+import { NPC_CRAFTER_LEVELS } from "../systems/NpcSystem.js?v=1.8.9";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
 
@@ -285,6 +286,13 @@ function renderNpcCard(npc) {
             value: npc.disposition,
             options: NPC_DISPOSITIONS,
             label: "Disposition"
+          })}
+          ${renderSelectField({
+            npcId: npc.id,
+            field: "crafterLevel",
+            value: npc.crafterLevel ?? "",
+            options: NPC_CRAFTER_LEVELS,
+            label: "Crafter Role"
           })}
         </div>
 

@@ -577,7 +577,7 @@ function renderSidebarRouteGroup(routes, pageKey, cityAlertCount, availableCryst
     .join("");
 }
 
-export function renderPageShell(state, pageKey, { title, subtitle, content, aside = "" }, overlays = "") {
+export function renderPageShell(state, pageKey, { title, subtitle, content, aside = "", hideHero = false }, overlays = "") {
   if (pageKey === "player") {
     return `
       <div class="game-shell game-shell--player game-shell--density-${state.settings?.uiDensity ?? "compact"} game-shell--theme-dark ${state.transientUi?.projectorMode ? "game-shell--projector" : ""} ${state.transientUi?.projectorChromeHidden ? "game-shell--projector-hidden" : ""}">
@@ -606,7 +606,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
   const townFocusAvailability = getTownFocusAvailability(state);
   const currentFocus = getCurrentTownFocus(state);
   const showResourceChrome = RESOURCE_CHROME_PAGES.has(pageKey);
-  const showGlobalCommandStrip = !["city", "forge", "expeditions", "vehicles", "uniques", "behemoths", "npcs", "awakened", "army", "chronicle", "help"].includes(pageKey);
+  const showGlobalCommandStrip = !["city", "forge", "expeditions", "vehicles", "uniques", "behemoths", "npcs", "awakened", "army", "chronicle", "crafting", "help"].includes(pageKey);
   const showBuildingStatus = BUILDING_STATUS_PAGES.has(pageKey);
   const cityAlertCount = getCriticalAlerts(state).length;
   const availableCrystalCount = Object.values(state.crystals ?? {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
@@ -797,6 +797,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
       <main class="page-stage page-stage--${pageKey}">
         <button class="page-build-tag" type="button" data-action="open-build-notes" aria-label="Open build notes">${APP_DISPLAY_VERSION}</button>
         ${pageKey === "city" || pageKey === "economy" ? renderCrisisBanner(state, pageKey) : ""}
+        ${hideHero ? "" : `
         <header class="page-hero">
           <div>
             <p class="page-hero__eyebrow">${pageKey}</p>
@@ -818,6 +819,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
             }
           </div>
         </header>
+        `}
 
         ${showResourceChrome ? renderResourceDeltaStrip(state) : ""}
 

@@ -14,12 +14,20 @@ const VALID_ROLE_IDS = new Set(NPC_ROLES.map((entry) => entry.id));
 const VALID_STATUS_IDS = new Set(NPC_STATUSES.map((entry) => entry.id));
 const VALID_DISPOSITION_IDS = new Set(NPC_DISPOSITIONS.map((entry) => entry.id));
 const VALID_STAT_IDS = new Set(NPC_STAT_KEYS.map((entry) => entry.id));
+export const NPC_CRAFTER_LEVELS = [
+  { id: "",            label: "Not a crafter" },
+  { id: "advanced",    label: "Advanced Crafter" },
+  { id: "experienced", label: "Experienced Crafter" },
+  { id: "master",      label: "Master Crafter" }
+];
+const VALID_CRAFTER_LEVEL_IDS = new Set(NPC_CRAFTER_LEVELS.map((entry) => entry.id));
 
 const EDITABLE_TEXT_FIELDS = new Set(["name", "kind", "lore", "origin", "imagePath"]);
 const EDITABLE_CHOICE_FIELDS = {
   role: VALID_ROLE_IDS,
   status: VALID_STATUS_IDS,
-  disposition: VALID_DISPOSITION_IDS
+  disposition: VALID_DISPOSITION_IDS,
+  crafterLevel: VALID_CRAFTER_LEVEL_IDS
 };
 
 function normalizeStats(rawStats) {
@@ -58,6 +66,7 @@ function normalizeNpc(raw) {
   const roleId = VALID_ROLE_IDS.has(raw.role) ? raw.role : "civilian";
   const statusId = VALID_STATUS_IDS.has(raw.status) ? raw.status : "active";
   const dispositionId = VALID_DISPOSITION_IDS.has(raw.disposition) ? raw.disposition : "cautious";
+  const crafterLevelId = VALID_CRAFTER_LEVEL_IDS.has(raw.crafterLevel) ? raw.crafterLevel : "";
   const imagePath = typeof raw.imagePath === "string" ? raw.imagePath.trim().slice(0, 1024) : "";
   const imageData = typeof raw.imageData === "string" && raw.imageData.startsWith("data:image/") ? raw.imageData : "";
 
@@ -68,6 +77,7 @@ function normalizeNpc(raw) {
     role: roleId,
     status: statusId,
     disposition: dispositionId,
+    crafterLevel: crafterLevelId,
     origin: String(raw.origin ?? "").trim().slice(0, 200),
     lore: String(raw.lore ?? "").trim().slice(0, 1200),
     imagePath,
@@ -88,6 +98,22 @@ export function normalizeNpcs(rawCollection) {
   return rawCollection.map(normalizeNpc).filter(Boolean);
 }
 
+/**
+ * Returns how many crafters of each level are available — i.e. NPCs whose
+ * crafterLevel matches and whose status is "active" (or otherwise present).
+ */
+export function getCrafterCapacity(state) {
+  const counts = { advanced: 0, experienced: 0, master: 0 };
+  const npcs = Array.isArray(state?.npcs) ? state.npcs : [];
+  for (const npc of npcs) {
+    const lvl = npc?.crafterLevel;
+    if (lvl && counts[lvl] !== undefined && npc.status !== "deceased") {
+      counts[lvl]++;
+    }
+  }
+  return counts;
+}
+
 export function createBlankNpc(state) {
   return {
     id: createId("npc"),
@@ -96,6 +122,7 @@ export function createBlankNpc(state) {
     role: "civilian",
     status: "active",
     disposition: "cautious",
+    crafterLevel: "",
     origin: "",
     lore: "",
     imagePath: "",

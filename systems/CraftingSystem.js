@@ -10,28 +10,34 @@ function makeCosts(raw = {}) {
   );
 }
 
-export function createCraftingItem({ name, desc = "", startDayOffset, durationDays, costs = {}, queued = false }) {
+const CRAFTER_LEVELS = ["advanced", "experienced", "master"];
+
+export function createCraftingItem({ name, desc = "", startDayOffset, durationDays, costs = {}, queued = false, crafterLevel = null }) {
   return {
-    id:             createId("crafting"),
-    name:           String(name ?? "Unnamed").trim(),
-    desc:           String(desc ?? "").trim(),
-    startDayOffset: Math.max(0, Number(startDayOffset ?? 0)),
-    durationDays:   Math.max(1, Number(durationDays ?? 1)),
-    status:         queued ? "queued" : "active",
-    costs:          makeCosts(costs),
+    id:                 createId("crafting"),
+    name:               String(name ?? "Unnamed").trim(),
+    desc:               String(desc ?? "").trim(),
+    startDayOffset:     Math.max(0, Number(startDayOffset ?? 0)),
+    durationDays:       Math.max(0.5, Number(durationDays ?? 1)),
+    status:             queued ? "queued" : "active",
+    costs:              makeCosts(costs),
+    crafterLevel:       CRAFTER_LEVELS.includes(crafterLevel) ? crafterLevel : null,
+    pausedElapsedDays:  null,
   };
 }
 
 export function normalizeCraftingItems(raw) {
   if (!Array.isArray(raw)) return [];
   return raw.map(item => ({
-    id:             String(item.id ?? createId("crafting")),
-    name:           String(item.name ?? "Unnamed"),
-    desc:           String(item.desc ?? ""),
-    startDayOffset: Math.max(0, Number(item.startDayOffset ?? 0)),
-    durationDays:   Math.max(1, Number(item.durationDays ?? 1)),
-    status:         ["active", "queued", "collected"].includes(item.status) ? item.status : "active",
-    costs:          makeCosts(item.costs),
+    id:                String(item.id ?? createId("crafting")),
+    name:              String(item.name ?? "Unnamed"),
+    desc:              String(item.desc ?? ""),
+    startDayOffset:    Math.max(0, Number(item.startDayOffset ?? 0)),
+    durationDays:      Math.max(0.5, Number(item.durationDays ?? 1)),
+    status:            ["active", "queued", "paused", "collected"].includes(item.status) ? item.status : "active",
+    costs:             makeCosts(item.costs),
+    crafterLevel:      CRAFTER_LEVELS.includes(item.crafterLevel) ? item.crafterLevel : null,
+    pausedElapsedDays: Number.isFinite(Number(item.pausedElapsedDays)) ? Number(item.pausedElapsedDays) : null,
   }));
 }
 
@@ -103,6 +109,27 @@ export function startNextQueuedCraftingItem(state) {
 /** Remove all collected items. */
 export function clearCollectedCraftingItems(state) {
   state.craftingItems = (state.craftingItems ?? []).filter(x => x.status !== "collected");
+}
+
+/** Pause an active item; stores elapsed days so progress is preserved. */
+export function pauseCraftingItem(state, itemId) {
+  const item = (state.craftingItems ?? []).find(x => x.id === itemId);
+  if (!item || item.status !== "active") return;
+  const day = state.calendar?.dayOffset ?? 0;
+  const elapsed = Math.max(0, Math.min(item.durationDays, day - item.startDayOffset));
+  item.status = "paused";
+  item.pausedElapsedDays = elapsed;
+}
+
+/** Resume a paused item; restores progress so the remaining duration matches. */
+export function resumeCraftingItem(state, itemId) {
+  const item = (state.craftingItems ?? []).find(x => x.id === itemId);
+  if (!item || item.status !== "paused") return;
+  const day = state.calendar?.dayOffset ?? 0;
+  const elapsed = Number.isFinite(Number(item.pausedElapsedDays)) ? Number(item.pausedElapsedDays) : 0;
+  item.startDayOffset = Math.max(0, day - elapsed);
+  item.status = "active";
+  item.pausedElapsedDays = null;
 }
 
 /** Returns items that became ready on the given dayOffset (for notifications). */

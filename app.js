@@ -2,7 +2,7 @@
 // This file wires together state, actions, routing, save/load, manifestation,
 // admin commands, and top-level UI events. Most game-wide behavior eventually
 // passes through here, while lower-level systems keep the domain rules isolated.
-import { AdminConsole } from "./admin/AdminConsole.js";
+import { AdminConsole } from "./admin/AdminConsole.js?v=1.8.9";
 import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js";
 import {
   APP_VERSION,
@@ -109,8 +109,9 @@ import {
   setNpcImageData,
   updateNpcAbility,
   updateNpcField,
-  updateNpcStat
-} from "./systems/NpcSystem.js";
+  updateNpcStat,
+  getCrafterCapacity
+} from "./systems/NpcSystem.js?v=1.8.9";
 import {
   createCraftingItem,
   collectCraftingItem,
@@ -120,7 +121,10 @@ import {
   moveCraftingQueueItem,
   startNextQueuedCraftingItem,
   clearCollectedCraftingItems,
-} from "./systems/CraftingSystem.js";
+  pauseCraftingItem,
+  resumeCraftingItem,
+} from "./systems/CraftingSystem.js?v=1.8.9";
+import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=1.8.9";
 import {
   addAwakened,
   clearAwakenedImage,
@@ -159,14 +163,14 @@ import {
   saveGameState,
   saveManualState,
   validateAndMigrateSave
-} from "./systems/StorageSystem.js";
+} from "./systems/StorageSystem.js?v=1.8.9";
 import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js";
 import { applyCompletedGoalRewards } from "./systems/GoalSystem.js";
 import { forceTownFocus, getMayorAdvice, reopenTownFocusSelection, selectTownFocus, updateTownFocusAvailability } from "./systems/TownFocusSystem.js";
 import { getEmergencyStatus, getCityTrendSummary } from "./systems/ResourceSystem.js";
 import { Toasts } from "./ui/Toasts.js";
 import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js";
-import { UIRenderer } from "./ui/UIRenderer.js";
+import { UIRenderer } from "./ui/UIRenderer.js?v=1.8.9";
 
 const root = document.querySelector("#app");
 const pageKey = document.body.dataset.page ?? "home";
@@ -565,6 +569,43 @@ function reportError(message, effectName = "error") {
   if (effectName) {
     playEffect(effectName);
   }
+}
+
+function applyCraftingTemplateAndStation(form) {
+  const tpl = findCraftingTemplate(form.dataset.templateId);
+  if (!tpl) return;
+  const stationKey = form.querySelector('[data-crafting-field="craftingStation"]')?.value || "";
+  const station = stationKey ? CRAFTING_STATIONS[stationKey] : null;
+  const cat = craftingTemplateCategory(tpl.id);
+  const categoryMult = station && cat ? (station.bonuses?.[cat] ?? 1) : 1;
+  const timeMult = station?.timeBonus ?? 1;
+
+  // Batch crafting: produces `count` items in less total time than crafting one-by-one.
+  // x5 → 50% of (5×singleTime). x10 → 30% of (10×singleTime).
+  const batchAllowed = cat === "scroll" || cat === "potion";
+  const batchCount = batchAllowed ? Math.max(1, Number(form.dataset.batchCount) || 1) : 1;
+  const batchTimeMult = batchCount >= 10 ? 0.30 : batchCount >= 5 ? 0.50 : 1;
+
+  // Category multiplier scales BOTH gold and time. Time/batch are time-only.
+  const goldTotal = tpl.gold * categoryMult * batchCount;
+  const days = +Math.max(0.5, tpl.days * categoryMult * timeMult * batchCount * batchTimeMult).toFixed(2);
+  const totalMana = Math.max(1, Math.ceil(goldTotal * 0.01));
+  const dailyGold = +(goldTotal / days).toFixed(2);
+  const dailyMana = Math.max(1, Math.ceil(totalMana / days));
+  const nameWithBatch = batchCount > 1 ? `${tpl.name} ×${batchCount}` : tpl.name;
+
+  const set = (field, value) => {
+    const el = form.querySelector(`[data-crafting-field="${field}"]`);
+    if (el) el.value = String(value);
+  };
+  set("name", nameWithBatch);
+  set("durationDays", days);
+  set("costs.gold", dailyGold);
+  set("costs.mana", dailyMana);
+
+  // Show/hide batch row depending on category.
+  const batchRow = form.querySelector('[data-crafting-batch-row]');
+  if (batchRow) batchRow.style.display = batchAllowed ? "" : "none";
 }
 
 async function copyTextToClipboard(text, successMessage) {
@@ -3960,8 +4001,33 @@ root.addEventListener("click", async (event) => {
       const get = (field) => form.querySelector(`[data-crafting-field="${field}"]`)?.value?.trim() ?? "";
       const name = get("name");
       if (!name) { reportError("Item name is required."); break; }
-      const dur   = Math.max(1, Number(get("durationDays")) || 1);
-      const start = Math.max(0, Number(get("startDayOffset")) || getCurrentState().calendar.dayOffset);
+      const baseDur = Math.max(0.5, Number(get("durationDays")) || 1);
+      // Apply selected crafter level (mutually-exclusive toggle on the form).
+      const crafterLevel = form.dataset.crafterLevel || null;
+      const crafterMult = crafterLevel === "advanced" ? 1.5 : crafterLevel === "experienced" ? 2 : crafterLevel === "master" ? 4 : 1;
+      const existingIdForCheck = target.dataset.itemId ?? "";
+      if (crafterLevel) {
+        const stateSnap = getCurrentState();
+        const cap = getCrafterCapacity(stateSnap)[crafterLevel] || 0;
+        const used = (stateSnap.craftingItems ?? []).filter(
+          (it) => it.status === "active" && it.crafterLevel === crafterLevel && it.id !== existingIdForCheck
+        ).length;
+        const goingActive = !(form.querySelector('[data-crafting-field="queued"]')?.checked);
+        if (goingActive && used + 1 > cap) {
+          reportError(`No ${crafterLevel} crafter available (${used}/${cap} in use). Assign an NPC as ${crafterLevel} crafter or pick a different level.`);
+          break;
+        }
+      }
+      const dur = Math.max(0.5, +(baseDur / crafterMult).toFixed(2));
+      const startYear  = Number(get("startDate.year"));
+      const startMonth = get("startDate.month");
+      const startDay   = Number(get("startDate.day"));
+      const computedStart = Number.isFinite(startYear) && startMonth && Number.isFinite(startDay)
+        ? dateFromParts(startYear, startMonth, startDay)
+        : null;
+      const start = computedStart !== null && computedStart !== undefined
+        ? Math.max(0, computedStart)
+        : getCurrentState().calendar.dayOffset;
       const queued = form.querySelector('[data-crafting-field="queued"]')?.checked ?? false;
       const costs = {
         gold:      Math.max(0, Number(get("costs.gold"))      || 0),
@@ -3975,11 +4041,11 @@ root.addEventListener("click", async (event) => {
         if (existingId) {
           const idx = draft.craftingItems.findIndex(x => x.id === existingId);
           if (idx !== -1) {
-            draft.craftingItems[idx] = { ...draft.craftingItems[idx], name, desc: get("desc"), startDayOffset: start, durationDays: dur, costs, status: queued ? "queued" : "active" };
+            draft.craftingItems[idx] = { ...draft.craftingItems[idx], name, desc: get("desc"), startDayOffset: start, durationDays: dur, costs, crafterLevel, status: queued ? "queued" : "active" };
           }
         } else {
           if (!Array.isArray(draft.craftingItems)) draft.craftingItems = [];
-          draft.craftingItems.push(createCraftingItem({ name, desc: get("desc"), startDayOffset: start, durationDays: dur, costs, queued }));
+          draft.craftingItems.push(createCraftingItem({ name, desc: get("desc"), startDayOffset: start, durationDays: dur, costs, queued, crafterLevel }));
         }
       });
       renderer.setTransientUi({ craftingFormOpen: false, craftingEditItem: null }, getCurrentState());
@@ -4012,6 +4078,30 @@ root.addEventListener("click", async (event) => {
       reportSuccess("Moved to queue.");
       break;
     }
+    case "pause-crafting-item": {
+      const pId = target.dataset.itemId ?? "";
+      commit((draft) => { pauseCraftingItem(draft, pId); });
+      reportSuccess("Crafting paused.");
+      break;
+    }
+    case "resume-crafting-item": {
+      const rId = target.dataset.itemId ?? "";
+      const snap = getCurrentState();
+      const target_ = (snap.craftingItems ?? []).find((it) => it.id === rId);
+      if (target_?.crafterLevel) {
+        const cap = getCrafterCapacity(snap)[target_.crafterLevel] || 0;
+        const used = (snap.craftingItems ?? []).filter(
+          (it) => it.status === "active" && it.crafterLevel === target_.crafterLevel
+        ).length;
+        if (used + 1 > cap) {
+          reportError(`No ${target_.crafterLevel} crafter available (${used}/${cap} in use). Pause another job first.`);
+          break;
+        }
+      }
+      commit((draft) => { resumeCraftingItem(draft, rId); });
+      reportSuccess("Crafting resumed.");
+      break;
+    }
     case "move-crafting-queue": {
       const mqId  = target.dataset.itemId ?? "";
       const mqDir = Number(target.dataset.dir ?? 0);
@@ -4026,6 +4116,30 @@ root.addEventListener("click", async (event) => {
     case "clear-collected-crafting": {
       commit((draft) => { clearCollectedCraftingItems(draft); });
       reportSuccess("Collected items cleared.");
+      break;
+    }
+    case "apply-crafter-bonus": {
+      const level = target.dataset.crafterLevel;
+      if (!level) break;
+      const form = document.getElementById("crafting-form");
+      if (!form) break;
+      const currentlySelected = form.dataset.crafterLevel === level;
+      form.dataset.crafterLevel = currentlySelected ? "" : level;
+      form.querySelectorAll('[data-action="apply-crafter-bonus"]').forEach((b) => {
+        b.classList.toggle("is-selected", !currentlySelected && b.dataset.crafterLevel === level);
+      });
+      break;
+    }
+    case "apply-crafting-batch": {
+      const count = Number(target.dataset.batchCount);
+      if (!Number.isFinite(count) || count <= 0) break;
+      const form = document.getElementById("crafting-form");
+      if (!form) break;
+      form.dataset.batchCount = String(count);
+      form.querySelectorAll('[data-action="apply-crafting-batch"]').forEach((b) => {
+        b.classList.toggle("is-selected", Number(b.dataset.batchCount) === count);
+      });
+      if (form.dataset.templateId) applyCraftingTemplateAndStation(form);
       break;
     }
     // ─── End Crafting ──────────────────────────────────────────────────────────
@@ -4620,6 +4734,29 @@ root.addEventListener("change", (event) => {
 
   if (target.dataset.action === "set-building-sort") {
     renderer.setTransientUi({ buildingSort: target.value }, getCurrentState());
+  }
+
+  if (target.dataset.action === "apply-crafting-template") {
+    const tpl = findCraftingTemplate(target.value);
+    if (!tpl) return;
+    const form = document.getElementById("crafting-form");
+    if (!form) return;
+    form.dataset.templateId = tpl.id;
+    applyCraftingTemplateAndStation(form);
+    target.value = "";
+  }
+
+  if (target.dataset.action === "apply-crafting-station") {
+    const form = document.getElementById("crafting-form");
+    if (!form) return;
+    const hint = form.querySelector("[data-crafting-station-hint]");
+    const stationKey = target.value;
+    if (hint) {
+      hint.textContent = stationKey
+        ? `Active bonus: ${describeCraftingStationBonuses(stationKey)} (when a matching template is picked).`
+        : "Pick a building to discount cost and time for the matching template category.";
+    }
+    if (form.dataset.templateId) applyCraftingTemplateAndStation(form);
   }
 
   if (target.dataset.action === "set-catalog-filter") {

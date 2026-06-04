@@ -14,10 +14,11 @@ import { renderExpeditionJourneyModal } from "./ExpeditionJourneyModal.js";
 import { renderForgePage } from "./ForgePage.js";
 import { renderHelpPage } from "./HelpPage.js";
 import { attachHelpBubbles } from "./HelpBubbles.js";
+import { attachListCollapse } from "./CollapsibleList.js?v=1.8.1";
 import { renderHomePage } from "./HomePage.js";
 import { renderHomeHelpModal } from "./HomeHelpModal.js";
 import { renderManifestCompleteModal } from "./ManifestCompleteModal.js";
-import { renderPageShell } from "./PageShell.js";
+import { renderPageShell } from "./PageShell.js?v=1.8.9";
 import { renderPlayerPage } from "./PlayerPage.js";
 import { renderResourceBreakdownModal } from "./ResourceBreakdownModal.js";
 import { renderTownFocusCouncilModal } from "./TownFocusCouncilModal.js";
@@ -25,10 +26,10 @@ import { renderTurnSummaryModal } from "./TurnSummaryModal.js";
 import { renderUniqueCitizensPage } from "./UniqueCitizensPage.js";
 import { renderVehiclesPage } from "./VehiclesPage.js";
 import { renderBehemothsPage } from "./BehemothsPage.js";
-import { renderNpcsPage } from "./NpcsPage.js";
+import { renderNpcsPage } from "./NpcsPage.js?v=1.8.9";
 import { renderAwakenedPage } from "./AwakenedPage.js";
 import { renderArmyPage } from "./ArmyPage.js";
-import { renderCraftingPage } from "./CraftingPage.js";
+import { renderCraftingPage } from "./CraftingPage.js?v=1.8.9";
 import { getMayorSuggestions } from "../systems/TownFocusSystem.js";
 import { getDefaultTownFocusPreviewId } from "./TownFocusShared.js";
 import { renderTownFocusCeremonyOverlay } from "./TownFocusCeremonyOverlay.js";
@@ -208,6 +209,7 @@ export class UIRenderer {
     ].join("");
     this.root.innerHTML = renderPageShell(viewState, this.pageKey, page, overlays);
     attachHelpBubbles(this.root);
+    attachListCollapse(this.root);
     this.modalFocus.applyPostRender();
   }
 
