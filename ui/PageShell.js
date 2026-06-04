@@ -577,7 +577,192 @@ function renderSidebarRouteGroup(routes, pageKey, cityAlertCount, availableCryst
     .join("");
 }
 
-export function renderPageShell(state, pageKey, { title, subtitle, content, aside = "", hideHero = false }, overlays = "") {
+// ─── Top nav, resource bar, alert strip (new shell chrome) ────────────────────
+
+const TOP_NAV_GROUPS = [
+  { label: "Core",   keys: ["home", "forge", "economy", "city"] },
+  { label: "People", keys: ["citizens", "npcs", "awakened", "uniques"] },
+  { label: "World",  keys: ["expeditions", "vehicles", "behemoths", "army", "chronicle"] },
+  { label: "Craft",  keys: ["crafting", "help"] }
+];
+
+function renderTopNavGroup(group, pageKey, badges) {
+  const items = group.keys
+    .map((key) => PAGE_ROUTES.find((r) => r.key === key))
+    .filter(Boolean);
+  const isActiveGroup = items.some((r) => r.key === pageKey);
+  return `
+    <div class="top-nav__group ${isActiveGroup ? "is-active" : ""}" tabindex="0">
+      <button class="top-nav__group-button" type="button">
+        <span>${escapeHtml(group.label)}</span>
+        <span class="top-nav__chevron" aria-hidden="true">▾</span>
+      </button>
+      <div class="top-nav__dropdown" role="menu">
+        ${items.map((route) => {
+          const isActive = route.key === pageKey;
+          const badge = badges[route.key];
+          return `
+            <a class="top-nav__link ${isActive ? "is-active" : ""}" href="${route.href}" role="menuitem">
+              <span>${escapeHtml(route.label)}</span>
+              ${badge ? `<em class="top-nav__badge">${escapeHtml(String(badge))}</em>` : ""}
+            </a>
+          `;
+        }).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderTopNavSettings(state, manualSaveSlots, uiDensity, conciseMode, diceAmount, diceType, lastDiceRoll, firebaseMeta) {
+  const textSize = state.settings?.textSize ?? "medium";
+  return `
+    <div class="top-nav__settings" data-top-nav-settings>
+      <button class="top-nav__icon-button" type="button" data-action="toggle-top-nav-settings" aria-label="Settings" title="Settings">⚙</button>
+      <div class="top-nav__settings-panel" data-top-nav-settings-panel hidden>
+        <div class="top-nav__settings-section">
+          <a class="top-nav__settings-link" href="./index.html"><strong>🎬 Player Mode</strong><small>Open shared player screen</small></a>
+          <button class="top-nav__settings-link" type="button" data-action="open-catalog"><strong>📚 Building Catalog</strong><small>Browse all buildings</small></button>
+          <button class="top-nav__settings-link" type="button" data-action="open-admin"><strong>🛠 ${state.settings?.liveSessionView ? "GM Console" : "Admin Console"}</strong><small>Type \`432!\` anywhere</small></button>
+          <button class="top-nav__settings-link" type="button" data-action="toggle-session-view"><strong>👁 View Mode</strong><small>${state.settings?.liveSessionView ? "Live Session" : "Deep Review"}</small></button>
+          <button class="top-nav__settings-link" type="button" data-action="open-build-notes"><strong>📝 ${APP_DISPLAY_VERSION}</strong><small>Build notes</small></button>
+        </div>
+        <div class="top-nav__settings-section">
+          ${renderDensityControls(uiDensity, conciseMode, textSize)}
+        </div>
+        <div class="top-nav__settings-section">
+          <div class="sidebar-dice">
+            <div class="sidebar-dice__header">
+              <span>Dice Roller</span>
+              <button class="button button--ghost sidebar-dice__history-toggle" type="button" data-action="toggle-dice-history">History</button>
+            </div>
+            <div class="sidebar-dice__controls">
+              <label>
+                <span>Amount</span>
+                <input type="number" min="1" max="20" value="${diceAmount}" data-action="set-dice-amount" />
+              </label>
+              <label>
+                <span>Die</span>
+                <select data-action="set-dice-type">
+                  ${DICE_TYPES.map((type) => `<option value="${type}" ${type === diceType ? "selected" : ""}>${type}</option>`).join("")}
+                </select>
+              </label>
+            </div>
+            <button class="button sidebar-dice__roll" type="button" data-action="roll-dice">Roll</button>
+            ${
+              lastDiceRoll
+                ? `<div class="sidebar-dice__last"><strong>${escapeHtml(lastDiceRoll.label ?? "Last Roll")}</strong><span>${escapeHtml((lastDiceRoll.results ?? []).join(", "))}</span><em>Total ${formatNumber(lastDiceRoll.total ?? 0)}</em></div>`
+                : `<p class="sidebar-dice__empty">Roll any combination to log it here.</p>`
+            }
+            ${
+              state.transientUi?.diceHistoryOpen
+                ? `<div class="sidebar-dice__history">${renderDiceHistory(state.settings?.diceHistory ?? [])}</div>`
+                : ""
+            }
+          </div>
+        </div>
+        <div class="top-nav__settings-section">
+          <div class="top-nav__settings-row">
+            <button class="button button--ghost" type="button" data-action="save-firebase-realm">☁ Cloud Save</button>
+            <button class="button button--ghost" type="button" data-action="load-firebase-realm">☁ Cloud Load</button>
+          </div>
+          ${firebaseMeta?.updatedAtMs ? `<p class="top-nav__settings-meta">Last cloud save: ${new Date(firebaseMeta.updatedAtMs).toLocaleString()}</p>` : ""}
+          <div class="sidebar-save-slots" role="group" aria-label="Local save slots">
+            <span class="sidebar-save-slots__label">Local Slots</span>
+            ${manualSaveSlots.map((slot) => `
+              <div class="sidebar-save-slot">
+                <div class="sidebar-save-slot__meta">
+                  <strong>Slot ${slot.slotId}</strong>
+                  <small>${slot.manualSavedAt ? new Date(slot.manualSavedAt).toLocaleString() : "Empty"}</small>
+                </div>
+                <div class="sidebar-save-slot__actions">
+                  <button class="button button--ghost button--small" type="button" data-action="save-manual-state" data-slot="${slot.slotId}">Save</button>
+                  <button class="button button--ghost button--small" type="button" data-action="load-manual-state" data-slot="${slot.slotId}" ${slot.manualSavedAt ? "" : "disabled"}>Load</button>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderTopNav(state, pageKey, badges, manualSaveSlots, uiDensity, conciseMode, diceAmount, diceType, lastDiceRoll, firebaseMeta) {
+  return `
+    <nav class="top-nav" aria-label="Primary navigation">
+      <a class="top-nav__brand" href="./gm.html">
+        <span class="top-nav__brand-name">Crystal Forge</span>
+        <strong class="top-nav__brand-city">City of Drift</strong>
+      </a>
+      <div class="top-nav__groups">
+        ${TOP_NAV_GROUPS.map((g) => renderTopNavGroup(g, pageKey, badges)).join("")}
+      </div>
+      <div class="top-nav__spacer"></div>
+      <button class="top-nav__icon-button" type="button" data-action="save-firebase-realm" title="Cloud Save" aria-label="Cloud Save">☁⤴</button>
+      <button class="top-nav__icon-button" type="button" data-action="load-firebase-realm" title="Cloud Load" aria-label="Cloud Load">☁⤵</button>
+      <button class="top-nav__icon-button" type="button" data-action="roll-dice" title="Roll ${diceAmount}${diceType}" aria-label="Roll dice">🎲</button>
+      ${renderTopNavSettings(state, manualSaveSlots, uiDensity, conciseMode, diceAmount, diceType, lastDiceRoll, firebaseMeta)}
+    </nav>
+  `;
+}
+
+function renderResourceBar(state) {
+  const deltas = Object.fromEntries(
+    getCityTrendSummary(state).map((entry) => [entry.key, entry.delta])
+  );
+  const slots = [
+    { key: "gold",      label: "Gold",      icon: "💰", color: "var(--accent-gold)"   },
+    { key: "food",      label: "Food",      icon: "🌾", color: "var(--success)"       },
+    { key: "materials", label: "Materials", icon: "🪵", color: "var(--accent)"        },
+    { key: "mana",      label: "Mana",      icon: "✨", color: "var(--accent-violet)" }
+  ];
+  return `
+    <div class="resource-bar" aria-label="City resources">
+      ${slots.map((slot) => {
+        const value = state.resources?.[slot.key] ?? 0;
+        const delta = Number(deltas[slot.key] ?? 0);
+        const deltaClass = delta > 0.005 ? "is-positive" : delta < -0.005 ? "is-negative" : "is-neutral";
+        const deltaText = (delta >= 0 ? "+" : "−") + formatNumber(Math.abs(delta), 1) + "/d";
+        return `
+          <button class="resource-bar__slot" type="button" data-action="open-resource-breakdown" data-resource-key="${slot.key}" style="--slot-color: ${slot.color};">
+            <span class="resource-bar__icon" aria-hidden="true">${slot.icon}</span>
+            <span class="resource-bar__value">${formatNumber(value, 0)}</span>
+            <span class="resource-bar__delta ${deltaClass}">${deltaText}</span>
+            <span class="resource-bar__label">${escapeHtml(slot.label)}</span>
+          </button>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function renderAlertStrip(state) {
+  const alerts = getCriticalAlerts(state);
+  if (!alerts.length) return "";
+  if (alerts.length === 1) {
+    const a = alerts[0];
+    return `
+      <div class="alert-strip" role="alert">
+        <span class="alert-strip__icon" aria-hidden="true">⚠</span>
+        <strong class="alert-strip__name">${escapeHtml(a.label)}</strong>
+        <span class="alert-strip__detail">${escapeHtml(a.details)}</span>
+        ${a.href ? `<a class="alert-strip__action" href="${a.href}">${escapeHtml(a.actionLabel || "Review event")} →</a>` : ""}
+        <button class="alert-strip__dismiss" type="button" data-action="dismiss-alert-strip" aria-label="Dismiss">✕</button>
+      </div>
+    `;
+  }
+  return `
+    <div class="alert-strip alert-strip--multi" role="alert">
+      <span class="alert-strip__icon" aria-hidden="true">⚠</span>
+      <strong class="alert-strip__name">${alerts.length} alerts</strong>
+      <span class="alert-strip__detail">${escapeHtml(alerts[0].label)}${alerts.length > 1 ? ` and ${alerts.length - 1} more` : ""}</span>
+      ${alerts[0].href ? `<a class="alert-strip__action" href="${alerts[0].href}">Review →</a>` : ""}
+      <button class="alert-strip__dismiss" type="button" data-action="dismiss-alert-strip" aria-label="Dismiss">✕</button>
+    </div>
+  `;
+}
+
+export function renderPageShell(state, pageKey, { title, subtitle, content, aside = "", hideHero = false, heroActions = "" }, overlays = "") {
   if (pageKey === "player") {
     return `
       <div class="game-shell game-shell--player game-shell--density-${state.settings?.uiDensity ?? "compact"} game-shell--theme-dark ${state.transientUi?.projectorMode ? "game-shell--projector" : ""} ${state.transientUi?.projectorChromeHidden ? "game-shell--projector-hidden" : ""}">
@@ -656,6 +841,13 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
   const lastDiceRoll = state.settings.lastDiceRoll ?? null;
   const uiDensity = UI_DENSITY_OPTIONS.some((option) => option.id === state.settings?.uiDensity) ? state.settings.uiDensity : "compact";
   const conciseMode = state.settings?.conciseMode === true;
+  const navBadges = {
+    forge: availableCrystalCount > 0 ? availableCrystalCount : null,
+    city: cityAlertCount > 0 ? cityAlertCount : null,
+    expeditions: expeditionCount > 0 ? expeditionCount : null,
+    uniques: uniqueCitizenCount > 0 ? uniqueCitizenCount : null,
+    crafting: craftingReadyCount > 0 ? craftingReadyCount : null
+  };
   return `
     <div class="game-shell game-shell--density-${uiDensity} game-shell--page-${pageKey} ${currentFocus ? `game-shell--focus-${currentFocus.id}` : ""} ${state.settings.liveSessionView ? "game-shell--live-session" : ""} ${conciseMode ? "game-shell--concise" : ""} game-shell--theme-${state.settings.theme ?? "dark"}">
       ${
@@ -670,7 +862,10 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
             `
           : ""
       }
-      <aside class="sidebar-nav">
+      ${renderTopNav(state, pageKey, navBadges, manualSaveSlots, uiDensity, conciseMode, diceAmount, diceType, lastDiceRoll, firebaseMeta)}
+      ${renderResourceBar(state)}
+      ${renderAlertStrip(state)}
+      <aside class="sidebar-nav sidebar-nav--legacy" hidden>
         <div class="sidebar-nav__brand">
           <p>Crystal Forge</p>
           <strong>City of Drift</strong>
@@ -795,8 +990,6 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
       </aside>
 
       <main class="page-stage page-stage--${pageKey}">
-        <button class="page-build-tag" type="button" data-action="open-build-notes" aria-label="Open build notes">${APP_DISPLAY_VERSION}</button>
-        ${pageKey === "city" || pageKey === "economy" ? renderCrisisBanner(state, pageKey) : ""}
         ${hideHero ? "" : `
         <header class="page-hero">
           <div>
@@ -817,6 +1010,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
                   `
                 : ""
             }
+            ${heroActions ? `<div class="page-hero__actions">${heroActions}</div>` : ""}
           </div>
         </header>
         `}

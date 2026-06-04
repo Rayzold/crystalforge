@@ -748,15 +748,28 @@ function renderAdministrationView(state) {
 }
 
 function renderCityModes(state) {
+  // Flattened tabs: combine the outer Buildings/Administration tab with the inner
+  // The Stream / Town Map tabs into a single row.
   const cityMode = state.transientUi?.cityMode ?? "buildings";
+  const buildingView = state.transientUi?.cityBuildingView ?? "stream";
+  // "buildings" subviews are encoded as the buildingView ("stream" or "map");
+  // "administration" is its own top-level entry.
+  let activeKey;
+  if (cityMode === "administration") activeKey = "administration";
+  else if (buildingView === "map") activeKey = "map";
+  else activeKey = "stream";
+  const tabs = [
+    { key: "stream",         label: "Buildings",     onClick: `data-action="set-city-mode" data-view="buildings" data-building-view="stream"` },
+    { key: "map",            label: "Town Map",      onClick: `data-action="set-city-mode" data-view="buildings" data-building-view="map"` },
+    { key: "administration", label: "Administration", onClick: `data-action="set-city-mode" data-view="administration"` }
+  ];
   return `
-    <section class="city-modes">
-      <div class="city-modes__tabs">
-        <button class="button button--ghost ${cityMode === "buildings" ? "is-active" : ""}" data-action="set-city-mode" data-view="buildings">Buildings</button>
-        <button class="button button--ghost ${cityMode === "administration" ? "is-active" : ""}" data-action="set-city-mode" data-view="administration">Administration</button>
-      </div>
-      ${cityMode === "buildings" ? renderBuildingsView(state) : renderAdministrationView(state)}
+    <section class="city-tabs">
+      ${tabs.map((t) => `
+        <button class="city-tab ${activeKey === t.key ? "is-active" : ""}" ${t.onClick}>${escapeHtml(t.label)}</button>
+      `).join("")}
     </section>
+    ${cityMode === "buildings" ? renderBuildingsView(state) : renderAdministrationView(state)}
   `;
 }
 
@@ -780,10 +793,30 @@ export function renderCityPage(state) {
   return {
     title: "City",
     subtitle: "Incubation, buildings, and administration.",
+    heroActions: `
+      <div class="page-hero__time-controls">
+        <button class="button" data-action="advance-time" data-step="day">▶ Advance Day</button>
+        <details class="page-hero__time-more">
+          <summary class="button button--ghost button--small">More ▾</summary>
+          <div class="page-hero__time-more-body">
+            <button class="button button--ghost button--small" data-action="advance-time" data-step="3days">+3d</button>
+            <button class="button button--ghost button--small" data-action="advance-time" data-step="week">+Week</button>
+            <button class="button button--ghost button--small" data-action="advance-time" data-step="month">+Month</button>
+            <button class="button button--ghost button--small" data-action="advance-time" data-step="year">+Year</button>
+            <label class="speed-selector">
+              Raising Speed
+              <select data-action="set-speed-multiplier">
+                ${SPEED_MULTIPLIERS.map(
+                  (value) => `<option value="${value}" ${state.constructionSpeedMultiplier === value ? "selected" : ""}>${value}x</option>`
+                ).join("")}
+              </select>
+            </label>
+          </div>
+        </details>
+      </div>
+    `,
     content: `
-      <section class="city-command-screen">
-        ${renderCitySectionNav("city")}
-        ${renderCitySessionControls(state)}
+      <section class="city-command-screen city-command-screen--v2">
         ${renderCityModes(state)}
       </section>
     `

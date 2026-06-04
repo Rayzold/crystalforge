@@ -2,7 +2,7 @@
 // This file wires together state, actions, routing, save/load, manifestation,
 // admin commands, and top-level UI events. Most game-wide behavior eventually
 // passes through here, while lower-level systems keep the domain rules isolated.
-import { AdminConsole } from "./admin/AdminConsole.js?v=1.9.1";
+import { AdminConsole } from "./admin/AdminConsole.js?v=1.9.3";
 import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js";
 import {
   APP_VERSION,
@@ -111,7 +111,7 @@ import {
   updateNpcField,
   updateNpcStat,
   getCrafterCapacity
-} from "./systems/NpcSystem.js?v=1.9.1";
+} from "./systems/NpcSystem.js?v=1.9.3";
 import {
   createCraftingItem,
   collectCraftingItem,
@@ -123,8 +123,8 @@ import {
   clearCollectedCraftingItems,
   pauseCraftingItem,
   resumeCraftingItem,
-} from "./systems/CraftingSystem.js?v=1.9.1";
-import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=1.9.1";
+} from "./systems/CraftingSystem.js?v=1.9.3";
+import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=1.9.3";
 import {
   addAwakened,
   clearAwakenedImage,
@@ -163,14 +163,14 @@ import {
   saveGameState,
   saveManualState,
   validateAndMigrateSave
-} from "./systems/StorageSystem.js?v=1.9.1";
+} from "./systems/StorageSystem.js?v=1.9.3";
 import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js";
 import { applyCompletedGoalRewards } from "./systems/GoalSystem.js";
 import { forceTownFocus, getMayorAdvice, reopenTownFocusSelection, selectTownFocus, updateTownFocusAvailability } from "./systems/TownFocusSystem.js";
 import { getEmergencyStatus, getCityTrendSummary } from "./systems/ResourceSystem.js";
 import { Toasts } from "./ui/Toasts.js";
 import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js";
-import { UIRenderer } from "./ui/UIRenderer.js?v=1.9.1";
+import { UIRenderer } from "./ui/UIRenderer.js?v=1.9.3";
 
 const root = document.querySelector("#app");
 const pageKey = document.body.dataset.page ?? "home";
@@ -3601,7 +3601,11 @@ root.addEventListener("click", async (event) => {
       break;
     case "set-city-mode":
       void audioEngine.playUiAccent("soft");
-      renderer.setTransientUi({ cityMode: target.dataset.view }, getCurrentState());
+      renderer.setTransientUi({
+        cityMode: target.dataset.view,
+        // Optional: tab buttons can also flip the building view in one click.
+        ...(target.dataset.buildingView ? { cityBuildingView: target.dataset.buildingView } : {})
+      }, getCurrentState());
       break;
     case "set-city-building-view":
       void audioEngine.playUiAccent("soft");
@@ -3691,6 +3695,17 @@ root.addEventListener("click", async (event) => {
     case "toggle-dice-history":
       renderer.setTransientUi({ diceHistoryOpen: !renderer.transientUi.diceHistoryOpen }, getCurrentState());
       break;
+    case "toggle-top-nav-settings": {
+      // Toggle the panel inline (avoid a full re-render so input focus is preserved).
+      const panel = document.querySelector("[data-top-nav-settings-panel]");
+      if (panel) panel.hidden = !panel.hidden;
+      break;
+    }
+    case "dismiss-alert-strip": {
+      const strip = target.closest(".alert-strip");
+      if (strip) strip.remove();
+      break;
+    }
     case "toggle-town-focus-panel":
       renderer.setTransientUi({ homeTownFocusExpanded: !renderer.transientUi.homeTownFocusExpanded }, getCurrentState());
       break;
