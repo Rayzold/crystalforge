@@ -715,6 +715,7 @@ function renderResourceBar(state) {
     { key: "gold",      label: "Gold",      icon: "💰", color: "var(--accent-gold)"   },
     { key: "food",      label: "Food",      icon: "🌾", color: "var(--success)"       },
     { key: "materials", label: "Materials", icon: "🪵", color: "var(--accent)"        },
+    { key: "salvage",   label: "Salvage",   icon: "⚙",  color: "var(--muted)"         },
     { key: "mana",      label: "Mana",      icon: "✨", color: "var(--accent-violet)" }
   ];
   const defenseValue = Number(state.cityStats?.defense ?? 0);
@@ -734,9 +735,9 @@ function renderResourceBar(state) {
           </button>
         `;
       }).join("")}
-      <a class="resource-bar__slot resource-bar__slot--defense" href="./city.html#defense" style="--slot-color: #f97316;" title="Defense readiness">
+      <a class="resource-bar__slot resource-bar__slot--defense" href="./city.html#defense" style="--slot-color: #f97316;" title="Defense stat (raw score)">
         <span class="resource-bar__icon" aria-hidden="true">🛡</span>
-        <span class="resource-bar__value">${formatNumber(defenseValue, 0)}%</span>
+        <span class="resource-bar__value">${formatNumber(defenseValue, 0)}</span>
         <span class="resource-bar__delta is-neutral">&nbsp;</span>
         <span class="resource-bar__label">Defense</span>
       </a>

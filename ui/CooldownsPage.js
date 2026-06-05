@@ -9,7 +9,7 @@ import {
   getCooldownDaysRemaining,
   getCooldownTriggerChance,
   isCooldownReady
-} from "../systems/CooldownSystem.js?v=2.0.5";
+} from "../systems/CooldownSystem.js?v=2.0.6";
 
 function renderStartDateSelector(startDayOffset) {
   const d = getStructuredDate(startDayOffset);
