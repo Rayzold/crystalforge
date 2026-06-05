@@ -16449,6 +16449,189 @@ body[data-theme="silver"] .collapse-toggle {
 }
 
 /* ============================================================================
+ * Cooldowns page
+ * ========================================================================== */
+
+.cooldown-add-form .cooldown-form__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cooldown-form__field {
+  display: grid;
+  gap: 4px;
+  font-size: 0.82rem;
+}
+
+.cooldown-form__field--full {
+  grid-column: 1 / -1;
+}
+
+.cooldown-form__field > span {
+  color: var(--muted);
+  font-family: var(--label-font);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cooldown-form__field input,
+.cooldown-form__field select {
+  height: 30px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.86rem;
+}
+
+.cooldown-form__type-fields {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(141, 214, 255, 0.04);
+  border: 1px solid rgba(141, 214, 255, 0.12);
+}
+
+.cooldown-form__type-fields[hidden] { display: none !important; }
+
+.cooldown-form__hint {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-style: italic;
+}
+
+.cooldown-form__footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.cooldown-section {
+  margin-top: 16px;
+}
+
+.cooldown-section__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(182, 212, 255, 0.10);
+}
+
+.cooldown-section__head h3 {
+  margin: 0;
+  font-family: var(--label-font);
+  font-size: 0.84rem;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+
+.cooldown-section__head span {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.cooldown-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+}
+
+.cooldown-card {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(141, 214, 255, 0.04);
+  border: 1px solid rgba(141, 214, 255, 0.12);
+}
+
+.cooldown-card.is-ready {
+  border-color: rgba(112, 241, 194, 0.36);
+  background: rgba(112, 241, 194, 0.08);
+}
+
+.cooldown-card.is-soon {
+  border-color: rgba(240, 196, 130, 0.36);
+  background: rgba(240, 196, 130, 0.06);
+}
+
+.cooldown-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.cooldown-card__head strong {
+  display: block;
+  font-size: 0.92rem;
+  color: var(--text);
+}
+
+.cooldown-card__head small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+  margin-top: 2px;
+}
+
+.cooldown-card__body {
+  display: grid;
+  gap: 2px;
+}
+
+.cooldown-card__big {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.cooldown-card__big--ready {
+  color: var(--success);
+}
+
+.cooldown-card__body small {
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.cooldown-card__notes {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-style: italic;
+}
+
+.cooldown-card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cooldown-card__footer .button {
+  padding: 4px 10px;
+  font-size: 0.76rem;
+}
+
+.cooldown-empty {
+  margin: 0;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px dashed rgba(182, 212, 255, 0.20);
+  color: var(--muted);
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+/* ============================================================================
  * Top navigation, resource bar, and alert strip (shell chrome)
  * ========================================================================== */
 

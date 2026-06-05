@@ -2,7 +2,7 @@
 // This file wires together state, actions, routing, save/load, manifestation,
 // admin commands, and top-level UI events. Most game-wide behavior eventually
 // passes through here, while lower-level systems keep the domain rules isolated.
-import { AdminConsole } from "./admin/AdminConsole.js?v=2.0.0";
+import { AdminConsole } from "./admin/AdminConsole.js?v=2.0.1";
 import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js";
 import {
   APP_VERSION,
@@ -111,7 +111,7 @@ import {
   updateNpcField,
   updateNpcStat,
   getCrafterCapacity
-} from "./systems/NpcSystem.js?v=2.0.0";
+} from "./systems/NpcSystem.js?v=2.0.1";
 import {
   createCraftingItem,
   collectCraftingItem,
@@ -123,8 +123,9 @@ import {
   clearCollectedCraftingItems,
   pauseCraftingItem,
   resumeCraftingItem,
-} from "./systems/CraftingSystem.js?v=2.0.0";
-import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=2.0.0";
+} from "./systems/CraftingSystem.js?v=2.0.1";
+import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=2.0.1";
+import { addCooldown, removeCooldown, restartCooldown, markCooldownTriggered } from "./systems/CooldownSystem.js?v=2.0.1";
 import {
   addAwakened,
   clearAwakenedImage,
@@ -163,14 +164,14 @@ import {
   saveGameState,
   saveManualState,
   validateAndMigrateSave
-} from "./systems/StorageSystem.js?v=2.0.0";
+} from "./systems/StorageSystem.js?v=2.0.1";
 import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js";
 import { applyCompletedGoalRewards } from "./systems/GoalSystem.js";
 import { forceTownFocus, getMayorAdvice, reopenTownFocusSelection, selectTownFocus, updateTownFocusAvailability } from "./systems/TownFocusSystem.js";
 import { getEmergencyStatus, getCityTrendSummary } from "./systems/ResourceSystem.js";
 import { Toasts } from "./ui/Toasts.js";
 import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js";
-import { UIRenderer } from "./ui/UIRenderer.js?v=2.0.0";
+import { UIRenderer } from "./ui/UIRenderer.js?v=2.0.1";
 
 const root = document.querySelector("#app");
 const pageKey = document.body.dataset.page ?? "home";
@@ -4179,6 +4180,67 @@ root.addEventListener("click", async (event) => {
       break;
     }
     // ─── End Crafting ──────────────────────────────────────────────────────────
+    // ─── Cooldowns ─────────────────────────────────────────────────────────────
+    case "add-cooldown": {
+      const form = target.closest("[data-cooldown-form]");
+      if (!form) break;
+      const get = (field) => form.querySelector(`[data-cooldown-field="${field}"]`)?.value?.trim() ?? "";
+      const typeSel = form.querySelector("[data-cooldown-type-select]");
+      const sourceSel = form.querySelector("[data-cooldown-source-picker]");
+      const type = typeSel?.value || "fixed";
+      const sourceValue = (sourceSel?.value || "custom::").split("::");
+      const sourceType = sourceValue[0] || "custom";
+      const sourceId = sourceValue[1] || null;
+      const name = get("name") || sourceSel?.selectedOptions?.[0]?.dataset?.name || "Unnamed cooldown";
+      if (!name.trim()) { reportError("Pick a source or type a name."); break; }
+      const input = {
+        name,
+        type,
+        sourceType,
+        sourceId,
+        notes: get("notes"),
+        startedDayOffset: Number(get("startedDayOffset") || getCurrentState().calendar.dayOffset)
+      };
+      if (type === "fixed") {
+        input.fixedDays = Number(get("fixedDays") || 1);
+      } else if (type === "dice") {
+        input.diceCount = Number(get("diceCount") || 1);
+        input.diceSides = Number(get("diceSides") || 4);
+      } else if (type === "percent") {
+        input.percentPerDay = Number(get("percentPerDay") || 1);
+      }
+      commit((draft) => { addCooldown(draft, input); });
+      reportSuccess(`Cooldown added: "${name}"`);
+      break;
+    }
+    case "remove-cooldown": {
+      const id = target.dataset.cooldownId ?? "";
+      const item = getCurrentState().cooldowns?.find((c) => c.id === id);
+      commit((draft) => { removeCooldown(draft, id); });
+      reportSuccess(`Removed cooldown: ${item?.name ?? id}`);
+      break;
+    }
+    case "restart-cooldown": {
+      const id = target.dataset.cooldownId ?? "";
+      const day = getCurrentState().calendar?.dayOffset ?? 0;
+      const item = getCurrentState().cooldowns?.find((c) => c.id === id);
+      commit((draft) => { restartCooldown(draft, id, day); });
+      if (item?.type === "dice") {
+        const refreshed = getCurrentState().cooldowns?.find((c) => c.id === id);
+        reportSuccess(`Rerolled ${item.diceCount}d${item.diceSides} → ${refreshed?.rolledDays ?? "?"} d`);
+      } else {
+        reportSuccess("Cooldown restarted.");
+      }
+      break;
+    }
+    case "mark-cooldown-triggered": {
+      const id = target.dataset.cooldownId ?? "";
+      const day = getCurrentState().calendar?.dayOffset ?? 0;
+      commit((draft) => { markCooldownTriggered(draft, id, day); });
+      reportSuccess("Marked as triggered today.");
+      break;
+    }
+    // ─── End Cooldowns ─────────────────────────────────────────────────────────
     case "delete-npc": {
       const npcId = target.dataset.npcId ?? "";
       if (!npcId) {
@@ -4740,6 +4802,25 @@ document.addEventListener("pointercancel", () => {
   root.querySelector(".hex-map")?.classList.remove("is-dragging");
   mapDragState = null;
   applyMapViewPreview(getMapViewState());
+});
+
+// ─── Cooldown form: swap visible type-fields + auto-fill name from source ────
+root.addEventListener("change", (event) => {
+  const typeSel = event.target.closest("[data-cooldown-type-select]");
+  if (typeSel) {
+    const form = typeSel.closest("[data-cooldown-form]");
+    form?.querySelectorAll("[data-cooldown-type-fields]").forEach((node) => {
+      node.hidden = node.dataset.cooldownTypeFields !== typeSel.value;
+    });
+    return;
+  }
+  const sourceSel = event.target.closest("[data-cooldown-source-picker]");
+  if (sourceSel) {
+    const form = sourceSel.closest("[data-cooldown-form]");
+    const nameInput = form?.querySelector("[data-cooldown-field='name']");
+    const autoName = sourceSel.selectedOptions?.[0]?.dataset?.name ?? "";
+    if (nameInput && autoName && !nameInput.value.trim()) nameInput.value = autoName;
+  }
 });
 
 root.addEventListener("change", (event) => {

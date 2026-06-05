@@ -58,6 +58,7 @@ export const PAGE_ROUTES = [
   { key: "awakened", label: "Awakened", href: "./awakened.html" },
   { key: "army", label: "Army", href: "./army.html" },
   { key: "crafting", label: "Crafting", href: "./crafting.html" },
+  { key: "cooldowns", label: "Cooldowns", href: "./cooldowns.html" },
   { key: "chronicle", label: "Chronicle", href: "./chronicle.html" },
   { key: "help", label: "Help", href: "./help.html" }
 ];

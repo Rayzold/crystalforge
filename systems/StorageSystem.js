@@ -41,9 +41,10 @@ import {
 } from "./ExpeditionSystem.js";
 import { createDefaultVehicleFleet } from "../content/VehicleConfig.js";
 import { normalizeBehemoths } from "./BehemothSystem.js";
-import { normalizeNpcs } from "./NpcSystem.js?v=2.0.0";
+import { normalizeNpcs } from "./NpcSystem.js?v=2.0.1";
 import { normalizeAwakenedRoster } from "./AwakenedSystem.js";
 import { normalizeCraftingItems } from "./CraftingSystem.js";
+import { normalizeCooldowns } from "./CooldownSystem.js?v=2.0.1";
 
 const SESSION_STATE_KEY = "crystal-forge-session-state-v1";
 const BUILD_NOTES_SEEN_KEY = "crystal-forge-build-notes-seen-v1";
@@ -138,6 +139,7 @@ export function createInitialState(preset = DEFAULT_START_PRESET) {
     npcs: [],
     awakened: [],
     craftingItems: [],
+    cooldowns: [],
     buildings: [],
     rollTables: createDefaultRollTables(),
     buildingCatalog: structuredClone(BASE_BUILDING_CATALOG),
@@ -593,6 +595,7 @@ export function validateAndMigrateSave(rawSave) {
     npcs: normalizeNpcs(rawSave.npcs ?? base.npcs),
     awakened: normalizeAwakenedRoster(rawSave.awakened ?? base.awakened),
     craftingItems: normalizeCraftingItems(rawSave.craftingItems ?? []),
+    cooldowns: normalizeCooldowns(rawSave.cooldowns ?? []),
     rollTables: normalizeRollTables(rawSave.rollTables),
     buildingCatalog: normalizedCatalog,
     districts: normalizeDistrictState(rawSave.districts),
