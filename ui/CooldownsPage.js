@@ -9,7 +9,7 @@ import {
   getCooldownDaysRemaining,
   getCooldownTriggerChance,
   isCooldownReady
-} from "../systems/CooldownSystem.js?v=2.0.3";
+} from "../systems/CooldownSystem.js?v=2.0.4";
 
 function renderStartDateSelector(startDayOffset) {
   const d = getStructuredDate(startDayOffset);
@@ -224,39 +224,14 @@ function renderCooldownCard(cooldown, dayOffset) {
   `;
 }
 
-// Module-level tracker so transitions from "not ready" → "ready" fire a
-// single toast per cooldown, not one per re-render.
-const cooldownReadySeen = new Set();
-
 export function renderCooldownsPage(state) {
   const dayOffset = state.calendar?.dayOffset ?? 0;
   const cooldowns = Array.isArray(state.cooldowns) ? state.cooldowns : [];
 
   const ready = [];
   const active = [];
-  const currentReadyIds = new Set();
-  const newlyReady = [];
   for (const c of cooldowns) {
-    const isReady = isCooldownReady(c, dayOffset);
-    (isReady ? ready : active).push(c);
-    if (isReady) {
-      currentReadyIds.add(c.id);
-      if (!cooldownReadySeen.has(c.id)) newlyReady.push(c);
-    }
-  }
-  // Drop ids that are no longer ready (e.g. user restarted) so a future
-  // re-trigger fires the toast again.
-  for (const id of cooldownReadySeen) {
-    if (!currentReadyIds.has(id)) cooldownReadySeen.delete(id);
-  }
-  // Fire one toast per cooldown that transitioned to ready since last render.
-  if (newlyReady.length && typeof window !== "undefined") {
-    queueMicrotask(() => {
-      for (const c of newlyReady) {
-        cooldownReadySeen.add(c.id);
-        window.dispatchEvent(new CustomEvent("crystal-forge-cooldown-ready", { detail: { cooldown: c } }));
-      }
-    });
+    (isCooldownReady(c, dayOffset) ? ready : active).push(c);
   }
   // Active sorted by ready-day (or by start day for percent).
   active.sort((a, b) => {

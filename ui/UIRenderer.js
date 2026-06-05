@@ -8,7 +8,7 @@ import { renderChroniclePage } from "./ChroniclePage.js";
 import { renderBuildingDetailModal } from "./BuildingDetailModal.js";
 import { renderBuildingCatalogModal } from "./BuildingCatalogModal.js";
 import { renderCitizensPage } from "./CitizensPage.js";
-import { renderCityPage, renderEconomyPage } from "./CityPage.js?v=2.0.3";
+import { renderCityPage, renderEconomyPage } from "./CityPage.js?v=2.0.4";
 import { renderExpeditionsPage } from "./ExpeditionsPage.js";
 import { renderExpeditionJourneyModal } from "./ExpeditionJourneyModal.js";
 import { renderForgePage } from "./ForgePage.js";
@@ -18,7 +18,7 @@ import { attachListCollapse } from "./CollapsibleList.js?v=1.8.1";
 import { renderHomePage } from "./HomePage.js";
 import { renderHomeHelpModal } from "./HomeHelpModal.js";
 import { renderManifestCompleteModal } from "./ManifestCompleteModal.js";
-import { renderPageShell } from "./PageShell.js?v=2.0.3";
+import { renderPageShell } from "./PageShell.js?v=2.0.4";
 import { renderPlayerPage } from "./PlayerPage.js";
 import { renderResourceBreakdownModal } from "./ResourceBreakdownModal.js";
 import { renderTownFocusCouncilModal } from "./TownFocusCouncilModal.js";
@@ -26,11 +26,12 @@ import { renderTurnSummaryModal } from "./TurnSummaryModal.js";
 import { renderUniqueCitizensPage } from "./UniqueCitizensPage.js";
 import { renderVehiclesPage } from "./VehiclesPage.js";
 import { renderBehemothsPage } from "./BehemothsPage.js";
-import { renderNpcsPage } from "./NpcsPage.js?v=2.0.3";
+import { renderNpcsPage } from "./NpcsPage.js?v=2.0.4";
 import { renderAwakenedPage } from "./AwakenedPage.js";
 import { renderArmyPage } from "./ArmyPage.js";
-import { renderCraftingPage } from "./CraftingPage.js?v=2.0.3";
-import { renderCooldownsPage } from "./CooldownsPage.js?v=2.0.3";
+import { renderCraftingPage } from "./CraftingPage.js?v=2.0.4";
+import { renderCooldownsPage } from "./CooldownsPage.js?v=2.0.4";
+import { isCooldownReady } from "../systems/CooldownSystem.js?v=2.0.4";
 import { getMayorSuggestions } from "../systems/TownFocusSystem.js";
 import { getDefaultTownFocusPreviewId } from "./TownFocusShared.js";
 import { renderTownFocusCeremonyOverlay } from "./TownFocusCeremonyOverlay.js";
@@ -149,6 +150,40 @@ export class UIRenderer {
     this.transientUi.buildNotesPromptedVersion = APP_VERSION;
   }
 
+  // Detects cooldowns that just transitioned from "cooling" → "ready" since
+  // the last render and dispatches a window event per cooldown. The toast
+  // listener in app.js turns those events into a "⏱ Foo is ready!" splash.
+  // Runs on every page, not just the Cooldowns page, so the GM is alerted
+  // even while looking at City / Expeditions / etc.
+  checkCooldownReadinessTransitions(state) {
+    if (!this._cooldownReadySeen) this._cooldownReadySeen = new Set();
+    const dayOffset = state.calendar?.dayOffset ?? 0;
+    const cooldowns = Array.isArray(state.cooldowns) ? state.cooldowns : [];
+    const currentReadyIds = new Set();
+    const newlyReady = [];
+    for (const c of cooldowns) {
+      if (isCooldownReady(c, dayOffset)) {
+        currentReadyIds.add(c.id);
+        if (!this._cooldownReadySeen.has(c.id)) newlyReady.push(c);
+      }
+    }
+    // Forget ids that are no longer ready so a re-cool → re-ready cycle
+    // fires the toast again the next time it triggers.
+    for (const id of this._cooldownReadySeen) {
+      if (!currentReadyIds.has(id)) this._cooldownReadySeen.delete(id);
+    }
+    if (newlyReady.length && typeof window !== "undefined") {
+      for (const c of newlyReady) this._cooldownReadySeen.add(c.id);
+      // Defer the dispatches so the toast listener fires after this render
+      // settles (and after any in-flight click handler returns).
+      queueMicrotask(() => {
+        for (const c of newlyReady) {
+          window.dispatchEvent(new CustomEvent("crystal-forge-cooldown-ready", { detail: { cooldown: c } }));
+        }
+      });
+    }
+  }
+
   resolvePage(state) {
     switch (this.pageKey) {
       case "forge":
@@ -192,6 +227,7 @@ export class UIRenderer {
   render(state) {
     this.syncCouncilModal(state);
     this.syncBuildNotesModal();
+    this.checkCooldownReadinessTransitions(state);
     this.modalFocus.capturePreRender();
     const viewState = {
       ...state,
