@@ -56,8 +56,22 @@ function blankCharacter(seed = "New Wanderer") {
     level: 1,
     attunements: 0,
     equipment: Object.fromEntries(EQUIPMENT_SLOTS.map((s) => [s.key, emptySlot()])),
+    notes: "",
+    wealth: { gp: 0, items: [] }
+  };
+}
+
+function blankWealthItem() {
+  return {
+    id: `wi-${Math.random().toString(36).slice(2, 8)}`,
+    name: "",
+    qty: 1,
     notes: ""
   };
+}
+
+export function createBlankWealthItem() {
+  return blankWealthItem();
 }
 
 function getRoster(state) {
@@ -285,6 +299,91 @@ function renderNotesPanel(character) {
   `;
 }
 
+function renderWealthPanel(character) {
+  const wealth = character.wealth ?? { gp: 0, items: [] };
+  const items = Array.isArray(wealth.items) ? wealth.items : [];
+  return `
+    <section class="eq-wealth panel">
+      <header class="eq-wealth__head">
+        <div>
+          <h3>Wealth & Inventory</h3>
+          <span>Gold and the odd things you carry that don't fill a slot.</span>
+        </div>
+        <label class="eq-wealth__gp">
+          <span>GP</span>
+          <input
+            type="number"
+            min="0"
+            step="1"
+            value="${escapeHtml(String(Number(wealth.gp ?? 0)))}"
+            placeholder="0"
+            data-action="set-player-gp"
+            data-character-id="${escapeHtml(character.id)}"
+            aria-label="Gold pieces"
+          />
+        </label>
+      </header>
+      <div class="eq-wealth__items">
+        ${items.length === 0
+          ? `<p class="eq-wealth__empty">No items yet. Add a torch, a map, a strange coin…</p>`
+          : items.map((item) => `
+              <article class="eq-wealth__row" data-wealth-item="${escapeHtml(item.id)}">
+                <input
+                  class="eq-wealth__name"
+                  type="text"
+                  placeholder="Item name"
+                  value="${escapeHtml(item.name ?? "")}"
+                  data-action="set-wealth-item-field"
+                  data-character-id="${escapeHtml(character.id)}"
+                  data-item-id="${escapeHtml(item.id)}"
+                  data-field="name"
+                />
+                <label class="eq-wealth__qty" aria-label="Quantity">
+                  <span>×</span>
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value="${escapeHtml(String(Number(item.qty ?? 1)))}"
+                    data-action="set-wealth-item-field"
+                    data-character-id="${escapeHtml(character.id)}"
+                    data-item-id="${escapeHtml(item.id)}"
+                    data-field="qty"
+                  />
+                </label>
+                <input
+                  class="eq-wealth__notes"
+                  type="text"
+                  placeholder="Notes (charges, weight, who gave it…)"
+                  value="${escapeHtml(item.notes ?? "")}"
+                  data-action="set-wealth-item-field"
+                  data-character-id="${escapeHtml(character.id)}"
+                  data-item-id="${escapeHtml(item.id)}"
+                  data-field="notes"
+                />
+                <button
+                  type="button"
+                  class="eq-wealth__remove"
+                  title="Remove item"
+                  aria-label="Remove item"
+                  data-action="remove-wealth-item"
+                  data-character-id="${escapeHtml(character.id)}"
+                  data-item-id="${escapeHtml(item.id)}"
+                >×</button>
+              </article>
+            `).join("")
+        }
+      </div>
+      <button
+        type="button"
+        class="eq-wealth__add"
+        data-action="add-wealth-item"
+        data-character-id="${escapeHtml(character.id)}"
+      >+ Add item</button>
+    </section>
+  `;
+}
+
 const SILHOUETTE_SVG = `
   <svg viewBox="0 0 200 360" xmlns="http://www.w3.org/2000/svg" focusable="false">
     <defs>
@@ -327,7 +426,10 @@ export function renderEquipmentSheetPage(state) {
             ${renderIdentityBlock(active)}
             <div class="eq-sheet__body">
               ${renderPaperDoll(active)}
-              ${renderNotesPanel(active)}
+              <div class="eq-sheet__side">
+                ${renderNotesPanel(active)}
+                ${renderWealthPanel(active)}
+              </div>
             </div>
           </article>
         ` : `<p class="empty-state">No characters yet. Use "+ New Character" to begin.</p>`}
@@ -459,10 +561,22 @@ const PAGE_STYLES = `
     min-height: 740px;
   }
   .eq-doll__silhouette {
+    /* Big presence behind the slot cards. The figure was width:30% / 92%
+       before — barely visible on a desktop doll panel. Bumping it to
+       ~70% width with a higher cap makes it read as a real character
+       backdrop. Slots stay on top because they're flow children with
+       their own opaque backgrounds + z-index in the grid. */
     position: absolute; inset: 0; display: grid; place-items: center;
-    pointer-events: none; opacity: 0.7;
+    pointer-events: none; opacity: 0.92;
+    z-index: 0;
   }
-  .eq-doll__silhouette svg { width: 30%; height: 92%; }
+  .eq-doll__silhouette svg {
+    width: 72%;
+    max-width: 560px;
+    height: 96%;
+    filter: drop-shadow(0 0 22px rgba(120, 200, 255, 0.20));
+  }
+  .eq-doll > .eq-slot { z-index: 1; }
 
   .eq-slot {
     position: relative;
@@ -542,6 +656,96 @@ const PAGE_STYLES = `
   }
   .eq-notes__body:focus { border-color: rgba(120,220,255,0.85); }
 
+  /* The right column now stacks Notes and Wealth one above the other. */
+  .eq-sheet__side {
+    display: flex; flex-direction: column; gap: 18px; min-width: 0;
+  }
+
+  /* ── Wealth & Inventory ─────────────────────────────────────────── */
+  .eq-wealth {
+    border-radius: 16px;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(240,188,96,0.10), transparent 60%),
+      rgba(8,12,28,0.55);
+    border: 1px solid rgba(140,170,230,0.18);
+    padding: 18px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .eq-wealth__head {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;
+  }
+  .eq-wealth__head h3 { margin: 0; font-size: 16px; letter-spacing: 0.04em; }
+  .eq-wealth__head span { font-size: 12px; color: #9aa7d4; }
+  .eq-wealth__gp {
+    display: flex; flex-direction: column; gap: 4px; min-width: 0;
+    align-items: flex-end;
+  }
+  .eq-wealth__gp > span {
+    font-size: 11px; letter-spacing: 0.16em; color: #f0c482;
+    text-transform: uppercase; font-weight: 700;
+  }
+  .eq-wealth__gp input {
+    width: 110px; text-align: right;
+    background: rgba(6,10,24,0.7); color: #ffe9be;
+    border: 1px solid rgba(240,188,96,0.32); border-radius: 8px;
+    padding: 6px 10px; font-size: 14px; font-weight: 700;
+    font-family: var(--display-font, inherit);
+    outline: none;
+  }
+  .eq-wealth__gp input:focus { border-color: rgba(240,188,96,0.85); }
+
+  .eq-wealth__items {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .eq-wealth__empty {
+    margin: 0; padding: 10px 12px;
+    color: #9aa7d4; font-size: 12px; font-style: italic;
+    border: 1px dashed rgba(140,170,230,0.22); border-radius: 8px;
+    background: rgba(6,10,24,0.4);
+  }
+  .eq-wealth__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) 78px minmax(0, 1.6fr) 28px;
+    gap: 6px; align-items: center;
+  }
+  .eq-wealth__row input {
+    background: rgba(6,10,24,0.7); color: #e5ecff;
+    border: 1px solid rgba(140,170,230,0.22); border-radius: 8px;
+    padding: 7px 9px; font-size: 12px; outline: none; min-width: 0;
+  }
+  .eq-wealth__row input:focus { border-color: rgba(120,220,255,0.85); }
+  .eq-wealth__qty {
+    display: flex; align-items: center; gap: 4px;
+    background: rgba(6,10,24,0.7);
+    border: 1px solid rgba(140,170,230,0.22); border-radius: 8px;
+    padding: 0 6px 0 8px;
+  }
+  .eq-wealth__qty > span {
+    color: #9aa7d4; font-size: 12px; font-weight: 700;
+  }
+  .eq-wealth__qty input {
+    background: transparent; border: 0; padding: 7px 0;
+    width: 44px; text-align: center; color: #e5ecff;
+  }
+  .eq-wealth__remove {
+    appearance: none; cursor: pointer;
+    background: rgba(244,114,182,0.10);
+    border: 1px solid rgba(244,114,182,0.35); border-radius: 8px;
+    color: #fbcfe8; font-size: 14px; line-height: 1;
+    width: 28px; height: 28px;
+    display: grid; place-items: center;
+  }
+  .eq-wealth__remove:hover { background: rgba(244,114,182,0.22); }
+  .eq-wealth__add {
+    align-self: flex-start;
+    appearance: none; cursor: pointer;
+    background: rgba(120,200,255,0.10);
+    border: 1px dashed rgba(120,200,255,0.40); border-radius: 8px;
+    color: #cfe6ff; padding: 7px 14px; font-size: 12px; font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .eq-wealth__add:hover { background: rgba(120,200,255,0.18); border-style: solid; }
+
   @media (max-width: 900px) {
     .eq-identity { grid-template-columns: 64px 1fr; }
     .eq-identity__remove { grid-column: 1 / -1; justify-self: end; }
@@ -554,6 +758,19 @@ const PAGE_STYLES = `
     }
     .eq-slot { grid-column: auto !important; grid-row: auto !important; }
     .eq-doll__silhouette { display: none; }
+
+    /* Wealth row needs to stack at narrow widths or the inputs get crushed. */
+    .eq-wealth__row {
+      grid-template-columns: 1fr 78px 28px;
+      grid-template-areas:
+        "name qty remove"
+        "notes notes notes";
+      gap: 6px;
+    }
+    .eq-wealth__name  { grid-area: name; }
+    .eq-wealth__qty   { grid-area: qty; }
+    .eq-wealth__remove { grid-area: remove; }
+    .eq-wealth__notes { grid-area: notes; }
   }
 `;
 

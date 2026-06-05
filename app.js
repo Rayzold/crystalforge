@@ -137,7 +137,11 @@ import {
 } from "./systems/AwakenedSystem.js";
 import {
   updatePlayerCharacterField,
-  updatePlayerCharacterEquipmentSlot
+  updatePlayerCharacterEquipmentSlot,
+  updatePlayerCharacterGold,
+  addPlayerCharacterWealthItem,
+  removePlayerCharacterWealthItem,
+  updatePlayerCharacterWealthItem
 } from "./systems/PlayerCharacterSystem.js?v=2.0.21";
 import { getDailyCitySnapshot } from "./systems/CitySnapshotSystem.js";
 import { manifestSelectedRarity } from "./systems/GachaSystem.js";
@@ -177,7 +181,7 @@ import { getEmergencyStatus, getCityTrendSummary } from "./systems/ResourceSyste
 import { Toasts } from "./ui/Toasts.js";
 import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js";
 import { UIRenderer } from "./ui/UIRenderer.js?v=2.0.21";
-import { createBlankPlayerCharacter } from "./ui/EquipmentSheetPage.js?v=2.0.21";
+import { createBlankPlayerCharacter, createBlankWealthItem } from "./ui/EquipmentSheetPage.js?v=2.0.21";
 
 const root = document.querySelector("#app");
 const pageKey = document.body.dataset.page ?? "home";
@@ -4849,6 +4853,28 @@ root.addEventListener("click", async (event) => {
       });
       break;
     }
+    case "add-wealth-item": {
+      const characterId = target.dataset.characterId ?? "";
+      if (!characterId) {
+        break;
+      }
+      const blank = createBlankWealthItem();
+      commit((draft) => {
+        addPlayerCharacterWealthItem(draft, characterId, blank);
+      });
+      break;
+    }
+    case "remove-wealth-item": {
+      const characterId = target.dataset.characterId ?? "";
+      const itemId = target.dataset.itemId ?? "";
+      if (!characterId || !itemId) {
+        break;
+      }
+      commit((draft) => {
+        removePlayerCharacterWealthItem(draft, characterId, itemId);
+      });
+      break;
+    }
     // ────────────────────────────────────────────────────────────────────────
 
     default:
@@ -5330,6 +5356,26 @@ root.addEventListener("input", (event) => {
     if (characterId) {
       commit((draft) => {
         updatePlayerCharacterField(draft, characterId, "notes", target.value);
+      });
+    }
+  }
+
+  if (target.dataset.action === "set-player-gp") {
+    const characterId = target.dataset.characterId ?? "";
+    if (characterId) {
+      commit((draft) => {
+        updatePlayerCharacterGold(draft, characterId, target.value);
+      });
+    }
+  }
+
+  if (target.dataset.action === "set-wealth-item-field") {
+    const characterId = target.dataset.characterId ?? "";
+    const itemId = target.dataset.itemId ?? "";
+    const field = target.dataset.field ?? "";
+    if (characterId && itemId && field) {
+      commit((draft) => {
+        updatePlayerCharacterWealthItem(draft, characterId, itemId, field, target.value);
       });
     }
   }

@@ -99,3 +99,90 @@ export function updatePlayerCharacterEquipmentSlot(state, characterId, slotKey, 
 
   return false;
 }
+
+// ─── Wealth & Inventory ────────────────────────────────────────────────────
+
+const WEALTH_TEXT_LIMITS = {
+  name: 80,
+  notes: 200
+};
+
+function ensureWealth(character) {
+  if (!character.wealth || typeof character.wealth !== "object") {
+    character.wealth = { gp: 0, items: [] };
+  }
+  if (!Array.isArray(character.wealth.items)) {
+    character.wealth.items = [];
+  }
+  if (typeof character.wealth.gp !== "number" || !Number.isFinite(character.wealth.gp)) {
+    character.wealth.gp = 0;
+  }
+  return character.wealth;
+}
+
+export function updatePlayerCharacterGold(state, characterId, value) {
+  const character = findPlayerCharacter(state, characterId);
+  if (!character) {
+    return false;
+  }
+  const wealth = ensureWealth(character);
+  const numeric = Number(value);
+  // Allow zero; clamp negatives to 0; cap to a sane ceiling so a stray paste
+  // can't poison the save.
+  wealth.gp = Number.isFinite(numeric) ? Math.max(0, Math.min(999_999_999, Math.floor(numeric))) : 0;
+  return true;
+}
+
+export function addPlayerCharacterWealthItem(state, characterId, item) {
+  const character = findPlayerCharacter(state, characterId);
+  if (!character || !item || !item.id) {
+    return null;
+  }
+  const wealth = ensureWealth(character);
+  // Normalize the incoming shape so the UI sees the same fields every render.
+  const normalized = {
+    id: String(item.id),
+    name: String(item.name ?? "").slice(0, WEALTH_TEXT_LIMITS.name),
+    qty: Math.max(1, Math.floor(Number(item.qty) || 1)),
+    notes: String(item.notes ?? "").slice(0, WEALTH_TEXT_LIMITS.notes)
+  };
+  wealth.items.push(normalized);
+  return normalized;
+}
+
+export function removePlayerCharacterWealthItem(state, characterId, itemId) {
+  const character = findPlayerCharacter(state, characterId);
+  if (!character || !itemId) {
+    return false;
+  }
+  const wealth = ensureWealth(character);
+  const before = wealth.items.length;
+  wealth.items = wealth.items.filter((entry) => entry?.id !== itemId);
+  return wealth.items.length !== before;
+}
+
+export function updatePlayerCharacterWealthItem(state, characterId, itemId, field, value) {
+  const character = findPlayerCharacter(state, characterId);
+  if (!character || !itemId) {
+    return false;
+  }
+  const wealth = ensureWealth(character);
+  const item = wealth.items.find((entry) => entry?.id === itemId);
+  if (!item) {
+    return false;
+  }
+
+  if (field === "name" || field === "notes") {
+    const limit = WEALTH_TEXT_LIMITS[field] ?? 80;
+    item[field] = String(value ?? "").slice(0, limit);
+    return true;
+  }
+
+  if (field === "qty") {
+    const numeric = Number(value);
+    item.qty = Number.isFinite(numeric) ? Math.max(1, Math.min(9999, Math.floor(numeric))) : 1;
+    return true;
+  }
+
+  return false;
+}
