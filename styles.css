@@ -13177,18 +13177,31 @@ body:-webkit-full-screen #app {
   background: linear-gradient(180deg, rgba(12, 18, 34, 0.98), rgba(7, 11, 23, 0.98));
   box-shadow: 0 28px 60px rgba(0, 0, 0, 0.42);
   padding: 1.2rem;
+  /* Cap to the viewport so tall content scrolls inside the card instead of
+     bleeding off the screen with no scrollbar (mouse wheel was hitting the
+     background page). overscroll-behavior: contain stops the scroll from
+     leaking into the underlying page once the user reaches an edge. */
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .modal-card__close {
-  position: absolute;
-  top: 0.8rem;
-  right: 0.8rem;
+  /* Sticky inside the scroll container so the X stays pinned at the top-
+     right as the user scrolls through tall content. `right: 0.2rem` keeps
+     it aligned to the card's inner edge after the scrollbar appears. */
+  position: sticky;
+  top: 0;
+  float: right;
   width: 2.1rem;
   height: 2.1rem;
+  margin-right: -0.4rem;
+  margin-top: -0.4rem;
   border-radius: 999px;
   border: 1px solid rgba(126, 153, 214, 0.18);
-  background: rgba(37, 46, 74, 0.85);
+  background: rgba(37, 46, 74, 0.92);
   color: rgba(245, 247, 255, 0.92);
+  z-index: 2;
 }
 
 .panel__empty {
