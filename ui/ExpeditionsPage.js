@@ -15,8 +15,11 @@ import {
   getExpeditionRelicSynergyStatus,
   getExpeditionRelicOverview,
   getExpeditionRelicSlots,
-  getExpeditionOverview
-} from "../systems/ExpeditionSystem.js";
+  getExpeditionOverview,
+  getEligibleExpeditionAwakened,
+  getBusyExpeditionAwakenedIds,
+  EXPEDITION_AWAKENED_GRADE_POWER
+} from "../systems/ExpeditionSystem.js?v=2.0.22";
 import { formatDate } from "../systems/CalendarSystem.js";
 import { createHelpBubble } from "./HelpBubbles.js";
 import { renderVehicleArt } from "./VehicleArt.js";
@@ -64,7 +67,10 @@ function getDefaultDraft(state) {
     durationDays,
     instantResults: state.transientUi?.expeditionDraft?.instantResults === true,
     team: structuredClone(state.transientUi?.expeditionDraft?.team ?? {}),
-    resources: structuredClone(state.transientUi?.expeditionDraft?.resources ?? {})
+    resources: structuredClone(state.transientUi?.expeditionDraft?.resources ?? {}),
+    awakenedIds: Array.isArray(state.transientUi?.expeditionDraft?.awakenedIds)
+      ? [...state.transientUi.expeditionDraft.awakenedIds]
+      : []
   };
 }
 
@@ -343,6 +349,61 @@ function renderTeamInputs(state, draft, expeditionType) {
               data-citizen-class="${citizenClass}"
             />
           </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function renderAwakenedInputs(state, draft) {
+  const eligible = getEligibleExpeditionAwakened(state);
+  const busyIds = getBusyExpeditionAwakenedIds(state);
+  const selectedIds = new Set(Array.isArray(draft.awakenedIds) ? draft.awakenedIds : []);
+
+  if (eligible.length === 0) {
+    return `
+      <p class="expedition-awakened__empty">
+        No Awakened have joined the city yet. Recruit one on the Awakened page — once their status is "Joined", they'll appear here and can be sent with mission-changing power bonuses.
+      </p>
+    `;
+  }
+
+  const sorted = [...eligible].sort((a, b) => {
+    const orderA = ["F", "D", "C", "B", "A", "S"].indexOf(a.grade);
+    const orderB = ["F", "D", "C", "B", "A", "S"].indexOf(b.grade);
+    return orderA - orderB;
+  });
+
+  return `
+    <p class="expedition-awakened__hint">
+      Each Awakened takes one seat but adds a flat power bonus by grade
+      (F+${EXPEDITION_AWAKENED_GRADE_POWER.F} · D+${EXPEDITION_AWAKENED_GRADE_POWER.D}
+      · C+${EXPEDITION_AWAKENED_GRADE_POWER.C} · B+${EXPEDITION_AWAKENED_GRADE_POWER.B}
+      · A+${EXPEDITION_AWAKENED_GRADE_POWER.A} · S+${EXPEDITION_AWAKENED_GRADE_POWER.S}).
+      A single B-rank dwarfs a small squad of common scouts.
+    </p>
+    <div class="expedition-awakened__grid">
+      ${sorted.map((entry) => {
+        const isSelected = selectedIds.has(entry.id);
+        const isBusy = busyIds.has(entry.id);
+        const disabled = isBusy && !isSelected;
+        const bonus = EXPEDITION_AWAKENED_GRADE_POWER[entry.grade] ?? 0;
+        return `
+          <button
+            type="button"
+            class="expedition-awakened-chip ${isSelected ? "is-selected" : ""} ${disabled ? "is-busy" : ""}"
+            data-action="toggle-expedition-awakened"
+            data-awakened-id="${escapeHtml(entry.id)}"
+            ${disabled ? "disabled aria-disabled=\"true\"" : ""}
+            title="${escapeHtml(entry.name)} — Grade ${escapeHtml(entry.grade)}${disabled ? " — already on another expedition" : ""}"
+          >
+            <span class="expedition-awakened-chip__grade" data-grade="${escapeHtml(entry.grade)}">${escapeHtml(entry.grade)}</span>
+            <span class="expedition-awakened-chip__body">
+              <strong>${escapeHtml(entry.name)}</strong>
+              <small>${disabled ? "Already away" : `+${formatNumber(bonus, 0)} power`}</small>
+            </span>
+            <span class="expedition-awakened-chip__mark" aria-hidden="true">${isSelected ? "✓" : "+"}</span>
+          </button>
         `;
       }).join("")}
     </div>
@@ -893,6 +954,10 @@ export function renderExpeditionsPage(state) {
         <div>
           <div class="panel__subtle">Crew Assignment</div>
           ${renderTeamInputs(state, draft, expeditionType)}
+        </div>
+        <div>
+          <div class="panel__subtle">Awakened Operatives</div>
+          ${renderAwakenedInputs(state, draft)}
         </div>
         <div>
           <div class="panel__subtle">Committed Supplies</div>

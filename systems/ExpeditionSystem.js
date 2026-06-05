@@ -1899,7 +1899,30 @@ function getExpeditionBuildingSynergy(state, mission, vehicle) {
   };
 }
 
-function computeExpeditionPowerScore(state, expeditionType, mission, approach, vehicle, team, committedResources, durationDays, buildingSynergy) {
+// Per-grade flat power that each Awakened contributes when assigned to an
+// expedition. The scale is intentionally generous — a single C-rank carries
+// more weight than a small citizen squad, an S-rank can swing an entire
+// mission. They also count as a single seat each (see createExpeditionLaunchPreview).
+export const EXPEDITION_AWAKENED_GRADE_POWER = {
+  F: 4,
+  D: 10,
+  C: 25,
+  B: 60,
+  A: 150,
+  S: 320
+};
+
+function computeExpeditionAwakenedPower(awakenedRequest) {
+  if (!Array.isArray(awakenedRequest) || awakenedRequest.length === 0) {
+    return 0;
+  }
+  return awakenedRequest.reduce(
+    (sum, entry) => sum + (EXPEDITION_AWAKENED_GRADE_POWER[entry?.grade] ?? 0),
+    0
+  );
+}
+
+function computeExpeditionPowerScore(state, expeditionType, mission, approach, vehicle, team, committedResources, durationDays, buildingSynergy, awakenedRequest = []) {
   const teamPower = Object.entries(team).reduce((sum, [citizenClass, bundle]) => {
     const classWeight = Number(expeditionType.favoredClasses?.[citizenClass] ?? 1) || 1;
     const bundlePower = Object.entries(bundle).reduce(
@@ -1908,6 +1931,8 @@ function computeExpeditionPowerScore(state, expeditionType, mission, approach, v
     );
     return sum + bundlePower * classWeight;
   }, 0);
+
+  const awakenedPower = computeExpeditionAwakenedPower(awakenedRequest);
 
   const supplyScore =
     committedResources.food * 0.14 +
@@ -1927,7 +1952,7 @@ function computeExpeditionPowerScore(state, expeditionType, mission, approach, v
   const rewardFactor = 1 + (Number(missionRisk.reward ?? 1) - 1);
 
   return roundTo(
-    (teamPower + supplyScore) *
+    (teamPower + awakenedPower + supplyScore) *
       durationFactor *
       (Number(approach.rewardModifier ?? 1) || 1) *
       uniqueBonus *
@@ -1936,6 +1961,51 @@ function computeExpeditionPowerScore(state, expeditionType, mission, approach, v
       rewardFactor,
     2
   );
+}
+
+// Returns the awakened entries currently eligible to be sent on expeditions.
+// Only those with status "joined" answer the city's call. The caller usually
+// filters this further (e.g. removing ones already on an active expedition).
+export function getEligibleExpeditionAwakened(state) {
+  if (!Array.isArray(state?.awakened)) {
+    return [];
+  }
+  return state.awakened.filter((entry) => entry && entry.status === "joined");
+}
+
+// Returns the IDs of awakened that are currently away on an active expedition
+// (so the UI can grey them out and the launch validator can reject duplicates).
+export function getBusyExpeditionAwakenedIds(state) {
+  const ids = new Set();
+  const active = state?.expeditions?.active;
+  if (!Array.isArray(active)) {
+    return ids;
+  }
+  for (const entry of active) {
+    const list = Array.isArray(entry?.awakenedIds) ? entry.awakenedIds : [];
+    for (const id of list) ids.add(id);
+  }
+  return ids;
+}
+
+// Resolve a draft.awakenedIds array into full {id, name, grade} entries that
+// are still eligible (joined + not already away). Order is preserved.
+function createAwakenedRequest(state, draftAwakenedIds) {
+  if (!Array.isArray(draftAwakenedIds) || draftAwakenedIds.length === 0) {
+    return [];
+  }
+  const eligible = new Map(getEligibleExpeditionAwakened(state).map((entry) => [entry.id, entry]));
+  const busy = getBusyExpeditionAwakenedIds(state);
+  const seen = new Set();
+  const out = [];
+  for (const id of draftAwakenedIds) {
+    if (seen.has(id) || busy.has(id)) continue;
+    const entry = eligible.get(id);
+    if (!entry) continue;
+    seen.add(id);
+    out.push({ id: entry.id, name: entry.name, grade: entry.grade });
+  }
+  return out;
 }
 
 function computeExpeditionDifficultyScore(expeditionType, mission, approach, vehicle, durationDays, buildingSynergy) {
@@ -3442,6 +3512,7 @@ export function createExpeditionLaunchPreview(state, draft = {}) {
   const committedResources = createExpeditionResourceCommitment(draft.resources);
   const committedSupplyTotal = getCommittedSupplyTotal(committedResources);
   const teamRequest = createTeamRequest(draft.team);
+  const awakenedRequest = createAwakenedRequest(state, draft.awakenedIds);
   const removedTeam = Object.fromEntries(
     Object.entries(teamRequest).map(([citizenClass, amount]) => [
       citizenClass,
@@ -3458,10 +3529,14 @@ export function createExpeditionLaunchPreview(state, draft = {}) {
     removedTeam,
     committedResources,
     durationDaysBase,
-    buildingSynergy
+    buildingSynergy,
+    awakenedRequest
   );
   const difficultyScore = computeExpeditionDifficultyScore(expeditionType, mission, approach, vehicle, durationDaysBase, buildingSynergy);
   const successScore = difficultyScore > 0 ? powerScore / difficultyScore : 1;
+  // Each Awakened takes a seat on the vehicle in addition to their power bonus.
+  const totalSeats = getTeamRequestSize(teamRequest) + awakenedRequest.length;
+  const awakenedPowerBonus = computeExpeditionAwakenedPower(awakenedRequest);
   const preview = {
     mission,
     expeditionType,
@@ -3472,9 +3547,12 @@ export function createExpeditionLaunchPreview(state, draft = {}) {
     committedResources,
     committedSupplyTotal,
     teamRequest,
-    teamSize: getTeamRequestSize(teamRequest),
+    teamSize: totalSeats,
+    teamCitizenSize: getTeamRequestSize(teamRequest),
+    awakenedRequest,
+    awakenedPowerBonus,
     vehicleCapacity: getVehicleCapacity(vehicle),
-    seatsRemaining: getVehicleCapacity(vehicle) - getTeamRequestSize(teamRequest),
+    seatsRemaining: getVehicleCapacity(vehicle) - totalSeats,
     vehicleSupplyCapacity: getVehicleSupplyCapacity(vehicle),
     suppliesRemaining: getVehicleSupplyCapacity(vehicle) - committedSupplyTotal,
     powerScore,
@@ -3509,10 +3587,24 @@ export function startExpedition(state, payload) {
     return { ok: false, reason: `No free ${preview.vehicle.name} is available.` };
   }
   if (preview.teamSize <= 0) {
-    return { ok: false, reason: "Assign at least one citizen to the expedition." };
+    return { ok: false, reason: "Assign at least one citizen or Awakened to the expedition." };
   }
   if (preview.vehicleCapacity > 0 && preview.teamSize > preview.vehicleCapacity) {
     return { ok: false, reason: `${preview.vehicle.name} can carry at most ${preview.vehicleCapacity} people.` };
+  }
+
+  // Validate awakened are still eligible (joined + not already away).
+  if (Array.isArray(payload?.awakenedIds) && payload.awakenedIds.length > 0) {
+    const eligibleIds = new Set(getEligibleExpeditionAwakened(state).map((entry) => entry.id));
+    const busyIds = getBusyExpeditionAwakenedIds(state);
+    for (const id of payload.awakenedIds) {
+      if (!eligibleIds.has(id)) {
+        return { ok: false, reason: "One of the selected Awakened isn't available — they may not have joined the city or may already be away." };
+      }
+      if (busyIds.has(id)) {
+        return { ok: false, reason: "One of the selected Awakened is already on another expedition." };
+      }
+    }
   }
   if (preview.vehicleSupplyCapacity > 0 && preview.committedSupplyTotal > preview.vehicleSupplyCapacity) {
     return { ok: false, reason: `${preview.vehicle.name} can carry at most ${preview.vehicleSupplyCapacity} committed supplies.` };
@@ -3550,7 +3642,8 @@ export function startExpedition(state, payload) {
     team,
     preview.committedResources,
     preview.durationDaysBase,
-    preview.buildingSynergy
+    preview.buildingSynergy,
+    preview.awakenedRequest
   );
   const actualDifficultyScore = computeExpeditionDifficultyScore(
     preview.expeditionType,
@@ -3589,6 +3682,8 @@ export function startExpedition(state, payload) {
     expectedReturnAt: formatDate(preview.expectedReturnDayOffset),
     committedResources: preview.committedResources,
     team,
+    awakenedIds: preview.awakenedRequest.map((entry) => entry.id),
+    awakenedSnapshot: preview.awakenedRequest.map((entry) => ({ id: entry.id, name: entry.name, grade: entry.grade })),
     powerScore: actualPowerScore,
     difficultyScore: actualDifficultyScore,
     successScore: actualSuccessScore,

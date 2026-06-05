@@ -2,7 +2,7 @@
 // This file wires together state, actions, routing, save/load, manifestation,
 // admin commands, and top-level UI events. Most game-wide behavior eventually
 // passes through here, while lower-level systems keep the domain rules isolated.
-import { AdminConsole } from "./admin/AdminConsole.js?v=2.0.21";
+import { AdminConsole } from "./admin/AdminConsole.js?v=2.0.22";
 import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js";
 import {
   APP_VERSION,
@@ -111,7 +111,7 @@ import {
   updateNpcField,
   updateNpcStat,
   getCrafterCapacity
-} from "./systems/NpcSystem.js?v=2.0.21";
+} from "./systems/NpcSystem.js?v=2.0.22";
 import {
   createCraftingItem,
   collectCraftingItem,
@@ -123,10 +123,10 @@ import {
   clearCollectedCraftingItems,
   pauseCraftingItem,
   resumeCraftingItem,
-} from "./systems/CraftingSystem.js?v=2.0.21";
-import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=2.0.21";
-import { addCooldown, removeCooldown, restartCooldown, markCooldownTriggered, ageCooldown, isCooldownReady, getCooldownReadyDay } from "./systems/CooldownSystem.js?v=2.0.21";
-import { craftingCompletionDay } from "./systems/CraftingSystem.js?v=2.0.21";
+} from "./systems/CraftingSystem.js?v=2.0.22";
+import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=2.0.22";
+import { addCooldown, removeCooldown, restartCooldown, markCooldownTriggered, ageCooldown, isCooldownReady, getCooldownReadyDay } from "./systems/CooldownSystem.js?v=2.0.22";
+import { craftingCompletionDay } from "./systems/CraftingSystem.js?v=2.0.22";
 import {
   addAwakened,
   clearAwakenedImage,
@@ -142,7 +142,7 @@ import {
   addPlayerCharacterWealthItem,
   removePlayerCharacterWealthItem,
   updatePlayerCharacterWealthItem
-} from "./systems/PlayerCharacterSystem.js?v=2.0.21";
+} from "./systems/PlayerCharacterSystem.js?v=2.0.22";
 import { getDailyCitySnapshot } from "./systems/CitySnapshotSystem.js";
 import { manifestSelectedRarity } from "./systems/GachaSystem.js";
 import { addHistoryEntry } from "./systems/HistoryLogSystem.js";
@@ -173,15 +173,15 @@ import {
   saveGameState,
   saveManualState,
   validateAndMigrateSave
-} from "./systems/StorageSystem.js?v=2.0.21";
-import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js?v=2.0.21";
+} from "./systems/StorageSystem.js?v=2.0.22";
+import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js?v=2.0.22";
 import { applyCompletedGoalRewards } from "./systems/GoalSystem.js";
 import { forceTownFocus, getMayorAdvice, reopenTownFocusSelection, selectTownFocus, updateTownFocusAvailability } from "./systems/TownFocusSystem.js";
 import { getEmergencyStatus, getCityTrendSummary } from "./systems/ResourceSystem.js";
 import { Toasts } from "./ui/Toasts.js";
 import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js";
-import { UIRenderer } from "./ui/UIRenderer.js?v=2.0.21";
-import { createBlankPlayerCharacter, createBlankWealthItem } from "./ui/EquipmentSheetPage.js?v=2.0.21";
+import { UIRenderer } from "./ui/UIRenderer.js?v=2.0.22";
+import { createBlankPlayerCharacter, createBlankWealthItem } from "./ui/EquipmentSheetPage.js?v=2.0.22";
 
 const root = document.querySelector("#app");
 const pageKey = document.body.dataset.page ?? "home";
@@ -2494,7 +2494,8 @@ function launchExpeditionFromDraft() {
         durationDays: result.expedition.durationDaysBase,
         instantResults: expeditionDraft.instantResults === true,
         team: {},
-        resources: {}
+        resources: {},
+        awakenedIds: []
       },
       expeditionJourneyOpen: result.resolvedImmediately ? true : renderer.transientUi.expeditionJourneyOpen,
       turnSummaryModal: result.resolvedImmediately ? null : renderer.transientUi.turnSummaryModal
@@ -3775,8 +3776,12 @@ root.addEventListener("click", async (event) => {
             ...(renderer.transientUi.expeditionDraft ?? {}),
             missionId: target.dataset.missionId ?? null,
             typeId: target.dataset.typeId ?? "rescue",
-            durationDays: Math.max(1, Number(target.dataset.durationDays ?? 7) || 7),
-            team: {}
+            durationDays: Math.max(1, Number(target.dataset.durationDays ?? 7) || 7)
+            // Intentionally NOT resetting team / awakenedIds / resources / vehicleId
+            // here — switching missions used to wipe the user's crew picks, which
+            // is annoying when they want to compare two missions with the same
+            // squad. If a class isn't valid for the new mission's allowedClasses,
+            // it's harmlessly ignored at preview/launch time.
           }
         },
         getCurrentState()
@@ -3789,8 +3794,9 @@ root.addEventListener("click", async (event) => {
           expeditionDraft: {
             ...(renderer.transientUi.expeditionDraft ?? {}),
             typeId: target.dataset.typeId ?? "rescue",
-            missionId: null,
-            team: {}
+            missionId: null
+            // Same reasoning as set-expedition-mission: preserve team /
+            // awakenedIds / resources / vehicleId across type switches.
           }
         },
         getCurrentState()
@@ -3848,6 +3854,29 @@ root.addEventListener("click", async (event) => {
       void audioEngine.playUiAccent("soft");
       setExpeditionResourceDraftValue(target.dataset.resourceKey, target.dataset.resourceMax);
       break;
+    case "toggle-expedition-awakened": {
+      void audioEngine.playUiAccent("soft");
+      const awakenedId = target.dataset.awakenedId ?? "";
+      if (!awakenedId) {
+        break;
+      }
+      const current = Array.isArray(renderer.transientUi.expeditionDraft?.awakenedIds)
+        ? renderer.transientUi.expeditionDraft.awakenedIds
+        : [];
+      const next = current.includes(awakenedId)
+        ? current.filter((id) => id !== awakenedId)
+        : [...current, awakenedId];
+      renderer.setTransientUi(
+        {
+          expeditionDraft: {
+            ...(renderer.transientUi.expeditionDraft ?? {}),
+            awakenedIds: next
+          }
+        },
+        getCurrentState()
+      );
+      break;
+    }
     case "launch-expedition":
       void audioEngine.playUiAccent("confirm");
       actions.launchExpedition();
