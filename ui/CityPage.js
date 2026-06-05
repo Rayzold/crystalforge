@@ -25,12 +25,12 @@ import {
 } from "../systems/ConstructionSystem.js";
 import { getEmergencyStatus, getGoodsSummary } from "../systems/ResourceSystem.js";
 import { getWorkforceCategoryLabel, getWorkforceSummary } from "../systems/WorkforceSystem.js";
-import { getVisibleBuildings, renderBuildingGrid } from "./BuildingGrid.js?v=2.0.12";
+import { getVisibleBuildings, renderBuildingGrid } from "./BuildingGrid.js?v=2.0.16";
 import { renderCalendarPanel } from "./CalendarPanel.js";
 import { renderDistrictPanel } from "./DistrictPanel.js";
 import { renderDriftEvolutionPanel } from "./DriftEvolutionPanel.js";
 import { renderEmergencyPanel } from "./EmergencyPanel.js";
-import { renderHexMap } from "./HexMap.js?v=2.0.12";
+import { renderHexMap } from "./HexMap.js?v=2.0.16";
 import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js";
 import { renderResourcePanel } from "./ResourcePanel.js";
 import { renderTownFocusPanel } from "./TownFocusPanel.js";
@@ -922,10 +922,10 @@ export function renderCityPage(state) {
         <details class="page-hero__time-more">
           <summary class="button button--ghost button--small" title="More time options">More ▾</summary>
           <div class="page-hero__time-more-body">
-            <button class="button button--ghost button--small" data-action="advance-time" data-step="3days">+3d</button>
-            <button class="button button--ghost button--small" data-action="advance-time" data-step="week">+Week</button>
-            <button class="button button--ghost button--small" data-action="advance-time" data-step="month">+Month</button>
-            <button class="button button--ghost button--small" data-action="advance-time" data-step="year">+Year</button>
+            <button class="button button--ghost button--small" data-action="advance-time" data-step="3days" aria-label="Advance 3 days" title="Advance 3 days">+3d</button>
+            <button class="button button--ghost button--small" data-action="advance-time" data-step="week" aria-label="Advance 1 week" title="Advance 1 week">+Week</button>
+            <button class="button button--ghost button--small" data-action="advance-time" data-step="month" aria-label="Advance 1 month" title="Advance 1 month">+Month</button>
+            <button class="button button--ghost button--small" data-action="advance-time" data-step="year" aria-label="Advance 1 year" title="Advance 1 year">+Year</button>
             <label class="speed-selector">
               Raising Speed
               <select data-action="set-speed-multiplier">

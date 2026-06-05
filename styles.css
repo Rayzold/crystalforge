@@ -2492,8 +2492,9 @@ button[aria-disabled="true"]:hover,
 
 .game-shell--page-city .page-hero {
   gap: 10px;
-  padding: 12px 14px;
+  padding: 6px 14px;
   border-radius: 16px;
+  min-height: 60px;
 }
 
 .game-shell--page-city .page-hero h1 {
@@ -11599,15 +11600,25 @@ body:-webkit-full-screen #app {
   }
 
   .page-hero {
-    flex-direction: column;
-    gap: 14px;
-    padding: 16px;
+    /* Keep the hero on a single horizontal row even at narrow widths so the
+       compact ~60px target survives. Items wrap only if they truly cannot fit. */
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 6px 12px;
+    min-height: 60px;
   }
 
-  .page-hero__side,
+  .page-hero__side {
+    width: auto;
+    max-width: 100%;
+    justify-items: end;
+    margin-left: auto;
+  }
+
   .page-hero__focus,
   .town-focus-panel__header-actions {
-    width: 100%;
+    width: auto;
     max-width: 100%;
     justify-items: start;
   }
@@ -17301,6 +17312,19 @@ body[data-theme="silver"] .collapse-toggle {
   gap: 8px;
 }
 
+/* Cap button heights inside the hero so the compact ~60px target holds at
+   wide viewports too — without this, the default .button (no --small modifier)
+   grew to ~90px and dragged the whole hero to ~104px. */
+.page-hero__actions .button,
+.page-hero__time-controls .button,
+.page-hero__time-controls summary.button {
+  min-height: 0;
+  max-height: 36px;
+  padding: 6px 12px;
+  white-space: nowrap;
+  line-height: 1.1;
+}
+
 .page-hero__time-more {
   position: relative;
 }
@@ -17708,7 +17732,12 @@ body[data-theme="silver"] .collapse-toggle {
 /* Update the page-layout aside width specifically for the city page */
 .page-stage--city .page-layout--with-aside {
   grid-template-columns: minmax(0, 1fr) 280px;
-  align-items: start;
+  /* Explicitly stretch — the base .page-layout--with-aside rule sets
+     align-items: start which would collapse the aside grid cell to its
+     content height (~314px), leaving the inner sticky sidebar with zero
+     travel room. Stretch lets the aside fill the grid row's full height
+     so the sticky element actually has distance to slide. */
+  align-items: stretch;
 }
 
 /* Make the aside wrapper itself sticky so the inner incubator sidebar pins
@@ -17716,14 +17745,18 @@ body[data-theme="silver"] .collapse-toggle {
    the wrapper avoids the "inner stretches to parent height" problem that
    stops the inner .incubator-sidebar from sticking inside a grid row. */
 .page-stage--city .page-layout__aside {
-  position: sticky;
-  top: 112px;
-  align-self: start;
+  /* The aside is the scrolling context for the sticky sidebar inside it.
+     Critically we do NOT set align-self: start here — that would collapse
+     the aside to the sidebar's content height (~314px), leaving the inner
+     sticky element with zero room to slide. Letting the aside stretch to
+     the grid row's full height is what gives sticky actual travel. */
 }
 
 .page-stage--city .incubator-sidebar {
-  position: static;
+  position: sticky;
+  top: 112px;
   max-height: calc(100vh - 124px);
+  overflow-y: auto;
 }
 
 /* Hide the legacy inline incubation strip — the right sidebar now owns this UI. */

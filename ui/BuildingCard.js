@@ -222,7 +222,11 @@ export function renderBuildingCard(building, state, workforceSummary = null) {
           <strong class="building-card__multiplier">${building.isComplete ? getQualityMultiplierReadout(building) : "--"}</strong>
         </div>
         <div class="building-card__quality">
-          <span>${building.isComplete ? escapeHtml(getQualityMultiplierReadout(building)) : `Quality ${escapeHtml(formatBuildingQualityDisplay(building))}`}</span>
+          ${/* The ring badge in the visual overlay is now the canonical quality
+                readout. For complete buildings we keep the multiplier readout (e.g.
+                "48.1% · 1.2x") because that data isn't in the ring; for incomplete
+                ones we drop the redundant "Quality 48.1%" line entirely. */ ""}
+          ${building.isComplete ? `<span>${escapeHtml(getQualityMultiplierReadout(building))}</span>` : ""}
           <span>${isRuined ? "Ruined" : building.isComplete ? "Complete" : "Incomplete"}</span>
         </div>
         ${
