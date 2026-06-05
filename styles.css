@@ -16497,6 +16497,20 @@ body[data-theme="silver"] .collapse-toggle {
 
 .cooldown-form__type-fields[hidden] { display: none !important; }
 
+.cooldown-form__date-selector {
+  display: grid;
+  grid-template-columns: 80px 1fr 100px;
+  gap: 6px;
+}
+
+.cooldown-form__date-selector select {
+  height: 30px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.86rem;
+  min-width: 0;
+}
+
 .cooldown-form__hint {
   grid-column: 1 / -1;
   margin: 0;

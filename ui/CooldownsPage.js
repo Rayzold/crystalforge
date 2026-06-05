@@ -2,12 +2,32 @@
 // custom GM-tracked recharges) and shows when they next become available.
 
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
-import { formatDate } from "../systems/CalendarSystem.js";
+import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js";
+import { MONTHS, DAYS_PER_MONTH } from "../content/CalendarConfig.js";
 import {
   getCooldownReadyDay,
   getCooldownDaysRemaining,
   getCooldownTriggerChance
-} from "../systems/CooldownSystem.js?v=2.0.1";
+} from "../systems/CooldownSystem.js?v=2.0.2";
+
+function renderStartDateSelector(startDayOffset) {
+  const d = getStructuredDate(startDayOffset);
+  const dayOpts = Array.from({ length: DAYS_PER_MONTH }, (_, i) => i + 1)
+    .map((n) => `<option value="${n}" ${n === d.day ? "selected" : ""}>${n}</option>`).join("");
+  const monthOpts = MONTHS
+    .map((m) => `<option value="${escapeHtml(m)}" ${m === d.month ? "selected" : ""}>${escapeHtml(m)}</option>`).join("");
+  const yearMin = d.year - 1;
+  const yearMax = d.year + 5;
+  const yearOpts = Array.from({ length: yearMax - yearMin + 1 }, (_, i) => yearMin + i)
+    .map((y) => `<option value="${y}" ${y === d.year ? "selected" : ""}>${y}</option>`).join("");
+  return `
+    <div class="cooldown-form__date-selector">
+      <select data-cooldown-field="startDate.day"   aria-label="Day">${dayOpts}</select>
+      <select data-cooldown-field="startDate.month" aria-label="Month">${monthOpts}</select>
+      <select data-cooldown-field="startDate.year"  aria-label="Year">${yearOpts}</select>
+    </div>
+  `;
+}
 
 function pickBuildingOptions(state) {
   // Only completed buildings (the cooldown is for activating their special effect).
@@ -98,10 +118,10 @@ function renderAddForm(state) {
             <option value="percent">% per day (cumulative)</option>
           </select>
         </label>
-        <label class="cooldown-form__field">
-          <span>Start day</span>
-          <input type="number" min="0" value="${state.calendar?.dayOffset ?? 0}" data-cooldown-field="startedDayOffset" />
-        </label>
+        <div class="cooldown-form__field">
+          <span>Start date</span>
+          ${renderStartDateSelector(state.calendar?.dayOffset ?? 0)}
+        </div>
         ${renderTypeFieldsForForm(state)}
         <label class="cooldown-form__field cooldown-form__field--full">
           <span>Notes (optional)</span>

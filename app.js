@@ -2,7 +2,7 @@
 // This file wires together state, actions, routing, save/load, manifestation,
 // admin commands, and top-level UI events. Most game-wide behavior eventually
 // passes through here, while lower-level systems keep the domain rules isolated.
-import { AdminConsole } from "./admin/AdminConsole.js?v=2.0.1";
+import { AdminConsole } from "./admin/AdminConsole.js?v=2.0.2";
 import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js";
 import {
   APP_VERSION,
@@ -111,7 +111,7 @@ import {
   updateNpcField,
   updateNpcStat,
   getCrafterCapacity
-} from "./systems/NpcSystem.js?v=2.0.1";
+} from "./systems/NpcSystem.js?v=2.0.2";
 import {
   createCraftingItem,
   collectCraftingItem,
@@ -123,9 +123,9 @@ import {
   clearCollectedCraftingItems,
   pauseCraftingItem,
   resumeCraftingItem,
-} from "./systems/CraftingSystem.js?v=2.0.1";
-import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=2.0.1";
-import { addCooldown, removeCooldown, restartCooldown, markCooldownTriggered } from "./systems/CooldownSystem.js?v=2.0.1";
+} from "./systems/CraftingSystem.js?v=2.0.2";
+import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=2.0.2";
+import { addCooldown, removeCooldown, restartCooldown, markCooldownTriggered } from "./systems/CooldownSystem.js?v=2.0.2";
 import {
   addAwakened,
   clearAwakenedImage,
@@ -164,14 +164,14 @@ import {
   saveGameState,
   saveManualState,
   validateAndMigrateSave
-} from "./systems/StorageSystem.js?v=2.0.1";
+} from "./systems/StorageSystem.js?v=2.0.2";
 import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js";
 import { applyCompletedGoalRewards } from "./systems/GoalSystem.js";
 import { forceTownFocus, getMayorAdvice, reopenTownFocusSelection, selectTownFocus, updateTownFocusAvailability } from "./systems/TownFocusSystem.js";
 import { getEmergencyStatus, getCityTrendSummary } from "./systems/ResourceSystem.js";
 import { Toasts } from "./ui/Toasts.js";
 import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js";
-import { UIRenderer } from "./ui/UIRenderer.js?v=2.0.1";
+import { UIRenderer } from "./ui/UIRenderer.js?v=2.0.2";
 
 const root = document.querySelector("#app");
 const pageKey = document.body.dataset.page ?? "home";
@@ -4193,13 +4193,25 @@ root.addEventListener("click", async (event) => {
       const sourceId = sourceValue[1] || null;
       const name = get("name") || sourceSel?.selectedOptions?.[0]?.dataset?.name || "Unnamed cooldown";
       if (!name.trim()) { reportError("Pick a source or type a name."); break; }
+      // Convert Day/Month/Year selectors back to a day offset using the same
+      // helper the crafting form uses. Fall back to today if the selectors
+      // are missing (older save UI) or if the parts don't resolve.
+      const startYear  = Number(get("startDate.year"));
+      const startMonth = get("startDate.month");
+      const startDay   = Number(get("startDate.day"));
+      const computedStart = Number.isFinite(startYear) && startMonth && Number.isFinite(startDay)
+        ? dateFromParts(startYear, startMonth, startDay)
+        : null;
+      const startedDayOffset = (computedStart !== null && computedStart !== undefined)
+        ? Math.max(0, computedStart)
+        : getCurrentState().calendar.dayOffset;
       const input = {
         name,
         type,
         sourceType,
         sourceId,
         notes: get("notes"),
-        startedDayOffset: Number(get("startedDayOffset") || getCurrentState().calendar.dayOffset)
+        startedDayOffset
       };
       if (type === "fixed") {
         input.fixedDays = Number(get("fixedDays") || 1);
