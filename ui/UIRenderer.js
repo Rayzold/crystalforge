@@ -8,31 +8,32 @@ import { renderChroniclePage } from "./ChroniclePage.js";
 import { renderBuildingDetailModal } from "./BuildingDetailModal.js";
 import { renderBuildingCatalogModal } from "./BuildingCatalogModal.js";
 import { renderCitizensPage } from "./CitizensPage.js";
-import { renderCityPage, renderEconomyPage } from "./CityPage.js?v=2.0.19";
+import { renderCityPage, renderEconomyPage } from "./CityPage.js?v=2.0.20";
 import { renderExpeditionsPage } from "./ExpeditionsPage.js";
 import { renderExpeditionJourneyModal } from "./ExpeditionJourneyModal.js";
 import { renderForgePage } from "./ForgePage.js";
 import { renderHelpPage } from "./HelpPage.js";
 import { attachHelpBubbles } from "./HelpBubbles.js";
 import { attachListCollapse } from "./CollapsibleList.js?v=1.8.1";
-import { attachHexMapCanvas } from "./HexMapCanvas.js?v=2.0.19";
+import { attachHexMapCanvas } from "./HexMapCanvas.js?v=2.0.20";
 import { renderHomePage } from "./HomePage.js";
 import { renderHomeHelpModal } from "./HomeHelpModal.js";
 import { renderManifestCompleteModal } from "./ManifestCompleteModal.js";
-import { renderPageShell } from "./PageShell.js?v=2.0.19";
+import { renderPageShell } from "./PageShell.js?v=2.0.20";
 import { renderPlayerPage } from "./PlayerPage.js";
 import { renderResourceBreakdownModal } from "./ResourceBreakdownModal.js";
 import { renderTownFocusCouncilModal } from "./TownFocusCouncilModal.js";
-import { renderTurnSummaryModal } from "./TurnSummaryModal.js?v=2.0.19";
+import { renderTurnSummaryModal } from "./TurnSummaryModal.js?v=2.0.20";
 import { renderUniqueCitizensPage } from "./UniqueCitizensPage.js";
+import { renderEquipmentSheetPage } from "./EquipmentSheetPage.js?v=2.0.20";
 import { renderVehiclesPage } from "./VehiclesPage.js";
 import { renderBehemothsPage } from "./BehemothsPage.js";
-import { renderNpcsPage } from "./NpcsPage.js?v=2.0.19";
+import { renderNpcsPage } from "./NpcsPage.js?v=2.0.20";
 import { renderAwakenedPage } from "./AwakenedPage.js";
 import { renderArmyPage } from "./ArmyPage.js";
-import { renderCraftingPage } from "./CraftingPage.js?v=2.0.19";
-import { renderCooldownsPage } from "./CooldownsPage.js?v=2.0.19";
-import { isCooldownReady } from "../systems/CooldownSystem.js?v=2.0.19";
+import { renderCraftingPage } from "./CraftingPage.js?v=2.0.20";
+import { renderCooldownsPage } from "./CooldownsPage.js?v=2.0.20";
+import { isCooldownReady } from "../systems/CooldownSystem.js?v=2.0.20";
 import { getMayorSuggestions } from "../systems/TownFocusSystem.js";
 import { getDefaultTownFocusPreviewId } from "./TownFocusShared.js";
 import { renderTownFocusCeremonyOverlay } from "./TownFocusCeremonyOverlay.js";
@@ -209,6 +210,8 @@ export class UIRenderer {
         return renderArmyPage(state);
       case "uniques":
         return renderUniqueCitizensPage(state);
+      case "equipment":
+        return renderEquipmentSheetPage(state);
       case "crafting":
         return renderCraftingPage(state);
       case "cooldowns":

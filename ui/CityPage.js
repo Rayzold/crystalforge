@@ -25,12 +25,12 @@ import {
 } from "../systems/ConstructionSystem.js";
 import { getEmergencyStatus, getGoodsSummary } from "../systems/ResourceSystem.js";
 import { getWorkforceCategoryLabel, getWorkforceSummary } from "../systems/WorkforceSystem.js";
-import { getVisibleBuildings, renderBuildingGrid } from "./BuildingGrid.js?v=2.0.19";
+import { getVisibleBuildings, renderBuildingGrid } from "./BuildingGrid.js?v=2.0.20";
 import { renderCalendarPanel } from "./CalendarPanel.js";
 import { renderDistrictPanel } from "./DistrictPanel.js";
 import { renderDriftEvolutionPanel } from "./DriftEvolutionPanel.js";
 import { renderEmergencyPanel } from "./EmergencyPanel.js";
-import { renderHexMap } from "./HexMap.js?v=2.0.19";
+import { renderHexMap } from "./HexMap.js?v=2.0.20";
 import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js";
 import { renderResourcePanel } from "./ResourcePanel.js";
 import { renderTownFocusPanel } from "./TownFocusPanel.js";

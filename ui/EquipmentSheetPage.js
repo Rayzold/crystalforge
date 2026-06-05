@@ -1,0 +1,584 @@
+// Equipment Sheet page.
+// Each player character gets a 13-slot loadout sheet (paper-doll layout) plus a
+// freeform player notes block. Backed by `state.playerCharacters[]`. If the
+// slice is empty the page renders a single starter character so the screen is
+// never blank — actual persistence requires hooking the data-action handlers
+// listed in the integration block at the bottom of this file.
+import { escapeHtml } from "../engine/Utils.js";
+
+// 13 slots, distributed into a 3-column paper-doll layout (left | center | right).
+// Column + order pins each slot to a CSS grid cell.
+const EQUIPMENT_SLOTS = [
+  { key: "helm",     label: "Helm",      icon: "\u{1F451}", column: "center", order: 1 },
+  { key: "neck",     label: "Neck",      icon: "\u{1F4FF}", column: "right",  order: 1 },
+  { key: "cloak",    label: "Cloak",     icon: "\u{1F9E5}", column: "left",   order: 1 },
+  { key: "mainhand", label: "Main Hand", icon: "⚔️",  column: "left",   order: 2 },
+  { key: "chest",    label: "Chest",     icon: "\u{1F6E1}️", column: "center", order: 2 },
+  { key: "offhand",  label: "Off Hand",  icon: "\u{1F6E1}", column: "right",  order: 2 },
+  { key: "gloves",   label: "Gloves",    icon: "\u{1F9E4}", column: "left",   order: 3 },
+  { key: "belt",     label: "Belt",      icon: "\u{1F45C}", column: "right",  order: 3 },
+  { key: "legs",     label: "Legs",      icon: "\u{1F456}", column: "center", order: 3 },
+  { key: "trinket",  label: "Trinket",   icon: "\u{1F52E}", column: "right",  order: 4 },
+  { key: "boots",    label: "Boots",     icon: "\u{1F462}", column: "center", order: 4 },
+  { key: "ring1",    label: "Ring I",    icon: "\u{1F48D}", column: "left",   order: 5 },
+  { key: "ring2",    label: "Ring II",   icon: "\u{1F48D}", column: "right",  order: 5 }
+];
+
+const RARITIES = [
+  { key: "common",    label: "Common",    color: "#94a3b8" },
+  { key: "uncommon",  label: "Uncommon",  color: "#34d399" },
+  { key: "rare",      label: "Rare",      color: "#38bdf8" },
+  { key: "epic",      label: "Epic",      color: "#a78bfa" },
+  { key: "legendary", label: "Legendary", color: "#fbbf24" },
+  { key: "mythic",    label: "Mythic",    color: "#f472b6" }
+];
+
+const RARITY_LOOKUP = Object.fromEntries(RARITIES.map((r) => [r.key, r]));
+
+function rarityColor(key) {
+  return RARITY_LOOKUP[key]?.color ?? RARITY_LOOKUP.common.color;
+}
+
+function emptySlot() {
+  return { name: "", rarity: "common", notes: "" };
+}
+
+export function createBlankPlayerCharacter(seed = "New Wanderer") {
+  return blankCharacter(seed);
+}
+
+function blankCharacter(seed = "New Wanderer") {
+  return {
+    id: `pc-${Math.random().toString(36).slice(2, 8)}`,
+    name: seed,
+    class: "",
+    title: "",
+    level: 1,
+    attunements: 0,
+    equipment: Object.fromEntries(EQUIPMENT_SLOTS.map((s) => [s.key, emptySlot()])),
+    notes: ""
+  };
+}
+
+function getRoster(state) {
+  const roster = state.playerCharacters ?? [];
+  if (roster.length === 0) {
+    return [blankCharacter("Aelara Stormveil")];
+  }
+  return roster;
+}
+
+function getActiveCharacter(state, roster) {
+  const activeId = state.transientUi?.activePlayerCharacterId;
+  return roster.find((c) => c.id === activeId) ?? roster[0];
+}
+
+function hashSeed(value = "") {
+  let hash = 0;
+  for (const character of String(value)) {
+    hash = (hash * 31 + character.charCodeAt(0)) % 2147483647;
+  }
+  return Math.abs(hash);
+}
+
+function renderCharacterSigil(character) {
+  const seed = hashSeed(character.id || character.name || "wanderer");
+  const hueA = seed % 360;
+  const hueB = (hueA + 60 + (seed % 70)) % 360;
+  const initials = String(character.name ?? "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase() ?? "")
+    .join("") || "PC";
+  return `
+    <div class="eq-sigil" style="--eq-hue-a:${hueA};--eq-hue-b:${hueB};" aria-hidden="true">
+      <span class="eq-sigil__ring"></span>
+      <span class="eq-sigil__ring eq-sigil__ring--inner"></span>
+      <strong>${escapeHtml(initials)}</strong>
+    </div>
+  `;
+}
+
+function renderRosterStrip(state, roster, active) {
+  return `
+    <nav class="eq-roster" aria-label="Player character roster">
+      ${roster
+        .map(
+          (c) => `
+            <button
+              class="eq-roster__chip ${active && c.id === active.id ? "is-active" : ""}"
+              type="button"
+              data-action="set-active-player-character"
+              data-character-id="${escapeHtml(c.id)}"
+            >
+              <strong>${escapeHtml(c.name || "Unnamed")}</strong>
+              <span>${escapeHtml(c.class || "—")}${Number(c.level) ? ` · Lv ${escapeHtml(String(c.level))}` : ""}</span>
+            </button>
+          `
+        )
+        .join("")}
+      <button class="eq-roster__add" type="button" data-action="add-player-character">+ New Character</button>
+    </nav>
+  `;
+}
+
+function renderIdentityBlock(character) {
+  return `
+    <header class="eq-identity">
+      ${renderCharacterSigil(character)}
+      <div class="eq-identity__fields">
+        <label class="eq-identity__row">
+          <span>Character Name</span>
+          <input
+            type="text"
+            class="eq-identity__name"
+            value="${escapeHtml(character.name ?? "")}"
+            placeholder="Name your hero…"
+            data-action="set-player-character-field"
+            data-character-id="${escapeHtml(character.id)}"
+            data-field="name"
+          />
+        </label>
+        <div class="eq-identity__grid">
+          <label>
+            <span>Class</span>
+            <input
+              type="text"
+              value="${escapeHtml(character.class ?? "")}"
+              placeholder="Stormcaller, Pact-Bearer…"
+              data-action="set-player-character-field"
+              data-character-id="${escapeHtml(character.id)}"
+              data-field="class"
+            />
+          </label>
+          <label>
+            <span>Title</span>
+            <input
+              type="text"
+              value="${escapeHtml(character.title ?? "")}"
+              placeholder="The Sundered, Voice of the Drift…"
+              data-action="set-player-character-field"
+              data-character-id="${escapeHtml(character.id)}"
+              data-field="title"
+            />
+          </label>
+          <label>
+            <span>Level</span>
+            <input
+              type="number"
+              min="1"
+              max="99"
+              value="${escapeHtml(String(character.level ?? 1))}"
+              data-action="set-player-character-field"
+              data-character-id="${escapeHtml(character.id)}"
+              data-field="level"
+            />
+          </label>
+          <label>
+            <span>Attunements</span>
+            <input
+              type="number"
+              min="0"
+              max="9"
+              value="${escapeHtml(String(character.attunements ?? 0))}"
+              data-action="set-player-character-field"
+              data-character-id="${escapeHtml(character.id)}"
+              data-field="attunements"
+            />
+          </label>
+        </div>
+      </div>
+      <button
+        class="eq-identity__remove"
+        type="button"
+        data-action="remove-player-character"
+        data-character-id="${escapeHtml(character.id)}"
+        title="Remove this character"
+      >Remove</button>
+    </header>
+  `;
+}
+
+function renderSlot(character, slot) {
+  const value = character.equipment?.[slot.key] ?? emptySlot();
+  const color = rarityColor(value.rarity);
+  const filled = Boolean(value.name);
+  return `
+    <article
+      class="eq-slot eq-slot--col-${slot.column} ${filled ? "is-filled" : ""}"
+      style="--eq-rarity:${color}; grid-column: ${slot.column}; grid-row: ${slot.order};"
+      data-slot="${slot.key}"
+    >
+      <header class="eq-slot__head">
+        <span class="eq-slot__icon" aria-hidden="true">${slot.icon}</span>
+        <span class="eq-slot__label">${escapeHtml(slot.label)}</span>
+      </header>
+      <input
+        class="eq-slot__name"
+        type="text"
+        placeholder="— empty —"
+        value="${escapeHtml(value.name ?? "")}"
+        data-action="set-equipment-slot"
+        data-character-id="${escapeHtml(character.id)}"
+        data-slot-key="${slot.key}"
+        data-field="name"
+      />
+      <div class="eq-slot__rarities" role="radiogroup" aria-label="Rarity for ${escapeHtml(slot.label)}">
+        ${RARITIES.map(
+          (r) => `
+            <button
+              type="button"
+              class="eq-slot__rarity ${value.rarity === r.key ? "is-active" : ""}"
+              style="--rarity:${r.color}"
+              title="${r.label}"
+              aria-label="${r.label}"
+              aria-pressed="${value.rarity === r.key ? "true" : "false"}"
+              data-action="set-equipment-slot"
+              data-character-id="${escapeHtml(character.id)}"
+              data-slot-key="${slot.key}"
+              data-field="rarity"
+              data-value="${r.key}"
+            ></button>
+          `
+        ).join("")}
+      </div>
+      <textarea
+        class="eq-slot__notes"
+        rows="2"
+        placeholder="Charges, attunement, sigils, who gave it…"
+        data-action="set-equipment-slot"
+        data-character-id="${escapeHtml(character.id)}"
+        data-slot-key="${slot.key}"
+        data-field="notes"
+      >${escapeHtml(value.notes ?? "")}</textarea>
+    </article>
+  `;
+}
+
+function renderPaperDoll(character) {
+  return `
+    <section class="eq-doll" aria-label="Equipment slots">
+      <div class="eq-doll__silhouette" aria-hidden="true">
+        ${SILHOUETTE_SVG}
+      </div>
+      ${EQUIPMENT_SLOTS.map((slot) => renderSlot(character, slot)).join("")}
+    </section>
+  `;
+}
+
+function renderNotesPanel(character) {
+  return `
+    <section class="eq-notes panel">
+      <header class="eq-notes__head">
+        <h3>Player Notes</h3>
+        <span>Free-form journal — backstory hooks, oaths, debts, anything.</span>
+      </header>
+      <textarea
+        class="eq-notes__body"
+        rows="10"
+        placeholder="Write whatever your character would scrawl in the margins of their journal…"
+        data-action="set-player-notes"
+        data-character-id="${escapeHtml(character.id)}"
+      >${escapeHtml(character.notes ?? "")}</textarea>
+    </section>
+  `;
+}
+
+const SILHOUETTE_SVG = `
+  <svg viewBox="0 0 200 360" xmlns="http://www.w3.org/2000/svg" focusable="false">
+    <defs>
+      <radialGradient id="eqHalo" cx="50%" cy="20%" r="60%">
+        <stop offset="0%" stop-color="rgba(120,200,255,0.55)" />
+        <stop offset="60%" stop-color="rgba(80,120,220,0.18)" />
+        <stop offset="100%" stop-color="rgba(10,15,40,0)" />
+      </radialGradient>
+      <linearGradient id="eqRobe" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="rgba(160,200,255,0.42)" />
+        <stop offset="100%" stop-color="rgba(60,80,170,0.18)" />
+      </linearGradient>
+    </defs>
+    <circle cx="100" cy="60" r="120" fill="url(#eqHalo)" />
+    <path
+      d="M100 40 C 116 40 128 54 128 70 C 128 86 116 100 100 100 C 84 100 72 86 72 70 C 72 54 84 40 100 40 Z
+         M70 110 Q 100 90 130 110 L 150 200 L 140 320 L 110 320 L 105 220 L 95 220 L 90 320 L 60 320 L 50 200 Z"
+      fill="url(#eqRobe)"
+      stroke="rgba(180,220,255,0.55)"
+      stroke-width="1.4"
+    />
+    <path d="M100 110 L 100 270" stroke="rgba(200,230,255,0.35)" stroke-width="1" stroke-dasharray="3 5" />
+  </svg>
+`;
+
+export function renderEquipmentSheetPage(state) {
+  const roster = getRoster(state);
+  const active = getActiveCharacter(state, roster);
+
+  return {
+    title: "Equipment Sheet",
+    subtitle: "Personal loadout for each player character.",
+    content: `
+      <style>${PAGE_STYLES}</style>
+      <section class="eq-stage">
+        <div class="eq-stage__aether" aria-hidden="true"></div>
+        ${renderRosterStrip(state, roster, active)}
+        ${active ? `
+          <article class="eq-sheet">
+            ${renderIdentityBlock(active)}
+            <div class="eq-sheet__body">
+              ${renderPaperDoll(active)}
+              ${renderNotesPanel(active)}
+            </div>
+          </article>
+        ` : `<p class="empty-state">No characters yet. Use "+ New Character" to begin.</p>`}
+      </section>
+    `
+  };
+}
+
+// All styling lives inline so the page slots in without touching the global
+// stylesheet. Token names mirror the Crystal Forge HUD palette.
+const PAGE_STYLES = `
+  .eq-stage {
+    position: relative;
+    width: 100%;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 24px 28px 64px;
+    color: #e5ecff;
+    font-family: inherit;
+  }
+  .eq-stage__aether {
+    position: absolute; inset: -20px 0 0 0;
+    background:
+      radial-gradient(circle at 18% 12%, rgba(120,200,255,0.22), transparent 55%),
+      radial-gradient(circle at 82% 18%, rgba(190,140,255,0.18), transparent 55%),
+      radial-gradient(circle at 50% 100%, rgba(255,180,120,0.12), transparent 60%),
+      linear-gradient(180deg, #0b1024 0%, #131a35 60%, #0a0e22 100%);
+    z-index: 0;
+    border-radius: 24px;
+    box-shadow: inset 0 0 80px rgba(0,0,0,0.55);
+  }
+  .eq-stage > *:not(.eq-stage__aether) { position: relative; z-index: 1; }
+
+  .eq-roster {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    margin-bottom: 18px;
+  }
+  .eq-roster__chip, .eq-roster__add {
+    appearance: none; border: 1px solid rgba(140,170,230,0.25);
+    background: rgba(20,28,60,0.55); color: #e5ecff;
+    padding: 10px 14px; border-radius: 12px; cursor: pointer;
+    text-align: left; display: flex; flex-direction: column; gap: 2px;
+    transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease;
+    backdrop-filter: blur(6px);
+  }
+  .eq-roster__chip strong { font-size: 14px; }
+  .eq-roster__chip span { font-size: 11px; color: #9aa7d4; }
+  .eq-roster__chip.is-active {
+    border-color: rgba(120,220,255,0.85);
+    box-shadow: 0 0 0 1px rgba(120,220,255,0.4), 0 8px 24px rgba(60,120,220,0.25);
+  }
+  .eq-roster__chip:hover { transform: translateY(-1px); }
+  .eq-roster__add { color: #80e7ff; font-weight: 600; }
+
+  .eq-sheet {
+    border: 1px solid rgba(140,170,230,0.22);
+    background: linear-gradient(180deg, rgba(20,28,60,0.7), rgba(12,18,40,0.7));
+    border-radius: 20px; padding: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
+    backdrop-filter: blur(8px);
+  }
+
+  .eq-identity {
+    display: grid;
+    grid-template-columns: 88px 1fr auto;
+    gap: 20px;
+    align-items: start;
+    padding-bottom: 18px;
+    border-bottom: 1px dashed rgba(140,170,230,0.2);
+    margin-bottom: 22px;
+  }
+  .eq-sigil {
+    position: relative; width: 88px; height: 88px; border-radius: 50%;
+    background:
+      radial-gradient(circle at 30% 30%, hsl(var(--eq-hue-a), 80%, 65%), hsl(var(--eq-hue-b), 65%, 35%) 70%);
+    display: grid; place-items: center;
+    color: #fff; font-weight: 800; letter-spacing: 1px;
+    box-shadow: 0 0 24px hsla(var(--eq-hue-a), 80%, 60%, 0.45);
+  }
+  .eq-sigil__ring {
+    position: absolute; inset: -6px; border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 50%;
+  }
+  .eq-sigil__ring--inner { inset: 8px; border-color: rgba(255,255,255,0.2); }
+  .eq-identity__fields { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .eq-identity__row { display: flex; flex-direction: column; gap: 4px; }
+  .eq-identity__row span { font-size: 11px; letter-spacing: 0.08em; color: #9aa7d4; text-transform: uppercase; }
+  .eq-identity__name {
+    font-size: 26px; font-weight: 700;
+    background: transparent; color: #f2f6ff;
+    border: none; border-bottom: 1px solid rgba(140,170,230,0.3);
+    padding: 4px 0; outline: none;
+  }
+  .eq-identity__name:focus { border-color: rgba(120,220,255,0.85); }
+  .eq-identity__grid {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;
+  }
+  .eq-identity__grid label { display: flex; flex-direction: column; gap: 4px; }
+  .eq-identity__grid span { font-size: 11px; letter-spacing: 0.08em; color: #9aa7d4; text-transform: uppercase; }
+  .eq-identity__grid input {
+    background: rgba(10,15,32,0.6); color: #e5ecff;
+    border: 1px solid rgba(140,170,230,0.2); border-radius: 8px;
+    padding: 8px 10px; font-size: 13px; outline: none;
+  }
+  .eq-identity__grid input:focus { border-color: rgba(120,220,255,0.85); }
+  .eq-identity__remove {
+    appearance: none; background: rgba(244,114,182,0.12);
+    border: 1px solid rgba(244,114,182,0.4); color: #fbcfe8;
+    padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px;
+  }
+
+  .eq-sheet__body {
+    display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(280px, 1fr); gap: 24px;
+    align-items: start;
+  }
+
+  .eq-doll {
+    position: relative;
+    display: grid;
+    grid-template-columns: [left] minmax(0,1fr) [center] minmax(0,1fr) [right] minmax(0,1fr);
+    grid-auto-rows: minmax(140px, auto);
+    gap: 14px;
+    padding: 24px;
+    border-radius: 16px;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(120,200,255,0.10), transparent 60%),
+      rgba(8,12,28,0.55);
+    border: 1px solid rgba(140,170,230,0.18);
+    min-height: 740px;
+  }
+  .eq-doll__silhouette {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    pointer-events: none; opacity: 0.7;
+  }
+  .eq-doll__silhouette svg { width: 30%; height: 92%; }
+
+  .eq-slot {
+    position: relative;
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 12px;
+    border-radius: 12px;
+    background: rgba(16,22,46,0.78);
+    border: 1px solid color-mix(in srgb, var(--eq-rarity) 35%, rgba(140,170,230,0.25));
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.25), 0 8px 22px rgba(0,0,0,0.35);
+    backdrop-filter: blur(4px);
+    transition: transform .12s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .eq-slot.is-filled {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--eq-rarity) 70%, transparent),
+      0 0 24px color-mix(in srgb, var(--eq-rarity) 35%, transparent),
+      0 10px 28px rgba(0,0,0,0.4);
+  }
+  .eq-slot:hover { transform: translateY(-1px); }
+
+  .eq-slot__head { display: flex; align-items: center; gap: 8px; }
+  .eq-slot__icon {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: color-mix(in srgb, var(--eq-rarity) 20%, rgba(20,28,60,0.85));
+    display: grid; place-items: center; font-size: 16px;
+  }
+  .eq-slot__label {
+    font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: color-mix(in srgb, var(--eq-rarity) 80%, #e5ecff);
+    font-weight: 700;
+  }
+  .eq-slot__name {
+    background: rgba(6,10,24,0.7); color: #f2f6ff;
+    border: 1px solid rgba(140,170,230,0.18); border-radius: 8px;
+    padding: 8px 10px; font-size: 13px; font-weight: 600; outline: none;
+  }
+  .eq-slot__name::placeholder { color: rgba(160,180,220,0.4); font-style: italic; font-weight: 400; }
+  .eq-slot__name:focus { border-color: var(--eq-rarity); }
+  .eq-slot__rarities { display: flex; gap: 6px; }
+  .eq-slot__rarity {
+    appearance: none; border: 1px solid rgba(255,255,255,0.15);
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--rarity); cursor: pointer; padding: 0;
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .eq-slot__rarity:hover { transform: scale(1.15); }
+  .eq-slot__rarity.is-active {
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.85), 0 0 12px var(--rarity);
+    transform: scale(1.15);
+  }
+  .eq-slot__notes {
+    background: rgba(6,10,24,0.55); color: #d8e1ff;
+    border: 1px dashed rgba(140,170,230,0.22); border-radius: 8px;
+    padding: 8px 10px; font-size: 12px; resize: vertical; outline: none;
+    min-height: 44px; font-family: inherit;
+  }
+  .eq-slot__notes::placeholder { color: rgba(160,180,220,0.4); }
+  .eq-slot__notes:focus { border-style: solid; border-color: var(--eq-rarity); }
+
+  .eq-notes {
+    border-radius: 16px;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(190,140,255,0.10), transparent 60%),
+      rgba(8,12,28,0.55);
+    border: 1px solid rgba(140,170,230,0.18);
+    padding: 18px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .eq-notes__head h3 { margin: 0; font-size: 16px; letter-spacing: 0.04em; }
+  .eq-notes__head span { font-size: 12px; color: #9aa7d4; }
+  .eq-notes__body {
+    flex: 1; min-height: 240px;
+    background: rgba(6,10,24,0.7); color: #e5ecff;
+    border: 1px solid rgba(140,170,230,0.22); border-radius: 10px;
+    padding: 12px; font-size: 13px; line-height: 1.55;
+    resize: vertical; outline: none; font-family: inherit;
+  }
+  .eq-notes__body:focus { border-color: rgba(120,220,255,0.85); }
+
+  @media (max-width: 900px) {
+    .eq-identity { grid-template-columns: 64px 1fr; }
+    .eq-identity__remove { grid-column: 1 / -1; justify-self: end; }
+    .eq-identity__grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .eq-sheet__body { grid-template-columns: 1fr; }
+    .eq-doll {
+      grid-template-columns: 1fr 1fr;
+      grid-auto-rows: auto;
+      min-height: 0;
+    }
+    .eq-slot { grid-column: auto !important; grid-row: auto !important; }
+    .eq-doll__silhouette { display: none; }
+  }
+`;
+
+// ------------------------------------------------------------
+// INTEGRATION NOTES (read me)
+// ------------------------------------------------------------
+// 1. Register the route in `content/Config.js`:
+//      PAGE_ROUTES.push({ key: "equipment", label: "Equipment", path: "./equipment.html" });
+//
+// 2. Add a case to your router/UIRenderer switch:
+//      import { renderEquipmentSheetPage } from "./ui/EquipmentSheetPage.js";
+//      case "equipment": return renderEquipmentSheetPage(state);
+//
+// 3. Initialize state slice (idempotent, in your state bootstrap):
+//      state.playerCharacters ??= [];
+//      state.transientUi ??= {};
+//
+// 4. Wire data-actions in your existing event delegator:
+//      - set-active-player-character  -> state.transientUi.activePlayerCharacterId = data.characterId
+//      - add-player-character         -> push blankCharacter() into state.playerCharacters; set active
+//      - remove-player-character      -> filter out by characterId
+//      - set-player-character-field   -> state.playerCharacters[i][data.field] = event.target.value
+//      - set-equipment-slot           -> state.playerCharacters[i].equipment[data.slotKey][data.field] = value
+//      - set-player-notes             -> state.playerCharacters[i].notes = event.target.value
+//
+// 5. Mobile: the @media (max-width: 900px) breakpoint stacks slots into a 2-col
+//    grid and hides the silhouette. For a true 820px-pinned variant, drop the
+//    media query and let the parent shell scroll horizontally.

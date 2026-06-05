@@ -2,7 +2,7 @@
 // This file wires together state, actions, routing, save/load, manifestation,
 // admin commands, and top-level UI events. Most game-wide behavior eventually
 // passes through here, while lower-level systems keep the domain rules isolated.
-import { AdminConsole } from "./admin/AdminConsole.js?v=2.0.19";
+import { AdminConsole } from "./admin/AdminConsole.js?v=2.0.20";
 import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js";
 import {
   APP_VERSION,
@@ -111,7 +111,7 @@ import {
   updateNpcField,
   updateNpcStat,
   getCrafterCapacity
-} from "./systems/NpcSystem.js?v=2.0.19";
+} from "./systems/NpcSystem.js?v=2.0.20";
 import {
   createCraftingItem,
   collectCraftingItem,
@@ -123,10 +123,10 @@ import {
   clearCollectedCraftingItems,
   pauseCraftingItem,
   resumeCraftingItem,
-} from "./systems/CraftingSystem.js?v=2.0.19";
-import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=2.0.19";
-import { addCooldown, removeCooldown, restartCooldown, markCooldownTriggered, ageCooldown, isCooldownReady, getCooldownReadyDay } from "./systems/CooldownSystem.js?v=2.0.19";
-import { craftingCompletionDay } from "./systems/CraftingSystem.js?v=2.0.19";
+} from "./systems/CraftingSystem.js?v=2.0.20";
+import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=2.0.20";
+import { addCooldown, removeCooldown, restartCooldown, markCooldownTriggered, ageCooldown, isCooldownReady, getCooldownReadyDay } from "./systems/CooldownSystem.js?v=2.0.20";
+import { craftingCompletionDay } from "./systems/CraftingSystem.js?v=2.0.20";
 import {
   addAwakened,
   clearAwakenedImage,
@@ -135,6 +135,10 @@ import {
   updateAwakenedAttribute,
   updateAwakenedField
 } from "./systems/AwakenedSystem.js";
+import {
+  updatePlayerCharacterField,
+  updatePlayerCharacterEquipmentSlot
+} from "./systems/PlayerCharacterSystem.js?v=2.0.20";
 import { getDailyCitySnapshot } from "./systems/CitySnapshotSystem.js";
 import { manifestSelectedRarity } from "./systems/GachaSystem.js";
 import { addHistoryEntry } from "./systems/HistoryLogSystem.js";
@@ -165,14 +169,15 @@ import {
   saveGameState,
   saveManualState,
   validateAndMigrateSave
-} from "./systems/StorageSystem.js?v=2.0.19";
-import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js?v=2.0.19";
+} from "./systems/StorageSystem.js?v=2.0.20";
+import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js?v=2.0.20";
 import { applyCompletedGoalRewards } from "./systems/GoalSystem.js";
 import { forceTownFocus, getMayorAdvice, reopenTownFocusSelection, selectTownFocus, updateTownFocusAvailability } from "./systems/TownFocusSystem.js";
 import { getEmergencyStatus, getCityTrendSummary } from "./systems/ResourceSystem.js";
 import { Toasts } from "./ui/Toasts.js";
 import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js";
-import { UIRenderer } from "./ui/UIRenderer.js?v=2.0.19";
+import { UIRenderer } from "./ui/UIRenderer.js?v=2.0.20";
+import { createBlankPlayerCharacter } from "./ui/EquipmentSheetPage.js?v=2.0.20";
 
 const root = document.querySelector("#app");
 const pageKey = document.body.dataset.page ?? "home";
@@ -4778,6 +4783,74 @@ root.addEventListener("click", async (event) => {
       void audioEngine.playUiAccent("soft");
       actions.openAdmin();
       break;
+
+    // ─── Equipment Sheet (player character loadouts) ────────────────────────
+    case "set-active-player-character": {
+      const characterId = target.dataset.characterId ?? "";
+      if (characterId) {
+        renderer.setTransientUi({ activePlayerCharacterId: characterId }, getCurrentState());
+      }
+      break;
+    }
+    case "add-player-character": {
+      void audioEngine.playUiAccent("soft");
+      const created = createBlankPlayerCharacter();
+      commit((draft) => {
+        if (!Array.isArray(draft.playerCharacters)) {
+          draft.playerCharacters = [];
+        }
+        draft.playerCharacters.push(created);
+      });
+      renderer.setTransientUi({ activePlayerCharacterId: created.id }, getCurrentState());
+      reportSuccess(`${created.name} added to the roster.`);
+      break;
+    }
+    case "remove-player-character": {
+      const characterId = target.dataset.characterId ?? "";
+      if (!characterId) {
+        break;
+      }
+      let removedName = "Character";
+      let nextActiveId = null;
+      commit((draft) => {
+        if (!Array.isArray(draft.playerCharacters)) {
+          draft.playerCharacters = [];
+          return;
+        }
+        const idx = draft.playerCharacters.findIndex((c) => c.id === characterId);
+        if (idx >= 0) {
+          removedName = draft.playerCharacters[idx]?.name || "Character";
+          draft.playerCharacters.splice(idx, 1);
+          // Pick a sensible next active: the one at the same index, or the
+          // previous one, or null if the roster is now empty.
+          const fallback = draft.playerCharacters[idx] ?? draft.playerCharacters[idx - 1] ?? null;
+          nextActiveId = fallback?.id ?? null;
+        }
+      });
+      renderer.setTransientUi({ activePlayerCharacterId: nextActiveId }, getCurrentState());
+      reportSuccess(`${removedName} removed from the roster.`);
+      break;
+    }
+    case "set-equipment-slot": {
+      // Click path: rarity pips carry data-value. Text inputs/textareas don't —
+      // those are handled in the input listener below.
+      if (!Object.prototype.hasOwnProperty.call(target.dataset, "value")) {
+        break;
+      }
+      const characterId = target.dataset.characterId ?? "";
+      const slotKey = target.dataset.slotKey ?? "";
+      const field = target.dataset.field ?? "";
+      const value = target.dataset.value ?? "";
+      if (!characterId || !slotKey || !field) {
+        break;
+      }
+      commit((draft) => {
+        updatePlayerCharacterEquipmentSlot(draft, characterId, slotKey, field, value);
+      });
+      break;
+    }
+    // ────────────────────────────────────────────────────────────────────────
+
     default:
       break;
   }
@@ -5224,6 +5297,43 @@ root.addEventListener("input", (event) => {
       getCurrentState()
     );
   }
+
+  // ─── Equipment Sheet inputs ──────────────────────────────────────────────
+  if (target.dataset.action === "set-player-character-field") {
+    const characterId = target.dataset.characterId ?? "";
+    const field = target.dataset.field ?? "";
+    if (characterId && field) {
+      commit((draft) => {
+        updatePlayerCharacterField(draft, characterId, field, target.value);
+      });
+    }
+  }
+
+  if (target.dataset.action === "set-equipment-slot") {
+    // Input path: text input (name) and textarea (notes). Rarity pips fire on
+    // click and are handled in the click listener (they carry data-value).
+    if (Object.prototype.hasOwnProperty.call(target.dataset, "value")) {
+      return;
+    }
+    const characterId = target.dataset.characterId ?? "";
+    const slotKey = target.dataset.slotKey ?? "";
+    const field = target.dataset.field ?? "";
+    if (characterId && slotKey && field) {
+      commit((draft) => {
+        updatePlayerCharacterEquipmentSlot(draft, characterId, slotKey, field, target.value);
+      });
+    }
+  }
+
+  if (target.dataset.action === "set-player-notes") {
+    const characterId = target.dataset.characterId ?? "";
+    if (characterId) {
+      commit((draft) => {
+        updatePlayerCharacterField(draft, characterId, "notes", target.value);
+      });
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────────
 
 });
 

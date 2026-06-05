@@ -41,10 +41,10 @@ import {
 } from "./ExpeditionSystem.js";
 import { createDefaultVehicleFleet } from "../content/VehicleConfig.js";
 import { normalizeBehemoths } from "./BehemothSystem.js";
-import { normalizeNpcs } from "./NpcSystem.js?v=2.0.19";
+import { normalizeNpcs } from "./NpcSystem.js?v=2.0.20";
 import { normalizeAwakenedRoster } from "./AwakenedSystem.js";
 import { normalizeCraftingItems } from "./CraftingSystem.js";
-import { normalizeCooldowns } from "./CooldownSystem.js?v=2.0.19";
+import { normalizeCooldowns } from "./CooldownSystem.js?v=2.0.20";
 
 const SESSION_STATE_KEY = "crystal-forge-session-state-v1";
 const BUILD_NOTES_SEEN_KEY = "crystal-forge-build-notes-seen-v1";
@@ -138,6 +138,7 @@ export function createInitialState(preset = DEFAULT_START_PRESET) {
     behemoths: [],
     npcs: [],
     awakened: [],
+    playerCharacters: [],
     craftingItems: [],
     cooldowns: [],
     buildings: [],
@@ -207,6 +208,7 @@ export function createSingleCommonCrystalResetState() {
   state.behemoths = [];
   state.npcs = [];
   state.awakened = [];
+  state.playerCharacters = [];
   state.craftingItems = [];
   state.buildings = [];
   state.constructionPriority = [];
@@ -594,6 +596,7 @@ export function validateAndMigrateSave(rawSave) {
     behemoths: normalizeBehemoths(rawSave.behemoths ?? base.behemoths),
     npcs: normalizeNpcs(rawSave.npcs ?? base.npcs),
     awakened: normalizeAwakenedRoster(rawSave.awakened ?? base.awakened),
+    playerCharacters: Array.isArray(rawSave.playerCharacters) ? rawSave.playerCharacters : [],
     craftingItems: normalizeCraftingItems(rawSave.craftingItems ?? []),
     cooldowns: normalizeCooldowns(rawSave.cooldowns ?? []),
     rollTables: normalizeRollTables(rawSave.rollTables),

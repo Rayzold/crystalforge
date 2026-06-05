@@ -1,0 +1,157 @@
+/* themes.css — structural layout + three swappable visual themes.
+   Wrap a doll in .theme-hud / .theme-story / .theme-arcane to reskin it. */
+
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Orbitron:wght@600;700;800&family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&family=Cinzel:wght@600;700&family=Spectral:wght@400;500;600&display=swap');
+
+/* ---------- structural (theme-neutral, var-driven) ---------- */
+.sheet{
+  width:820px; box-sizing:border-box; position:relative; overflow:hidden;
+  display:flex; flex-direction:column; min-height:1180px;
+  background:var(--page-bg); color:var(--ink); font-family:var(--body-font);
+  border-radius:18px;
+}
+.sheet > *{ position:relative; z-index:1; }
+.sheet-foot{ flex:1; }
+
+/* header */
+.sheet-head{ display:flex; align-items:flex-end; gap:18px; padding:24px 28px 16px; }
+.field{ display:flex; flex-direction:column; gap:5px; }
+.field.name{ flex:1; }
+.field.cls{ width:172px; }
+.field.lvl{ width:62px; }
+.field-label{ font-family:var(--title-font); font-size:12px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--label); font-weight:700; }
+.field input{ border:none; background:transparent; border-bottom:2px solid var(--accent);
+  outline:none; color:var(--ink); font-family:var(--title-font); font-size:21px; padding:4px 2px; }
+.field.name input{ font-size:25px; }
+.field.lvl input{ text-align:center; }
+.field input::placeholder{ color:var(--muted); }
+
+/* figure zone */
+.figure-zone{ width:820px; position:relative; }
+.connectors{ position:absolute; inset:0; pointer-events:none; z-index:1; overflow:visible; }
+.conn-line{ stroke:var(--line); stroke-width:2; }
+.conn-stub{ fill:var(--line); }
+.conn-node{ fill:var(--node); filter:drop-shadow(0 0 6px var(--node)); }
+.figure{ position:absolute; z-index:1; }
+.figure .silhouette{ color:var(--fig); filter:var(--fig-filter); }
+
+/* slot boxes */
+.slot{ position:absolute; z-index:3; display:flex; flex-direction:column; justify-content:center;
+  gap:5px; padding:9px 14px; background:var(--box-bg); border:var(--box-bd);
+  border-radius:var(--box-radius,10px); }
+.slot-head{ display:flex; align-items:center; gap:7px; }
+.slot-dot{ width:9px; height:9px; border-radius:50%; background:var(--accent);
+  flex:none; box-shadow:0 0 8px var(--accent); }
+.slot-label{ font-family:var(--title-font); font-size:13px; letter-spacing:.07em;
+  text-transform:uppercase; color:var(--label); font-weight:700; line-height:1; }
+.slot-input{ width:100%; border:none; background:transparent; outline:none; color:var(--ink);
+  font-family:var(--body-font); font-size:16px; border-bottom:1px solid var(--field-line); padding:2px 0; }
+.slot-input::placeholder{ color:var(--muted); }
+
+/* footer */
+.sheet-foot{ display:flex; gap:22px; padding:10px 28px 28px; align-items:stretch; }
+.foot-col{ flex:1; background:var(--panel-bg); border:var(--panel-bd); border-radius:12px; padding:16px 18px; }
+.foot-title{ margin:0 0 14px; font-family:var(--title-font); font-size:17px; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--title-color); font-weight:700; }
+.ars-row{ display:flex; flex-direction:column; gap:4px; margin-bottom:13px; }
+.ars-label{ font-family:var(--title-font); font-size:12px; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--label); font-weight:700; }
+.ars-input{ border:none; background:transparent; border-bottom:1px solid var(--field-line);
+  outline:none; color:var(--ink); font-family:var(--body-font); font-size:16px; padding:3px 0; }
+.coins{ display:flex; flex-direction:column; gap:7px; margin-top:2px; }
+.coin-fields{ display:flex; gap:10px; }
+.coin{ display:flex; align-items:center; gap:6px; background:var(--box-bg); border:var(--box-bd);
+  border-radius:8px; padding:6px 9px; flex:1; }
+.coin input{ width:100%; min-width:0; border:none; background:transparent; outline:none; color:var(--ink);
+  font-family:var(--title-font); font-size:16px; }
+.coin span{ font-family:var(--title-font); font-size:11px; font-weight:700; letter-spacing:.05em; }
+.coin.gp span{ color:#f4b740; } .coin.sp span{ color:#c2c9d4; } .coin.cp span{ color:#d08a52; }
+.pack-list{ display:flex; flex-direction:column; gap:8px; }
+.pack-row{ display:flex; gap:8px; }
+.pack-item{ flex:1; min-width:0; border:none; background:transparent; border-bottom:1px solid var(--field-line);
+  outline:none; color:var(--ink); font-family:var(--body-font); font-size:15px; padding:3px 0; }
+.pack-qty{ width:46px; border:none; background:transparent; border-bottom:1px solid var(--field-line);
+  outline:none; color:var(--ink); text-align:center; font-family:var(--body-font); font-size:15px; }
+
+/* ============================================================ */
+/* THEME A — AETHER HUD (modern game UI)                        */
+/* ============================================================ */
+.theme-hud{
+  --title-font:'Orbitron',sans-serif; --body-font:'Chakra Petch',sans-serif;
+  --page-bg:radial-gradient(125% 85% at 50% 6%, #1b2f4d 0%, #102036 52%, #080f1d 100%);
+  --ink:#dceafa; --muted:#5f7790; --label:#79d3ef; --title-color:#9fe3ff;
+  --accent:#39d4ff; --accent2:#ffb648;
+  --box-bg:linear-gradient(180deg, rgba(30,52,82,.82), rgba(15,28,48,.9));
+  --box-bd:1px solid rgba(80,168,214,.42); --box-radius:8px;
+  --field-line:rgba(120,200,235,.35);
+  --line:rgba(95,205,245,.5); --node:#39d4ff;
+  --fig:#2aa6d6; --fig-filter:drop-shadow(0 0 20px rgba(57,212,255,.45));
+  --panel-bg:rgba(13,26,45,.55); --panel-bd:1px solid rgba(80,168,214,.3);
+}
+.theme-hud .sheet::before{ content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
+  background-image:linear-gradient(rgba(90,180,225,.06) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(90,180,225,.06) 1px,transparent 1px);
+  background-size:34px 34px; mask-image:radial-gradient(circle at 50% 40%, #000 55%, transparent 100%); }
+.theme-hud .slot{ clip-path:polygon(0 0, calc(100% - 11px) 0, 100% 11px, 100% 100%, 11px 100%, 0 calc(100% - 11px));
+  box-shadow:inset 0 0 14px rgba(57,212,255,.06); }
+.theme-hud .slot-label{ text-shadow:0 0 8px rgba(57,212,255,.4); }
+.theme-hud .foot-title{ text-shadow:0 0 10px rgba(57,212,255,.4); }
+
+/* ============================================================ */
+/* THEME B — STORYBOOK (bright playful fantasy)                 */
+/* ============================================================ */
+.theme-story{
+  --title-font:'Baloo 2',cursive; --body-font:'Nunito',sans-serif;
+  --page-bg:#fbf4e6;
+  --ink:#3a302a; --muted:#c3b39c; --label:#7a6657; --title-color:#2f2a26;
+  --accent:#ff6b5e; --accent2:#16b8a6;
+  --box-bg:#ffffff;
+  --box-bd:2.5px solid #2f2a26; --box-radius:15px;
+  --field-line:#e6d8c2;
+  --line:#2f2a26; --node:#ff6b5e;
+  --fig:#19bca9; --fig-filter:drop-shadow(5px 6px 0 rgba(47,42,38,.16));
+  --panel-bg:#ffffff; --panel-bd:2.5px solid #2f2a26;
+}
+.theme-story .sheet::before{ content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(circle at 92% 7%, rgba(244,183,64,.30), transparent 26%),
+    radial-gradient(circle at 5% 26%, rgba(22,184,166,.24), transparent 24%),
+    radial-gradient(circle at 96% 72%, rgba(139,108,239,.20), transparent 26%),
+    radial-gradient(circle at 8% 94%, rgba(255,107,94,.20), transparent 26%); }
+.theme-story .slot{ box-shadow:3px 4px 0 rgba(47,42,38,.13); }
+.theme-story .conn-line{ stroke-width:2.5; stroke-linecap:round; }
+.theme-story .foot-col{ box-shadow:4px 5px 0 rgba(47,42,38,.13); }
+/* playful per-slot dot hues */
+.theme-story .slot:nth-of-type(3n+1) .slot-dot{ background:#ff6b5e; box-shadow:0 0 0 transparent; }
+.theme-story .slot:nth-of-type(3n+2) .slot-dot{ background:#16b8a6; box-shadow:0 0 0 transparent; }
+.theme-story .slot:nth-of-type(3n+3) .slot-dot{ background:#8b6cef; box-shadow:0 0 0 transparent; }
+.theme-story .slot-dot{ box-shadow:none; }
+
+/* ============================================================ */
+/* THEME C — ARCANE ATLAS (jewel tones + gold)                 */
+/* ============================================================ */
+.theme-arcane{
+  --title-font:'Cinzel',serif; --body-font:'Spectral',serif;
+  --page-bg:radial-gradient(125% 95% at 50% 0%, #2c1f58 0%, #1b1239 52%, #100a24 100%);
+  --ink:#ece3ff; --muted:#6c609a; --label:#e8c479; --title-color:#f1d89c;
+  --accent:#e8c479; --accent2:#b58bff;
+  --box-bg:rgba(255,255,255,.045);
+  --box-bd:1px solid rgba(232,196,121,.42); --box-radius:6px;
+  --field-line:rgba(232,196,121,.3);
+  --line:rgba(232,196,121,.5); --node:#e8c479;
+  --fig:#7b5fc4; --fig-filter:drop-shadow(0 0 22px rgba(150,110,255,.5));
+  --panel-bg:rgba(255,255,255,.035); --panel-bd:1px solid rgba(232,196,121,.32);
+}
+.theme-arcane .sheet{ box-shadow:inset 0 0 0 1px rgba(232,196,121,.22), inset 0 0 0 7px rgba(255,255,255,.02); }
+.theme-arcane .sheet::before{ content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
+  background-image:
+    radial-gradient(1.4px 1.4px at 18% 22%, rgba(232,196,121,.5), transparent),
+    radial-gradient(1.4px 1.4px at 78% 14%, rgba(181,139,255,.5), transparent),
+    radial-gradient(1.2px 1.2px at 62% 40%, rgba(232,196,121,.4), transparent),
+    radial-gradient(1.2px 1.2px at 30% 64%, rgba(181,139,255,.4), transparent),
+    radial-gradient(1.4px 1.4px at 86% 58%, rgba(232,196,121,.45), transparent),
+    radial-gradient(1.2px 1.2px at 12% 82%, rgba(232,196,121,.4), transparent),
+    radial-gradient(1.3px 1.3px at 70% 86%, rgba(181,139,255,.4), transparent); }
+.theme-arcane .slot-label{ font-variant:small-caps; letter-spacing:.04em; }
+.theme-arcane .foot-title{ font-variant:small-caps; }

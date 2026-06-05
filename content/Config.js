@@ -53,6 +53,7 @@ export const PAGE_ROUTES = [
   { key: "expeditions", label: "Expeditions", href: "./expeditions.html" },
   { key: "vehicles", label: "Vehicles", href: "./vehicles.html" },
   { key: "uniques", label: "Legends", href: "./uniques.html" },
+  { key: "equipment", label: "Equipment", href: "./equipment.html" },
   { key: "behemoths", label: "Behemoths", href: "./behemoths.html" },
   { key: "npcs", label: "NPCs", href: "./npcs.html" },
   { key: "awakened", label: "Awakened", href: "./awakened.html" },
