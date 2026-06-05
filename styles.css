@@ -7039,9 +7039,43 @@ body:-webkit-full-screen #app {
 }
 
 .page-hero__focus .town-focus-badge {
-  gap: 4px;
-  padding: 8px 10px;
-  border-radius: 14px;
+  /* Compact pill in the hero — the global .town-focus-badge is a stacked
+     column (used in cards/modals) which made this badge 64px tall and
+     pushed the hero to 105px. In the hero we want a single-line ~24px pill. */
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  line-height: 1.2;
+  white-space: nowrap;
+  margin-top: 0;
+}
+
+.page-hero__focus .town-focus-badge span,
+.page-hero__focus .town-focus-badge strong {
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+/* The badge already announces "EXPEDITION CHARTER / Crystal Expedition", so
+   the wrapper's "Town Focus" eyebrow and the long mayor description are
+   redundant in the compact hero — hide them so the hero stays ~60px even
+   when a focus is active. (They're still rendered in panels/modals where
+   .page-hero__focus is not the parent.) */
+.page-hero__focus > span,
+.page-hero__focus > small {
+  display: none !important;
+}
+
+/* Collapse the focus container itself to a compact wrapper around the pill. */
+.page-hero__focus {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  min-width: 0;
+  max-width: none;
 }
 
 .page-hero__focus small {
