@@ -2,7 +2,7 @@
 // This file wires together state, actions, routing, save/load, manifestation,
 // admin commands, and top-level UI events. Most game-wide behavior eventually
 // passes through here, while lower-level systems keep the domain rules isolated.
-import { AdminConsole } from "./admin/AdminConsole.js?v=2.0.20";
+import { AdminConsole } from "./admin/AdminConsole.js?v=2.0.21";
 import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js";
 import {
   APP_VERSION,
@@ -111,7 +111,7 @@ import {
   updateNpcField,
   updateNpcStat,
   getCrafterCapacity
-} from "./systems/NpcSystem.js?v=2.0.20";
+} from "./systems/NpcSystem.js?v=2.0.21";
 import {
   createCraftingItem,
   collectCraftingItem,
@@ -123,10 +123,10 @@ import {
   clearCollectedCraftingItems,
   pauseCraftingItem,
   resumeCraftingItem,
-} from "./systems/CraftingSystem.js?v=2.0.20";
-import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=2.0.20";
-import { addCooldown, removeCooldown, restartCooldown, markCooldownTriggered, ageCooldown, isCooldownReady, getCooldownReadyDay } from "./systems/CooldownSystem.js?v=2.0.20";
-import { craftingCompletionDay } from "./systems/CraftingSystem.js?v=2.0.20";
+} from "./systems/CraftingSystem.js?v=2.0.21";
+import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=2.0.21";
+import { addCooldown, removeCooldown, restartCooldown, markCooldownTriggered, ageCooldown, isCooldownReady, getCooldownReadyDay } from "./systems/CooldownSystem.js?v=2.0.21";
+import { craftingCompletionDay } from "./systems/CraftingSystem.js?v=2.0.21";
 import {
   addAwakened,
   clearAwakenedImage,
@@ -138,7 +138,7 @@ import {
 import {
   updatePlayerCharacterField,
   updatePlayerCharacterEquipmentSlot
-} from "./systems/PlayerCharacterSystem.js?v=2.0.20";
+} from "./systems/PlayerCharacterSystem.js?v=2.0.21";
 import { getDailyCitySnapshot } from "./systems/CitySnapshotSystem.js";
 import { manifestSelectedRarity } from "./systems/GachaSystem.js";
 import { addHistoryEntry } from "./systems/HistoryLogSystem.js";
@@ -169,15 +169,15 @@ import {
   saveGameState,
   saveManualState,
   validateAndMigrateSave
-} from "./systems/StorageSystem.js?v=2.0.20";
-import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js?v=2.0.20";
+} from "./systems/StorageSystem.js?v=2.0.21";
+import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js?v=2.0.21";
 import { applyCompletedGoalRewards } from "./systems/GoalSystem.js";
 import { forceTownFocus, getMayorAdvice, reopenTownFocusSelection, selectTownFocus, updateTownFocusAvailability } from "./systems/TownFocusSystem.js";
 import { getEmergencyStatus, getCityTrendSummary } from "./systems/ResourceSystem.js";
 import { Toasts } from "./ui/Toasts.js";
 import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js";
-import { UIRenderer } from "./ui/UIRenderer.js?v=2.0.20";
-import { createBlankPlayerCharacter } from "./ui/EquipmentSheetPage.js?v=2.0.20";
+import { UIRenderer } from "./ui/UIRenderer.js?v=2.0.21";
+import { createBlankPlayerCharacter } from "./ui/EquipmentSheetPage.js?v=2.0.21";
 
 const root = document.querySelector("#app");
 const pageKey = document.body.dataset.page ?? "home";
