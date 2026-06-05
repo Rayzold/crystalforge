@@ -9,7 +9,7 @@ import {
   getCooldownDaysRemaining,
   getCooldownTriggerChance,
   isCooldownReady
-} from "../systems/CooldownSystem.js?v=2.0.6";
+} from "../systems/CooldownSystem.js?v=2.0.7";
 
 function renderStartDateSelector(startDayOffset) {
   const d = getStructuredDate(startDayOffset);
@@ -163,14 +163,6 @@ function renderCooldownCard(cooldown, dayOffset) {
   if (cooldown.type === "percent") {
     if (cooldown.triggeredDayOffset !== null) {
       primaryInfo = `<span class="cooldown-card__big cooldown-card__big--ready">✓ Triggered on ${formatDate(cooldown.triggeredDayOffset)}</span>`;
-    } else if (triggerChance >= 100) {
-      // Cumulative chance has reached or passed 100% — declare it ready and
-      // prompt the user to roll & confirm via Mark triggered today.
-      const daysPassed = Math.max(0, dayOffset - cooldown.startedDayOffset);
-      primaryInfo = `
-        <span class="cooldown-card__big cooldown-card__big--ready">Ready! (${formatNumber(triggerChance, 0)}% chance)</span>
-        <small>${formatNumber(daysPassed, 0)} d elapsed — roll or just mark it triggered</small>
-      `;
     } else {
       const daysPassed = Math.max(0, dayOffset - cooldown.startedDayOffset);
       const daysToCertain = Math.ceil(100 / (cooldown.percentPerDay || 1));
@@ -178,7 +170,7 @@ function renderCooldownCard(cooldown, dayOffset) {
       const certainIn = certainDay - dayOffset;
       primaryInfo = `
         <span class="cooldown-card__big">${formatNumber(triggerChance, 1)}% chance today</span>
-        <small>${formatNumber(daysPassed, 0)} d elapsed</small>
+        <small>${formatNumber(daysPassed, 0)} d elapsed — rolled every Advance Day</small>
         <small>Certain by ${formatDate(certainDay)} (${certainIn <= 0 ? "now" : `in ${certainIn} d`})</small>
       `;
     }
@@ -194,13 +186,13 @@ function renderCooldownCard(cooldown, dayOffset) {
     }
   }
 
-  const triggerButton = cooldown.type === "percent" && cooldown.triggeredDayOffset === null
-    ? `<button class="button" type="button" data-action="mark-cooldown-triggered" data-cooldown-id="${escapeHtml(cooldown.id)}">Mark triggered today</button>`
-    : "";
+  // Percent cooldowns are rolled automatically each day during the global
+  // Advance Day tick — no manual "Mark triggered today" needed in normal play.
+  // For fixed/dice cooldowns the user explicitly "uses" the effect, which
+  // restarts the cooldown.
   const restartButton = isAvailable || cooldown.triggeredDayOffset !== null
     ? `<button class="button" type="button" data-action="restart-cooldown" data-cooldown-id="${escapeHtml(cooldown.id)}">${cooldown.type === "dice" ? "Use & reroll" : "Use again"}</button>`
     : `<button class="button button--ghost" type="button" data-action="restart-cooldown" data-cooldown-id="${escapeHtml(cooldown.id)}">Restart now</button>`;
-  const dayForwardButton = `<button class="button button--ghost" type="button" data-action="age-cooldown" data-cooldown-id="${escapeHtml(cooldown.id)}" title="Move this cooldown forward by 1 day">+1 d</button>`;
 
   return `
     <article class="cooldown-card ${statusClass}">
@@ -216,8 +208,6 @@ function renderCooldownCard(cooldown, dayOffset) {
         ${cooldown.notes ? `<p class="cooldown-card__notes">${escapeHtml(cooldown.notes)}</p>` : ""}
       </div>
       <footer class="cooldown-card__footer">
-        ${dayForwardButton}
-        ${triggerButton}
         ${restartButton}
       </footer>
     </article>

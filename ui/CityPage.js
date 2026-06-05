@@ -25,7 +25,7 @@ import {
 } from "../systems/ConstructionSystem.js";
 import { getEmergencyStatus, getGoodsSummary } from "../systems/ResourceSystem.js";
 import { getWorkforceCategoryLabel, getWorkforceSummary } from "../systems/WorkforceSystem.js";
-import { getVisibleBuildings, renderBuildingGrid } from "./BuildingGrid.js?v=2.0.6";
+import { getVisibleBuildings, renderBuildingGrid } from "./BuildingGrid.js?v=2.0.7";
 import { renderCalendarPanel } from "./CalendarPanel.js";
 import { renderDistrictPanel } from "./DistrictPanel.js";
 import { renderDriftEvolutionPanel } from "./DriftEvolutionPanel.js";

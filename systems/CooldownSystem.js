@@ -161,3 +161,27 @@ export function isCooldownReady(cooldown, dayOffset) {
   const remaining = getCooldownDaysRemaining(cooldown, dayOffset);
   return remaining !== null && remaining <= 0;
 }
+
+/**
+ * Rolls every still-cooling percent cooldown once for the given dayOffset.
+ * If a roll succeeds, marks the cooldown as triggered on that day. Returns
+ * the list of cooldowns that triggered this tick (for toast/notification).
+ *
+ * Called by TimeSystem.runTimeAdvance once per day so a multi-day advance
+ * gets one roll per day per cooldown (matching the cumulative model:
+ * day 1 = 1% chance, day 2 = 2%, …, day 100 = guaranteed).
+ */
+export function rollPercentCooldownsForDay(state, dayOffset) {
+  const triggered = [];
+  for (const cooldown of state.cooldowns ?? []) {
+    if (cooldown.type !== "percent") continue;
+    if (cooldown.triggeredDayOffset !== null) continue;
+    const chance = getCooldownTriggerChance(cooldown, dayOffset);
+    if (chance <= 0) continue;
+    if (Math.random() * 100 < chance) {
+      cooldown.triggeredDayOffset = dayOffset;
+      triggered.push(cooldown);
+    }
+  }
+  return triggered;
+}

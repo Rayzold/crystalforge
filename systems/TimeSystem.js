@@ -10,6 +10,7 @@ import { applyDailyResources } from "./ResourceSystem.js";
 import { captureDailyCitySnapshot } from "./CitySnapshotSystem.js";
 import { applyTownFocusDailyEffects, updateTownFocusAvailability } from "./TownFocusSystem.js";
 import { getNewlyCompletedCraftingItems } from "./CraftingSystem.js";
+import { rollPercentCooldownsForDay } from "./CooldownSystem.js?v=2.0.7";
 
 function runTimeAdvance(state, days, stepKey = null) {
   const completions = [];
@@ -55,6 +56,10 @@ function runTimeAdvance(state, days, stepKey = null) {
     recalculateCityStats(state);
     updateTownFocusAvailability(state);
     captureDailyCitySnapshot(state);
+    // Roll each still-cooling percent cooldown ONCE for today. The
+    // UIRenderer's readiness watcher detects the resulting "ready" transition
+    // and fires the splash toast — no separate notification path needed.
+    rollPercentCooldownsForDay(state, state.calendar.dayOffset);
     triggeredEvents.push(...processScheduledEvents(state));
     triggeredEvents.push(...maybeTriggerHolidayEvents(state));
   }
