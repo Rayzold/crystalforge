@@ -16600,7 +16600,80 @@ body[data-theme="silver"] .collapse-toggle {
   font-size: 0.86rem;
 }
 
-.hex-map--legacy-fallback { display: none !important; }
+.hex-map--legacy-fallback,
+.hex-map--legacy-disabled { display: none !important; }
+
+/* District summary cards (Part 2 of redesign-townmap.md) */
+.district-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.district-card {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(141, 214, 255, 0.04);
+  border: 1px solid rgba(141, 214, 255, 0.12);
+}
+
+.district-card__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.district-card__swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex: 0 0 12px;
+}
+
+.district-card__name {
+  flex: 1 1 auto;
+  font-weight: 600;
+  font-size: 0.86rem;
+  color: var(--text);
+}
+
+.district-card__count {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.district-card__bar {
+  height: 4px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.district-card__fill {
+  height: 100%;
+  border-radius: 3px;
+}
+
+.district-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.district-card__awaiting {
+  color: var(--accent-gold, #f0c482);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.district-card__sub {
+  color: var(--muted);
+  font-size: 0.74rem;
+}
 
 /* ============================================================================
  * Cooldowns page

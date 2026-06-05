@@ -797,6 +797,107 @@ function renderResonanceOverlay(state, cells, size, selectedBuilding, mapOverlay
     .join("");
 }
 
+// District summary cards (Part 2 of redesign-townmap.md). One card per
+// district the city actually has buildings in, plus a Frontier / Bastion
+// summary so the GM can read map composition at a glance.
+function renderDistrictSummaryCards(state, cells) {
+  const definitions = state.districts?.definitions ?? {};
+  const counts = {};
+  const placedCounts = {};
+  for (const cell of cells) {
+    if (cell.isReserved) continue;
+    const isBastion = cell.isFortificationRing;
+    const zoneKey = isBastion ? "__bastion" : "__frontier";
+    counts[zoneKey] = (counts[zoneKey] ?? 0) + 1;
+  }
+  for (const b of state.buildings ?? []) {
+    if (!b.mapPosition) continue;
+    const cell = cells.find((c) => c.q === b.mapPosition.q && c.r === b.mapPosition.r);
+    const zoneKey = cell?.isFortificationRing ? "__bastion" : "__frontier";
+    placedCounts[zoneKey] = (placedCounts[zoneKey] ?? 0) + 1;
+    if (b.district) {
+      counts[b.district] = (counts[b.district] ?? 0) + 1;
+      placedCounts[b.district] = (placedCounts[b.district] ?? 0) + 1;
+    }
+  }
+  const awaitingByDistrict = {};
+  for (const b of state.buildings ?? []) {
+    if (b.mapPosition) continue;
+    const key = b.district || "__unassigned";
+    awaitingByDistrict[key] = (awaitingByDistrict[key] ?? 0) + 1;
+  }
+
+  const cards = [];
+  // Frontier / Bastion zone cards always appear so the GM sees ring usage.
+  const frontierTotal = counts.__frontier ?? 0;
+  const frontierPlaced = placedCounts.__frontier ?? 0;
+  const bastionTotal = counts.__bastion ?? 0;
+  const bastionPlaced = placedCounts.__bastion ?? 0;
+  const frontierPct = frontierTotal > 0 ? Math.round((frontierPlaced / frontierTotal) * 100) : 0;
+  const bastionPct = bastionTotal > 0 ? Math.round((bastionPlaced / bastionTotal) * 100) : 0;
+  cards.push({
+    key: "__frontier",
+    name: "Frontier District",
+    color: "#94a3b8",
+    placed: frontierPlaced,
+    total: frontierTotal,
+    pct: frontierPct,
+    awaiting: Object.values(awaitingByDistrict).reduce((a, b) => a + b, 0),
+    sub: "Inner ring · city plots"
+  });
+  cards.push({
+    key: "__bastion",
+    name: "Bastion Ring",
+    color: "#e58cff",
+    placed: bastionPlaced,
+    total: bastionTotal,
+    pct: bastionPct,
+    awaiting: 0,
+    sub: `${bastionTotal - bastionPlaced} gaps remaining`
+  });
+  // Per-district cards (only those that have either a definition or any building).
+  const districtKeys = new Set([
+    ...Object.keys(definitions),
+    ...Object.keys(placedCounts).filter((k) => !k.startsWith("__"))
+  ]);
+  for (const dKey of districtKeys) {
+    const def = definitions[dKey] ?? {};
+    const placed = placedCounts[dKey] ?? 0;
+    if (!placed && !def.name) continue;
+    cards.push({
+      key: dKey,
+      name: def.name || dKey,
+      color: def.color || "var(--accent)",
+      placed,
+      total: placed, // district has no fixed cap; show as 100%
+      pct: 100,
+      awaiting: awaitingByDistrict[dKey] ?? 0,
+      sub: def.summary || ""
+    });
+  }
+
+  return `
+    <section class="district-cards" aria-label="District summary">
+      ${cards.map((c) => `
+        <article class="district-card" data-district="${escapeHtml(c.key)}">
+          <header class="district-card__header">
+            <span class="district-card__swatch" style="background:${escapeHtml(c.color)}"></span>
+            <span class="district-card__name">${escapeHtml(c.name)}</span>
+            <span class="district-card__count">${formatNumber(c.placed, 0)}${c.total !== c.placed ? ` / ${formatNumber(c.total, 0)}` : ""}</span>
+          </header>
+          ${c.total > 0 && c.key.startsWith("__") ? `
+            <div class="district-card__bar"><div class="district-card__fill" style="width:${c.pct}%; background:${escapeHtml(c.color)}"></div></div>
+          ` : ""}
+          <div class="district-card__meta">
+            ${c.awaiting > 0 ? `<span class="district-card__awaiting">${formatNumber(c.awaiting, 0)} building${c.awaiting === 1 ? "" : "s"} awaiting placement</span>` : ""}
+            ${c.sub ? `<span class="district-card__sub">${escapeHtml(c.sub)}</span>` : ""}
+          </div>
+        </article>
+      `).join("")}
+    </section>
+  `;
+}
+
 function renderMapPresets(state) {
   const presets = state.settings?.mapPresets ?? [];
   return `
@@ -1143,163 +1244,6 @@ export function renderHexMap(state) {
       </div>
       <div class="hex-map-wrap hex-map-wrap--canvas">
         <div class="town-map-canvas-mount" data-town-map-mount role="img" aria-label="City hex map"></div>
-        <!--
-          Canvas-backed map (HexMapCanvas.js) replaces the SVG hex grid. We
-          keep the rest of the SVG render commented-as-fallback below — it's
-          only used when JS or the canvas controller fails to attach.
-        -->
-        <svg
-          class="hex-map hex-map--legacy-fallback ${placementModeActive ? "is-placement-mode" : ""} ${isPlacementPlannerActive ? "is-placement-lite" : ""} is-overlay-${overlaySlug}"
-          style="display:none;transform: translate(${mapPanX}px, ${mapPanY}px) scale(${mapZoom}); transform-origin: 50% 50%;"
-          viewBox="${bounds.minX} ${bounds.minY} ${bounds.width} ${bounds.height}"
-          role="img"
-          aria-label="City hex map (fallback)"
-        >
-          <g class="hex-map__zone-fields">
-            ${renderZoneField(cells, size, "hex-map__zone-field hex-map__zone-field--city", (cell) => !cell.isReserved && !cell.isFortificationRing)}
-            ${renderZoneField(cells, size, "hex-map__zone-field hex-map__zone-field--bastion", (cell) => cell.isFortificationRing, 1.06)}
-          </g>
-          ${
-            renderMapDecor
-              ? `
-                <g class="hex-map__bastion-links">
-                  ${renderBastionLinks(cells, size)}
-                </g>
-                <g class="hex-map__district-fields">
-                  ${renderDistrictInfluenceField(state, cells, size)}
-                </g>
-                <g class="hex-map__district-labels">
-                  ${renderDistrictLabels(state, size)}
-                </g>
-                <g class="hex-map__roads">
-                  ${renderRoads(state, size)}
-                </g>
-                <g class="hex-map__overlay-tags">
-                  ${renderResonanceOverlay(state, cells, size, selectedBuilding, mapOverlay)}
-                </g>
-              `
-              : ""
-          }
-          ${cells
-            .map((cell) => {
-              const center = axialToPixel(cell.q, cell.r, size);
-              const theme = MAP_TERRAIN_THEMES[cell.terrain] ?? MAP_TERRAIN_THEMES.neutral;
-              const building = getBuildingAtCell(state, cell.q, cell.r);
-              const isSelected =
-                selectedPosition && selectedPosition.q === cell.q && selectedPosition.r === cell.r;
-              const isFocusedCell =
-                state.ui.selectedMapCell &&
-                state.ui.selectedMapCell.q === cell.q &&
-                state.ui.selectedMapCell.r === cell.r;
-              const fill = building ? RARITY_COLORS[building.rarity] : theme.fill;
-              const title = cell.isReserved
-                ? "Forge core"
-                : building
-                  ? `${building.displayName} (${building.rarity} / ${building.district})`
-                  : cell.isFortificationRing
-                    ? `Bastion hex ${cell.q}, ${cell.r}`
-                    : `City plot ${cell.q}, ${cell.r}`;
-              const districtColor =
-                building && state.districts.definitions[building.district]
-                  ? state.districts.definitions[building.district].color
-                  : null;
-              const isPulseCell =
-                adjacencyPulse &&
-                adjacencyPulse.q === cell.q &&
-                adjacencyPulse.r === cell.r &&
-                adjacencyPulse.buildingId === building?.id;
-              const isSelectedEmptyCell =
-                selectedMapCell &&
-                selectedMapCell.q === cell.q &&
-                selectedMapCell.r === cell.r &&
-                !building;
-              const canTargetCell =
-                selectedBuilding &&
-                !cell.isReserved &&
-                (!cell.isFortificationRing || selectedBuildingCanUseBastion) &&
-                (!building || building.id === selectedBuilding.id);
-              const placementState =
-                placementModeActive && selectedBuilding
-                  ? canTargetCell
-                    ? "is-placement-valid"
-                    : "is-placement-dim"
-                  : "";
-              const overlayState = renderMapDecor ? getOverlayCellClass(state, mapOverlay, cell, building, selectedBuilding) : "";
-              const isPlacementFlash =
-                state.transientUi?.mapPlacementPulseCell?.q === cell.q &&
-                state.transientUi?.mapPlacementPulseCell?.r === cell.r;
-
-              return `
-                <g
-                  class="hex-map__cell ${cell.isReserved ? "is-reserved" : ""} ${cell.isFortificationRing ? "is-fortification-ring" : "is-city-plot"} ${building ? "is-occupied" : ""} ${isSelected ? "is-selected" : ""} ${isFocusedCell ? "is-focused" : ""} ${adjacentKeys.has(cell.key) ? "is-adjacent" : ""} ${isPulseCell ? "is-resonance-pulse" : ""} ${isSelectedEmptyCell && selectedBuilding ? (selectedPreviewValidation?.ok ? "is-preview-valid" : "is-preview-invalid") : ""} ${placementState} ${overlayState} ${isPlacementFlash ? "is-placement-flash" : ""}"
-                  data-action="select-map-cell"
-                  data-q="${cell.q}"
-                  data-r="${cell.r}"
-                >
-                  <title>${escapeHtml(title)}</title>
-                  <polygon
-                    class="hex-map__cell-face"
-                    points="${hexPoints(center.x, center.y, size)}"
-                    fill="${fill}"
-                    stroke="${building ? MAP_CONFIG.occupiedOutlineColor : theme.stroke}"
-                    stroke-width="${isSelected || isFocusedCell ? 3 : 1.5}"
-                    aria-label="${escapeHtml(title)}"
-                  ></polygon>
-                  <polygon
-                    class="hex-map__cell-bevel"
-                    points="${hexPoints(center.x, center.y, size * 0.86)}"
-                    fill="none"
-                  ></polygon>
-                  ${renderMapDecor && mapOverlay === "Water" ? renderWaterOverlay(cell, center.x, center.y) : ""}
-                  ${
-                    isSelectedEmptyCell && selectedBuilding
-                      ? renderPlacementPreview(selectedBuilding, cell, center, size, Boolean(selectedPreviewValidation?.ok))
-                      : ""
-                  }
-                  ${building ? renderBuildingThumb(building, center.x, center.y, size) : ""}
-                  ${building && renderMapDecor ? renderDistrictCrest(building, districtColor, center.x, center.y, size) : ""}
-                  ${
-                    building
-                      ? renderMapDecor && districtColor
-                        ? `
-                          <polygon
-                            class="hex-map__district-aura"
-                            points="${hexPoints(center.x, center.y, size * 0.92)}"
-                            fill="none"
-                            stroke="${districtColor}"
-                            stroke-width="5"
-                            style="--district-color:${districtColor}"
-                          ></polygon>
-                          <polygon
-                            points="${hexPoints(center.x, center.y, size * 0.8)}"
-                            fill="none"
-                            stroke="${districtColor}"
-                            stroke-width="3"
-                          ></polygon>
-                        `
-                        : ""
-                      : renderTerrainGlyph(cell, center.x, center.y)
-                  }
-                  ${renderMapDecor ? renderBuildingMapBadges(building, state, center.x, center.y, size) : ""}
-                  ${
-                    cell.isReserved
-                      ? `<text x="${center.x}" y="${center.y + 5}" text-anchor="middle" class="hex-map__core-text">${cell.q === 0 && cell.r === 0 ? "FORGE" : ""}</text>`
-                      : ""
-                  }
-                   ${
-                     isPulseCell
-                       ? `<g class="hex-map__pulse-tag" aria-hidden="true">
-                           <circle cx="${center.x}" cy="${center.y - size * 0.48}" r="${size * 0.3}"></circle>
-                           <text x="${center.x}" y="${center.y - size * 0.42}" text-anchor="middle">+${formatNumber((adjacencyPulse.gain ?? 0) * 100, 1)}%</text>
-                         </g>`
-                       : ""
-                   }
-                   ${isPlacementFlash ? renderPlacementCelebrationBurst(state.transientUi?.mapPlacementPulseCell, center, size) : ""}
-                </g>
-              `;
-            })
-            .join("")}
-        </svg>
         ${renderPlacementPicker(state, selectedMapCell)}
       </div>
       ${
@@ -1319,7 +1263,8 @@ export function renderHexMap(state) {
       <div class="hex-map-panel__tooltip">
         ${renderCellInspector(state, focalMapCell, selectedBuilding)}
       </div>
-      ${renderMapDecor ? renderMapPresets(state) : ""}
+      ${renderDistrictSummaryCards(state, cells)}
+      ${/* Map Presets removed per redesign-townmap.md Part 2. */ ""}
       <div class="hex-map-panel__actions">
         <button class="button" data-action="auto-place-buildings">Auto Place Unplaced</button>
         <button class="button button--ghost" data-action="clear-building-placement">Clear Selected Placement</button>

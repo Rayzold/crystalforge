@@ -11,7 +11,7 @@ import {
   getNpcStatusDetail,
   getNpcStatusLabel
 } from "../content/NpcConfig.js";
-import { NPC_CRAFTER_LEVELS } from "../systems/NpcSystem.js?v=2.0.10";
+import { NPC_CRAFTER_LEVELS } from "../systems/NpcSystem.js?v=2.0.12";
 import { escapeHtml, formatNumber } from "../engine/Utils.js";
 import { formatDate } from "../systems/CalendarSystem.js";
 
