@@ -2,7 +2,7 @@
 // This file wires together state, actions, routing, save/load, manifestation,
 // admin commands, and top-level UI events. Most game-wide behavior eventually
 // passes through here, while lower-level systems keep the domain rules isolated.
-import { AdminConsole } from "./admin/AdminConsole.js?v=2.0.7";
+import { AdminConsole } from "./admin/AdminConsole.js?v=2.0.8";
 import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js";
 import {
   APP_VERSION,
@@ -111,7 +111,7 @@ import {
   updateNpcField,
   updateNpcStat,
   getCrafterCapacity
-} from "./systems/NpcSystem.js?v=2.0.7";
+} from "./systems/NpcSystem.js?v=2.0.8";
 import {
   createCraftingItem,
   collectCraftingItem,
@@ -123,9 +123,10 @@ import {
   clearCollectedCraftingItems,
   pauseCraftingItem,
   resumeCraftingItem,
-} from "./systems/CraftingSystem.js?v=2.0.7";
-import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=2.0.7";
-import { addCooldown, removeCooldown, restartCooldown, markCooldownTriggered, ageCooldown } from "./systems/CooldownSystem.js?v=2.0.7";
+} from "./systems/CraftingSystem.js?v=2.0.8";
+import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=2.0.8";
+import { addCooldown, removeCooldown, restartCooldown, markCooldownTriggered, ageCooldown, isCooldownReady, getCooldownReadyDay } from "./systems/CooldownSystem.js?v=2.0.8";
+import { craftingCompletionDay } from "./systems/CraftingSystem.js?v=2.0.8";
 import {
   addAwakened,
   clearAwakenedImage,
@@ -164,14 +165,14 @@ import {
   saveGameState,
   saveManualState,
   validateAndMigrateSave
-} from "./systems/StorageSystem.js?v=2.0.7";
-import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js?v=2.0.7";
+} from "./systems/StorageSystem.js?v=2.0.8";
+import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js?v=2.0.8";
 import { applyCompletedGoalRewards } from "./systems/GoalSystem.js";
 import { forceTownFocus, getMayorAdvice, reopenTownFocusSelection, selectTownFocus, updateTownFocusAvailability } from "./systems/TownFocusSystem.js";
 import { getEmergencyStatus, getCityTrendSummary } from "./systems/ResourceSystem.js";
 import { Toasts } from "./ui/Toasts.js";
 import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js";
-import { UIRenderer } from "./ui/UIRenderer.js?v=2.0.7";
+import { UIRenderer } from "./ui/UIRenderer.js?v=2.0.8";
 
 const root = document.querySelector("#app");
 const pageKey = document.body.dataset.page ?? "home";
@@ -762,9 +763,40 @@ function createTurnSummary(previousState, nextState, days, advanceResult = null)
     .slice(0, 3);
   const nextAttention = getMayorAdvice(nextState).slice(0, 2);
 
+  // Newly-ready things — items / cooldowns that flipped from "still cooking"
+  // to "use it now" during this advance. Surfaced in a dominant header strip
+  // at the top of the Turn Digest.
+  const previousDay = previousState.calendar?.dayOffset ?? 0;
+  const nextDay = nextState.calendar?.dayOffset ?? 0;
+  const prevCraftingMap = new Map((previousState.craftingItems ?? []).map((it) => [it.id, it]));
+  const newlyReadyCrafting = (nextState.craftingItems ?? [])
+    .filter((it) => it.status === "active" && nextDay >= craftingCompletionDay(it))
+    .filter((it) => {
+      const prev = prevCraftingMap.get(it.id);
+      // It wasn't ready before this advance (either didn't exist, was paused,
+      // or its completion day hadn't passed yet).
+      if (!prev) return true;
+      if (prev.status !== "active") return true;
+      return previousDay < craftingCompletionDay(prev);
+    })
+    .map((it) => ({ id: it.id, name: it.name }))
+    .slice(0, 6);
+  const prevCooldownMap = new Map((previousState.cooldowns ?? []).map((c) => [c.id, c]));
+  const newlyReadyCooldowns = (nextState.cooldowns ?? [])
+    .filter((c) => isCooldownReady(c, nextDay))
+    .filter((c) => {
+      const prev = prevCooldownMap.get(c.id);
+      if (!prev) return true;
+      return !isCooldownReady(prev, previousDay);
+    })
+    .map((c) => ({ id: c.id, name: c.name, type: c.type }))
+    .slice(0, 6);
+
   return {
     days,
     dateLabel: formatDate(nextState.calendar.dayOffset),
+    newlyReadyCrafting,
+    newlyReadyCooldowns,
     resourceDeltas: resourceKeys.map(([key, label]) => {
       const before = Number(previousState.resources?.[key] ?? 0);
       const after = Number(nextState.resources?.[key] ?? 0);

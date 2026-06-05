@@ -12899,11 +12899,115 @@ body:-webkit-full-screen #app {
   gap: 0.85rem;
 }
 
-.turn-summary-modal__deltas,
+.turn-summary-modal__deltas {
+  /* All five resources on one row by default; tighten min-width so they fit
+     in the modal's interior even at 720px wide. Wraps gracefully if it can't. */
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+@media (max-width: 720px) {
+  .turn-summary-modal__deltas {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+}
+
+.turn-summary-modal__deltas .turn-summary__delta {
+  padding: 0.55rem 0.7rem;
+}
+
 .turn-summary-modal__facts {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 0.75rem;
+}
+
+/* Ready Now header strip — sits at the top of the digest, dominant. */
+.turn-summary-modal__ready {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(112, 241, 194, 0.16), rgba(141, 214, 255, 0.10));
+  border: 1px solid rgba(112, 241, 194, 0.36);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(112, 241, 194, 0.08) inset;
+}
+
+.turn-summary-modal__ready-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.turn-summary-modal__ready-eyebrow {
+  font-family: var(--label-font);
+  font-size: 0.78rem;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--success);
+}
+
+.turn-summary-modal__ready-head strong {
+  font-size: 0.98rem;
+  color: var(--text);
+}
+
+.turn-summary-modal__ready-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.5rem;
+}
+
+.turn-summary-modal__ready-chip {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(112, 241, 194, 0.30);
+  background: rgba(112, 241, 194, 0.08);
+  color: var(--text);
+  text-decoration: none;
+  transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+
+.turn-summary-modal__ready-chip:hover {
+  background: rgba(112, 241, 194, 0.18);
+  border-color: var(--success);
+  transform: translateY(-1px);
+}
+
+.turn-summary-modal__ready-chip--cooldown {
+  border-color: rgba(141, 214, 255, 0.32);
+  background: rgba(141, 214, 255, 0.10);
+}
+
+.turn-summary-modal__ready-chip--cooldown:hover {
+  background: rgba(141, 214, 255, 0.20);
+  border-color: var(--accent);
+}
+
+.turn-summary-modal__ready-tag {
+  font-family: var(--label-font);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.turn-summary-modal__ready-chip strong {
+  font-size: 0.92rem;
+  color: var(--text);
+}
+
+.turn-summary-modal__ready-chip em {
+  font-size: 0.74rem;
+  font-style: normal;
+  color: var(--success);
+}
+
+.turn-summary-modal__ready-chip--cooldown em {
+  color: var(--accent);
 }
 
 .turn-summary__delta,

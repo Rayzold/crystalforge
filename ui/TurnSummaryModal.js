@@ -15,6 +15,36 @@ function renderDeltaRows(deltas = []) {
     .join("");
 }
 
+function renderReadyNowSection(summary) {
+  const craftingReady = summary.newlyReadyCrafting ?? [];
+  const cooldownsReady = summary.newlyReadyCooldowns ?? [];
+  if (!craftingReady.length && !cooldownsReady.length) return "";
+  return `
+    <section class="turn-summary-modal__ready">
+      <div class="turn-summary-modal__ready-head">
+        <span class="turn-summary-modal__ready-eyebrow">⏱ Ready Now</span>
+        <strong>${craftingReady.length + cooldownsReady.length} new ${craftingReady.length + cooldownsReady.length === 1 ? "thing" : "things"} ready to use</strong>
+      </div>
+      <div class="turn-summary-modal__ready-grid">
+        ${craftingReady.map((it) => `
+          <a class="turn-summary-modal__ready-chip turn-summary-modal__ready-chip--craft" href="./crafting.html">
+            <span class="turn-summary-modal__ready-tag">Crafting</span>
+            <strong>${escapeHtml(it.name)}</strong>
+            <em>Collect →</em>
+          </a>
+        `).join("")}
+        ${cooldownsReady.map((c) => `
+          <a class="turn-summary-modal__ready-chip turn-summary-modal__ready-chip--cooldown" href="./cooldowns.html">
+            <span class="turn-summary-modal__ready-tag">${escapeHtml(c.type === "percent" ? "Triggered" : "Cooldown")}</span>
+            <strong>${escapeHtml(c.name)}</strong>
+            <em>Use →</em>
+          </a>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
 function renderChangeFacts(summary) {
   const items = [
     {
@@ -144,6 +174,7 @@ export function renderTurnSummaryModal(state) {
           <p>${escapeHtml(summary.dateLabel)}</p>
         </div>
         <div class="turn-summary-modal__body">
+          ${renderReadyNowSection(summary)}
           <section class="turn-summary-modal__section">
             <div class="turn-summary-modal__section-head">
               <strong>What Changed</strong>
