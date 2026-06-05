@@ -7,8 +7,9 @@ import { MONTHS, DAYS_PER_MONTH } from "../content/CalendarConfig.js";
 import {
   getCooldownReadyDay,
   getCooldownDaysRemaining,
-  getCooldownTriggerChance
-} from "../systems/CooldownSystem.js?v=2.0.2";
+  getCooldownTriggerChance,
+  isCooldownReady
+} from "../systems/CooldownSystem.js?v=2.0.3";
 
 function renderStartDateSelector(startDayOffset) {
   const d = getStructuredDate(startDayOffset);
@@ -139,11 +140,12 @@ function renderCooldownCard(cooldown, dayOffset) {
   const ready = getCooldownReadyDay(cooldown);
   const daysLeft = getCooldownDaysRemaining(cooldown, dayOffset);
   const triggerChance = getCooldownTriggerChance(cooldown, dayOffset);
-  const isAvailable =
-    cooldown.type === "percent"
-      ? cooldown.triggeredDayOffset !== null
-      : daysLeft !== null && daysLeft <= 0;
-  const statusClass = isAvailable ? "is-ready" : daysLeft !== null && daysLeft <= 2 ? "is-soon" : "";
+  const isAvailable = isCooldownReady(cooldown, dayOffset);
+  const statusClass = isAvailable
+    ? "is-ready"
+    : daysLeft !== null && daysLeft <= 2
+      ? "is-soon"
+      : "";
 
   let summaryParts = [];
   if (cooldown.type === "fixed") {
@@ -160,10 +162,17 @@ function renderCooldownCard(cooldown, dayOffset) {
   let primaryInfo = "";
   if (cooldown.type === "percent") {
     if (cooldown.triggeredDayOffset !== null) {
-      primaryInfo = `<span class="cooldown-card__big">Triggered on ${formatDate(cooldown.triggeredDayOffset)}</span>`;
+      primaryInfo = `<span class="cooldown-card__big cooldown-card__big--ready">✓ Triggered on ${formatDate(cooldown.triggeredDayOffset)}</span>`;
+    } else if (triggerChance >= 100) {
+      // Cumulative chance has reached or passed 100% — declare it ready and
+      // prompt the user to roll & confirm via Mark triggered today.
+      const daysPassed = Math.max(0, dayOffset - cooldown.startedDayOffset);
+      primaryInfo = `
+        <span class="cooldown-card__big cooldown-card__big--ready">Ready! (${formatNumber(triggerChance, 0)}% chance)</span>
+        <small>${formatNumber(daysPassed, 0)} d elapsed — roll or just mark it triggered</small>
+      `;
     } else {
       const daysPassed = Math.max(0, dayOffset - cooldown.startedDayOffset);
-      // Days needed for chance to reach 100% (i.e. when triggering is certain).
       const daysToCertain = Math.ceil(100 / (cooldown.percentPerDay || 1));
       const certainDay = cooldown.startedDayOffset + daysToCertain;
       const certainIn = certainDay - dayOffset;
@@ -176,7 +185,7 @@ function renderCooldownCard(cooldown, dayOffset) {
   } else if (ready !== null) {
     if (daysLeft <= 0) {
       const overdue = Math.abs(daysLeft);
-      primaryInfo = `<span class="cooldown-card__big cooldown-card__big--ready">Ready to use${overdue > 0 ? ` (${overdue} d ago)` : ""}</span>`;
+      primaryInfo = `<span class="cooldown-card__big cooldown-card__big--ready">✓ Ready to use${overdue > 0 ? ` (${overdue} d ago)` : ""}</span>`;
     } else {
       primaryInfo = `
         <span class="cooldown-card__big">${formatNumber(daysLeft, 0)} d remaining</span>
@@ -191,6 +200,7 @@ function renderCooldownCard(cooldown, dayOffset) {
   const restartButton = isAvailable || cooldown.triggeredDayOffset !== null
     ? `<button class="button" type="button" data-action="restart-cooldown" data-cooldown-id="${escapeHtml(cooldown.id)}">${cooldown.type === "dice" ? "Use & reroll" : "Use again"}</button>`
     : `<button class="button button--ghost" type="button" data-action="restart-cooldown" data-cooldown-id="${escapeHtml(cooldown.id)}">Restart now</button>`;
+  const dayForwardButton = `<button class="button button--ghost" type="button" data-action="age-cooldown" data-cooldown-id="${escapeHtml(cooldown.id)}" title="Move this cooldown forward by 1 day">+1 d</button>`;
 
   return `
     <article class="cooldown-card ${statusClass}">
@@ -206,6 +216,7 @@ function renderCooldownCard(cooldown, dayOffset) {
         ${cooldown.notes ? `<p class="cooldown-card__notes">${escapeHtml(cooldown.notes)}</p>` : ""}
       </div>
       <footer class="cooldown-card__footer">
+        ${dayForwardButton}
         ${triggerButton}
         ${restartButton}
       </footer>
@@ -213,16 +224,39 @@ function renderCooldownCard(cooldown, dayOffset) {
   `;
 }
 
+// Module-level tracker so transitions from "not ready" → "ready" fire a
+// single toast per cooldown, not one per re-render.
+const cooldownReadySeen = new Set();
+
 export function renderCooldownsPage(state) {
   const dayOffset = state.calendar?.dayOffset ?? 0;
   const cooldowns = Array.isArray(state.cooldowns) ? state.cooldowns : [];
 
   const ready = [];
   const active = [];
+  const currentReadyIds = new Set();
+  const newlyReady = [];
   for (const c of cooldowns) {
-    const remaining = getCooldownDaysRemaining(c, dayOffset);
-    const isReady = c.type === "percent" ? c.triggeredDayOffset !== null : remaining !== null && remaining <= 0;
+    const isReady = isCooldownReady(c, dayOffset);
     (isReady ? ready : active).push(c);
+    if (isReady) {
+      currentReadyIds.add(c.id);
+      if (!cooldownReadySeen.has(c.id)) newlyReady.push(c);
+    }
+  }
+  // Drop ids that are no longer ready (e.g. user restarted) so a future
+  // re-trigger fires the toast again.
+  for (const id of cooldownReadySeen) {
+    if (!currentReadyIds.has(id)) cooldownReadySeen.delete(id);
+  }
+  // Fire one toast per cooldown that transitioned to ready since last render.
+  if (newlyReady.length && typeof window !== "undefined") {
+    queueMicrotask(() => {
+      for (const c of newlyReady) {
+        cooldownReadySeen.add(c.id);
+        window.dispatchEvent(new CustomEvent("crystal-forge-cooldown-ready", { detail: { cooldown: c } }));
+      }
+    });
   }
   // Active sorted by ready-day (or by start day for percent).
   active.sort((a, b) => {

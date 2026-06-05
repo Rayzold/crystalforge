@@ -139,3 +139,25 @@ export function markCooldownTriggered(state, id, dayOffset) {
   if (cooldown) cooldown.triggeredDayOffset = dayOffset;
   return cooldown ?? null;
 }
+
+/** Advance a single cooldown's age by N days (default 1) without touching
+ *  the global calendar. Internally moves startedDayOffset earlier so the
+ *  elapsed time increases. Will not move the start before day 0. */
+export function ageCooldown(state, id, days = 1) {
+  const cooldown = (state.cooldowns ?? []).find((c) => c.id === id);
+  if (!cooldown) return null;
+  cooldown.startedDayOffset = Math.max(0, cooldown.startedDayOffset - Math.max(1, Math.floor(days)));
+  return cooldown;
+}
+
+/** True iff the cooldown is currently ready to use. For percent-style this
+ *  means either the GM marked it triggered OR the cumulative chance has hit
+ *  100% (Math.floor(chance) >= 100). */
+export function isCooldownReady(cooldown, dayOffset) {
+  if (cooldown.type === "percent") {
+    if (cooldown.triggeredDayOffset !== null) return true;
+    return getCooldownTriggerChance(cooldown, dayOffset) >= 100;
+  }
+  const remaining = getCooldownDaysRemaining(cooldown, dayOffset);
+  return remaining !== null && remaining <= 0;
+}

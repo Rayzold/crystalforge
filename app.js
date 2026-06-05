@@ -2,7 +2,7 @@
 // This file wires together state, actions, routing, save/load, manifestation,
 // admin commands, and top-level UI events. Most game-wide behavior eventually
 // passes through here, while lower-level systems keep the domain rules isolated.
-import { AdminConsole } from "./admin/AdminConsole.js?v=2.0.2";
+import { AdminConsole } from "./admin/AdminConsole.js?v=2.0.3";
 import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js";
 import {
   APP_VERSION,
@@ -111,7 +111,7 @@ import {
   updateNpcField,
   updateNpcStat,
   getCrafterCapacity
-} from "./systems/NpcSystem.js?v=2.0.2";
+} from "./systems/NpcSystem.js?v=2.0.3";
 import {
   createCraftingItem,
   collectCraftingItem,
@@ -123,9 +123,9 @@ import {
   clearCollectedCraftingItems,
   pauseCraftingItem,
   resumeCraftingItem,
-} from "./systems/CraftingSystem.js?v=2.0.2";
-import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=2.0.2";
-import { addCooldown, removeCooldown, restartCooldown, markCooldownTriggered } from "./systems/CooldownSystem.js?v=2.0.2";
+} from "./systems/CraftingSystem.js?v=2.0.3";
+import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=2.0.3";
+import { addCooldown, removeCooldown, restartCooldown, markCooldownTriggered, ageCooldown } from "./systems/CooldownSystem.js?v=2.0.3";
 import {
   addAwakened,
   clearAwakenedImage,
@@ -164,19 +164,29 @@ import {
   saveGameState,
   saveManualState,
   validateAndMigrateSave
-} from "./systems/StorageSystem.js?v=2.0.2";
+} from "./systems/StorageSystem.js?v=2.0.3";
 import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js";
 import { applyCompletedGoalRewards } from "./systems/GoalSystem.js";
 import { forceTownFocus, getMayorAdvice, reopenTownFocusSelection, selectTownFocus, updateTownFocusAvailability } from "./systems/TownFocusSystem.js";
 import { getEmergencyStatus, getCityTrendSummary } from "./systems/ResourceSystem.js";
 import { Toasts } from "./ui/Toasts.js";
 import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js";
-import { UIRenderer } from "./ui/UIRenderer.js?v=2.0.2";
+import { UIRenderer } from "./ui/UIRenderer.js?v=2.0.3";
 
 const root = document.querySelector("#app");
 const pageKey = document.body.dataset.page ?? "home";
 const renderer = new UIRenderer(root, pageKey);
 const toasts = new Toasts();
+
+// Cooldown "Ready!" splash: fired by CooldownsPage when any tracked cooldown
+// transitions from cooling to ready. Surfaces a brief toast regardless of
+// which page is currently in view.
+window.addEventListener("crystal-forge-cooldown-ready", (event) => {
+  const cooldown = event.detail?.cooldown;
+  if (!cooldown) return;
+  toasts.show(`⏱ ${cooldown.name} is ready!`, "success");
+  void audioEngine?.playUiAccent?.("confirm");
+});
 const animationEngine = new AnimationEngine();
 const audioEngine = new AudioEngine();
 const EXPEDITION_JOURNEY_TRANSITION_MS = 560;
@@ -4250,6 +4260,12 @@ root.addEventListener("click", async (event) => {
       const day = getCurrentState().calendar?.dayOffset ?? 0;
       commit((draft) => { markCooldownTriggered(draft, id, day); });
       reportSuccess("Marked as triggered today.");
+      break;
+    }
+    case "age-cooldown": {
+      const id = target.dataset.cooldownId ?? "";
+      commit((draft) => { ageCooldown(draft, id, 1); });
+      reportSuccess("Aged by 1 day.");
       break;
     }
     // ─── End Cooldowns ─────────────────────────────────────────────────────────
