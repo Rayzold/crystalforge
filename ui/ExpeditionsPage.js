@@ -19,7 +19,7 @@ import {
   getEligibleExpeditionAwakened,
   getBusyExpeditionAwakenedIds,
   EXPEDITION_AWAKENED_GRADE_POWER
-} from "../systems/ExpeditionSystem.js?v=2.0.23";
+} from "../systems/ExpeditionSystem.js?v=2.0.24";
 import { formatDate } from "../systems/CalendarSystem.js";
 import { createHelpBubble } from "./HelpBubbles.js";
 import { renderVehicleArt } from "./VehicleArt.js";
@@ -380,7 +380,7 @@ function renderAwakenedInputs(state, draft) {
       (F+${EXPEDITION_AWAKENED_GRADE_POWER.F} · D+${EXPEDITION_AWAKENED_GRADE_POWER.D}
       · C+${EXPEDITION_AWAKENED_GRADE_POWER.C} · B+${EXPEDITION_AWAKENED_GRADE_POWER.B}
       · A+${EXPEDITION_AWAKENED_GRADE_POWER.A} · S+${EXPEDITION_AWAKENED_GRADE_POWER.S}).
-      A single B-rank dwarfs a small squad of common scouts.
+      A single B-rank already eclipses a full citizen squad, and an S-rank can carry the mission on their own.
     </p>
     <div class="expedition-awakened__grid">
       ${sorted.map((entry) => {

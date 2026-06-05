@@ -1900,16 +1900,17 @@ function getExpeditionBuildingSynergy(state, mission, vehicle) {
 }
 
 // Per-grade flat power that each Awakened contributes when assigned to an
-// expedition. The scale is intentionally generous — a single C-rank carries
-// more weight than a small citizen squad, an S-rank can swing an entire
-// mission. They also count as a single seat each (see createExpeditionLaunchPreview).
+// expedition. The scale is intentionally generous and accelerates sharply
+// at the high end — F/D are squad-equivalent, C/B are full-party tier, A/S
+// can single-handedly dictate the return. They also count as a single seat
+// each (see createExpeditionLaunchPreview).
 export const EXPEDITION_AWAKENED_GRADE_POWER = {
   F: 4,
   D: 10,
-  C: 25,
-  B: 60,
-  A: 150,
-  S: 320
+  C: 30,
+  B: 100,
+  A: 350,
+  S: 1500
 };
 
 function computeExpeditionAwakenedPower(awakenedRequest) {
