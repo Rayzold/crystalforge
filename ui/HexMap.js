@@ -1141,13 +1141,19 @@ export function renderHexMap(state) {
           <span>${formatNumber(defenseSummary.siegeCoveragePercent, 0)}% siege coverage of the inner edge</span>
         </div>
       </div>
-      <div class="hex-map-wrap">
+      <div class="hex-map-wrap hex-map-wrap--canvas">
+        <div class="town-map-canvas-mount" data-town-map-mount role="img" aria-label="City hex map"></div>
+        <!--
+          Canvas-backed map (HexMapCanvas.js) replaces the SVG hex grid. We
+          keep the rest of the SVG render commented-as-fallback below — it's
+          only used when JS or the canvas controller fails to attach.
+        -->
         <svg
-          class="hex-map ${placementModeActive ? "is-placement-mode" : ""} ${isPlacementPlannerActive ? "is-placement-lite" : ""} is-overlay-${overlaySlug}"
-          style="transform: translate(${mapPanX}px, ${mapPanY}px) scale(${mapZoom}); transform-origin: 50% 50%;"
+          class="hex-map hex-map--legacy-fallback ${placementModeActive ? "is-placement-mode" : ""} ${isPlacementPlannerActive ? "is-placement-lite" : ""} is-overlay-${overlaySlug}"
+          style="display:none;transform: translate(${mapPanX}px, ${mapPanY}px) scale(${mapZoom}); transform-origin: 50% 50%;"
           viewBox="${bounds.minX} ${bounds.minY} ${bounds.width} ${bounds.height}"
           role="img"
-          aria-label="City hex map"
+          aria-label="City hex map (fallback)"
         >
           <g class="hex-map__zone-fields">
             ${renderZoneField(cells, size, "hex-map__zone-field hex-map__zone-field--city", (cell) => !cell.isReserved && !cell.isFortificationRing)}
