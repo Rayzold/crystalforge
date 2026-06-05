@@ -17005,7 +17005,10 @@ body[data-theme="silver"] .collapse-toggle {
   position: absolute;
   top: 100%;
   left: 0;
-  margin-top: 6px;
+  /* No margin-top — a gap between the button and the dropdown both looks
+     loose AND breaks hover stability (the cursor crosses an unhovered
+     no-man's land between button and panel, closing the menu). */
+  margin-top: 0;
   min-width: 200px;
   display: none;
   flex-direction: column;
