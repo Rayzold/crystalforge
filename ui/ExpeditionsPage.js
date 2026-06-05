@@ -19,7 +19,7 @@ import {
   getEligibleExpeditionAwakened,
   getBusyExpeditionAwakenedIds,
   EXPEDITION_AWAKENED_GRADE_POWER
-} from "../systems/ExpeditionSystem.js?v=2.0.22";
+} from "../systems/ExpeditionSystem.js?v=2.0.23";
 import { formatDate } from "../systems/CalendarSystem.js";
 import { createHelpBubble } from "./HelpBubbles.js";
 import { renderVehicleArt } from "./VehicleArt.js";
