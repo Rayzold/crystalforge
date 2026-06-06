@@ -153,14 +153,22 @@ body[data-theme="parchment"] [class*="section"] {
   border-color: rgba(101, 67, 33, 0.25);
 }
 
+/* Primary button (e.g. Advance Day) inherits var(--panel) for its base now,
+ * but the iridescent neon overlay needs ink-text + sepia border to read on
+ * a warm-cream surface. */
+body[data-theme="parchment"] .button {
+  color: var(--text);
+  border-color: rgba(101, 67, 33, 0.40);
+}
+
 /* Ghost buttons: sepia ink-line. */
 body[data-theme="parchment"] .button--ghost {
   border-color: rgba(101, 67, 33, 0.30);
   color: #4a2c10;
 }
 body[data-theme="parchment"] .button--ghost:hover {
-  background: rgba(101, 67, 33, 0.08);
-  border-color: rgba(101, 67, 33, 0.50);
+  background: rgba(101, 67, 33, 0.10);
+  border-color: rgba(101, 67, 33, 0.55);
 }
 body[data-theme="parchment"] .button--ghost.is-active {
   background: rgba(139, 69, 19, 0.14);
@@ -634,7 +642,7 @@ textarea {
   font-size: 0.9rem;
   background:
     linear-gradient(135deg, rgba(229, 140, 255, 0.24), rgba(88, 184, 255, 0.18) 52%, rgba(240, 196, 130, 0.12)),
-    rgba(12, 18, 30, 0.92);
+    var(--panel);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 10px 24px rgba(0, 0, 0, 0.16);
@@ -677,7 +685,7 @@ button[aria-disabled="true"]:hover,
 .button--ghost {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02)),
-    rgba(10, 12, 19, 0.92);
+    var(--panel);
   border-color: rgba(255, 255, 255, 0.1);
 }
 
@@ -4810,7 +4818,7 @@ textarea {
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--text);
-  background: rgba(5, 10, 18, 0.9);
+  background: var(--bg-1);
 }
 
 .toast-stack {

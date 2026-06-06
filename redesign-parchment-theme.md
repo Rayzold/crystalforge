@@ -294,6 +294,55 @@ Based on what's visually broken in the screenshot:
 grep -rn "background.*#1[0-9a-f]\{5\}\|background.*#0[0-9a-f]\{5\}" src/ --include="*.vue"
 ```
 
+### Round 2 — Remaining dark elements (after first pass)
+
+After the first fix pass, the major panels are now correctly themed. Only **3 unique hardcoded dark values** remain (verified via live DOM audit with parchment theme active):
+
+| Hardcoded value | Used on | Replace with | Status |
+|---|---|---|---|
+| `rgba(12, 18, 30, 0.92)` | `.button` (primary — Advance Day) | `var(--panel)` | ✅ applied `2.0.34` |
+| `rgba(10, 12, 19, 0.92)` | `.button--ghost`, `.city-filter`, all ghost buttons | `var(--panel)` | ✅ applied `2.0.34` |
+| `rgba(5, 10, 18, 0.9)` | Sub-panel container (time controls area) | `var(--bg-1)` | ✅ applied `2.0.34` (the input/select/textarea rule; the SVG hex-map hover-readout still uses raw rgba because it's a tooltip, not a panel) |
+
+The `.reveal-overlay` (`rgba(0,0,0,0.96)`) and `alert-strip` (`rgba(185,28,28,0.08)`) are **intentional** — do not change them.
+
+Find these in CSS:
+```bash
+grep -rn "rgba(12, 18, 30\|rgba(10, 12, 19\|rgba(5, 10, 18" src/
+```
+
+Button fix — replace hardcoded backgrounds:
+```css
+/* Before */
+.button        { background: rgba(12, 18, 30, 0.92); }
+.button--ghost { background: rgba(10, 12, 19, 0.92); }
+
+/* After */
+.button        { background: var(--panel); }
+.button--ghost { background: var(--panel); }
+```
+
+Then add parchment-specific button hover/active states to the theme block:
+```css
+[data-theme="parchment"] .button {
+  color: var(--text);
+  border-color: rgba(101, 67, 33, 0.40);
+}
+[data-theme="parchment"] .button--ghost {
+  border-color: rgba(101, 67, 33, 0.30);
+  color: #4a2c10;
+}
+[data-theme="parchment"] .button--ghost:hover {
+  background: rgba(101, 67, 33, 0.10);
+  border-color: rgba(101, 67, 33, 0.55);
+}
+[data-theme="parchment"] .button--ghost.is-active {
+  background: rgba(139, 69, 19, 0.14);
+  border-color: #8b4513;
+  color: #8b4513;
+}
+```
+
 ### After the refactor
 
 Once all hardcoded values are replaced with variables, the `[data-theme="parchment"]` block in the CSS will automatically theme every component with zero additional selectors needed.
