@@ -294,6 +294,17 @@ Based on what's visually broken in the screenshot:
 grep -rn "background.*#1[0-9a-f]\{5\}\|background.*#0[0-9a-f]\{5\}" src/ --include="*.vue"
 ```
 
+### Round 7 — Forge page dark surfaces (`2.0.39`)
+
+User screenshot showed four dark surfaces still surviving on the Forge page after Round 6:
+
+| Surface | Was | Now |
+|---|---|---|
+| `.crystal-card` (rarity selector "LEVEL 1 / Common / 2") | `linear-gradient(180deg, rgba(17,18,28,0.98), rgba(18,19,32,0.88))` + rarity radial | Cream gradient + bumped rarity radial (22% → strong), sepia border, ink text. Selected state uses sepia ring instead of white. |
+| `.manifest-panel__switch` (Quick Manifestations toggle bar) | `linear-gradient(180deg, rgba(17,23,39,0.84), rgba(10,13,22,0.92))` | Cream gradient; `.is-active` keeps mint accent border (success indicator). Switch track + thumb retinted sepia-on-cream. |
+| `.forge-stage__visual` (manifest sphere "scrying chamber") | `linear-gradient(180deg, rgba(14,27,49,0.98), rgba(6,10,17,0.98))` cold navy | Warm aged umber gradient (`#5a3a1f → #3a2510`). Kept intentionally darker than the surrounding cream cards so the orb glow still reads, but in-theme. Sigil rings and ::after vignette retinted warm. |
+| `.forge-stage__ritual-notes article` (Reality / Available / Last Roll tiles) | `linear-gradient(180deg, rgba(30,42,68,0.92), rgba(16,22,40,0.95))` | Cream gradient + sepia border, ink text, brown muted labels |
+
 ### Round 6 — Contrast pass (`2.0.38`)
 
 Visual feedback: cream-on-cream panels-vs-body had almost zero value delta — the parchment theme looked flat and uninteresting. Repainted the body to a medium aged-tan / leather tone so cream panels lift off the page like real paper on a worn desk.

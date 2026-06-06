@@ -486,6 +486,90 @@ body[data-theme="silver"] {
   box-shadow: 0 16px 34px rgba(80, 40, 10, 0.18);
 }
 
+/* ─── Round 7 — Forge page dark surfaces ───────────────────────────────
+ * Four dark cards remained on the forge: the crystal level cards, the
+ * Quick Manifestations toggle bar, the manifest sphere scene, and the
+ * Reality Level / Available / Last Roll stat tiles. */
+
+/* Crystal level card (e.g. Common / 2 / 0 shards). Keeps the rarity-color
+ * radial tint but on a cream base instead of inky navy. */
+[data-theme="parchment"] .crystal-card {
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--rarity-color) 22%, transparent), transparent 50%),
+    linear-gradient(180deg, rgba(250, 244, 232, 0.97), rgba(237, 224, 196, 0.92));
+  border-color: rgba(101, 67, 33, 0.25);
+  color: #2c1a0e;
+}
+[data-theme="parchment"] .crystal-card:hover {
+  border-color: color-mix(in srgb, var(--rarity-color) 50%, rgba(101, 67, 33, 0.40));
+}
+[data-theme="parchment"] .crystal-card.is-selected {
+  border-color: rgba(101, 67, 33, 0.85);
+  box-shadow:
+    0 0 0 1px rgba(101, 67, 33, 0.40),
+    0 0 28px color-mix(in srgb, var(--rarity-color) 26%, transparent);
+}
+
+/* Quick Manifestations toggle bar — was an inky navy slab. */
+[data-theme="parchment"] .manifest-panel__switch {
+  background: linear-gradient(180deg, rgba(250, 244, 232, 0.96), rgba(237, 224, 196, 0.90));
+  border-color: rgba(101, 67, 33, 0.28);
+  color: #2c1a0e;
+}
+[data-theme="parchment"] .manifest-panel__switch:hover,
+[data-theme="parchment"] .manifest-panel__switch:focus-visible {
+  border-color: rgba(101, 67, 33, 0.50);
+  box-shadow: 0 12px 24px rgba(70, 35, 8, 0.20);
+}
+[data-theme="parchment"] .manifest-panel__switch.is-active {
+  border-color: rgba(38, 103, 73, 0.55);
+  box-shadow: 0 14px 28px rgba(38, 103, 73, 0.22);
+}
+[data-theme="parchment"] .manifest-panel__switch-track {
+  background: rgba(101, 67, 33, 0.18);
+  box-shadow: inset 0 1px 4px rgba(70, 35, 8, 0.18);
+}
+[data-theme="parchment"] .manifest-panel__switch-thumb {
+  background: #faf4e8;
+  box-shadow: 0 4px 12px rgba(70, 35, 8, 0.28);
+}
+[data-theme="parchment"] .manifest-panel__switch-copy small {
+  color: rgba(101, 67, 33, 0.78);
+}
+
+/* Manifest sphere scene (the "scrying chamber" with the floating orb).
+ * Stays darker than the surrounding cream cards so the orb glow still
+ * reads — but switched from cold navy to warm aged umber. */
+[data-theme="parchment"] .forge-stage__visual {
+  background:
+    radial-gradient(circle at center, rgba(244, 234, 214, 0.35), transparent 30%),
+    linear-gradient(180deg, #5a3a1f, #3a2510);
+}
+[data-theme="parchment"] .forge-stage__visual::after {
+  background:
+    linear-gradient(180deg, rgba(30, 18, 8, 0.10), rgba(30, 18, 8, 0.65)),
+    radial-gradient(circle at center, color-mix(in srgb, var(--accent) 22%, transparent), transparent 48%);
+}
+[data-theme="parchment"] .forge-stage__sigil {
+  border-color: rgba(244, 234, 214, 0.22);
+  box-shadow: inset 0 0 22px rgba(244, 234, 214, 0.10);
+}
+[data-theme="parchment"] .forge-stage__sigil::before,
+[data-theme="parchment"] .forge-stage__sigil::after {
+  border-color: rgba(244, 234, 214, 0.12);
+}
+
+/* Reality Level / Available / Last Roll stat tiles in the forge stage —
+ * was rgba(30,42,68,0.92) navy. */
+[data-theme="parchment"] .forge-stage__ritual-notes article {
+  background: linear-gradient(180deg, rgba(248, 240, 220, 0.94), rgba(237, 224, 196, 0.88));
+  border-color: rgba(101, 67, 33, 0.22);
+  color: #2c1a0e;
+}
+[data-theme="parchment"] .forge-stage__ritual-notes span {
+  color: rgba(101, 67, 33, 0.78);
+}
+
 * {
   box-sizing: border-box;
 }
