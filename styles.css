@@ -570,6 +570,43 @@ body[data-theme="silver"] {
   color: rgba(101, 67, 33, 0.78);
 }
 
+/* ─── Round 8 — Forge command banner + date chip ───────────────────────
+ * The .forge-command is the huge feature banner with "CRYSTAL FORGE" in
+ * pink. Keep its dramatic feel but in warm aged leather instead of cold
+ * navy — like an embossed book cover. Date chip in the page-hero was
+ * also a hardcoded dark gradient. */
+[data-theme="parchment"] .forge-command {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(181, 50, 90, 0.20), transparent 30%),
+    linear-gradient(180deg, #5a3a1f 0%, #3a2510 60%, #2c1a0e 100%);
+  border: 1px solid rgba(70, 35, 8, 0.35);
+}
+[data-theme="parchment"] .forge-command__eyebrow {
+  color: rgba(244, 234, 214, 0.78);
+}
+/* The pink title already swaps via var(--accent-pink) — under parchment
+ * it becomes the deeper rose #b5325a, which reads well on the umber. We
+ * tone down the glow halo to match the cream-lit feel. */
+[data-theme="parchment"] .forge-command__headline h2 {
+  text-shadow: 0 0 28px rgba(181, 50, 90, 0.36);
+}
+[data-theme="parchment"] .forge-command__footer {
+  color: rgba(244, 234, 214, 0.72);
+}
+
+/* Page date chip (top-right "Glimmerday, Firethorn the 17th, …" pill). */
+[data-theme="parchment"] .page-date-chip {
+  background: linear-gradient(180deg, rgba(250, 244, 232, 0.96), rgba(237, 224, 196, 0.92));
+  border-color: rgba(101, 67, 33, 0.28);
+  color: #2c1a0e;
+}
+[data-theme="parchment"] .page-date-chip span {
+  color: rgba(101, 67, 33, 0.78);
+}
+[data-theme="parchment"] .page-date-chip strong {
+  color: #2c1a0e;
+}
+
 * {
   box-sizing: border-box;
 }

@@ -294,6 +294,17 @@ Based on what's visually broken in the screenshot:
 grep -rn "background.*#1[0-9a-f]\{5\}\|background.*#0[0-9a-f]\{5\}" src/ --include="*.vue"
 ```
 
+### Round 8 — Forge command banner + date chip (`2.0.40`)
+
+User screenshot called out a "broken top bar" — the actual visual culprits were:
+
+| Surface | Was | Now |
+|---|---|---|
+| `.forge-command` (huge "CRYSTAL FORGE" banner) | `linear-gradient(180deg, rgba(9,11,19,0.76), rgba(9,11,19,0.16))` + pink radial | Warm aged leather gradient `#5a3a1f → #3a2510 → #2c1a0e` with the rose-pink radial overlay kept (using parchment `--accent-pink` = `#b5325a`). Like an embossed book cover. Eyebrow + footer text retinted cream-on-leather. |
+| `.page-date-chip` (top-right Glimmerday pill) | `linear-gradient(180deg, rgba(11,17,29,0.92), rgba(18,28,45,0.84))` | Cream gradient, sepia border, brown muted prefix span, ink date |
+
+The pink `CRYSTAL FORGE` title was already swapping correctly via `var(--accent-pink)` (becomes deep rose `#b5325a` in parchment), so the title still reads dramatically on the new leather base. Glow halo opacity reduced from 0.28 → 0.36 to compensate for the warmer ambient.
+
 ### Round 7 — Forge page dark surfaces (`2.0.39`)
 
 User screenshot showed four dark surfaces still surviving on the Forge page after Round 6:
