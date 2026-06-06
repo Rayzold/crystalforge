@@ -10,8 +10,10 @@ import {
   getNextHoliday,
   getMonthDayOffsets,
   getMonthStartOffset,
-  getStructuredDate
-} from "../systems/CalendarSystem.js";
+  getStructuredDate,
+  getWeatherForDay,
+  WEATHER_BY_SEASON
+} from "../systems/CalendarSystem.js?v=2.0.28";
 import { getDailyCitySnapshot } from "../systems/CitySnapshotSystem.js";
 import { getExpeditionCalendarEntries } from "../systems/ExpeditionSystem.js";
 import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js";
@@ -115,6 +117,10 @@ function getDaysUntilYearlyEvent(state, displayYear, event) {
 
 function renderDayCell(state, dayOffset, selectedDayOffset, eventsByDay) {
   const date = getStructuredDate(dayOffset);
+  // Override the deterministic weather with any persisted user roll. Reassigning
+  // on the structured-date object keeps every downstream reader (tone, icon,
+  // name, .chronicle-calendar__day-weather--tone modifier) working unchanged.
+  date.weather = getWeatherForDay(state, dayOffset);
   const eventCount = eventsByDay[dayOffset]?.length ?? 0;
   const noteText = state.chronicleNotes?.[String(dayOffset)] ?? "";
   const isToday = dayOffset === state.calendar.dayOffset;
@@ -280,10 +286,14 @@ export function renderChronicleCalendar(state) {
   const displayMonthOffset = getDisplayMonthOffset(state);
   const monthOffsets = getMonthDayOffsets(displayMonthOffset);
   const displayDate = getStructuredDate(displayMonthOffset);
+  // Make sure the day-detail panel below the grid also reflects any user
+  // override of the selected day's weather.
+  displayDate.weather = getWeatherForDay(state, displayMonthOffset);
   const nextHoliday = getNextHoliday(state.calendar.dayOffset);
   const nextHolidayAccentClass = nextHoliday ? getHolidayTypeClass(nextHoliday) : "";
   const selectedDayOffset = getSelectedDayOffset(state, displayMonthOffset);
   const selectedDate = getStructuredDate(selectedDayOffset);
+  selectedDate.weather = getWeatherForDay(state, selectedDayOffset);
   const selectedSnapshot = getDailyCitySnapshot(state, selectedDayOffset);
   const eventsByDay = collectEventsForMonth(state, monthOffsets);
   const selectedEvents = eventsByDay[selectedDayOffset] ?? [];
@@ -307,6 +317,13 @@ export function renderChronicleCalendar(state) {
           <button class="button button--ghost" type="button" data-action="chronicle-prev-month" data-month-offset="${prevMonthOffset}">Previous</button>
           <strong>${escapeHtml(displayDate.month)} / Year ${displayDate.year} AC</strong>
           <button class="button button--ghost" type="button" data-action="chronicle-next-month" data-month-offset="${nextMonthOffset}">Next</button>
+          <button
+            class="button button--ghost chronicle-calendar__roll"
+            type="button"
+            data-action="randomize-month-weather"
+            data-month-offset="${displayMonthOffset}"
+            title="Roll a season-appropriate weather streak for every day of this month — 70% calm, 30% dramatic, with persistence so conditions linger for a few days."
+          >🎲 Randomize Weather</button>
         </div>
       </div>
 
@@ -429,6 +446,53 @@ export function renderChronicleCalendar(state) {
           </div>
         </div>
       </div>
+    </section>
+  `;
+}
+
+// Information panel listing every weather condition by season, with its
+// icon, atmospheric tone, and intensity class (calm vs dramatic). The roller
+// uses the same data — this panel just makes the table visible so GMs can
+// reference what each tone implies and how often each will appear.
+export function renderWeatherInfoPanel() {
+  const seasons = Object.entries(WEATHER_BY_SEASON);
+  return `
+    <section class="panel weather-info">
+      <div class="panel__header">
+        <div>
+          <h3>Weather Conditions</h3>
+          <span class="panel__subtle">Every condition the calendar can roll, grouped by season. Calm conditions fire ~70% of the time and tend to linger; dramatic conditions break in for storms and surprises.</span>
+        </div>
+        <div class="weather-info__legend">
+          <span class="weather-info__legend-tag weather-info__legend-tag--calm">Calm · 70%</span>
+          <span class="weather-info__legend-tag weather-info__legend-tag--dramatic">Dramatic · 30%</span>
+        </div>
+      </div>
+      <div class="weather-info__seasons">
+        ${seasons.map(([season, conditions]) => `
+          <article class="weather-info__season">
+            <header class="weather-info__season-head">
+              <h4>${escapeHtml(season)}</h4>
+              <span>${conditions.length} condition${conditions.length === 1 ? "" : "s"} · ${conditions.filter((c) => c.intensity === "calm").length} calm / ${conditions.filter((c) => c.intensity === "dramatic").length} dramatic</span>
+            </header>
+            <ul class="weather-info__list">
+              ${conditions.map((entry) => `
+                <li class="weather-info__row weather-info__row--${escapeHtml(entry.intensity)}">
+                  <span class="weather-info__icon" aria-hidden="true">${entry.icon}</span>
+                  <div class="weather-info__body">
+                    <strong>${escapeHtml(entry.name)}</strong>
+                    <small>Tone: ${escapeHtml(entry.tone)}</small>
+                  </div>
+                  <span class="weather-info__intensity weather-info__intensity--${escapeHtml(entry.intensity)}">${escapeHtml(entry.intensity)}</span>
+                </li>
+              `).join("")}
+            </ul>
+          </article>
+        `).join("")}
+      </div>
+      <p class="weather-info__footnote">
+        Streak rules: a calm day repeats 65%, swaps to another calm 25%, or breaks dramatic 10%. A dramatic day repeats 55%, swaps to another dramatic 20%, or breaks back to calm 25%. When the city crosses into the last week of a month, the next month's weather is rolled in automatically.
+      </p>
     </section>
   `;
 }

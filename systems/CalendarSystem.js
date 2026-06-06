@@ -20,36 +20,62 @@ const MOON_PHASES = [
   { name: "Waning Crescent", icon: "🌘", from: 23, to: 27 }
 ];
 
-const WEATHER_BY_SEASON = {
+// Each weather entry is tagged with an `intensity` of "calm" or "dramatic".
+// Calm conditions are the typical comfortable weather of the season — they
+// fire ~70% of the time when rolling randomized weather. Dramatic conditions
+// are the events that affect travel, expeditions, or moods — they fire the
+// remaining ~30%. The streak logic in WeatherSystem.js uses this tag to
+// decide whether the next day stays in the same category or breaks out.
+export const WEATHER_BY_SEASON = {
   "Season of the Twilight": [
-    { name: "Pale Sun", icon: "🌤", tone: "clear" },
-    { name: "Snowfall", icon: "🌨", tone: "snow" },
-    { name: "Frostwind", icon: "💨", tone: "wind" },
-    { name: "Overcast", icon: "☁️", tone: "cloud" },
-    { name: "Hard Freeze", icon: "❄️", tone: "frost" }
+    { name: "Pale Sun",    icon: "🌤", tone: "clear",  intensity: "calm" },
+    { name: "Snowfall",    icon: "🌨", tone: "snow",   intensity: "dramatic" },
+    { name: "Frostwind",   icon: "💨", tone: "wind",   intensity: "dramatic" },
+    { name: "Overcast",    icon: "☁️", tone: "cloud",  intensity: "calm" },
+    { name: "Hard Freeze", icon: "❄️", tone: "frost",  intensity: "dramatic" }
   ],
   "Season of the Mists": [
-    { name: "Mistbound", icon: "🌫️", tone: "mist" },
-    { name: "Rainfall", icon: "🌧️", tone: "rain" },
-    { name: "Drizzle", icon: "🌦️", tone: "rain" },
-    { name: "Windlash", icon: "💨", tone: "wind" },
-    { name: "Clear Break", icon: "⛅", tone: "clear" }
+    { name: "Mistbound",   icon: "🌫️", tone: "mist",   intensity: "calm" },
+    { name: "Rainfall",    icon: "🌧️", tone: "rain",   intensity: "dramatic" },
+    { name: "Drizzle",     icon: "🌦️", tone: "rain",   intensity: "calm" },
+    { name: "Windlash",    icon: "💨", tone: "wind",   intensity: "dramatic" },
+    { name: "Clear Break", icon: "⛅", tone: "clear",  intensity: "calm" }
   ],
   "Season of the Embers": [
-    { name: "Bright Sun", icon: "☀️", tone: "clear" },
-    { name: "Dry Heat", icon: "🌞", tone: "heat" },
-    { name: "Warm Gusts", icon: "🌬️", tone: "wind" },
-    { name: "Stormflash", icon: "⛈️", tone: "storm" },
-    { name: "Golden Skies", icon: "🌅", tone: "clear" }
+    { name: "Bright Sun",   icon: "☀️", tone: "clear", intensity: "calm" },
+    { name: "Dry Heat",     icon: "🌞", tone: "heat",  intensity: "calm" },
+    { name: "Warm Gusts",   icon: "🌬️", tone: "wind", intensity: "calm" },
+    { name: "Stormflash",   icon: "⛈️", tone: "storm", intensity: "dramatic" },
+    { name: "Golden Skies", icon: "🌅", tone: "clear", intensity: "calm" }
   ],
   "Season of the Gloom": [
-    { name: "Ashen Overcast", icon: "☁️", tone: "cloud" },
-    { name: "Cold Rain", icon: "🌧️", tone: "rain" },
-    { name: "Dim Mist", icon: "🌫️", tone: "mist" },
-    { name: "Amber Wind", icon: "💨", tone: "wind" },
-    { name: "Dusklight", icon: "🌥️", tone: "clear" }
+    { name: "Ashen Overcast", icon: "☁️", tone: "cloud", intensity: "calm" },
+    { name: "Cold Rain",      icon: "🌧️", tone: "rain",  intensity: "dramatic" },
+    { name: "Dim Mist",       icon: "🌫️", tone: "mist",  intensity: "calm" },
+    { name: "Amber Wind",     icon: "💨", tone: "wind",  intensity: "calm" },
+    { name: "Dusklight",      icon: "🌥️", tone: "clear", intensity: "calm" }
   ]
 };
+
+export function getSeasonForOffset(dayOffset = 0) {
+  const date = getStructuredDate(dayOffset);
+  return date.season;
+}
+
+export function getWeatherPoolForSeason(season) {
+  return WEATHER_BY_SEASON[season] ?? WEATHER_BY_SEASON["Season of the Mists"];
+}
+
+// Returns the weather for a given day — honoring any persisted user override
+// in state.weatherOverrides, otherwise falling back to the deterministic
+// season-table pick that drives the read-only calendar history.
+export function getWeatherForDay(state, dayOffset) {
+  const override = state?.weatherOverrides?.[String(dayOffset)];
+  if (override && override.name) {
+    return override;
+  }
+  return getStructuredDate(dayOffset).weather;
+}
 
 const START_ORDINAL =
   START_DATE.year * DAYS_PER_YEAR +

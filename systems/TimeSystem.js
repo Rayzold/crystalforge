@@ -10,7 +10,8 @@ import { applyDailyResources } from "./ResourceSystem.js";
 import { captureDailyCitySnapshot } from "./CitySnapshotSystem.js";
 import { applyTownFocusDailyEffects, updateTownFocusAvailability } from "./TownFocusSystem.js";
 import { getNewlyCompletedCraftingItems } from "./CraftingSystem.js";
-import { rollPercentCooldownsForDay } from "./CooldownSystem.js?v=2.0.27";
+import { rollPercentCooldownsForDay } from "./CooldownSystem.js?v=2.0.28";
+import { ensureNextMonthWeatherGenerated } from "./WeatherSystem.js?v=2.0.28";
 
 function runTimeAdvance(state, days, stepKey = null) {
   const completions = [];
@@ -60,6 +61,11 @@ function runTimeAdvance(state, days, stepKey = null) {
     // UIRenderer's readiness watcher detects the resulting "ready" transition
     // and fires the splash toast — no separate notification path needed.
     rollPercentCooldownsForDay(state, state.calendar.dayOffset);
+    // Once the city has crossed into the last week of the current month, pre-fill
+    // the next month's weather (idempotent — skips if it's already filled).
+    // Doing this per advanced day means a +Month step generates each new month
+    // exactly once as it crosses the threshold, with no duplicate work.
+    ensureNextMonthWeatherGenerated(state);
     triggeredEvents.push(...processScheduledEvents(state));
     triggeredEvents.push(...maybeTriggerHolidayEvents(state));
   }

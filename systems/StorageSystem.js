@@ -41,10 +41,10 @@ import {
 } from "./ExpeditionSystem.js";
 import { createDefaultVehicleFleet } from "../content/VehicleConfig.js";
 import { normalizeBehemoths } from "./BehemothSystem.js";
-import { normalizeNpcs } from "./NpcSystem.js?v=2.0.27";
+import { normalizeNpcs } from "./NpcSystem.js?v=2.0.28";
 import { normalizeAwakenedRoster } from "./AwakenedSystem.js";
 import { normalizeCraftingItems } from "./CraftingSystem.js";
-import { normalizeCooldowns } from "./CooldownSystem.js?v=2.0.27";
+import { normalizeCooldowns } from "./CooldownSystem.js?v=2.0.28";
 
 const SESSION_STATE_KEY = "crystal-forge-session-state-v1";
 const BUILD_NOTES_SEEN_KEY = "crystal-forge-build-notes-seen-v1";
@@ -155,6 +155,7 @@ export function createInitialState(preset = DEFAULT_START_PRESET) {
     pausedConstructionIds: [],
     events: { active: [], recent: [], scheduled: [] },
     chronicleNotes: {},
+    weatherOverrides: {},
     historyLog: [],
     calendar: { dayOffset: 0 },
     dailyCitySnapshots: {},
@@ -614,6 +615,7 @@ export function validateAndMigrateSave(rawSave) {
       scheduled: Array.isArray(rawSave.events?.scheduled) ? rawSave.events.scheduled : []
     },
     chronicleNotes: rawSave.chronicleNotes && typeof rawSave.chronicleNotes === "object" ? rawSave.chronicleNotes : {},
+    weatherOverrides: rawSave.weatherOverrides && typeof rawSave.weatherOverrides === "object" ? rawSave.weatherOverrides : {},
     historyLog: Array.isArray(rawSave.historyLog) ? rawSave.historyLog : [],
     calendar: { dayOffset: Number(rawSave.calendar?.dayOffset ?? 0) },
     dailyCitySnapshots:
