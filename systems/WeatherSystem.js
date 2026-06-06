@@ -27,9 +27,10 @@
 import { DAYS_PER_MONTH } from "../content/CalendarConfig.js";
 import {
   getSeasonForOffset,
-  getWeatherPoolForSeason,
+  getCalmPoolForSeason,
+  getDramaticPool,
   getStructuredDate
-} from "./CalendarSystem.js?v=2.0.28";
+} from "./CalendarSystem.js?v=2.0.29";
 
 const CALM_BIAS = 0.70;   // First-day bias when no previous day is available.
 
@@ -50,29 +51,37 @@ function pickOne(list) {
   return list[Math.floor(Math.random() * list.length)];
 }
 
-function pickByIntensity(pool, intensity) {
-  const matches = pool.filter((entry) => entry.intensity === intensity);
-  return pickOne(matches.length ? matches : pool);
+// Calm picks come from the season's per-season pool; dramatic picks come from
+// the single global DRAMATIC_WEATHER list. The streak logic decides intensity,
+// these helpers just return a concrete entry.
+function pickCalmFor(season) {
+  return pickOne(getCalmPoolForSeason(season));
 }
 
-function pickFirstDay(pool) {
-  return Math.random() < CALM_BIAS
-    ? pickByIntensity(pool, "calm")
-    : pickByIntensity(pool, "dramatic");
+function pickDramaticFor() {
+  return pickOne(getDramaticPool());
 }
 
-function pickOtherInCategory(pool, currentName, intensity) {
-  const matches = pool.filter((entry) => entry.intensity === intensity && entry.name !== currentName);
-  if (matches.length === 0) {
-    // The season only has one condition of this intensity; just keep it.
-    return pickByIntensity(pool, intensity);
+function pickByIntensity(season, intensity) {
+  return intensity === "calm" ? pickCalmFor(season) : pickDramaticFor();
+}
+
+function pickFirstDay(season) {
+  return Math.random() < CALM_BIAS ? pickCalmFor(season) : pickDramaticFor();
+}
+
+function pickOtherInCategory(season, currentName, intensity) {
+  const pool = intensity === "calm" ? getCalmPoolForSeason(season) : getDramaticPool();
+  const others = pool.filter((entry) => entry.name !== currentName);
+  if (others.length === 0) {
+    return pool[0] ?? null;
   }
-  return pickOne(matches);
+  return pickOne(others);
 }
 
-function pickFollowing(pool, previous) {
+function pickFollowing(season, previous) {
   if (!previous) {
-    return pickFirstDay(pool);
+    return pickFirstDay(season);
   }
   const rules = previous.intensity === "calm" ? CALM_FOLLOW : DRAMATIC_FOLLOW;
   const roll = Math.random();
@@ -80,10 +89,10 @@ function pickFollowing(pool, previous) {
     return previous;
   }
   if (roll < rules.repeat + rules.sameCategory) {
-    return pickOtherInCategory(pool, previous.name, previous.intensity);
+    return pickOtherInCategory(season, previous.name, previous.intensity);
   }
   const otherCategory = previous.intensity === "calm" ? "dramatic" : "calm";
-  return pickByIntensity(pool, otherCategory);
+  return pickByIntensity(season, otherCategory);
 }
 
 function ensureOverridesBag(state) {
@@ -105,9 +114,8 @@ function getPrevDayEntry(state, dayOffset) {
 
 export function rollWeatherForDay(state, dayOffset) {
   const season = getSeasonForOffset(dayOffset);
-  const pool = getWeatherPoolForSeason(season);
   const previous = getPrevDayEntry(state, dayOffset);
-  return pickFollowing(pool, previous);
+  return pickFollowing(season, previous);
 }
 
 // Writes a fresh weather pick for every day in [monthStartOffset, +28). Uses

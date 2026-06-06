@@ -10,8 +10,8 @@ import { applyDailyResources } from "./ResourceSystem.js";
 import { captureDailyCitySnapshot } from "./CitySnapshotSystem.js";
 import { applyTownFocusDailyEffects, updateTownFocusAvailability } from "./TownFocusSystem.js";
 import { getNewlyCompletedCraftingItems } from "./CraftingSystem.js";
-import { rollPercentCooldownsForDay } from "./CooldownSystem.js?v=2.0.28";
-import { ensureNextMonthWeatherGenerated } from "./WeatherSystem.js?v=2.0.28";
+import { rollPercentCooldownsForDay } from "./CooldownSystem.js?v=2.0.29";
+import { ensureNextMonthWeatherGenerated } from "./WeatherSystem.js?v=2.0.29";
 
 function runTimeAdvance(state, days, stepKey = null) {
   const completions = [];

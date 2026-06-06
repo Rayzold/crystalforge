@@ -12,8 +12,9 @@ import {
   getMonthStartOffset,
   getStructuredDate,
   getWeatherForDay,
-  WEATHER_BY_SEASON
-} from "../systems/CalendarSystem.js?v=2.0.28";
+  WEATHER_BY_SEASON,
+  DRAMATIC_WEATHER
+} from "../systems/CalendarSystem.js?v=2.0.29";
 import { getDailyCitySnapshot } from "../systems/CitySnapshotSystem.js";
 import { getExpeditionCalendarEntries } from "../systems/ExpeditionSystem.js";
 import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js";
@@ -450,48 +451,76 @@ export function renderChronicleCalendar(state) {
   `;
 }
 
-// Information panel listing every weather condition by season, with its
-// icon, atmospheric tone, and intensity class (calm vs dramatic). The roller
-// uses the same data — this panel just makes the table visible so GMs can
-// reference what each tone implies and how often each will appear.
+// Information panel for weather. Two parts:
+//   1. Calm conditions — per-season grid, the everyday weather that fills
+//      ~70% of days.
+//   2. Dramatic phenomena — the global 20-entry catalogue from the Scarred
+//      Lands sourcebook. Each entry has the full GM dossier: nav level
+//      badge, monster range, description, signs, gear, drifter quote.
+// The randomizer draws from both pools using the streak rules.
 export function renderWeatherInfoPanel() {
   const seasons = Object.entries(WEATHER_BY_SEASON);
+  const dramaticTotal = DRAMATIC_WEATHER.length;
   return `
     <section class="panel weather-info">
       <div class="panel__header">
         <div>
           <h3>Weather Conditions</h3>
-          <span class="panel__subtle">Every condition the calendar can roll, grouped by season. Calm conditions fire ~70% of the time and tend to linger; dramatic conditions break in for storms and surprises.</span>
+          <span class="panel__subtle">Calm seasonal weather fills the ~70% of days that aren't dramatic. The 20 dramatic phenomena are global Scarred Lands events — storms, time rifts, and worse.</span>
         </div>
         <div class="weather-info__legend">
-          <span class="weather-info__legend-tag weather-info__legend-tag--calm">Calm · 70%</span>
-          <span class="weather-info__legend-tag weather-info__legend-tag--dramatic">Dramatic · 30%</span>
+          <span class="weather-info__legend-tag weather-info__legend-tag--calm">Calm · ~70%</span>
+          <span class="weather-info__legend-tag weather-info__legend-tag--dramatic">Dramatic · ~30%</span>
         </div>
       </div>
+
+      <h4 class="weather-info__section-title">Calm Conditions <small>by season</small></h4>
       <div class="weather-info__seasons">
         ${seasons.map(([season, conditions]) => `
           <article class="weather-info__season">
             <header class="weather-info__season-head">
               <h4>${escapeHtml(season)}</h4>
-              <span>${conditions.length} condition${conditions.length === 1 ? "" : "s"} · ${conditions.filter((c) => c.intensity === "calm").length} calm / ${conditions.filter((c) => c.intensity === "dramatic").length} dramatic</span>
+              <span>${conditions.length} calm condition${conditions.length === 1 ? "" : "s"}</span>
             </header>
             <ul class="weather-info__list">
               ${conditions.map((entry) => `
-                <li class="weather-info__row weather-info__row--${escapeHtml(entry.intensity)}">
+                <li class="weather-info__row weather-info__row--calm">
                   <span class="weather-info__icon" aria-hidden="true">${entry.icon}</span>
                   <div class="weather-info__body">
                     <strong>${escapeHtml(entry.name)}</strong>
                     <small>Tone: ${escapeHtml(entry.tone)}</small>
                   </div>
-                  <span class="weather-info__intensity weather-info__intensity--${escapeHtml(entry.intensity)}">${escapeHtml(entry.intensity)}</span>
                 </li>
               `).join("")}
             </ul>
           </article>
         `).join("")}
       </div>
+
+      <h4 class="weather-info__section-title">Dramatic Phenomena <small>${dramaticTotal} global events</small></h4>
+      <div class="weather-info__dramatic-grid">
+        ${DRAMATIC_WEATHER.map((entry) => `
+          <article class="weather-info__phenomenon weather-info__phenomenon--nav-${escapeHtml(entry.navLevel.toLowerCase())}">
+            <header class="weather-info__phenomenon-head">
+              <span class="weather-info__phenomenon-icon" aria-hidden="true">${entry.icon}</span>
+              <div class="weather-info__phenomenon-titles">
+                <strong>${escapeHtml(entry.name)}</strong>
+                <span>Nav ${escapeHtml(entry.navLevel)} · Monsters ${escapeHtml(entry.monsterRange)}</span>
+              </div>
+              <span class="weather-info__nav-badge weather-info__nav-badge--${escapeHtml(entry.navLevel.toLowerCase())}">${escapeHtml(entry.navLevel)}</span>
+            </header>
+            <p class="weather-info__phenomenon-desc">${escapeHtml(entry.description)}</p>
+            <dl class="weather-info__phenomenon-meta">
+              <div><dt>Signs</dt><dd>${escapeHtml(entry.signs)}</dd></div>
+              <div><dt>Gear</dt><dd>${escapeHtml(entry.gear)}</dd></div>
+            </dl>
+            <blockquote class="weather-info__phenomenon-quote">${escapeHtml(entry.quote)}</blockquote>
+          </article>
+        `).join("")}
+      </div>
+
       <p class="weather-info__footnote">
-        Streak rules: a calm day repeats 65%, swaps to another calm 25%, or breaks dramatic 10%. A dramatic day repeats 55%, swaps to another dramatic 20%, or breaks back to calm 25%. When the city crosses into the last week of a month, the next month's weather is rolled in automatically.
+        Streak rules: a calm day repeats 65%, swaps to another calm 25%, or breaks dramatic 10%. A dramatic day repeats 55%, swaps to another dramatic 20%, or breaks back to calm 25%. When the city crosses into the last week of a month, the next month's weather is rolled in automatically. Nav letters mark sourcebook navigation difficulty (D Drizzle → C Cyclone → B Blizzard → A Avalanche → S Scarring).
       </p>
     </section>
   `;

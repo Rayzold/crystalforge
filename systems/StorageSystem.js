@@ -41,10 +41,10 @@ import {
 } from "./ExpeditionSystem.js";
 import { createDefaultVehicleFleet } from "../content/VehicleConfig.js";
 import { normalizeBehemoths } from "./BehemothSystem.js";
-import { normalizeNpcs } from "./NpcSystem.js?v=2.0.28";
+import { normalizeNpcs } from "./NpcSystem.js?v=2.0.29";
 import { normalizeAwakenedRoster } from "./AwakenedSystem.js";
 import { normalizeCraftingItems } from "./CraftingSystem.js";
-import { normalizeCooldowns } from "./CooldownSystem.js?v=2.0.28";
+import { normalizeCooldowns } from "./CooldownSystem.js?v=2.0.29";
 
 const SESSION_STATE_KEY = "crystal-forge-session-state-v1";
 const BUILD_NOTES_SEEN_KEY = "crystal-forge-build-notes-seen-v1";

@@ -13108,6 +13108,170 @@ body:-webkit-full-screen #app {
   line-height: 1.5;
 }
 
+/* ── Section titles between Calm seasons and Dramatic phenomena grids ── */
+.weather-info__section-title {
+  margin: 18px 0 8px 0;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.weather-info__section-title small {
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--text-muted, rgba(184, 200, 233, 0.78));
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── Dramatic Phenomena cards (Scarred Lands sourcebook entries) ───── */
+.weather-info__dramatic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 12px;
+}
+.weather-info__phenomenon {
+  border-radius: 14px;
+  border: 1px solid rgba(244, 114, 114, 0.30);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(244, 114, 114, 0.10), transparent 60%),
+    rgba(10, 16, 30, 0.55);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+}
+.weather-info__phenomenon--nav-d {
+  border-color: rgba(141, 214, 255, 0.35);
+}
+.weather-info__phenomenon--nav-c {
+  border-color: rgba(140, 195, 110, 0.40);
+}
+.weather-info__phenomenon--nav-b {
+  border-color: rgba(240, 188, 96, 0.45);
+}
+.weather-info__phenomenon--nav-a {
+  border-color: rgba(255, 140, 90, 0.55);
+}
+.weather-info__phenomenon--nav-s {
+  border-color: rgba(244, 114, 182, 0.70);
+  box-shadow:
+    0 0 0 1px rgba(244, 114, 182, 0.30),
+    0 0 22px rgba(244, 114, 182, 0.18);
+}
+
+.weather-info__phenomenon-head {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+.weather-info__phenomenon-icon {
+  font-size: 1.6rem;
+  text-align: center;
+}
+.weather-info__phenomenon-titles {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.weather-info__phenomenon-titles strong {
+  font-size: 1rem;
+  font-weight: 700;
+}
+.weather-info__phenomenon-titles span {
+  font-size: 0.74rem;
+  color: var(--text-muted, rgba(184, 200, 233, 0.78));
+  letter-spacing: 0.04em;
+}
+.weather-info__nav-badge {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  font-family: var(--display-font, inherit);
+  font-size: 1rem;
+  font-weight: 800;
+  border: 1px solid;
+}
+.weather-info__nav-badge--d {
+  color: #cfe6ff;
+  background: rgba(141, 214, 255, 0.14);
+  border-color: rgba(141, 214, 255, 0.55);
+}
+.weather-info__nav-badge--c {
+  color: #c4e8ad;
+  background: rgba(140, 195, 110, 0.14);
+  border-color: rgba(140, 195, 110, 0.55);
+}
+.weather-info__nav-badge--b {
+  color: #ffe4a8;
+  background: rgba(240, 188, 96, 0.16);
+  border-color: rgba(240, 188, 96, 0.60);
+}
+.weather-info__nav-badge--a {
+  color: #ffd1b1;
+  background: rgba(255, 140, 90, 0.16);
+  border-color: rgba(255, 140, 90, 0.70);
+}
+.weather-info__nav-badge--s {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(244, 114, 182, 0.55), rgba(190, 163, 255, 0.55));
+  border-color: rgba(255, 255, 255, 0.55);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+}
+
+.weather-info__phenomenon-desc {
+  margin: 0;
+  color: #d8e1ff;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+.weather-info__phenomenon-meta {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.weather-info__phenomenon-meta > div {
+  display: grid;
+  grid-template-columns: 60px minmax(0, 1fr);
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(6, 10, 24, 0.55);
+  border: 1px solid rgba(140, 170, 230, 0.16);
+}
+.weather-info__phenomenon-meta dt {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted, rgba(184, 200, 233, 0.78));
+  align-self: center;
+}
+.weather-info__phenomenon-meta dd {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #e5ecff;
+}
+.weather-info__phenomenon-quote {
+  margin: 0;
+  padding: 8px 12px;
+  border-left: 3px solid rgba(190, 163, 255, 0.55);
+  background: rgba(190, 163, 255, 0.08);
+  border-radius: 0 8px 8px 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: rgba(220, 215, 255, 0.94);
+  font-style: italic;
+}
+
 .chronicle-notes-list__date-flag.is-today {
   color: #ffe9be;
   border-color: rgba(240, 188, 96, 0.55);
