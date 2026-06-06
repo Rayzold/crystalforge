@@ -232,6 +232,96 @@ Re-call `render()` when the theme toggle fires.
 
 ---
 
+---
+
+## Fix — Panels and cards still rendering dark (hardcoded colors)
+
+### Problem
+
+After applying `[data-theme="parchment"]`, the top nav, resource bar, alert strip, and page background correctly adopt parchment colors. However all `.panel` elements, content cards, and sidebar cards remain dark navy/black. This happens because component styles use **hardcoded hex values** instead of CSS variables — the theme override changes the variables but the components never read them.
+
+Screenshot evidence: "THE CHRONICLE" header, "LATEST CHRONICLE" card, "UPCOMING HOLIDAY" card, and right sidebar cards ("Quiet Streets") all remained dark navy/black.
+
+### Find all hardcoded colors
+
+Run this in the project root to locate every offending line:
+
+```bash
+grep -rn "#131b2e\|#1b2440\|#0c1322\|rgba(30, 42, 66\|rgba(30,42,66\|rgba(182, 212, 255\|#f2f7ff\|#b6c6e3" src/
+```
+
+Also check for these patterns in `.vue`, `.js`, `.ts`, `.css`, `.scss` files:
+
+```bash
+grep -rn "background:\s*#1[0-9a-f]\{5\}\|background-color:\s*#0[0-9a-f]\{5\}" src/
+```
+
+### Replace all hardcoded values with CSS variables
+
+Every occurrence of a hardcoded color must become the corresponding `var(--*)`:
+
+| Find (hardcoded) | Replace with |
+|---|---|
+| `#131b2e` | `var(--bg-0)` |
+| `#1b2440` | `var(--bg-1)` |
+| `#0c1322` | `var(--bg-2)` |
+| `rgba(30, 42, 66, 0.92)` | `var(--panel)` |
+| `rgba(30,42,66,0.92)` | `var(--panel)` |
+| `rgba(182, 212, 255, 0.34)` | `var(--panel-border)` |
+| `rgba(182,212,255,0.34)` | `var(--panel-border)` |
+| `#f2f7ff` | `var(--text)` |
+| `#b6c6e3` | `var(--muted)` |
+| `#8dd6ff` | `var(--accent)` |
+| `#f0c482` | `var(--accent-gold)` |
+| `#72d9c8` | `var(--accent-mint)` |
+| `#ff7c9d` | `var(--danger)` |
+| `#70f1c2` | `var(--success)` |
+| `#131c30` | `var(--bg-start)` |
+| `#0d1426` | `var(--bg-mid)` |
+| `#07101e` | `var(--bg-end)` |
+
+### Priority components (fix these first)
+
+Based on what's visually broken in the screenshot:
+
+1. `.panel` — the main card wrapper used everywhere (Chronicle header, content panels)
+2. `.building-card`, `.building-card--stream` — black in parchment mode
+3. Right sidebar cards (`.incubator-sidebar`, event cards, chronicle cards)
+4. `.page-hero` band
+5. Any component with an inline `style` binding like `:style="{ background: '#131b2e' }"` in Vue templates — these won't be caught by CSS grep and need a separate search:
+
+```bash
+grep -rn "background.*#1[0-9a-f]\{5\}\|background.*#0[0-9a-f]\{5\}" src/ --include="*.vue"
+```
+
+### After the refactor
+
+Once all hardcoded values are replaced with variables, the `[data-theme="parchment"]` block in the CSS will automatically theme every component with zero additional selectors needed.
+
+### Resolution applied (styles.css `2.0.33`)
+
+Rather than rewrite every hardcoded color in the project (which would change the dark theme as a side-effect and touch hundreds of rules), the parchment block in `styles.css` was extended with a **structural-overrides** section that re-paints each affected surface under `body[data-theme="parchment"]`. The dark theme rules are bit-for-bit unchanged.
+
+Selectors repainted (cream backgrounds + sepia ink borders + `#2c1a0e` text):
+
+- **Top-level surfaces:** `.panel`, `.scene-panel`, `.modal__dialog`, `.hud-ribbon__item`, `.sidebar-nav`, `.page-hero`, `.building-card--stream`
+- **Inner cards:** `.expedition-card`, `.expedition-team-card`, `.expedition-return-card`, `.vehicle-card`, `.notable-card`, `.vehicle-roster-panel`, `.expedition-vehicle-group`
+- **Stat tiles:** `.vehicle-card__stats article`, `.expedition-preview-grid article`
+- **Awakened picker chips:** `.expedition-awakened-chip`, `__grade`, `__body small`, `__mark` (selected + unselected)
+- **Sidebar widgets:** `.sidebar-manifest-list`, `.sidebar-dice`, `.sidebar-save-slot`, `.sidebar-gm-tools`
+- **Top-nav popovers:** `.top-nav__dropdown`, `.top-nav__link`, `.top-nav__settings-panel`, `.top-nav__settings-link`
+- **Chronicle:** `.chronicle-calendar__day`, `.chronicle-calendar__day-cell`, `.chronicle-notes-list__item`, `.weather-info-panel__*`
+- **Crisis banner:** `.crisis-banner`
+- **Muted text:** `.panel__subtle`, `.*-card__eyebrow`, `.*-card__footer`, `.*-card p`, `.vehicle-roster-panel__counts`, `.expedition-pending-panel__copy`, etc. → `rgba(101, 67, 33, 0.82)`
+
+This means the dark theme keeps using its hardcoded values exactly as before, and the parchment theme reads cleanly on every visible card, panel, and tile without a global codebase refactor.
+
+If a new card style appears later that uses hardcoded rgba dark colors, the fix is one of:
+1. Add it to the structural-overrides block in `styles.css` under `body[data-theme="parchment"]`, **or**
+2. Rewrite the component's rule to use `var(--bg-1)` / `var(--panel)` / etc. (preferred for new code).
+
+---
+
 ## Files to change
 
 - Root CSS file (wherever `:root` is defined) — add `[data-theme="parchment"]` block
