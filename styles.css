@@ -13868,9 +13868,16 @@ body:-webkit-full-screen #app {
 
 .expedition-grid--team,
 .expedition-grid--supplies,
-.vehicle-grid,
 .notable-grid {
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+/* Vehicle cards carry a 16:9 art block + a 7-cell stats grid, so they need
+ * meaningfully more width than the other auto-fit grids or every label
+ * collapses on top of the next one. */
+.vehicle-grid {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.1rem;
 }
 
 /* ── Awakened operatives picker (expeditions launch panel) ────────────── */
@@ -13993,6 +14000,13 @@ body:-webkit-full-screen #app {
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
 }
 
+/* Vehicle stat tiles need more breathing room — they sit 7-up inside an
+ * already-busy card, so bump the gap and per-tile padding a touch. */
+.vehicle-card__stats {
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 0.65rem;
+}
+
 .expedition-preview-grid article,
 .vehicle-card__stats article {
   display: grid;
@@ -14002,6 +14016,10 @@ body:-webkit-full-screen #app {
   border: 1px solid rgba(130, 160, 220, 0.12);
   background: rgba(10, 15, 28, 0.52);
   padding: 0.75rem 0.8rem;
+}
+
+.vehicle-card__stats article {
+  padding: 0.7rem 0.85rem;
 }
 
 .expedition-preview-grid article span,
@@ -14082,6 +14100,12 @@ body:-webkit-full-screen #app {
 .expedition-vehicle-group {
   display: grid;
   gap: 0.8rem;
+}
+
+/* Land and Air sections each get their own bordered panel, so the inter-
+ * section gap needs to be visibly larger than the inter-card gap. */
+.vehicle-groups {
+  gap: 1.4rem;
 }
 
 .expedition-card--vehicle {
@@ -14247,6 +14271,12 @@ body:-webkit-full-screen #app {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
+/* Land/Air roster panel needs more interior breathing — the section head and
+ * the first card row were almost touching. */
+.vehicle-roster-panel {
+  padding: 1.3rem 1.35rem 1.4rem;
+}
+
 .vehicle-roster-panel__head,
 .expedition-vehicle-group__head {
   display: flex;
@@ -14254,6 +14284,10 @@ body:-webkit-full-screen #app {
   justify-content: space-between;
   gap: 0.8rem;
   margin-bottom: 0.9rem;
+}
+
+.vehicle-roster-panel__head {
+  margin-bottom: 1.3rem;
 }
 
 .vehicle-roster-panel__counts,
@@ -14549,9 +14583,13 @@ body:-webkit-full-screen #app {
   padding: 1rem 1.05rem;
 }
 
+/* The card stacks art → title → blurb → 7-stat grid → "best for". Bump padding
+ * and inter-row gap so each section has its own breathing room instead of
+ * crowding the stat grid. */
 .vehicle-card {
   display: grid;
-  gap: 0.85rem;
+  gap: 1rem;
+  padding: 1.15rem 1.2rem 1.25rem;
 }
 
 .expedition-return-card__meta,
