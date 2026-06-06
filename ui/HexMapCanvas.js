@@ -77,50 +77,111 @@ function buildLookup(cells, buildings) {
   return byKey;
 }
 
+// Theme-aware palette so the hex map matches the parchment paper background.
+// The dark palette mirrors the original hardcoded values; the parchment
+// palette uses sepia/earth tones that read against the warm tan body.
+const HEX_PALETTES = {
+  dark: {
+    emptyFill:        "rgba(40, 54, 84, 0.85)",
+    emptyStroke:      "rgba(140, 170, 220, 0.18)",
+    reservedFill:     "rgba(120, 90, 60, 0.85)",
+    reservedStroke:   "rgba(240, 196, 130, 0.8)",
+    fortBuiltFill:    "rgba(120, 80, 110, 0.78)",
+    fortEmptyFill:    "rgba(36, 30, 56, 0.72)",
+    fortStroke:       "rgba(229, 140, 255, 0.32)",
+    buildingStroke:   "rgba(255, 255, 255, 0.32)",
+    selectedStroke:   "#ffffff",
+    hoverStroke:      "rgba(141, 214, 255, 0.95)",
+    defenseBuilt:     "#f97316",
+    defenseRing:      "rgba(255, 124, 157, 0.32)",
+    trade:            "rgba(240, 196, 130, 0.82)",
+    resonance:        "rgba(167, 139, 250, 0.82)",
+    water:            "rgba(96, 165, 250, 0.78)",
+    bastionBuilt:     "rgba(148, 163, 184, 0.85)",
+    bastionRing:      "rgba(255, 124, 157, 0.48)",
+    rarity:           RARITY_COLORS
+  },
+  parchment: {
+    emptyFill:        "rgba(232, 217, 184, 0.92)",
+    emptyStroke:      "rgba(101, 67, 33, 0.22)",
+    reservedFill:     "rgba(180, 130, 70, 0.78)",
+    reservedStroke:   "rgba(120, 70, 20, 0.7)",
+    fortBuiltFill:    "rgba(150, 90, 110, 0.74)",
+    fortEmptyFill:    "rgba(208, 184, 142, 0.78)",
+    fortStroke:       "rgba(125, 60, 100, 0.45)",
+    buildingStroke:   "rgba(60, 35, 10, 0.45)",
+    selectedStroke:   "#2c1a0e",
+    hoverStroke:      "rgba(139, 69, 19, 0.95)",
+    defenseBuilt:     "#b45309",
+    defenseRing:      "rgba(185, 28, 28, 0.32)",
+    trade:            "rgba(180, 83, 9, 0.78)",
+    resonance:        "rgba(107, 63, 160, 0.78)",
+    water:            "rgba(30, 95, 168, 0.72)",
+    bastionBuilt:     "rgba(120, 110, 95, 0.85)",
+    bastionRing:      "rgba(185, 28, 28, 0.42)",
+    rarity: {
+      Common:    "#64748b",
+      Uncommon:  "#166534",
+      Rare:      "#1e4fa8",
+      Epic:      "#6d28d9",
+      Legendary: "#b45309",
+      Beyond:    "#be185d"
+    }
+  }
+};
+
+function getActivePalette() {
+  if (typeof document !== "undefined" && document.body?.dataset?.theme === "parchment") {
+    return HEX_PALETTES.parchment;
+  }
+  return HEX_PALETTES.dark;
+}
+
 // Color rules per overlay. Each returns { fill, stroke }.
 function getHexStyle(entry, overlay, state, isHovered, isSelected) {
   const { cell, building } = entry;
   const rarity = building?.rarity;
-  let fill = "rgba(40, 54, 84, 0.85)"; // empty plot default
-  let stroke = "rgba(140, 170, 220, 0.18)";
+  const palette = getActivePalette();
+  let fill = palette.emptyFill;
+  let stroke = palette.emptyStroke;
   let strokeWidth = 0.6;
 
   if (cell.isReserved) {
-    fill = "rgba(120, 90, 60, 0.85)";
-    stroke = "rgba(240, 196, 130, 0.8)";
+    fill = palette.reservedFill;
+    stroke = palette.reservedStroke;
   } else if (cell.isFortificationRing) {
-    fill = building ? "rgba(120, 80, 110, 0.78)" : "rgba(36, 30, 56, 0.72)";
-    stroke = "rgba(229, 140, 255, 0.32)";
+    fill = building ? palette.fortBuiltFill : palette.fortEmptyFill;
+    stroke = palette.fortStroke;
   }
 
-  if (building && rarity && RARITY_COLORS[rarity]) {
-    fill = RARITY_COLORS[rarity];
-    stroke = "rgba(255, 255, 255, 0.32)";
+  if (building && rarity && palette.rarity[rarity]) {
+    fill = palette.rarity[rarity];
+    stroke = palette.buildingStroke;
     strokeWidth = 1;
   }
 
   // Overlay tweaks — light tinting on top of the base.
   if (overlay === "Defense") {
-    if (building && cell.isFortificationRing) fill = "#f97316";
-    else if (cell.isFortificationRing && !building) fill = "rgba(255, 124, 157, 0.32)";
+    if (building && cell.isFortificationRing) fill = palette.defenseBuilt;
+    else if (cell.isFortificationRing && !building) fill = palette.defenseRing;
   } else if (overlay === "Trade") {
-    if (building) fill = "rgba(240, 196, 130, 0.82)";
+    if (building) fill = palette.trade;
   } else if (overlay === "Resonance") {
-    if (building) fill = "rgba(167, 139, 250, 0.82)";
+    if (building) fill = palette.resonance;
   } else if (overlay === "Water" && cell.terrain === "water") {
-    fill = "rgba(96, 165, 250, 0.78)";
+    fill = palette.water;
   } else if (overlay === "Bastion" && cell.isFortificationRing) {
-    fill = building ? "rgba(148, 163, 184, 0.85)" : "rgba(255, 124, 157, 0.48)";
+    fill = building ? palette.bastionBuilt : palette.bastionRing;
   } else if (overlay === "District" && building && state.districts?.definitions?.[building.district]) {
     const dColor = state.districts.definitions[building.district].color;
     if (dColor) fill = dColor;
   }
 
   if (isSelected) {
-    stroke = "#ffffff";
+    stroke = palette.selectedStroke;
     strokeWidth = 2.5;
   } else if (isHovered) {
-    stroke = "rgba(141, 214, 255, 0.95)";
+    stroke = palette.hoverStroke;
     strokeWidth = 2;
   }
 
@@ -331,11 +392,12 @@ class TownMapCanvas {
       // Building marker — small filled disc inside the hex so the GM can see
       // where buildings are at a glance regardless of overlay tint.
       if (entry?.building) {
+        const isParchment = typeof document !== "undefined" && document.body?.dataset?.theme === "parchment";
         ctx.beginPath();
         ctx.arc(x, y, drawSize * 0.32, 0, TWO_PI);
-        ctx.fillStyle = "rgba(20, 28, 44, 0.85)";
+        ctx.fillStyle = isParchment ? "rgba(44, 26, 14, 0.78)" : "rgba(20, 28, 44, 0.85)";
         ctx.fill();
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+        ctx.strokeStyle = isParchment ? "rgba(244, 234, 216, 0.55)" : "rgba(255, 255, 255, 0.4)";
         ctx.lineWidth = 1 / this.zoom;
         ctx.stroke();
       }

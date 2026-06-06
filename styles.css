@@ -90,6 +90,118 @@ body[data-theme="silver"] {
   color-scheme: light;
 }
 
+/* ─── Parchment theme ────────────────────────────────────────────────────────
+ * Aged-manuscript look: warm tan paper, sepia ink, ruled lines. Toggle via
+ * data-theme="parchment" on <body> (set by the 📜 button in the top-nav).
+ * Dark theme (the :root defaults) is untouched.
+ * ----------------------------------------------------------------------- */
+body[data-theme="parchment"] {
+  --bg-0: #f4ead8;
+  --bg-1: #ede0c4;
+  --bg-2: #faf4e8;
+  --panel: rgba(237, 224, 196, 0.96);
+  --panel-border: rgba(101, 67, 33, 0.28);
+  --text: #2c1a0e;
+  --muted: #7a5c3c;
+  --accent: #8b4513;
+  --accent-soft: rgba(139, 69, 19, 0.14);
+  --accent-pink: #b5325a;
+  --accent-blue: #1e5fa8;
+  --accent-violet: #6b3fa0;
+  --accent-gold: #b45309;
+  --accent-mint: #276749;
+  --danger: #b91c1c;
+  --success: #166534;
+  --shadow: 0 4px 20px rgba(80, 40, 10, 0.18);
+  --shadow-soft: 0 2px 10px rgba(80, 40, 10, 0.10);
+  --bg-radial-a: rgba(180, 140, 80, 0.10);
+  --bg-radial-b: rgba(160, 90, 60, 0.07);
+  --bg-radial-c: rgba(100, 60, 140, 0.05);
+  --bg-radial-d: rgba(200, 160, 80, 0.08);
+  --bg-start: #f0e6cc;
+  --bg-mid: #ede0c4;
+  --bg-end: #e8d9b8;
+  --overlay-grid: rgba(101, 67, 33, 0.03);
+  --overlay-vignette-a: rgba(120, 80, 40, 0.04);
+  --overlay-vignette-b: rgba(80, 50, 20, 0.10);
+  /* Rarity overrides — darkened so they read against warm paper. */
+  --rarity-common:    #64748b;
+  --rarity-uncommon:  #166534;
+  --rarity-rare:      #1e4fa8;
+  --rarity-epic:      #6d28d9;
+  --rarity-legendary: #b45309;
+  --rarity-beyond:    #be185d;
+  color-scheme: light;
+}
+
+/* Ruled paper texture over warm tan gradient. Overrides the body radial mix. */
+body[data-theme="parchment"] {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 27px,
+      rgba(101, 67, 33, 0.04) 28px
+    ),
+    linear-gradient(160deg, #f5ecda 0%, #ede0c4 50%, #e8d4b0 100%);
+}
+
+/* Inked borders instead of glow-blue. */
+body[data-theme="parchment"] .panel,
+body[data-theme="parchment"] [class*="card"],
+body[data-theme="parchment"] [class*="section"] {
+  border-color: rgba(101, 67, 33, 0.25);
+}
+
+/* Ghost buttons: sepia ink-line. */
+body[data-theme="parchment"] .button--ghost {
+  border-color: rgba(101, 67, 33, 0.30);
+  color: #4a2c10;
+}
+body[data-theme="parchment"] .button--ghost:hover {
+  background: rgba(101, 67, 33, 0.08);
+  border-color: rgba(101, 67, 33, 0.50);
+}
+body[data-theme="parchment"] .button--ghost.is-active {
+  background: rgba(139, 69, 19, 0.14);
+  border-color: #8b4513;
+  color: #8b4513;
+}
+
+/* Alert strip: warm red ink instead of hot pink. */
+body[data-theme="parchment"] .alert-strip {
+  background: rgba(185, 28, 28, 0.08);
+  border-color: rgba(185, 28, 28, 0.25);
+  color: #7f1d1d;
+}
+
+/* Scrollbars — brown thumb on parchment track. */
+body[data-theme="parchment"] * {
+  scrollbar-color: rgba(101, 67, 33, 0.35) rgba(237, 224, 196, 0.5);
+}
+body[data-theme="parchment"] ::-webkit-scrollbar-thumb {
+  background: rgba(101, 67, 33, 0.35);
+  border-radius: 4px;
+}
+body[data-theme="parchment"] ::-webkit-scrollbar-track {
+  background: rgba(237, 224, 196, 0.5);
+}
+
+/* Rarity accents — many components hardcode their hex per rarity, so we
+ * override them at the rarity-class level under parchment. */
+body[data-theme="parchment"] [data-rarity="legendary"] .rarity-accent,
+body[data-theme="parchment"] .bldg--legendary::before { background: #b45309; }
+body[data-theme="parchment"] [data-rarity="epic"] .rarity-accent,
+body[data-theme="parchment"] .bldg--epic::before      { background: #6d28d9; }
+body[data-theme="parchment"] [data-rarity="rare"] .rarity-accent,
+body[data-theme="parchment"] .bldg--rare::before      { background: #1e4fa8; }
+body[data-theme="parchment"] [data-rarity="uncommon"] .rarity-accent,
+body[data-theme="parchment"] .bldg--uncommon::before  { background: #166534; }
+body[data-theme="parchment"] [data-rarity="common"] .rarity-accent,
+body[data-theme="parchment"] .bldg--common::before    { background: #64748b; }
+body[data-theme="parchment"] [data-rarity="beyond"] .rarity-accent,
+body[data-theme="parchment"] .bldg--beyond::before    { background: #be185d; }
+
 * {
   box-sizing: border-box;
 }

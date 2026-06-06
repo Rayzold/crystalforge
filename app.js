@@ -181,7 +181,7 @@ import { forceTownFocus, getMayorAdvice, reopenTownFocusSelection, selectTownFoc
 import { getEmergencyStatus, getCityTrendSummary } from "./systems/ResourceSystem.js";
 import { Toasts } from "./ui/Toasts.js";
 import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js";
-import { UIRenderer } from "./ui/UIRenderer.js?v=2.0.30";
+import { UIRenderer } from "./ui/UIRenderer.js?v=2.0.31";
 import { createBlankPlayerCharacter, createBlankWealthItem } from "./ui/EquipmentSheetPage.js?v=2.0.30";
 
 const root = document.querySelector("#app");
@@ -526,7 +526,15 @@ function syncDerivedState(state) {
       RARITY_ORDER.find((rarity) => (state.crystals[rarity] ?? 0) > 0 || (state.shards[rarity] ?? 0) > 0) ?? state.selectedRarity;
   }
   state.settings.currentPage = pageKey;
-  state.settings.theme = "dark";
+  // Theme is sourced from localStorage so it persists across pages (each page
+  // bundles its own save). Default to "dark" if unset or running outside a
+  // browser context.
+  try {
+    const savedTheme = typeof localStorage !== "undefined" ? localStorage.getItem("crystalforge-theme") : null;
+    state.settings.theme = savedTheme === "parchment" ? "parchment" : "dark";
+  } catch {
+    state.settings.theme = state.settings.theme === "parchment" ? "parchment" : "dark";
+  }
   state.settings.firebaseRealmId = getPublishedFirebaseRealmId(state);
   const driftUpdate = syncDriftEvolutionState(state);
   for (const stage of driftUpdate.newStages) {
@@ -3521,6 +3529,16 @@ root.addEventListener("click", async (event) => {
       reportSuccess(`Session mode ${isOn ? "on — animations killed" : "off"}.`);
       break;
     }
+    case "toggle-theme": {
+      const current = getCurrentState().settings.theme === "parchment" ? "parchment" : "dark";
+      const next = current === "parchment" ? "dark" : "parchment";
+      try { localStorage.setItem("crystalforge-theme", next); } catch {}
+      commit((draft) => { draft.settings.theme = next; });
+      // Apply immediately so the body class flips before the next render.
+      document.body.dataset.theme = next;
+      reportSuccess(next === "parchment" ? "Parchment theme on." : "Dark theme on.");
+      break;
+    }
     case "set-text-size":
       commit((draft) => {
         draft.settings.textSize = ["small", "medium", "large"].includes(target.dataset.textSize) ? target.dataset.textSize : "medium";
@@ -5481,7 +5499,7 @@ root.addEventListener("input", (event) => {
 });
 
 audioEngine.setMuted(getCurrentState().settings.muted);
-document.body.dataset.theme = "dark";
+document.body.dataset.theme = getCurrentState().settings.theme === "parchment" ? "parchment" : "dark";
 document.documentElement.dataset.textSize = getCurrentState().settings.textSize ?? "large";
 
 // Restore session mode across page loads

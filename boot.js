@@ -1,4 +1,15 @@
-const APP_ENTRY = "./app.js?v=2.0.30";
+const APP_ENTRY = "./app.js?v=2.0.31";
+
+// Apply persisted theme BEFORE the app boots so the parchment palette doesn't
+// flash dark for a frame. The 📜 button in the top-nav writes this key.
+try {
+  const savedTheme = localStorage.getItem("crystalforge-theme");
+  if (savedTheme === "parchment") {
+    document.body.dataset.theme = "parchment";
+  }
+} catch {
+  /* localStorage blocked — fall back to default dark theme. */
+}
 
 function getBootFailureTitle() {
   const page = String(document.body?.dataset?.page ?? "forge").trim();

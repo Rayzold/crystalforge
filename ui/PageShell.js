@@ -702,6 +702,7 @@ function renderTopNav(state, pageKey, badges, manualSaveSlots, uiDensity, concis
       <button class="top-nav__icon-button" type="button" data-action="save-firebase-realm" title="Cloud Save (publish current state)" aria-label="Cloud Save">💾</button>
       <button class="top-nav__icon-button" type="button" data-action="load-firebase-realm" title="Cloud Load (pull latest published state)" aria-label="Cloud Load">☁⤵</button>
       <button class="top-nav__icon-button" type="button" data-action="roll-dice" title="Roll Dice (${diceAmount}${diceType})" aria-label="Roll dice">🎲</button>
+      <button class="top-nav__icon-button top-nav__theme-toggle" type="button" data-action="toggle-theme" title="Toggle parchment theme" aria-label="Toggle parchment theme">${(state.settings?.theme ?? "dark") === "parchment" ? "🌙" : "📜"}</button>
       ${renderTopNavSettings(state, manualSaveSlots, uiDensity, conciseMode, diceAmount, diceType, lastDiceRoll, firebaseMeta)}
     </nav>
   `;
