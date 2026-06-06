@@ -12833,6 +12833,130 @@ body:-webkit-full-screen #app {
   color: var(--text-muted);
 }
 
+/* ─── All-notes chronological list (below the calendar) ────────────────── */
+
+.chronicle-notes-list .panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+.chronicle-notes-list__count {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(141, 214, 255, 0.32);
+  background: rgba(141, 214, 255, 0.08);
+  color: var(--accent, #8dd6ff);
+  white-space: nowrap;
+}
+.chronicle-notes-list__empty {
+  margin: 12px 0 0 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px dashed rgba(140, 170, 230, 0.25);
+  background: rgba(10, 15, 28, 0.4);
+  color: var(--text-muted, rgba(184, 200, 233, 0.78));
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.chronicle-notes-list__items {
+  list-style: none;
+  margin: 14px 0 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.chronicle-notes-list__item {
+  display: grid;
+  grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
+  gap: 14px;
+  align-items: stretch;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(140, 170, 230, 0.18);
+  background:
+    linear-gradient(180deg, rgba(20, 26, 50, 0.4), rgba(10, 15, 28, 0.55));
+}
+.chronicle-notes-list__date {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid rgba(140, 170, 230, 0.22);
+  border-radius: 10px;
+  background: rgba(8, 12, 28, 0.55);
+  color: #e5ecff;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition: border-color 0.12s ease, background 0.12s ease, transform 0.12s ease;
+}
+.chronicle-notes-list__date:hover {
+  border-color: rgba(141, 214, 255, 0.55);
+  background: rgba(141, 214, 255, 0.08);
+  transform: translateY(-1px);
+}
+.chronicle-notes-list__date-day {
+  font-family: var(--display-font, inherit);
+  font-size: 0.98rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.chronicle-notes-list__date-year {
+  font-size: 0.78rem;
+  color: var(--text-muted, rgba(184, 200, 233, 0.78));
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.chronicle-notes-list__date-flag {
+  margin-top: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(140, 170, 230, 0.32);
+}
+.chronicle-notes-list__date-flag.is-today {
+  color: #ffe9be;
+  border-color: rgba(240, 188, 96, 0.55);
+  background: rgba(240, 188, 96, 0.14);
+}
+.chronicle-notes-list__date-flag.is-past {
+  color: var(--text-muted, rgba(184, 200, 233, 0.78));
+}
+.chronicle-notes-list__date-flag.is-future {
+  color: #cfe6ff;
+  border-color: rgba(141, 214, 255, 0.45);
+  background: rgba(141, 214, 255, 0.12);
+}
+.chronicle-notes-list__body {
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(6, 10, 24, 0.55);
+  border: 1px solid rgba(140, 170, 230, 0.16);
+  color: #d8e1ff;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .chronicle-notes-list__item {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
 @media (max-width: 1024px) {
   .chronicle-calendar__detail-grid {
     grid-template-columns: 1fr;

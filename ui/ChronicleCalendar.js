@@ -188,6 +188,79 @@ function renderYearlyEventsStrip(state, displayDate) {
   `;
 }
 
+// Renders every non-empty player note chronologically as a single scrollable
+// list. The calendar grid above only shows one day at a time, so once a
+// campaign accumulates dozens of sessions the GM has no way to see them all
+// in one place. This block fills that gap — each row is a date header + the
+// note body, click the header to jump the calendar selection to that day.
+export function renderChronicleNotesList(state) {
+  const notes = state.chronicleNotes ?? {};
+  const today = state.calendar?.dayOffset ?? 0;
+
+  // Pull only entries with real content (ignore whitespace-only). Sort by
+  // day offset descending so the most recent session is on top, matching
+  // the way most journals are read.
+  const entries = Object.entries(notes)
+    .map(([rawOffset, text]) => ({
+      dayOffset: Number(rawOffset),
+      text: String(text ?? "")
+    }))
+    .filter((entry) => Number.isFinite(entry.dayOffset) && entry.text.trim().length > 0)
+    .sort((left, right) => right.dayOffset - left.dayOffset);
+
+  return `
+    <section class="panel chronicle-notes-list">
+      <div class="panel__header">
+        <div>
+          <h3>Player Notes — All Entries</h3>
+          <span class="panel__subtle">Every saved note, newest first. Click a date to jump the calendar to that day.</span>
+        </div>
+        <span class="chronicle-notes-list__count">
+          ${entries.length} ${entries.length === 1 ? "entry" : "entries"}
+        </span>
+      </div>
+
+      ${
+        entries.length === 0
+          ? `<p class="chronicle-notes-list__empty">No saved notes yet. Pick a day on the calendar above, write something in the Player Notes panel, and press Save Note to start the journal.</p>`
+          : `
+            <ol class="chronicle-notes-list__items">
+              ${entries.map((entry) => {
+                const date = getStructuredDate(entry.dayOffset);
+                const isToday = entry.dayOffset === today;
+                const isFuture = entry.dayOffset > today;
+                const isPast = entry.dayOffset < today;
+                const flag = isToday ? "Today" : isFuture ? "Upcoming" : "Past";
+                const flagClass = isToday ? "is-today" : isFuture ? "is-future" : "is-past";
+                return `
+                  <li class="chronicle-notes-list__item">
+                    <button
+                      type="button"
+                      class="chronicle-notes-list__date"
+                      data-action="select-chronicle-day"
+                      data-day-offset="${entry.dayOffset}"
+                      data-highlight-jump="1"
+                      title="Jump the calendar to this day"
+                    >
+                      <span class="chronicle-notes-list__date-day">
+                        ${escapeHtml(date.weekday)}, ${escapeHtml(date.month)} ${escapeHtml(String(date.day))}
+                      </span>
+                      <span class="chronicle-notes-list__date-year">
+                        Year ${escapeHtml(String(date.year))} AC
+                      </span>
+                      <span class="chronicle-notes-list__date-flag ${flagClass}">${flag}</span>
+                    </button>
+                    <div class="chronicle-notes-list__body">${escapeHtml(entry.text)}</div>
+                  </li>
+                `;
+              }).join("")}
+            </ol>
+          `
+      }
+    </section>
+  `;
+}
+
 export function renderChronicleCalendar(state) {
   const displayMonthOffset = getDisplayMonthOffset(state);
   const monthOffsets = getMonthDayOffsets(displayMonthOffset);
