@@ -294,6 +294,27 @@ Based on what's visually broken in the screenshot:
 grep -rn "background.*#1[0-9a-f]\{5\}\|background.*#0[0-9a-f]\{5\}" src/ --include="*.vue"
 ```
 
+### Round 6 — Contrast pass (`2.0.38`)
+
+Visual feedback: cream-on-cream panels-vs-body had almost zero value delta — the parchment theme looked flat and uninteresting. Repainted the body to a medium aged-tan / leather tone so cream panels lift off the page like real paper on a worn desk.
+
+Body palette deepened:
+
+| Var | Round 1 | Round 6 |
+|---|---|---|
+| `--bg-start` | `#f0e6cc` (very light) | `#d6b985` (medium aged tan) |
+| `--bg-mid`   | `#ede0c4` (very light) | `#c5a572` (deeper bronze) |
+| `--bg-end`   | `#e8d9b8` (very light) | `#ab8a52` (warm khaki / leather) |
+| `--bg-radial-a` | `rgba(180,140,80,0.10)` | `rgba(150,100,50,0.18)` |
+| `--bg-radial-b` | `rgba(160,90,60,0.07)` | `rgba(130,70,40,0.14)` |
+| `--bg-radial-d` | `rgba(200,160,80,0.08)` | `rgba(170,120,60,0.14)` |
+| `--shadow` | `0 4px 20px rgba(80,40,10,0.18)` | `0 8px 28px rgba(70,35,8,0.28)` (more lift) |
+| `--overlay-grid` | `rgba(101,67,33,0.03)` | `rgba(70,40,10,0.05)` (rule lines stay visible on deeper bg) |
+
+Body rule rewritten to include two explicit warm radial highlights (220,180,120 at top-left and 130,75,35 at bottom-right) over the new linear-gradient(160deg, #d6b985 → #c5a572 → #a88654). Ruled lines bumped to 0.07 alpha so they don't get lost on the darker base.
+
+Panel rules are unchanged — they're still the bright cream gradient (`rgba(250,244,232,…)` → `rgba(237,224,196,…)`). The new contrast comes entirely from the deeper body, plus the stronger shadow for visual lift.
+
 ### Round 5 — Audit script sweep (`2.0.37`)
 
 Ran `find-hardcoded-colors.sh` (adapted to project root, since this codebase keeps source at root, not under `src/`). The full audit surfaced ~20 more dark-gradient backgrounds. Most are minor card depth gradients that aren't visible on common screens. The user's screenshot specifically called out **two black boxes** (empty-state + empowerment slot) plus the **top-nav** chrome — all three repainted plus a few neighbors with no rarity dependency.

@@ -112,18 +112,21 @@ body[data-theme="silver"] {
   --accent-mint: #276749;
   --danger: #b91c1c;
   --success: #166534;
-  --shadow: 0 4px 20px rgba(80, 40, 10, 0.18);
-  --shadow-soft: 0 2px 10px rgba(80, 40, 10, 0.10);
-  --bg-radial-a: rgba(180, 140, 80, 0.10);
-  --bg-radial-b: rgba(160, 90, 60, 0.07);
-  --bg-radial-c: rgba(100, 60, 140, 0.05);
-  --bg-radial-d: rgba(200, 160, 80, 0.08);
-  --bg-start: #f0e6cc;
-  --bg-mid: #ede0c4;
-  --bg-end: #e8d9b8;
-  --overlay-grid: rgba(101, 67, 33, 0.03);
-  --overlay-vignette-a: rgba(120, 80, 40, 0.04);
-  --overlay-vignette-b: rgba(80, 50, 20, 0.10);
+  /* Deeper, warmer shadow so cream panels feel lifted off the aged backdrop. */
+  --shadow: 0 8px 28px rgba(70, 35, 8, 0.28);
+  --shadow-soft: 0 4px 14px rgba(70, 35, 8, 0.18);
+  /* Bigger radial tint so the page reads as warm leather, not flat paper. */
+  --bg-radial-a: rgba(150, 100, 50, 0.18);
+  --bg-radial-b: rgba(130, 70, 40, 0.14);
+  --bg-radial-c: rgba(90, 50, 110, 0.08);
+  --bg-radial-d: rgba(170, 120, 60, 0.14);
+  /* Body gradient — medium aged-tan / leather tones so cream panels pop. */
+  --bg-start: #d6b985;
+  --bg-mid: #c5a572;
+  --bg-end: #ab8a52;
+  --overlay-grid: rgba(70, 40, 10, 0.05);
+  --overlay-vignette-a: rgba(70, 40, 10, 0.10);
+  --overlay-vignette-b: rgba(50, 28, 8, 0.22);
   /* Rarity overrides — darkened so they read against warm paper. */
   --rarity-common:    #64748b;
   --rarity-uncommon:  #166534;
@@ -134,16 +137,19 @@ body[data-theme="silver"] {
   color-scheme: light;
 }
 
-/* Ruled paper texture over warm tan gradient. Overrides the body radial mix. */
+/* Deeper aged-tan body so cream panels read with real contrast.
+ * Ruled lines slightly bolder to stay visible on the darker base. */
 [data-theme="parchment"] {
   background:
     repeating-linear-gradient(
       0deg,
       transparent,
       transparent 27px,
-      rgba(101, 67, 33, 0.04) 28px
+      rgba(70, 40, 10, 0.07) 28px
     ),
-    linear-gradient(160deg, #f5ecda 0%, #ede0c4 50%, #e8d4b0 100%);
+    radial-gradient(circle at 18% 12%, rgba(220, 180, 120, 0.30), transparent 38%),
+    radial-gradient(circle at 82% 88%, rgba(130, 75, 35, 0.22), transparent 42%),
+    linear-gradient(160deg, #d6b985 0%, #c5a572 50%, #a88654 100%);
 }
 
 /* Inked borders instead of glow-blue. */
