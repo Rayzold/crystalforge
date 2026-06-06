@@ -133,7 +133,9 @@ function renderDayCell(state, dayOffset, selectedDayOffset, eventsByDay) {
         <span class="chronicle-calendar__day-number">${date.day}</span>
         <span class="chronicle-calendar__day-moon" title="${escapeHtml(date.moonPhase.name)}">${date.moonPhase.icon}</span>
       </div>
-      <span class="chronicle-calendar__day-weekday">${escapeHtml(date.weekday.slice(0, 3))}</span>
+      ${/* The weekday (MOD / TID / GLI / …) is already shown as the column
+            header above the grid, so repeating it on every card is just
+            redundant noise. Dropped. */ ""}
       ${date.holiday ? `<span class="chronicle-calendar__day-holiday">${escapeHtml(date.holiday.name)}</span>` : ""}
       <span class="chronicle-calendar__day-weather chronicle-calendar__day-weather--${escapeHtml(date.weather.tone)}">${date.weather.icon} ${escapeHtml(date.weather.name)}</span>
       <span class="chronicle-calendar__day-meta">
