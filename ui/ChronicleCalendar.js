@@ -14,7 +14,7 @@ import {
   getWeatherForDay,
   WEATHER_BY_SEASON,
   DRAMATIC_WEATHER
-} from "../systems/CalendarSystem.js?v=2.0.29";
+} from "../systems/CalendarSystem.js?v=2.0.30";
 import { getDailyCitySnapshot } from "../systems/CitySnapshotSystem.js";
 import { getExpeditionCalendarEntries } from "../systems/ExpeditionSystem.js";
 import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js";
@@ -145,10 +145,16 @@ function renderDayCell(state, dayOffset, selectedDayOffset, eventsByDay) {
             redundant noise. Dropped. */ ""}
       ${date.holiday ? `<span class="chronicle-calendar__day-holiday">${escapeHtml(date.holiday.name)}</span>` : ""}
       <span class="chronicle-calendar__day-weather chronicle-calendar__day-weather--${escapeHtml(date.weather.tone)}">${date.weather.icon} ${escapeHtml(date.weather.name)}</span>
-      <span class="chronicle-calendar__day-meta">
-        ${eventCount ? `<em>${eventCount} event${eventCount === 1 ? "" : "s"}</em>` : `<em>Quiet</em>`}
-        ${noteText ? `<strong>Note</strong>` : ""}
-      </span>
+      ${/* Meta strip only renders when there's something worth showing —
+            either scheduled events or a saved note. Dropping the "Quiet"
+            filler that used to fire on every empty day so the grid stays
+            clean on a campaign that hasn't booked anything yet. */ ""}
+      ${(eventCount > 0 || noteText)
+        ? `<span class="chronicle-calendar__day-meta">
+            ${eventCount ? `<em>${eventCount} event${eventCount === 1 ? "" : "s"}</em>` : ""}
+            ${noteText ? `<strong>Note</strong>` : ""}
+          </span>`
+        : ""}
     </button>
   `;
 }

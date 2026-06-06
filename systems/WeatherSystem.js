@@ -30,7 +30,7 @@ import {
   getCalmPoolForSeason,
   getDramaticPool,
   getStructuredDate
-} from "./CalendarSystem.js?v=2.0.29";
+} from "./CalendarSystem.js?v=2.0.30";
 
 const CALM_BIAS = 0.70;   // First-day bias when no previous day is available.
 
