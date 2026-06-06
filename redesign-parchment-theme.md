@@ -294,6 +294,23 @@ Based on what's visually broken in the screenshot:
 grep -rn "background.*#1[0-9a-f]\{5\}\|background.*#0[0-9a-f]\{5\}" src/ --include="*.vue"
 ```
 
+### Round 5 — Audit script sweep (`2.0.37`)
+
+Ran `find-hardcoded-colors.sh` (adapted to project root, since this codebase keeps source at root, not under `src/`). The full audit surfaced ~20 more dark-gradient backgrounds. Most are minor card depth gradients that aren't visible on common screens. The user's screenshot specifically called out **two black boxes** (empty-state + empowerment slot) plus the **top-nav** chrome — all three repainted plus a few neighbors with no rarity dependency.
+
+| Surface | Original | Parchment override |
+|---|---|---|
+| `.empty-state` | `linear-gradient(180deg, rgba(15,18,29,0.92), rgba(8,10,16,0.96))` | Warm cream gradient + sepia border + ink text |
+| `.city-empowerment-slot__active`, `.city-empowerment-slot__candidate` | `linear-gradient(180deg, rgba(15,18,29,0.92), rgba(10,13,22,0.98))` | Same cream gradient; `.is-filled` keeps the rarity-color border via `color-mix` |
+| `.top-nav` | `linear-gradient(180deg, rgba(32,46,74,0.98), rgba(18,26,46,0.98))` | Cream gradient, sepia border; brand divider tinted sepia |
+| `.town-statistics` | `rgba(18,17,28,0.98)` → `rgba(10,10,18,0.98)` | Cream gradient, sepia border, ink text |
+| `.city-aside__summary-card` | `rgba(18,17,28,0.94)` → `rgba(12,14,22,0.96)` | Cream gradient + ink text |
+| `.sidebar-density-picker__button.is-active` | `rgba(10,12,19,0.96)` base | Cream base + faint sepia accent layer, ink text |
+| `.landing-hero__badge` | `rgba(5,10,18,0.72)` | Cream tinted, sepia border, warm shadow |
+| Inner muted text (`.empowerment-slot__head span`, etc.) | mixed greys | `rgba(101, 67, 33, 0.82)` |
+
+The dark theme is bit-for-bit unchanged. Remaining audit hits are deeper card variants (rarity-tinted building cards, focus-accent gradients per town focus) — those should keep their accent palette and will need a follow-up per-focus parchment palette if they ever become visually broken.
+
 ### Round 4 — Buttons + city workspace (`2.0.36`)
 
 DOM audit after Round 3 surfaced two more hardcoded dark backgrounds the parchment swap couldn't reach:

@@ -407,6 +407,79 @@ body[data-theme="silver"] {
   color: #2c1a0e;
 }
 
+/* ─── Round 5 audit fixes (find-hardcoded-colors.sh hits) ──────────────── */
+
+/* Empty state — dashed-border placeholder box (city page, sidebar, etc.).
+ * Was rgba(15,18,29,0.92) → rgba(8,10,16,0.96) navy gradient. */
+[data-theme="parchment"] .empty-state {
+  background: linear-gradient(180deg, rgba(248, 240, 220, 0.92), rgba(237, 224, 196, 0.86));
+  border-color: rgba(101, 67, 33, 0.30);
+  color: #2c1a0e;
+}
+[data-theme="parchment"] .empty-state strong {
+  color: #2c1a0e;
+}
+
+/* City empowerment slot — the active + candidate cards in the city page.
+ * Were rgba(15,18,29,0.92) → rgba(10,13,22,0.98) inky gradient. */
+[data-theme="parchment"] .city-empowerment-slot__active,
+[data-theme="parchment"] .city-empowerment-slot__candidate {
+  background: linear-gradient(180deg, rgba(248, 240, 220, 0.94), rgba(237, 224, 196, 0.88));
+  border-color: rgba(101, 67, 33, 0.22);
+  color: #2c1a0e;
+}
+[data-theme="parchment"] .city-empowerment-slot__active.is-filled {
+  border-color: color-mix(in srgb, var(--rarity-color, #8b4513) 38%, rgba(101, 67, 33, 0.30));
+}
+[data-theme="parchment"] .city-empowerment-slot__head span,
+[data-theme="parchment"] .city-empowerment-slot__head small,
+[data-theme="parchment"] .city-empowerment-slot__candidate small,
+[data-theme="parchment"] .city-empowerment-slot__note,
+[data-theme="parchment"] .city-empowerment-slot__active-head span,
+[data-theme="parchment"] .city-empowerment-slot__stats span {
+  color: rgba(101, 67, 33, 0.82);
+}
+
+/* Top-nav chrome — was rgba(32,46,74,0.98) → rgba(18,26,46,0.98) navy bar. */
+[data-theme="parchment"] .top-nav {
+  background: linear-gradient(180deg, rgba(250, 244, 232, 0.98), rgba(237, 224, 196, 0.96));
+  border-color: rgba(101, 67, 33, 0.28);
+}
+[data-theme="parchment"] .top-nav__brand {
+  border-right-color: rgba(101, 67, 33, 0.22);
+  color: #2c1a0e;
+}
+
+/* Town statistics panel — was rgba(18,17,28,0.98) → rgba(10,10,18,0.98). */
+[data-theme="parchment"] .town-statistics {
+  background: linear-gradient(180deg, rgba(248, 240, 220, 0.94), rgba(237, 224, 196, 0.92));
+  border-color: rgba(101, 67, 33, 0.22);
+  color: #2c1a0e;
+}
+
+/* City aside summary card. */
+[data-theme="parchment"] .city-aside__summary-card {
+  background: linear-gradient(180deg, rgba(248, 240, 220, 0.94), rgba(237, 224, 196, 0.92));
+  color: #2c1a0e;
+}
+
+/* Sidebar density picker active button — was rgba(10,12,19,0.96) ink base. */
+[data-theme="parchment"] .sidebar-density-picker__button.is-active {
+  background:
+    linear-gradient(135deg, rgba(139, 69, 19, 0.14), rgba(180, 83, 9, 0.10)),
+    rgba(244, 234, 214, 0.95);
+  border-color: rgba(101, 67, 33, 0.40);
+  color: #4a2c10;
+}
+
+/* Landing-hero badge — was rgba(5,10,18,0.72) floating dark panel. */
+[data-theme="parchment"] .landing-hero__badge {
+  background: rgba(244, 234, 214, 0.78);
+  border-color: rgba(101, 67, 33, 0.22);
+  color: #2c1a0e;
+  box-shadow: 0 16px 34px rgba(80, 40, 10, 0.18);
+}
+
 * {
   box-sizing: border-box;
 }
