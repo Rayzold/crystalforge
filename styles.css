@@ -12841,6 +12841,12 @@ body:-webkit-full-screen #app {
   justify-content: space-between;
   gap: 0.6rem;
 }
+.chronicle-notes-list__tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 .chronicle-notes-list__count {
   font-size: 0.78rem;
   font-weight: 700;
@@ -12851,6 +12857,29 @@ body:-webkit-full-screen #app {
   background: rgba(141, 214, 255, 0.08);
   color: var(--accent, #8dd6ff);
   white-space: nowrap;
+}
+.chronicle-notes-list__export {
+  white-space: nowrap;
+}
+.chronicle-notes-list__export[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+/* Short numeric date "5/4/1218" — sits between the long date and the year
+   line so the GM can pin a session to a real day at a glance. Monospace
+   font and a subtle pill so it reads as data, not narrative. */
+.chronicle-notes-list__date-short {
+  display: inline-block;
+  margin-top: 2px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(141, 214, 255, 0.10);
+  border: 1px solid rgba(141, 214, 255, 0.22);
+  color: var(--accent, #8dd6ff);
+  font-family: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
 }
 .chronicle-notes-list__empty {
   margin: 12px 0 0 0;

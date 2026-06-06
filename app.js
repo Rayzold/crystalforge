@@ -2,7 +2,7 @@
 // This file wires together state, actions, routing, save/load, manifestation,
 // admin commands, and top-level UI events. Most game-wide behavior eventually
 // passes through here, while lower-level systems keep the domain rules isolated.
-import { AdminConsole } from "./admin/AdminConsole.js?v=2.0.25";
+import { AdminConsole } from "./admin/AdminConsole.js?v=2.0.26";
 import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js";
 import {
   APP_VERSION,
@@ -111,7 +111,7 @@ import {
   updateNpcField,
   updateNpcStat,
   getCrafterCapacity
-} from "./systems/NpcSystem.js?v=2.0.25";
+} from "./systems/NpcSystem.js?v=2.0.26";
 import {
   createCraftingItem,
   collectCraftingItem,
@@ -123,10 +123,10 @@ import {
   clearCollectedCraftingItems,
   pauseCraftingItem,
   resumeCraftingItem,
-} from "./systems/CraftingSystem.js?v=2.0.25";
-import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=2.0.25";
-import { addCooldown, removeCooldown, restartCooldown, markCooldownTriggered, ageCooldown, isCooldownReady, getCooldownReadyDay } from "./systems/CooldownSystem.js?v=2.0.25";
-import { craftingCompletionDay } from "./systems/CraftingSystem.js?v=2.0.25";
+} from "./systems/CraftingSystem.js?v=2.0.26";
+import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=2.0.26";
+import { addCooldown, removeCooldown, restartCooldown, markCooldownTriggered, ageCooldown, isCooldownReady, getCooldownReadyDay } from "./systems/CooldownSystem.js?v=2.0.26";
+import { craftingCompletionDay } from "./systems/CraftingSystem.js?v=2.0.26";
 import {
   addAwakened,
   clearAwakenedImage,
@@ -142,7 +142,7 @@ import {
   addPlayerCharacterWealthItem,
   removePlayerCharacterWealthItem,
   updatePlayerCharacterWealthItem
-} from "./systems/PlayerCharacterSystem.js?v=2.0.25";
+} from "./systems/PlayerCharacterSystem.js?v=2.0.26";
 import { getDailyCitySnapshot } from "./systems/CitySnapshotSystem.js";
 import { manifestSelectedRarity } from "./systems/GachaSystem.js";
 import { addHistoryEntry } from "./systems/HistoryLogSystem.js";
@@ -173,15 +173,15 @@ import {
   saveGameState,
   saveManualState,
   validateAndMigrateSave
-} from "./systems/StorageSystem.js?v=2.0.25";
-import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js?v=2.0.25";
+} from "./systems/StorageSystem.js?v=2.0.26";
+import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js?v=2.0.26";
 import { applyCompletedGoalRewards } from "./systems/GoalSystem.js";
 import { forceTownFocus, getMayorAdvice, reopenTownFocusSelection, selectTownFocus, updateTownFocusAvailability } from "./systems/TownFocusSystem.js";
 import { getEmergencyStatus, getCityTrendSummary } from "./systems/ResourceSystem.js";
 import { Toasts } from "./ui/Toasts.js";
 import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js";
-import { UIRenderer } from "./ui/UIRenderer.js?v=2.0.25";
-import { createBlankPlayerCharacter, createBlankWealthItem } from "./ui/EquipmentSheetPage.js?v=2.0.25";
+import { UIRenderer } from "./ui/UIRenderer.js?v=2.0.26";
+import { createBlankPlayerCharacter, createBlankWealthItem } from "./ui/EquipmentSheetPage.js?v=2.0.26";
 
 const root = document.querySelector("#app");
 const pageKey = document.body.dataset.page ?? "home";
@@ -688,6 +688,48 @@ function describeCityStatus(state) {
     `Security: ${Math.round(state.cityStats.security ?? 0)}`,
     `Warnings: ${emergencyState.emergencies.length ? emergencyState.emergencies.map((entry) => entry.label).join(", ") : "None"}`
   ].join("\n");
+}
+
+// Builds a single plain-text export of every saved chronicle note, oldest
+// first (so the resulting document reads like a journal from start to end).
+// Each entry header has BOTH date forms — the long in-world line and the
+// short numeric "D/M/YYYY" — so when this is pasted into a session log or
+// shared with players, dates can be referenced either way.
+function buildChronicleNotesExport(state) {
+  const notes = state.chronicleNotes ?? {};
+  const today = state.calendar?.dayOffset ?? 0;
+  const entries = Object.entries(notes)
+    .map(([rawOffset, text]) => ({
+      dayOffset: Number(rawOffset),
+      text: String(text ?? "")
+    }))
+    .filter((entry) => Number.isFinite(entry.dayOffset) && entry.text.trim().length > 0)
+    .sort((left, right) => left.dayOffset - right.dayOffset);
+
+  if (entries.length === 0) {
+    return "";
+  }
+
+  const lines = [
+    "Crystal Forge — Chronicle Notes",
+    `Exported on ${formatDate(today)}`,
+    `${entries.length} ${entries.length === 1 ? "entry" : "entries"}`,
+    "",
+    "================================================================",
+    ""
+  ];
+
+  for (const entry of entries) {
+    const date = getStructuredDate(entry.dayOffset);
+    const shortDate = `${date.day}/${date.monthIndex + 1}/${date.year}`;
+    const longDate = `${date.weekday}, ${date.month} ${date.day}, Year ${date.year} AC`;
+    lines.push(`[${shortDate}] ${longDate}`);
+    lines.push("----------------------------------------------------------------");
+    lines.push(entry.text.trim());
+    lines.push("");
+  }
+
+  return lines.join("\n");
 }
 
 function describeChronicleDay(state, dayOffset) {
@@ -3132,6 +3174,14 @@ const actions = {
   async copyChronicleDaySummary(dayOffset) {
     await copyTextToClipboard(describeChronicleDay(getCurrentState(), dayOffset), "Day summary copied.");
   },
+  async exportChronicleNotes() {
+    const text = buildChronicleNotesExport(getCurrentState());
+    if (!text) {
+      reportError("No saved notes to export yet.");
+      return;
+    }
+    await copyTextToClipboard(text, "All chronicle notes copied to clipboard.");
+  },
   toggleBuildingPin(buildingId) {
     commit((draft) => {
       const current = new Set(draft.settings.pinnedBuildingIds ?? []);
@@ -4498,6 +4548,9 @@ root.addEventListener("click", async (event) => {
       break;
     case "copy-chronicle-day-summary":
       await actions.copyChronicleDaySummary(Number(target.dataset.dayOffset ?? getCurrentState().calendar.dayOffset));
+      break;
+    case "export-chronicle-notes":
+      await actions.exportChronicleNotes();
       break;
     case "go-to-problem":
       actions.goToProblem(target.dataset.problem ?? "overview");

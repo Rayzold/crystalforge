@@ -215,9 +215,18 @@ export function renderChronicleNotesList(state) {
           <h3>Player Notes — All Entries</h3>
           <span class="panel__subtle">Every saved note, newest first. Click a date to jump the calendar to that day.</span>
         </div>
-        <span class="chronicle-notes-list__count">
-          ${entries.length} ${entries.length === 1 ? "entry" : "entries"}
-        </span>
+        <div class="chronicle-notes-list__tools">
+          <span class="chronicle-notes-list__count">
+            ${entries.length} ${entries.length === 1 ? "entry" : "entries"}
+          </span>
+          <button
+            class="button button--ghost chronicle-notes-list__export"
+            type="button"
+            data-action="export-chronicle-notes"
+            ${entries.length === 0 ? "disabled" : ""}
+            title="Copy every saved note to the clipboard as plain text"
+          >📋 Export</button>
+        </div>
       </div>
 
       ${
@@ -229,9 +238,12 @@ export function renderChronicleNotesList(state) {
                 const date = getStructuredDate(entry.dayOffset);
                 const isToday = entry.dayOffset === today;
                 const isFuture = entry.dayOffset > today;
-                const isPast = entry.dayOffset < today;
                 const flag = isToday ? "Today" : isFuture ? "Upcoming" : "Past";
                 const flagClass = isToday ? "is-today" : isFuture ? "is-future" : "is-past";
+                // Short numeric form, e.g. "5/4/1218" — day/monthIndex+1/year.
+                // monthIndex is 0-based in state, so add 1 to get the human
+                // month number (1-12) that matches the printed calendar order.
+                const shortDate = `${date.day}/${date.monthIndex + 1}/${date.year}`;
                 return `
                   <li class="chronicle-notes-list__item">
                     <button
@@ -245,6 +257,7 @@ export function renderChronicleNotesList(state) {
                       <span class="chronicle-notes-list__date-day">
                         ${escapeHtml(date.weekday)}, ${escapeHtml(date.month)} ${escapeHtml(String(date.day))}
                       </span>
+                      <span class="chronicle-notes-list__date-short">${escapeHtml(shortDate)}</span>
                       <span class="chronicle-notes-list__date-year">
                         Year ${escapeHtml(String(date.year))} AC
                       </span>

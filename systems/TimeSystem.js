@@ -10,7 +10,7 @@ import { applyDailyResources } from "./ResourceSystem.js";
 import { captureDailyCitySnapshot } from "./CitySnapshotSystem.js";
 import { applyTownFocusDailyEffects, updateTownFocusAvailability } from "./TownFocusSystem.js";
 import { getNewlyCompletedCraftingItems } from "./CraftingSystem.js";
-import { rollPercentCooldownsForDay } from "./CooldownSystem.js?v=2.0.25";
+import { rollPercentCooldownsForDay } from "./CooldownSystem.js?v=2.0.26";
 
 function runTimeAdvance(state, days, stepKey = null) {
   const completions = [];

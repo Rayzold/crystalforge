@@ -1,6 +1,6 @@
 import { getNextHoliday } from "../systems/CalendarSystem.js";
 import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js";
-import { renderChronicleCalendar, renderChronicleNotesList } from "./ChronicleCalendar.js?v=2.0.25";
+import { renderChronicleCalendar, renderChronicleNotesList } from "./ChronicleCalendar.js?v=2.0.26";
 import { renderEventChainPanel } from "./EventChainPanel.js";
 import { renderEventPanel } from "./EventPanel.js";
 import { renderHistoryPanel } from "./HistoryPanel.js";
