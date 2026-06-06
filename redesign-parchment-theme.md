@@ -294,6 +294,17 @@ Based on what's visually broken in the screenshot:
 grep -rn "background.*#1[0-9a-f]\{5\}\|background.*#0[0-9a-f]\{5\}" src/ --include="*.vue"
 ```
 
+### Round 4 — Buttons + city workspace (`2.0.36`)
+
+DOM audit after Round 3 surfaced two more hardcoded dark backgrounds the parchment swap couldn't reach:
+
+| Surface | Hardcoded value | Cause | Fix |
+|---|---|---|---|
+| `.button`, `.button--ghost` | resolved to `rgba(30, 42, 66, 0.92)` | The button background was already `linear-gradient(...) , var(--panel)` — the variable *did* swap, but the iridescent neon overlay on top of the cream `--panel` skewed the perceived color and still let the audit script flag a "dark" value. The right call was to strip the overlay under parchment, not to chase the literal. | `[data-theme="parchment"] .button, .button--ghost { background: var(--panel); }` flattens both buttons to a clean cream surface; existing ink-text + sepia-border rules anchor them. |
+| `.panel.city-workspace`, `.city-admin-view` | literal `rgba(18, 17, 28, 0.94)` | Hand-tuned dark fill that pre-dated the var system; not caught by previous greps. | Two rules swapped to `var(--panel)` in the base CSS; `[data-theme="parchment"] .panel.city-workspace, .city-workspace, .city-admin-view { background: var(--panel); }` added for belt-and-braces. |
+
+After this round, the only remaining `rgba(* dark *)` literals are the two intentional ones from Round 2: `.reveal-overlay` and `.alert-strip`.
+
 ### Round 3 — Selector + JS hosting fix (`2.0.35`)
 
 Audit on a deployed build showed `:root` still reporting dark CSS variables after the parchment toggle was clicked. Root cause: the parchment overrides were all scoped to `body[data-theme="parchment"]` (matching the existing silver-theme convention), but the spec puts `data-theme` on `<html>`, and DevTools shows custom properties scoped per-element. CSS inheritance still made parchment reach descendants, but the audit signal was misleading and easier to fix at the source.

@@ -153,9 +153,15 @@ body[data-theme="silver"] {
   border-color: rgba(101, 67, 33, 0.25);
 }
 
-/* Primary button (e.g. Advance Day) inherits var(--panel) for its base now,
- * but the iridescent neon overlay needs ink-text + sepia border to read on
- * a warm-cream surface. */
+/* Primary button (e.g. Advance Day) — strip the dark-mode iridescent neon
+ * overlay entirely under parchment so the button reads as a flat cream
+ * surface with ink-brown text + sepia border. (The audit kept reporting
+ * the dark --panel value because the gradient sat on top of var(--panel)
+ * and skewed the perceived color even though the var resolved correctly.) */
+[data-theme="parchment"] .button,
+[data-theme="parchment"] .button--ghost {
+  background: var(--panel);
+}
 [data-theme="parchment"] .button {
   color: var(--text);
   border-color: rgba(101, 67, 33, 0.40);
@@ -237,6 +243,16 @@ body[data-theme="silver"] {
 [data-theme="parchment"] .page-hero {
   background: linear-gradient(180deg, rgba(250, 244, 232, 0.96), rgba(237, 224, 196, 0.92));
   border-color: rgba(101, 67, 33, 0.30);
+}
+
+/* City workspace + admin view used a specific hardcoded dark fill
+ * (rgba(18, 17, 28, 0.94)) that was easy to miss. Force it to follow
+ * --panel under parchment so it inherits cleanly. The literal in the
+ * dark rules has been swapped to var(--panel) as well. */
+[data-theme="parchment"] .panel.city-workspace,
+[data-theme="parchment"] .city-workspace,
+[data-theme="parchment"] .city-admin-view {
+  background: var(--panel);
 }
 
 /* Inner cards used by expeditions, vehicles, notables — these all share
@@ -2606,13 +2622,13 @@ button[aria-disabled="true"]:hover,
 }
 
 .city-workspace {
-  background: rgba(18, 17, 28, 0.94);
+  background: var(--panel);
   border-color: rgba(150, 111, 255, 0.18);
   min-width: 0;
 }
 
 .city-admin-view {
-  background: rgba(18, 17, 28, 0.94);
+  background: var(--panel);
   border-color: rgba(150, 111, 255, 0.18);
 }
 
