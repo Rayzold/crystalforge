@@ -7243,12 +7243,17 @@ body:-webkit-full-screen #app {
   }
 }
 
-.game-shell--page-forge {
-  grid-template-columns: 220px minmax(0, 1fr);
-}
-
+/* Legacy forge sidebar slot — the .sidebar-nav--legacy is hidden via the
+ * !important rule near .game-shell, so this grid was forcing every top-level
+ * shell child (top-nav, resource-bar, alert-strip, main) into a 220px-wide
+ * left column with empty right column, making the brand pill, alert pill,
+ * and resource bar all appear visually misaligned with the nav groups that
+ * flex-overflow past the 220px boundary. Restore the single-column grid
+ * from the base .game-shell rule so the forge page matches every other
+ * page. The collapsed variant follows the same logic. */
+.game-shell--page-forge,
 .game-shell--page-forge.game-shell--forge-collapsed {
-  grid-template-columns: 112px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .game-shell--page-forge.game-shell--forge-collapsed .sidebar-nav {
