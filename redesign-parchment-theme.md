@@ -294,6 +294,14 @@ Based on what's visually broken in the screenshot:
 grep -rn "background.*#1[0-9a-f]\{5\}\|background.*#0[0-9a-f]\{5\}" src/ --include="*.vue"
 ```
 
+### Round 3 — Selector + JS hosting fix (`2.0.35`)
+
+Audit on a deployed build showed `:root` still reporting dark CSS variables after the parchment toggle was clicked. Root cause: the parchment overrides were all scoped to `body[data-theme="parchment"]` (matching the existing silver-theme convention), but the spec puts `data-theme` on `<html>`, and DevTools shows custom properties scoped per-element. CSS inheritance still made parchment reach descendants, but the audit signal was misleading and easier to fix at the source.
+
+Fix applied:
+- **CSS:** stripped the `body` prefix from all 85 occurrences of `body[data-theme="parchment"]` → `[data-theme="parchment"]`. Now matches either `<html>` or `<body>`, and `:root[data-theme="parchment"]` would also match if needed. Specificity stays at 0,1,0 — same as `:root` — and source order puts parchment after, so it wins on conflicts.
+- **JS:** `boot.js`, the gameState subscriber, the boot-time sync, and the `toggle-theme` action handler all now set the `data-theme` attribute on **both** `document.documentElement` and `document.body`. DevTools inspection of `:root` now shows parchment variables when the theme is active.
+
 ### Round 2 — Remaining dark elements (after first pass)
 
 After the first fix pass, the major panels are now correctly themed. Only **3 unique hardcoded dark values** remain (verified via live DOM audit with parchment theme active):

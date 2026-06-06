@@ -95,7 +95,7 @@ body[data-theme="silver"] {
  * data-theme="parchment" on <body> (set by the 📜 button in the top-nav).
  * Dark theme (the :root defaults) is untouched.
  * ----------------------------------------------------------------------- */
-body[data-theme="parchment"] {
+[data-theme="parchment"] {
   --bg-0: #f4ead8;
   --bg-1: #ede0c4;
   --bg-2: #faf4e8;
@@ -135,7 +135,7 @@ body[data-theme="parchment"] {
 }
 
 /* Ruled paper texture over warm tan gradient. Overrides the body radial mix. */
-body[data-theme="parchment"] {
+[data-theme="parchment"] {
   background:
     repeating-linear-gradient(
       0deg,
@@ -147,68 +147,68 @@ body[data-theme="parchment"] {
 }
 
 /* Inked borders instead of glow-blue. */
-body[data-theme="parchment"] .panel,
-body[data-theme="parchment"] [class*="card"],
-body[data-theme="parchment"] [class*="section"] {
+[data-theme="parchment"] .panel,
+[data-theme="parchment"] [class*="card"],
+[data-theme="parchment"] [class*="section"] {
   border-color: rgba(101, 67, 33, 0.25);
 }
 
 /* Primary button (e.g. Advance Day) inherits var(--panel) for its base now,
  * but the iridescent neon overlay needs ink-text + sepia border to read on
  * a warm-cream surface. */
-body[data-theme="parchment"] .button {
+[data-theme="parchment"] .button {
   color: var(--text);
   border-color: rgba(101, 67, 33, 0.40);
 }
 
 /* Ghost buttons: sepia ink-line. */
-body[data-theme="parchment"] .button--ghost {
+[data-theme="parchment"] .button--ghost {
   border-color: rgba(101, 67, 33, 0.30);
   color: #4a2c10;
 }
-body[data-theme="parchment"] .button--ghost:hover {
+[data-theme="parchment"] .button--ghost:hover {
   background: rgba(101, 67, 33, 0.10);
   border-color: rgba(101, 67, 33, 0.55);
 }
-body[data-theme="parchment"] .button--ghost.is-active {
+[data-theme="parchment"] .button--ghost.is-active {
   background: rgba(139, 69, 19, 0.14);
   border-color: #8b4513;
   color: #8b4513;
 }
 
 /* Alert strip: warm red ink instead of hot pink. */
-body[data-theme="parchment"] .alert-strip {
+[data-theme="parchment"] .alert-strip {
   background: rgba(185, 28, 28, 0.08);
   border-color: rgba(185, 28, 28, 0.25);
   color: #7f1d1d;
 }
 
 /* Scrollbars — brown thumb on parchment track. */
-body[data-theme="parchment"] * {
+[data-theme="parchment"] * {
   scrollbar-color: rgba(101, 67, 33, 0.35) rgba(237, 224, 196, 0.5);
 }
-body[data-theme="parchment"] ::-webkit-scrollbar-thumb {
+[data-theme="parchment"] ::-webkit-scrollbar-thumb {
   background: rgba(101, 67, 33, 0.35);
   border-radius: 4px;
 }
-body[data-theme="parchment"] ::-webkit-scrollbar-track {
+[data-theme="parchment"] ::-webkit-scrollbar-track {
   background: rgba(237, 224, 196, 0.5);
 }
 
 /* Rarity accents — many components hardcode their hex per rarity, so we
  * override them at the rarity-class level under parchment. */
-body[data-theme="parchment"] [data-rarity="legendary"] .rarity-accent,
-body[data-theme="parchment"] .bldg--legendary::before { background: #b45309; }
-body[data-theme="parchment"] [data-rarity="epic"] .rarity-accent,
-body[data-theme="parchment"] .bldg--epic::before      { background: #6d28d9; }
-body[data-theme="parchment"] [data-rarity="rare"] .rarity-accent,
-body[data-theme="parchment"] .bldg--rare::before      { background: #1e4fa8; }
-body[data-theme="parchment"] [data-rarity="uncommon"] .rarity-accent,
-body[data-theme="parchment"] .bldg--uncommon::before  { background: #166534; }
-body[data-theme="parchment"] [data-rarity="common"] .rarity-accent,
-body[data-theme="parchment"] .bldg--common::before    { background: #64748b; }
-body[data-theme="parchment"] [data-rarity="beyond"] .rarity-accent,
-body[data-theme="parchment"] .bldg--beyond::before    { background: #be185d; }
+[data-theme="parchment"] [data-rarity="legendary"] .rarity-accent,
+[data-theme="parchment"] .bldg--legendary::before { background: #b45309; }
+[data-theme="parchment"] [data-rarity="epic"] .rarity-accent,
+[data-theme="parchment"] .bldg--epic::before      { background: #6d28d9; }
+[data-theme="parchment"] [data-rarity="rare"] .rarity-accent,
+[data-theme="parchment"] .bldg--rare::before      { background: #1e4fa8; }
+[data-theme="parchment"] [data-rarity="uncommon"] .rarity-accent,
+[data-theme="parchment"] .bldg--uncommon::before  { background: #166534; }
+[data-theme="parchment"] [data-rarity="common"] .rarity-accent,
+[data-theme="parchment"] .bldg--common::before    { background: #64748b; }
+[data-theme="parchment"] [data-rarity="beyond"] .rarity-accent,
+[data-theme="parchment"] .bldg--beyond::before    { background: #be185d; }
 
 /* ─── Parchment structural overrides ─────────────────────────────────────
  * Many components in styles.css use hardcoded dark rgba backgrounds
@@ -216,15 +216,15 @@ body[data-theme="parchment"] .bldg--beyond::before    { background: #be185d; }
  * vars, so the variable swap above doesn't reach them. We re-paint each
  * surface here with cream/parchment backgrounds + ink borders. The dark
  * theme is untouched because every selector is scoped under
- * body[data-theme="parchment"]. */
+ * [data-theme="parchment"]. */
 
-body[data-theme="parchment"] .panel,
-body[data-theme="parchment"] .scene-panel,
-body[data-theme="parchment"] .modal__dialog,
-body[data-theme="parchment"] .hud-ribbon__item,
-body[data-theme="parchment"] .sidebar-nav,
-body[data-theme="parchment"] .page-hero,
-body[data-theme="parchment"] .building-card--stream {
+[data-theme="parchment"] .panel,
+[data-theme="parchment"] .scene-panel,
+[data-theme="parchment"] .modal__dialog,
+[data-theme="parchment"] .hud-ribbon__item,
+[data-theme="parchment"] .sidebar-nav,
+[data-theme="parchment"] .page-hero,
+[data-theme="parchment"] .building-card--stream {
   background:
     linear-gradient(180deg, rgba(250, 244, 232, 0.97), rgba(237, 224, 196, 0.94));
   border-color: rgba(101, 67, 33, 0.28);
@@ -234,20 +234,20 @@ body[data-theme="parchment"] .building-card--stream {
 
 /* Page-hero band has its own focus-tint vars; flatten under parchment so
  * the warm cream reads cleanly. */
-body[data-theme="parchment"] .page-hero {
+[data-theme="parchment"] .page-hero {
   background: linear-gradient(180deg, rgba(250, 244, 232, 0.96), rgba(237, 224, 196, 0.92));
   border-color: rgba(101, 67, 33, 0.30);
 }
 
 /* Inner cards used by expeditions, vehicles, notables — these all share
  * the rgba(12, 18, 34, 0.76) pattern that survives the var swap. */
-body[data-theme="parchment"] .expedition-card,
-body[data-theme="parchment"] .expedition-team-card,
-body[data-theme="parchment"] .expedition-return-card,
-body[data-theme="parchment"] .vehicle-card,
-body[data-theme="parchment"] .notable-card,
-body[data-theme="parchment"] .vehicle-roster-panel,
-body[data-theme="parchment"] .expedition-vehicle-group {
+[data-theme="parchment"] .expedition-card,
+[data-theme="parchment"] .expedition-team-card,
+[data-theme="parchment"] .expedition-return-card,
+[data-theme="parchment"] .vehicle-card,
+[data-theme="parchment"] .notable-card,
+[data-theme="parchment"] .vehicle-roster-panel,
+[data-theme="parchment"] .expedition-vehicle-group {
   background: rgba(248, 240, 220, 0.92);
   border-color: rgba(101, 67, 33, 0.22);
   color: #2c1a0e;
@@ -255,43 +255,43 @@ body[data-theme="parchment"] .expedition-vehicle-group {
 }
 
 /* Stat tile inner cards (vehicle, expedition-preview). */
-body[data-theme="parchment"] .vehicle-card__stats article,
-body[data-theme="parchment"] .expedition-preview-grid article {
+[data-theme="parchment"] .vehicle-card__stats article,
+[data-theme="parchment"] .expedition-preview-grid article {
   background: rgba(244, 234, 214, 0.88);
   border-color: rgba(101, 67, 33, 0.18);
   color: #2c1a0e;
 }
 
-body[data-theme="parchment"] .vehicle-card__stats article span,
-body[data-theme="parchment"] .expedition-preview-grid article span {
+[data-theme="parchment"] .vehicle-card__stats article span,
+[data-theme="parchment"] .expedition-preview-grid article span {
   color: rgba(101, 67, 33, 0.78);
 }
 
-body[data-theme="parchment"] .vehicle-card__stats article strong,
-body[data-theme="parchment"] .expedition-preview-grid article strong {
+[data-theme="parchment"] .vehicle-card__stats article strong,
+[data-theme="parchment"] .expedition-preview-grid article strong {
   color: #2c1a0e;
 }
 
 /* Awakened picker chips — used inside the expedition launch panel. */
-body[data-theme="parchment"] .expedition-awakened-chip {
+[data-theme="parchment"] .expedition-awakened-chip {
   background: rgba(248, 240, 220, 0.92);
   border-color: rgba(101, 67, 33, 0.22);
   color: #2c1a0e;
 }
-body[data-theme="parchment"] .expedition-awakened-chip__grade {
+[data-theme="parchment"] .expedition-awakened-chip__grade {
   background: rgba(237, 224, 196, 0.85);
   border-color: rgba(101, 67, 33, 0.30);
   color: #2c1a0e;
 }
-body[data-theme="parchment"] .expedition-awakened-chip__body small {
+[data-theme="parchment"] .expedition-awakened-chip__body small {
   color: rgba(101, 67, 33, 0.78);
 }
-body[data-theme="parchment"] .expedition-awakened-chip__mark {
+[data-theme="parchment"] .expedition-awakened-chip__mark {
   background: rgba(237, 224, 196, 0.85);
   border-color: rgba(101, 67, 33, 0.40);
   color: rgba(101, 67, 33, 0.78);
 }
-body[data-theme="parchment"] .expedition-awakened-chip.is-selected .expedition-awakened-chip__mark {
+[data-theme="parchment"] .expedition-awakened-chip.is-selected .expedition-awakened-chip__mark {
   background: rgba(139, 69, 19, 0.85);
   border-color: rgba(101, 67, 33, 0.5);
   color: #fff;
@@ -299,93 +299,93 @@ body[data-theme="parchment"] .expedition-awakened-chip.is-selected .expedition-a
 
 /* Common muted-text patterns (eyebrow / subtle / footer). The vars don't
  * help here because the rules use raw rgba(*, *, *, alpha) of cool greys. */
-body[data-theme="parchment"] .panel__subtle,
-body[data-theme="parchment"] .vehicle-card__eyebrow,
-body[data-theme="parchment"] .notable-card__eyebrow,
-body[data-theme="parchment"] .expedition-card__footer,
-body[data-theme="parchment"] .expedition-card__tags em,
-body[data-theme="parchment"] .expedition-card small,
-body[data-theme="parchment"] .vehicle-card p,
-body[data-theme="parchment"] .notable-card p,
-body[data-theme="parchment"] .expedition-return-card p,
-body[data-theme="parchment"] .expedition-launch-preview__outlook,
-body[data-theme="parchment"] .vehicle-roster-panel__counts,
-body[data-theme="parchment"] .expedition-vehicle-group__head span,
-body[data-theme="parchment"] .expedition-pending-panel__copy {
+[data-theme="parchment"] .panel__subtle,
+[data-theme="parchment"] .vehicle-card__eyebrow,
+[data-theme="parchment"] .notable-card__eyebrow,
+[data-theme="parchment"] .expedition-card__footer,
+[data-theme="parchment"] .expedition-card__tags em,
+[data-theme="parchment"] .expedition-card small,
+[data-theme="parchment"] .vehicle-card p,
+[data-theme="parchment"] .notable-card p,
+[data-theme="parchment"] .expedition-return-card p,
+[data-theme="parchment"] .expedition-launch-preview__outlook,
+[data-theme="parchment"] .vehicle-roster-panel__counts,
+[data-theme="parchment"] .expedition-vehicle-group__head span,
+[data-theme="parchment"] .expedition-pending-panel__copy {
   color: rgba(101, 67, 33, 0.82);
 }
 
-body[data-theme="parchment"] .vehicle-roster-panel__counts strong,
-body[data-theme="parchment"] .expedition-vehicle-group__head strong {
+[data-theme="parchment"] .vehicle-roster-panel__counts strong,
+[data-theme="parchment"] .expedition-vehicle-group__head strong {
   color: #2c1a0e;
 }
 
 /* Sidebar inner manifest list, dice strip, save slots. */
-body[data-theme="parchment"] .sidebar-manifest-list,
-body[data-theme="parchment"] .sidebar-dice,
-body[data-theme="parchment"] .sidebar-save-slot,
-body[data-theme="parchment"] .sidebar-gm-tools {
+[data-theme="parchment"] .sidebar-manifest-list,
+[data-theme="parchment"] .sidebar-dice,
+[data-theme="parchment"] .sidebar-save-slot,
+[data-theme="parchment"] .sidebar-gm-tools {
   background: rgba(244, 234, 214, 0.85);
   border-color: rgba(101, 67, 33, 0.22);
   color: #2c1a0e;
 }
 
 /* Top-nav dropdown menu items. */
-body[data-theme="parchment"] .top-nav__dropdown {
+[data-theme="parchment"] .top-nav__dropdown {
   background: linear-gradient(180deg, rgba(250, 244, 232, 0.98), rgba(237, 224, 196, 0.96));
   border-color: rgba(101, 67, 33, 0.30);
   box-shadow: 0 12px 28px rgba(80, 40, 10, 0.20);
 }
-body[data-theme="parchment"] .top-nav__link {
+[data-theme="parchment"] .top-nav__link {
   color: #2c1a0e;
 }
-body[data-theme="parchment"] .top-nav__link:hover,
-body[data-theme="parchment"] .top-nav__link.is-active {
+[data-theme="parchment"] .top-nav__link:hover,
+[data-theme="parchment"] .top-nav__link.is-active {
   background: rgba(139, 69, 19, 0.10);
 }
 
 /* Top-nav settings popover. */
-body[data-theme="parchment"] .top-nav__settings-panel {
+[data-theme="parchment"] .top-nav__settings-panel {
   background: linear-gradient(180deg, rgba(250, 244, 232, 0.98), rgba(237, 224, 196, 0.96));
   border-color: rgba(101, 67, 33, 0.30);
   color: #2c1a0e;
   box-shadow: 0 12px 28px rgba(80, 40, 10, 0.20);
 }
-body[data-theme="parchment"] .top-nav__settings-link {
+[data-theme="parchment"] .top-nav__settings-link {
   background: rgba(244, 234, 214, 0.7);
   border-color: rgba(101, 67, 33, 0.22);
   color: #2c1a0e;
 }
-body[data-theme="parchment"] .top-nav__settings-link:hover {
+[data-theme="parchment"] .top-nav__settings-link:hover {
   background: rgba(139, 69, 19, 0.10);
 }
 
 /* Crisis banner / alert strip cards. */
-body[data-theme="parchment"] .crisis-banner {
+[data-theme="parchment"] .crisis-banner {
   background: rgba(248, 240, 220, 0.94);
   border-color: rgba(101, 67, 33, 0.28);
   color: #2c1a0e;
 }
 
 /* Chronicle calendar day cells — were rgba(20, 28, 44, 0.X). */
-body[data-theme="parchment"] .chronicle-calendar__day,
-body[data-theme="parchment"] .chronicle-calendar__day-cell {
+[data-theme="parchment"] .chronicle-calendar__day,
+[data-theme="parchment"] .chronicle-calendar__day-cell {
   background: rgba(244, 234, 214, 0.88);
   border-color: rgba(101, 67, 33, 0.22);
   color: #2c1a0e;
 }
 
 /* Notes list cards. */
-body[data-theme="parchment"] .chronicle-notes-list__item {
+[data-theme="parchment"] .chronicle-notes-list__item {
   background: rgba(244, 234, 214, 0.88);
   border-color: rgba(101, 67, 33, 0.22);
   color: #2c1a0e;
 }
 
 /* Weather info panel cards. */
-body[data-theme="parchment"] .weather-info-panel__card,
-body[data-theme="parchment"] .weather-info-panel__calm,
-body[data-theme="parchment"] .weather-info-panel__dramatic {
+[data-theme="parchment"] .weather-info-panel__card,
+[data-theme="parchment"] .weather-info-panel__calm,
+[data-theme="parchment"] .weather-info-panel__dramatic {
   background: rgba(244, 234, 214, 0.88);
   border-color: rgba(101, 67, 33, 0.22);
   color: #2c1a0e;

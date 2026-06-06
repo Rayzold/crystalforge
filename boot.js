@@ -1,10 +1,15 @@
-const APP_ENTRY = "./app.js?v=2.0.31";
+const APP_ENTRY = "./app.js?v=2.0.35";
 
 // Apply persisted theme BEFORE the app boots so the parchment palette doesn't
 // flash dark for a frame. The 📜 button in the top-nav writes this key.
+// We set the attribute on BOTH <html> and <body> so the CSS variable
+// inheritance starts from :root — that way DevTools shows the parchment
+// vars on the root element, and any descendant (including <body>) picks
+// them up via normal cascade.
 try {
   const savedTheme = localStorage.getItem("crystalforge-theme");
   if (savedTheme === "parchment") {
+    document.documentElement.dataset.theme = "parchment";
     document.body.dataset.theme = "parchment";
   }
 } catch {

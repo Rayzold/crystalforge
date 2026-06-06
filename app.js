@@ -3340,7 +3340,11 @@ gameState.subscribe((state) => {
   saveGameState(state);
   audioEngine.setMuted(state.settings.muted);
   audioEngine.setPage(pageKey);
-  document.body.dataset.theme = state.settings.theme ?? "dark";
+  {
+    const themeValue = state.settings.theme === "parchment" ? "parchment" : "dark";
+    document.documentElement.dataset.theme = themeValue;
+    document.body.dataset.theme = themeValue;
+  }
   document.documentElement.dataset.textSize = state.settings.textSize ?? "large";
   renderer.render(state);
   applyMapViewPreview();
@@ -3534,7 +3538,9 @@ root.addEventListener("click", async (event) => {
       const next = current === "parchment" ? "dark" : "parchment";
       try { localStorage.setItem("crystalforge-theme", next); } catch {}
       commit((draft) => { draft.settings.theme = next; });
-      // Apply immediately so the body class flips before the next render.
+      // Apply immediately to BOTH the html and body so the CSS variable
+      // cascade starts from :root and any descendant inherits cleanly.
+      document.documentElement.dataset.theme = next;
       document.body.dataset.theme = next;
       reportSuccess(next === "parchment" ? "Parchment theme on." : "Dark theme on.");
       break;
@@ -5499,7 +5505,11 @@ root.addEventListener("input", (event) => {
 });
 
 audioEngine.setMuted(getCurrentState().settings.muted);
-document.body.dataset.theme = getCurrentState().settings.theme === "parchment" ? "parchment" : "dark";
+{
+  const themeValue = getCurrentState().settings.theme === "parchment" ? "parchment" : "dark";
+  document.documentElement.dataset.theme = themeValue;
+  document.body.dataset.theme = themeValue;
+}
 document.documentElement.dataset.textSize = getCurrentState().settings.textSize ?? "large";
 
 // Restore session mode across page loads
