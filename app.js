@@ -636,9 +636,42 @@ function applyCraftingTemplateAndStation(form) {
   set("costs.gold", dailyGold);
   set("costs.mana", dailyMana);
 
-  // Show/hide batch row depending on category.
-  const batchRow = form.querySelector('[data-crafting-batch-row]');
-  if (batchRow) batchRow.style.display = batchAllowed ? "" : "none";
+  // Batch row is always visible — even for custom (no-template) items, the
+  // user can mark a batch and the apply-crafting-batch handler will scale
+  // the duration with the same time-discount formula.
+}
+
+/**
+ * Apply the batch time-discount to a custom (no-template) crafting form.
+ * Uses dataset.baseDuration / dataset.baseName as the "single-item" basis so
+ * switching between ×1 / ×5 / ×10 is fully reversible (no compounding).
+ * The first time it runs (no base stored yet), it captures the current
+ * field values as the base.
+ */
+function applyCraftingBatchToCustomForm(form, batchCount) {
+  const nameField = form.querySelector('[data-crafting-field="name"]');
+  const durationField = form.querySelector('[data-crafting-field="durationDays"]');
+  if (!nameField || !durationField) return;
+
+  // Lazy-init the "base" snapshot the first time the user touches a batch
+  // button (or whenever the base was cleared, e.g. on template selection).
+  if (!form.dataset.baseName) {
+    form.dataset.baseName = nameField.value.replace(/\s*×\d+\s*$/, "");
+  }
+  if (!form.dataset.baseDuration) {
+    const parsed = Number(durationField.value);
+    form.dataset.baseDuration = Number.isFinite(parsed) && parsed > 0 ? String(parsed) : "";
+  }
+
+  const baseName = form.dataset.baseName;
+  const baseDuration = Number(form.dataset.baseDuration);
+  const batchTimeMult = batchCount >= 10 ? 0.30 : batchCount >= 5 ? 0.50 : 1;
+
+  nameField.value = batchCount > 1 ? `${baseName} ×${batchCount}` : baseName;
+  if (Number.isFinite(baseDuration) && baseDuration > 0) {
+    const scaled = +Math.max(0.5, baseDuration * batchCount * batchTimeMult).toFixed(2);
+    durationField.value = String(scaled);
+  }
 }
 
 async function copyTextToClipboard(text, successMessage) {
@@ -4334,7 +4367,13 @@ root.addEventListener("click", async (event) => {
       form.querySelectorAll('[data-action="apply-crafting-batch"]').forEach((b) => {
         b.classList.toggle("is-selected", Number(b.dataset.batchCount) === count);
       });
-      if (form.dataset.templateId) applyCraftingTemplateAndStation(form);
+      if (form.dataset.templateId) {
+        applyCraftingTemplateAndStation(form);
+      } else {
+        // Custom (no-template) crafts get the same time-discount applied to
+        // whatever the user typed as the single-item duration.
+        applyCraftingBatchToCustomForm(form, count);
+      }
       break;
     }
     // ─── End Crafting ──────────────────────────────────────────────────────────
@@ -5139,6 +5178,10 @@ root.addEventListener("change", (event) => {
     const form = document.getElementById("crafting-form");
     if (!form) return;
     form.dataset.templateId = tpl.id;
+    // Picking a template overrides any custom base — the template formula
+    // becomes the source of truth for name/duration scaling.
+    delete form.dataset.baseName;
+    delete form.dataset.baseDuration;
     applyCraftingTemplateAndStation(form);
     target.value = "";
   }
@@ -5382,6 +5425,30 @@ root.addEventListener("change", (event) => {
 });
 
 root.addEventListener("input", (event) => {
+  // Clear the cached batch base when the user manually edits the name or
+  // duration on the crafting form. Without this, the next click on ×5/×10
+  // would re-apply the OLD base (from before the edit) and clobber the
+  // typed change. Only matters for custom (no-template) crafts.
+  const craftField = event.target.closest("[data-crafting-field]");
+  if (craftField) {
+    const field = craftField.dataset.craftingField;
+    if (field === "name" || field === "durationDays") {
+      const form = craftField.closest("#crafting-form");
+      if (form && !form.dataset.templateId) {
+        delete form.dataset.baseName;
+        delete form.dataset.baseDuration;
+        // Reset the visible selection to ×1 too — the user is now editing
+        // a single-item baseline, not a derived batch.
+        if (form.dataset.batchCount && form.dataset.batchCount !== "1") {
+          form.dataset.batchCount = "1";
+          form.querySelectorAll('[data-action="apply-crafting-batch"]').forEach((b) => {
+            b.classList.toggle("is-selected", Number(b.dataset.batchCount) === 1);
+          });
+        }
+      }
+    }
+  }
+
   const target = event.target.closest("[data-action]");
   if (!target) {
     return;

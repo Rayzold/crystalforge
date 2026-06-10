@@ -411,8 +411,8 @@ function renderCraftingForm(editItem, dayOffset, buildings = [], crafterCapacity
           <label class="crafting-form__label">Template <span style="font-weight:400;color:var(--muted);font-size:0.8em;">(fills name, duration and per-day costs)</span></label>
           ${renderTemplatePicker()}
         </div>
-        <div class="crafting-form__field crafting-form__field--full" data-crafting-batch-row style="display:none;">
-          <label class="crafting-form__label">Batch Size <span style="font-weight:400;color:var(--muted);font-size:0.8em;">(produce many in less total time — applies to any item)</span></label>
+        <div class="crafting-form__field crafting-form__field--full" data-crafting-batch-row>
+          <label class="crafting-form__label">Batch Size <span style="font-weight:400;color:var(--muted);font-size:0.8em;">(produce many in less total time — works for any item)</span></label>
           <div class="crafting-form__batch-buttons">
             <button type="button" class="button button--ghost is-selected" data-action="apply-crafting-batch" data-batch-count="1">×1 (single)</button>
             <button type="button" class="button button--ghost" data-action="apply-crafting-batch" data-batch-count="5">×5 — half time per unit</button>

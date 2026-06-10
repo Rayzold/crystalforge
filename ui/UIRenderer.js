@@ -31,7 +31,7 @@ import { renderBehemothsPage } from "./BehemothsPage.js";
 import { renderNpcsPage } from "./NpcsPage.js?v=2.0.30";
 import { renderAwakenedPage } from "./AwakenedPage.js";
 import { renderArmyPage } from "./ArmyPage.js";
-import { renderCraftingPage } from "./CraftingPage.js?v=2.0.30";
+import { renderCraftingPage } from "./CraftingPage.js?v=2.0.42";
 import { renderCooldownsPage } from "./CooldownsPage.js?v=2.0.30";
 import { isCooldownReady } from "../systems/CooldownSystem.js?v=2.0.30";
 import { getMayorSuggestions } from "../systems/TownFocusSystem.js";
