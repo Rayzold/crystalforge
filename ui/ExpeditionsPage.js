@@ -1,10 +1,10 @@
 // Expedition planning page.
 // This screen renders the rotating mission board, launch setup, and the return
 // feed that turns expeditions into a proper citizen-and-resource mini-game.
-import { EXPEDITION_APPROACHES, EXPEDITION_DURATION_OPTIONS, EXPEDITION_ORDER, EXPEDITION_TYPES } from "../content/ExpeditionConfig.js";
-import { CITIZEN_DEFINITIONS } from "../content/CitizenConfig.js";
-import { VEHICLE_DEFINITIONS, VEHICLE_ORDER, VEHICLE_TYPE_SECTIONS } from "../content/VehicleConfig.js";
-import { escapeHtml, formatNumber } from "../engine/Utils.js";
+import { EXPEDITION_APPROACHES, EXPEDITION_DURATION_OPTIONS, EXPEDITION_ORDER, EXPEDITION_TYPES } from "../content/ExpeditionConfig.js?v=2.0.44";
+import { CITIZEN_DEFINITIONS } from "../content/CitizenConfig.js?v=2.0.44";
+import { VEHICLE_DEFINITIONS, VEHICLE_ORDER, VEHICLE_TYPE_SECTIONS } from "../content/VehicleConfig.js?v=2.0.44";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=2.0.44";
 import {
   createExpeditionLaunchPreview,
   formatExpeditionDisplayName,
@@ -19,11 +19,11 @@ import {
   getEligibleExpeditionAwakened,
   getBusyExpeditionAwakenedIds,
   EXPEDITION_AWAKENED_GRADE_POWER
-} from "../systems/ExpeditionSystem.js?v=2.0.30";
-import { formatDate } from "../systems/CalendarSystem.js";
-import { createHelpBubble } from "./HelpBubbles.js";
-import { renderVehicleArt } from "./VehicleArt.js";
-import { renderUiIcon } from "./UiIcons.js";
+} from "../systems/ExpeditionSystem.js?v=2.0.44";
+import { formatDate } from "../systems/CalendarSystem.js?v=2.0.44";
+import { createHelpBubble } from "./HelpBubbles.js?v=2.0.44";
+import { renderVehicleArt } from "./VehicleArt.js?v=2.0.44";
+import { renderUiIcon } from "./UiIcons.js?v=2.0.44";
 
 const RESOURCE_LABELS = {
   food: "Food",

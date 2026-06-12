@@ -1,9 +1,9 @@
-import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js";
-import { MAP_CONFIG, MAP_TERRAIN_THEMES } from "../content/MapConfig.js";
-import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js";
-import { escapeHtml, formatNumber } from "../engine/Utils.js";
-import { getConstructionEtaDetails } from "../systems/ConstructionSystem.js";
-import { getBuildingMultiplier } from "../systems/BuildingSystem.js";
+import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js?v=2.0.44";
+import { MAP_CONFIG, MAP_TERRAIN_THEMES } from "../content/MapConfig.js?v=2.0.44";
+import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js?v=2.0.44";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=2.0.44";
+import { getConstructionEtaDetails } from "../systems/ConstructionSystem.js?v=2.0.44";
+import { getBuildingMultiplier } from "../systems/BuildingSystem.js?v=2.0.44";
 import {
   canPlaceBuildingAt,
   getBuildingAtCell,
@@ -12,7 +12,7 @@ import {
   getCellKey,
   getNeighborCoords,
   isFortificationBuilding
-} from "../systems/MapSystem.js";
+} from "../systems/MapSystem.js?v=2.0.44";
 
 const HEX_NEIGHBORS = [
   [1, 0],

@@ -1,6 +1,6 @@
-import { RARITY_POWER } from "../content/Rarities.js";
-import { seededFloat } from "../engine/Random.js";
-import { roundTo } from "../engine/Utils.js";
+import { RARITY_POWER } from "../content/Rarities.js?v=2.0.44";
+import { seededFloat } from "../engine/Random.js?v=2.0.44";
+import { roundTo } from "../engine/Utils.js?v=2.0.44";
 
 const EMPTY_STATS = {
   goods: 0,

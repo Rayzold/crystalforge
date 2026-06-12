@@ -1,10 +1,10 @@
-import { BUILDING_GRID_LIMIT } from "../content/Config.js";
-import { getBuildingEconomySummary } from "../content/BuildingCatalog.js";
-import { RARITY_ORDER } from "../content/Rarities.js";
-import { sortBuildings } from "../engine/Utils.js";
-import { getActiveConstructionQueue, getConstructionEtaDetails, getDriftConstructionSlots, isBuildingActivelyConstructed } from "../systems/ConstructionSystem.js";
-import { getBuildingWorkforceStatus, getWorkforceSummary } from "../systems/WorkforceSystem.js";
-import { renderBuildingCard } from "./BuildingCard.js?v=2.0.30";
+import { BUILDING_GRID_LIMIT } from "../content/Config.js?v=2.0.44";
+import { getBuildingEconomySummary } from "../content/BuildingCatalog.js?v=2.0.44";
+import { RARITY_ORDER } from "../content/Rarities.js?v=2.0.44";
+import { sortBuildings } from "../engine/Utils.js?v=2.0.44";
+import { getActiveConstructionQueue, getConstructionEtaDetails, getDriftConstructionSlots, isBuildingActivelyConstructed } from "../systems/ConstructionSystem.js?v=2.0.44";
+import { getBuildingWorkforceStatus, getWorkforceSummary } from "../systems/WorkforceSystem.js?v=2.0.44";
+import { renderBuildingCard } from "./BuildingCard.js?v=2.0.44";
 
 function getPinnedBuildingIds(state) {
   return new Set(state.settings?.pinnedBuildingIds ?? []);

@@ -1,5 +1,5 @@
-import { MAX_HISTORY_ENTRIES } from "../content/Config.js";
-import { formatDate } from "./CalendarSystem.js";
+import { MAX_HISTORY_ENTRIES } from "../content/Config.js?v=2.0.44";
+import { formatDate } from "./CalendarSystem.js?v=2.0.44";
 
 export function addHistoryEntry(state, entry) {
   state.historyLog.unshift({

@@ -1,6 +1,6 @@
-import { escapeHtml, formatNumber } from "../engine/Utils.js";
-import { getEmergencyStatus } from "../systems/ResourceSystem.js";
-import { getSuggestedFocusForAlert } from "../systems/TownFocusSystem.js";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=2.0.44";
+import { getEmergencyStatus } from "../systems/ResourceSystem.js?v=2.0.44";
+import { getSuggestedFocusForAlert } from "../systems/TownFocusSystem.js?v=2.0.44";
 
 function renderRunway(label, days, dailyDelta) {
   if (days === null) {

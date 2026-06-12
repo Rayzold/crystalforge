@@ -1,17 +1,17 @@
-import { STEP_DURATIONS } from "../content/Config.js";
-import { formatDate, getStructuredDate } from "./CalendarSystem.js";
-import { recalculateCityStats } from "./CityStatsSystem.js";
-import { advanceConstructionOneDay } from "./ConstructionSystem.js";
-import { expireEvents, maybeTriggerHolidayEvents, maybeTriggerRandomEvents, processScheduledEvents } from "./EventSystem.js";
-import { advanceExpeditionsOneDay } from "./ExpeditionSystem.js";
-import { addHistoryEntry } from "./HistoryLogSystem.js";
-import { addMonthlyChronicleIfNeeded } from "./MonthlyChronicleSystem.js";
-import { applyDailyResources } from "./ResourceSystem.js";
-import { captureDailyCitySnapshot } from "./CitySnapshotSystem.js";
-import { applyTownFocusDailyEffects, updateTownFocusAvailability } from "./TownFocusSystem.js";
-import { getNewlyCompletedCraftingItems } from "./CraftingSystem.js";
-import { rollPercentCooldownsForDay } from "./CooldownSystem.js?v=2.0.30";
-import { ensureNextMonthWeatherGenerated } from "./WeatherSystem.js?v=2.0.30";
+import { STEP_DURATIONS } from "../content/Config.js?v=2.0.44";
+import { formatDate, getStructuredDate } from "./CalendarSystem.js?v=2.0.44";
+import { recalculateCityStats } from "./CityStatsSystem.js?v=2.0.44";
+import { advanceConstructionOneDay } from "./ConstructionSystem.js?v=2.0.44";
+import { expireEvents, maybeTriggerHolidayEvents, maybeTriggerRandomEvents, processScheduledEvents } from "./EventSystem.js?v=2.0.44";
+import { advanceExpeditionsOneDay } from "./ExpeditionSystem.js?v=2.0.44";
+import { addHistoryEntry } from "./HistoryLogSystem.js?v=2.0.44";
+import { addMonthlyChronicleIfNeeded } from "./MonthlyChronicleSystem.js?v=2.0.44";
+import { applyDailyResources } from "./ResourceSystem.js?v=2.0.44";
+import { captureDailyCitySnapshot } from "./CitySnapshotSystem.js?v=2.0.44";
+import { applyTownFocusDailyEffects, updateTownFocusAvailability } from "./TownFocusSystem.js?v=2.0.44";
+import { getNewlyCompletedCraftingItems } from "./CraftingSystem.js?v=2.0.44";
+import { rollPercentCooldownsForDay } from "./CooldownSystem.js?v=2.0.44";
+import { ensureNextMonthWeatherGenerated } from "./WeatherSystem.js?v=2.0.44";
 
 function runTimeAdvance(state, days, stepKey = null) {
   const completions = [];

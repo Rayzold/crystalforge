@@ -1,6 +1,6 @@
-import { CRYSTAL_LEVEL_LABELS, RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js";
-import { formatNumber } from "../engine/Utils.js";
-import { SHARDS_PER_CRYSTAL } from "../systems/ShardSystem.js";
+import { CRYSTAL_LEVEL_LABELS, RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js?v=2.0.44";
+import { formatNumber } from "../engine/Utils.js?v=2.0.44";
+import { SHARDS_PER_CRYSTAL } from "../systems/ShardSystem.js?v=2.0.44";
 
 function renderCrystalIcon(rarity) {
   const outlines = {

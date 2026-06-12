@@ -1,4 +1,4 @@
-import { escapeHtml } from "../engine/Utils.js";
+import { escapeHtml } from "../engine/Utils.js?v=2.0.44";
 
 const ICONS = {
   gold: `<path d="M17 22c0-5.5 4.5-10 10-10h18c5.5 0 10 4.5 10 10v20c0 5.5-4.5 10-10 10H27c-5.5 0-10-4.5-10-10Z" />

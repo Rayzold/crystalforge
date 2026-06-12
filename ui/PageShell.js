@@ -1,16 +1,16 @@
-import { APP_DISPLAY_VERSION, MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js";
-import { getBuildingEmoji } from "../content/BuildingCatalog.js";
-import { escapeHtml, formatNumber } from "../engine/Utils.js";
-import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js";
-import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js";
-import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js";
-import { getDecisionHistory, getDecisionInboxItems } from "../systems/DecisionInboxSystem.js";
-import { getCityTrendSummary } from "../systems/ResourceSystem.js";
-import { getAllManualSaveMeta } from "../systems/StorageSystem.js";
-import { getCurrentTownFocus, getMayorAdvice, getTownFocusAvailability } from "../systems/TownFocusSystem.js";
-import { getCriticalAlerts, renderCrisisBanner } from "./CrisisBanner.js";
-import { renderTownFocusBadge } from "./TownFocusShared.js";
-import { renderUiIcon } from "./UiIcons.js";
+import { APP_DISPLAY_VERSION, MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js?v=2.0.44";
+import { getBuildingEmoji } from "../content/BuildingCatalog.js?v=2.0.44";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=2.0.44";
+import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js?v=2.0.44";
+import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js?v=2.0.44";
+import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js?v=2.0.44";
+import { getDecisionHistory, getDecisionInboxItems } from "../systems/DecisionInboxSystem.js?v=2.0.44";
+import { getCityTrendSummary } from "../systems/ResourceSystem.js?v=2.0.44";
+import { getAllManualSaveMeta } from "../systems/StorageSystem.js?v=2.0.44";
+import { getCurrentTownFocus, getMayorAdvice, getTownFocusAvailability } from "../systems/TownFocusSystem.js?v=2.0.44";
+import { getCriticalAlerts, renderCrisisBanner } from "./CrisisBanner.js?v=2.0.44";
+import { renderTownFocusBadge } from "./TownFocusShared.js?v=2.0.44";
+import { renderUiIcon } from "./UiIcons.js?v=2.0.44";
 
 const HUD_ICON_KEYS = {
   Gold: "gold",
@@ -625,12 +625,12 @@ function renderTopNavSettings(state, manualSaveSlots, uiDensity, conciseMode, di
   const textSize = state.settings?.textSize ?? "medium";
   return `
     <div class="top-nav__settings" data-top-nav-settings>
-      <button class="top-nav__icon-button" type="button" data-action="toggle-top-nav-settings" aria-label="Settings" title="Session Settings (density, dice, saves)">⚙</button>
+      <button class="top-nav__icon-button" type="button" data-action="toggle-top-nav-settings" aria-label="Settings" title="Session Settings (density, dice, saves)">⚙️</button>
       <div class="top-nav__settings-panel" data-top-nav-settings-panel hidden>
         <div class="top-nav__settings-section">
           <a class="top-nav__settings-link" href="./index.html"><strong>🎬 Player Mode</strong><small>Open shared player screen</small></a>
           <button class="top-nav__settings-link" type="button" data-action="open-catalog"><strong>📚 Building Catalog</strong><small>Browse all buildings</small></button>
-          <button class="top-nav__settings-link" type="button" data-action="open-admin"><strong>🛠 ${state.settings?.liveSessionView ? "GM Console" : "Admin Console"}</strong><small>Type \`432!\` anywhere</small></button>
+          <button class="top-nav__settings-link" type="button" data-action="open-admin"><strong>🛠️ ${state.settings?.liveSessionView ? "GM Console" : "Admin Console"}</strong><small>Type \`432!\` anywhere</small></button>
           <button class="top-nav__settings-link" type="button" data-action="toggle-session-view"><strong>👁 View Mode</strong><small>${state.settings?.liveSessionView ? "Live Session" : "Deep Review"}</small></button>
           <button class="top-nav__settings-link" type="button" data-action="open-build-notes"><strong>📝 ${APP_DISPLAY_VERSION}</strong><small>Build notes</small></button>
         </div>
@@ -706,9 +706,9 @@ function renderTopNav(state, pageKey, badges, manualSaveSlots, uiDensity, concis
         ${TOP_NAV_GROUPS.map((g) => renderTopNavGroup(g, pageKey, badges)).join("")}
       </div>
       <div class="top-nav__spacer"></div>
-      <button class="top-nav__icon-button" type="button" data-action="open-admin" title="${state.settings?.liveSessionView ? "GM Console" : "Admin Console"}" aria-label="GM Console">🛠</button>
+      <button class="top-nav__icon-button" type="button" data-action="open-admin" title="${state.settings?.liveSessionView ? "GM Console" : "Admin Console"}" aria-label="GM Console">🛠️</button>
       <button class="top-nav__icon-button" type="button" data-action="save-firebase-realm" title="Cloud Save (publish current state)" aria-label="Cloud Save">💾</button>
-      <button class="top-nav__icon-button" type="button" data-action="load-firebase-realm" title="Cloud Load (pull latest published state)" aria-label="Cloud Load">☁⤵</button>
+      <button class="top-nav__icon-button" type="button" data-action="load-firebase-realm" title="Cloud Load (pull latest published state)" aria-label="Cloud Load">☁️⤵️</button>
       <button class="top-nav__icon-button" type="button" data-action="roll-dice" title="Roll Dice (${diceAmount}${diceType})" aria-label="Roll dice">🎲</button>
       <button class="top-nav__icon-button top-nav__theme-toggle" type="button" data-action="toggle-theme" title="Toggle parchment theme" aria-label="Toggle parchment theme">${(state.settings?.theme ?? "dark") === "parchment" ? "🌙" : "📜"}</button>
       ${renderTopNavSettings(state, manualSaveSlots, uiDensity, conciseMode, diceAmount, diceType, lastDiceRoll, firebaseMeta)}
@@ -724,7 +724,7 @@ function renderResourceBar(state) {
     { key: "gold",      label: "Gold",      icon: "💰", color: "var(--accent-gold)"   },
     { key: "food",      label: "Food",      icon: "🌾", color: "var(--success)"       },
     { key: "materials", label: "Materials", icon: "🪵", color: "var(--accent)"        },
-    { key: "salvage",   label: "Salvage",   icon: "⚙",  color: "var(--muted)"         },
+    { key: "salvage",   label: "Salvage",   icon: "⚙️",  color: "var(--muted)"         },
     { key: "mana",      label: "Mana",      icon: "✨", color: "var(--accent-violet)" }
   ];
   const defenseValue = Number(state.cityStats?.defense ?? 0);
@@ -745,9 +745,9 @@ function renderResourceBar(state) {
         `;
       }).join("")}
       <a class="resource-bar__slot resource-bar__slot--defense" href="./city.html#defense" style="--slot-color: #f97316;" title="Defense stat (raw score)">
-        <span class="resource-bar__icon" aria-hidden="true">🛡</span>
+        <span class="resource-bar__icon" aria-hidden="true">🛡️</span>
         <span class="resource-bar__value">${formatNumber(defenseValue, 0)}</span>
-        <span class="resource-bar__delta is-neutral">&nbsp;</span>
+        <span class="resource-bar__delta is-neutral"></span>
         <span class="resource-bar__label">Defense</span>
       </a>
     </div>
@@ -761,7 +761,7 @@ function renderAlertStrip(state) {
     const a = alerts[0];
     return `
       <div class="alert-strip" role="alert">
-        <span class="alert-strip__icon" aria-hidden="true">⚠</span>
+        <span class="alert-strip__icon" aria-hidden="true">⚠️</span>
         <strong class="alert-strip__name">${escapeHtml(a.label)}</strong>
         <span class="alert-strip__detail">${escapeHtml(a.details)}</span>
         ${a.href ? `<a class="alert-strip__action" href="${a.href}">${escapeHtml(a.actionLabel || "Review event")} →</a>` : ""}
@@ -771,13 +771,35 @@ function renderAlertStrip(state) {
   }
   return `
     <div class="alert-strip alert-strip--multi" role="alert">
-      <span class="alert-strip__icon" aria-hidden="true">⚠</span>
+      <span class="alert-strip__icon" aria-hidden="true">⚠️</span>
       <strong class="alert-strip__name">${alerts.length} alerts</strong>
       <span class="alert-strip__detail">${escapeHtml(alerts[0].label)}${alerts.length > 1 ? ` and ${alerts.length - 1} more` : ""}</span>
       ${alerts[0].href ? `<a class="alert-strip__action" href="${alerts[0].href}">Review →</a>` : ""}
       <button class="alert-strip__dismiss" type="button" data-action="dismiss-alert-strip" aria-label="Dismiss">✕</button>
     </div>
   `;
+}
+
+// Mounted ONCE outside the re-rendered root so the looping video element
+// survives innerHTML re-renders. Re-creating it on every render restarted
+// the (5 MB) download each time and kept the tab spinner alive forever.
+export function ensureMascotBackdrop() {
+  if (!MASCOT_MEDIA?.enabled) {
+    return;
+  }
+  if (document.querySelector("body > .mascot-backdrop")) {
+    return;
+  }
+  const backdrop = document.createElement("div");
+  backdrop.className = "mascot-backdrop";
+  backdrop.setAttribute("aria-hidden", "true");
+  backdrop.innerHTML = `
+    <div class="mascot-backdrop__halo"></div>
+    <video class="mascot-backdrop__video" autoplay muted loop playsinline preload="metadata">
+      <source src="${MASCOT_MEDIA.videoPath}" type="video/mp4" />
+    </video>
+  `;
+  document.body.prepend(backdrop);
 }
 
 export function renderPageShell(state, pageKey, { title, subtitle, content, aside = "", hideHero = false, heroActions = "" }, overlays = "") {
@@ -868,18 +890,6 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
   };
   return `
     <div class="game-shell game-shell--density-${uiDensity} game-shell--page-${pageKey} ${currentFocus ? `game-shell--focus-${currentFocus.id}` : ""} ${state.settings.liveSessionView ? "game-shell--live-session" : ""} ${conciseMode ? "game-shell--concise" : ""} game-shell--theme-${state.settings.theme ?? "dark"}">
-      ${
-        MASCOT_MEDIA?.enabled
-          ? `
-              <div class="mascot-backdrop" aria-hidden="true">
-                <div class="mascot-backdrop__halo"></div>
-                <video class="mascot-backdrop__video" autoplay muted loop playsinline preload="metadata">
-                  <source src="${MASCOT_MEDIA.videoPath}" type="video/mp4" />
-                </video>
-              </div>
-            `
-          : ""
-      }
       ${renderTopNav(state, pageKey, navBadges, manualSaveSlots, uiDensity, conciseMode, diceAmount, diceType, lastDiceRoll, firebaseMeta)}
       ${renderResourceBar(state)}
       ${renderAlertStrip(state)}
@@ -917,7 +927,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
           <button class="button button--ghost" data-action="open-catalog">Building Catalog</button>
           <details class="sidebar-gm-tools">
             <summary class="sidebar-gm-tools__summary">
-              <span>⚙ Session Settings</span>
+              <span>⚙️ Session Settings</span>
               <strong>Density, text size, view mode, dice</strong>
             </summary>
             <div class="sidebar-gm-tools__body">
@@ -1097,3 +1107,5 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
     </div>
   `;
 }
+
+                      

@@ -1,48 +1,51 @@
 // Top-level page renderer.
 // It selects the correct page shell/content for the current route and injects
 // transient overlays like modals, help bubbles, and reveal states.
-import { APP_VERSION } from "../content/Config.js";
-import { getSeenBuildNotesVersion } from "../systems/StorageSystem.js";
-import { renderBuildNotesModal } from "./BuildNotesModal.js";
-import { renderChroniclePage } from "./ChroniclePage.js?v=2.0.30";
-import { renderBuildingDetailModal } from "./BuildingDetailModal.js";
-import { renderBuildingCatalogModal } from "./BuildingCatalogModal.js";
-import { renderCitizensPage } from "./CitizensPage.js";
-import { renderCityPage, renderEconomyPage } from "./CityPage.js?v=2.0.30";
-import { renderExpeditionsPage } from "./ExpeditionsPage.js?v=2.0.30";
-import { renderExpeditionJourneyModal } from "./ExpeditionJourneyModal.js";
-import { renderForgePage } from "./ForgePage.js";
-import { renderHelpPage } from "./HelpPage.js";
-import { attachHelpBubbles } from "./HelpBubbles.js";
-import { attachListCollapse } from "./CollapsibleList.js?v=1.8.1";
-import { attachHexMapCanvas } from "./HexMapCanvas.js?v=2.0.31";
-import { renderHomePage } from "./HomePage.js";
-import { renderHomeHelpModal } from "./HomeHelpModal.js";
-import { renderManifestCompleteModal } from "./ManifestCompleteModal.js";
-import { renderPageShell } from "./PageShell.js?v=2.0.43";
-import { renderPlayerPage } from "./PlayerPage.js";
-import { renderResourceBreakdownModal } from "./ResourceBreakdownModal.js";
-import { renderTownFocusCouncilModal } from "./TownFocusCouncilModal.js";
-import { renderTurnSummaryModal } from "./TurnSummaryModal.js?v=2.0.30";
-import { renderUniqueCitizensPage } from "./UniqueCitizensPage.js";
-import { renderEquipmentSheetPage } from "./EquipmentSheetPage.js?v=2.0.30";
-import { renderVehiclesPage } from "./VehiclesPage.js";
-import { renderBehemothsPage } from "./BehemothsPage.js";
-import { renderNpcsPage } from "./NpcsPage.js?v=2.0.30";
-import { renderAwakenedPage } from "./AwakenedPage.js";
-import { renderArmyPage } from "./ArmyPage.js";
-import { renderCraftingPage } from "./CraftingPage.js?v=2.0.42";
-import { renderCooldownsPage } from "./CooldownsPage.js?v=2.0.30";
-import { isCooldownReady } from "../systems/CooldownSystem.js?v=2.0.30";
-import { getMayorSuggestions } from "../systems/TownFocusSystem.js";
-import { getDefaultTownFocusPreviewId } from "./TownFocusShared.js";
-import { renderTownFocusCeremonyOverlay } from "./TownFocusCeremonyOverlay.js";
-import { ModalFocusManager } from "../engine/ModalFocus.js";
+import { APP_VERSION } from "../content/Config.js?v=2.0.44";
+import { getSeenBuildNotesVersion } from "../systems/StorageSystem.js?v=2.0.44";
+import { renderBuildNotesModal } from "./BuildNotesModal.js?v=2.0.44";
+import { renderChroniclePage } from "./ChroniclePage.js?v=2.0.44";
+import { renderBuildingDetailModal } from "./BuildingDetailModal.js?v=2.0.44";
+import { renderBuildingCatalogModal } from "./BuildingCatalogModal.js?v=2.0.44";
+import { renderCitizensPage } from "./CitizensPage.js?v=2.0.44";
+import { renderCityPage, renderEconomyPage } from "./CityPage.js?v=2.0.44";
+import { renderExpeditionsPage } from "./ExpeditionsPage.js?v=2.0.44";
+import { renderExpeditionJourneyModal } from "./ExpeditionJourneyModal.js?v=2.0.44";
+import { renderForgePage } from "./ForgePage.js?v=2.0.44";
+import { renderHelpPage } from "./HelpPage.js?v=2.0.44";
+import { attachHelpBubbles } from "./HelpBubbles.js?v=2.0.44";
+import { attachListCollapse } from "./CollapsibleList.js?v=2.0.44";
+import { attachHexMapCanvas } from "./HexMapCanvas.js?v=2.0.44";
+import { renderHomePage } from "./HomePage.js?v=2.0.44";
+import { renderHomeHelpModal } from "./HomeHelpModal.js?v=2.0.44";
+import { renderManifestCompleteModal } from "./ManifestCompleteModal.js?v=2.0.44";
+import { ensureMascotBackdrop, renderPageShell } from "./PageShell.js?v=2.0.44";
+import { renderPlayerPage } from "./PlayerPage.js?v=2.0.44";
+import { renderResourceBreakdownModal } from "./ResourceBreakdownModal.js?v=2.0.44";
+import { renderTownFocusCouncilModal } from "./TownFocusCouncilModal.js?v=2.0.44";
+import { renderTurnSummaryModal } from "./TurnSummaryModal.js?v=2.0.44";
+import { renderUniqueCitizensPage } from "./UniqueCitizensPage.js?v=2.0.44";
+import { renderEquipmentSheetPage } from "./EquipmentSheetPage.js?v=2.0.44";
+import { renderVehiclesPage } from "./VehiclesPage.js?v=2.0.44";
+import { renderBehemothsPage } from "./BehemothsPage.js?v=2.0.44";
+import { renderNpcsPage } from "./NpcsPage.js?v=2.0.44";
+import { renderAwakenedPage } from "./AwakenedPage.js?v=2.0.44";
+import { renderArmyPage } from "./ArmyPage.js?v=2.0.44";
+import { renderCraftingPage } from "./CraftingPage.js?v=2.0.44";
+import { renderCooldownsPage } from "./CooldownsPage.js?v=2.0.44";
+import { isCooldownReady } from "../systems/CooldownSystem.js?v=2.0.44";
+import { getMayorSuggestions } from "../systems/TownFocusSystem.js?v=2.0.44";
+import { getDefaultTownFocusPreviewId } from "./TownFocusShared.js?v=2.0.44";
+import { renderTownFocusCeremonyOverlay } from "./TownFocusCeremonyOverlay.js?v=2.0.44";
+import { ModalFocusManager } from "../engine/ModalFocus.js?v=2.0.44";
 
 export class UIRenderer {
   constructor(root, pageKey = "home") {
     this.root = root;
     this.pageKey = pageKey;
+    if (pageKey !== "player") {
+      ensureMascotBackdrop();
+    }
     this.modalFocus = new ModalFocusManager();
     this.transientUi = {
       hoveredMapCell: null,
@@ -265,3 +268,4 @@ export class UIRenderer {
     this.render(state);
   }
 }
+

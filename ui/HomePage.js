@@ -1,11 +1,11 @@
-import { renderUiIcon } from "./UiIcons.js";
-import { escapeHtml, formatNumber } from "../engine/Utils.js";
-import { getStructuredDate } from "../systems/CalendarSystem.js";
-import { formatBuildingExactQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js";
-import { getOnboardingGoals, getRealmGoals as getRealmGoalCards } from "../systems/GoalSystem.js";
-import { getMayorAdvice, getTownFocusAvailability } from "../systems/TownFocusSystem.js";
-import { getCityTrendSummary } from "../systems/ResourceSystem.js";
-import { renderBuildingArt } from "./BuildingArt.js";
+import { renderUiIcon } from "./UiIcons.js?v=2.0.44";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=2.0.44";
+import { getStructuredDate } from "../systems/CalendarSystem.js?v=2.0.44";
+import { formatBuildingExactQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js?v=2.0.44";
+import { getOnboardingGoals, getRealmGoals as getRealmGoalCards } from "../systems/GoalSystem.js?v=2.0.44";
+import { getMayorAdvice, getTownFocusAvailability } from "../systems/TownFocusSystem.js?v=2.0.44";
+import { getCityTrendSummary } from "../systems/ResourceSystem.js?v=2.0.44";
+import { renderBuildingArt } from "./BuildingArt.js?v=2.0.44";
 
 function getHomeProgress(state) {
   return getOnboardingGoals(state);

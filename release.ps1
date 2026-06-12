@@ -64,19 +64,66 @@ function Invoke-GitChecked {
   return $output
 }
 
+function Update-AssetVersions {
+  # Rewrites every local "?v=..." cache-bust param (and adds it where missing)
+  # so ALL html/js references share ONE asset version per release. This
+  # prevents stale caches AND duplicate module instances from mixed pins.
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$AssetVersion
+  )
+
+  $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+  $jsDirs = @(".", "admin", "systems", "ui", "engine", "content", "fx", "firebase")
+
+  $reFrom  = '(from\s+")(\.{1,2}/[^"?]+\.js)(\?v=[^"]*)?(")'
+  $reDyn   = '(import\(")(\.{1,2}/[^"?]+\.js)(\?v=[^"]*)?("\))'
+  $reEntry = '(const APP_ENTRY = ")(\./app\.js)(\?v=[^"]*)?(")'
+  $reHtml  = '((?:src|href)=")(\./[^"?]+\.(?:js|css))(\?v=[^"]*)?(")'
+
+  $touched = 0
+  foreach ($dir in $jsDirs) {
+    $dirPath = Join-Path $scriptRoot $dir
+    if (-not (Test-Path $dirPath)) { continue }
+    foreach ($file in Get-ChildItem -Path $dirPath -Filter "*.js" -File) {
+      $text = [System.IO.File]::ReadAllText($file.FullName)
+      $new = $text -replace $reFrom,  "`${1}`${2}?v=$AssetVersion`${4}"
+      $new = $new  -replace $reDyn,   "`${1}`${2}?v=$AssetVersion`${4}"
+      $new = $new  -replace $reEntry, "`${1}`${2}?v=$AssetVersion`${4}"
+      if ($new -ne $text) {
+        [System.IO.File]::WriteAllText($file.FullName, $new, $utf8NoBom)
+        $touched++
+      }
+    }
+  }
+  foreach ($file in Get-ChildItem -Path $scriptRoot -Filter "*.html" -File) {
+    $text = [System.IO.File]::ReadAllText($file.FullName)
+    $new = $text -replace $reHtml, "`${1}`${2}?v=$AssetVersion`${4}"
+    if ($new -ne $text) {
+      [System.IO.File]::WriteAllText($file.FullName, $new, $utf8NoBom)
+      $touched++
+    }
+  }
+  Write-Host "Asset version set to $AssetVersion in $touched files." -ForegroundColor Cyan
+}
+
 $git = Get-GitExecutable
 $version = Get-AppVersion
+$assetVersion = "$version-$(Get-Date -Format 'yyyyMMddHHmm')"
 
 Push-Location $scriptRoot
 try {
   Invoke-GitChecked -Arguments @("rev-parse", "--is-inside-work-tree") | Out-Null
-  Invoke-GitChecked -Arguments @("add", ".") | Out-Null
 
   $status = Invoke-GitChecked -Arguments @("status", "--porcelain")
   if (-not $status) {
     Write-Host "No changes to release. Current build is $version" -ForegroundColor Yellow
     exit 0
   }
+
+  Update-AssetVersions -AssetVersion $assetVersion
+
+  Invoke-GitChecked -Arguments @("add", ".") | Out-Null
 
   Invoke-GitChecked -Arguments @("commit", "-m", $version) | Out-Null
   Invoke-GitChecked -Arguments @("push", "origin", "main") | Out-Null

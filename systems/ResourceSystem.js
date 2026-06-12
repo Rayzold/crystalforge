@@ -4,30 +4,30 @@
 import {
   CITIZEN_RARITY_OUTPUT_MULTIPLIERS,
   CITIZEN_RARITY_UPKEEP_MULTIPLIERS
-} from "../content/CitizenConfig.js";
-import { RESOURCE_MINIMUMS } from "../content/Config.js";
-import { clamp } from "../engine/Utils.js";
-import { getDistrictSummary } from "./DistrictSystem.js";
-import { getBuildingTierResourceRate } from "./BuildingSystem.js";
+} from "../content/CitizenConfig.js?v=2.0.44";
+import { RESOURCE_MINIMUMS } from "../content/Config.js?v=2.0.44";
+import { clamp } from "../engine/Utils.js?v=2.0.44";
+import { getDistrictSummary } from "./DistrictSystem.js?v=2.0.44";
+import { getBuildingTierResourceRate } from "./BuildingSystem.js?v=2.0.44";
 import {
   getEquippedExpeditionRelics,
   getExpeditionRelicActiveBonuses,
   getLegendAssignmentDetails,
   getUniqueCitizenResourceBonuses
-} from "./ExpeditionSystem.js";
-import { getBuildingPlacementBonuses } from "./MapSystem.js";
-import { getCurrentTownFocus, getSuggestedFocusForAlert } from "./TownFocusSystem.js";
-import { iterateCitizenRarityEntries } from "./CitizenSystem.js";
+} from "./ExpeditionSystem.js?v=2.0.44";
+import { getBuildingPlacementBonuses } from "./MapSystem.js?v=2.0.44";
+import { getCurrentTownFocus, getSuggestedFocusForAlert } from "./TownFocusSystem.js?v=2.0.44";
+import { iterateCitizenRarityEntries } from "./CitizenSystem.js?v=2.0.44";
 import {
   applyBuildingWorkforceToResource,
   getBuildingWorkforceMultiplier,
   getWorkforceSummary
-} from "./WorkforceSystem.js";
+} from "./WorkforceSystem.js?v=2.0.44";
 import {
   getEventRollModifier,
   getFoodOutputMultiplier,
   getGoldOutputMultiplier
-} from "./CityConditionSystem.js";
+} from "./CityConditionSystem.js?v=2.0.44";
 
 const ECONOMY_RESOURCE_KEYS = ["gold", "food", "materials", "salvage", "mana", "prosperity"];
 
@@ -700,7 +700,7 @@ export function getEmergencyStatus(state) {
       severity: (state.cityStats.morale ?? 0) <= 8 ? "critical" : "warning",
       label: "Morale strain",
       details: `Morale is ${Math.round(state.cityStats.morale ?? 0)} and the city is at risk of unrest.`,
-      cause: `Morale is sitting at ${Math.round(state.cityStats.morale ?? 0)} while ${pressureCount} other pressure point${pressureCount === 1 ? "" : "s"} are dragging confidence down.`,
+      cause: `Morale is sitting at ${Math.round(state.cityStats.morale ?? 0)} while ${pressureCount} other pressure point${pressureCount === 1 ? " is" : "s are"} dragging confidence down.`,
       fixes: getEmergencyFixes(state, "morale")
     });
   }

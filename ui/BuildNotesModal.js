@@ -1,6 +1,6 @@
-import { APP_DISPLAY_VERSION, BUILD_NOTES } from "../content/Config.js";
-import { escapeHtml } from "../engine/Utils.js";
-import { renderUiIcon } from "./UiIcons.js";
+import { APP_DISPLAY_VERSION, BUILD_NOTES } from "../content/Config.js?v=2.0.44";
+import { escapeHtml } from "../engine/Utils.js?v=2.0.44";
+import { renderUiIcon } from "./UiIcons.js?v=2.0.44";
 
 export function renderBuildNotesModal(state) {
   if (!state.transientUi?.buildNotesOpen) {

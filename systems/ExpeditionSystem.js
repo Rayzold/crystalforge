@@ -8,22 +8,22 @@ import {
   EXPEDITION_MISSION_TEMPLATES,
   EXPEDITION_ORDER,
   EXPEDITION_TYPES
-} from "../content/ExpeditionConfig.js";
-import { CITIZEN_RARITY_OUTPUT_MULTIPLIERS } from "../content/CitizenConfig.js";
-import { UNIQUE_CITIZEN_ARCHETYPES, drawUniqueCitizenFullName } from "../content/UniqueCitizenConfig.js";
-import { VEHICLE_DEFINITIONS, VEHICLE_ORDER, createDefaultVehicleFleet } from "../content/VehicleConfig.js";
-import { RARITY_ORDER } from "../content/Rarities.js";
-import { clamp, createId, roundTo } from "../engine/Utils.js";
-import { addCrystals } from "./CrystalSystem.js";
+} from "../content/ExpeditionConfig.js?v=2.0.44";
+import { CITIZEN_RARITY_OUTPUT_MULTIPLIERS } from "../content/CitizenConfig.js?v=2.0.44";
+import { UNIQUE_CITIZEN_ARCHETYPES, drawUniqueCitizenFullName } from "../content/UniqueCitizenConfig.js?v=2.0.44";
+import { VEHICLE_DEFINITIONS, VEHICLE_ORDER, createDefaultVehicleFleet } from "../content/VehicleConfig.js?v=2.0.44";
+import { RARITY_ORDER } from "../content/Rarities.js?v=2.0.44";
+import { clamp, createId, roundTo } from "../engine/Utils.js?v=2.0.44";
+import { addCrystals } from "./CrystalSystem.js?v=2.0.44";
 import {
   addCitizenRarityBundle,
   addCitizensByRarity,
   takeCitizensFromRoster
-} from "./CitizenSystem.js";
-import { formatDate } from "./CalendarSystem.js";
-import { addHistoryEntry } from "./HistoryLogSystem.js";
-import { addShards } from "./ShardSystem.js";
-import { getCurrentTownFocus } from "./TownFocusSystem.js";
+} from "./CitizenSystem.js?v=2.0.44";
+import { formatDate } from "./CalendarSystem.js?v=2.0.44";
+import { addHistoryEntry } from "./HistoryLogSystem.js?v=2.0.44";
+import { addShards } from "./ShardSystem.js?v=2.0.44";
+import { getCurrentTownFocus } from "./TownFocusSystem.js?v=2.0.44";
 
 const RESOURCE_KEYS = ["food", "gold", "materials", "mana"];
 const EXPEDITION_RESOURCE_REWARD_KEYS = ["gold", "food", "materials", "salvage", "mana", "prosperity"];

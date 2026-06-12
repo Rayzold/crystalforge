@@ -5652,7 +5652,7 @@ textarea {
   display: grid;
   gap: 2px;
   min-width: 220px;
-  max-width: min(330px, calc(100vw - 36px));
+  max-width: min(430px, calc(100vw - 36px));
   padding: 7px 10px;
   border-radius: 12px;
   border: 1px solid rgba(182, 212, 255, 0.2);
@@ -7523,7 +7523,7 @@ body:-webkit-full-screen #app {
 .page-hero__focus span,
 .page-hero__focus small {
   display: inline;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   color: var(--accent-mint, var(--accent));
   margin: 0;
 }
@@ -7622,6 +7622,7 @@ body:-webkit-full-screen #app {
 
 .page-command-strip__section {
   display: grid;
+  grid-template-rows: auto 1fr;
   gap: 0.85rem;
   padding: 0.95rem 1rem;
   border-radius: 18px;
@@ -7683,6 +7684,7 @@ body:-webkit-full-screen #app {
 
 .page-command-strip__list {
   display: grid;
+  align-content: start;
   gap: 0.7rem;
 }
 
@@ -9710,6 +9712,7 @@ body:-webkit-full-screen #app {
 
 .onboarding-card__impact {
   display: block;
+  font-size: 0.78rem;
   line-height: 1.45;
 }
 
@@ -17285,7 +17288,7 @@ html.session-mode .sidebar-density-picker__session-mode {
 }
 
 .crafting-section__count {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-style: normal;
   padding: 2px 8px;
   border-radius: 999px;
@@ -17392,7 +17395,7 @@ html.session-mode .sidebar-density-picker__session-mode {
 .crafting-card__progress-row {
   display: flex;
   justify-content: space-between;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   color: var(--muted);
   margin-bottom: 8px;
 }
@@ -17419,7 +17422,7 @@ html.session-mode .sidebar-density-picker__session-mode {
 
 /* Days badge */
 .crafting-days {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   color: var(--muted);
 }
 
@@ -17681,12 +17684,12 @@ select[data-action="apply-crafting-station"] option:disabled {
   background: rgba(141, 214, 255, 0.10);
   box-shadow: none;
   color: var(--accent);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
 }
 
 .page-hero .page-date-chip--hero span,
 .page-hero .page-date-chip--hero strong {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   color: var(--accent);
   line-height: 1.2;
 }
@@ -17890,7 +17893,7 @@ body[data-theme="silver"] .collapse-toggle {
 .cooldown-form__field > span {
   color: var(--muted);
   font-family: var(--label-font);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -18011,7 +18014,7 @@ body[data-theme="silver"] .collapse-toggle {
 .cooldown-card__head small {
   display: block;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   margin-top: 2px;
 }
 
@@ -18097,14 +18100,14 @@ body[data-theme="silver"] .collapse-toggle {
 .top-nav__brand-name {
   color: var(--accent);
   font-family: var(--label-font);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
 }
 
 .top-nav__brand-city {
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
 }
 
 .top-nav__groups {
@@ -18311,7 +18314,7 @@ body[data-theme="silver"] .collapse-toggle {
 .top-nav__settings-meta {
   margin: 0;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
 }
 
 /* Resource bar */
@@ -18321,8 +18324,9 @@ body[data-theme="silver"] .collapse-toggle {
   top: 58px; /* top-nav height (44px) + grid gap (14px) */
   z-index: 90;
   display: flex;
+  flex-wrap: wrap;
   align-items: stretch;
-  height: 40px;
+  min-height: 40px;
   padding: 0 4px;
   background: var(--bg-2);
   border: 1px solid var(--panel-border);
@@ -18365,7 +18369,7 @@ body[data-theme="silver"] .collapse-toggle {
 }
 
 .resource-bar__delta {
-  font-size: 0.74rem;
+  font-size: 0.78rem;
   font-weight: 600;
 }
 
@@ -18373,10 +18377,16 @@ body[data-theme="silver"] .collapse-toggle {
 .resource-bar__delta.is-negative { color: var(--danger); }
 .resource-bar__delta.is-neutral  { color: var(--muted); }
 
+.resource-bar__slot--defense,
+.resource-bar__slot--defense:hover,
+.resource-bar__slot--defense:focus {
+  text-decoration: none;
+}
+
 .resource-bar__label {
   color: var(--muted);
   font-family: var(--label-font);
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   text-align: right;
@@ -18731,7 +18741,7 @@ body[data-theme="silver"] .collapse-toggle {
 
 .incubator-sidebar__head small {
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
 }
 
 .incubator-sidebar__head-actions {
@@ -18741,7 +18751,7 @@ body[data-theme="silver"] .collapse-toggle {
 
 .incubator-sidebar__head-actions .button {
   padding: 2px 8px;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
 }
 
 .incubator-sidebar__slot,
@@ -18856,7 +18866,7 @@ body[data-theme="silver"] .collapse-toggle {
 
 .incubator-sidebar__slot-metrics small {
   color: var(--success);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
 }
 
 .incubator-sidebar__bar {
@@ -18882,7 +18892,7 @@ body[data-theme="silver"] .collapse-toggle {
 .incubator-sidebar__queued small,
 .incubator-sidebar__available small {
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
 }
 
 .incubator-sidebar__queued-actions,
@@ -18896,7 +18906,7 @@ body[data-theme="silver"] .collapse-toggle {
 .incubator-sidebar__available-actions .button,
 .incubator-sidebar__section > .button {
   padding: 3px 8px;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
 }
 
 .incubator-sidebar__empty {
@@ -18910,7 +18920,7 @@ body[data-theme="silver"] .collapse-toggle {
   display: block;
   text-align: center;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
 }
 
 /* Update the page-layout aside width specifically for the city page */

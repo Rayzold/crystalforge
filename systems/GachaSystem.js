@@ -1,13 +1,13 @@
 // Manifestation roll logic.
 // This system spends crystals, chooses a result from the current rarity pool,
 // and either manifests a building or resolves a direct crystal-upgrade outcome.
-import { pickRandom, randomInt } from "../engine/Random.js";
-import { getCatalogKey } from "../content/BuildingCatalog.js";
-import { getNextRarity } from "../content/Rarities.js";
-import { formatDate } from "./CalendarSystem.js";
-import { addCrystals, hasCrystalAvailable, spendCrystal } from "./CrystalSystem.js";
-import { addHistoryEntry } from "./HistoryLogSystem.js";
-import { manifestIntoBuilding } from "./BuildingSystem.js";
+import { pickRandom, randomInt } from "../engine/Random.js?v=2.0.44";
+import { getCatalogKey } from "../content/BuildingCatalog.js?v=2.0.44";
+import { getNextRarity } from "../content/Rarities.js?v=2.0.44";
+import { formatDate } from "./CalendarSystem.js?v=2.0.44";
+import { addCrystals, hasCrystalAvailable, spendCrystal } from "./CrystalSystem.js?v=2.0.44";
+import { addHistoryEntry } from "./HistoryLogSystem.js?v=2.0.44";
+import { manifestIntoBuilding } from "./BuildingSystem.js?v=2.0.44";
 
 export function manifestSelectedRarity(state, rarity) {
   const pool = state.rollTables[rarity] ?? [];

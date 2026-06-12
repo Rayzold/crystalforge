@@ -1,23 +1,23 @@
 // GM/admin console renderer and input handler.
 // This file builds the hidden administration UI, unlock flow, and the direct
 // controls that modify crystals, buildings, citizens, events, and save tools.
-import { MONTHS } from "../content/CalendarConfig.js";
-import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "../content/BuildingCatalog.js";
-import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER, getCitizenHelpText } from "../content/CitizenConfig.js";
-import { GM_QUICK_CRYSTAL_PACKS, GM_QUICK_EVENT_IDS, SPEED_MULTIPLIERS } from "../content/Config.js";
-import { EVENT_POOLS } from "../content/EventPools.js";
-import { EXPEDITION_ORDER, EXPEDITION_TYPES } from "../content/ExpeditionConfig.js";
-import { RARITY_ORDER } from "../content/Rarities.js";
-import { TOWN_FOCUS_DEFINITIONS } from "../content/TownFocusConfig.js";
-import { UNIQUE_CITIZEN_ARCHETYPES } from "../content/UniqueCitizenConfig.js";
-import { escapeHtml, formatNumber } from "../engine/Utils.js";
-import { attachHelpBubbles, createHelpBubble } from "../ui/HelpBubbles.js";
-import { renderModal } from "../ui/Modal.js";
-import { formatDate } from "../systems/CalendarSystem.js";
-import { formatBuildingQualityDisplay, getBuildingOutputTypes, BUILDING_OUTPUT_RESOURCE_KEYS } from "../systems/BuildingSystem.js";
-import { getDriftEvolutionStages } from "../systems/DriftEvolutionSystem.js";
-import { getEconomyDebugSummary, getEconomyTopContributorsSummary } from "../systems/ResourceSystem.js";
-import { getManualSaveMeta } from "../systems/StorageSystem.js";
+import { MONTHS } from "../content/CalendarConfig.js?v=2.0.44";
+import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "../content/BuildingCatalog.js?v=2.0.44";
+import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER, getCitizenHelpText } from "../content/CitizenConfig.js?v=2.0.44";
+import { GM_QUICK_CRYSTAL_PACKS, GM_QUICK_EVENT_IDS, SPEED_MULTIPLIERS } from "../content/Config.js?v=2.0.44";
+import { EVENT_POOLS } from "../content/EventPools.js?v=2.0.44";
+import { EXPEDITION_ORDER, EXPEDITION_TYPES } from "../content/ExpeditionConfig.js?v=2.0.44";
+import { RARITY_ORDER } from "../content/Rarities.js?v=2.0.44";
+import { TOWN_FOCUS_DEFINITIONS } from "../content/TownFocusConfig.js?v=2.0.44";
+import { UNIQUE_CITIZEN_ARCHETYPES } from "../content/UniqueCitizenConfig.js?v=2.0.44";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=2.0.44";
+import { attachHelpBubbles, createHelpBubble } from "../ui/HelpBubbles.js?v=2.0.44";
+import { renderModal } from "../ui/Modal.js?v=2.0.44";
+import { formatDate } from "../systems/CalendarSystem.js?v=2.0.44";
+import { formatBuildingQualityDisplay, getBuildingOutputTypes, BUILDING_OUTPUT_RESOURCE_KEYS } from "../systems/BuildingSystem.js?v=2.0.44";
+import { getDriftEvolutionStages } from "../systems/DriftEvolutionSystem.js?v=2.0.44";
+import { getEconomyDebugSummary, getEconomyTopContributorsSummary } from "../systems/ResourceSystem.js?v=2.0.44";
+import { getManualSaveMeta } from "../systems/StorageSystem.js?v=2.0.44";
 
 function options(values, selectedValue) {
   return values

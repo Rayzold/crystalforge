@@ -1,4 +1,4 @@
-import { AMBIENT_AUDIO_FILE_CANDIDATES, AUDIO_FILE_CANDIDATES, EFFECT_AUDIO_FILE_CANDIDATES } from "../content/Config.js";
+import { AMBIENT_AUDIO_FILE_CANDIDATES, AUDIO_FILE_CANDIDATES, EFFECT_AUDIO_FILE_CANDIDATES } from "../content/Config.js?v=2.0.44";
 
 const RARITY_AUDIO = {
   Common: { base: 220, duration: 0.14, detune: 0 },

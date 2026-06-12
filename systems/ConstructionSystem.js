@@ -1,17 +1,17 @@
 // Incubation and build-progress rules.
 // This system converts building points per day into quality gain, applies
 // support-bpd from completed structures, and computes ETA/stall information.
-import { BUILDING_ACTIVE_THRESHOLD, SPEED_MULTIPLIERS } from "../content/Config.js";
-import { getBuildingConstructionSupportBpd } from "../content/BuildingCatalog.js";
-import { RARITY_BUILD_POINTS_PER_PERCENT, RARITY_RANKS } from "../content/Rarities.js";
-import { roundTo } from "../engine/Utils.js";
-import { getDriftConstructionSlots, getDriftConstructionSpeedMultiplier } from "./DriftEvolutionSystem.js";
-import { getBuildingMultiplier } from "./BuildingSystem.js";
+import { BUILDING_ACTIVE_THRESHOLD, SPEED_MULTIPLIERS } from "../content/Config.js?v=2.0.44";
+import { getBuildingConstructionSupportBpd } from "../content/BuildingCatalog.js?v=2.0.44";
+import { RARITY_BUILD_POINTS_PER_PERCENT, RARITY_RANKS } from "../content/Rarities.js?v=2.0.44";
+import { roundTo } from "../engine/Utils.js?v=2.0.44";
+import { getDriftConstructionSlots, getDriftConstructionSpeedMultiplier } from "./DriftEvolutionSystem.js?v=2.0.44";
+import { getBuildingMultiplier } from "./BuildingSystem.js?v=2.0.44";
 import {
   getBuildingWorkforceCategory,
   getConstructionWorkforceSupportBpd,
   getWorkforceSummary
-} from "./WorkforceSystem.js";
+} from "./WorkforceSystem.js?v=2.0.44";
 
 export { getDriftConstructionSlots };
 

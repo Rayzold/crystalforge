@@ -1,8 +1,8 @@
 // Chronicle calendar and day detail view.
 // This page renders the in-world calendar, yearly events, weather, moon phases,
 // notes, and stored city snapshots for each recorded date.
-import { DAYS_PER_MONTH, YEARLY_EVENTS } from "../content/CalendarConfig.js";
-import { escapeHtml } from "../engine/Utils.js";
+import { DAYS_PER_MONTH, YEARLY_EVENTS } from "../content/CalendarConfig.js?v=2.0.44";
+import { escapeHtml } from "../engine/Utils.js?v=2.0.44";
 import {
   addMonthsToOffset,
   dateFromParts,
@@ -14,11 +14,11 @@ import {
   getWeatherForDay,
   WEATHER_BY_SEASON,
   DRAMATIC_WEATHER
-} from "../systems/CalendarSystem.js?v=2.0.30";
-import { getDailyCitySnapshot } from "../systems/CitySnapshotSystem.js";
-import { getExpeditionCalendarEntries } from "../systems/ExpeditionSystem.js";
-import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js";
-import { renderUiIcon } from "./UiIcons.js";
+} from "../systems/CalendarSystem.js?v=2.0.44";
+import { getDailyCitySnapshot } from "../systems/CitySnapshotSystem.js?v=2.0.44";
+import { getExpeditionCalendarEntries } from "../systems/ExpeditionSystem.js?v=2.0.44";
+import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js?v=2.0.44";
+import { renderUiIcon } from "./UiIcons.js?v=2.0.44";
 
 const WEEKDAY_ORDER = ["Moonday", "Tidesday", "Glimmerday", "Dreamday", "Soothingday", "Dazzleday", "Sunburstday"];
 

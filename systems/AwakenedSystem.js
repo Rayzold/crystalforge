@@ -2,7 +2,7 @@
 // CRUD + normalization for the GM-authored roster of Awakened — the
 // superhuman individuals who may join the city. Mirrors the NPC/Behemoth
 // sheet pattern with grade, ability archetype, and a six-attribute block.
-import { createId } from "../engine/Utils.js";
+import { createId } from "../engine/Utils.js?v=2.0.44";
 import {
   AWAKENED_GRADES,
   AWAKENED_STATUSES,
@@ -11,7 +11,7 @@ import {
   AWAKENED_ATTRIBUTE_KEYS,
   getAwakenedAbilityType,
   createDefaultAwakenedAttributes
-} from "../content/AwakenedConfig.js";
+} from "../content/AwakenedConfig.js?v=2.0.44";
 
 const VALID_GRADE_IDS = new Set(AWAKENED_GRADES.map((entry) => entry.id));
 const VALID_STATUS_IDS = new Set(AWAKENED_STATUSES.map((entry) => entry.id));

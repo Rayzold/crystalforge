@@ -1,8 +1,8 @@
-import { escapeHtml, formatNumber } from "../engine/Utils.js";
-import { dateFromParts, formatDate, getStructuredDate } from "../systems/CalendarSystem.js";
-import { MONTHS, DAYS_PER_MONTH } from "../content/CalendarConfig.js";
-import { getActiveCraftingUpkeep } from "../systems/CraftingSystem.js";
-import { getCrafterCapacity } from "../systems/NpcSystem.js?v=2.0.30";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=2.0.44";
+import { dateFromParts, formatDate, getStructuredDate } from "../systems/CalendarSystem.js?v=2.0.44";
+import { MONTHS, DAYS_PER_MONTH } from "../content/CalendarConfig.js?v=2.0.44";
+import { getActiveCraftingUpkeep } from "../systems/CraftingSystem.js?v=2.0.44";
+import { getCrafterCapacity } from "../systems/NpcSystem.js?v=2.0.44";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function craftingCompletionDay(item) {

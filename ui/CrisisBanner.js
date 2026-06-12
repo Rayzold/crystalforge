@@ -1,6 +1,6 @@
-import { escapeHtml } from "../engine/Utils.js";
-import { getEmergencyStatus } from "../systems/ResourceSystem.js";
-import { getSuggestedFocusForAlert, getSuggestedFocusForEvent } from "../systems/TownFocusSystem.js";
+import { escapeHtml } from "../engine/Utils.js?v=2.0.44";
+import { getEmergencyStatus } from "../systems/ResourceSystem.js?v=2.0.44";
+import { getSuggestedFocusForAlert, getSuggestedFocusForEvent } from "../systems/TownFocusSystem.js?v=2.0.44";
 
 const RARITY_WEIGHTS = {
   Common: 1,

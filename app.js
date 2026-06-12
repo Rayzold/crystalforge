@@ -2,29 +2,29 @@
 // This file wires together state, actions, routing, save/load, manifestation,
 // admin commands, and top-level UI events. Most game-wide behavior eventually
 // passes through here, while lower-level systems keep the domain rules isolated.
-import { AdminConsole } from "./admin/AdminConsole.js?v=2.0.30";
-import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js";
+import { AdminConsole } from "./admin/AdminConsole.js?v=2.0.44";
+import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js?v=2.0.44";
 import {
   APP_VERSION,
   BUILDING_ACTIVE_THRESHOLD,
   FIREBASE_DEFAULT_REALM_ID,
   GM_QUICK_CRYSTAL_PACKS,
   SPEED_MULTIPLIERS
-} from "./content/Config.js";
-import { EVENT_POOLS } from "./content/EventPools.js";
-import { RARITY_ORDER } from "./content/Rarities.js";
-import { GameState } from "./engine/GameState.js";
-import { installModalKeyboardHandlers } from "./engine/ModalFocus.js";
-import { downscaleImageFile, formatNumber } from "./engine/Utils.js";
-import { AnimationEngine, getManifestRevealTotalDuration } from "./fx/AnimationEngine.js";
-import { AudioEngine } from "./fx/AudioEngine.js";
-import { ensureFirebaseAuth, getFirebaseUserId } from "./firebase/FirebaseConfig.js";
+} from "./content/Config.js?v=2.0.44";
+import { EVENT_POOLS } from "./content/EventPools.js?v=2.0.44";
+import { RARITY_ORDER } from "./content/Rarities.js?v=2.0.44";
+import { GameState } from "./engine/GameState.js?v=2.0.44";
+import { installModalKeyboardHandlers } from "./engine/ModalFocus.js?v=2.0.44";
+import { downscaleImageFile, formatNumber } from "./engine/Utils.js?v=2.0.44";
+import { AnimationEngine, getManifestRevealTotalDuration } from "./fx/AnimationEngine.js?v=2.0.44";
+import { AudioEngine } from "./fx/AudioEngine.js?v=2.0.44";
+import { ensureFirebaseAuth, getFirebaseUserId } from "./firebase/FirebaseConfig.js?v=2.0.44";
 import {
   isFirebaseConfigured,
   loadFirebaseRealmState,
   saveFirebaseRealmState,
   subscribeFirebaseRealmState
-} from "./firebase/FirebaseSharedState.js";
+} from "./firebase/FirebaseSharedState.js?v=2.0.44";
 import {
   formatBuildingExactQualityDisplay,
   empowerBuildingWithShards,
@@ -35,8 +35,8 @@ import {
   setBuildingOutputRates,
   setBuildingQuality,
   setBuildingRuinState
-} from "./systems/BuildingSystem.js";
-import { addMonthsToOffset, dateFromParts, formatDate, getMonthStartOffset, getStructuredDate } from "./systems/CalendarSystem.js";
+} from "./systems/BuildingSystem.js?v=2.0.44";
+import { addMonthsToOffset, dateFromParts, formatDate, getMonthStartOffset, getStructuredDate } from "./systems/CalendarSystem.js?v=2.0.44";
 import {
   addCitizens,
   applyCitizenBulkSet,
@@ -45,9 +45,9 @@ import {
   removeCitizens,
   resetCitizens,
   setCitizens
-} from "./systems/CitizenSystem.js";
-import { recalculateCityStats } from "./systems/CityStatsSystem.js";
-import { addCrystals, setCrystals } from "./systems/CrystalSystem.js";
+} from "./systems/CitizenSystem.js?v=2.0.44";
+import { recalculateCityStats } from "./systems/CityStatsSystem.js?v=2.0.44";
+import { addCrystals, setCrystals } from "./systems/CrystalSystem.js?v=2.0.44";
 import {
   activateConstruction,
   getActiveConstructionQueue,
@@ -57,17 +57,17 @@ import {
   moveConstructionPriority,
   normalizeConstructionPriority,
   pauseConstruction
-} from "./systems/ConstructionSystem.js";
-import { resetDistrictLevels, setDistrictDefinition, setDistrictLevelOverride, getDistrictSummary } from "./systems/DistrictSystem.js";
+} from "./systems/ConstructionSystem.js?v=2.0.44";
+import { resetDistrictLevels, setDistrictDefinition, setDistrictLevelOverride, getDistrictSummary } from "./systems/DistrictSystem.js?v=2.0.44";
 import {
   clearDecisionSnooze,
   getDecisionInboxItems,
   getTopDecisionInboxItem,
   recordDecisionHistory,
   setDecisionSnooze
-} from "./systems/DecisionInboxSystem.js";
-import { setDriftEvolutionStageOverride, syncDriftEvolutionState } from "./systems/DriftEvolutionSystem.js";
-import { clearActiveEvents, triggerEvent } from "./systems/EventSystem.js";
+} from "./systems/DecisionInboxSystem.js?v=2.0.44";
+import { setDriftEvolutionStageOverride, syncDriftEvolutionState } from "./systems/DriftEvolutionSystem.js?v=2.0.44";
+import { clearActiveEvents, triggerEvent } from "./systems/EventSystem.js?v=2.0.44";
 import {
   addManualUniqueCitizen,
   formatExpeditionDisplayName,
@@ -84,8 +84,8 @@ import {
   normalizeVehicleFleet,
   refreshExpeditionBoardIfNeeded,
   startExpedition
-} from "./systems/ExpeditionSystem.js";
-import { VEHICLE_DEFINITIONS } from "./content/VehicleConfig.js";
+} from "./systems/ExpeditionSystem.js?v=2.0.44";
+import { VEHICLE_DEFINITIONS } from "./content/VehicleConfig.js?v=2.0.44";
 import {
   addBehemoth,
   addBehemothAbility,
@@ -99,7 +99,7 @@ import {
   updateBehemothField,
   updateBehemothStat,
   updateBehemothUpkeep
-} from "./systems/BehemothSystem.js";
+} from "./systems/BehemothSystem.js?v=2.0.44";
 import {
   addNpc,
   addNpcAbility,
@@ -111,7 +111,7 @@ import {
   updateNpcField,
   updateNpcStat,
   getCrafterCapacity
-} from "./systems/NpcSystem.js?v=2.0.30";
+} from "./systems/NpcSystem.js?v=2.0.44";
 import {
   createCraftingItem,
   collectCraftingItem,
@@ -123,11 +123,11 @@ import {
   clearCollectedCraftingItems,
   pauseCraftingItem,
   resumeCraftingItem,
-} from "./systems/CraftingSystem.js?v=2.0.30";
-import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=2.0.30";
-import { addCooldown, removeCooldown, restartCooldown, markCooldownTriggered, ageCooldown, isCooldownReady, getCooldownReadyDay } from "./systems/CooldownSystem.js?v=2.0.30";
-import { generateMonthWeather } from "./systems/WeatherSystem.js?v=2.0.30";
-import { craftingCompletionDay } from "./systems/CraftingSystem.js?v=2.0.30";
+} from "./systems/CraftingSystem.js?v=2.0.44";
+import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=2.0.44";
+import { addCooldown, removeCooldown, restartCooldown, markCooldownTriggered, ageCooldown, isCooldownReady, getCooldownReadyDay } from "./systems/CooldownSystem.js?v=2.0.44";
+import { generateMonthWeather } from "./systems/WeatherSystem.js?v=2.0.44";
+import { craftingCompletionDay } from "./systems/CraftingSystem.js?v=2.0.44";
 import {
   addAwakened,
   clearAwakenedImage,
@@ -135,7 +135,7 @@ import {
   setAwakenedImageData,
   updateAwakenedAttribute,
   updateAwakenedField
-} from "./systems/AwakenedSystem.js";
+} from "./systems/AwakenedSystem.js?v=2.0.44";
 import {
   updatePlayerCharacterField,
   updatePlayerCharacterEquipmentSlot,
@@ -143,10 +143,10 @@ import {
   addPlayerCharacterWealthItem,
   removePlayerCharacterWealthItem,
   updatePlayerCharacterWealthItem
-} from "./systems/PlayerCharacterSystem.js?v=2.0.30";
-import { getDailyCitySnapshot } from "./systems/CitySnapshotSystem.js";
-import { manifestSelectedRarity } from "./systems/GachaSystem.js";
-import { addHistoryEntry } from "./systems/HistoryLogSystem.js";
+} from "./systems/PlayerCharacterSystem.js?v=2.0.44";
+import { getDailyCitySnapshot } from "./systems/CitySnapshotSystem.js?v=2.0.44";
+import { manifestSelectedRarity } from "./systems/GachaSystem.js?v=2.0.44";
+import { addHistoryEntry } from "./systems/HistoryLogSystem.js?v=2.0.44";
 import {
   canPlaceBuildingAt,
   clearBuildingPlacement,
@@ -156,8 +156,8 @@ import {
   getBuildingAtCell,
   isFortificationBuilding,
   setBuildingPlacement
-} from "./systems/MapSystem.js";
-import { addShards, convertShardsToCrystals, setShards } from "./systems/ShardSystem.js";
+} from "./systems/MapSystem.js?v=2.0.44";
+import { addShards, convertShardsToCrystals, setShards } from "./systems/ShardSystem.js?v=2.0.44";
 import {
   createLiveSessionResetState,
   createSessionSnapshot as createSessionSnapshotRecord,
@@ -174,15 +174,15 @@ import {
   saveGameState,
   saveManualState,
   validateAndMigrateSave
-} from "./systems/StorageSystem.js?v=2.0.30";
-import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js?v=2.0.30";
-import { applyCompletedGoalRewards } from "./systems/GoalSystem.js";
-import { forceTownFocus, getMayorAdvice, reopenTownFocusSelection, selectTownFocus, updateTownFocusAvailability } from "./systems/TownFocusSystem.js";
-import { getEmergencyStatus, getCityTrendSummary } from "./systems/ResourceSystem.js";
-import { Toasts } from "./ui/Toasts.js";
-import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js";
-import { UIRenderer } from "./ui/UIRenderer.js?v=2.0.31";
-import { createBlankPlayerCharacter, createBlankWealthItem } from "./ui/EquipmentSheetPage.js?v=2.0.30";
+} from "./systems/StorageSystem.js?v=2.0.44";
+import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js?v=2.0.44";
+import { applyCompletedGoalRewards } from "./systems/GoalSystem.js?v=2.0.44";
+import { forceTownFocus, getMayorAdvice, reopenTownFocusSelection, selectTownFocus, updateTownFocusAvailability } from "./systems/TownFocusSystem.js?v=2.0.44";
+import { getEmergencyStatus, getCityTrendSummary } from "./systems/ResourceSystem.js?v=2.0.44";
+import { Toasts } from "./ui/Toasts.js?v=2.0.44";
+import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js?v=2.0.44";
+import { UIRenderer } from "./ui/UIRenderer.js?v=2.0.44";
+import { createBlankPlayerCharacter, createBlankWealthItem } from "./ui/EquipmentSheetPage.js?v=2.0.44";
 
 const root = document.querySelector("#app");
 const pageKey = document.body.dataset.page ?? "home";

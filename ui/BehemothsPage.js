@@ -12,9 +12,9 @@ import {
   getBehemothSizeLabel,
   getBehemothStatusDetail,
   getBehemothStatusLabel
-} from "../content/BehemothConfig.js";
-import { escapeHtml, formatNumber } from "../engine/Utils.js";
-import { formatDate } from "../systems/CalendarSystem.js";
+} from "../content/BehemothConfig.js?v=2.0.44";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=2.0.44";
+import { formatDate } from "../systems/CalendarSystem.js?v=2.0.44";
 
 function renderBehemothSummaryThumb(behemoth) {
   const src = getBehemothImageSrc(behemoth);

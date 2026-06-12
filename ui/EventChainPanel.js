@@ -1,6 +1,6 @@
-import { EVENT_POOLS } from "../content/EventPools.js";
-import { escapeHtml } from "../engine/Utils.js";
-import { formatDate } from "../systems/CalendarSystem.js";
+import { EVENT_POOLS } from "../content/EventPools.js?v=2.0.44";
+import { escapeHtml } from "../engine/Utils.js?v=2.0.44";
+import { formatDate } from "../systems/CalendarSystem.js?v=2.0.44";
 
 function getEventName(eventId) {
   return EVENT_POOLS.find((event) => event.id === eventId)?.name ?? eventId;
