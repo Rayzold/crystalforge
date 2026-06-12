@@ -38,7 +38,8 @@ const ROUTE_GLYPHS = {
   army: "⚔️",
   crafting: "\u2692",
   chronicle: "\u{1F4DC}",
-  ultima: "\u26a1",
+  battle: "\u{265F}\ufe0f",
+  ultima: "\u{1F52E}",
   campaign: "\u{1F4CB}",
   music: "\u266a",
   help: "\u2754"
@@ -588,8 +589,9 @@ function renderSidebarRouteGroup(routes, pageKey, cityAlertCount, availableCryst
 const TOP_NAV_GROUPS = [
   { label: "Core",   keys: ["home", "forge", "economy", "city"] },
   { label: "People", keys: ["citizens", "npcs", "awakened", "uniques", "equipment"] },
-  { label: "World",  keys: ["expeditions", "vehicles", "behemoths", "army", "battle", "chronicle"] },
-  { label: "Craft",  keys: ["crafting", "cooldowns", "ultima", "campaign", "music", "help"] }
+  { label: "World",   keys: ["expeditions", "vehicles", "behemoths", "army", "chronicle"] },
+  { label: "Craft",   keys: ["crafting", "cooldowns", "help"] },
+  { label: "Session", keys: ["ultima", "campaign", "music", "battle"] }
 ];
 
 function renderTopNavGroup(group, pageKey, badges) {
