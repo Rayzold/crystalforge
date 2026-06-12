@@ -38,6 +38,9 @@ const ROUTE_GLYPHS = {
   army: "⚔️",
   crafting: "\u2692",
   chronicle: "\u{1F4DC}",
+  ultima: "\u26a1",
+  campaign: "\u{1F4CB}",
+  music: "\u266a",
   help: "\u2754"
 };
 
@@ -51,7 +54,10 @@ const ROUTE_SHORTCUTS = {
   expeditions: "7",
   vehicles: "8",
   uniques: "9",
-  help: "0"
+  help: "0",
+  ultima: "u",
+  campaign: "c",
+  music: "m"
 };
 
 const DICE_TYPES = ["d2", "d4", "d6", "d8", "d10", "d12", "d20", "d100"];
@@ -582,8 +588,8 @@ function renderSidebarRouteGroup(routes, pageKey, cityAlertCount, availableCryst
 const TOP_NAV_GROUPS = [
   { label: "Core",   keys: ["home", "forge", "economy", "city"] },
   { label: "People", keys: ["citizens", "npcs", "awakened", "uniques", "equipment"] },
-  { label: "World",  keys: ["expeditions", "vehicles", "behemoths", "army", "chronicle"] },
-  { label: "Craft",  keys: ["crafting", "cooldowns", "ultima", "help"] }
+  { label: "World",  keys: ["expeditions", "vehicles", "behemoths", "army", "battle", "chronicle"] },
+  { label: "Craft",  keys: ["crafting", "cooldowns", "ultima", "campaign", "music", "help"] }
 ];
 
 function renderTopNavGroup(group, pageKey, badges) {

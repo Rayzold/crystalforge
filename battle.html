@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crystal Forge / Battle</title>
+<link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0f1117; color: #d4c9b0; font-family: Georgia, serif; min-height: 100vh; }
+  header { padding: 12px 20px; border-bottom: 1px solid #2a2520; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+  .title-block h1 { font-size: 18px; color: #f0e6cc; letter-spacing: 2px; }
+  .title-block .subtitle { color: #7a6e5a; font-size: 11px; letter-spacing: 1px; margin-top: 2px; }
+  .toolbar { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; }
+  .group { display: flex; gap: 8px; align-items: center; }
+  .group-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #7a6e5a; }
+  .palette { display: flex; gap: 4px; }
+  .swatch { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #2a2520; cursor: pointer; transition: transform 0.1s; }
+  .swatch:hover { transform: scale(1.15); }
+  .swatch.active { box-shadow: 0 0 0 2px #0f1117, 0 0 0 3px #f0e6cc; }
+  .letter-input { width: 56px; padding: 5px 8px; background: #181c24; border: 1px solid #2a2a38; color: #f0e6cc; border-radius: 4px; font-family: Georgia, serif; font-size: 14px; text-align: center; }
+  .btn { padding: 6px 14px; background: #181c24; border: 1px solid #2a2a38; color: #d4c9b0; border-radius: 4px; cursor: pointer; font-family: Georgia, serif; font-size: 12px; letter-spacing: 1px; }
+  .btn:hover { border-color: #5060a0; color: #f0e6cc; }
+  .btn-danger:hover { border-color: #a05050; color: #e09090; }
+  .nav-link { color: #7a6e5a; font-size: 11px; letter-spacing: 1px; text-decoration: none; padding: 5px 10px; border: 1px solid #2a2520; border-radius: 4px; margin-left: auto; }
+  .nav-link:hover { color: #f0e6cc; border-color: #5060a0; }
+  main { padding: 20px; overflow: auto; }
+  .map-wrap { display: flex; justify-content: center; }
+  svg { display: block; max-width: 100%; height: auto; }
+  .hex { stroke: #2a3040; stroke-width: 1.5; cursor: pointer; transition: filter 0.08s; }
+  .hex:hover { filter: brightness(1.35); }
+  .mode-toggle { display: flex; border: 1px solid #2a2a38; border-radius: 4px; overflow: hidden; }
+  .mode-btn { padding: 5px 12px; background: #181c24; color: #7a6e5a; border: none; cursor: pointer; font-family: Georgia, serif; font-size: 12px; letter-spacing: 1px; transition: background 0.1s, color 0.1s; }
+  .mode-btn + .mode-btn { border-left: 1px solid #2a2a38; }
+  .mode-btn:hover { color: #d4c9b0; }
+  .mode-btn.active { background: #2a2a38; color: #f0e6cc; }
+  .swatch-square { border-radius: 4px; }
+  .swatch.clear-paint { background: repeating-linear-gradient(45deg, #2a2520, #2a2520 4px, #181c24 4px, #181c24 8px); position: relative; }
+  .swatch.clear-paint::after { content: '×'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #c0a070; font-size: 16px; line-height: 1; }
+  .token-group { cursor: grab; }
+  .token-group.dragging { cursor: grabbing; opacity: 0.75; }
+  .token-circle { stroke: #0f1117; stroke-width: 2.5; }
+  .token-text { font-family: 'Arial Black', 'Helvetica', sans-serif; font-weight: 900; text-anchor: middle; dominant-baseline: central; pointer-events: none; user-select: none; }
+  .hint { font-size: 11px; color: #5a6070; padding: 0 20px 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-block">
+    <h1>BATTLE GRID</h1>
+    <div class="subtitle">Tokens: click to place, drag to move, right-click to remove • Paint: click to color hex, right-click to clear</div>
+  </div>
+  <div class="toolbar">
+    <div class="group">
+      <span class="group-label">Mode</span>
+      <div class="mode-toggle">
+        <button class="mode-btn active" data-mode="token" type="button">Tokens</button>
+        <button class="mode-btn" data-mode="paint" type="button">Paint</button>
+      </div>
+    </div>
+    <div class="group" id="token-controls">
+      <span class="group-label">Color</span>
+      <div id="palette" class="palette"></div>
+    </div>
+    <div class="group" id="letter-controls">
+      <span class="group-label">Letter</span>
+      <input id="letter-input" class="letter-input" type="text" maxlength="2" value="A" />
+    </div>
+    <div class="group" id="paint-controls" style="display:none;">
+      <span class="group-label">Terrain</span>
+      <div id="bg-palette" class="palette"></div>
+    </div>
+    <div class="group">
+      <button class="btn btn-danger" id="clear-btn">Clear All</button>
+    </div>
+  </div>
+  <a class="nav-link" href="./gm.html">&larr; Back to Forge</a>
+</header>
+
+<main>
+  <div class="map-wrap">
+    <svg id="grid" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+</main>
+
+<script>
+(() => {
+  const COLS = 18;
+  const ROWS = 14;
+  const SIZE = 34;
+  const SQRT3 = Math.sqrt(3);
+  const HEX_W = SIZE * SQRT3;
+  const HEX_H = SIZE * 2;
+
+  const COLORS = [
+    '#e74c3c', '#3498db', '#2ecc71', '#f1c40f',
+    '#9b59b6', '#e67e22', '#1abc9c', '#ecf0f1',
+    '#7f8c8d', '#34495e'
+  ];
+
+  const BG_COLORS = [
+    '#3a4a2a', // forest
+    '#2a3a5a', // water
+    '#4a3a2a', // dirt
+    '#3a3a3a', // stone
+    '#5a4a3a', // sand
+    '#2a4a3a', // swamp
+    '#4a2a3a', // danger
+    '#3a2a4a', // arcane
+    '#5a5a5a', // road
+    '__clear__'
+  ];
+
+  const DEFAULT_HEX_FILL = '#181c24';
+  const STORAGE_KEY = 'crystalforge-battle-grid-v1';
+
+  let state = { mode: 'token', color: COLORS[0], letter: 'A', paintColor: BG_COLORS[0], tokens: {}, bg: {} };
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+    if (saved && saved.tokens) state.tokens = saved.tokens;
+    if (saved && saved.bg && typeof saved.bg === 'object') state.bg = saved.bg;
+    if (saved && saved.color && COLORS.includes(saved.color)) state.color = saved.color;
+    if (saved && typeof saved.letter === 'string') state.letter = saved.letter;
+    if (saved && saved.paintColor && BG_COLORS.includes(saved.paintColor)) state.paintColor = saved.paintColor;
+    if (saved && (saved.mode === 'token' || saved.mode === 'paint')) state.mode = saved.mode;
+  } catch (e) {}
+
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function hexCenter(col, row) {
+    const x = col * HEX_W + (row % 2 === 1 ? HEX_W / 2 : 0) + HEX_W / 2;
+    const y = row * HEX_H * 0.75 + HEX_H / 2;
+    return [x, y];
+  }
+
+  function hexPoints(cx, cy) {
+    const pts = [];
+    for (let i = 0; i < 6; i++) {
+      const angle = Math.PI / 180 * (60 * i - 30);
+      pts.push([(cx + SIZE * Math.cos(angle)).toFixed(2), (cy + SIZE * Math.sin(angle)).toFixed(2)]);
+    }
+    return pts.map(p => p.join(',')).join(' ');
+  }
+
+  function luminance(hex) {
+    const m = /^#([0-9a-f]{6})$/i.exec(hex);
+    if (!m) return 0;
+    const n = parseInt(m[1], 16);
+    const r = (n >> 16) & 0xff, g = (n >> 8) & 0xff, b = n & 0xff;
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  }
+
+  // Token color palette
+  const palette = document.getElementById('palette');
+  COLORS.forEach(c => {
+    const sw = document.createElement('span');
+    sw.className = 'swatch' + (c === state.color ? ' active' : '');
+    sw.style.background = c;
+    sw.dataset.color = c;
+    sw.addEventListener('click', () => {
+      state.color = c;
+      palette.querySelectorAll('.swatch').forEach(s => s.classList.toggle('active', s.dataset.color === c));
+      save();
+    });
+    palette.appendChild(sw);
+  });
+
+  // Terrain palette
+  const bgPalette = document.getElementById('bg-palette');
+  BG_COLORS.forEach(c => {
+    const sw = document.createElement('span');
+    const isClear = c === '__clear__';
+    sw.className = 'swatch swatch-square' + (isClear ? ' clear-paint' : '') + (c === state.paintColor ? ' active' : '');
+    if (!isClear) sw.style.background = c;
+    sw.dataset.color = c;
+    sw.title = isClear ? 'Erase paint' : '';
+    sw.addEventListener('click', () => {
+      state.paintColor = c;
+      bgPalette.querySelectorAll('.swatch').forEach(s => s.classList.toggle('active', s.dataset.color === c));
+      save();
+    });
+    bgPalette.appendChild(sw);
+  });
+
+  // Letter
+  const letterInput = document.getElementById('letter-input');
+  letterInput.value = state.letter;
+  letterInput.addEventListener('input', () => {
+    state.letter = letterInput.value;
+    save();
+  });
+
+  // Mode toggle
+  const modeBtns = document.querySelectorAll('.mode-btn');
+  function applyMode() {
+    modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === state.mode));
+    const paintActive = state.mode === 'paint';
+    document.getElementById('token-controls').style.display = paintActive ? 'none' : '';
+    document.getElementById('letter-controls').style.display = paintActive ? 'none' : '';
+    document.getElementById('paint-controls').style.display = paintActive ? '' : 'none';
+  }
+  modeBtns.forEach(b => {
+    b.addEventListener('click', () => {
+      state.mode = b.dataset.mode;
+      applyMode();
+      save();
+    });
+  });
+  applyMode();
+
+  // Grid
+  const svg = document.getElementById('grid');
+  const totalW = COLS * HEX_W + HEX_W / 2;
+  const totalH = ROWS * HEX_H * 0.75 + HEX_H / 4;
+  svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+  svg.setAttribute('width', totalW);
+  svg.setAttribute('height', totalH);
+
+  const hexLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  const tokenLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  svg.appendChild(hexLayer);
+  svg.appendChild(tokenLayer);
+
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const [cx, cy] = hexCenter(col, row);
+      const key = `${col},${row}`;
+      const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+      poly.setAttribute('points', hexPoints(cx, cy));
+      poly.setAttribute('class', 'hex');
+      poly.setAttribute('fill', state.bg[key] || DEFAULT_HEX_FILL);
+      poly.dataset.col = col;
+      poly.dataset.row = row;
+      poly.addEventListener('click', () => {
+        if (state.mode === 'paint') paintHex(col, row);
+        else placeToken(col, row);
+      });
+      poly.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        if (state.mode === 'paint') clearHexBg(col, row);
+        else removeToken(col, row);
+      });
+      hexLayer.appendChild(poly);
+    }
+  }
+
+  function placeToken(col, row) {
+    state.tokens[`${col},${row}`] = { color: state.color, letter: state.letter };
+    save();
+    renderTokens();
+  }
+
+  function removeToken(col, row) {
+    delete state.tokens[`${col},${row}`];
+    save();
+    renderTokens();
+  }
+
+  function paintHex(col, row) {
+    const key = `${col},${row}`;
+    if (state.paintColor === '__clear__') {
+      delete state.bg[key];
+    } else {
+      state.bg[key] = state.paintColor;
+    }
+    save();
+    const poly = hexLayer.querySelector(`.hex[data-col="${col}"][data-row="${row}"]`);
+    if (poly) poly.setAttribute('fill', state.bg[key] || DEFAULT_HEX_FILL);
+  }
+
+  function clearHexBg(col, row) {
+    const key = `${col},${row}`;
+    delete state.bg[key];
+    save();
+    const poly = hexLayer.querySelector(`.hex[data-col="${col}"][data-row="${row}"]`);
+    if (poly) poly.setAttribute('fill', DEFAULT_HEX_FILL);
+  }
+
+  function renderTokens() {
+    tokenLayer.innerHTML = '';
+    Object.entries(state.tokens).forEach(([key, tok]) => {
+      const [col, row] = key.split(',').map(Number);
+      const [cx, cy] = hexCenter(col, row);
+      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      g.setAttribute('class', 'token-group');
+      g.dataset.key = key;
+
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', cx);
+      circle.setAttribute('cy', cy);
+      circle.setAttribute('r', SIZE * 0.72);
+      circle.setAttribute('fill', tok.color);
+      circle.setAttribute('class', 'token-circle');
+      g.appendChild(circle);
+
+      if (tok.letter) {
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', cx);
+        text.setAttribute('y', cy);
+        const fontSize = tok.letter.length > 1 ? SIZE * 0.6 : SIZE * 0.85;
+        text.setAttribute('font-size', fontSize);
+        text.setAttribute('class', 'token-text');
+        text.setAttribute('fill', luminance(tok.color) > 0.55 ? '#111' : '#fff');
+        text.textContent = tok.letter;
+        g.appendChild(text);
+      }
+
+      makeDraggable(g, key);
+      tokenLayer.appendChild(g);
+    });
+  }
+
+  function makeDraggable(g, key) {
+    g.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      const [col, row] = key.split(',').map(Number);
+      removeToken(col, row);
+    });
+    g.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      e.stopPropagation();
+      g.classList.add('dragging');
+      const [startCol, startRow] = key.split(',').map(Number);
+      const [startX, startY] = hexCenter(startCol, startRow);
+
+      function svgPoint(ev) {
+        const pt = svg.createSVGPoint();
+        pt.x = ev.clientX; pt.y = ev.clientY;
+        return pt.matrixTransform(svg.getScreenCTM().inverse());
+      }
+
+      function move(ev) {
+        const loc = svgPoint(ev);
+        g.setAttribute('transform', `translate(${loc.x - startX} ${loc.y - startY})`);
+      }
+      function up(ev) {
+        document.removeEventListener('mousemove', move);
+        document.removeEventListener('mouseup', up);
+        g.classList.remove('dragging');
+        g.removeAttribute('transform');
+
+        // Find hex under cursor (hide token layer briefly so elementFromPoint hits the hex)
+        tokenLayer.style.pointerEvents = 'none';
+        const target = document.elementFromPoint(ev.clientX, ev.clientY);
+        tokenLayer.style.pointerEvents = '';
+
+        if (target && target.classList && target.classList.contains('hex')) {
+          const newKey = `${target.dataset.col},${target.dataset.row}`;
+          if (newKey !== key) {
+            const tok = state.tokens[key];
+            delete state.tokens[key];
+            state.tokens[newKey] = tok;
+            save();
+            renderTokens();
+          }
+        }
+      }
+      document.addEventListener('mousemove', move);
+      document.addEventListener('mouseup', up);
+    });
+  }
+
+  document.getElementById('clear-btn').addEventListener('click', () => {
+    if (confirm('Clear all tokens and terrain?')) {
+      state.tokens = {};
+      state.bg = {};
+      save();
+      hexLayer.querySelectorAll('.hex').forEach(p => p.setAttribute('fill', DEFAULT_HEX_FILL));
+      renderTokens();
+    }
+  });
+
+  renderTokens();
+})();
+</script>
+
+</body>
+</html>

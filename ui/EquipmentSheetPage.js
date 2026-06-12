@@ -87,6 +87,34 @@ function getActiveCharacter(state, roster) {
   return roster.find((c) => c.id === activeId) ?? roster[0];
 }
 
+const EQUIPMENT_THEMES = ["aether", "parchment"];
+const EQUIPMENT_THEME_LABELS = { aether: "Aether", parchment: "Parchment" };
+
+function getEquipmentTheme(state) {
+  const requested = state.transientUi?.equipmentSheetTheme;
+  return EQUIPMENT_THEMES.includes(requested) ? requested : "aether";
+}
+
+function renderThemeSwitcher(theme) {
+  return `
+    <div class="eq-theme-switch" role="group" aria-label="Sheet theme">
+      ${EQUIPMENT_THEMES.map((key) => `
+        <button
+          type="button"
+          class="eq-theme-switch__btn ${theme === key ? "is-active" : ""}"
+          data-action="set-equipment-theme"
+          data-theme="${key}"
+          aria-pressed="${theme === key ? "true" : "false"}"
+          title="Switch to ${EQUIPMENT_THEME_LABELS[key]} mode"
+        >
+          <span class="eq-theme-switch__dot eq-theme-switch__dot--${key}" aria-hidden="true"></span>
+          ${EQUIPMENT_THEME_LABELS[key]}
+        </button>
+      `).join("")}
+    </div>
+  `;
+}
+
 function hashSeed(value = "") {
   let hash = 0;
   for (const character of String(value)) {
@@ -412,15 +440,19 @@ const SILHOUETTE_SVG = `
 export function renderEquipmentSheetPage(state) {
   const roster = getRoster(state);
   const active = getActiveCharacter(state, roster);
+  const theme = getEquipmentTheme(state);
 
   return {
     title: "Equipment Sheet",
     subtitle: "Personal loadout for each player character.",
     content: `
       <style>${PAGE_STYLES}</style>
-      <section class="eq-stage">
+      <section class="eq-stage" data-theme="${theme}">
         <div class="eq-stage__aether" aria-hidden="true"></div>
-        ${renderRosterStrip(state, roster, active)}
+        <div class="eq-topbar">
+          ${renderRosterStrip(state, roster, active)}
+          ${renderThemeSwitcher(theme)}
+        </div>
         ${active ? `
           <article class="eq-sheet">
             ${renderIdentityBlock(active)}
@@ -772,6 +804,246 @@ const PAGE_STYLES = `
     .eq-wealth__remove { grid-area: remove; }
     .eq-wealth__notes { grid-area: notes; }
   }
+
+  /* ── Top bar holds the roster + theme switcher on one row ─────────── */
+  .eq-topbar {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap; margin-bottom: 18px;
+  }
+  .eq-topbar .eq-roster { margin-bottom: 0; flex: 1 1 auto; }
+
+  .eq-theme-switch {
+    display: inline-flex; align-items: stretch; gap: 4px;
+    padding: 4px; border-radius: 999px;
+    background: rgba(8,12,28,0.55);
+    border: 1px solid rgba(140,170,230,0.22);
+    backdrop-filter: blur(6px);
+    flex: 0 0 auto;
+  }
+  .eq-theme-switch__btn {
+    appearance: none; cursor: pointer; font: inherit;
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 0; background: transparent;
+    color: #9aa7d4; padding: 6px 14px; border-radius: 999px;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.04em;
+    transition: background .15s ease, color .15s ease;
+  }
+  .eq-theme-switch__btn:hover { color: #e5ecff; }
+  .eq-theme-switch__btn.is-active {
+    background: rgba(120,200,255,0.18); color: #f2f6ff;
+    box-shadow: inset 0 0 0 1px rgba(120,220,255,0.45);
+  }
+  .eq-theme-switch__dot {
+    width: 12px; height: 12px; border-radius: 50%;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.25);
+  }
+  .eq-theme-switch__dot--aether {
+    background: radial-gradient(circle at 30% 30%, #8dd6ff, #2c4dd1 70%);
+  }
+  .eq-theme-switch__dot--parchment {
+    background: radial-gradient(circle at 30% 30%, #fff3c8, #b07a2c 70%);
+  }
+
+  /* ════════════════════════════════════════════════════════════════════
+     PARCHMENT THEME OVERRIDE
+     Applies when .eq-stage[data-theme="parchment"]. Re-skins the dark
+     Aether HUD into an aged-paper look without touching the base rules.
+     ═══════════════════════════════════════════════════════════════════ */
+  .eq-stage[data-theme="parchment"] {
+    color: #3a2412;
+    font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+  }
+  .eq-stage[data-theme="parchment"] .eq-stage__aether {
+    background:
+      radial-gradient(circle at 18% 12%, rgba(196,128,42,0.18), transparent 55%),
+      radial-gradient(circle at 82% 18%, rgba(140,80,20,0.14), transparent 55%),
+      radial-gradient(circle at 50% 100%, rgba(120,70,20,0.12), transparent 60%),
+      linear-gradient(180deg, #f6ecc8 0%, #ebd9a0 60%, #d9c184 100%);
+    box-shadow:
+      inset 0 0 90px rgba(120, 80, 30, 0.35),
+      inset 0 0 12px rgba(80, 50, 20, 0.25);
+  }
+  /* Subtle paper fibre noise on top of the parchment background. */
+  .eq-stage[data-theme="parchment"]::before {
+    content: ""; position: absolute; inset: -20px 0 0 0; z-index: 0;
+    border-radius: 24px; pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='3'/><feColorMatrix values='0 0 0 0 0.30  0 0 0 0 0.18  0 0 0 0 0.05  0 0 0 0.18 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/></svg>");
+    mix-blend-mode: multiply;
+    opacity: 0.45;
+  }
+
+  .eq-stage[data-theme="parchment"] .eq-theme-switch {
+    background: rgba(255, 247, 220, 0.7);
+    border-color: rgba(120, 80, 30, 0.32);
+  }
+  .eq-stage[data-theme="parchment"] .eq-theme-switch__btn { color: #7a5530; }
+  .eq-stage[data-theme="parchment"] .eq-theme-switch__btn:hover { color: #3a2412; }
+  .eq-stage[data-theme="parchment"] .eq-theme-switch__btn.is-active {
+    background: rgba(196, 128, 42, 0.22); color: #3a2412;
+    box-shadow: inset 0 0 0 1px rgba(120, 80, 30, 0.55);
+  }
+
+  .eq-stage[data-theme="parchment"] .eq-roster__chip,
+  .eq-stage[data-theme="parchment"] .eq-roster__add {
+    background: rgba(255, 247, 220, 0.85);
+    border: 1px solid rgba(120, 80, 30, 0.35);
+    color: #3a2412;
+    backdrop-filter: none;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 2px 6px rgba(120, 80, 30, 0.15);
+  }
+  .eq-stage[data-theme="parchment"] .eq-roster__chip span { color: #7a5530; }
+  .eq-stage[data-theme="parchment"] .eq-roster__chip.is-active {
+    border-color: #8b3a1b;
+    box-shadow: 0 0 0 1px #8b3a1b, 0 6px 18px rgba(120, 60, 20, 0.25);
+  }
+  .eq-stage[data-theme="parchment"] .eq-roster__add { color: #8b3a1b; }
+
+  .eq-stage[data-theme="parchment"] .eq-sheet {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(255, 247, 220, 0.95), rgba(245, 232, 195, 0.95)),
+      #f5e8c3;
+    border: 1px solid rgba(120, 80, 30, 0.35);
+    border-radius: 8px;
+    box-shadow:
+      0 30px 60px rgba(80, 50, 20, 0.35),
+      inset 0 0 0 2px rgba(255, 255, 255, 0.45),
+      inset 0 0 0 3px rgba(120, 80, 30, 0.25);
+    backdrop-filter: none;
+  }
+
+  .eq-stage[data-theme="parchment"] .eq-identity {
+    border-bottom: 1px solid rgba(120, 80, 30, 0.35);
+    border-image: linear-gradient(90deg, transparent, rgba(120, 80, 30, 0.55), transparent) 1;
+  }
+  .eq-stage[data-theme="parchment"] .eq-identity__row span,
+  .eq-stage[data-theme="parchment"] .eq-identity__grid span {
+    color: #7a5530;
+  }
+  .eq-stage[data-theme="parchment"] .eq-identity__name {
+    color: #2a1a08; border-bottom-color: rgba(120, 80, 30, 0.45);
+    font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+    font-style: italic;
+  }
+  .eq-stage[data-theme="parchment"] .eq-identity__name:focus { border-color: #8b3a1b; }
+  .eq-stage[data-theme="parchment"] .eq-identity__grid input {
+    background: rgba(255, 252, 235, 0.9); color: #3a2412;
+    border-color: rgba(120, 80, 30, 0.32);
+  }
+  .eq-stage[data-theme="parchment"] .eq-identity__grid input:focus { border-color: #8b3a1b; }
+  .eq-stage[data-theme="parchment"] .eq-identity__remove {
+    background: rgba(139, 58, 27, 0.10);
+    border-color: rgba(139, 58, 27, 0.45);
+    color: #8b3a1b;
+  }
+
+  .eq-stage[data-theme="parchment"] .eq-doll {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(196, 128, 42, 0.10), transparent 60%),
+      rgba(255, 247, 220, 0.55);
+    border: 1px dashed rgba(120, 80, 30, 0.4);
+  }
+  /* Recolor the silhouette so it reads on paper instead of dark. */
+  .eq-stage[data-theme="parchment"] .eq-doll__silhouette {
+    opacity: 0.55;
+    filter:
+      sepia(0.7) hue-rotate(-15deg) saturate(1.4) brightness(0.65) contrast(1.1);
+  }
+  .eq-stage[data-theme="parchment"] .eq-doll__silhouette svg {
+    filter: drop-shadow(0 0 18px rgba(120, 80, 30, 0.25));
+  }
+
+  .eq-stage[data-theme="parchment"] .eq-slot {
+    background: rgba(255, 252, 235, 0.92);
+    border: 1px solid color-mix(in srgb, var(--eq-rarity) 50%, rgba(120, 80, 30, 0.4));
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.7) inset,
+      0 6px 14px rgba(120, 80, 30, 0.18);
+    backdrop-filter: none;
+  }
+  .eq-stage[data-theme="parchment"] .eq-slot.is-filled {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--eq-rarity) 70%, transparent),
+      0 0 18px color-mix(in srgb, var(--eq-rarity) 28%, transparent),
+      0 8px 18px rgba(120, 80, 30, 0.22);
+  }
+  .eq-stage[data-theme="parchment"] .eq-slot__icon {
+    background: color-mix(in srgb, var(--eq-rarity) 22%, rgba(255, 247, 220, 0.95));
+  }
+  .eq-stage[data-theme="parchment"] .eq-slot__label {
+    color: color-mix(in srgb, var(--eq-rarity) 55%, #5a3a18);
+  }
+  .eq-stage[data-theme="parchment"] .eq-slot__name {
+    background: rgba(255, 252, 235, 0.85); color: #2a1a08;
+    border-color: rgba(120, 80, 30, 0.28);
+    font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+  }
+  .eq-stage[data-theme="parchment"] .eq-slot__name::placeholder { color: rgba(120, 80, 30, 0.45); }
+  .eq-stage[data-theme="parchment"] .eq-slot__notes {
+    background: rgba(255, 252, 235, 0.72); color: #4a3220;
+    border-color: rgba(120, 80, 30, 0.28);
+    font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+  }
+  .eq-stage[data-theme="parchment"] .eq-slot__notes::placeholder { color: rgba(120, 80, 30, 0.45); }
+  .eq-stage[data-theme="parchment"] .eq-slot__rarity {
+    border-color: rgba(120, 80, 30, 0.5);
+  }
+  .eq-stage[data-theme="parchment"] .eq-slot__rarity.is-active {
+    box-shadow: 0 0 0 2px #fff8e1, 0 0 0 3px rgba(120, 80, 30, 0.55), 0 0 10px var(--rarity);
+  }
+
+  .eq-stage[data-theme="parchment"] .eq-notes,
+  .eq-stage[data-theme="parchment"] .eq-wealth {
+    background:
+      radial-gradient(circle at 100% 0%, rgba(196, 128, 42, 0.12), transparent 60%),
+      rgba(255, 247, 220, 0.82);
+    border: 1px dashed rgba(120, 80, 30, 0.4);
+  }
+  .eq-stage[data-theme="parchment"] .eq-notes__head span,
+  .eq-stage[data-theme="parchment"] .eq-wealth__head span {
+    color: #7a5530;
+  }
+  .eq-stage[data-theme="parchment"] .eq-notes__head h3,
+  .eq-stage[data-theme="parchment"] .eq-wealth__head h3 {
+    color: #2a1a08;
+    font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+    font-variant: small-caps; letter-spacing: 0.08em;
+  }
+  .eq-stage[data-theme="parchment"] .eq-notes__body {
+    background:
+      repeating-linear-gradient(180deg, transparent 0, transparent 23px, rgba(120, 80, 30, 0.12) 23px, rgba(120, 80, 30, 0.12) 24px),
+      rgba(255, 252, 235, 0.85);
+    color: #2a1a08;
+    border-color: rgba(120, 80, 30, 0.28);
+    font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+    line-height: 24px;
+  }
+  .eq-stage[data-theme="parchment"] .eq-notes__body:focus { border-color: #8b3a1b; }
+
+  .eq-stage[data-theme="parchment"] .eq-wealth__gp > span { color: #8b3a1b; }
+  .eq-stage[data-theme="parchment"] .eq-wealth__gp input {
+    background: rgba(255, 252, 235, 0.92); color: #6a3a08;
+    border-color: rgba(139, 58, 27, 0.45);
+  }
+  .eq-stage[data-theme="parchment"] .eq-wealth__row input,
+  .eq-stage[data-theme="parchment"] .eq-wealth__qty {
+    background: rgba(255, 252, 235, 0.88); color: #3a2412;
+    border-color: rgba(120, 80, 30, 0.28);
+  }
+  .eq-stage[data-theme="parchment"] .eq-wealth__qty input { background: transparent; color: #3a2412; }
+  .eq-stage[data-theme="parchment"] .eq-wealth__qty > span { color: #7a5530; }
+  .eq-stage[data-theme="parchment"] .eq-wealth__empty {
+    color: #7a5530; border-color: rgba(120, 80, 30, 0.32);
+    background: rgba(255, 252, 235, 0.55);
+  }
+  .eq-stage[data-theme="parchment"] .eq-wealth__add {
+    background: rgba(139, 58, 27, 0.10); color: #8b3a1b;
+    border-color: rgba(139, 58, 27, 0.45);
+  }
+  .eq-stage[data-theme="parchment"] .eq-wealth__add:hover { background: rgba(139, 58, 27, 0.18); }
+  .eq-stage[data-theme="parchment"] .eq-wealth__remove {
+    background: rgba(139, 58, 27, 0.08); color: #8b3a1b;
+    border-color: rgba(139, 58, 27, 0.4);
+  }
 `;
 
 // ------------------------------------------------------------
@@ -795,6 +1067,8 @@ const PAGE_STYLES = `
 //      - set-player-character-field   -> state.playerCharacters[i][data.field] = event.target.value
 //      - set-equipment-slot           -> state.playerCharacters[i].equipment[data.slotKey][data.field] = value
 //      - set-player-notes             -> state.playerCharacters[i].notes = event.target.value
+//      - set-equipment-theme          -> state.transientUi.equipmentSheetTheme = data.theme
+//        (allowed values: "aether" | "parchment"; default "aether")
 //
 // 5. Mobile: the @media (max-width: 900px) breakpoint stacks slots into a 2-col
 //    grid and hides the silhouette. For a true 820px-pinned variant, drop the

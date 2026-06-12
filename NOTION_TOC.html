@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campaign Index — The Scarred Lands</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0f1117; color: #d4c9b0; font-family: Georgia, serif; font-size: 14px; line-height: 1.5; padding: 28px 20px; max-width: 1100px; margin: 0 auto; }
+
+  h1 { text-align: center; font-size: 24px; color: #f0e6cc; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: #4a5060; font-size: 11px; letter-spacing: 2px; margin-bottom: 36px; text-transform: uppercase; }
+
+  .section { margin-bottom: 36px; }
+  .section-header { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #5a6070; border-bottom: 1px solid #1e2028; padding-bottom: 6px; margin-bottom: 14px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+  .grid-wide { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+
+  a.card {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: #181c24; border: 1px solid #22263a; border-radius: 6px;
+    padding: 11px 14px; text-decoration: none; color: inherit;
+    transition: background 0.12s, border-color 0.12s;
+  }
+  a.card:hover { background: #1e2230; border-color: #404870; }
+
+  .card-icon { font-size: 18px; flex-shrink: 0; line-height: 1.3; }
+  .card-body { flex: 1; min-width: 0; }
+  .card-title { font-size: 13px; font-weight: bold; color: #c8d8f0; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-desc { font-size: 11px; color: #4a5870; margin-top: 2px; line-height: 1.4; }
+
+  /* location accent colours */
+  .loc-ng    { border-left: 3px solid #5070a0; }
+  .loc-mem   { border-left: 3px solid #404060; }
+  .loc-thun  { border-left: 3px solid #806030; }
+  .loc-wyld  { border-left: 3px solid #305040; }
+  .loc-scar  { border-left: 3px solid #602020; }
+  .loc-volc  { border-left: 3px solid #803020; }
+  .loc-brim  { border-left: 3px solid #705020; }
+  .loc-obs   { border-left: 3px solid #405080; }
+  .loc-other { border-left: 3px solid #301830; }
+  .loc-outer { border-left: 3px solid #304040; }
+  .loc-bog   { border-left: 3px solid #304030; }
+  .loc-fw    { border-left: 3px solid #503040; }
+  .loc-data  { border-left: 3px solid #203060; }
+  .loc-fac   { border-left: 3px solid #604020; }
+
+  .hook-badge {
+    display: inline-block; font-size: 9px; font-family: monospace;
+    background: #1a2a1a; color: #4a8a4a; border: 1px solid #2a4a2a;
+    border-radius: 10px; padding: 1px 6px; margin-top: 4px; letter-spacing: 0.5px;
+  }
+
+  .divider { border: none; border-top: 1px solid #1a1e28; margin: 28px 0; }
+</style>
+</head>
+<body>
+
+<h1>⚔ The Scarred Lands</h1>
+<p class="subtitle">Campaign Index &nbsp;·&nbsp; All links open in Notion</p>
+
+<!-- ═══ CAMPAIGN ═══ -->
+<div class="section">
+  <div class="section-header">📋 Campaign</div>
+  <div class="grid grid-wide">
+    <a class="card" href="https://app.notion.com/p/355414fb2dda8106a273cf4cc9a08ae7" target="_blank">
+      <span class="card-icon">🗡️</span>
+      <div class="card-body">
+        <div class="card-title">Campaign Hub</div>
+        <div class="card-desc">Central command — all databases, status, DM notes</div>
+      </div>
+    </a>
+    <a class="card" href="https://app.notion.com/p/363414fb2dda8187996ad28514348a3f" target="_blank">
+      <span class="card-icon">🏔️</span>
+      <div class="card-body">
+        <div class="card-title">New Grandia Campaign Overview</div>
+        <div class="card-desc">Setting, factions, major NPCs, arc summary</div>
+      </div>
+    </a>
+    <a class="card" href="https://app.notion.com/p/363414fb2dda8177ae61d81382fcbc0e" target="_blank">
+      <span class="card-icon">📖</span>
+      <div class="card-body">
+        <div class="card-title">New Grandia Playbook Index</div>
+        <div class="card-desc">Player-facing reference for the setting</div>
+      </div>
+    </a>
+    <a class="card" href="https://app.notion.com/p/363414fb2dda816f8d91dca0a947f286" target="_blank">
+      <span class="card-icon">⚡</span>
+      <div class="card-body">
+        <div class="card-title">Quick Reference &amp; Stats</div>
+        <div class="card-desc">Rules at-a-glance, key numbers</div>
+      </div>
+    </a>
+    <a class="card" href="https://app.notion.com/p/363414fb2dda810d9436d15cd5173e30" target="_blank">
+      <span class="card-icon">🕸️</span>
+      <div class="card-body">
+        <div class="card-title">NPC Relationship Web</div>
+        <div class="card-desc">Who knows who, tensions, alliances</div>
+      </div>
+    </a>
+    <a class="card" href="https://app.notion.com/p/363414fb2dda81f1bb11dca6108c4db7" target="_blank">
+      <span class="card-icon">🎮</span>
+      <div class="card-body">
+        <div class="card-title">Session Zero Guide</div>
+        <div class="card-desc">Character creation, world introduction</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- ═══ LOCATIONS ═══ -->
+<div class="section">
+  <div class="section-header">🗺️ Locations &amp; Areas <span style="color:#2a4a2a;font-size:10px;margin-left:8px;">20 plot hooks each</span></div>
+  <div class="grid">
+
+    <a class="card loc-ng" href="https://app.notion.com/p/355414fb2dda81fe9129db8749f4de06" target="_blank">
+      <span class="card-icon">🏛️</span>
+      <div class="card-body">
+        <div class="card-title">New Grandia</div>
+        <div class="card-desc">The Free City. Council of Elders. Grand Observatory.</div>
+        <span class="hook-badge">20 hooks</span>
+      </div>
+    </a>
+
+    <a class="card loc-mem" href="https://app.notion.com/p/355414fb2dda81628ebfcb867b05f2b3" target="_blank">
+      <span class="card-icon">🌑</span>
+      <div class="card-body">
+        <div class="card-title">Memento</div>
+        <div class="card-desc">City of alleys below. Dawn &amp; Dusk councils.</div>
+        <span class="hook-badge">20 hooks</span>
+      </div>
+    </a>
+
+    <a class="card loc-thun" href="https://app.notion.com/p/355414fb2dda81dd9c5de8086d73e93d" target="_blank">
+      <span class="card-icon">⚙️</span>
+      <div class="card-body">
+        <div class="card-title">Thundermount</div>
+        <div class="card-desc">Most advanced city. Crystalline ore mountain.</div>
+        <span class="hook-badge">20 hooks</span>
+      </div>
+    </a>
+
+    <a class="card loc-wyld" href="https://app.notion.com/p/355414fb2dda81f286a9e20c95b04e3c" target="_blank">
+      <span class="card-icon">🌿</span>
+      <div class="card-body">
+        <div class="card-title">Wyldermoore</div>
+        <div class="card-desc">Living wood city. Dead never fully leave.</div>
+        <span class="hook-badge">20 hooks</span>
+      </div>
+    </a>
+
+    <a class="card loc-scar" href="https://app.notion.com/p/355414fb2dda81949b82d2f96c935d34" target="_blank">
+      <span class="card-icon">🔥</span>
+      <div class="card-body">
+        <div class="card-title">The Scar</div>
+        <div class="card-desc">Immense canyon. Perpetual mist. Epicenter.</div>
+        <span class="hook-badge">20 hooks</span>
+      </div>
+    </a>
+
+    <a class="card loc-volc" href="https://app.notion.com/p/355414fb2dda81c2ac23d81ed51eda92" target="_blank">
+      <span class="card-icon">🌋</span>
+      <div class="card-body">
+        <div class="card-title">The Celestial Volcano</div>
+        <div class="card-desc">The Throne in the Volcano. Lords at war.</div>
+        <span class="hook-badge">20 hooks</span>
+      </div>
+    </a>
+
+    <a class="card loc-brim" href="https://app.notion.com/p/355414fb2dda8172b093ed27cee43b66" target="_blank">
+      <span class="card-icon">💀</span>
+      <div class="card-body">
+        <div class="card-title">The Brimstone Ruin</div>
+        <div class="card-desc">Decommissioned. Still powered. Still watched.</div>
+        <span class="hook-badge">20 hooks</span>
+      </div>
+    </a>
+
+    <a class="card loc-obs" href="https://app.notion.com/p/355414fb2dda818d9983e7cd679b8b7c" target="_blank">
+      <span class="card-icon">🔭</span>
+      <div class="card-body">
+        <div class="card-title">The Grand Observatory</div>
+        <div class="card-desc">Scientific &amp; military watch. Predicts weather.</div>
+        <span class="hook-badge">20 hooks</span>
+      </div>
+    </a>
+
+    <a class="card loc-other" href="https://app.notion.com/p/355414fb2dda81318d2ae4fcc35c9d1d" target="_blank">
+      <span class="card-icon">🖤</span>
+      <div class="card-body">
+        <div class="card-title">The Otherside</div>
+        <div class="card-desc">Black stone, ash, Ashenborn. Lords war here.</div>
+        <span class="hook-badge">20 hooks</span>
+      </div>
+    </a>
+
+    <a class="card loc-outer" href="https://app.notion.com/p/355414fb2dda81ac8185d1b7d43408a2" target="_blank">
+      <span class="card-icon">🏕️</span>
+      <div class="card-body">
+        <div class="card-title">The Outer Lands</div>
+        <div class="card-desc">Between civilization and the deep wilds.</div>
+        <span class="hook-badge">20 hooks</span>
+      </div>
+    </a>
+
+    <a class="card loc-bog" href="https://app.notion.com/p/355414fb2dda814396e1cd699ba70520" target="_blank">
+      <span class="card-icon">🌫️</span>
+      <div class="card-body">
+        <div class="card-title">The Bog</div>
+        <div class="card-desc">Submerged ruins. Lights that respond. Center unreached.</div>
+        <span class="hook-badge">20 hooks</span>
+      </div>
+    </a>
+
+    <a class="card loc-fw" href="https://app.notion.com/p/355414fb2dda81648878e606e369c086" target="_blank">
+      <span class="card-icon">🗻</span>
+      <div class="card-body">
+        <div class="card-title">Fur Wehn</div>
+        <div class="card-desc">Far East. Wehnfolk. Powerful and reclusive.</div>
+        <span class="hook-badge">20 hooks</span>
+      </div>
+    </a>
+
+    <a class="card loc-data" href="https://app.notion.com/p/355414fb2dda815d8ed1d905d8edb377" target="_blank">
+      <span class="card-icon">💾</span>
+      <div class="card-body">
+        <div class="card-title">The Datasphere</div>
+        <div class="card-desc">Pre-Scarring information network. 108 Wonders.</div>
+        <span class="hook-badge">20 hooks</span>
+      </div>
+    </a>
+
+    <a class="card loc-fac" href="https://app.notion.com/p/355414fb2dda810380cec05985d802bc" target="_blank">
+      <span class="card-icon">🔩</span>
+      <div class="card-body">
+        <div class="card-title">Factory of Aeons</div>
+        <div class="card-desc">Heart of Thundermount. Pre-Scarring. Never stops.</div>
+        <span class="hook-badge">20 hooks</span>
+      </div>
+    </a>
+
+  </div>
+</div>
+
+<!-- ═══ DATABASES ═══ -->
+<div class="section">
+  <div class="section-header">📊 Databases</div>
+  <div class="grid">
+    <a class="card" href="https://app.notion.com/p/b36657deb5f74b6fb0cad4e268400a1f" target="_blank">
+      <span class="card-icon">👥</span>
+      <div class="card-body">
+        <div class="card-title">NPCs</div>
+        <div class="card-desc">All characters the party has met or heard of</div>
+      </div>
+    </a>
+    <a class="card" href="https://app.notion.com/p/4d21d19a7f3a4ec7a780cde4568a4896" target="_blank">
+      <span class="card-icon">⚔️</span>
+      <div class="card-body">
+        <div class="card-title">Factions</div>
+        <div class="card-desc">Major groups and their agendas</div>
+      </div>
+    </a>
+    <a class="card" href="https://app.notion.com/p/9fe438d5113549ff9efe43ed6442a44b" target="_blank">
+      <span class="card-icon">📜</span>
+      <div class="card-body">
+        <div class="card-title">Quests</div>
+        <div class="card-desc">Active, completed, and failed quests</div>
+      </div>
+    </a>
+    <a class="card" href="https://app.notion.com/p/434960a7acbb47a19c264648a65f2bee" target="_blank">
+      <span class="card-icon">📅</span>
+      <div class="card-body">
+        <div class="card-title">Sessions Log</div>
+        <div class="card-desc">Recap of every session played</div>
+      </div>
+    </a>
+    <a class="card" href="https://app.notion.com/p/64d3d35b785d48d7b1e3f3230bca914d" target="_blank">
+      <span class="card-icon">🎒</span>
+      <div class="card-body">
+        <div class="card-title">Items &amp; Loot</div>
+        <div class="card-desc">Notable items, artifacts, party treasure</div>
+      </div>
+    </a>
+    <a class="card" href="https://app.notion.com/p/c41ec0fbe8624e87a3f9e23d73cba163" target="_blank">
+      <span class="card-icon">🐉</span>
+      <div class="card-body">
+        <div class="card-title">Bestiary</div>
+        <div class="card-desc">Monsters encountered and their stats</div>
+      </div>
+    </a>
+    <a class="card" href="https://app.notion.com/p/6b70ba80007a41e897693586a5b1bcef" target="_blank">
+      <span class="card-icon">🗺️</span>
+      <div class="card-body">
+        <div class="card-title">Locations Database</div>
+        <div class="card-desc">Full locations table with danger levels</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- ═══ WORLD LORE ═══ -->
+<div class="section">
+  <div class="section-header">🌍 World Lore</div>
+  <div class="grid">
+    <a class="card" href="https://app.notion.com/p/363414fb2dda8105a0b6d7ea7d2d4d82" target="_blank">
+      <span class="card-icon">📚</span>
+      <div class="card-body">
+        <div class="card-title">World Bible</div>
+        <div class="card-desc">The Scarred Lands — full world reference</div>
+      </div>
+    </a>
+    <a class="card" href="https://app.notion.com/p/363414fb2dda81aca91ed1f3377ba2c2" target="_blank">
+      <span class="card-icon">📍</span>
+      <div class="card-body">
+        <div class="card-title">Locations Overview</div>
+        <div class="card-desc">The four cities, special locations, 108 Wonders</div>
+      </div>
+    </a>
+    <a class="card" href="https://app.notion.com/p/363414fb2dda818496cdd927cc394399" target="_blank">
+      <span class="card-icon">🏛️</span>
+      <div class="card-body">
+        <div class="card-title">Factions &amp; Organizations</div>
+        <div class="card-desc">Guardians, Reclaimers, all major groups</div>
+      </div>
+    </a>
+    <a class="card" href="https://app.notion.com/p/355414fb2dda81829cf8fb0c5232baa0" target="_blank">
+      <span class="card-icon">🌍</span>
+      <div class="card-body">
+        <div class="card-title">World Lore</div>
+        <div class="card-desc">History, deep lore, The Scarring</div>
+      </div>
+    </a>
+    <a class="card" href="https://app.notion.com/p/355414fb2dda81718058f7e6124700c0" target="_blank">
+      <span class="card-icon">⚙️</span>
+      <div class="card-body">
+        <div class="card-title">World Mechanics</div>
+        <div class="card-desc">How the world works — rules, systems</div>
+      </div>
+    </a>
+    <a class="card" href="https://app.notion.com/p/363414fb2dda81069847e2e40b04e019" target="_blank">
+      <span class="card-icon">📅</span>
+      <div class="card-body">
+        <div class="card-title">Calendar &amp; Culture</div>
+        <div class="card-desc">In-world dates, holidays, customs</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+</body>
+</html>

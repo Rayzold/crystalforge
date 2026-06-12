@@ -58,10 +58,13 @@ export const PAGE_ROUTES = [
   { key: "npcs", label: "NPCs", href: "./npcs.html" },
   { key: "awakened", label: "Awakened", href: "./awakened.html" },
   { key: "army", label: "Army", href: "./army.html" },
+  { key: "battle", label: "Battle", href: "./battle.html" },
   { key: "crafting", label: "Crafting", href: "./crafting.html" },
   { key: "cooldowns", label: "Cooldowns", href: "./cooldowns.html" },
   { key: "chronicle", label: "Chronicle", href: "./chronicle.html" },
   { key: "ultima", label: "Ultima", href: "./POWERS_REFERENCE.html" },
+  { key: "campaign", label: "Campaign Index", href: "./NOTION_TOC.html" },
+  { key: "music", label: "Music Guide", href: "./DND_MUSIC_GUIDE.html" },
   { key: "help", label: "Help", href: "./help.html" }
 ];
 export const BUILD_NOTES = [

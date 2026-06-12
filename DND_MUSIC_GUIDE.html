@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DnD Music Guide — The Scarred Lands</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #0f1117; color: #c8bfa8;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 14px; line-height: 1.55;
+  padding: 28px 20px 60px; max-width: 1200px; margin: 0 auto;
+}
+h1 { text-align:center; font-size:26px; letter-spacing:4px; text-transform:uppercase; color:#e8dcc8; margin-bottom:4px; }
+.subtitle { text-align:center; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:#3a4050; margin-bottom:32px; }
+
+.filters {
+  display:flex; flex-wrap:wrap; gap:12px;
+  margin-bottom:32px; padding:14px 16px;
+  background:#131520; border:1px solid #1e2230; border-radius:8px;
+}
+.filter-group { display:flex; align-items:center; flex-wrap:wrap; gap:5px; }
+.filter-label { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:#3a4050; margin-right:4px; }
+.filter-btn {
+  background:#181c24; color:#5a6070; border:1px solid #22263a;
+  border-radius:4px; padding:4px 10px; font-size:11px; font-family:inherit;
+  cursor:pointer; transition:all 0.12s;
+}
+.filter-btn:hover { background:#1e2230; color:#8a90a0; border-color:#303550; }
+.filter-btn.active { background:#1e2845; color:#8ab0e0; border-color:#304880; }
+
+.section { margin-bottom:40px; }
+.section.section-hidden { display:none; }
+.section-head {
+  font-size:11px; letter-spacing:3px; text-transform:uppercase; color:#4a5060;
+  border-bottom:1px solid #1a1e28; padding-bottom:7px; margin-bottom:14px;
+}
+.grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(270px,1fr)); gap:10px; }
+
+.card {
+  background:#141820; border:1px solid #1e2230; border-left-width:3px;
+  border-radius:6px; padding:13px 14px; transition:background 0.12s;
+  display:flex; flex-direction:column;
+}
+.card:hover { background:#191e2a; }
+.card.hidden { display:none; }
+
+.song-name { font-size:14px; font-weight:bold; color:#d8cfc0; margin-bottom:3px; }
+.song-credit { font-size:11px; color:#404858; font-style:italic; margin-bottom:7px; }
+.song-note { font-size:12px; color:#7a8090; line-height:1.5; margin-bottom:9px; flex:1; }
+
+.song-footer { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px; margin-top:auto; }
+.song-tags { display:flex; flex-wrap:wrap; gap:5px; }
+.song-links { display:flex; gap:6px; }
+
+.tag {
+  font-size:9px; letter-spacing:1px; text-transform:uppercase;
+  padding:2px 7px; border-radius:10px; font-family:monospace;
+}
+.tag.instrumental { background:#0f2010; color:#3a8a40; border:1px solid #1a4020; }
+.tag.choir        { background:#2a1a08; color:#a87030; border:1px solid #4a3010; }
+.tag.lyrics       { background:#200a0a; color:#a04040; border:1px solid #401010; }
+.tag.wordless     { background:#080f20; color:#3060a0; border:1px solid #102040; }
+
+.link-btn {
+  display:inline-flex; align-items:center; gap:4px;
+  font-size:10px; letter-spacing:0.5px; text-transform:uppercase;
+  padding:3px 9px; border-radius:4px; text-decoration:none;
+  font-family:monospace; font-weight:bold; transition:all 0.12s;
+  white-space:nowrap;
+}
+.link-yt { background:#1e0a0a; color:#cc3333; border:1px solid #451010; }
+.link-yt:hover { background:#2e1010; color:#ff5555; border-color:#701818; }
+.link-sp { background:#071410; color:#1db954; border:1px solid #0d3020; }
+.link-sp:hover { background:#0a1e16; color:#2ddb64; border-color:#184830; }
+
+.boss     { border-left-color:#7a1a1a; }
+.suspense { border-left-color:#3a1a5a; }
+.mystery  { border-left-color:#1a4a4a; }
+.horror   { border-left-color:#1a2a0a; }
+.tavern   { border-left-color:#6a4a00; }
+.ambience { border-left-color:#1a2a4a; }
+.combat   { border-left-color:#5a3000; }
+.sorrow   { border-left-color:#1a1a4a; }
+.triumph  { border-left-color:#4a4a00; }
+</style>
+</head>
+<body>
+
+<h1>♪ DnD Music Guide</h1>
+<p class="subtitle">Scene &amp; Atmosphere Reference &nbsp;·&nbsp; Curated for Tabletop</p>
+
+<div class="filters">
+  <div class="filter-group">
+    <span class="filter-label">Scene</span>
+    <button class="filter-btn active" data-group="category" data-value="all">All</button>
+    <button class="filter-btn" data-group="category" data-value="boss">⚔ Boss Battle</button>
+    <button class="filter-btn" data-group="category" data-value="suspense">💀 Suspense</button>
+    <button class="filter-btn" data-group="category" data-value="mystery">🔍 Mystery</button>
+    <button class="filter-btn" data-group="category" data-value="horror">👁 Horror</button>
+    <button class="filter-btn" data-group="category" data-value="tavern">🍺 Tavern &amp; City</button>
+    <button class="filter-btn" data-group="category" data-value="ambience">🌩 Weather &amp; Ambience</button>
+    <button class="filter-btn" data-group="category" data-value="combat">🗡 Combat</button>
+    <button class="filter-btn" data-group="category" data-value="sorrow">💔 Sorrow &amp; Loss</button>
+    <button class="filter-btn" data-group="category" data-value="triumph">🎺 Triumph</button>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Vocals</span>
+    <button class="filter-btn active" data-group="words" data-value="all">All</button>
+    <button class="filter-btn" data-group="words" data-value="instrumental">Instrumental Only</button>
+    <button class="filter-btn" data-group="words" data-value="wordless">Wordless Vocals</button>
+    <button class="filter-btn" data-group="words" data-value="choir">Choir</button>
+    <button class="filter-btn" data-group="words" data-value="lyrics">Has Lyrics</button>
+  </div>
+</div>
+<div class="section">
+<h2 class="section-head">⚔ Boss Battle — Legendary, Final, Terrifying</h2>
+<div class="grid">
+<div class="card boss" data-category="boss" data-words="choir">
+  <div class="song-name">One Winged Angel</div>
+  <div class="song-credit">Nobuo Uematsu · Final Fantasy VII</div>
+  <div class="song-note">The definitive villain theme. Latin choir screaming the enemy's name — save it for the final boss's ultimate form.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag choir">⚠ Choir (Latin)</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=One+Winged+Angel+Nobuo+Uematsu+Final+Fantasy+VII" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/One+Winged+Angel+Nobuo+Uematsu" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card boss" data-category="boss" data-words="choir">
+  <div class="song-name">O Fortuna</div>
+  <div class="song-credit">Carl Orff · Carmina Burana (1937)</div>
+  <div class="song-note">The sound of fate crushing the party. Perfect for a god descending, a ritual completing, or a prophecy being catastrophically fulfilled.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag choir">⚠ Choir (Latin)</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=O+Fortuna+Carl+Orff+Carmina+Burana" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/O+Fortuna+Carmina+Burana+Carl+Orff" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card boss" data-category="boss" data-words="instrumental">
+  <div class="song-name">Battle with the Colossus</div>
+  <div class="song-credit">Kow Otani · Shadow of the Colossus</div>
+  <div class="song-note">Thunderous orchestra for a foe that dwarfs the players. Best for a creature so massive it's a puzzle — something they must outthink, not outfight.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Battle+with+the+Colossus+Shadow+of+the+Colossus+Kow+Otani" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Battle+with+the+Colossus+Shadow+of+the+Colossus" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card boss" data-category="boss" data-words="instrumental">
+  <div class="song-name">You Will Know Our Names</div>
+  <div class="song-credit">ACE+ · Xenoblade Chronicles</div>
+  <div class="song-note">Relentless, driving urgency. Every crescendo signals another phase. Excellent for a boss that never slows down and keeps escalating.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=You+Will+Know+Our+Names+Xenoblade+Chronicles" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/You+Will+Know+Our+Names+Xenoblade+Chronicles" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card boss" data-category="boss" data-words="instrumental">
+  <div class="song-name">Dancing Mad</div>
+  <div class="song-credit">Nobuo Uematsu · Final Fantasy VI</div>
+  <div class="song-note">A 17-minute organ epic with four movements. Built for a villain who considers himself a god of chaos and art. Loop the final movement for the fight itself.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Dancing+Mad+Final+Fantasy+VI+Nobuo+Uematsu" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Dancing+Mad+Final+Fantasy+VI" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card boss" data-category="boss" data-words="instrumental">
+  <div class="song-name">MEGALOVANIA</div>
+  <div class="song-credit">Toby Fox · Undertale</div>
+  <div class="song-note">The 'you messed up and now face consequences' theme. Drop this when the villain stops playing games. The table will immediately understand the shift.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=MEGALOVANIA+Toby+Fox+Undertale" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/MEGALOVANIA+Undertale+Toby+Fox" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card boss" data-category="boss" data-words="instrumental">
+  <div class="song-name">Calamity Ganon Battle</div>
+  <div class="song-credit">Manaka Kataoka · Zelda: Breath of the Wild</div>
+  <div class="song-note">Ancient malice distilled into orchestral fury. Use for a corrupted entity — something that was once familiar, now transformed into pure threat.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Calamity+Ganon+Battle+Zelda+Breath+of+the+Wild" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Calamity+Ganon+Battle+Breath+of+the+Wild" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card boss" data-category="boss" data-words="wordless">
+  <div class="song-name">Cleric Beast</div>
+  <div class="song-credit">Ryan Amon · Bloodborne</div>
+  <div class="song-note">Frenzied church choir without intelligible words — just raw, holy dread. Perfect for a monster that was once something sacred and is still worshipped.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag wordless">Wordless Vocals</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Cleric+Beast+Bloodborne+Ryan+Amon" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Cleric+Beast+Bloodborne" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+</div></div>
+
+<div class="section">
+<h2 class="section-head">💀 Suspense — Tension, Dread, the Moment Before</h2>
+<div class="grid">
+<div class="card suspense" data-category="suspense" data-words="instrumental">
+  <div class="song-name">Requiem for a Dream</div>
+  <div class="song-credit">Clint Mansell · Film Score (2000)</div>
+  <div class="song-note">Spiraling strings that tighten with every loop. Use when the party realizes they are out of time — a slow-burn dread that keeps escalating.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Requiem+for+a+Dream+Clint+Mansell+Lux+Aeterna" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Requiem+for+a+Dream+Clint+Mansell" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card suspense" data-category="suspense" data-words="instrumental">
+  <div class="song-name">Jaws Theme</div>
+  <div class="song-credit">John Williams · Jaws (1975)</div>
+  <div class="song-note">Simple, inevitable. Use quietly in the background when something unseen is approaching — and the party doesn't know yet.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Jaws+Theme+John+Williams" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Jaws+Theme+John+Williams" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card suspense" data-category="suspense" data-words="instrumental">
+  <div class="song-name">Time</div>
+  <div class="song-credit">Hans Zimmer · Inception OST (2010)</div>
+  <div class="song-note">Starts as solitude, becomes overwhelming inevitability. Perfect for a slow-burn revelation or a countdown that the players can feel closing in.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Time+Hans+Zimmer+Inception+OST" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Time+Hans+Zimmer+Inception" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card suspense" data-category="suspense" data-words="instrumental">
+  <div class="song-name">In the Hall of the Mountain King</div>
+  <div class="song-credit">Edvard Grieg · Peer Gynt Suite (1875)</div>
+  <div class="song-note">Creeping tempo that builds to outright chaos. Ideal for sneaking through a villain's domain that slowly becomes aware of their presence.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=In+the+Hall+of+the+Mountain+King+Grieg" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/In+the+Hall+of+the+Mountain+King+Grieg" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card suspense" data-category="suspense" data-words="instrumental">
+  <div class="song-name">Toccata and Fugue in D Minor</div>
+  <div class="song-credit">J.S. Bach · Organ Piece (~1704)</div>
+  <div class="song-note">The sound of terrible grandeur. Use when the players enter a crypt, an evil cathedral, or face something so ancient it predates the current gods.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Toccata+and+Fugue+in+D+Minor+Bach+organ" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Toccata+and+Fugue+D+minor+Bach" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card suspense" data-category="suspense" data-words="instrumental">
+  <div class="song-name">Tension</div>
+  <div class="song-credit">Akira Yamaoka · Silent Hill 2 OST</div>
+  <div class="song-note">Industrial ambience hovering at the edge of silence. Works under any scene where the party doesn't know what's watching them from the dark.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Tension+Akira+Yamaoka+Silent+Hill+2" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Tension+Akira+Yamaoka+Silent+Hill+2" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card suspense" data-category="suspense" data-words="instrumental">
+  <div class="song-name">Dread (Metroid Prime)</div>
+  <div class="song-credit">Kenji Yamamoto · Metroid Prime</div>
+  <div class="song-note">Alien ambience that pulses with quiet menace. Use in any confined space where something deadly is just beyond the next door.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Dread+Metroid+Prime+OST+Kenji+Yamamoto" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Metroid+Prime+Dread+OST" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+</div></div>
+
+<div class="section">
+<h2 class="section-head">🔍 Mystery — Intrigue, Discovery, the Unknown</h2>
+<div class="grid">
+<div class="card mystery" data-category="mystery" data-words="instrumental">
+  <div class="song-name">X-Files Theme</div>
+  <div class="song-credit">Mark Snow · The X-Files (1993)</div>
+  <div class="song-note">Eerie and procedural. Use during investigation scenes — inspecting a crime scene, deciphering old notes, piecing together a conspiracy.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=X-Files+Theme+Mark+Snow" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/X-Files+Theme+Mark+Snow" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card mystery" data-category="mystery" data-words="instrumental">
+  <div class="song-name">Twin Peaks Theme</div>
+  <div class="song-credit">Angelo Badalamenti · Twin Peaks (1990)</div>
+  <div class="song-note">Dreamy unease — beauty wrapped around something wrong. Perfect for a town that seems entirely fine but very much is not.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Twin+Peaks+Theme+Angelo+Badalamenti" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Twin+Peaks+Theme+Angelo+Badalamenti" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card mystery" data-category="mystery" data-words="instrumental">
+  <div class="song-name">Kingdom of Zeal</div>
+  <div class="song-credit">Yasunori Mitsuda · Chrono Trigger</div>
+  <div class="song-note">A floating utopia of impossible magic with moral rot underneath. Use for a place that seems wondrous but hides something terrible at its heart.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Kingdom+of+Zeal+Chrono+Trigger+Yasunori+Mitsuda" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Kingdom+of+Zeal+Chrono+Trigger" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card mystery" data-category="mystery" data-words="instrumental">
+  <div class="song-name">Professor Layton Main Theme</div>
+  <div class="song-credit">Tomohito Nishiura · Professor Layton Series</div>
+  <div class="song-note">Curious, light, and clever. Good for cozy investigation and puzzle-solving — keeps the mystery fun rather than threatening.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Professor+Layton+Main+Theme+Tomohito+Nishiura" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Professor+Layton+Main+Theme" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card mystery" data-category="mystery" data-words="instrumental">
+  <div class="song-name">Dark World</div>
+  <div class="song-credit">Koji Kondo · Zelda: A Link to the Past</div>
+  <div class="song-note">A corrupted mirror of the familiar. Drop it when the players enter a shadow realm or wrong version of a place they know well.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Dark+World+Zelda+Link+to+the+Past+Koji+Kondo" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Dark+World+Zelda+A+Link+to+the+Past" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card mystery" data-category="mystery" data-words="instrumental">
+  <div class="song-name">Dearly Beloved</div>
+  <div class="song-credit">Yoko Shimomura · Kingdom Hearts Series</div>
+  <div class="song-note">Melancholic and intimate. Use for a quiet moment after a revelation — when everything is understood but nothing is yet resolved.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Dearly+Beloved+Yoko+Shimomura+Kingdom+Hearts" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Dearly+Beloved+Kingdom+Hearts+Yoko+Shimomura" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card mystery" data-category="mystery" data-words="instrumental">
+  <div class="song-name">Myst Main Theme</div>
+  <div class="song-credit">Robyn Miller · Myst (1993)</div>
+  <div class="song-note">Lonely, puzzle-soaked wonder. Use when the party finds themselves in an abandoned place full of mechanisms no one alive understands.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Myst+Main+Theme+Robyn+Miller+1993" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Myst+Main+Theme" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card mystery" data-category="mystery" data-words="instrumental">
+  <div class="song-name">Hedwig's Theme</div>
+  <div class="song-credit">John Williams · Harry Potter and the Sorcerer's Stone (2001)</div>
+  <div class="song-note">The definitive sound of magic entering everyday life. Use for a first glimpse of a wondrous place, an enchanted object, or a child discovering their power.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Hedwig%27s+Theme+John+Williams+Harry+Potter" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Hedwig%27s+Theme+John+Williams+Harry+Potter" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card mystery" data-category="mystery" data-words="instrumental">
+  <div class="song-name">A Window to the Past</div>
+  <div class="song-credit">John Williams · Harry Potter and the Prisoner of Azkaban (2004)</div>
+  <div class="song-note">Gentle, nostalgic wonder — the feeling of finding a photograph of someone you never knew. Use when the party uncovers old history that changes how they understand the present.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=A+Window+to+the+Past+John+Williams+Prisoner+of+Azkaban" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/A+Window+to+the+Past+John+Williams+Harry+Potter" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+</div></div>
+
+<div class="section">
+<h2 class="section-head">👁 Horror — Dread, Wrongness, the Dark</h2>
+<div class="grid">
+<div class="card horror" data-category="horror" data-words="instrumental">
+  <div class="song-name">Halloween Theme</div>
+  <div class="song-credit">John Carpenter · Halloween (1978)</div>
+  <div class="song-note">5/4 piano relentlessness. Use for a slasher-style threat that cannot be stopped, or any scene where the party is being hunted through familiar streets.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Halloween+Theme+John+Carpenter+1978" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Halloween+Theme+John+Carpenter" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card horror" data-category="horror" data-words="instrumental">
+  <div class="song-name">Tubular Bells</div>
+  <div class="song-credit">Mike Oldfield · The Exorcist (1973)</div>
+  <div class="song-note">Childhood-tinged wrongness. Best for something that shouldn't be there — possession, corruption, or an innocent thing with hollow eyes.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Tubular+Bells+Mike+Oldfield+Exorcist" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Tubular+Bells+Mike+Oldfield" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card horror" data-category="horror" data-words="instrumental">
+  <div class="song-name">Don't Be Afraid</div>
+  <div class="song-credit">Akira Yamaoka · Silent Hill 2 OST</div>
+  <div class="song-note">Dissonant industrial ambience. Use for exploring an abandoned place where something is deeply wrong with reality — walls breathe, angles feel off.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Don%27t+Be+Afraid+Akira+Yamaoka+Silent+Hill+2" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Dont+Be+Afraid+Akira+Yamaoka+Silent+Hill+2" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card horror" data-category="horror" data-words="instrumental">
+  <div class="song-name">It Follows OST</div>
+  <div class="song-credit">Disasterpeace · It Follows (2014)</div>
+  <div class="song-note">Synth dread that builds with quiet inevitability. Something is always approaching. Works under any scene where the party cannot safely rest.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=It+Follows+OST+Disasterpeace" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/It+Follows+OST+Disasterpeace" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card horror" data-category="horror" data-words="instrumental">
+  <div class="song-name">The Thing Main Theme</div>
+  <div class="song-credit">Ennio Morricone · The Thing (1982)</div>
+  <div class="song-note">Cold, droning paranoia. Ideal for a shapeshifter or infection scenario — when the party suspects one another, not just the dark.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=The+Thing+Main+Theme+Ennio+Morricone+1982" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/The+Thing+Theme+Ennio+Morricone" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card horror" data-category="horror" data-words="instrumental">
+  <div class="song-name">Crimson Head (Arrange)</div>
+  <div class="song-credit">Capcom Sound Team · Resident Evil</div>
+  <div class="song-note">Tense, rhythmic dread in a confined space. Use when every door might have something behind it and resources are running out.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Resident+Evil+Crimson+Head+theme+OST" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Resident+Evil+Crimson+Head" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card horror" data-category="horror" data-words="instrumental">
+  <div class="song-name">Amnesia: The Dark Descent OST</div>
+  <div class="song-credit">Mikko Tarmia · Amnesia (2010)</div>
+  <div class="song-note">Formless, oppressive dread. Use when the party has no weapons and no good options — only running and hiding, in absolute darkness.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Amnesia+The+Dark+Descent+OST+Mikko+Tarmia" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Amnesia+Dark+Descent+OST+Mikko+Tarmia" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+</div></div>
+
+<div class="section">
+<h2 class="section-head">🍺 Tavern &amp; City — Life, Rest, Civilization</h2>
+<div class="grid">
+<div class="card tavern" data-category="tavern" data-words="instrumental">
+  <div class="song-name">Flagon's Dragon</div>
+  <div class="song-credit">Inon Zur · Dragon Age: Origins</div>
+  <div class="song-note">The definitive fantasy tavern track. Lute and fiddle, warm and lively. Use whenever the party is resting, drinking, or trading rumours.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Flagon%27s+Dragon+Dragon+Age+Origins+Inon+Zur" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Flagon%27s+Dragon+Dragon+Age+Origins" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card tavern" data-category="tavern" data-words="instrumental">
+  <div class="song-name">Tristram Village</div>
+  <div class="song-credit">Matt Uelmen · Diablo (1996)</div>
+  <div class="song-note">Guitar meditation — melancholy beneath the mundane. Use for a town that feels safe on the surface but carries old grief and dark rumours just below.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Tristram+Village+Matt+Uelmen+Diablo+1996" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Tristram+Village+Diablo" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card tavern" data-category="tavern" data-words="instrumental">
+  <div class="song-name">The Valley Comes Alive</div>
+  <div class="song-credit">ConcernedApe · Stardew Valley</div>
+  <div class="song-note">Cheerful, pastoral, unhurried. Perfect for a small friendly village with market stalls and NPCs who genuinely like the party.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=The+Valley+Comes+Alive+Stardew+Valley" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/The+Valley+Comes+Alive+Stardew+Valley" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card tavern" data-category="tavern" data-words="instrumental">
+  <div class="song-name">Witcher 3 Tavern Music</div>
+  <div class="song-credit">Marcin Przybyłowicz · The Witcher 3</div>
+  <div class="song-note">Medieval folk with Slavic flair. Energetic and slightly rough-edged — for a crowded rowdy inn, not a noble banquet.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Witcher+3+Tavern+Music+Marcin+Przybylowicz" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Witcher+3+Tavern+Music" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card tavern" data-category="tavern" data-words="instrumental">
+  <div class="song-name">Bag End (Shire Theme)</div>
+  <div class="song-credit">Howard Shore · The Lord of the Rings (2001)</div>
+  <div class="song-note">Warm, hobbit-hole comfort. Use for a very safe settlement — a beloved village untouched by war, the party's cherished home base.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Bag+End+Shire+Theme+Howard+Shore+Lord+of+the+Rings" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Bag+End+Shire+Theme+Howard+Shore" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card tavern" data-category="tavern" data-words="instrumental">
+  <div class="song-name">Midgar (City Theme)</div>
+  <div class="song-credit">Nobuo Uematsu · Final Fantasy VII</div>
+  <div class="song-note">Industrial city energy — a metropolis of ambition and inequality. Use for a large city that runs on power, money, and people being forgotten.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Midgar+City+Theme+Final+Fantasy+VII+Nobuo+Uematsu" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Midgar+Theme+Final+Fantasy+VII" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card tavern" data-category="tavern" data-words="lyrics">
+  <div class="song-name">The Wolven Storm (Priscilla's Song)</div>
+  <div class="song-credit">Marcin Przybyłowicz · The Witcher 3</div>
+  <div class="song-note">A haunting bardic performance. Use when a tavern bard is playing for the crowd, or to set a bittersweet mood at a quiet city moment.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag lyrics">⚠ Has Lyrics</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=The+Wolven+Storm+Priscilla%27s+Song+Witcher+3" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/The+Wolven+Storm+Priscilla%27s+Song+Witcher+3" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+</div></div>
+
+<div class="section">
+<h2 class="section-head">🌩 Weather &amp; Ambience — Place, Sky, Elemental Forces</h2>
+<div class="grid">
+<div class="card ambience" data-category="ambience" data-words="instrumental">
+  <div class="song-name">Clair de Lune</div>
+  <div class="song-credit">Claude Debussy · Suite bergamasque (1905)</div>
+  <div class="song-note">Moonlit stillness. Use for a quiet night scene — a campfire conversation, a rooftop meeting, a lake surface reflecting the stars perfectly.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Clair+de+Lune+Debussy+piano" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Clair+de+Lune+Debussy" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card ambience" data-category="ambience" data-words="instrumental">
+  <div class="song-name">La Mer</div>
+  <div class="song-credit">Claude Debussy · Orchestral Suite (1905)</div>
+  <div class="song-note">The sea in three movements — glittering, surging, formless. Use for ocean travel, a port city waking up, or any vast open natural space.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=La+Mer+Debussy+orchestra" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/La+Mer+Debussy" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card ambience" data-category="ambience" data-words="instrumental">
+  <div class="song-name">City of Tears (Waterways)</div>
+  <div class="song-credit">Christopher Larkin · Hollow Knight</div>
+  <div class="song-note">Endless rain and melancholy beauty. Use for a ruined, flooded city — or any scene under perpetual, heavy, unceasing rain.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=City+of+Tears+Hollow+Knight+Christopher+Larkin" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/City+of+Tears+Hollow+Knight" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card ambience" data-category="ambience" data-words="instrumental">
+  <div class="song-name">Snowdin Town</div>
+  <div class="song-credit">Toby Fox · Undertale</div>
+  <div class="song-note">Quiet, frosted, and still. A snowy settlement, an ice cave passage, or any cold scene that should feel peaceful rather than threatening.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Snowdin+Town+Toby+Fox+Undertale" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Snowdin+Town+Undertale+Toby+Fox" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card ambience" data-category="ambience" data-words="wordless">
+  <div class="song-name">Far Horizons</div>
+  <div class="song-credit">Jeremy Soule · The Elder Scrolls V: Skyrim</div>
+  <div class="song-note">Wordless soprano over vast open sky. Use for a long journey montage, dawn after a terrible night, or a view from a mountain summit.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag wordless">Wordless Vocals</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Far+Horizons+Jeremy+Soule+Skyrim" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Far+Horizons+Skyrim+Jeremy+Soule" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card ambience" data-category="ambience" data-words="instrumental">
+  <div class="song-name">Storm (Journey OST)</div>
+  <div class="song-credit">Austin Wintory · Journey (2012)</div>
+  <div class="song-note">Wind, sand, silence, and awe. Use for traversal through a dead or ancient landscape — a desert, a ruin, a bleached wasteland with no living memory.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Storm+Austin+Wintory+Journey+OST" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Storm+Austin+Wintory+Journey" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card ambience" data-category="ambience" data-words="instrumental">
+  <div class="song-name">Pastoral Symphony — Storm (Mvt. 4)</div>
+  <div class="song-credit">Ludwig van Beethoven · Symphony No. 6 (1808)</div>
+  <div class="song-note">A literal musical thunderstorm. Drop movement 4 when the weather should feel like a character in the scene — not ambient, but wrathful.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Beethoven+Pastoral+Symphony+Storm+Movement+4" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Beethoven+Pastoral+Symphony+Movement+4" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+</div></div>
+
+<div class="section">
+<h2 class="section-head">🗡 Combat — Skirmish, Chase, General Battle</h2>
+<div class="grid">
+<div class="card combat" data-category="combat" data-words="instrumental">
+  <div class="song-name">Gerudo Valley</div>
+  <div class="song-credit">Koji Kondo · Zelda: Ocarina of Time</div>
+  <div class="song-note">Flamenco urgency with desert flair. Use for a swift skirmish, a chase through a market, or any fight that should feel more acrobatic than brutal.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Gerudo+Valley+Koji+Kondo+Zelda+Ocarina+of+Time" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Gerudo+Valley+Zelda+Ocarina+of+Time" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card combat" data-category="combat" data-words="instrumental">
+  <div class="song-name">He's a Pirate</div>
+  <div class="song-credit">Hans Zimmer · Pirates of the Caribbean (2003)</div>
+  <div class="song-note">Swashbuckling, kinetic, fun. A boarding action, a running brawl through a port — any fight that should feel more daring than deadly.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=He%27s+a+Pirate+Hans+Zimmer+Pirates+of+the+Caribbean" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/He%27s+a+Pirate+Hans+Zimmer+Pirates+of+the+Caribbean" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card combat" data-category="combat" data-words="instrumental">
+  <div class="song-name">Saber's Edge</div>
+  <div class="song-credit">Masashi Hamauzu · Final Fantasy XIII</div>
+  <div class="song-note">Relentless mechanical drive. Excellent for a combat that should feel efficient and dangerous rather than grand and epic.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Saber%27s+Edge+Masashi+Hamauzu+Final+Fantasy+XIII" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Saber%27s+Edge+Final+Fantasy+XIII" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card combat" data-category="combat" data-words="wordless">
+  <div class="song-name">Combat Theme (Halo CE)</div>
+  <div class="song-credit">Martin O'Donnell · Halo: Combat Evolved (2001)</div>
+  <div class="song-note">Gregorian wordless chant over sci-fi percussion. Versatile — works for any mid-tier encounter that needs weight without a full boss reveal.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag wordless">Wordless Vocals</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Halo+Combat+Evolved+Combat+Theme+Martin+O%27Donnell" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Halo+Combat+Evolved+Theme" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card combat" data-category="combat" data-words="instrumental">
+  <div class="song-name">Gwyn, Lord of Cinder</div>
+  <div class="song-credit">Motoi Sakuraba · Dark Souls</div>
+  <div class="song-note">A solo piano for a broken king. Use for a fight against someone who was once great — a mentor gone wrong, a former ally, a tragic and inevitable end.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Gwyn+Lord+of+Cinder+Dark+Souls+Motoi+Sakuraba" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Gwyn+Lord+of+Cinder+Dark+Souls" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card combat" data-category="combat" data-words="instrumental">
+  <div class="song-name">The Decisive Battle</div>
+  <div class="song-credit">Nobuo Uematsu · Final Fantasy VI</div>
+  <div class="song-note">Classic urgent JRPG battle energy. A strong, reliable theme for any mid-stakes group fight — high-energy without being so overwhelming it overshadows roleplay.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=The+Decisive+Battle+Nobuo+Uematsu+Final+Fantasy+VI" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/The+Decisive+Battle+Final+Fantasy+VI" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card combat" data-category="combat" data-words="instrumental">
+  <div class="song-name">Tempest</div>
+  <div class="song-credit">ACE+ · Xenoblade Chronicles</div>
+  <div class="song-note">Driving urgency for a timed encounter or desperate retreat. Pairs well with any fight the party is losing and needs to survive, not win.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Tempest+Xenoblade+Chronicles+ACE%2B" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Tempest+Xenoblade+Chronicles" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+</div></div>
+
+<div class="section">
+<h2 class="section-head">💔 Sorrow &amp; Loss — Grief, Sacrifice, Endings</h2>
+<div class="grid">
+<div class="card sorrow" data-category="sorrow" data-words="instrumental">
+  <div class="song-name">To Zanarkand</div>
+  <div class="song-credit">Nobuo Uematsu · Final Fantasy X</div>
+  <div class="song-note">The purest musical expression of knowing something is over. Use for a farewell, a sacrifice, or a player-driven decision that cannot be undone.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=To+Zanarkand+Nobuo+Uematsu+Final+Fantasy+X" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/To+Zanarkand+Final+Fantasy+X" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card sorrow" data-category="sorrow" data-words="instrumental">
+  <div class="song-name">Aerith's Theme</div>
+  <div class="song-credit">Nobuo Uematsu · Final Fantasy VII</div>
+  <div class="song-note">The loss of someone irreplaceable. Use only for the most significant NPC deaths — don't dilute it. When this plays, every player at the table will feel it.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Aerith%27s+Theme+Nobuo+Uematsu+Final+Fantasy+VII" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Aerith%27s+Theme+Final+Fantasy+VII" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card sorrow" data-category="sorrow" data-words="wordless">
+  <div class="song-name">Ezio's Family</div>
+  <div class="song-credit">Jesper Kyd · Assassin's Creed II</div>
+  <div class="song-note">Wordless soprano and acoustic guitar — personal grief with a thread of dignity. For loss that doesn't break a person but changes them permanently.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag wordless">Wordless Vocals</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Ezio%27s+Family+Jesper+Kyd+Assassin%27s+Creed+II" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Ezio%27s+Family+Jesper+Kyd+Assassin%27s+Creed+2" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card sorrow" data-category="sorrow" data-words="wordless">
+  <div class="song-name">Hymn of the Fayth</div>
+  <div class="song-credit">Nobuo Uematsu · Final Fantasy X</div>
+  <div class="song-note">Ancient sacrificial prayer in a dead language. Use for a ghost, a memorial, or a people who gave everything and are now completely gone.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag wordless">Wordless Vocals</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Hymn+of+the+Fayth+Final+Fantasy+X+Nobuo+Uematsu" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Hymn+of+the+Fayth+Final+Fantasy+X" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card sorrow" data-category="sorrow" data-words="instrumental">
+  <div class="song-name">The Last of Us Main Theme</div>
+  <div class="song-credit">Gustavo Santaolalla · The Last of Us (2013)</div>
+  <div class="song-note">Sparse guitar carrying unbearable weight. Use for scenes of aftermath — a dead settlement, an old friend's grave, the end of something that will not return.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=The+Last+of+Us+Main+Theme+Gustavo+Santaolalla" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/The+Last+of+Us+Main+Theme+Santaolalla" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card sorrow" data-category="sorrow" data-words="instrumental">
+  <div class="song-name">Shadow World</div>
+  <div class="song-credit">Jeremy Soule · Dragon Age: Origins</div>
+  <div class="song-note">Quiet mourning with weight. Use for a slow walk through ruins of what was once a home, or a funeral scene where no one has the words.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Shadow+World+Jeremy+Soule+Dragon+Age+Origins" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Shadow+World+Dragon+Age+Origins+Jeremy+Soule" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card sorrow" data-category="sorrow" data-words="instrumental">
+  <div class="song-name">Weight of the World (Instrumental)</div>
+  <div class="song-credit">Keiichi Okabe · NieR:Automata</div>
+  <div class="song-note">Profound, exhausted beauty. Use for an ending that came at too high a cost — when the party won but is not sure it was worth it.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Weight+of+the+World+instrumental+NieR+Automata+Keiichi+Okabe" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Weight+of+the+World+Nier+Automata" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card sorrow" data-category="sorrow" data-words="lyrics">
+  <div class="song-name">Misty Mountains Cold</div>
+  <div class="song-credit">Richard Armitage &amp; Cast · The Hobbit: An Unexpected Journey (2012)</div>
+  <div class="song-note">An ancient dwarf song about a home lost to a dragon and gold taken from their kin. Use when a people remembers what was taken from them — slow, proud, devastating.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag lyrics">⚠ Has Lyrics</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Misty+Mountains+Cold+The+Hobbit+Richard+Armitage+dwarves" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Misty+Mountains+Cold+The+Hobbit" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card sorrow" data-category="sorrow" data-words="instrumental">
+  <div class="song-name">Leaving Hogwarts</div>
+  <div class="song-credit">John Williams · Harry Potter and the Sorcerer's Stone (2001)</div>
+  <div class="song-note">The bittersweet ache of departing somewhere that became home. Use when the party says goodbye to a place — or a time in their lives — that they know they cannot return to.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Leaving+Hogwarts+John+Williams+Harry+Potter+Sorcerer%27s+Stone" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Leaving+Hogwarts+John+Williams+Harry+Potter" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card sorrow" data-category="sorrow" data-words="instrumental">
+  <div class="song-name">Dobby's Farewell</div>
+  <div class="song-credit">Alexandre Desplat · Harry Potter and the Deathly Hallows Part 1 (2010)</div>
+  <div class="song-note">A short, devastating piece for the loss of someone small and loyal. Use for a beloved companion's death — a familiar, a hireling who became family, an NPC who mattered.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Dobby%27s+Farewell+Alexandre+Desplat+Deathly+Hallows" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Dobby%27s+Farewell+Alexandre+Desplat+Harry+Potter" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+</div></div>
+
+<div class="section">
+<h2 class="section-head">🎺 Triumph &amp; Celebration — Victory, Revelation, Dawn</h2>
+<div class="grid">
+<div class="card triumph" data-category="triumph" data-words="instrumental">
+  <div class="song-name">Also Sprach Zarathustra (Sunrise)</div>
+  <div class="song-credit">Richard Strauss · Tone Poem (1896)</div>
+  <div class="song-note">The universe acknowledging what just happened. Use for a monumental achievement — a prophecy fulfilled, a god slain, a world pulled back from the edge.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Also+Sprach+Zarathustra+Richard+Strauss+sunrise" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Also+Sprach+Zarathustra+Strauss" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card triumph" data-category="triumph" data-words="choir">
+  <div class="song-name">Ode to Joy (Orchestral)</div>
+  <div class="song-credit">Ludwig van Beethoven · Symphony No. 9 (1824)</div>
+  <div class="song-note">Pure human triumph. Use the orchestral version for a grand coronation, a liberation, or the end of a war — humanity celebrating its own survival.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag choir">Choir (German)</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Ode+to+Joy+Beethoven+Symphony+9+orchestra" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Ode+to+Joy+Beethoven+Symphony+9" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card triumph" data-category="triumph" data-words="instrumental">
+  <div class="song-name">Fellowship of the Ring Theme</div>
+  <div class="song-credit">Howard Shore · The Lord of the Rings (2001)</div>
+  <div class="song-note">Bittersweet triumph — something great ended, but it was not in vain. Use for a victory that came at great cost and leaves the party changed.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Fellowship+of+the+Ring+Theme+Howard+Shore+Lord+of+the+Rings" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Fellowship+of+the+Ring+Theme+Howard+Shore" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card triumph" data-category="triumph" data-words="instrumental">
+  <div class="song-name">Star Wars Main Theme</div>
+  <div class="song-credit">John Williams · Star Wars (1977)</div>
+  <div class="song-note">Heroic, optimistic, instantly recognizable. Use with awareness — incredibly powerful, but players who know it too well may break immersion.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Star+Wars+Main+Theme+John+Williams" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Star+Wars+Main+Theme+John+Williams" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card triumph" data-category="triumph" data-words="instrumental">
+  <div class="song-name">Victory Fanfare</div>
+  <div class="song-credit">Nobuo Uematsu · Final Fantasy Series</div>
+  <div class="song-note">Short, playful, irresistible. Use after a beloved or silly fight for a comedic beat — the table will laugh and feel rewarded. Never overstays its welcome.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Victory+Fanfare+Final+Fantasy+Nobuo+Uematsu" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Victory+Fanfare+Final+Fantasy" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card triumph" data-category="triumph" data-words="wordless">
+  <div class="song-name">Apotheosis</div>
+  <div class="song-credit">Austin Wintory · Journey (2012)</div>
+  <div class="song-note">A wordless ascent into light. Use for a transcendent ending — apotheosis, rebirth, or the final quiet moment when a long campaign reaches its last page.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag wordless">Wordless Vocals</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Apotheosis+Austin+Wintory+Journey" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Apotheosis+Journey+Austin+Wintory" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card triumph" data-category="triumph" data-words="instrumental">
+  <div class="song-name">Aria di Mezzo Carattere (Orchestral)</div>
+  <div class="song-credit">Nobuo Uematsu · Final Fantasy VI</div>
+  <div class="song-note">An opera performed by machines for a dying world. Use for a celebration tinged with awareness of how much was lost to get here.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Aria+di+Mezzo+Carattere+Final+Fantasy+VI+Nobuo+Uematsu" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Aria+di+Mezzo+Carattere+Final+Fantasy+VI" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+<div class="card triumph" data-category="triumph" data-words="instrumental">
+  <div class="song-name">Harry's Wondrous World</div>
+  <div class="song-credit">John Williams · Harry Potter and the Sorcerer's Stone (2001)</div>
+  <div class="song-note">Pure wide-eyed wonder and earned triumph. Use when the party discovers something truly magical for the first time, or when a long journey ends in a place more beautiful than they imagined.</div>
+  <div class="song-footer">
+    <div class="song-tags"><span class="tag instrumental">Instrumental</span></div>
+    <div class="song-links">
+      <a class="link-btn link-yt" href="https://www.youtube.com/results?search_query=Harry%27s+Wondrous+World+John+Williams+Harry+Potter" target="_blank">▶ YT</a>
+      <a class="link-btn link-sp" href="https://open.spotify.com/search/Harry%27s+Wondrous+World+John+Williams+Harry+Potter" target="_blank">♫ SP</a>
+    </div>
+  </div>
+</div>
+</div></div>
+
+<script>
+const state = { category: 'all', words: 'all' };
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const group = btn.dataset.group, value = btn.dataset.value;
+    state[group] = value;
+    document.querySelectorAll(`.filter-btn[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilters();
+  });
+});
+function applyFilters() {
+  document.querySelectorAll('.card').forEach(card => {
+    const ok = (state.category === 'all' || card.dataset.category === state.category)
+             && (state.words === 'all' || card.dataset.words === state.words);
+    card.classList.toggle('hidden', !ok);
+  });
+  document.querySelectorAll('.section').forEach(s => {
+    s.classList.toggle('section-hidden', ![...s.querySelectorAll('.card')].some(c => !c.classList.contains('hidden')));
+  });
+}
+</script>
+</body>
+</html>
