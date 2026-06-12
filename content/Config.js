@@ -61,6 +61,7 @@ export const PAGE_ROUTES = [
   { key: "crafting", label: "Crafting", href: "./crafting.html" },
   { key: "cooldowns", label: "Cooldowns", href: "./cooldowns.html" },
   { key: "chronicle", label: "Chronicle", href: "./chronicle.html" },
+  { key: "ultima", label: "Ultima", href: "./POWERS_REFERENCE.html" },
   { key: "help", label: "Help", href: "./help.html" }
 ];
 export const BUILD_NOTES = [

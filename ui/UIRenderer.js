@@ -19,7 +19,7 @@ import { attachHexMapCanvas } from "./HexMapCanvas.js?v=2.0.31";
 import { renderHomePage } from "./HomePage.js";
 import { renderHomeHelpModal } from "./HomeHelpModal.js";
 import { renderManifestCompleteModal } from "./ManifestCompleteModal.js";
-import { renderPageShell } from "./PageShell.js?v=2.0.31";
+import { renderPageShell } from "./PageShell.js?v=2.0.43";
 import { renderPlayerPage } from "./PlayerPage.js";
 import { renderResourceBreakdownModal } from "./ResourceBreakdownModal.js";
 import { renderTownFocusCouncilModal } from "./TownFocusCouncilModal.js";
