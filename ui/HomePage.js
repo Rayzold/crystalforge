@@ -107,7 +107,7 @@ function renderLandingHero(state) {
           <div class="landing-hero__actions">
             <a class="button landing-hero__primary-action" href="${nextStep.href}" title="${escapeHtml(`Primary next step: ${nextStep.cta}`)}">${escapeHtml(nextStep.cta)}</a>
             <a class="button button--ghost landing-hero__secondary-action" href="./help.html" title="Open Help">Start Here Guide</a>
-            <a class="button button--ghost landing-hero__secondary-action" href="./index.html" title="Open the shared player screen">Open Player Page</a>
+            <a class="button button--ghost landing-hero__secondary-action" href="./player.html" title="Open the shared player screen">Open Player Page</a>
           </div>
         </div>
         <div class="landing-hero__visual">
@@ -148,7 +148,7 @@ function renderHomeRouteDeck() {
       routes: [
         { eyebrow: "Read The Story", title: "Chronicle", href: "./chronicle.html", details: "Open events, history, and the calendar." },
         { eyebrow: "Learn The Rules", title: "Help", href: "./help.html", details: "Use Start Here, the core loop, and the glossary." },
-        { eyebrow: "Share The Table", title: "Player Page", href: "./index.html", details: "Show the simplified public screen." }
+        { eyebrow: "Share The Table", title: "Player Page", href: "./player.html", details: "Show the simplified public screen." }
       ]
     }
   ];

@@ -628,7 +628,7 @@ function renderTopNavSettings(state, manualSaveSlots, uiDensity, conciseMode, di
       <button class="top-nav__icon-button" type="button" data-action="toggle-top-nav-settings" aria-label="Settings" title="Session Settings (density, dice, saves)">⚙️</button>
       <div class="top-nav__settings-panel" data-top-nav-settings-panel hidden>
         <div class="top-nav__settings-section">
-          <a class="top-nav__settings-link" href="./index.html"><strong>🎬 Player Mode</strong><small>Open shared player screen</small></a>
+          <a class="top-nav__settings-link" href="./player.html"><strong>🎬 Player Mode</strong><small>Open shared player screen</small></a>
           <button class="top-nav__settings-link" type="button" data-action="open-catalog"><strong>📚 Building Catalog</strong><small>Browse all buildings</small></button>
           <button class="top-nav__settings-link" type="button" data-action="open-admin"><strong>🛠️ ${state.settings?.liveSessionView ? "GM Console" : "Admin Console"}</strong><small>Type \`432!\` anywhere</small></button>
           <button class="top-nav__settings-link" type="button" data-action="toggle-session-view"><strong>👁 View Mode</strong><small>${state.settings?.liveSessionView ? "Live Session" : "Deep Review"}</small></button>
@@ -924,7 +924,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
             : ""
         }
         <div class="sidebar-nav__footer">
-          <a class="sidebar-mode-link" href="./index.html">
+          <a class="sidebar-mode-link" href="./player.html">
             <span>Player Mode</span>
             <strong>Open Shared Player Screen</strong>
           </a>
