@@ -837,7 +837,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
   const townFocusAvailability = getTownFocusAvailability(state);
   const currentFocus = getCurrentTownFocus(state);
   const showResourceChrome = RESOURCE_CHROME_PAGES.has(pageKey);
-  const showGlobalCommandStrip = !["city", "forge", "expeditions", "vehicles", "uniques", "behemoths", "npcs", "awakened", "army", "chronicle", "crafting", "cooldowns", "help", "equipment"].includes(pageKey);
+  const showGlobalCommandStrip = !["city", "forge", "expeditions", "vehicles", "uniques", "behemoths", "npcs", "awakened", "army", "chronicle", "crafting", "cooldowns", "codex", "help", "equipment"].includes(pageKey);
   const showBuildingStatus = BUILDING_STATUS_PAGES.has(pageKey);
   const cityAlertCount = getCriticalAlerts(state).length;
   const availableCrystalCount = Object.values(state.crystals ?? {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
