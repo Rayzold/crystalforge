@@ -1,5 +1,5 @@
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615092143";
-import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.20-20260615092143";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615092907";
+import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.20-20260615092907";
 
 let lastAnimatedManifestToken = null;
 
@@ -50,7 +50,7 @@ export function renderManifestCompleteModal(state) {
             ${
               isCrystalUpgrade
                 ? `<div class="manifest-complete-modal__fallback">${escapeHtml(manifestModal.targetRarity?.slice(0, 1) ?? "U")}</div>`
-                : renderBuildingArt(building?.imagePath, `${manifestModal.rolledName} artwork`, `<div class="manifest-complete-modal__fallback">${escapeHtml(manifestModal.rolledName.slice(0, 1))}</div>`, "grid")
+                : renderBuildingArt(building, `${manifestModal.rolledName} artwork`, `<div class="manifest-complete-modal__fallback">${escapeHtml(manifestModal.rolledName.slice(0, 1))}</div>`, "grid")
             }
           </div>
           <span class="manifest-complete-modal__eyebrow">${isCrystalUpgrade ? "Rarity Elevated" : "Manifestation Complete"}</span>

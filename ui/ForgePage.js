@@ -1,7 +1,7 @@
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615092143";
-import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.20-20260615092143";
-import { renderCrystalSelector } from "./CrystalSelector.js?v=v1.7.20-20260615092143";
-import { renderManifestPanel } from "./ManifestPanel.js?v=v1.7.20-20260615092143";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615092907";
+import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.20-20260615092907";
+import { renderCrystalSelector } from "./CrystalSelector.js?v=v1.7.20-20260615092907";
+import { renderManifestPanel } from "./ManifestPanel.js?v=v1.7.20-20260615092907";
 
 function renderForgeCommandDeck(state) {
   const totalRolls = Object.values(state.crystals).reduce((sum, value) => sum + (Number(value) || 0), 0);
@@ -48,7 +48,7 @@ function renderManifestShrine(state) {
                       <div class="manifest-shrine__art">
                         ${
                           renderBuildingArt(
-                            building?.imagePath,
+                            building,
                             `${entry.title} artwork`,
                             `<div class="manifest-shrine__fallback">${escapeHtml(entry.title.slice(0, 1))}</div>`
                           )
@@ -77,7 +77,7 @@ function renderManifestShrine(state) {
 function renderForgeStage(state) {
   const selectedBuilding = state.buildings.find((building) => building.id === state.ui.selectedBuildingId) ?? null;
   const visual = renderBuildingArt(
-    selectedBuilding?.imagePath,
+    selectedBuilding,
     `${selectedBuilding?.displayName ?? state.selectedRarity} artwork`,
     `<div class="forge-stage__orb"><span>${escapeHtml(state.selectedRarity)}</span></div>`
   );

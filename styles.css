@@ -4395,6 +4395,13 @@ button[data-confirming="1"] {
   background: linear-gradient(180deg, rgba(141, 214, 255, 0.12), rgba(255, 255, 255, 0.04));
 }
 
+.building-detail__art-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
 .building-detail__art {
   min-height: 320px;
   overflow: hidden;

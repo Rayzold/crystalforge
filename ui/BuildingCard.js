@@ -1,17 +1,17 @@
-import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615092143";
-import { RARITY_COLORS } from "../content/Rarities.js?v=v1.7.20-20260615092143";
-import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js?v=v1.7.20-20260615092143";
-import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.20-20260615092143";
+import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615092907";
+import { RARITY_COLORS } from "../content/Rarities.js?v=v1.7.20-20260615092907";
+import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js?v=v1.7.20-20260615092907";
+import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.20-20260615092907";
 import {
   getConstructionEtaDetails,
   getConstructionQueuePosition,
   getDriftConstructionSlots,
   isBuildingActivelyConstructed
-} from "../systems/ConstructionSystem.js?v=v1.7.20-20260615092143";
-import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier, isBuildingAtApex } from "../systems/BuildingSystem.js?v=v1.7.20-20260615092143";
-import { getBuildingWorkforceStatus } from "../systems/WorkforceSystem.js?v=v1.7.20-20260615092143";
-import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.20-20260615092143";
-import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260615092143";
+} from "../systems/ConstructionSystem.js?v=v1.7.20-20260615092907";
+import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier, isBuildingAtApex } from "../systems/BuildingSystem.js?v=v1.7.20-20260615092907";
+import { getBuildingWorkforceStatus } from "../systems/WorkforceSystem.js?v=v1.7.20-20260615092907";
+import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.20-20260615092907";
+import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260615092907";
 
 function renderIcon(iconKey) {
   const shapes = {
@@ -75,9 +75,9 @@ function renderBuildingCardQualityRing(building, isIncomplete, etaDetails) {
 
 function renderMedia(building) {
   return `
-    <div class="building-card__banner ${building.imagePath ? "" : "building-card__banner--fallback"}">
+    <div class="building-card__banner ${building.imagePath || building.imageData ? "" : "building-card__banner--fallback"}">
       ${renderBuildingArt(
-        building.imagePath,
+        building,
         `${building.displayName} artwork`,
         `<div class="building-card__icon">${renderIcon(building.iconKey)}</div>`
       )}

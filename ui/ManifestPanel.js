@@ -1,7 +1,7 @@
-import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615092143";
-import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js?v=v1.7.20-20260615092143";
-import { formatBuildingExactQualityDisplay, getBuildingCatalogStatusLabel, getBuildingMultiplier } from "../systems/BuildingSystem.js?v=v1.7.20-20260615092143";
-import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.20-20260615092143";
+import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615092907";
+import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js?v=v1.7.20-20260615092907";
+import { formatBuildingExactQualityDisplay, getBuildingCatalogStatusLabel, getBuildingMultiplier } from "../systems/BuildingSystem.js?v=v1.7.20-20260615092907";
+import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.20-20260615092907";
 
 function renderMetricList(entries, emptyLabel) {
   if (!entries.length) {
@@ -112,7 +112,7 @@ export function renderManifestPanel(state) {
               ${
                 last.isCrystalUpgrade
                   ? `<div class="manifest-result__art manifest-result__art--upgrade"><div class="manifest-result__fallback">${escapeHtml(last.targetRarity?.slice(0, 1) ?? "U")}</div></div>`
-                  : `<div class="manifest-result__art">${renderBuildingArt(last.building?.imagePath, `${last.rolledName} artwork`, `<div class="manifest-result__fallback">${escapeHtml(last.rolledName.slice(0, 1))}</div>`)}</div>`
+                  : `<div class="manifest-result__art">${renderBuildingArt(last.building, `${last.rolledName} artwork`, `<div class="manifest-result__fallback">${escapeHtml(last.rolledName.slice(0, 1))}</div>`)}</div>`
               }
               <div class="manifest-result__copy">
                 <strong>${escapeHtml(last.isCrystalUpgrade ? `${last.sourceRarity} to ${last.targetRarity}` : last.rolledName)}</strong>

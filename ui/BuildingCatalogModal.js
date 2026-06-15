@@ -1,8 +1,8 @@
-import { getBuildingEmoji, getCatalogKey } from "../content/BuildingCatalog.js?v=v1.7.20-20260615092143";
-import { RARITY_ORDER } from "../content/Rarities.js?v=v1.7.20-20260615092143";
-import { escapeHtml } from "../engine/Utils.js?v=v1.7.20-20260615092143";
-import { formatBuildingExactQualityDisplay, getBuildingCatalogStatusLabel } from "../systems/BuildingSystem.js?v=v1.7.20-20260615092143";
-import { renderModal } from "./Modal.js?v=v1.7.20-20260615092143";
+import { getBuildingEmoji, getCatalogKey } from "../content/BuildingCatalog.js?v=v1.7.20-20260615092907";
+import { RARITY_ORDER } from "../content/Rarities.js?v=v1.7.20-20260615092907";
+import { escapeHtml } from "../engine/Utils.js?v=v1.7.20-20260615092907";
+import { formatBuildingExactQualityDisplay, getBuildingCatalogStatusLabel } from "../systems/BuildingSystem.js?v=v1.7.20-20260615092907";
+import { renderModal } from "./Modal.js?v=v1.7.20-20260615092907";
 
 function getCatalogEntries(state) {
   return RARITY_ORDER.flatMap((rarity) =>

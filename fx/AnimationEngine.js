@@ -1,5 +1,5 @@
-import { getBuildingArtCandidates, getBuildingArtFallbackAttribute } from "../ui/BuildingArt.js?v=v1.7.20-20260615092143";
-import { RARITY_COLORS } from "../content/Rarities.js?v=v1.7.20-20260615092143";
+import { getBuildingArtCandidates, getBuildingArtFallbackAttribute } from "../ui/BuildingArt.js?v=v1.7.20-20260615092907";
+import { RARITY_COLORS } from "../content/Rarities.js?v=v1.7.20-20260615092907";
 
 const REVEAL_PROFILES = {
   Common: { duration: 3300, particles: 8, rings: 2, title: "Common Manifest", accent: "A faint pulse answers the forge." },

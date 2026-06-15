@@ -1,20 +1,20 @@
 // Aggregated city stat calculation.
 // This file turns citizens, buildings, districts, and condition modifiers into
 // the shared city-stat block used across the UI and downstream systems.
-import { CITIZEN_RARITY_OUTPUT_MULTIPLIERS } from "../content/CitizenConfig.js?v=v1.7.20-20260615092143";
-import { sumObjectValues } from "../engine/Utils.js?v=v1.7.20-20260615092143";
-import { getDistrictSummary } from "./DistrictSystem.js?v=v1.7.20-20260615092143";
-import { scalePopulationSupport } from "./DriftEvolutionSystem.js?v=v1.7.20-20260615092143";
-import { getUniqueCitizenStatBonuses } from "./ExpeditionSystem.js?v=v1.7.20-20260615092143";
-import { iterateCitizenRarityEntries } from "./CitizenSystem.js?v=v1.7.20-20260615092143";
-import { getBuildingPlacementBonuses } from "./MapSystem.js?v=v1.7.20-20260615092143";
-import { getCurrentTownFocus } from "./TownFocusSystem.js?v=v1.7.20-20260615092143";
-import { getGoodsOutputMultiplier, getHousingStrainPenalty } from "./CityConditionSystem.js?v=v1.7.20-20260615092143";
+import { CITIZEN_RARITY_OUTPUT_MULTIPLIERS } from "../content/CitizenConfig.js?v=v1.7.20-20260615092907";
+import { sumObjectValues } from "../engine/Utils.js?v=v1.7.20-20260615092907";
+import { getDistrictSummary } from "./DistrictSystem.js?v=v1.7.20-20260615092907";
+import { scalePopulationSupport } from "./DriftEvolutionSystem.js?v=v1.7.20-20260615092907";
+import { getUniqueCitizenStatBonuses } from "./ExpeditionSystem.js?v=v1.7.20-20260615092907";
+import { iterateCitizenRarityEntries } from "./CitizenSystem.js?v=v1.7.20-20260615092907";
+import { getBuildingPlacementBonuses } from "./MapSystem.js?v=v1.7.20-20260615092907";
+import { getCurrentTownFocus } from "./TownFocusSystem.js?v=v1.7.20-20260615092907";
+import { getGoodsOutputMultiplier, getHousingStrainPenalty } from "./CityConditionSystem.js?v=v1.7.20-20260615092907";
 import {
   applyBuildingWorkforceToStat,
   getBuildingWorkforceMultiplier,
   getWorkforceSummary
-} from "./WorkforceSystem.js?v=v1.7.20-20260615092143";
+} from "./WorkforceSystem.js?v=v1.7.20-20260615092907";
 
 const EMPTY_CITY_STATS = {
   goods: 0,

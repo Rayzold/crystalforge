@@ -1,20 +1,20 @@
-import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615092143";
-import { RARITY_COLORS } from "../content/Rarities.js?v=v1.7.20-20260615092143";
-import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js?v=v1.7.20-20260615092143";
-import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.20-20260615092143";
-import { getFoodOutputMultiplier, getGoldOutputMultiplier } from "../systems/CityConditionSystem.js?v=v1.7.20-20260615092143";
-import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier, isBuildingAtApex } from "../systems/BuildingSystem.js?v=v1.7.20-20260615092143";
+import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615092907";
+import { RARITY_COLORS } from "../content/Rarities.js?v=v1.7.20-20260615092907";
+import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js?v=v1.7.20-20260615092907";
+import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.20-20260615092907";
+import { getFoodOutputMultiplier, getGoldOutputMultiplier } from "../systems/CityConditionSystem.js?v=v1.7.20-20260615092907";
+import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier, isBuildingAtApex } from "../systems/BuildingSystem.js?v=v1.7.20-20260615092907";
 import {
   getConstructionEtaDetails,
   getConstructionQueuePosition,
   getDriftConstructionSlots,
   isBuildingActivelyConstructed
-} from "../systems/ConstructionSystem.js?v=v1.7.20-20260615092143";
-import { getBuildingPlacementBonuses } from "../systems/MapSystem.js?v=v1.7.20-20260615092143";
-import { getTradeGoodsGoldMultiplier } from "../systems/ResourceSystem.js?v=v1.7.20-20260615092143";
-import { applyBuildingWorkforceToResource, getBuildingWorkforceStatus, getBuildingWorkforceMultiplier, getWorkforceSummary } from "../systems/WorkforceSystem.js?v=v1.7.20-20260615092143";
-import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.20-20260615092143";
-import { renderModal } from "./Modal.js?v=v1.7.20-20260615092143";
+} from "../systems/ConstructionSystem.js?v=v1.7.20-20260615092907";
+import { getBuildingPlacementBonuses } from "../systems/MapSystem.js?v=v1.7.20-20260615092907";
+import { getTradeGoodsGoldMultiplier } from "../systems/ResourceSystem.js?v=v1.7.20-20260615092907";
+import { applyBuildingWorkforceToResource, getBuildingWorkforceStatus, getBuildingWorkforceMultiplier, getWorkforceSummary } from "../systems/WorkforceSystem.js?v=v1.7.20-20260615092907";
+import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.20-20260615092907";
+import { renderModal } from "./Modal.js?v=v1.7.20-20260615092907";
 
 function renderList(items, inactive) {
   return Object.entries(items)
@@ -125,16 +125,34 @@ export function renderBuildingDetailModal(state, pageKey) {
   const effectiveRateSummary = getEffectiveRateSummary(building, state, workforceSummary, placementBonus);
   const buildingEmoji = getBuildingEmoji(building);
   const artMarkup = renderBuildingArt(
-    building.imagePath,
+    building,
     `${building.displayName} artwork`,
     `<div class="building-detail__fallback">${escapeHtml(buildingEmoji)}</div>`
   );
+  const hasUploadedArt = typeof building.imageData === "string" && building.imageData.startsWith("data:image/");
 
   const content = `
     <article class="building-detail" style="--rarity-color:${RARITY_COLORS[building.rarity]}">
       <div class="building-detail__hero">
         <div class="building-detail__showcase">
           <div class="building-detail__art">${artMarkup}</div>
+          <div class="building-detail__art-tools">
+            <label class="button button--ghost button--small">
+              <span>${hasUploadedArt ? "Replace Image" : "Upload Image"}</span>
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                data-action="upload-building-image"
+                data-building-id="${escapeHtml(building.id)}"
+              />
+            </label>
+            ${
+              hasUploadedArt
+                ? `<button class="button button--ghost button--small" type="button" data-action="clear-building-image" data-building-id="${escapeHtml(building.id)}">Reset to Default</button>`
+                : ""
+            }
+          </div>
           <div class="building-detail__spotlights">
             <article class="building-detail__spotlight">
               <span>Placement Resonance</span>

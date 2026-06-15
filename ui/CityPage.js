@@ -1,17 +1,17 @@
 // City management page.
 // This page combines the building stream, map access, incubation controls,
 // filters, and city-side summaries used during active management play.
-import { getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615092143";
-import { BUILDING_QUALITY_CAP, SPEED_MULTIPLIERS } from "../content/Config.js?v=v1.7.20-20260615092143";
-import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js?v=v1.7.20-20260615092143";
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615092143";
+import { getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615092907";
+import { BUILDING_QUALITY_CAP, SPEED_MULTIPLIERS } from "../content/Config.js?v=v1.7.20-20260615092907";
+import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js?v=v1.7.20-20260615092907";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615092907";
 import {
   formatBuildingExactQualityDisplay,
   getBuildingMultiplier,
   getEmpowermentCandidates,
   getEmpowermentShardProjection
-} from "../systems/BuildingSystem.js?v=v1.7.20-20260615092143";
-import { formatDate, getNextHoliday } from "../systems/CalendarSystem.js?v=v1.7.20-20260615092143";
+} from "../systems/BuildingSystem.js?v=v1.7.20-20260615092907";
+import { formatDate, getNextHoliday } from "../systems/CalendarSystem.js?v=v1.7.20-20260615092907";
 import {
   getActiveConstructionQueue,
   getAvailableConstructionQueue,
@@ -22,19 +22,19 @@ import {
   getIncubatorQueuedBuildings,
   INCUBATOR_QUEUE_LIMIT,
   isBuildingActivelyConstructed
-} from "../systems/ConstructionSystem.js?v=v1.7.20-20260615092143";
-import { getEmergencyStatus, getGoodsSummary } from "../systems/ResourceSystem.js?v=v1.7.20-20260615092143";
-import { getWorkforceCategoryLabel, getWorkforceSummary } from "../systems/WorkforceSystem.js?v=v1.7.20-20260615092143";
-import { getVisibleBuildings, renderBuildingGrid } from "./BuildingGrid.js?v=v1.7.20-20260615092143";
-import { renderCalendarPanel } from "./CalendarPanel.js?v=v1.7.20-20260615092143";
-import { renderDistrictPanel } from "./DistrictPanel.js?v=v1.7.20-20260615092143";
-import { renderDriftEvolutionPanel } from "./DriftEvolutionPanel.js?v=v1.7.20-20260615092143";
-import { renderEmergencyPanel } from "./EmergencyPanel.js?v=v1.7.20-20260615092143";
-import { renderHexMap } from "./HexMap.js?v=v1.7.20-20260615092143";
-import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js?v=v1.7.20-20260615092143";
-import { renderResourcePanel } from "./ResourcePanel.js?v=v1.7.20-20260615092143";
-import { renderTownFocusPanel } from "./TownFocusPanel.js?v=v1.7.20-20260615092143";
-import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260615092143";
+} from "../systems/ConstructionSystem.js?v=v1.7.20-20260615092907";
+import { getEmergencyStatus, getGoodsSummary } from "../systems/ResourceSystem.js?v=v1.7.20-20260615092907";
+import { getWorkforceCategoryLabel, getWorkforceSummary } from "../systems/WorkforceSystem.js?v=v1.7.20-20260615092907";
+import { getVisibleBuildings, renderBuildingGrid } from "./BuildingGrid.js?v=v1.7.20-20260615092907";
+import { renderCalendarPanel } from "./CalendarPanel.js?v=v1.7.20-20260615092907";
+import { renderDistrictPanel } from "./DistrictPanel.js?v=v1.7.20-20260615092907";
+import { renderDriftEvolutionPanel } from "./DriftEvolutionPanel.js?v=v1.7.20-20260615092907";
+import { renderEmergencyPanel } from "./EmergencyPanel.js?v=v1.7.20-20260615092907";
+import { renderHexMap } from "./HexMap.js?v=v1.7.20-20260615092907";
+import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js?v=v1.7.20-20260615092907";
+import { renderResourcePanel } from "./ResourcePanel.js?v=v1.7.20-20260615092907";
+import { renderTownFocusPanel } from "./TownFocusPanel.js?v=v1.7.20-20260615092907";
+import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260615092907";
 
 function renderCitySectionNav(pageKey) {
   return `

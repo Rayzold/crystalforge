@@ -1,11 +1,11 @@
 // Building instance lifecycle helpers.
 // This file handles quality thresholds, building stages, manifestation merges,
 // overflow into shards, and metadata updates for individual structures.
-import { BUILDING_ACTIVE_THRESHOLD, BUILDING_QUALITY_CAP } from "../content/Config.js?v=v1.7.20-20260615092143";
-import { getCatalogKey } from "../content/BuildingCatalog.js?v=v1.7.20-20260615092143";
-import { createId } from "../engine/Utils.js?v=v1.7.20-20260615092143";
-import { createBuildingGameplayProfile } from "./BalanceSystem.js?v=v1.7.20-20260615092143";
-import { addShards } from "./ShardSystem.js?v=v1.7.20-20260615092143";
+import { BUILDING_ACTIVE_THRESHOLD, BUILDING_QUALITY_CAP } from "../content/Config.js?v=v1.7.20-20260615092907";
+import { getCatalogKey } from "../content/BuildingCatalog.js?v=v1.7.20-20260615092907";
+import { createId } from "../engine/Utils.js?v=v1.7.20-20260615092907";
+import { createBuildingGameplayProfile } from "./BalanceSystem.js?v=v1.7.20-20260615092907";
+import { addShards } from "./ShardSystem.js?v=v1.7.20-20260615092907";
 
 export function getBuildingMultiplier(quality) {
   if (quality >= BUILDING_QUALITY_CAP) {
@@ -117,6 +117,7 @@ export function createBuildingInstance(state, catalogEntry, quality, timestamps)
     district: catalogEntry.district,
     iconKey: catalogEntry.iconKey,
     imagePath: catalogEntry.imagePath ?? null,
+    imageData: "",
     flavorText: catalogEntry.flavorText ?? null,
     mapPosition: null,
     tags: catalogEntry.tags,
@@ -439,5 +440,26 @@ export function setBuildingApexNote(state, buildingId, note) {
   if (state.buildingCatalog?.[key]) {
     state.buildingCatalog[key].apexNote = cleanNote;
   }
+  return true;
+}
+
+export function setBuildingImageData(state, buildingId, dataUrl) {
+  const target = (state.buildings ?? []).find((entry) => entry.id === buildingId);
+  if (!target) {
+    return false;
+  }
+  if (typeof dataUrl === "string" && dataUrl.startsWith("data:image/")) {
+    target.imageData = dataUrl;
+    return true;
+  }
+  return false;
+}
+
+export function clearBuildingImageData(state, buildingId) {
+  const target = (state.buildings ?? []).find((entry) => entry.id === buildingId);
+  if (!target) {
+    return false;
+  }
+  target.imageData = "";
   return true;
 }
