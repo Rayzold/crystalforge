@@ -67,6 +67,79 @@
   /* hidden state */
   .card.hidden { display: none; }
   .section-hidden { display: none !important; }
+  /* ── XP cost panel (3 columns: 2 / 3 / 4 paths) ── */
+  .xp-costs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin: 0 auto 28px;
+    max-width: 960px;
+  }
+  .xp-card {
+    background: #181c24;
+    border: 1px solid #2a2a38;
+    border-top: 2px solid #a09020;
+    border-radius: 6px;
+    padding: 14px 16px;
+  }
+  .xp-card__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+  }
+  .xp-card__title {
+    font-size: 13px;
+    font-weight: bold;
+    color: #f0e0a0;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .xp-card__sub {
+    font-size: 10px;
+    color: #5a6070;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .xp-card ul { list-style: none; }
+  .xp-card li {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid #1e2028;
+    font-size: 12.5px;
+  }
+  .xp-card li:last-of-type { border-bottom: none; }
+  .xp-card li.is-ultima {
+    background: #1e2820;
+    border-radius: 4px;
+    padding: 6px 8px;
+    margin: 4px -4px 0;
+    border-bottom: none;
+  }
+  .xp-card li.is-ultima .xp-level { color: #a0d880; font-weight: bold; }
+  .xp-card li.is-ultima .xp-cost  { color: #a0d880; font-weight: bold; }
+  .xp-card li.is-already {
+    color: #4a5060;
+    font-style: italic;
+  }
+  .xp-level { color: #90a0b0; }
+  .xp-cost  { color: #c0ccc0; font-family: monospace; }
+  .xp-card__total {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid #2a2520;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11.5px;
+    letter-spacing: 0.5px;
+  }
+  .xp-card__total span { color: #7a6e5a; text-transform: uppercase; letter-spacing: 1px; }
+  .xp-card__total strong { color: #d4c9b0; font-family: monospace; }
+  @media (max-width: 760px) {
+    .xp-costs { grid-template-columns: 1fr; }
+  }
   @media print {
     body { background: white; color: #111; font-size: 11px; padding: 12px; }
     .card { background: #f8f8f8; border: 1px solid #ccc; break-inside: avoid; }
@@ -74,6 +147,11 @@
     .tier-text { color: #222 !important; }
     .card-meta, .card-cast { color: #444 !important; }
     h2 { color: #333 !important; border-color: #999; }
+    .xp-card { background: #f8f8f8; border: 1px solid #ccc; }
+    .xp-card__title, .xp-card__total strong { color: #111 !important; }
+    .xp-level, .xp-cost { color: #333 !important; }
+    .xp-card li.is-ultima { background: #ece6cc; }
+    .xp-card li.is-ultima .xp-level, .xp-card li.is-ultima .xp-cost { color: #5a4a10 !important; }
   }
 </style>
 </head>
@@ -81,6 +159,53 @@
 
 <h1>POWERS REFERENCE</h1>
 <p class="subtitle">Tier 1 — 2 — 3 — 4 — 5 &nbsp;·&nbsp; Each tier includes all previous tiers</p>
+
+<section class="xp-costs" aria-label="XP costs by pillar count">
+  <article class="xp-card">
+    <div class="xp-card__head">
+      <span class="xp-card__title">2 Paths</span>
+      <span class="xp-card__sub">Per Pillar</span>
+    </div>
+    <ul>
+      <li><span class="xp-level">Level 1</span><span class="xp-cost">10 XP</span></li>
+      <li><span class="xp-level">Level 2</span><span class="xp-cost">20 XP</span></li>
+      <li><span class="xp-level">Level 3</span><span class="xp-cost">45 XP</span></li>
+      <li><span class="xp-level">Level 4</span><span class="xp-cost">80 XP</span></li>
+      <li class="is-ultima"><span class="xp-level">Level 5 — Ultima</span><span class="xp-cost">140 XP</span></li>
+    </ul>
+    <div class="xp-card__total"><span>Total / Pillar</span><strong>295 XP</strong></div>
+  </article>
+
+  <article class="xp-card">
+    <div class="xp-card__head">
+      <span class="xp-card__title">3 Paths</span>
+      <span class="xp-card__sub">Per Pillar</span>
+    </div>
+    <ul>
+      <li><span class="xp-level">Level 1</span><span class="xp-cost">20 XP</span></li>
+      <li><span class="xp-level">Level 2</span><span class="xp-cost">35 XP</span></li>
+      <li><span class="xp-level">Level 3</span><span class="xp-cost">70 XP</span></li>
+      <li><span class="xp-level">Level 4</span><span class="xp-cost">130 XP</span></li>
+      <li class="is-ultima"><span class="xp-level">Level 5 — Ultima</span><span class="xp-cost">240 XP</span></li>
+    </ul>
+    <div class="xp-card__total"><span>Total / Pillar</span><strong>495 XP</strong></div>
+  </article>
+
+  <article class="xp-card">
+    <div class="xp-card__head">
+      <span class="xp-card__title">All 4 Paths</span>
+      <span class="xp-card__sub">Per Pillar</span>
+    </div>
+    <ul>
+      <li class="is-already"><span class="xp-level">Level 1</span><span class="xp-cost">already owned</span></li>
+      <li><span class="xp-level">Level 2</span><span class="xp-cost">55 XP</span></li>
+      <li><span class="xp-level">Level 3</span><span class="xp-cost">115 XP</span></li>
+      <li><span class="xp-level">Level 4</span><span class="xp-cost">225 XP</span></li>
+      <li class="is-ultima"><span class="xp-level">Level 5 — Ultima</span><span class="xp-cost">500 XP</span></li>
+    </ul>
+    <div class="xp-card__total"><span>Total / Pillar</span><strong>925 XP</strong></div>
+  </article>
+</section>
 
 <div class="filters">
   <div class="filter-group">
