@@ -691,7 +691,7 @@ function renderPlacementCelebration(pulseCell, center, size) {
   if (!pulseCell) {
     return "";
   }
-  const emoji = pulseCell.emoji ?? "âœ¨";
+  const emoji = pulseCell.emoji ?? "✨";
   return `
     <g class="hex-map__placement-burst" aria-hidden="true">
       <circle class="hex-map__placement-ring hex-map__placement-ring--outer" cx="${center.x}" cy="${center.y}" r="${size * 0.5}"></circle>
@@ -843,7 +843,7 @@ function renderDistrictSummaryCards(state, cells) {
     total: frontierTotal,
     pct: frontierPct,
     awaiting: Object.values(awaitingByDistrict).reduce((a, b) => a + b, 0),
-    sub: "Inner ring Â· city plots"
+    sub: "Inner ring · city plots"
   });
   cards.push({
     key: "__bastion",
@@ -986,7 +986,7 @@ function renderPlacementPicker(state, cell) {
   const filterKey = state.transientUi?.mapPlacementFilter ?? "All";
   const candidates = sortPlacementCandidates(filterPlacementCandidates(getPlacementCandidates(state, cell), state, filterKey), state, cell);
   const zoneLabel = cell.isFortificationRing ? "Bastion Ring" : "City Plot";
-  const zoneEmoji = cell.isFortificationRing ? "ðŸ›¡ï¸" : "âœ¨";
+  const zoneEmoji = cell.isFortificationRing ? "🛡️" : "✨";
   const zoneDetail = cell.isFortificationRing
     ? "Only walls, towers, and defensive structures can be placed here."
     : "Any unplaced city structure that passes placement rules can be assigned here.";

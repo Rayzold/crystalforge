@@ -155,7 +155,7 @@ export function renderBuildingGrid(state, options = {}) {
         <input
           type="text"
           class="building-grid-panel__search-input"
-          placeholder="Search buildingsâ€¦"
+          placeholder="Search buildings…"
           value="${(state.transientUi?.buildingTextQuery ?? "").replace(/"/g, "&quot;")}"
           data-action="set-building-text-query"
           autocomplete="off"

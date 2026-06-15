@@ -362,7 +362,7 @@ A few HTML files in the repo are deliberately standalone — they have their own
 - **`battle.html`** — battle tool (not yet linked from the nav).
 - **`index.html`** — redirect stub that forwards to `gm.html`.
 
-When editing the standalone files, watch for **double-encoded UTF-8 mojibake** (`â€"`, `Â·`, etc.) if the editor isn't UTF-8 safe. The fix pattern is to encode-as-cp1252 then decode-as-utf-8, or do targeted string replacements (see the `redesign-parchment-theme.md` Round 2 notes for the lookup table used on `POWERS_REFERENCE.html`).
+When editing the standalone files, watch for **double-encoded UTF-8 mojibake** (the literal sequence `â€”` rendering instead of an em-dash, `Â·` instead of a middle dot, and so on) if the editor isn't UTF-8 safe. The fix pattern is to encode-as-cp1252 then decode-as-utf-8, or do targeted string replacements (see the `redesign-parchment-theme.md` Round 2 notes for the lookup table used on `POWERS_REFERENCE.html`).
 
 ### `player.html`
 
@@ -1123,7 +1123,7 @@ When adding a parchment override, write `[data-theme="parchment"] .my-class { �
 
 ### Standalone HTML Files Risk Mojibake
 
-`POWERS_REFERENCE.html`, `battle.html`, `DND_MUSIC_GUIDE.html`, and `NOTION_TOC.html` do not load `boot.js` — they have their own `<style>` blocks and run independently. Editors that aren't UTF-8 safe can introduce double-encoded mojibake (typical signs: `â€"` for em-dash, `Â·` for middle dot, `âš¡` for ⚡, `ðŸŒŠ` for 🌊). Fix pattern is encode-as-cp1252 then decode-as-utf-8, or use the targeted replacement table in `redesign-parchment-theme.md` (Round 2 section).
+`POWERS_REFERENCE.html`, `battle.html`, `DND_MUSIC_GUIDE.html`, and `NOTION_TOC.html` do not load `boot.js` — they have their own `<style>` blocks and run independently. Editors that aren't UTF-8 safe can introduce double-encoded mojibake (em-dashes start rendering as the literal sequence `â€"`, middle dots as `Â·`, ⚡ emoji as `âš¡`, 🌊 emoji as `ðŸŒŠ`). Fix pattern is encode-as-cp1252 then decode-as-utf-8, or use the targeted replacement table in `redesign-parchment-theme.md` (Round 2 section).
 
 ### `.game-shell--page-X` Can Carry Stale Grid Overrides
 

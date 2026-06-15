@@ -70,7 +70,7 @@ function getSignatureReadout(building) {
 
 function getQualityMultiplierReadout(building) {
   const multiplier = getBuildingMultiplier(building?.quality ?? 0);
-  return `${formatBuildingExactQualityDisplay(building)}${multiplier > 1 ? ` Â· ${multiplier}x` : ""}`;
+  return `${formatBuildingExactQualityDisplay(building)}${multiplier > 1 ? ` · ${multiplier}x` : ""}`;
 }
 
 function getEffectiveRateSummary(building, state, workforceSummary, placementBonus) {
@@ -228,7 +228,7 @@ export function renderBuildingDetailModal(state, pageKey) {
           <h4>350% Apex Bonus</h4>
           <p class="building-detail__status-note">${
             isBuildingAtApex(building)
-              ? "This building has reached 350% â€” its apex bonus is active."
+              ? "This building has reached 350% — its apex bonus is active."
               : `Reached at 350% quality (currently ${formatBuildingExactQualityDisplay(building)}). Note the bonus here so it is ready when it caps.`
           }</p>
           <textarea

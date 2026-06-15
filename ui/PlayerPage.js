@@ -66,7 +66,7 @@ function renderPublishedFooter(state) {
 function renderPlayerSessionBanner(state) {
   const date = getStructuredDate(state.calendar.dayOffset);
   const nextHoliday = getNextHoliday(state.calendar.dayOffset);
-  const nextHolidayGlyph = nextHoliday ? getHolidayGlyph(nextHoliday) : "âœ¦";
+  const nextHolidayGlyph = nextHoliday ? getHolidayGlyph(nextHoliday) : "✦";
   const nextHolidayAccentClass = nextHoliday ? getHolidayTypeClass(nextHoliday) : "";
   const meta = state.transientUi?.firebasePublishedMeta ?? null;
   const timestamp = meta?.updatedAtMs ? new Date(meta.updatedAtMs).toLocaleString() : "No published timestamp yet";
@@ -390,7 +390,7 @@ function filterBuildingsByRarity(buildings, rarityFilter) {
 
 function getQualityMultiplierReadout(building) {
   const multiplier = getBuildingMultiplier(building?.quality ?? 0);
-  return `${formatBuildingExactQualityDisplay(building)}${multiplier > 1 ? ` Â· ${multiplier}x` : ""}`;
+  return `${formatBuildingExactQualityDisplay(building)}${multiplier > 1 ? ` · ${multiplier}x` : ""}`;
 }
 
 function getPlayerEffectiveRateSummary(building, state, workforceSummary) {

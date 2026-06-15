@@ -2,7 +2,7 @@
 // A read-only muster of the city's military strength, pulled together from the
 // systems that own each piece: martial citizens, Awakened operatives, defensive
 // structures, the vehicle fleet, and held behemoth war beasts. Editing happens
-// on each source page â€” this screen just consolidates the picture.
+// on each source page — this screen just consolidates the picture.
 import { CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER } from "../content/CitizenConfig.js?v=v1.7.20-20260615130257";
 import {
   AWAKENED_GRADES,
@@ -69,7 +69,7 @@ function renderForceGroup(state, title, units, emptyLabel) {
               <div class="army-unit-row ${unit.count <= 0 ? "is-empty" : ""}">
                 <span class="army-unit-row__name"><span aria-hidden="true">${escapeHtml(unit.emoji)}</span> ${escapeHtml(unit.name)}</span>
                 <span class="army-unit-row__count">${formatNumber(unit.count)}</span>
-                <span class="army-unit-row__stat">DEF ${formatNumber(unit.defense, 2)} Â· SEC ${formatNumber(unit.security, 2)}</span>
+                <span class="army-unit-row__stat">DEF ${formatNumber(unit.defense, 2)} · SEC ${formatNumber(unit.security, 2)}</span>
               </div>
             `
           )
@@ -114,7 +114,7 @@ function renderAwakenedSection(state) {
                 <span class="awakened-grade awakened-grade--${escapeHtml(AWAKENED_GRADES.some((g) => g.id === entry.grade) ? entry.grade : "F")}">${escapeHtml(entry.grade)}</span>
                 <div class="army-awakened-row__meta">
                   <strong>${escapeHtml(entry.name || "Unnamed Awakened")}</strong>
-                  <span>${escapeHtml(getAwakenedAbilityTypeLabel(entry.abilityTypeId))} Â· ${escapeHtml(getAwakenedStatusLabel(entry.status))}</span>
+                  <span>${escapeHtml(getAwakenedAbilityTypeLabel(entry.abilityTypeId))} · ${escapeHtml(getAwakenedStatusLabel(entry.status))}</span>
                 </div>
               </div>
             `
@@ -211,7 +211,7 @@ function renderVessels(state) {
   return `
     <section class="panel army-panel">
       <div class="panel__header">
-        <div><h3>Vessels</h3><span class="panel__subtle">${formatNumber(totalVessels)} vessels Â· up to ${formatNumber(totalLift)} crew lift.</span></div>
+        <div><h3>Vessels</h3><span class="panel__subtle">${formatNumber(totalVessels)} vessels · up to ${formatNumber(totalLift)} crew lift.</span></div>
         <a class="button button--ghost button--small" href="./vehicles.html">Open Fleet</a>
       </div>
       <div class="army-structure-list">
@@ -220,7 +220,7 @@ function renderVessels(state) {
             (row) => `
               <div class="army-structure-row">
                 <span class="army-structure-row__name"><span aria-hidden="true">${escapeHtml(row.emoji)}</span> ${escapeHtml(row.name)}</span>
-                <span class="army-structure-row__stat">${formatNumber(row.total)} total Â· ${formatNumber(row.free)} free</span>
+                <span class="army-structure-row__stat">${formatNumber(row.total)} total · ${formatNumber(row.free)} free</span>
                 <span class="army-structure-row__stat">${formatNumber(row.capacity)} crew each</span>
               </div>
             `
@@ -257,7 +257,7 @@ function renderBehemoths(state) {
             (entry) => `
               <div class="army-structure-row">
                 <span class="army-structure-row__name"><span aria-hidden="true">\u{1F409}</span> ${escapeHtml(entry.name || "Unnamed Behemoth")}</span>
-                <span class="army-structure-row__stat">PWR ${formatNumber(Number(entry.stats?.power ?? 0))} Â· HP ${formatNumber(Number(entry.stats?.health ?? 0))}</span>
+                <span class="army-structure-row__stat">PWR ${formatNumber(Number(entry.stats?.power ?? 0))} · HP ${formatNumber(Number(entry.stats?.health ?? 0))}</span>
                 <span class="army-structure-row__stat">${escapeHtml(getBehemothStatusLabel(entry.status))}</span>
               </div>
             `
@@ -321,7 +321,7 @@ export function renderArmyPage(state) {
 
   return {
     title: "Army",
-    subtitle: "The full muster of the Drift â€” forces, Awakened, defenses, vessels, and war beasts in one place.",
+    subtitle: "The full muster of the Drift — forces, Awakened, defenses, vessels, and war beasts in one place.",
     content
   };
 }

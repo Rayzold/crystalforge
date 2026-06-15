@@ -339,7 +339,7 @@ export function getBuildingRole(building) {
   const primaryTag = building?.tags?.[0] ?? "";
   return BUILDING_ROLE_LEGEND.find((role) => role.key === primaryTag) ?? {
     key: "structure",
-    emoji: "ðŸ—ï¸",
+    emoji: "🏗️",
     label: "Structure",
     detail: "A city structure with mixed purpose."
   };

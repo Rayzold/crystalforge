@@ -688,7 +688,7 @@ export function saveAutoLocalState(state) {
     const serializable = createSerializableState(state, { autoSavedAt: Date.now() });
     localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify(serializable));
   } catch (error) {
-    // Quota or privacy mode â€” silent failure keeps the in-memory game alive.
+    // Quota or privacy mode — silent failure keeps the in-memory game alive.
   }
 }
 

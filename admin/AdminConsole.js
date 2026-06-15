@@ -36,7 +36,7 @@ const RARITY_COLOR_MAP = {
 };
 
 function rarityControls(state, kind) {
-  // Compact spinner: [label] [current count] [âˆ’] [input] [+]. The static
+  // Compact spinner: [label] [current count] [−] [input] [+]. The static
   // count gives at-a-glance state; the input is the editable value (commits
   // on blur/Enter via data-admin-direct-set).
   return RARITY_ORDER.map((rarity) => {
@@ -47,7 +47,7 @@ function rarityControls(state, kind) {
           <strong>${escapeHtml(rarity)}</strong>
         </div>
         <span class="admin-spin-row__value">${formatNumber(current, 0)}</span>
-        <button class="button button--ghost admin-spin-row__step" type="button" data-admin-action="${kind}-step" data-rarity="${rarity}" data-amount="-1" title="âˆ’1">âˆ’</button>
+        <button class="button button--ghost admin-spin-row__step" type="button" data-admin-action="${kind}-step" data-rarity="${rarity}" data-amount="-1" title="−1">−</button>
         <input type="number" data-admin-direct-set="${kind}" id="${kind}-${rarity}" data-rarity="${rarity}" value="${current}" min="0" />
         <button class="button button--ghost admin-spin-row__step" type="button" data-admin-action="${kind}-step" data-rarity="${rarity}" data-amount="1" title="+1">+</button>
       </div>
@@ -57,7 +57,7 @@ function rarityControls(state, kind) {
 
 function citizenControls(state) {
   // Round 2 Fix 2: each citizen class is now a spinner row matching the
-  // Currencies layout. Â± steps by 1; typed value commits on blur.
+  // Currencies layout. ± steps by 1; typed value commits on blur.
   return CITIZEN_GROUP_ORDER.map((groupTitle) => {
     const classes = CITIZEN_CLASSES.filter((citizenClass) => CITIZEN_DEFINITIONS[citizenClass]?.group === groupTitle);
     if (!classes.length) {
@@ -87,7 +87,7 @@ function citizenControls(state) {
                   </div>
                   ${createHelpBubble(getCitizenHelpText(citizenClass))}
                   <span class="admin-spin-row__value">${formatNumber(Math.round(count), 0)}</span>
-                  <button class="button button--ghost admin-spin-row__step" type="button" data-admin-action="citizen-step" data-citizen-class="${citizenClass}" data-amount="-1" title="âˆ’1">âˆ’</button>
+                  <button class="button button--ghost admin-spin-row__step" type="button" data-admin-action="citizen-step" data-citizen-class="${citizenClass}" data-amount="-1" title="−1">−</button>
                   <input type="number" data-admin-direct-set="citizen" id="citizen-${citizenClass}" data-citizen-class="${citizenClass}" value="${Math.round(count)}" min="0" />
                   <button class="button button--ghost admin-spin-row__step" type="button" data-admin-action="citizen-step" data-citizen-class="${citizenClass}" data-amount="1" title="+1">+</button>
                 </div>
@@ -181,8 +181,8 @@ function renderQuickCrystalPacks() {
   };
   const formatEffect = (pack) => {
     const parts = Object.entries(pack.crystals ?? {}).map(([rarity, count]) => `${count} ${rarity}`);
-    if (parts.length === 1) return `${parts[0]} crystal Â· tap to apply`;
-    if (parts.length > 1) return `${parts.join(", ")} Â· tap to apply`;
+    if (parts.length === 1) return `${parts[0]} crystal · tap to apply`;
+    if (parts.length > 1) return `${parts.join(", ")} · tap to apply`;
     return "Tap to apply";
   };
   return `
@@ -208,7 +208,7 @@ function renderQuickEvents() {
         (event) => `
           <button class="button button--ghost admin-quick-card" data-admin-action="trigger-quick-event" data-event-id="${event.id}">
             <strong>${escapeHtml(event.name)}</strong>
-            <span>${escapeHtml(`${event.type} Â· ${event.rarity}`)}</span>
+            <span>${escapeHtml(`${event.type} · ${event.rarity}`)}</span>
           </button>
         `
       ).join("")}
@@ -269,7 +269,7 @@ function renderManifestedBuildingAdminList(state) {
               <div class="admin-active-building-card__meta">
                 <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
                 <span>${escapeHtml(building.rarity)} / ${escapeHtml(building.district ?? "Unassigned")}</span>
-                <small>${building.mapPosition ? escapeHtml(`Placed at ${building.mapPosition.q}, ${building.mapPosition.r}`) : "Unplaced"} Â· ${escapeHtml(`Stage ${formatBuildingQualityDisplay(building)}`)}</small>
+                <small>${building.mapPosition ? escapeHtml(`Placed at ${building.mapPosition.q}, ${building.mapPosition.r}`) : "Unplaced"} · ${escapeHtml(`Stage ${formatBuildingQualityDisplay(building)}`)}</small>
               </div>
               <button class="button button--ghost" data-admin-action="remove-active-building" data-building-id="${building.id}">
                 Unmanifest
@@ -386,11 +386,11 @@ function renderEconomyDebugTable(state) {
   const renderContributorSection = (label, entries) => {
     const resourceGlyph = {
       "Top Gold": "$",
-      "Top Food": "â—’",
-      "Top Materials": "â–¦",
-      "Top Salvage": "â›­",
-      "Top Mana": "âœ¦"
-    }[label] ?? "â€¢";
+      "Top Food": "◒",
+      "Top Materials": "▦",
+      "Top Salvage": "⛭",
+      "Top Mana": "✦"
+    }[label] ?? "•";
     const positiveEntries = entries.filter((entry) => entry.amount > 0.005);
     const negativeEntries = entries.filter((entry) => entry.amount < -0.005);
 
@@ -399,11 +399,11 @@ function renderEconomyDebugTable(state) {
         <div class="admin-contributor-row__label"><span class="admin-contributor-row__glyph" aria-hidden="true">${escapeHtml(resourceGlyph)}</span><strong>${escapeHtml(label)}:</strong></div>
         <div class="admin-contributor-row__groups">
           <div class="admin-contributor-group">
-            <span class="admin-contributor-group__label admin-contributor-group__label--positive"><span class="admin-contributor-group__icon" aria-hidden="true">â†—</span> Gains</span>
+            <span class="admin-contributor-group__label admin-contributor-group__label--positive"><span class="admin-contributor-group__icon" aria-hidden="true">↗</span> Gains</span>
             <div class="admin-contributor-group__pills">${renderContributorPills(positiveEntries)}</div>
           </div>
           <div class="admin-contributor-group">
-            <span class="admin-contributor-group__label admin-contributor-group__label--negative"><span class="admin-contributor-group__icon" aria-hidden="true">â†˜</span> Drains</span>
+            <span class="admin-contributor-group__label admin-contributor-group__label--negative"><span class="admin-contributor-group__icon" aria-hidden="true">↘</span> Drains</span>
             <div class="admin-contributor-group__pills">${renderContributorPills(negativeEntries)}</div>
           </div>
         </div>
@@ -564,7 +564,7 @@ export class AdminConsole {
           target.setAttribute("data-confirming", "1");
           const originalLabel = target.dataset.adminConfirmOriginal ?? target.textContent;
           target.dataset.adminConfirmOriginal = originalLabel;
-          target.textContent = "Confirm âœ“";
+          target.textContent = "Confirm ✓";
           setTimeout(() => {
             if (this.armedConfirms.has(id)) {
               this.armedConfirms.delete(id);
@@ -642,7 +642,7 @@ export class AdminConsole {
       dialog.append(toast);
     }
     toast.innerHTML = `
-      <span class="admin-toast__icon" aria-hidden="true">âœ“</span>
+      <span class="admin-toast__icon" aria-hidden="true">✓</span>
       <span class="admin-toast__msg">${message}</span>
       ${undo ? `<button class="admin-toast__undo" type="button">Undo</button>` : ""}
     `;
@@ -700,7 +700,7 @@ export class AdminConsole {
           break;
         case "crystal-step":
         case "shard-step": {
-          // Issue 2: Â± stepper. Adjusts by data-amount (Â±1 by default).
+          // Issue 2: ± stepper. Adjusts by data-amount (±1 by default).
           const adjust = action === "crystal-step" ? this.actions.adjustCrystal : this.actions.adjustShard;
           const amount = Math.abs(Number(target.dataset.amount) || 1);
           adjust({
@@ -712,7 +712,7 @@ export class AdminConsole {
         }
         case "apply-resource": {
           // Issue 4: per-resource Apply. Reads the matching input and applies
-          // only that key â€” never overwrites neighbouring fields.
+          // only that key — never overwrites neighbouring fields.
           const key = target.dataset.resourceKey;
           if (!key) break;
           const value = this.getNumberInput(`resource-${key}`, 0);
@@ -757,7 +757,7 @@ export class AdminConsole {
           });
           break;
         case "citizen-step": {
-          // Round 2 Fix 2: Â± stepper for citizen rows. Â±1 by data-amount.
+          // Round 2 Fix 2: ± stepper for citizen rows. ±1 by data-amount.
           const klass = target.dataset.citizenClass;
           const amount = Math.abs(Number(target.dataset.amount) || 1);
           const mode = Number(target.dataset.amount) < 0 ? "remove" : "add";
@@ -1109,14 +1109,14 @@ export class AdminConsole {
           <section class="admin-section">
             <h3>Resources</h3>
             ${[
-              { key: "gold", label: "Gold", icon: "ðŸ’°", value: state.resources?.gold },
-              { key: "food", label: "Food", icon: "ðŸŒ¾", value: state.resources?.food },
-              { key: "materials", label: "Materials", icon: "ðŸªµ", value: state.resources?.materials },
-              { key: "salvage", label: "Salvage", icon: "âš™", value: state.resources?.salvage },
-              { key: "mana", label: "Mana", icon: "âœ¨", value: state.resources?.mana },
-              { key: "prosperity", label: "Prosperity", icon: "ðŸŒŸ", value: state.resources?.prosperity },
-              { key: "goods", label: "Goods", icon: "ðŸ“¦", value: state.cityStats?.goods },
-              { key: "population", label: "Population", icon: "ðŸ‘¥", value: state.resources?.population, disabled: true }
+              { key: "gold", label: "Gold", icon: "💰", value: state.resources?.gold },
+              { key: "food", label: "Food", icon: "🌾", value: state.resources?.food },
+              { key: "materials", label: "Materials", icon: "🪵", value: state.resources?.materials },
+              { key: "salvage", label: "Salvage", icon: "⚙", value: state.resources?.salvage },
+              { key: "mana", label: "Mana", icon: "✨", value: state.resources?.mana },
+              { key: "prosperity", label: "Prosperity", icon: "🌟", value: state.resources?.prosperity },
+              { key: "goods", label: "Goods", icon: "📦", value: state.cityStats?.goods },
+              { key: "population", label: "Population", icon: "👥", value: state.resources?.population, disabled: true }
             ].map((r) => `
               <div class="admin-resource-row">
                 <div class="admin-spin-row__label">
@@ -1133,7 +1133,7 @@ export class AdminConsole {
             </div>
           </section>
           <details class="admin-debug-collapsible">
-            <summary>â–¶ Economy Debug</summary>
+            <summary>▶ Economy Debug</summary>
             ${renderEconomyDebugTable(state)}
           </details>
         `
@@ -1389,7 +1389,7 @@ export class AdminConsole {
         content: `
           <section class="admin-section">
             <h3>Building Output Rates</h3>
-            <p>Set the base per-day resources each building type produces (negative values consume). The x2 and x3 tiers are these values doubled and tripled â€” buildings reach x2 at 220% quality and x3 at the 350% cap. Saving updates every building of that type and all future copies.</p>
+            <p>Set the base per-day resources each building type produces (negative values consume). The x2 and x3 tiers are these values doubled and tripled — buildings reach x2 at 220% quality and x3 at the 350% cap. Saving updates every building of that type and all future copies.</p>
             ${renderBuildingOutputEditor(state)}
           </section>
         `
@@ -1464,7 +1464,7 @@ export class AdminConsole {
         content: `
           <section class="admin-section">
             <h3>Drift Evolution</h3>
-            <div class="admin-drift-warning"><span aria-hidden="true">âš </span><span>Advanced â€” changes affect core game progression. Press Save Drift Stage to commit; nothing auto-saves.</span></div>
+            <div class="admin-drift-warning"><span aria-hidden="true">⚠</span><span>Advanced — changes affect core game progression. Press Save Drift Stage to commit; nothing auto-saves.</span></div>
             <p>Edit stage definitions for this save if you need to tune the Drift live.</p>
             <div class="admin-grid">
               <label>Stage<select id="drift-stage-id">${driftStages
@@ -1573,12 +1573,12 @@ export class AdminConsole {
           <h2 class="admin-drawer-header__title">Admin Console</h2>
           <label class="admin-drawer-search">
             <span class="visually-hidden">Search</span>
-            <input id="admin-search" value="${escapeHtml(this.searchQuery)}" placeholder="Search panelsâ€¦ (Ctrl+K)" autocomplete="off" />
+            <input id="admin-search" value="${escapeHtml(this.searchQuery)}" placeholder="Search panels… (Ctrl+K)" autocomplete="off" />
           </label>
           <button type="button" class="admin-drawer-session-toggle ${state.settings?.liveSessionView ? "is-active" : ""}" data-admin-action="toggle-session-view" title="Toggle Live Session view">
-            ${state.settings?.liveSessionView ? "â— Session" : "Session"}
+            ${state.settings?.liveSessionView ? "● Session" : "Session"}
           </button>
-          <button type="button" class="modal__close" data-action="close-modal" aria-label="Close console" title="Close (Esc)">âœ•</button>
+          <button type="button" class="modal__close" data-action="close-modal" aria-label="Close console" title="Close (Esc)">✕</button>
         </header>
         <div class="admin-tabs">
           <button class="button button--ghost ${this.activeTab === "economy" ? "is-active" : ""}" data-admin-ui="tab" data-tab="economy">Economy</button>
