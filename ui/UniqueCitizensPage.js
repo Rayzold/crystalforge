@@ -1,10 +1,10 @@
 // Legends page.
 // Named citizens live here so they feel separate from the normal workforce and
 // read more like a roster of singular characters than another resource screen.
-import { EXPEDITION_TYPES } from "../content/ExpeditionConfig.js?v=v1.7.20-20260615092907";
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615092907";
-import { getLegendAssignmentDetails, getLegendAssignmentPosts } from "../systems/ExpeditionSystem.js?v=v1.7.20-20260615092907";
-import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260615092907";
+import { EXPEDITION_TYPES } from "../content/ExpeditionConfig.js?v=v1.7.20-20260615093534";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615093534";
+import { getLegendAssignmentDetails, getLegendAssignmentPosts } from "../systems/ExpeditionSystem.js?v=v1.7.20-20260615093534";
+import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260615093534";
 
 const LEGEND_SOURCE_ICONS = {
   rescue: "citizens",

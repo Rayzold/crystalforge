@@ -1,8 +1,8 @@
 // Goal and reward system.
 // This module defines the guided Home goals, short-term realm goals, and the
 // tiny completion rewards that make progress feel more tangible over time.
-import { getCityTrendSummary } from "./ResourceSystem.js?v=v1.7.20-20260615092907";
-import { addHistoryEntry } from "./HistoryLogSystem.js?v=v1.7.20-20260615092907";
+import { getCityTrendSummary } from "./ResourceSystem.js?v=v1.7.20-20260615093534";
+import { addHistoryEntry } from "./HistoryLogSystem.js?v=v1.7.20-20260615093534";
 
 const RESOURCE_LABELS = {
   gold: "Gold",

@@ -1,7 +1,7 @@
-import { BASE_BUILDING_CATALOG } from "../content/BuildingCatalog.js?v=v1.7.20-20260615092907";
-import { DISTRICT_LEVEL_THRESHOLDS, BASE_DISTRICT_CONFIG } from "../content/DistrictConfig.js?v=v1.7.20-20260615092907";
-import { DRIFT_EVOLUTION_STAGES, DRIFT_POPULATION_GOALS } from "../content/DriftEvolutionConfig.js?v=v1.7.20-20260615092907";
-import { createBuildingGameplayProfile } from "./BalanceSystem.js?v=v1.7.20-20260615092907";
+import { BASE_BUILDING_CATALOG } from "../content/BuildingCatalog.js?v=v1.7.20-20260615093534";
+import { DISTRICT_LEVEL_THRESHOLDS, BASE_DISTRICT_CONFIG } from "../content/DistrictConfig.js?v=v1.7.20-20260615093534";
+import { DRIFT_EVOLUTION_STAGES, DRIFT_POPULATION_GOALS } from "../content/DriftEvolutionConfig.js?v=v1.7.20-20260615093534";
+import { createBuildingGameplayProfile } from "./BalanceSystem.js?v=v1.7.20-20260615093534";
 
 function getDistrictLevelFromCount(count) {
   return DISTRICT_LEVEL_THRESHOLDS.reduce((level, threshold, index) => {

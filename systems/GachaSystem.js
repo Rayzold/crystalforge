@@ -1,13 +1,13 @@
 // Manifestation roll logic.
 // This system spends crystals, chooses a result from the current rarity pool,
 // and either manifests a building or resolves a direct crystal-upgrade outcome.
-import { pickRandom, randomInt } from "../engine/Random.js?v=v1.7.20-20260615092907";
-import { getCatalogKey } from "../content/BuildingCatalog.js?v=v1.7.20-20260615092907";
-import { getNextRarity } from "../content/Rarities.js?v=v1.7.20-20260615092907";
-import { formatDate } from "./CalendarSystem.js?v=v1.7.20-20260615092907";
-import { addCrystals, hasCrystalAvailable, spendCrystal } from "./CrystalSystem.js?v=v1.7.20-20260615092907";
-import { addHistoryEntry } from "./HistoryLogSystem.js?v=v1.7.20-20260615092907";
-import { manifestIntoBuilding } from "./BuildingSystem.js?v=v1.7.20-20260615092907";
+import { pickRandom, randomInt } from "../engine/Random.js?v=v1.7.20-20260615093534";
+import { getCatalogKey } from "../content/BuildingCatalog.js?v=v1.7.20-20260615093534";
+import { getNextRarity } from "../content/Rarities.js?v=v1.7.20-20260615093534";
+import { formatDate } from "./CalendarSystem.js?v=v1.7.20-20260615093534";
+import { addCrystals, hasCrystalAvailable, spendCrystal } from "./CrystalSystem.js?v=v1.7.20-20260615093534";
+import { addHistoryEntry } from "./HistoryLogSystem.js?v=v1.7.20-20260615093534";
+import { manifestIntoBuilding } from "./BuildingSystem.js?v=v1.7.20-20260615093534";
 
 export function manifestSelectedRarity(state, rarity) {
   const pool = state.rollTables[rarity] ?? [];
