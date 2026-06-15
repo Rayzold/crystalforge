@@ -1,5 +1,5 @@
-import { APP_DISPLAY_VERSION, MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js?v=v1.7.20-20260615130257";
-import { getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615130257";
+﻿import { APP_DISPLAY_VERSION, MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js?v=v1.7.20-20260615130257";
+import { getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615180000";
 import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615130257";
 import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js?v=v1.7.20-20260615130257";
 import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js?v=v1.7.20-20260615130257";
@@ -35,8 +35,8 @@ const ROUTE_GLYPHS = {
   uniques: "\u2728",
   behemoths: "\u{1F409}",
   npcs: "\u{1F3AD}",
-  awakened: "⚡",
-  army: "⚔️",
+  awakened: "âš¡",
+  army: "âš”ï¸",
   crafting: "\u2692",
   chronicle: "\u{1F4DC}",
   battle: "\u{265F}\ufe0f",
@@ -192,7 +192,7 @@ function renderSidebarBuildingList(state, title, items, emptyLabel, variant = "a
               data-action="toggle-sidebar-building-list"
               title="${isExpanded ? "Collapse building list" : "Expand building list"}"
               aria-expanded="${isExpanded ? "true" : "false"}"
-            >${isExpanded ? "▲" : "▼"}</button>
+            >${isExpanded ? "â–²" : "â–¼"}</button>
           ` : ""}
         </div>
       </div>
@@ -201,7 +201,7 @@ function renderSidebarBuildingList(state, title, items, emptyLabel, variant = "a
           <input
             type="text"
             class="sidebar-manifest-list__search-input"
-            placeholder="Filter buildings…"
+            placeholder="Filter buildingsâ€¦"
             value="${escapeHtml(state.transientUi?.sidebarBuildingQuery ?? "")}"
             data-action="set-sidebar-building-query"
             autocomplete="off"
@@ -225,11 +225,11 @@ function renderSidebarBuildingList(state, title, items, emptyLabel, variant = "a
                       const emoji = getBuildingEmoji(building);
                       return `
                       <div class="sidebar-manifest-list__item ${isRecentlyChanged ? "is-recently-changed" : ""}" title="${escapeHtml(`${emoji} ${building.displayName}`)}">
-                        <span>${escapeHtml(`${state.settings?.pinnedBuildingIds?.includes(building.id) ? "📌 " : ""}${emoji} ${building.displayName}`)}</span>
+                        <span>${escapeHtml(`${state.settings?.pinnedBuildingIds?.includes(building.id) ? "ðŸ“Œ " : ""}${emoji} ${building.displayName}`)}</span>
                         <div class="sidebar-manifest-list__meta">
                           <em>${escapeHtml(
                             variant === "active"
-                              ? `${formatBuildingExactQualityDisplay(building)}${getBuildingMultiplier(building.quality) > 1 ? ` · ${getBuildingMultiplier(building.quality)}x` : ""}`
+                              ? `${formatBuildingExactQualityDisplay(building)}${getBuildingMultiplier(building.quality) > 1 ? ` Â· ${getBuildingMultiplier(building.quality)}x` : ""}`
                               : formatBuildingExactQualityDisplay(building)
                           )}</em>
                           ${
@@ -343,7 +343,7 @@ function renderDensityControls(currentDensity = "compact", conciseMode = false, 
         data-action="toggle-session-mode"
         title="Kill all animations for faster navigation during live sessions"
       >
-        ⚡ Session Mode
+        âš¡ Session Mode
       </button>
     </div>
   `;
@@ -585,7 +585,7 @@ function renderSidebarRouteGroup(routes, pageKey, cityAlertCount, availableCryst
     .join("");
 }
 
-// ─── Top nav, resource bar, alert strip (new shell chrome) ────────────────────
+// â”€â”€â”€ Top nav, resource bar, alert strip (new shell chrome) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const TOP_NAV_GROUPS = [
   { label: "Core",   keys: ["home", "forge", "economy", "city"] },
@@ -604,7 +604,7 @@ function renderTopNavGroup(group, pageKey, badges) {
     <div class="top-nav__group ${isActiveGroup ? "is-active" : ""}" tabindex="0">
       <button class="top-nav__group-button" type="button">
         <span>${escapeHtml(group.label)}</span>
-        <span class="top-nav__chevron" aria-hidden="true">▾</span>
+        <span class="top-nav__chevron" aria-hidden="true">â–¾</span>
       </button>
       <div class="top-nav__dropdown" role="menu">
         ${items.map((route) => {
@@ -626,14 +626,14 @@ function renderTopNavSettings(state, manualSaveSlots, uiDensity, conciseMode, di
   const textSize = state.settings?.textSize ?? "medium";
   return `
     <div class="top-nav__settings" data-top-nav-settings>
-      <button class="top-nav__icon-button" type="button" data-action="toggle-top-nav-settings" aria-label="Settings" title="Session Settings (density, dice, saves)">⚙️</button>
+      <button class="top-nav__icon-button" type="button" data-action="toggle-top-nav-settings" aria-label="Settings" title="Session Settings (density, dice, saves)">âš™ï¸</button>
       <div class="top-nav__settings-panel" data-top-nav-settings-panel hidden>
         <div class="top-nav__settings-section">
-          <a class="top-nav__settings-link" href="./player.html"><strong>🎬 Player Mode</strong><small>Open shared player screen</small></a>
-          <button class="top-nav__settings-link" type="button" data-action="open-catalog"><strong>📚 Building Catalog</strong><small>Browse all buildings</small></button>
-          <button class="top-nav__settings-link" type="button" data-action="open-admin"><strong>🛠️ ${state.settings?.liveSessionView ? "GM Console" : "Admin Console"}</strong><small>Type \`432!\` anywhere</small></button>
-          <button class="top-nav__settings-link" type="button" data-action="toggle-session-view"><strong>👁 View Mode</strong><small>${state.settings?.liveSessionView ? "Live Session" : "Deep Review"}</small></button>
-          <button class="top-nav__settings-link" type="button" data-action="open-build-notes"><strong>📝 ${APP_DISPLAY_VERSION}</strong><small>Build notes</small></button>
+          <a class="top-nav__settings-link" href="./player.html"><strong>ðŸŽ¬ Player Mode</strong><small>Open shared player screen</small></a>
+          <button class="top-nav__settings-link" type="button" data-action="open-catalog"><strong>ðŸ“š Building Catalog</strong><small>Browse all buildings</small></button>
+          <button class="top-nav__settings-link" type="button" data-action="open-admin"><strong>ðŸ› ï¸ ${state.settings?.liveSessionView ? "GM Console" : "Admin Console"}</strong><small>Type \`432!\` anywhere</small></button>
+          <button class="top-nav__settings-link" type="button" data-action="toggle-session-view"><strong>ðŸ‘ View Mode</strong><small>${state.settings?.liveSessionView ? "Live Session" : "Deep Review"}</small></button>
+          <button class="top-nav__settings-link" type="button" data-action="open-build-notes"><strong>ðŸ“ ${APP_DISPLAY_VERSION}</strong><small>Build notes</small></button>
         </div>
         <div class="top-nav__settings-section">
           ${renderDensityControls(uiDensity, conciseMode, textSize)}
@@ -671,8 +671,8 @@ function renderTopNavSettings(state, manualSaveSlots, uiDensity, conciseMode, di
         </div>
         <div class="top-nav__settings-section">
           <div class="top-nav__settings-row">
-            <button class="button button--ghost" type="button" data-action="save-firebase-realm">☁ Cloud Save</button>
-            <button class="button button--ghost" type="button" data-action="load-firebase-realm">☁ Cloud Load</button>
+            <button class="button button--ghost" type="button" data-action="save-firebase-realm">â˜ Cloud Save</button>
+            <button class="button button--ghost" type="button" data-action="load-firebase-realm">â˜ Cloud Load</button>
           </div>
           ${firebaseMeta?.updatedAtMs ? `<p class="top-nav__settings-meta">Last cloud save: ${new Date(firebaseMeta.updatedAtMs).toLocaleString()}</p>` : ""}
           <div class="sidebar-save-slots" role="group" aria-label="Local save slots">
@@ -691,8 +691,8 @@ function renderTopNavSettings(state, manualSaveSlots, uiDensity, conciseMode, di
             `).join("")}
           </div>
           <div class="top-nav__settings-row">
-            <button class="button button--ghost" type="button" data-action="download-save-file" title="Download current save as a .json file">⬇ Download Save</button>
-            <button class="button button--ghost" type="button" data-action="load-save-file" title="Load a save from a .json file">⬆ Load from File…</button>
+            <button class="button button--ghost" type="button" data-action="download-save-file" title="Download current save as a .json file">â¬‡ Download Save</button>
+            <button class="button button--ghost" type="button" data-action="load-save-file" title="Load a save from a .json file">â¬† Load from Fileâ€¦</button>
           </div>
         </div>
       </div>
@@ -712,11 +712,11 @@ function renderTopNav(state, pageKey, badges, manualSaveSlots, uiDensity, concis
       </div>
       <div class="top-nav__spacer"></div>
       ${renderGlobalSearchWidget()}
-      <button class="top-nav__icon-button" type="button" data-action="open-admin" title="${state.settings?.liveSessionView ? "GM Console" : "Admin Console"}" aria-label="GM Console">🛠️</button>
-      <button class="top-nav__icon-button" type="button" data-action="save-firebase-realm" title="Cloud Save (publish current state)" aria-label="Cloud Save">💾</button>
-      <button class="top-nav__icon-button" type="button" data-action="load-firebase-realm" title="Cloud Load (pull latest published state)" aria-label="Cloud Load">📥</button>
-      <button class="top-nav__icon-button" type="button" data-action="roll-dice" title="Roll Dice (${diceAmount}${diceType})" aria-label="Roll dice">🎲</button>
-      <button class="top-nav__icon-button top-nav__theme-toggle" type="button" data-action="toggle-theme" title="Toggle parchment theme" aria-label="Toggle parchment theme">${(state.settings?.theme ?? "dark") === "parchment" ? "🌙" : "📜"}</button>
+      <button class="top-nav__icon-button" type="button" data-action="open-admin" title="${state.settings?.liveSessionView ? "GM Console" : "Admin Console"}" aria-label="GM Console">ðŸ› ï¸</button>
+      <button class="top-nav__icon-button" type="button" data-action="save-firebase-realm" title="Cloud Save (publish current state)" aria-label="Cloud Save">ðŸ’¾</button>
+      <button class="top-nav__icon-button" type="button" data-action="load-firebase-realm" title="Cloud Load (pull latest published state)" aria-label="Cloud Load">ðŸ“¥</button>
+      <button class="top-nav__icon-button" type="button" data-action="roll-dice" title="Roll Dice (${diceAmount}${diceType})" aria-label="Roll dice">ðŸŽ²</button>
+      <button class="top-nav__icon-button top-nav__theme-toggle" type="button" data-action="toggle-theme" title="Toggle parchment theme" aria-label="Toggle parchment theme">${(state.settings?.theme ?? "dark") === "parchment" ? "ðŸŒ™" : "ðŸ“œ"}</button>
       ${renderTopNavSettings(state, manualSaveSlots, uiDensity, conciseMode, diceAmount, diceType, lastDiceRoll, firebaseMeta)}
     </nav>
   `;
@@ -727,11 +727,11 @@ function renderResourceBar(state) {
     getCityTrendSummary(state).map((entry) => [entry.key, entry.delta])
   );
   const slots = [
-    { key: "gold",      label: "Gold",      icon: "💰", color: "var(--accent-gold)"   },
-    { key: "food",      label: "Food",      icon: "🌾", color: "var(--success)"       },
-    { key: "materials", label: "Materials", icon: "🪵", color: "var(--accent)"        },
-    { key: "salvage",   label: "Salvage",   icon: "⚙️",  color: "var(--muted)"         },
-    { key: "mana",      label: "Mana",      icon: "✨", color: "var(--accent-violet)" }
+    { key: "gold",      label: "Gold",      icon: "ðŸ’°", color: "var(--accent-gold)"   },
+    { key: "food",      label: "Food",      icon: "ðŸŒ¾", color: "var(--success)"       },
+    { key: "materials", label: "Materials", icon: "ðŸªµ", color: "var(--accent)"        },
+    { key: "salvage",   label: "Salvage",   icon: "âš™ï¸",  color: "var(--muted)"         },
+    { key: "mana",      label: "Mana",      icon: "âœ¨", color: "var(--accent-violet)" }
   ];
   const defenseValue = Number(state.cityStats?.defense ?? 0);
   return `
@@ -740,7 +740,7 @@ function renderResourceBar(state) {
         const value = state.resources?.[slot.key] ?? 0;
         const delta = Number(deltas[slot.key] ?? 0);
         const deltaClass = delta > 0.005 ? "is-positive" : delta < -0.005 ? "is-negative" : "is-neutral";
-        const deltaText = (delta >= 0 ? "+" : "−") + formatNumber(Math.abs(delta), 1) + "/d";
+        const deltaText = (delta >= 0 ? "+" : "âˆ’") + formatNumber(Math.abs(delta), 1) + "/d";
         return `
           <button class="resource-bar__slot" type="button" data-action="open-resource-breakdown" data-resource-key="${slot.key}" style="--slot-color: ${slot.color};">
             <span class="resource-bar__icon" aria-hidden="true">${slot.icon}</span>
@@ -751,7 +751,7 @@ function renderResourceBar(state) {
         `;
       }).join("")}
       <a class="resource-bar__slot resource-bar__slot--defense" href="./city.html#defense" style="--slot-color: #f97316;" title="Defense stat (raw score)">
-        <span class="resource-bar__icon" aria-hidden="true">🛡️</span>
+        <span class="resource-bar__icon" aria-hidden="true">ðŸ›¡ï¸</span>
         <span class="resource-bar__value">${formatNumber(defenseValue, 0)}</span>
         <span class="resource-bar__delta is-neutral"></span>
         <span class="resource-bar__label">Defense</span>
@@ -767,21 +767,21 @@ function renderAlertStrip(state) {
     const a = alerts[0];
     return `
       <div class="alert-strip" role="alert">
-        <span class="alert-strip__icon" aria-hidden="true">⚠️</span>
+        <span class="alert-strip__icon" aria-hidden="true">âš ï¸</span>
         <strong class="alert-strip__name">${escapeHtml(a.label)}</strong>
         <span class="alert-strip__detail">${escapeHtml(a.details)}</span>
-        ${a.href ? `<a class="alert-strip__action" href="${a.href}">${escapeHtml(a.actionLabel || "Review event")} →</a>` : ""}
-        <button class="alert-strip__dismiss" type="button" data-action="dismiss-alert-strip" aria-label="Dismiss">✕</button>
+        ${a.href ? `<a class="alert-strip__action" href="${a.href}">${escapeHtml(a.actionLabel || "Review event")} â†’</a>` : ""}
+        <button class="alert-strip__dismiss" type="button" data-action="dismiss-alert-strip" aria-label="Dismiss">âœ•</button>
       </div>
     `;
   }
   return `
     <div class="alert-strip alert-strip--multi" role="alert">
-      <span class="alert-strip__icon" aria-hidden="true">⚠️</span>
+      <span class="alert-strip__icon" aria-hidden="true">âš ï¸</span>
       <strong class="alert-strip__name">${alerts.length} alerts</strong>
       <span class="alert-strip__detail">${escapeHtml(alerts[0].label)}${alerts.length > 1 ? ` and ${alerts.length - 1} more` : ""}</span>
-      ${alerts[0].href ? `<a class="alert-strip__action" href="${alerts[0].href}">Review →</a>` : ""}
-      <button class="alert-strip__dismiss" type="button" data-action="dismiss-alert-strip" aria-label="Dismiss">✕</button>
+      ${alerts[0].href ? `<a class="alert-strip__action" href="${alerts[0].href}">Review â†’</a>` : ""}
+      <button class="alert-strip__dismiss" type="button" data-action="dismiss-alert-strip" aria-label="Dismiss">âœ•</button>
     </div>
   `;
 }
@@ -933,7 +933,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
           <button class="button button--ghost" data-action="open-catalog">Building Catalog</button>
           <details class="sidebar-gm-tools">
             <summary class="sidebar-gm-tools__summary">
-              <span>⚙️ Session Settings</span>
+              <span>âš™ï¸ Session Settings</span>
               <strong>Density, text size, view mode, dice</strong>
             </summary>
             <div class="sidebar-gm-tools__body">
@@ -975,7 +975,7 @@ export function renderPageShell(state, pageKey, { title, subtitle, content, asid
           </details>
           <details class="sidebar-gm-tools">
             <summary class="sidebar-gm-tools__summary">
-              <span>💾 Save &amp; Load</span>
+              <span>ðŸ’¾ Save &amp; Load</span>
               <strong>Cloud and local save slots</strong>
             </summary>
             <div class="sidebar-gm-tools__body">

@@ -1,4 +1,4 @@
-// Save, load, and migration layer.
+﻿// Save, load, and migration layer.
 // This file creates fresh game states, normalizes imported data, keeps manual
 // and session saves stable, and upgrades old save shapes into the current model.
 import {
@@ -13,7 +13,7 @@ import {
   createDefaultDistrictState,
   createDefaultRollTables
 } from "../content/Config.js?v=v1.7.20-20260615130257";
-import { BASE_BUILDING_CATALOG, buildFlavorText } from "../content/BuildingCatalog.js?v=v1.7.20-20260615130257";
+import { BASE_BUILDING_CATALOG, buildFlavorText } from "../content/BuildingCatalog.js?v=v1.7.20-20260615180000";
 import { getNextRarity } from "../content/Rarities.js?v=v1.7.20-20260615130257";
 import { createId, safeJsonParse } from "../engine/Utils.js?v=v1.7.20-20260615130257";
 import { formatDate } from "./CalendarSystem.js?v=v1.7.20-20260615130257";
@@ -688,7 +688,7 @@ export function saveAutoLocalState(state) {
     const serializable = createSerializableState(state, { autoSavedAt: Date.now() });
     localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify(serializable));
   } catch (error) {
-    // Quota or privacy mode — silent failure keeps the in-memory game alive.
+    // Quota or privacy mode â€” silent failure keeps the in-memory game alive.
   }
 }
 

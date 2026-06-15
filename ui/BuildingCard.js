@@ -1,4 +1,4 @@
-import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615130257";
+﻿import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615180000";
 import { RARITY_COLORS } from "../content/Rarities.js?v=v1.7.20-20260615130257";
 import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js?v=v1.7.20-20260615130257";
 import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.20-20260615130257";
@@ -117,7 +117,7 @@ function getCompactStageBadge(building) {
 
 function getQualityMultiplierReadout(building) {
   const multiplier = getBuildingMultiplier(building?.quality ?? 0);
-  return `${formatBuildingExactQualityDisplay(building)}${multiplier > 1 ? ` · ${multiplier}x` : ""}`;
+  return `${formatBuildingExactQualityDisplay(building)}${multiplier > 1 ? ` Â· ${multiplier}x` : ""}`;
 }
 
 function getConstructionSupportReadout(etaDetails) {
@@ -224,7 +224,7 @@ export function renderBuildingCard(building, state, workforceSummary = null) {
         <div class="building-card__quality">
           ${/* The ring badge in the visual overlay is now the canonical quality
                 readout. For complete buildings we keep the multiplier readout (e.g.
-                "48.1% · 1.2x") because that data isn't in the ring; for incomplete
+                "48.1% Â· 1.2x") because that data isn't in the ring; for incomplete
                 ones we drop the redundant "Quality 48.1%" line entirely. */ ""}
           ${building.isComplete ? `<span>${escapeHtml(getQualityMultiplierReadout(building))}</span>` : ""}
           <span>${isRuined ? "Ruined" : building.isComplete ? "Complete" : "Incomplete"}</span>
@@ -250,7 +250,7 @@ export function renderBuildingCard(building, state, workforceSummary = null) {
         ${
           workforceStatus.isManaged
             ? `<div class="building-card__meta building-card__meta--compact building-card__meta--workforce ${workforceStatus.totalMultiplier < 0.999 ? "is-constrained" : ""}">
-                <span>Workforce x${formatNumber(workforceStatus.totalMultiplier, 2)} · General ${formatNumber(workforceStatus.generalRatio * 100, 0)}%</span>
+                <span>Workforce x${formatNumber(workforceStatus.totalMultiplier, 2)} Â· General ${formatNumber(workforceStatus.generalRatio * 100, 0)}%</span>
                 <span>${escapeHtml(workforceStatus.categoryLabel)} ${formatNumber(workforceStatus.specialistRatio * 100, 0)}%</span>
               </div>`
             : ""
@@ -272,7 +272,7 @@ export function renderBuildingCard(building, state, workforceSummary = null) {
         ${
           building.apexNote && building.apexNote.trim()
             ? `<div class="building-card__apex ${isBuildingAtApex(building) ? "is-apex-active" : ""}">
-                <span class="building-card__apex-label">350% Apex${isBuildingAtApex(building) ? " · Active" : ""}</span>
+                <span class="building-card__apex-label">350% Apex${isBuildingAtApex(building) ? " Â· Active" : ""}</span>
                 <p>${escapeHtml(building.apexNote)}</p>
               </div>`
             : ""
@@ -342,7 +342,7 @@ export function renderBuildingCard(building, state, workforceSummary = null) {
         <button class="button button--ghost building-card__pin-button ${isPinned ? "is-active" : ""}" data-action="toggle-building-pin" data-building-id="${building.id}">${isPinned ? "Unpin" : "Pin"}</button>
         ${
           state.ui.adminUnlocked
-            ? `<button class="button button--ghost button--danger-icon" data-action="remove-building" data-building-id="${building.id}" aria-label="Delete ${escapeHtml(building.displayName)}" title="Delete building">🗑</button>`
+            ? `<button class="button button--ghost button--danger-icon" data-action="remove-building" data-building-id="${building.id}" aria-label="Delete ${escapeHtml(building.displayName)}" title="Delete building">ðŸ—‘</button>`
             : ""
         }
       </div>

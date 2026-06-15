@@ -1,5 +1,5 @@
-import { BUILDING_GRID_LIMIT } from "../content/Config.js?v=v1.7.20-20260615130257";
-import { getBuildingEconomySummary } from "../content/BuildingCatalog.js?v=v1.7.20-20260615130257";
+﻿import { BUILDING_GRID_LIMIT } from "../content/Config.js?v=v1.7.20-20260615130257";
+import { getBuildingEconomySummary } from "../content/BuildingCatalog.js?v=v1.7.20-20260615180000";
 import { RARITY_ORDER } from "../content/Rarities.js?v=v1.7.20-20260615130257";
 import { sortBuildings } from "../engine/Utils.js?v=v1.7.20-20260615130257";
 import { getActiveConstructionQueue, getConstructionEtaDetails, getDriftConstructionSlots, isBuildingActivelyConstructed } from "../systems/ConstructionSystem.js?v=v1.7.20-20260615130257";
@@ -155,7 +155,7 @@ export function renderBuildingGrid(state, options = {}) {
         <input
           type="text"
           class="building-grid-panel__search-input"
-          placeholder="Search buildings…"
+          placeholder="Search buildingsâ€¦"
           value="${(state.transientUi?.buildingTextQuery ?? "").replace(/"/g, "&quot;")}"
           data-action="set-building-text-query"
           autocomplete="off"

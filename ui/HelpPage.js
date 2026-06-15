@@ -1,4 +1,4 @@
-import { BUILDING_ROLE_LEGEND } from "../content/BuildingCatalog.js?v=v1.7.20-20260615130257";
+﻿import { BUILDING_ROLE_LEGEND } from "../content/BuildingCatalog.js?v=v1.7.20-20260615180000";
 import {
   BUILDING_IMAGE_FILENAME_SAMPLES,
   BUILDING_IMAGE_LOOKUP_EXTENSIONS

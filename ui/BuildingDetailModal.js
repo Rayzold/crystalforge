@@ -1,4 +1,4 @@
-import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615130257";
+﻿import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615180000";
 import { RARITY_COLORS } from "../content/Rarities.js?v=v1.7.20-20260615130257";
 import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js?v=v1.7.20-20260615130257";
 import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.20-20260615130257";
@@ -70,7 +70,7 @@ function getSignatureReadout(building) {
 
 function getQualityMultiplierReadout(building) {
   const multiplier = getBuildingMultiplier(building?.quality ?? 0);
-  return `${formatBuildingExactQualityDisplay(building)}${multiplier > 1 ? ` · ${multiplier}x` : ""}`;
+  return `${formatBuildingExactQualityDisplay(building)}${multiplier > 1 ? ` Â· ${multiplier}x` : ""}`;
 }
 
 function getEffectiveRateSummary(building, state, workforceSummary, placementBonus) {
@@ -228,7 +228,7 @@ export function renderBuildingDetailModal(state, pageKey) {
           <h4>350% Apex Bonus</h4>
           <p class="building-detail__status-note">${
             isBuildingAtApex(building)
-              ? "This building has reached 350% — its apex bonus is active."
+              ? "This building has reached 350% â€” its apex bonus is active."
               : `Reached at 350% quality (currently ${formatBuildingExactQualityDisplay(building)}). Note the bonus here so it is ready when it caps.`
           }</p>
           <textarea

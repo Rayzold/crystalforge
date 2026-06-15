@@ -1,8 +1,8 @@
-// Manifestation roll logic.
+﻿// Manifestation roll logic.
 // This system spends crystals, chooses a result from the current rarity pool,
 // and either manifests a building or resolves a direct crystal-upgrade outcome.
 import { pickRandom, randomInt } from "../engine/Random.js?v=v1.7.20-20260615130257";
-import { getCatalogKey } from "../content/BuildingCatalog.js?v=v1.7.20-20260615130257";
+import { getCatalogKey } from "../content/BuildingCatalog.js?v=v1.7.20-20260615180000";
 import { getNextRarity } from "../content/Rarities.js?v=v1.7.20-20260615130257";
 import { formatDate } from "./CalendarSystem.js?v=v1.7.20-20260615130257";
 import { addCrystals, hasCrystalAvailable, spendCrystal } from "./CrystalSystem.js?v=v1.7.20-20260615130257";

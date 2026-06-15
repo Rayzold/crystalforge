@@ -1,7 +1,7 @@
-// City management page.
+﻿// City management page.
 // This page combines the building stream, map access, incubation controls,
 // filters, and city-side summaries used during active management play.
-import { getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615130257";
+import { getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615180000";
 import { BUILDING_QUALITY_CAP, SPEED_MULTIPLIERS } from "../content/Config.js?v=v1.7.20-20260615130257";
 import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js?v=v1.7.20-20260615130257";
 import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615130257";
@@ -286,7 +286,7 @@ function renderTownStatistics(state) {
   const foodRunway = emergencyState.runway.foodDays;
   const nextHoliday = getNextHoliday(state.calendar.dayOffset);
   const nextHolidayAccentClass = nextHoliday ? getHolidayTypeClass(nextHoliday) : "";
-  const nextHolidayGlyph = nextHoliday ? getHolidayGlyph(nextHoliday) : "✦";
+  const nextHolidayGlyph = nextHoliday ? getHolidayGlyph(nextHoliday) : "âœ¦";
   const goodsSummary = getGoodsSummary(state);
 
   const items = [
@@ -421,7 +421,7 @@ function renderWorkforcePanel(state) {
   `;
 }
 
-// ─── Right-side incubator sidebar (Change 6 — extracted from renderBuildingsView) ──
+// â”€â”€â”€ Right-side incubator sidebar (Change 6 â€” extracted from renderBuildingsView) â”€â”€
 function renderIncubatorSidebar(state) {
   const incubating = getActiveConstructionQueue(state);
   const queued = getIncubatorQueuedBuildings(state);
@@ -443,8 +443,8 @@ function renderIncubatorSidebar(state) {
             <small>${formatNumber(incubating.length, 0)} active / ${formatNumber(slots, 0)} slots</small>
           </div>
           <div class="incubator-sidebar__head-actions">
-            <button class="button button--ghost button--small" data-action="pause-all-construction" title="Pause all incubating buildings">⏸</button>
-            <button class="button button--ghost button--small" data-action="resume-all-construction" title="Resume all incubating buildings">▶</button>
+            <button class="button button--ghost button--small" data-action="pause-all-construction" title="Pause all incubating buildings">â¸</button>
+            <button class="button button--ghost button--small" data-action="resume-all-construction" title="Resume all incubating buildings">â–¶</button>
           </div>
         </header>
         ${incubating.length ? incubating.map((building, index) => {
@@ -508,11 +508,11 @@ function renderIncubatorSidebar(state) {
           return `
             <article class="incubator-sidebar__queued">
               <strong>${escapeHtml(`${getBuildingEmoji(building)} ${building.displayName}`)}</strong>
-              <small>#${queueIndex + 1} — fills next open slot</small>
+              <small>#${queueIndex + 1} â€” fills next open slot</small>
               <div class="incubator-sidebar__queued-actions">
                 <button class="button button--ghost button--small" data-action="prioritize-construction" data-direction="top" data-building-id="${building.id}">Top</button>
-                <button class="button button--ghost button--small" data-action="prioritize-construction" data-direction="up" data-building-id="${building.id}" ${queueIndex <= 0 ? "disabled" : ""}>▲</button>
-                <button class="button button--ghost button--small" data-action="prioritize-construction" data-direction="down" data-building-id="${building.id}" ${queueIndex === constructionQueue.length - 1 ? "disabled" : ""}>▼</button>
+                <button class="button button--ghost button--small" data-action="prioritize-construction" data-direction="up" data-building-id="${building.id}" ${queueIndex <= 0 ? "disabled" : ""}>â–²</button>
+                <button class="button button--ghost button--small" data-action="prioritize-construction" data-direction="down" data-building-id="${building.id}" ${queueIndex === constructionQueue.length - 1 ? "disabled" : ""}>â–¼</button>
               </div>
             </article>
           `;
@@ -537,7 +537,7 @@ function renderIncubatorSidebar(state) {
           </article>
         `).join("") : `<p class="incubator-sidebar__empty">No extra buildings waiting.</p>`}
         ${waiting.length > 8 ? `<small class="incubator-sidebar__more">+${waiting.length - 8} more</small>` : ""}
-        <button class="button button--ghost" data-action="open-catalog">📚 Building Catalog</button>
+        <button class="button button--ghost" data-action="open-catalog">ðŸ“š Building Catalog</button>
       </section>
     </aside>
   `;
@@ -619,7 +619,7 @@ function renderBuildingsView(state) {
         <input
           type="text"
           class="city-workspace__building-search"
-          placeholder="Search buildings…"
+          placeholder="Search buildingsâ€¦"
           value="${(state.transientUi?.buildingTextQuery ?? "").replace(/"/g, "&quot;")}"
           data-action="set-building-text-query"
           autocomplete="off"
@@ -918,9 +918,9 @@ export function renderCityPage(state) {
     aside: cityMode === "buildings" ? renderIncubatorSidebar(state) : "",
     heroActions: `
       <div class="page-hero__time-controls">
-        <button class="button" data-action="advance-time" data-step="day" title="Advance Day">▶ Advance Day</button>
+        <button class="button" data-action="advance-time" data-step="day" title="Advance Day">â–¶ Advance Day</button>
         <details class="page-hero__time-more">
-          <summary class="button button--ghost button--small" title="More time options">More ▾</summary>
+          <summary class="button button--ghost button--small" title="More time options">More â–¾</summary>
           <div class="page-hero__time-more-body">
             <button class="button button--ghost button--small" data-action="advance-time" data-step="3days" aria-label="Advance 3 days" title="Advance 3 days">+3d</button>
             <button class="button button--ghost button--small" data-action="advance-time" data-step="week" aria-label="Advance 1 week" title="Advance 1 week">+Week</button>

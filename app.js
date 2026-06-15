@@ -1,9 +1,9 @@
-// Main application controller.
+﻿// Main application controller.
 // This file wires together state, actions, routing, save/load, manifestation,
 // admin commands, and top-level UI events. Most game-wide behavior eventually
 // passes through here, while lower-level systems keep the domain rules isolated.
 import { AdminConsole } from "./admin/AdminConsole.js?v=v1.7.20-20260615130257";
-import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js?v=v1.7.20-20260615130257";
+import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js?v=v1.7.20-20260615180000";
 import {
   APP_VERSION,
   BUILDING_ACTIVE_THRESHOLD,
@@ -199,7 +199,7 @@ const toasts = new Toasts();
 window.addEventListener("crystal-forge-cooldown-ready", (event) => {
   const cooldown = event.detail?.cooldown;
   if (!cooldown) return;
-  toasts.show(`⏱ ${cooldown.name} is ready!`, "success");
+  toasts.show(`â± ${cooldown.name} is ready!`, "success");
   void audioEngine?.playUiAccent?.("confirm");
 });
 const animationEngine = new AnimationEngine();
@@ -615,8 +615,8 @@ function applyCraftingTemplateAndStation(form) {
   const timeMult = station?.timeBonus ?? 1;
 
   // Batch crafting: produces `count` items in less total time than crafting one-by-one.
-  // x5 → 50% of (5×singleTime). x10 → 30% of (10×singleTime).
-  // Available for every category (perm / cons / scroll / potion) — a master
+  // x5 â†’ 50% of (5Ã—singleTime). x10 â†’ 30% of (10Ã—singleTime).
+  // Available for every category (perm / cons / scroll / potion) â€” a master
   // crafter can set up a production line for swords or rings just as well as
   // for potions, so the same tiered discount applies.
   const batchAllowed = Boolean(cat);
@@ -629,7 +629,7 @@ function applyCraftingTemplateAndStation(form) {
   const totalMana = Math.max(1, Math.ceil(goldTotal * 0.01));
   const dailyGold = +(goldTotal / days).toFixed(2);
   const dailyMana = Math.max(1, Math.ceil(totalMana / days));
-  const nameWithBatch = batchCount > 1 ? `${tpl.name} ×${batchCount}` : tpl.name;
+  const nameWithBatch = batchCount > 1 ? `${tpl.name} Ã—${batchCount}` : tpl.name;
 
   const set = (field, value) => {
     const el = form.querySelector(`[data-crafting-field="${field}"]`);
@@ -640,7 +640,7 @@ function applyCraftingTemplateAndStation(form) {
   set("costs.gold", dailyGold);
   set("costs.mana", dailyMana);
 
-  // Batch row is always visible — even for custom (no-template) items, the
+  // Batch row is always visible â€” even for custom (no-template) items, the
   // user can mark a batch and the apply-crafting-batch handler will scale
   // the duration with the same time-discount formula.
 }
@@ -648,7 +648,7 @@ function applyCraftingTemplateAndStation(form) {
 /**
  * Apply the batch time-discount to a custom (no-template) crafting form.
  * Uses dataset.baseDuration / dataset.baseName as the "single-item" basis so
- * switching between ×1 / ×5 / ×10 is fully reversible (no compounding).
+ * switching between Ã—1 / Ã—5 / Ã—10 is fully reversible (no compounding).
  * The first time it runs (no base stored yet), it captures the current
  * field values as the base.
  */
@@ -660,7 +660,7 @@ function applyCraftingBatchToCustomForm(form, batchCount) {
   // Lazy-init the "base" snapshot the first time the user touches a batch
   // button (or whenever the base was cleared, e.g. on template selection).
   if (!form.dataset.baseName) {
-    form.dataset.baseName = nameField.value.replace(/\s*×\d+\s*$/, "");
+    form.dataset.baseName = nameField.value.replace(/\s*Ã—\d+\s*$/, "");
   }
   if (!form.dataset.baseDuration) {
     const parsed = Number(durationField.value);
@@ -671,7 +671,7 @@ function applyCraftingBatchToCustomForm(form, batchCount) {
   const baseDuration = Number(form.dataset.baseDuration);
   const batchTimeMult = batchCount >= 10 ? 0.30 : batchCount >= 5 ? 0.50 : 1;
 
-  nameField.value = batchCount > 1 ? `${baseName} ×${batchCount}` : baseName;
+  nameField.value = batchCount > 1 ? `${baseName} Ã—${batchCount}` : baseName;
   if (Number.isFinite(baseDuration) && baseDuration > 0) {
     const scaled = +Math.max(0.5, baseDuration * batchCount * batchTimeMult).toFixed(2);
     durationField.value = String(scaled);
@@ -738,8 +738,8 @@ function describeCityStatus(state) {
 
 // Builds a single plain-text export of every saved chronicle note, oldest
 // first (so the resulting document reads like a journal from start to end).
-// Each entry header has BOTH date forms — the long in-world line and the
-// short numeric "D/M/YYYY" — so when this is pasted into a session log or
+// Each entry header has BOTH date forms â€” the long in-world line and the
+// short numeric "D/M/YYYY" â€” so when this is pasted into a session log or
 // shared with players, dates can be referenced either way.
 function buildChronicleNotesExport(state) {
   const notes = state.chronicleNotes ?? {};
@@ -757,7 +757,7 @@ function buildChronicleNotesExport(state) {
   }
 
   const lines = [
-    "Crystal Forge — Chronicle Notes",
+    "Crystal Forge â€” Chronicle Notes",
     `Exported on ${formatDate(today)}`,
     `${entries.length} ${entries.length === 1 ? "entry" : "entries"}`,
     "",
@@ -863,7 +863,7 @@ function createTurnSummary(previousState, nextState, days, advanceResult = null)
     .slice(0, 3);
   const nextAttention = getMayorAdvice(nextState).slice(0, 2);
 
-  // Newly-ready things — items / cooldowns that flipped from "still cooking"
+  // Newly-ready things â€” items / cooldowns that flipped from "still cooking"
   // to "use it now" during this advance. Surfaced in a dominant header strip
   // at the top of the Turn Digest.
   const previousDay = previousState.calendar?.dayOffset ?? 0;
@@ -3535,7 +3535,7 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-// Hidden file input for "Load from File…" — kept outside the re-rendered
+// Hidden file input for "Load from Fileâ€¦" â€” kept outside the re-rendered
 // shell so the file picker survives state updates.
 (function ensureLoadSaveFileInput() {
   if (document.getElementById("load-save-file-input")) {
@@ -3555,7 +3555,7 @@ document.addEventListener("keydown", (event) => {
   document.body.appendChild(input);
 })();
 
-// Page navigation shortcuts — match ROUTE_SHORTCUTS in PageShell.js
+// Page navigation shortcuts â€” match ROUTE_SHORTCUTS in PageShell.js
 const PAGE_NAV_SHORTCUTS = {
   "1": "./gm.html",
   "2": "./forge.html",
@@ -3612,7 +3612,7 @@ document.addEventListener("keydown", (event) => {
   if (navHref && key.length === 1 && /[0-9]/.test(key)) {
     clearNavigationShortcutTimer();
     if (adminUnlockPrefix) {
-      // Could be part of 432! — wait 380ms before navigating
+      // Could be part of 432! â€” wait 380ms before navigating
       navigationShortcutTimer = window.setTimeout(() => {
         navigationShortcutTimer = null;
         if (navigationShortcutBuffer !== "432!") {
@@ -3669,7 +3669,7 @@ root.addEventListener("click", async (event) => {
     case "toggle-session-mode": {
       const isOn = document.documentElement.classList.toggle("session-mode");
       localStorage.setItem("cf-session-mode", isOn ? "1" : "0");
-      reportSuccess(`Session mode ${isOn ? "on — animations killed" : "off"}.`);
+      reportSuccess(`Session mode ${isOn ? "on â€” animations killed" : "off"}.`);
       break;
     }
     case "toggle-theme": {
@@ -4023,7 +4023,7 @@ root.addEventListener("click", async (event) => {
             typeId: target.dataset.typeId ?? "rescue",
             durationDays: Math.max(1, Number(target.dataset.durationDays ?? 7) || 7)
             // Intentionally NOT resetting team / awakenedIds / resources / vehicleId
-            // here — switching missions used to wipe the user's crew picks, which
+            // here â€” switching missions used to wipe the user's crew picks, which
             // is annoying when they want to compare two missions with the same
             // squad. If a class isn't valid for the new mission's allowedClasses,
             // it's harmlessly ignored at preview/launch time.
@@ -4323,7 +4323,7 @@ root.addEventListener("click", async (event) => {
     case "clear-npc-filter":
       renderer.setTransientUi({ npcFilter: { query: "", statuses: [] } }, getCurrentState());
       break;
-    // ─── Crafting ──────────────────────────────────────────────────────────────
+    // â”€â”€â”€ Crafting â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     case "open-crafting-form":
       renderer.setTransientUi({ craftingFormOpen: true, craftingEditItem: null }, getCurrentState());
       break;
@@ -4409,7 +4409,7 @@ root.addEventListener("click", async (event) => {
       const collectId = target.dataset.itemId ?? "";
       const itemName  = getCurrentState().craftingItems?.find(x => x.id === collectId)?.name ?? "Item";
       commit((draft) => { collectCraftingItem(draft, collectId); });
-      reportSuccess(`📦 "${itemName}" collected!`);
+      reportSuccess(`ðŸ“¦ "${itemName}" collected!`);
       break;
     }
     case "delete-crafting-item": {
@@ -4510,8 +4510,8 @@ root.addEventListener("click", async (event) => {
       }
       break;
     }
-    // ─── End Crafting ──────────────────────────────────────────────────────────
-    // ─── Cooldowns ─────────────────────────────────────────────────────────────
+    // â”€â”€â”€ End Crafting â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // â”€â”€â”€ Cooldowns â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     case "add-cooldown": {
       const form = target.closest("[data-cooldown-form]");
       if (!form) break;
@@ -4570,7 +4570,7 @@ root.addEventListener("click", async (event) => {
       commit((draft) => { restartCooldown(draft, id, day); });
       if (item?.type === "dice") {
         const refreshed = getCurrentState().cooldowns?.find((c) => c.id === id);
-        reportSuccess(`Rerolled ${item.diceCount}d${item.diceSides} → ${refreshed?.rolledDays ?? "?"} d`);
+        reportSuccess(`Rerolled ${item.diceCount}d${item.diceSides} â†’ ${refreshed?.rolledDays ?? "?"} d`);
       } else {
         reportSuccess("Cooldown restarted.");
       }
@@ -4589,7 +4589,7 @@ root.addEventListener("click", async (event) => {
       reportSuccess("Aged by 1 day.");
       break;
     }
-    // ─── End Cooldowns ─────────────────────────────────────────────────────────
+    // â”€â”€â”€ End Cooldowns â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     case "delete-npc": {
       const npcId = target.dataset.npcId ?? "";
       if (!npcId) {
@@ -5103,7 +5103,7 @@ root.addEventListener("click", async (event) => {
       actions.openAdmin();
       break;
 
-    // ─── Equipment Sheet (player character loadouts) ────────────────────────
+    // â”€â”€â”€ Equipment Sheet (player character loadouts) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     case "set-active-player-character": {
       const characterId = target.dataset.characterId ?? "";
       if (characterId) {
@@ -5151,7 +5151,7 @@ root.addEventListener("click", async (event) => {
       break;
     }
     case "set-equipment-slot": {
-      // Click path: rarity pips carry data-value. Text inputs/textareas don't —
+      // Click path: rarity pips carry data-value. Text inputs/textareas don't â€”
       // those are handled in the input listener below.
       if (!Object.prototype.hasOwnProperty.call(target.dataset, "value")) {
         break;
@@ -5190,7 +5190,7 @@ root.addEventListener("click", async (event) => {
       });
       break;
     }
-    // ────────────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     default:
       break;
@@ -5278,7 +5278,7 @@ document.addEventListener("pointercancel", () => {
   applyMapViewPreview(getMapViewState());
 });
 
-// ─── Cooldown form: swap visible type-fields + auto-fill name from source ────
+// â”€â”€â”€ Cooldown form: swap visible type-fields + auto-fill name from source â”€â”€â”€â”€
 root.addEventListener("change", (event) => {
   const typeSel = event.target.closest("[data-cooldown-type-select]");
   if (typeSel) {
@@ -5341,7 +5341,7 @@ root.addEventListener("change", (event) => {
     const form = document.getElementById("crafting-form");
     if (!form) return;
     form.dataset.templateId = tpl.id;
-    // Picking a template overrides any custom base — the template formula
+    // Picking a template overrides any custom base â€” the template formula
     // becomes the source of truth for name/duration scaling.
     delete form.dataset.baseName;
     delete form.dataset.baseDuration;
@@ -5614,7 +5614,7 @@ root.addEventListener("change", (event) => {
 
 root.addEventListener("input", (event) => {
   // Clear the cached batch base when the user manually edits the name or
-  // duration on the crafting form. Without this, the next click on ×5/×10
+  // duration on the crafting form. Without this, the next click on Ã—5/Ã—10
   // would re-apply the OLD base (from before the edit) and clobber the
   // typed change. Only matters for custom (no-template) crafts.
   const craftField = event.target.closest("[data-crafting-field]");
@@ -5625,7 +5625,7 @@ root.addEventListener("input", (event) => {
       if (form && !form.dataset.templateId) {
         delete form.dataset.baseName;
         delete form.dataset.baseDuration;
-        // Reset the visible selection to ×1 too — the user is now editing
+        // Reset the visible selection to Ã—1 too â€” the user is now editing
         // a single-item baseline, not a derived batch.
         if (form.dataset.batchCount && form.dataset.batchCount !== "1") {
           form.dataset.batchCount = "1";
@@ -5700,7 +5700,7 @@ root.addEventListener("input", (event) => {
     );
   }
 
-  // ─── Equipment Sheet inputs ──────────────────────────────────────────────
+  // â”€â”€â”€ Equipment Sheet inputs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (target.dataset.action === "set-player-character-field") {
     const characterId = target.dataset.characterId ?? "";
     const field = target.dataset.field ?? "";
@@ -5755,7 +5755,7 @@ root.addEventListener("input", (event) => {
       });
     }
   }
-  // ─────────────────────────────────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 });
 

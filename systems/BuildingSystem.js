@@ -1,8 +1,8 @@
-// Building instance lifecycle helpers.
+﻿// Building instance lifecycle helpers.
 // This file handles quality thresholds, building stages, manifestation merges,
 // overflow into shards, and metadata updates for individual structures.
 import { BUILDING_ACTIVE_THRESHOLD, BUILDING_QUALITY_CAP } from "../content/Config.js?v=v1.7.20-20260615130257";
-import { getCatalogKey } from "../content/BuildingCatalog.js?v=v1.7.20-20260615130257";
+import { getCatalogKey } from "../content/BuildingCatalog.js?v=v1.7.20-20260615180000";
 import { createId } from "../engine/Utils.js?v=v1.7.20-20260615130257";
 import { createBuildingGameplayProfile } from "./BalanceSystem.js?v=v1.7.20-20260615130257";
 import { addShards } from "./ShardSystem.js?v=v1.7.20-20260615130257";

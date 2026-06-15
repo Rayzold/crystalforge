@@ -1,8 +1,8 @@
-// Public/player-facing presentation page.
+﻿// Public/player-facing presentation page.
 // It exposes the shared session state in a simplified read-mostly format with
 // manifest choices, incubator controls, active buildings, and table-safe info.
 import { APP_DISPLAY_VERSION, BUILD_NOTES, FIREBASE_DEFAULT_REALM_ID } from "../content/Config.js?v=v1.7.20-20260615130257";
-import { BUILDING_ROLE_LEGEND, getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615130257";
+import { BUILDING_ROLE_LEGEND, getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615180000";
 import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER, getCitizenHelpText } from "../content/CitizenConfig.js?v=v1.7.20-20260615130257";
 import { GLOSSARY_TERMS } from "../content/GlossaryConfig.js?v=v1.7.20-20260615130257";
 import { RARITY_ORDER } from "../content/Rarities.js?v=v1.7.20-20260615130257";
@@ -66,7 +66,7 @@ function renderPublishedFooter(state) {
 function renderPlayerSessionBanner(state) {
   const date = getStructuredDate(state.calendar.dayOffset);
   const nextHoliday = getNextHoliday(state.calendar.dayOffset);
-  const nextHolidayGlyph = nextHoliday ? getHolidayGlyph(nextHoliday) : "✦";
+  const nextHolidayGlyph = nextHoliday ? getHolidayGlyph(nextHoliday) : "âœ¦";
   const nextHolidayAccentClass = nextHoliday ? getHolidayTypeClass(nextHoliday) : "";
   const meta = state.transientUi?.firebasePublishedMeta ?? null;
   const timestamp = meta?.updatedAtMs ? new Date(meta.updatedAtMs).toLocaleString() : "No published timestamp yet";
@@ -390,7 +390,7 @@ function filterBuildingsByRarity(buildings, rarityFilter) {
 
 function getQualityMultiplierReadout(building) {
   const multiplier = getBuildingMultiplier(building?.quality ?? 0);
-  return `${formatBuildingExactQualityDisplay(building)}${multiplier > 1 ? ` · ${multiplier}x` : ""}`;
+  return `${formatBuildingExactQualityDisplay(building)}${multiplier > 1 ? ` Â· ${multiplier}x` : ""}`;
 }
 
 function getPlayerEffectiveRateSummary(building, state, workforceSummary) {
