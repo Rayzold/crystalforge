@@ -171,6 +171,7 @@ import {
   resetSave,
   restoreSessionSnapshot,
   createSerializableState,
+  saveAutoLocalState,
   saveGameState,
   saveManualState,
   validateAndMigrateSave
@@ -3207,6 +3208,40 @@ const actions = {
     const json = exportSave(getCurrentState());
     await copyTextToClipboard(json, "Save JSON copied to clipboard.");
   },
+  downloadSaveFile() {
+    try {
+      const json = exportSave(getCurrentState());
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+      link.href = url;
+      link.download = `crystal-forge-save-${stamp}.json`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      reportSuccess("Save downloaded.", "save");
+    } catch (error) {
+      reportError(error?.message || "Could not download save.");
+    }
+  },
+  async loadSaveFromFile(file) {
+    if (!file) {
+      return;
+    }
+    try {
+      const text = await file.text();
+      const nextState = importSave(text);
+      gameState.replace(nextState);
+      resetTransientUi();
+      markRecentResourceChanges(["gold", "food", "materials", "salvage", "mana", "prosperity"]);
+      markRecentCitizenChanges(Object.keys(getCurrentState().citizens ?? {}));
+      reportSuccess(`Save loaded from ${file.name}.`, "load");
+    } catch (error) {
+      reportError(error?.message || "Could not read save file.");
+    }
+  },
   async copyCityStatus() {
     await copyTextToClipboard(describeCityStatus(getCurrentState()), "City status copied.");
   },
@@ -3385,7 +3420,18 @@ gameState.subscribe((state) => {
 });
 
 window.addEventListener("pagehide", () => {
-  saveGameState(getCurrentState());
+  const state = getCurrentState();
+  saveGameState(state);
+  // sessionStorage is wiped when the tab closes, so also keep a copy in
+  // localStorage as a safety net. loadGameState() will fall back to this
+  // if sessionStorage is empty at boot.
+  saveAutoLocalState(state);
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") {
+    saveAutoLocalState(getCurrentState());
+  }
 });
 
 document.addEventListener(
@@ -3448,6 +3494,26 @@ function getAdminUnlockPrefix(buffer) {
 }
 
 installModalKeyboardHandlers(document);
+
+// Hidden file input for "Load from File…" — kept outside the re-rendered
+// shell so the file picker survives state updates.
+(function ensureLoadSaveFileInput() {
+  if (document.getElementById("load-save-file-input")) {
+    return;
+  }
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "application/json,.json";
+  input.id = "load-save-file-input";
+  input.style.display = "none";
+  input.addEventListener("change", () => {
+    const file = input.files && input.files[0];
+    if (file) {
+      actions.loadSaveFromFile(file);
+    }
+  });
+  document.body.appendChild(input);
+})();
 
 // Page navigation shortcuts — match ROUTE_SHORTCUTS in PageShell.js
 const PAGE_NAV_SHORTCUTS = {
@@ -4645,6 +4711,17 @@ root.addEventListener("click", async (event) => {
     case "load-manual-state": {
       const slot = Number(target.dataset.slot) || 1;
       actions.loadManualState(slot);
+      break;
+    }
+    case "download-save-file":
+      actions.downloadSaveFile();
+      break;
+    case "load-save-file": {
+      const input = document.getElementById("load-save-file-input");
+      if (input) {
+        input.value = "";
+        input.click();
+      }
       break;
     }
     case "save-firebase-realm":

@@ -48,6 +48,10 @@ import { normalizeCooldowns } from "./CooldownSystem.js?v=2.0.44";
 
 const SESSION_STATE_KEY = "crystal-forge-session-state-v1";
 const BUILD_NOTES_SEEN_KEY = "crystal-forge-build-notes-seen-v1";
+// Auto-saved snapshot in localStorage. Written on pagehide / visibility-hidden
+// so closing the tab does not lose progress. Read as a fallback when
+// sessionStorage is empty at boot.
+const AUTO_SAVE_KEY = "crystal-forge-auto-save-v1";
 
 // Three local save slots. Slot 1 reuses the original MANUAL_SAVE_KEY so
 // existing local saves keep loading; slots 2 and 3 use parallel keys.
@@ -657,12 +661,55 @@ export function validateAndMigrateSave(rawSave) {
 }
 
 export function loadGameState() {
-  const rawText = getSessionSaveRawText();
-  const parsed = safeJsonParse(rawText);
-  if (!parsed) {
-    return createInitialState();
+  const sessionParsed = safeJsonParse(getSessionSaveRawText());
+  if (sessionParsed) {
+    return validateAndMigrateSave(sessionParsed);
   }
-  return validateAndMigrateSave(parsed);
+  // Fallback: when sessionStorage is empty (closed tab, fresh tab, browser
+  // restart) try the auto-saved snapshot in localStorage before starting
+  // a brand new game.
+  try {
+    const autoParsed = safeJsonParse(localStorage.getItem(AUTO_SAVE_KEY));
+    if (autoParsed) {
+      return validateAndMigrateSave(autoParsed);
+    }
+  } catch (error) {
+    // localStorage may be unavailable (privacy mode); fall through.
+  }
+  return createInitialState();
+}
+
+export function saveAutoLocalState(state) {
+  try {
+    const serializable = createSerializableState(state, { autoSavedAt: Date.now() });
+    localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify(serializable));
+  } catch (error) {
+    // Quota or privacy mode — silent failure keeps the in-memory game alive.
+  }
+}
+
+export function clearAutoLocalState() {
+  try {
+    localStorage.removeItem(AUTO_SAVE_KEY);
+  } catch (error) {
+    // Ignore storage failures.
+  }
+}
+
+export function getAutoSaveMeta() {
+  try {
+    const parsed = safeJsonParse(localStorage.getItem(AUTO_SAVE_KEY));
+    if (!parsed) {
+      return null;
+    }
+    return {
+      autoSavedAt: Number(parsed.autoSavedAt ?? 0) || null,
+      buildingCount: Array.isArray(parsed.buildings) ? parsed.buildings.length : 0,
+      population: Number(parsed.resources?.population ?? 0) || 0
+    };
+  } catch (error) {
+    return null;
+  }
 }
 
 export function createSerializableState(state, extraFields = {}) {
@@ -760,5 +807,6 @@ export function resetSave() {
   for (const slot of MANUAL_SAVE_SLOTS) {
     localStorage.removeItem(slot.key);
   }
+  clearAutoLocalState();
   return createInitialState();
 }

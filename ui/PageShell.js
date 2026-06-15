@@ -689,6 +689,10 @@ function renderTopNavSettings(state, manualSaveSlots, uiDensity, conciseMode, di
               </div>
             `).join("")}
           </div>
+          <div class="top-nav__settings-row">
+            <button class="button button--ghost" type="button" data-action="download-save-file" title="Download current save as a .json file">⬇ Download Save</button>
+            <button class="button button--ghost" type="button" data-action="load-save-file" title="Load a save from a .json file">⬆ Load from File…</button>
+          </div>
         </div>
       </div>
     </div>
