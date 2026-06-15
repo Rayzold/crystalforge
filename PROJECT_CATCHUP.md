@@ -6,7 +6,7 @@ Current build: `Preview v1.7.20` (cache-busters use timestamp form `?v=v1.7.20-Y
 
 Current save version: `12`
 
-Current pushed commit at time of writing: `9ad0aca docs(claude.md): refresh memory file with session-learned context`. The last tagged release commit is `da3077d Release v1.7.20`; there are ~80 unreleased commits on top of it covering the page redesigns, theming work, and content described below.
+Current pushed commit at time of writing: `1f713f1 feat(codex): pokédex-style Building Codex page tracks discovery progress`. The last tagged release commit is `da3077d Release v1.7.20`; there are ~85 unreleased commits on top of it covering the page redesigns, theming work, and content described below.
 
 Companion documents:
 
@@ -328,6 +328,12 @@ Date-based item tracking that drains the town economy while items are in progres
 ### `cooldowns.html`
 
 A page for Seeker / Oracle / NPC / custom cooldowns. Each entry has a start date (day/month/year picker, defaults to today), a length in days, and a "Ready!" indicator + splash toast when it hits 100%. `ui/CooldownsPage.js`, `systems/CooldownSystem.js`. Toast events for cooldown readiness are dispatched globally from `ui/UIRenderer.js` so the splash fires regardless of which page the GM is on.
+
+### `codex.html`
+
+The Building Codex — a pokédex-style discovery tracker for the canonical building pools. Each entry is one (name, rarity) pair from `BUILDING_POOLS`; matched against `state.buildings` to compute discovered vs undiscovered. The header shows an overall completion ring (e.g. 129 / 139 = 93%) plus a row of per-rarity progress bars. Three independent filters: rarity, role (Harvest / Trade / Industry / Military / Arcane / Sacred / Housing / Civic / Harbor / Culture / Frontier), and discovery state. Discovered cards show building art, role icon, district, flavor text, best-quality-reached, and the 350% apex bonus when the player has hit it. Undiscovered cards show a diagonal-hatched silhouette with a `???` name and a hint pointing at the rarity needed. Crystal Upgrade entries are filtered out (they're slot placeholders, not real buildings).
+
+Files: `ui/CodexPage.js` (entire page logic), `codex.html` (entry), CSS block in `styles.css` starting near `.codex-header`.
 
 ### `equipment.html`
 
@@ -739,7 +745,10 @@ The full granular changelog lives in `BUILD_NOTES` near the top of `content/Conf
 
 ### Unreleased work on top of v1.7.20 (June 2026 sessions)
 
-The branch carries ~80 commits since `da3077d Release v1.7.20`. The big themes:
+The branch carries ~85 commits since `da3077d Release v1.7.20`. The big themes:
+
+- **Building Codex** — pokédex-style discovery tracker at `codex.html` (Craft top-nav group). Lists every (name, rarity) entry in `BUILDING_POOLS`, marks discovered vs undiscovered based on `state.buildings`, shows per-rarity progress bars + overall % ring. Filters by rarity / role / discovery state. `ui/CodexPage.js` is the entire page; pulled together from `createBaseBuildingCatalog()` + the `BUILDING_ROLE_LEGEND` list. Discovered cards show art, district, flavor, best quality reached, and the 350% apex bonus when applicable; undiscovered show a hatched silhouette with `???` name.
+- **Source-tree mojibake repair (666 sequences across 13 files)** — `app.js`, `ui/PageShell.js`, `admin/AdminConsole.js`, and many smaller files had accumulated double-encoded UTF-8 corruption (top-nav showed `CORE Â-¾` instead of `CORE ▾`, resource bar showed `ðŸ'°` instead of `💰`). Fixed in one ftfy-style pass and documented as a friction point that can affect ANY file, not just standalone HTML docs.
 
 - **Parchment theme** — optional warm aged-paper theme toggled with the 📜 button in the top-nav. Persists to `localStorage["crystalforge-theme"]`. `data-theme="parchment"` attribute set on BOTH `<html>` and `<body>`, all CSS selectors are scoped with no element prefix so they match either host. Variable swaps cover ~30 CSS vars; structural overrides handle the dozens of components that use hardcoded rgba dark backgrounds. Town Map canvas carries dual palettes (`HEX_PALETTES.dark` / `.parchment`) selected from `document.body.dataset.theme` at draw time. Full 8-round fix history in `redesign-parchment-theme.md`.
 - **Ultima page** — `POWERS_REFERENCE.html` added to the Craft top-nav group as a standalone static reference doc. XP cost panel at the top (2 / 3 / 4 paths × 5 levels with Ultima cap highlighted), sticky `← Crystal Forge` back-link strip, and ~700 mojibake characters repaired across two rounds (em-dashes, middle dots, ellipses, box-drawing chars, arrows, math signs, path-icon emoji).
@@ -1121,13 +1130,17 @@ The Windows `python.exe` in this environment may point to a Store stub. If local
 
 When adding a parchment override, write `[data-theme="parchment"] .my-class { … }` — NOT `body[data-theme="parchment"]` or `html[data-theme="parchment"]`. The JS toggle sets `data-theme` on both `<html>` and `<body>` so an unprefixed selector matches either. If a new dark-only component appears in parchment, either add a structural override at the top of `styles.css` or refactor the rule to use `var(--panel)` / `var(--bg-1)` instead of a hardcoded rgba.
 
-### Standalone HTML Files Risk Mojibake
+### Any Source File Can Catch Mojibake
 
-`POWERS_REFERENCE.html`, `battle.html`, `DND_MUSIC_GUIDE.html`, and `NOTION_TOC.html` do not load `boot.js` — they have their own `<style>` blocks and run independently. Editors that aren't UTF-8 safe can introduce double-encoded mojibake (em-dashes start rendering as the literal sequence `â€"`, middle dots as `Â·`, ⚡ emoji as `âš¡`, 🌊 emoji as `ðŸŒŠ`). Fix pattern is encode-as-cp1252 then decode-as-utf-8, or use the targeted replacement table in `redesign-parchment-theme.md` (Round 2 section).
+Originally noted as a standalone-HTML problem (`POWERS_REFERENCE.html` and friends), but the June 2026 sessions discovered the same corruption in `app.js`, `ui/PageShell.js`, `admin/AdminConsole.js`, and several other shell files. Symptoms in the running app: top-nav shows `CORE Â-¾` instead of `CORE ▾`, resource bar shows `ðŸ'°` instead of `💰`, route glyphs show `âš¡` instead of `⚡`. Cause: source files re-saved through a non-UTF-8 editor at some point. Fix: walk runs that start with `Â`/`Ã`/`â`/`ð`, encode the run as cp1252 (with latin-1 fallback for the 5 cp1252-undefined slots), then decode the resulting bytes as UTF-8 strict — swap if the result is shorter than the run. The targeted replacement table for the most common patterns lives in `redesign-parchment-theme.md` (Round 2 section).
 
 ### `.game-shell--page-X` Can Carry Stale Grid Overrides
 
 Per-page shell overrides in `styles.css` may set a `grid-template-columns` that was sized for a legacy sidebar. If the sidebar is hidden but the columns persist, every top-level shell child (top-nav, resource-bar, alert-strip, main) gets squeezed into the wrong column. Forge hit this — the top-nav visibly split until the override was collapsed back to `minmax(0, 1fr)`.
+
+### Adding A New Page Requires Bumping `UIRenderer.js`'s Cache Buster
+
+When you add a new route (new HTML entry + `case` in `ui/UIRenderer.js:resolvePage`), the browser will still execute the CACHED `UIRenderer.js` if its import URL in `app.js` hasn't changed. The new page key falls through to `home` silently — `data-page` and `.page-stage--X` classes look correct, but the content panels are the home dashboard. Fix: bump `app.js`'s `./ui/UIRenderer.js?v=...` cache buster every time you add a route. Bit me on the Codex rollout.
 
 ### Two Cache-Buster Conventions In Flight
 
@@ -1210,6 +1223,7 @@ Use this list when trying to find a feature quickly.
 - Army (aggregate muster): `ui/ArmyPage.js`
 - Crafting: `ui/CraftingPage.js` (templates + custom items + ×5/×10 batch)
 - Cooldowns: `ui/CooldownsPage.js`, `systems/CooldownSystem.js`
+- Codex (pokédex over canonical pools): `ui/CodexPage.js`, `codex.html`, CSS block in `styles.css`
 - Chronicle / calendar: `systems/CalendarSystem.js`, `systems/MonthlyChronicleSystem.js`, `ui/ChronicleCalendar.js`, `ui/ChroniclePage.js`
 - Weather: calm pools in `systems/CalendarSystem.js`, dramatic pools and randomizer in `systems/WeatherSystem.js`
 - Help / glossary: `ui/HelpPage.js`, `content/GlossaryConfig.js`

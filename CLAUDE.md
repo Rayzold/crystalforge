@@ -17,9 +17,9 @@ Crystal Forge is a static browser-based fantasy settlement simulator (GM control
 - `APP_RELEASE_STAGE = "preview"`
 - `SAVE_VERSION = 12`
 - `MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3"`
-- Last pushed: `1187837 feat(buildings): 46 polished 350% apex notes wired through the catalog`
+- Last pushed: `1f713f1 feat(codex): pokédex-style Building Codex page tracks discovery progress`
 
-**Cache-buster:** boot.js entry now uses **timestamp form** `?v=v1.7.20-YYYYMMDDHHMMSS` (current `20260615180000`). Older modules still on the legacy `?v=2.0.X` are gradually being migrated. When bumping, prefer the timestamp form for consistency.
+**Cache-buster:** boot.js entry now uses **timestamp form** `?v=v1.7.20-YYYYMMDDHHMMSS` (current `20260615190000`). Older modules still on the legacy `?v=2.0.X` are gradually being migrated. When bumping, prefer the timestamp form for consistency.
 
 ---
 
@@ -68,6 +68,7 @@ assets/      audio/, images/buildings/, images/vehicles/, video/
 | Army | `army.html` | `ui/ArmyPage.js` | aggregates citizens + awakened + vehicles + behemoths |
 | Crafting | `crafting.html` | `ui/CraftingPage.js` | template-based + custom items, batch x1/x5/x10 |
 | Cooldowns | `cooldowns.html` | `ui/CooldownsPage.js` | `systems/CooldownSystem.js` |
+| Codex | `codex.html` | `ui/CodexPage.js` | pokédex over `BUILDING_POOLS` + `state.buildings`; filters by rarity / role / discovery |
 | Chronicle | `chronicle.html` | `ui/ChronicleCalendar.js`, `ui/ChroniclePage.js` | `CalendarSystem.js`, `MonthlyChronicleSystem.js`, `WeatherSystem.js` |
 | Ultima | `POWERS_REFERENCE.html` | **standalone** — own dark theme, no app shell | none — static reference doc with sticky back-link strip |
 | Player | `player.html` | `ui/PlayerPage.js` | shared screen for players |
@@ -111,7 +112,7 @@ assets/      audio/, images/buildings/, images/vehicles/, video/
 
 8. **Parchment theme uses `[data-theme="parchment"]` on BOTH `<html>` and `<body>`.** JS in `boot.js`, `app.js` gameState subscriber, boot-time sync, and `toggle-theme` handler all set the attribute on both elements. CSS selectors are `[data-theme="parchment"]` (no element prefix) so they match either host. The toggle persists via `localStorage["crystalforge-theme"]`. Many components use hardcoded rgba dark backgrounds — variable swaps don't reach them; structural overrides live in `styles.css` under the parchment block.
 
-9. **Standalone HTML files (`POWERS_REFERENCE.html`, `battle.html`, `DND_MUSIC_GUIDE.html`, `NOTION_TOC.html`) do NOT load the app shell.** They have their own `<style>` blocks. Editing them with non-UTF-8-safe tools can introduce double-encoded mojibake (e.g. `â€"` for em-dash). Fix pattern: `text.encode(cp1252).decode(utf-8)` or targeted string replace.
+9. **Double-encoded UTF-8 mojibake can hit ANY source file, not just standalone HTML.** Standalone files (`POWERS_REFERENCE.html`, `battle.html`, `DND_MUSIC_GUIDE.html`, `NOTION_TOC.html`) lack the app shell so corruption shows immediately, but `app.js`, `ui/PageShell.js`, `admin/AdminConsole.js`, and several other shell files have been hit too — symptoms like `CORE Â-¾` instead of `CORE ▾` in the top-nav, or `ðŸ'°` instead of `💰` in the resource bar. Cause: source files re-saved through a non-UTF-8 editor. Fix: encode-as-cp1252-with-latin-1-fallback → decode-as-utf-8 over runs that start with `Â`/`Ã`/`â`/`ð`. Algorithm pattern documented in `redesign-parchment-theme.md` Round 2.
 
 10. **`.game-shell--page-X` may override grid layout.** Watch for stale `grid-template-columns` overrides for legacy sidebars that are now `display: none`. Forge page hit this — the 220px sidebar slot persisted and split the top-nav visually until restored to single-column.
 
@@ -169,9 +170,9 @@ git status --short --branch
 - **Core**: home, forge, economy, city
 - **People**: citizens, npcs, awakened, uniques, equipment
 - **World**: expeditions, vehicles, behemoths, army, chronicle
-- **Craft**: crafting, cooldowns, ultima, help
+- **Craft**: crafting, cooldowns, codex, ultima, help
 
-`PAGE_ROUTES` in `content/Config.js` is the canonical list of nav links. To add a page: append to `PAGE_ROUTES`, then add the key to the appropriate TOP_NAV_GROUPS entry.
+`PAGE_ROUTES` in `content/Config.js` is the canonical list of nav links. To add a page: (1) append to `PAGE_ROUTES`, (2) add the key to the appropriate TOP_NAV_GROUPS entry, (3) import the renderer in `ui/UIRenderer.js` and add a `case` to `resolvePage()`, (4) **bump `UIRenderer.js`'s cache buster in `app.js`** or the browser keeps the old switch statement and your new page silently falls through to `home`.
 
 ---
 
@@ -186,6 +187,12 @@ The 📜 / 🌙 button in the top-nav fires `data-action="toggle-theme"`. Implem
 ## Session Log
 
 > After each session, append an entry. Keep entries short — 3–5 bullets max. Delete entries older than ~10 sessions.
+
+### 2026-06-15 — Codex page + source-tree mojibake sweep
+- Added Building Codex (`codex.html`, `ui/CodexPage.js`) to the Craft top-nav group: per-rarity progress bars, overall % ring, filters by rarity / role / discovery, discovered cards show art + apex bonus, undiscovered show silhouettes. Verified live with 139 cards (93% discovered on the test save).
+- Routing trap caught: when adding a new resolvePage case you MUST bump `UIRenderer.js`'s cache buster in `app.js` (`./ui/UIRenderer.js?v=...`) or the cached switch statement silently sends your new page to the home fallback. Documented in Top-Nav Group Layout section.
+- Source-tree mojibake repair: 666 double-encoded sequences swept across 13 files (`app.js` 496, `ui/PageShell.js` 40, `admin/AdminConsole.js` 39, others). Was rendering as `CORE Â-¾`, `ðŸ'°`, etc. in the top-nav and resource bar. Cause: source re-saved through a non-UTF-8 editor. Friction-point #9 expanded.
+- Last commit: `1f713f1`.
 
 ### 2026-06-15 — Apex notes + housekeeping
 - Wired 46 polished 350% apex notes onto the building catalog. Bug: `defineBuilding` and `createCatalogEntry` were not propagating new fields — fixed both.
