@@ -1,5 +1,5 @@
-import { FIREBASE_REALM_COLLECTION } from "../content/Config.js?v=v1.7.20-20260615093534";
-import { firebaseConfigured, ensureFirebaseAuth, getFirebaseUserId, loadFirebaseRuntime } from "./FirebaseConfig.js?v=v1.7.20-20260615093534";
+import { FIREBASE_REALM_COLLECTION } from "../content/Config.js?v=v1.7.20-20260615124155";
+import { firebaseConfigured, ensureFirebaseAuth, getFirebaseUserId, loadFirebaseRuntime } from "./FirebaseConfig.js?v=v1.7.20-20260615124155";
 
 async function getFirestoreRuntime() {
   const runtime = await loadFirebaseRuntime();

@@ -1,17 +1,17 @@
-import { APP_DISPLAY_VERSION, MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js?v=v1.7.20-20260615093534";
-import { getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615093534";
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615093534";
-import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js?v=v1.7.20-20260615093534";
-import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js?v=v1.7.20-20260615093534";
-import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js?v=v1.7.20-20260615093534";
-import { getDecisionHistory, getDecisionInboxItems } from "../systems/DecisionInboxSystem.js?v=v1.7.20-20260615093534";
-import { getCityTrendSummary } from "../systems/ResourceSystem.js?v=v1.7.20-20260615093534";
-import { getAllManualSaveMeta } from "../systems/StorageSystem.js?v=v1.7.20-20260615093534";
-import { getCurrentTownFocus, getMayorAdvice, getTownFocusAvailability } from "../systems/TownFocusSystem.js?v=v1.7.20-20260615093534";
-import { getCriticalAlerts, renderCrisisBanner } from "./CrisisBanner.js?v=v1.7.20-20260615093534";
-import { renderTownFocusBadge } from "./TownFocusShared.js?v=v1.7.20-20260615093534";
-import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260615093534";
-import { renderGlobalSearchWidget } from "./GlobalSearch.js?v=v1.7.20-20260615093534";
+import { APP_DISPLAY_VERSION, MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js?v=v1.7.20-20260615124155";
+import { getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615124155";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615124155";
+import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js?v=v1.7.20-20260615124155";
+import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js?v=v1.7.20-20260615124155";
+import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js?v=v1.7.20-20260615124155";
+import { getDecisionHistory, getDecisionInboxItems } from "../systems/DecisionInboxSystem.js?v=v1.7.20-20260615124155";
+import { getCityTrendSummary } from "../systems/ResourceSystem.js?v=v1.7.20-20260615124155";
+import { getAllManualSaveMeta } from "../systems/StorageSystem.js?v=v1.7.20-20260615124155";
+import { getCurrentTownFocus, getMayorAdvice, getTownFocusAvailability } from "../systems/TownFocusSystem.js?v=v1.7.20-20260615124155";
+import { getCriticalAlerts, renderCrisisBanner } from "./CrisisBanner.js?v=v1.7.20-20260615124155";
+import { renderTownFocusBadge } from "./TownFocusShared.js?v=v1.7.20-20260615124155";
+import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260615124155";
+import { renderGlobalSearchWidget } from "./GlobalSearch.js?v=v1.7.20-20260615124155";
 
 const HUD_ICON_KEYS = {
   Gold: "gold",
@@ -714,7 +714,7 @@ function renderTopNav(state, pageKey, badges, manualSaveSlots, uiDensity, concis
       ${renderGlobalSearchWidget()}
       <button class="top-nav__icon-button" type="button" data-action="open-admin" title="${state.settings?.liveSessionView ? "GM Console" : "Admin Console"}" aria-label="GM Console">🛠️</button>
       <button class="top-nav__icon-button" type="button" data-action="save-firebase-realm" title="Cloud Save (publish current state)" aria-label="Cloud Save">💾</button>
-      <button class="top-nav__icon-button" type="button" data-action="load-firebase-realm" title="Cloud Load (pull latest published state)" aria-label="Cloud Load">☁️⤵️</button>
+      <button class="top-nav__icon-button" type="button" data-action="load-firebase-realm" title="Cloud Load (pull latest published state)" aria-label="Cloud Load">📥</button>
       <button class="top-nav__icon-button" type="button" data-action="roll-dice" title="Roll Dice (${diceAmount}${diceType})" aria-label="Roll dice">🎲</button>
       <button class="top-nav__icon-button top-nav__theme-toggle" type="button" data-action="toggle-theme" title="Toggle parchment theme" aria-label="Toggle parchment theme">${(state.settings?.theme ?? "dark") === "parchment" ? "🌙" : "📜"}</button>
       ${renderTopNavSettings(state, manualSaveSlots, uiDensity, conciseMode, diceAmount, diceType, lastDiceRoll, firebaseMeta)}
