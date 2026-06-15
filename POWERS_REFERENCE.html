@@ -67,6 +67,39 @@
   /* hidden state */
   .card.hidden { display: none; }
   .section-hidden { display: none !important; }
+  /* ── Back-link strip (return to Crystal Forge) ── */
+  .back-bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: -24px -16px 24px;
+    padding: 10px 18px;
+    background: linear-gradient(180deg, rgba(20, 24, 32, 0.96), rgba(15, 17, 23, 0.92));
+    border-bottom: 1px solid #2a2520;
+    backdrop-filter: blur(8px);
+    font-family: Georgia, serif;
+    font-size: 12px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+  }
+  .back-bar__home {
+    color: #d4c9b0;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    transition: color 0.15s, background 0.15s;
+  }
+  .back-bar__home:hover { color: #f0e6cc; background: rgba(255, 255, 255, 0.04); }
+  .back-bar__home .chev { font-size: 14px; color: #7a6e5a; }
+  .back-bar__brand { color: #7a6e5a; letter-spacing: 2px; }
+  @media print { .back-bar { display: none; } }
   /* ── XP cost panel (3 columns: 2 / 3 / 4 paths) ── */
   .xp-costs {
     display: grid;
@@ -156,6 +189,11 @@
 </style>
 </head>
 <body>
+
+<nav class="back-bar" aria-label="Return to Crystal Forge">
+  <a class="back-bar__home" href="./gm.html"><span class="chev" aria-hidden="true">←</span><span>Crystal Forge</span></a>
+  <span class="back-bar__brand">Ultima · Powers Reference</span>
+</nav>
 
 <h1>POWERS REFERENCE</h1>
 <p class="subtitle">Tier 1 — 2 — 3 — 4 — 5 &nbsp;·&nbsp; Each tier includes all previous tiers</p>
