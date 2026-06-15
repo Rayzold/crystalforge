@@ -3,9 +3,9 @@ import {
   CITIZEN_DEFINITIONS,
   CITIZEN_RARITIES,
   CITIZEN_PROMOTION_PATHS
-} from "../content/CitizenConfig.js?v=v1.7.20-20260615124155";
-import { sumObjectValues } from "../engine/Utils.js?v=v1.7.20-20260615124155";
-import { addHistoryEntry } from "./HistoryLogSystem.js?v=v1.7.20-20260615124155";
+} from "../content/CitizenConfig.js?v=v1.7.20-20260615125540";
+import { sumObjectValues } from "../engine/Utils.js?v=v1.7.20-20260615125540";
+import { addHistoryEntry } from "./HistoryLogSystem.js?v=v1.7.20-20260615125540";
 
 // Legacy-only class names from pre-rework saves.
 // Do not include names that are also valid current classes, or load-time

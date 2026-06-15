@@ -1,8 +1,8 @@
 // Chronicle calendar and day detail view.
 // This page renders the in-world calendar, yearly events, weather, moon phases,
 // notes, and stored city snapshots for each recorded date.
-import { DAYS_PER_MONTH, YEARLY_EVENTS } from "../content/CalendarConfig.js?v=v1.7.20-20260615124155";
-import { escapeHtml } from "../engine/Utils.js?v=v1.7.20-20260615124155";
+import { DAYS_PER_MONTH, YEARLY_EVENTS } from "../content/CalendarConfig.js?v=v1.7.20-20260615125540";
+import { escapeHtml } from "../engine/Utils.js?v=v1.7.20-20260615125540";
 import {
   addMonthsToOffset,
   dateFromParts,
@@ -14,11 +14,11 @@ import {
   getWeatherForDay,
   WEATHER_BY_SEASON,
   DRAMATIC_WEATHER
-} from "../systems/CalendarSystem.js?v=v1.7.20-20260615124155";
-import { getDailyCitySnapshot } from "../systems/CitySnapshotSystem.js?v=v1.7.20-20260615124155";
-import { getExpeditionCalendarEntries } from "../systems/ExpeditionSystem.js?v=v1.7.20-20260615124155";
-import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js?v=v1.7.20-20260615124155";
-import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260615124155";
+} from "../systems/CalendarSystem.js?v=v1.7.20-20260615125540";
+import { getDailyCitySnapshot } from "../systems/CitySnapshotSystem.js?v=v1.7.20-20260615125540";
+import { getExpeditionCalendarEntries } from "../systems/ExpeditionSystem.js?v=v1.7.20-20260615125540";
+import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js?v=v1.7.20-20260615125540";
+import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260615125540";
 
 const WEEKDAY_ORDER = ["Moonday", "Tidesday", "Glimmerday", "Dreamday", "Soothingday", "Dazzleday", "Sunburstday"];
 

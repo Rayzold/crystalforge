@@ -1,5 +1,5 @@
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615124155";
-import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260615124155";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615125540";
+import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260615125540";
 
 function renderDeltaRows(deltas = []) {
   return deltas

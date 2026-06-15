@@ -4,30 +4,30 @@
 import {
   CITIZEN_RARITY_OUTPUT_MULTIPLIERS,
   CITIZEN_RARITY_UPKEEP_MULTIPLIERS
-} from "../content/CitizenConfig.js?v=v1.7.20-20260615124155";
-import { RESOURCE_MINIMUMS } from "../content/Config.js?v=v1.7.20-20260615124155";
-import { clamp } from "../engine/Utils.js?v=v1.7.20-20260615124155";
-import { getDistrictSummary } from "./DistrictSystem.js?v=v1.7.20-20260615124155";
-import { getBuildingTierResourceRate } from "./BuildingSystem.js?v=v1.7.20-20260615124155";
+} from "../content/CitizenConfig.js?v=v1.7.20-20260615125540";
+import { RESOURCE_MINIMUMS } from "../content/Config.js?v=v1.7.20-20260615125540";
+import { clamp } from "../engine/Utils.js?v=v1.7.20-20260615125540";
+import { getDistrictSummary } from "./DistrictSystem.js?v=v1.7.20-20260615125540";
+import { getBuildingTierResourceRate } from "./BuildingSystem.js?v=v1.7.20-20260615125540";
 import {
   getEquippedExpeditionRelics,
   getExpeditionRelicActiveBonuses,
   getLegendAssignmentDetails,
   getUniqueCitizenResourceBonuses
-} from "./ExpeditionSystem.js?v=v1.7.20-20260615124155";
-import { getBuildingPlacementBonuses } from "./MapSystem.js?v=v1.7.20-20260615124155";
-import { getCurrentTownFocus, getSuggestedFocusForAlert } from "./TownFocusSystem.js?v=v1.7.20-20260615124155";
-import { iterateCitizenRarityEntries } from "./CitizenSystem.js?v=v1.7.20-20260615124155";
+} from "./ExpeditionSystem.js?v=v1.7.20-20260615125540";
+import { getBuildingPlacementBonuses } from "./MapSystem.js?v=v1.7.20-20260615125540";
+import { getCurrentTownFocus, getSuggestedFocusForAlert } from "./TownFocusSystem.js?v=v1.7.20-20260615125540";
+import { iterateCitizenRarityEntries } from "./CitizenSystem.js?v=v1.7.20-20260615125540";
 import {
   applyBuildingWorkforceToResource,
   getBuildingWorkforceMultiplier,
   getWorkforceSummary
-} from "./WorkforceSystem.js?v=v1.7.20-20260615124155";
+} from "./WorkforceSystem.js?v=v1.7.20-20260615125540";
 import {
   getEventRollModifier,
   getFoodOutputMultiplier,
   getGoldOutputMultiplier
-} from "./CityConditionSystem.js?v=v1.7.20-20260615124155";
+} from "./CityConditionSystem.js?v=v1.7.20-20260615125540";
 
 const ECONOMY_RESOURCE_KEYS = ["gold", "food", "materials", "salvage", "mana", "prosperity"];
 
@@ -850,6 +850,24 @@ export function getCityTrendSummary(state) {
       detail: "Economic confidence"
     }
   ];
+}
+
+const QUICK_EDITABLE_RESOURCE_KEYS = new Set(Object.keys(RESOURCE_MINIMUMS));
+
+export function setResourceValue(state, key, rawValue) {
+  if (!QUICK_EDITABLE_RESOURCE_KEYS.has(key)) {
+    return false;
+  }
+  if (!state.resources || typeof state.resources !== "object") {
+    return false;
+  }
+  const numeric = Number(rawValue);
+  if (!Number.isFinite(numeric)) {
+    return false;
+  }
+  const min = RESOURCE_MINIMUMS[key] ?? 0;
+  state.resources[key] = Math.max(min, Math.round(numeric * 100) / 100);
+  return true;
 }
 
 export function getResourceChainSummary(state) {

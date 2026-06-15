@@ -19009,4 +19009,11 @@ body[data-theme="silver"] .collapse-toggle {
 .global-search__result-body small { font-size: 0.74rem; color: rgba(241, 247, 255, 0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .global-search__result-type { font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; font-style: normal; color: rgba(141, 214, 255, 0.7); padding: 2px 6px; border: 1px solid rgba(141, 214, 255, 0.24); border-radius: 999px; }
 
+.resource-panel .panel__header { display: flex; align-items: center; gap: 10px; }
+.resource-panel .panel__header > h3 { margin-right: 4px; }
+.resource-panel .panel__header > .button { margin-left: auto; }
+.resource-chip--editing { display: grid; gap: 6px; padding: 10px 12px; border: 1px solid rgba(141, 214, 255, 0.28); border-radius: 12px; background: rgba(141, 214, 255, 0.06); }
+.resource-chip__edit-input { width: 100%; padding: 6px 10px; background: rgba(0, 0, 0, 0.32); border: 1px solid rgba(255, 255, 255, 0.16); color: var(--text); border-radius: 8px; font-family: var(--label-font); font-size: 0.95rem; }
+.resource-chip__edit-input:focus { outline: none; border-color: rgba(141, 214, 255, 0.6); box-shadow: 0 0 0 2px rgba(141, 214, 255, 0.18); }
+
 

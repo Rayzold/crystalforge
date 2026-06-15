@@ -1,7 +1,7 @@
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615124155";
-import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.20-20260615124155";
-import { renderCrystalSelector } from "./CrystalSelector.js?v=v1.7.20-20260615124155";
-import { renderManifestPanel } from "./ManifestPanel.js?v=v1.7.20-20260615124155";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615125540";
+import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.20-20260615125540";
+import { renderCrystalSelector } from "./CrystalSelector.js?v=v1.7.20-20260615125540";
+import { renderManifestPanel } from "./ManifestPanel.js?v=v1.7.20-20260615125540";
 
 function renderForgeCommandDeck(state) {
   const totalRolls = Object.values(state.crystals).reduce((sum, value) => sum + (Number(value) || 0), 0);
