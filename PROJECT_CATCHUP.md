@@ -1,14 +1,20 @@
 # Crystal Forge Project Catchup
 
-Last updated: 2026-05-05
+Last updated: 2026-06-15
 
-Current build: `Preview v1.7.9`
+Current build: `Preview v1.7.20` (cache-busters use timestamp form `?v=v1.7.20-YYYYMMDDHHMMSS`)
 
 Current save version: `12`
 
-Current pushed commit at time of writing: `defb463 Release v1.7.7`
+Current pushed commit at time of writing: `9ad0aca docs(claude.md): refresh memory file with session-learned context`. The last tagged release commit is `da3077d Release v1.7.20`; there are ~80 unreleased commits on top of it covering the page redesigns, theming work, and content described below.
 
-Primary companion document: [SAVEPOINT_RECREATION_SPEC.md](SAVEPOINT_RECREATION_SPEC.md)
+Companion documents:
+
+- [SAVEPOINT_RECREATION_SPEC.md](SAVEPOINT_RECREATION_SPEC.md) — long rebuild spec, use when recreating from scratch.
+- [CLAUDE.md](CLAUDE.md) — short Claude Code session memory file, refreshed each session.
+- [redesign-parchment-theme.md](redesign-parchment-theme.md) — full spec and 8-round fix history of the optional Parchment theme.
+- [redesign-admin.md](redesign-admin.md) — admin console redesign brief that drove the v1.7.20-era Admin Console rewrite.
+- [SUGGESTIONS.md](SUGGESTIONS.md) — backlog of small UX/QA items.
 
 This document is a human-friendly handoff and follow-up guide for Crystal Forge. It is meant to help a future developer, designer, or Codex session quickly understand what the project is, how it is structured, what has recently changed, and where the next work is likely to happen.
 
@@ -297,6 +303,36 @@ Important files:
 - `systems/CitySnapshotSystem.js`
 - `content/CalendarConfig.js`
 
+### `behemoths.html`, `npcs.html`, `awakened.html`
+
+Three roster pages added across the v1.7.10-v1.7.18 cycle. Each follows the same compact-row-then-expanded-sheet pattern with search and status filters and per-record portrait upload that is auto-downscaled to keep saves small.
+
+- **Behemoths** — captured/bonded huge monsters with daily upkeep. Held behemoths subtract their listed food/gold/materials/salvage/mana from the city every day. Owned by `ui/BehemothsPage.js`, content in `content/BehemothConfig.js`.
+- **NPCs** — notable people authored as character sheets (image, role, status, core stats, abilities, lore) without resource upkeep. `ui/NpcsPage.js`, `content/NpcConfig.js`.
+- **Awakened** — Scarred Lands superhumans with grades F through S, ability archetypes from the world bible, six attributes, recruitment status. `ui/AwakenedPage.js`, `content/AwakenedConfig.js`. Awakened can also be assigned to expeditions for a large power bonus (see Expeditions section).
+
+### `army.html`
+
+A muster page that consolidates the city's fighting strength: martial citizen units split offensive/defensive, Awakened operatives by grade, active defensive structures, the vessel fleet, and held behemoth war beasts. `ui/ArmyPage.js`. Aggregates from existing systems — no separate state.
+
+### `crafting.html`
+
+Date-based item tracking that drains the town economy while items are in progress. Each item has start date, duration in days, daily resource costs, a crafting building (one active item per building), and an optional crafter (Advanced / Experienced / Master speed tiers).
+
+- A library of `CRAFTING_TEMPLATES` auto-fills name, duration, and per-day costs by category (perm / cons / scroll / potion).
+- Custom items skip the template and let the user enter everything manually.
+- **Batch ×5 / ×10 buttons** apply a time-discount formula (×5 → 50% time per unit, ×10 → 30% time per unit) to both template AND custom items. The custom-item branch lazy-captures the typed name + duration as the base, so toggling between ×1/×5/×10 is fully reversible.
+
+`ui/CraftingPage.js`, batch + template helpers in `app.js`.
+
+### `cooldowns.html`
+
+A page for Seeker / Oracle / NPC / custom cooldowns. Each entry has a start date (day/month/year picker, defaults to today), a length in days, and a "Ready!" indicator + splash toast when it hits 100%. `ui/CooldownsPage.js`, `systems/CooldownSystem.js`. Toast events for cooldown readiness are dispatched globally from `ui/UIRenderer.js` so the splash fires regardless of which page the GM is on.
+
+### `equipment.html`
+
+The Equipment Sheet page — a player-character paperdoll with 13 slots, sigil, identity, notes, and a wealth section (GP plus arbitrary item list). Lives in `ui/EquipmentSheetPage.js` and `systems/PlayerCharacterSystem.js`.
+
 ### `help.html`
 
 The reference page.
@@ -315,6 +351,18 @@ Important files:
 - `ui/HelpPage.js`
 - `content/GlossaryConfig.js`
 - `content/BuildingImageFilenameGuide.js`
+
+### Standalone HTML files (no app shell)
+
+A few HTML files in the repo are deliberately standalone — they have their own `<style>` block, do not load `boot.js`, and are not part of the app's state-driven page system. They appear in the top-nav (Craft group) as links rather than app routes.
+
+- **`POWERS_REFERENCE.html` (Ultima)** — the player-facing powers reference. Dark, Georgia-serif. Contains a tier filter UI (1-5), a per-path filter (Knowledge / Purity / Elementalism / Materialism), the powers grid itself, an XP cost panel at the top, and a sticky `← Crystal Forge` back-link strip. Hard-coded as a static doc rather than an app page because the layout/style is intentionally print-friendly and the data does not need to live in game state.
+- **`DND_MUSIC_GUIDE.html`** — session music guide.
+- **`NOTION_TOC.html`** — campaign index mirrored from Notion.
+- **`battle.html`** — battle tool (not yet linked from the nav).
+- **`index.html`** — redirect stub that forwards to `gm.html`.
+
+When editing the standalone files, watch for **double-encoded UTF-8 mojibake** (`â€"`, `Â·`, etc.) if the editor isn't UTF-8 safe. The fix pattern is to encode-as-cp1252 then decode-as-utf-8, or do targeted string replacements (see the `redesign-parchment-theme.md` Round 2 notes for the lookup table used on `POWERS_REFERENCE.html`).
 
 ### `player.html`
 
@@ -687,6 +735,107 @@ const APP_ENTRY = "./app.js?v=1.7.9";
 
 ## Recent History To Know
 
+The full granular changelog lives in `BUILD_NOTES` near the top of `content/Config.js` (it is the array the build-notes modal reads from). The entries below are the high-level themes per release.
+
+### Unreleased work on top of v1.7.20 (June 2026 sessions)
+
+The branch carries ~80 commits since `da3077d Release v1.7.20`. The big themes:
+
+- **Parchment theme** — optional warm aged-paper theme toggled with the 📜 button in the top-nav. Persists to `localStorage["crystalforge-theme"]`. `data-theme="parchment"` attribute set on BOTH `<html>` and `<body>`, all CSS selectors are scoped with no element prefix so they match either host. Variable swaps cover ~30 CSS vars; structural overrides handle the dozens of components that use hardcoded rgba dark backgrounds. Town Map canvas carries dual palettes (`HEX_PALETTES.dark` / `.parchment`) selected from `document.body.dataset.theme` at draw time. Full 8-round fix history in `redesign-parchment-theme.md`.
+- **Ultima page** — `POWERS_REFERENCE.html` added to the Craft top-nav group as a standalone static reference doc. XP cost panel at the top (2 / 3 / 4 paths × 5 levels with Ultima cap highlighted), sticky `← Crystal Forge` back-link strip, and ~700 mojibake characters repaired across two rounds (em-dashes, middle dots, ellipses, box-drawing chars, arrows, math signs, path-icon emoji).
+- **350% apex notes** — 46 building catalog entries got polished one-line bonuses that fire at the x3 quality cap (e.g. "Every building in the city gains +1 maximum HP." for Wooden Wall). Required threading `apexNote` through both `defineBuilding()` AND `createCatalogEntry()` in `content/BuildingCatalog.js` — the original schema dropped it silently.
+- **Forge page redesigns** — Quick Add Crystals panel with `-1 / +1 / +5` per rarity; crystal level cards / manifest switch / manifest sphere / Reality-Level stat tiles all got parchment overrides; legacy `.game-shell--page-forge { grid-template-columns: 220px 1fr }` collapsed back to single-column after the legacy sidebar was hidden (was breaking the top-nav layout).
+- **City Stores Quick Edit** — inline number inputs for all 7 city-store resources.
+- **Vehicles roster breathing room** — cards `minmax(180px → 280px)`, stat grid loosened so 7 tiles read cleanly inside each card.
+- **Admin Console redesign (Rounds 1-4)** — drove from `redesign-admin.md`, dropped the Set button, added citizen spinners, undo toast, bulk confirm, data-confirming attrs.
+- **Global search** — buildings, NPCs, awakened, behemoths, legends, characters (`ui/GlobalSearch.js`).
+- **Save safety net** — localStorage auto-save plus file save/load buttons so the GM never loses progress.
+- **Top-nav shell** — persistent resource bar, alert strip, group nav, sticky chrome.
+- **Crafting batch ×5/×10 for custom items** — works for any item, not only potions, with reversible lazy-base capture.
+
+Once a Release v1.7.21 commit lands, much of this should be grouped into a single tagged release in `BUILD_NOTES`.
+
+### v1.7.20
+
+Primary purpose:
+
+- New Army page consolidates the city's fighting strength in one muster.
+
+Important changes:
+
+- Martial citizen units split offensive/defensive, Awakened operatives grouped by grade, active defensive structures, vessel fleet, and held behemoth war beasts all shown side-by-side.
+
+### v1.7.19
+
+Primary purpose:
+
+- Anti-scrying defense buildings and 350% apex notes infrastructure.
+
+Important changes:
+
+- Three new defense buildings: Prohibition Tower (Rare), Brain Fog Tower (Epic), Privacy Mantle (Legendary).
+- Buildings can now carry a GM-authored `apexNote` describing the special bonus they gain at the 350% quality cap, shown on building cards and the dossier.
+- Newly shipped buildings auto-merge into existing saves' roll tables (`systems/StorageSystem.js:normalizeRollTables`) so they become rollable without manual admin work. Logic preserves GM removals/moves via a `knownNames` set.
+
+### v1.7.18
+
+Primary purpose:
+
+- Awakened page joins management routes.
+
+Important changes:
+
+- Track Scarred Lands superhumans with power grades F through S, ability archetypes from the world bible, six attributes, recruitment status, portraits, lore.
+
+### v1.7.17
+
+Primary purpose:
+
+- Admin economy controls.
+
+Important changes:
+
+- Building Output Rates editor — set each building's per-day resources with x2/x3 tiers (default doubled/tripled but individually hijackable).
+- Daily Resource Adjustments — flat city-wide bonuses or drains (good harvest, strong trade season).
+
+### v1.7.16
+
+Primary purpose:
+
+- Behemoth upkeep + roster scaling + save slots + readability picker.
+
+Important changes:
+
+- Held behemoths (Captured / Bonded) subtract daily upkeep from the city, shown as a Behemoth Upkeep line in resource breakdowns and a Behemoths column in the economy debug table.
+- Roster pages (Behemoths, NPCs) collapse into compact rows with search and status filters; expanded sheets span full width; uploaded portraits auto-downscale.
+- Local saves expanded to three slots; Legends sidebar badge now only flags unassigned Legends; Text Size picker plus Concise Mode added.
+
+### v1.7.12
+
+Primary purpose:
+
+- Special NPCs page + admin shortcut.
+
+Important changes:
+
+- NPCs page lets GMs author notable people without the daily resource upkeep that behemoths use.
+- Backtick (\`) key opens the Admin Console instantly.
+- Population tab gains a Random Citizen Generator with per-class checkboxes for exclusions.
+
+### v1.7.11, v1.7.13, v1.7.14, v1.7.15
+
+Internal release bumps — no `BUILD_NOTES` additions in the release commit itself. Refer to git log around the date for incremental fixes.
+
+### v1.7.10
+
+Primary purpose:
+
+- Behemoths page debuts.
+
+Important changes:
+
+- GMs can author huge captured monsters as simple character sheets with image, status, core stats, ability lists, and lore.
+
 ### v1.7.9
 
 Primary purpose:
@@ -960,27 +1109,65 @@ Keep this mechanical and verify with a scan.
 
 The Windows `python.exe` in this environment may point to a Store stub. If local HTTP smoke fails, try `py`, install Python, or use a small Node server.
 
+### Catalog Field Propagation Is Two-Step
+
+`content/BuildingCatalog.js` has `defineBuilding({...})` for the BUILDING_DEFINITIONS source-of-truth AND `createCatalogEntry()` that builds the runtime catalog entry. Adding a new field requires touching BOTH — if you only add it to `defineBuilding`, the field is silently dropped before reaching the runtime catalog. This bit the `apexNote` rollout. Pattern test: `import('/content/BuildingCatalog.js').then(m => Object.values(m.createBaseBuildingCatalog())[0])` should show the new field.
+
+### Roll Table Normalization Preserves GM Removals/Moves
+
+`systems/StorageSystem.js:normalizeRollTables` only auto-merges canonical pool entries that don't exist in ANY rarity of a saved table (`knownNames` set). If a building was once in a different rarity in a save, it won't be re-added to the new rarity automatically — appearing to "go missing" from rolls. The Admin Console's Roll Tables editor lets the GM add it back manually. This is intentional behaviour designed to preserve deliberate GM removals.
+
+### Parchment Theme Selectors Need No Element Prefix
+
+When adding a parchment override, write `[data-theme="parchment"] .my-class { … }` — NOT `body[data-theme="parchment"]` or `html[data-theme="parchment"]`. The JS toggle sets `data-theme` on both `<html>` and `<body>` so an unprefixed selector matches either. If a new dark-only component appears in parchment, either add a structural override at the top of `styles.css` or refactor the rule to use `var(--panel)` / `var(--bg-1)` instead of a hardcoded rgba.
+
+### Standalone HTML Files Risk Mojibake
+
+`POWERS_REFERENCE.html`, `battle.html`, `DND_MUSIC_GUIDE.html`, and `NOTION_TOC.html` do not load `boot.js` — they have their own `<style>` blocks and run independently. Editors that aren't UTF-8 safe can introduce double-encoded mojibake (typical signs: `â€"` for em-dash, `Â·` for middle dot, `âš¡` for ⚡, `ðŸŒŠ` for 🌊). Fix pattern is encode-as-cp1252 then decode-as-utf-8, or use the targeted replacement table in `redesign-parchment-theme.md` (Round 2 section).
+
+### `.game-shell--page-X` Can Carry Stale Grid Overrides
+
+Per-page shell overrides in `styles.css` may set a `grid-template-columns` that was sized for a legacy sidebar. If the sidebar is hidden but the columns persist, every top-level shell child (top-nav, resource-bar, alert-strip, main) gets squeezed into the wrong column. Forge hit this — the top-nav visibly split until the override was collapsed back to `minmax(0, 1fr)`.
+
+### Two Cache-Buster Conventions In Flight
+
+Older modules import with `?v=2.0.X` (legacy semver). Newer imports use `?v=v1.7.20-YYYYMMDDHHMMSS` (timestamp form, matches `APP_VERSION` plus an event-time stamp). Bulk-update via PowerShell when bumping a module:
+
+```powershell
+$new = 'v1.7.20-YYYYMMDDHHMMSS'
+Get-ChildItem -Recurse -Include "*.js","*.html" -File | Where-Object { $_.FullName -notmatch '\\node_modules\\|\\.git\\' } | ForEach-Object {
+  $c = Get-Content -Raw -LiteralPath $_.FullName
+  $n = $c -replace 'MyModule\.js\?v=v[\d\.\-]+', "MyModule.js?v=$new"
+  if ($n -ne $c) { Set-Content -LiteralPath $_.FullName -Value $n -Encoding utf8 -NoNewline }
+}
+```
+
 ## Current Pending Suggestions
 
-`SUGGESTIONS.md` currently has no saved suggestions waiting.
+Refer to `SUGGESTIONS.md` for any saved suggestions waiting.
 
-At the time this doc was created, the obvious next quality pass was:
+Quality-pass items left from recent sessions:
 
-- Browser visual skim at desktop and mobile widths after the app-wide font-size lift.
-- Confirm no button or badge text wraps awkwardly after the readability pass.
-- Confirm city map placement still feels fast in the real browser, not only in render smoke tests.
+- Tag a `v1.7.21` release that captures the ~80 unreleased commits since `da3077d Release v1.7.20`, then consolidate the new BUILD_NOTES entries.
+- Retroactively migrate already-manifested buildings in active saves so they pick up the new `apexNote` text on existing instances. Newly manifested buildings get them automatically; old saves carry the previous empty value. Could be a one-time admin action ("Refresh apex notes from catalog").
+- Sweep the remaining `?v=2.0.X` cache-buster imports across to the timestamp form for consistency.
+- Audit standalone HTML files (`POWERS_REFERENCE.html`, `battle.html`, etc.) for residual mojibake before they get edited again.
+- Confirm the parchment theme reads cleanly on every page — the systematic audit script `find-hardcoded-colors.sh` covers most surfaces but a real-browser scan at common breakpoints would catch anything missed.
 
 ## Good Follow-Up Tasks
 
 Useful next tasks include:
 
-- Run a real browser visual QA pass across all pages after `v1.7.1`.
-- Add more formal automated smoke tests for key flows.
-- Split parts of `styles.css` if the project ever gets a build step.
-- Add a small dev-only diagnostics page or command for save state health.
+- Run a real-browser visual QA pass across all pages in BOTH themes (dark + parchment) and at common breakpoints.
+- Add more formal automated smoke tests for key flows (manifest, place, manage incubator, launch expedition).
+- Split parts of `styles.css` if the project ever gets a build step — currently ~19k lines.
+- Add a dev-only diagnostics page for save state health (would have caught the roll-table-merge edge case that hides buildings).
 - Improve map virtualization or canvas rendering if city size grows beyond current SVG comfort.
 - Add specific expedition regression tests around instant results and journey debrief resolution.
-- Keep updating this file after major releases so future catchup stays cheap.
+- Add Awakened on expeditions to the regression tests once the system stabilises.
+- Refactor more hardcoded `rgba(...)` colors in `styles.css` to use CSS vars so future theme work needs fewer structural overrides.
+- Consider an automated CI smoke (GitHub Actions) that loads `gm.html`, `forge.html`, `city.html`, `chronicle.html`, etc. via headless Chrome and asserts zero console errors.
+- Keep updating this file and `CLAUDE.md` after major releases so future catchup stays cheap.
 
 ## How To Approach Future Work
 
@@ -1002,25 +1189,37 @@ When picking up a new task:
 Use this list when trying to find a feature quickly.
 
 - App boot: `boot.js`, `app.js`
-- Shared config/version/routes: `content/Config.js`
-- Styling: `styles.css`
+- Shared config / version / routes / build notes: `content/Config.js`
+- Styling: `styles.css` (also see `find-hardcoded-colors.sh` for theme audits)
 - State engine: `engine/GameState.js`
-- Storage/migrations/testing state: `systems/StorageSystem.js`
-- Resources/economy: `systems/ResourceSystem.js`
-- Construction/incubation: `systems/ConstructionSystem.js`
-- Buildings: `content/BuildingCatalog.js`, `systems/BuildingSystem.js`
-- Manifestation: `systems/GachaSystem.js`, `ui/ManifestPanel.js`
+- Storage / migrations / testing state: `systems/StorageSystem.js`
+- Resources / economy: `systems/ResourceSystem.js`, `systems/BalanceSystem.js`
+- Construction / incubation: `systems/ConstructionSystem.js`
+- Buildings (catalog + lifecycle): `content/BuildingCatalog.js`, `content/BuildingPools.js`, `systems/BuildingSystem.js`
+- Manifestation / gacha: `systems/GachaSystem.js`, `ui/ManifestPanel.js`, `ui/CrystalSelector.js`
 - City page: `ui/CityPage.js`
-- Map: `ui/HexMap.js`, `systems/MapSystem.js`, `content/MapConfig.js`
-- Citizens: `systems/CitizenSystem.js`, `ui/CitizensPage.js`
-- Expeditions: `systems/ExpeditionSystem.js`, `ui/ExpeditionsPage.js`
-- Vehicles: `content/VehicleConfig.js`, `ui/VehiclesPage.js`
+- Map: `ui/HexMap.js`, `ui/HexMapCanvas.js`, `systems/MapSystem.js`, `content/MapConfig.js`
+- Citizens: `systems/CitizenSystem.js`, `systems/WorkforceSystem.js`, `ui/CitizensPage.js`
+- Player characters / equipment: `systems/PlayerCharacterSystem.js`, `ui/EquipmentSheetPage.js`
+- Expeditions: `systems/ExpeditionSystem.js`, `ui/ExpeditionsPage.js`, `ui/ExpeditionJourneyModal.js`
+- Vehicles: `content/VehicleConfig.js`, `ui/VehiclesPage.js`, `ui/VehicleArt.js`
 - Legends: `content/UniqueCitizenConfig.js`, `ui/UniqueCitizensPage.js`
-- Chronicle/calendar: `systems/CalendarSystem.js`, `ui/ChronicleCalendar.js`
-- Help/glossary: `ui/HelpPage.js`, `content/GlossaryConfig.js`
+- Behemoths: `content/BehemothConfig.js`, `ui/BehemothsPage.js`
+- NPCs: `content/NpcConfig.js`, `ui/NpcsPage.js`
+- Awakened: `content/AwakenedConfig.js`, `ui/AwakenedPage.js`
+- Army (aggregate muster): `ui/ArmyPage.js`
+- Crafting: `ui/CraftingPage.js` (templates + custom items + ×5/×10 batch)
+- Cooldowns: `ui/CooldownsPage.js`, `systems/CooldownSystem.js`
+- Chronicle / calendar: `systems/CalendarSystem.js`, `systems/MonthlyChronicleSystem.js`, `ui/ChronicleCalendar.js`, `ui/ChroniclePage.js`
+- Weather: calm pools in `systems/CalendarSystem.js`, dramatic pools and randomizer in `systems/WeatherSystem.js`
+- Help / glossary: `ui/HelpPage.js`, `content/GlossaryConfig.js`
 - Player view: `ui/PlayerPage.js`
-- Firebase: `firebase/FirebaseSync.js`
+- Top-nav shell: `ui/PageShell.js` (also drives `TOP_NAV_GROUPS` and global search via `ui/GlobalSearch.js`)
+- Standalone pages (no shell): `POWERS_REFERENCE.html` (Ultima), `DND_MUSIC_GUIDE.html`, `NOTION_TOC.html`, `battle.html`
+- Firebase: `firebase/FirebaseSync.js`, `firebase/FirebaseSharedState.js`, `firebase/FirebaseConfig.js`
+- Admin console: `admin/AdminConsole.js`
 - Release script: `release.ps1`
+- Audit script (hardcoded dark colors): `find-hardcoded-colors.sh`
 
 ## Final Mental Model
 
