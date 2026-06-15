@@ -1,6 +1,6 @@
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=2.0.44";
-import { getEmergencyStatus } from "../systems/ResourceSystem.js?v=2.0.44";
-import { renderUiIcon } from "./UiIcons.js?v=2.0.44";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=2.0.44-20260615090902";
+import { getEmergencyStatus } from "../systems/ResourceSystem.js?v=2.0.44-20260615090902";
+import { renderUiIcon } from "./UiIcons.js?v=2.0.44-20260615090902";
 
 export function renderResourcePanel(state) {
   const emergencyState = getEmergencyStatus(state);

@@ -1,20 +1,20 @@
-import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js?v=2.0.44";
-import { RARITY_COLORS } from "../content/Rarities.js?v=2.0.44";
-import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js?v=2.0.44";
-import { formatDate } from "../systems/CalendarSystem.js?v=2.0.44";
-import { getFoodOutputMultiplier, getGoldOutputMultiplier } from "../systems/CityConditionSystem.js?v=2.0.44";
-import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier, isBuildingAtApex } from "../systems/BuildingSystem.js?v=2.0.44";
+import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js?v=2.0.44-20260615090902";
+import { RARITY_COLORS } from "../content/Rarities.js?v=2.0.44-20260615090902";
+import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js?v=2.0.44-20260615090902";
+import { formatDate } from "../systems/CalendarSystem.js?v=2.0.44-20260615090902";
+import { getFoodOutputMultiplier, getGoldOutputMultiplier } from "../systems/CityConditionSystem.js?v=2.0.44-20260615090902";
+import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier, isBuildingAtApex } from "../systems/BuildingSystem.js?v=2.0.44-20260615090902";
 import {
   getConstructionEtaDetails,
   getConstructionQueuePosition,
   getDriftConstructionSlots,
   isBuildingActivelyConstructed
-} from "../systems/ConstructionSystem.js?v=2.0.44";
-import { getBuildingPlacementBonuses } from "../systems/MapSystem.js?v=2.0.44";
-import { getTradeGoodsGoldMultiplier } from "../systems/ResourceSystem.js?v=2.0.44";
-import { applyBuildingWorkforceToResource, getBuildingWorkforceStatus, getBuildingWorkforceMultiplier, getWorkforceSummary } from "../systems/WorkforceSystem.js?v=2.0.44";
-import { renderBuildingArt } from "./BuildingArt.js?v=2.0.44";
-import { renderModal } from "./Modal.js?v=2.0.44";
+} from "../systems/ConstructionSystem.js?v=2.0.44-20260615090902";
+import { getBuildingPlacementBonuses } from "../systems/MapSystem.js?v=2.0.44-20260615090902";
+import { getTradeGoodsGoldMultiplier } from "../systems/ResourceSystem.js?v=2.0.44-20260615090902";
+import { applyBuildingWorkforceToResource, getBuildingWorkforceStatus, getBuildingWorkforceMultiplier, getWorkforceSummary } from "../systems/WorkforceSystem.js?v=2.0.44-20260615090902";
+import { renderBuildingArt } from "./BuildingArt.js?v=2.0.44-20260615090902";
+import { renderModal } from "./Modal.js?v=2.0.44-20260615090902";
 
 function renderList(items, inactive) {
   return Object.entries(items)

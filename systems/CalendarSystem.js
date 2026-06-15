@@ -7,7 +7,7 @@ import {
   SEASON_BY_MONTH,
   START_DATE,
   WEEKDAYS
-} from "../content/CalendarConfig.js?v=2.0.44";
+} from "../content/CalendarConfig.js?v=2.0.44-20260615090902";
 
 const MOON_PHASES = [
   { name: "New Moon", icon: "🌑", from: 0, to: 2 },

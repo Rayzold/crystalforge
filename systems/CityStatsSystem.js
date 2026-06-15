@@ -1,20 +1,20 @@
 // Aggregated city stat calculation.
 // This file turns citizens, buildings, districts, and condition modifiers into
 // the shared city-stat block used across the UI and downstream systems.
-import { CITIZEN_RARITY_OUTPUT_MULTIPLIERS } from "../content/CitizenConfig.js?v=2.0.44";
-import { sumObjectValues } from "../engine/Utils.js?v=2.0.44";
-import { getDistrictSummary } from "./DistrictSystem.js?v=2.0.44";
-import { scalePopulationSupport } from "./DriftEvolutionSystem.js?v=2.0.44";
-import { getUniqueCitizenStatBonuses } from "./ExpeditionSystem.js?v=2.0.44";
-import { iterateCitizenRarityEntries } from "./CitizenSystem.js?v=2.0.44";
-import { getBuildingPlacementBonuses } from "./MapSystem.js?v=2.0.44";
-import { getCurrentTownFocus } from "./TownFocusSystem.js?v=2.0.44";
-import { getGoodsOutputMultiplier, getHousingStrainPenalty } from "./CityConditionSystem.js?v=2.0.44";
+import { CITIZEN_RARITY_OUTPUT_MULTIPLIERS } from "../content/CitizenConfig.js?v=2.0.44-20260615090902";
+import { sumObjectValues } from "../engine/Utils.js?v=2.0.44-20260615090902";
+import { getDistrictSummary } from "./DistrictSystem.js?v=2.0.44-20260615090902";
+import { scalePopulationSupport } from "./DriftEvolutionSystem.js?v=2.0.44-20260615090902";
+import { getUniqueCitizenStatBonuses } from "./ExpeditionSystem.js?v=2.0.44-20260615090902";
+import { iterateCitizenRarityEntries } from "./CitizenSystem.js?v=2.0.44-20260615090902";
+import { getBuildingPlacementBonuses } from "./MapSystem.js?v=2.0.44-20260615090902";
+import { getCurrentTownFocus } from "./TownFocusSystem.js?v=2.0.44-20260615090902";
+import { getGoodsOutputMultiplier, getHousingStrainPenalty } from "./CityConditionSystem.js?v=2.0.44-20260615090902";
 import {
   applyBuildingWorkforceToStat,
   getBuildingWorkforceMultiplier,
   getWorkforceSummary
-} from "./WorkforceSystem.js?v=2.0.44";
+} from "./WorkforceSystem.js?v=2.0.44-20260615090902";
 
 const EMPTY_CITY_STATS = {
   goods: 0,

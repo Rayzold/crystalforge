@@ -1,4 +1,4 @@
-import { escapeHtml } from "../engine/Utils.js?v=2.0.44";
+import { escapeHtml } from "../engine/Utils.js?v=2.0.44-20260615090902";
 
 const SUPPORTED_VEHICLE_ART_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp", ".svg"];
 

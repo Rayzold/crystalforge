@@ -8,22 +8,22 @@ import {
   EXPEDITION_MISSION_TEMPLATES,
   EXPEDITION_ORDER,
   EXPEDITION_TYPES
-} from "../content/ExpeditionConfig.js?v=2.0.44";
-import { CITIZEN_RARITY_OUTPUT_MULTIPLIERS } from "../content/CitizenConfig.js?v=2.0.44";
-import { UNIQUE_CITIZEN_ARCHETYPES, drawUniqueCitizenFullName } from "../content/UniqueCitizenConfig.js?v=2.0.44";
-import { VEHICLE_DEFINITIONS, VEHICLE_ORDER, createDefaultVehicleFleet } from "../content/VehicleConfig.js?v=2.0.44";
-import { RARITY_ORDER } from "../content/Rarities.js?v=2.0.44";
-import { clamp, createId, roundTo } from "../engine/Utils.js?v=2.0.44";
-import { addCrystals } from "./CrystalSystem.js?v=2.0.44";
+} from "../content/ExpeditionConfig.js?v=2.0.44-20260615090902";
+import { CITIZEN_RARITY_OUTPUT_MULTIPLIERS } from "../content/CitizenConfig.js?v=2.0.44-20260615090902";
+import { UNIQUE_CITIZEN_ARCHETYPES, drawUniqueCitizenFullName } from "../content/UniqueCitizenConfig.js?v=2.0.44-20260615090902";
+import { VEHICLE_DEFINITIONS, VEHICLE_ORDER, createDefaultVehicleFleet } from "../content/VehicleConfig.js?v=2.0.44-20260615090902";
+import { RARITY_ORDER } from "../content/Rarities.js?v=2.0.44-20260615090902";
+import { clamp, createId, roundTo } from "../engine/Utils.js?v=2.0.44-20260615090902";
+import { addCrystals } from "./CrystalSystem.js?v=2.0.44-20260615090902";
 import {
   addCitizenRarityBundle,
   addCitizensByRarity,
   takeCitizensFromRoster
-} from "./CitizenSystem.js?v=2.0.44";
-import { formatDate } from "./CalendarSystem.js?v=2.0.44";
-import { addHistoryEntry } from "./HistoryLogSystem.js?v=2.0.44";
-import { addShards } from "./ShardSystem.js?v=2.0.44";
-import { getCurrentTownFocus } from "./TownFocusSystem.js?v=2.0.44";
+} from "./CitizenSystem.js?v=2.0.44-20260615090902";
+import { formatDate } from "./CalendarSystem.js?v=2.0.44-20260615090902";
+import { addHistoryEntry } from "./HistoryLogSystem.js?v=2.0.44-20260615090902";
+import { addShards } from "./ShardSystem.js?v=2.0.44-20260615090902";
+import { getCurrentTownFocus } from "./TownFocusSystem.js?v=2.0.44-20260615090902";
 
 const RESOURCE_KEYS = ["food", "gold", "materials", "mana"];
 const EXPEDITION_RESOURCE_REWARD_KEYS = ["gold", "food", "materials", "salvage", "mana", "prosperity"];

@@ -1,14 +1,14 @@
 // Random event orchestration.
 // This system evaluates city pressure, holiday timing, and event weights to
 // trigger appropriate incidents while keeping a bounded recent-event history.
-import { EVENT_POOLS } from "../content/EventPools.js?v=2.0.44";
-import { EVENT_STEP_CHANCES, MAX_RECENT_EVENTS } from "../content/Config.js?v=2.0.44";
-import { pickRandom, randomInt } from "../engine/Random.js?v=2.0.44";
-import { addHistoryEntry } from "./HistoryLogSystem.js?v=2.0.44";
-import { formatDate, getHolidayName } from "./CalendarSystem.js?v=2.0.44";
-import { getDistrictSummary } from "./DistrictSystem.js?v=2.0.44";
-import { getWarningFlags } from "./ResourceSystem.js?v=2.0.44";
-import { getEventRollModifier, getEventTypeWeight } from "./CityConditionSystem.js?v=2.0.44";
+import { EVENT_POOLS } from "../content/EventPools.js?v=2.0.44-20260615090902";
+import { EVENT_STEP_CHANCES, MAX_RECENT_EVENTS } from "../content/Config.js?v=2.0.44-20260615090902";
+import { pickRandom, randomInt } from "../engine/Random.js?v=2.0.44-20260615090902";
+import { addHistoryEntry } from "./HistoryLogSystem.js?v=2.0.44-20260615090902";
+import { formatDate, getHolidayName } from "./CalendarSystem.js?v=2.0.44-20260615090902";
+import { getDistrictSummary } from "./DistrictSystem.js?v=2.0.44-20260615090902";
+import { getWarningFlags } from "./ResourceSystem.js?v=2.0.44-20260615090902";
+import { getEventRollModifier, getEventTypeWeight } from "./CityConditionSystem.js?v=2.0.44-20260615090902";
 
 function hasActiveBuilding(state, names) {
   return state.buildings.some((building) => building.isComplete && names.includes(building.name));

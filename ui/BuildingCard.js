@@ -1,17 +1,17 @@
-import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js?v=2.0.44";
-import { RARITY_COLORS } from "../content/Rarities.js?v=2.0.44";
-import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js?v=2.0.44";
-import { formatDate } from "../systems/CalendarSystem.js?v=2.0.44";
+import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js?v=2.0.44-20260615090902";
+import { RARITY_COLORS } from "../content/Rarities.js?v=2.0.44-20260615090902";
+import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js?v=2.0.44-20260615090902";
+import { formatDate } from "../systems/CalendarSystem.js?v=2.0.44-20260615090902";
 import {
   getConstructionEtaDetails,
   getConstructionQueuePosition,
   getDriftConstructionSlots,
   isBuildingActivelyConstructed
-} from "../systems/ConstructionSystem.js?v=2.0.44";
-import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier, isBuildingAtApex } from "../systems/BuildingSystem.js?v=2.0.44";
-import { getBuildingWorkforceStatus } from "../systems/WorkforceSystem.js?v=2.0.44";
-import { renderBuildingArt } from "./BuildingArt.js?v=2.0.44";
-import { renderUiIcon } from "./UiIcons.js?v=2.0.44";
+} from "../systems/ConstructionSystem.js?v=2.0.44-20260615090902";
+import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier, isBuildingAtApex } from "../systems/BuildingSystem.js?v=2.0.44-20260615090902";
+import { getBuildingWorkforceStatus } from "../systems/WorkforceSystem.js?v=2.0.44-20260615090902";
+import { renderBuildingArt } from "./BuildingArt.js?v=2.0.44-20260615090902";
+import { renderUiIcon } from "./UiIcons.js?v=2.0.44-20260615090902";
 
 function renderIcon(iconKey) {
   const shapes = {

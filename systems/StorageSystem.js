@@ -12,39 +12,39 @@ import {
   createEmptyCollection,
   createDefaultDistrictState,
   createDefaultRollTables
-} from "../content/Config.js?v=2.0.44";
-import { BASE_BUILDING_CATALOG, buildFlavorText } from "../content/BuildingCatalog.js?v=2.0.44";
-import { getNextRarity } from "../content/Rarities.js?v=2.0.44";
-import { createId, safeJsonParse } from "../engine/Utils.js?v=2.0.44";
-import { formatDate } from "./CalendarSystem.js?v=2.0.44";
+} from "../content/Config.js?v=2.0.44-20260615090902";
+import { BASE_BUILDING_CATALOG, buildFlavorText } from "../content/BuildingCatalog.js?v=2.0.44-20260615090902";
+import { getNextRarity } from "../content/Rarities.js?v=2.0.44-20260615090902";
+import { createId, safeJsonParse } from "../engine/Utils.js?v=2.0.44-20260615090902";
+import { formatDate } from "./CalendarSystem.js?v=2.0.44-20260615090902";
 import {
   createCitizenDefinitionsSnapshot,
   createCitizenRarityRoster,
   normalizeCitizenRarityRoster,
   normalizeCitizens,
   syncCitizenTotalsFromRoster
-} from "./CitizenSystem.js?v=2.0.44";
-import { normalizeCrystalCollection } from "./CrystalSystem.js?v=2.0.44";
-import { recalculateCityStats } from "./CityStatsSystem.js?v=2.0.44";
-import { getDistrictSummary } from "./DistrictSystem.js?v=2.0.44";
-import { normalizeShardCollection } from "./ShardSystem.js?v=2.0.44";
-import { createMapCells } from "./MapSystem.js?v=2.0.44";
-import { createDefaultDriftEvolutionState, normalizeDriftEvolutionState, syncDriftEvolutionState } from "./DriftEvolutionSystem.js?v=2.0.44";
-import { getDriftConstructionSlots, normalizeConstructionPriority } from "./ConstructionSystem.js?v=2.0.44";
-import { createDefaultTownFocusState, normalizeTownFocusState } from "./TownFocusSystem.js?v=2.0.44";
-import { captureDailyCitySnapshot } from "./CitySnapshotSystem.js?v=2.0.44";
+} from "./CitizenSystem.js?v=2.0.44-20260615090902";
+import { normalizeCrystalCollection } from "./CrystalSystem.js?v=2.0.44-20260615090902";
+import { recalculateCityStats } from "./CityStatsSystem.js?v=2.0.44-20260615090902";
+import { getDistrictSummary } from "./DistrictSystem.js?v=2.0.44-20260615090902";
+import { normalizeShardCollection } from "./ShardSystem.js?v=2.0.44-20260615090902";
+import { createMapCells } from "./MapSystem.js?v=2.0.44-20260615090902";
+import { createDefaultDriftEvolutionState, normalizeDriftEvolutionState, syncDriftEvolutionState } from "./DriftEvolutionSystem.js?v=2.0.44-20260615090902";
+import { getDriftConstructionSlots, normalizeConstructionPriority } from "./ConstructionSystem.js?v=2.0.44-20260615090902";
+import { createDefaultTownFocusState, normalizeTownFocusState } from "./TownFocusSystem.js?v=2.0.44-20260615090902";
+import { captureDailyCitySnapshot } from "./CitySnapshotSystem.js?v=2.0.44-20260615090902";
 import {
   createDefaultExpeditionState,
   normalizeExpeditionState,
   normalizeUniqueCitizens,
   normalizeVehicleFleet
-} from "./ExpeditionSystem.js?v=2.0.44";
-import { createDefaultVehicleFleet } from "../content/VehicleConfig.js?v=2.0.44";
-import { normalizeBehemoths } from "./BehemothSystem.js?v=2.0.44";
-import { normalizeNpcs } from "./NpcSystem.js?v=2.0.44";
-import { normalizeAwakenedRoster } from "./AwakenedSystem.js?v=2.0.44";
-import { normalizeCraftingItems } from "./CraftingSystem.js?v=2.0.44";
-import { normalizeCooldowns } from "./CooldownSystem.js?v=2.0.44";
+} from "./ExpeditionSystem.js?v=2.0.44-20260615090902";
+import { createDefaultVehicleFleet } from "../content/VehicleConfig.js?v=2.0.44-20260615090902";
+import { normalizeBehemoths } from "./BehemothSystem.js?v=2.0.44-20260615090902";
+import { normalizeNpcs } from "./NpcSystem.js?v=2.0.44-20260615090902";
+import { normalizeAwakenedRoster } from "./AwakenedSystem.js?v=2.0.44-20260615090902";
+import { normalizeCraftingItems } from "./CraftingSystem.js?v=2.0.44-20260615090902";
+import { normalizeCooldowns } from "./CooldownSystem.js?v=2.0.44-20260615090902";
 
 const SESSION_STATE_KEY = "crystal-forge-session-state-v1";
 const BUILD_NOTES_SEEN_KEY = "crystal-forge-build-notes-seen-v1";

@@ -1,11 +1,11 @@
 // Vehicle roster page.
 // Vehicles gate how many expeditions can be active at once and expose GM-side
 // fleet adjustment controls after the hidden admin mode is unlocked.
-import { VEHICLE_DEFINITIONS, VEHICLE_ORDER, VEHICLE_TYPE_SECTIONS } from "../content/VehicleConfig.js?v=2.0.44";
-import { EXPEDITION_TYPES } from "../content/ExpeditionConfig.js?v=2.0.44";
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=2.0.44";
-import { getAvailableVehicleCounts, getVehicleAssignments } from "../systems/ExpeditionSystem.js?v=2.0.44";
-import { renderVehicleArt } from "./VehicleArt.js?v=2.0.44";
+import { VEHICLE_DEFINITIONS, VEHICLE_ORDER, VEHICLE_TYPE_SECTIONS } from "../content/VehicleConfig.js?v=2.0.44-20260615090902";
+import { EXPEDITION_TYPES } from "../content/ExpeditionConfig.js?v=2.0.44-20260615090902";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=2.0.44-20260615090902";
+import { getAvailableVehicleCounts, getVehicleAssignments } from "../systems/ExpeditionSystem.js?v=2.0.44-20260615090902";
+import { renderVehicleArt } from "./VehicleArt.js?v=2.0.44-20260615090902";
 
 function renderVehicleImage(definition, variant = "full") {
   const fallbackMarkup = `

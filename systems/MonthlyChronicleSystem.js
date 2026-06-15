@@ -1,7 +1,7 @@
-import { formatNumber } from "../engine/Utils.js?v=2.0.44";
-import { addHistoryEntry } from "./HistoryLogSystem.js?v=2.0.44";
-import { getStructuredDate } from "./CalendarSystem.js?v=2.0.44";
-import { getCurrentTownFocus } from "./TownFocusSystem.js?v=2.0.44";
+import { formatNumber } from "../engine/Utils.js?v=2.0.44-20260615090902";
+import { addHistoryEntry } from "./HistoryLogSystem.js?v=2.0.44-20260615090902";
+import { getStructuredDate } from "./CalendarSystem.js?v=2.0.44-20260615090902";
+import { getCurrentTownFocus } from "./TownFocusSystem.js?v=2.0.44-20260615090902";
 
 function getMonthBounds(dayOffset) {
   const date = getStructuredDate(dayOffset);

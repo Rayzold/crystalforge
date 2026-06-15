@@ -1,10 +1,10 @@
-import { renderUiIcon } from "./UiIcons.js?v=2.0.44";
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=2.0.44";
-import { getStructuredDate } from "../systems/CalendarSystem.js?v=2.0.44";
-import { formatBuildingExactQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js?v=2.0.44";
-import { getOnboardingGoals } from "../systems/GoalSystem.js?v=2.0.44";
-import { getCityTrendSummary } from "../systems/ResourceSystem.js?v=2.0.44";
-import { renderBuildingArt } from "./BuildingArt.js?v=2.0.44";
+import { renderUiIcon } from "./UiIcons.js?v=2.0.44-20260615090902";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=2.0.44-20260615090902";
+import { getStructuredDate } from "../systems/CalendarSystem.js?v=2.0.44-20260615090902";
+import { formatBuildingExactQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js?v=2.0.44-20260615090902";
+import { getOnboardingGoals } from "../systems/GoalSystem.js?v=2.0.44-20260615090902";
+import { getCityTrendSummary } from "../systems/ResourceSystem.js?v=2.0.44-20260615090902";
+import { renderBuildingArt } from "./BuildingArt.js?v=2.0.44-20260615090902";
 
 function getQualityMultiplierReadout(building) {
   const multiplier = getBuildingMultiplier(building?.quality ?? 0);

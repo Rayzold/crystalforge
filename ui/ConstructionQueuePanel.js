@@ -1,13 +1,13 @@
-import { getBuildingEmoji } from "../content/BuildingCatalog.js?v=2.0.44";
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=2.0.44";
-import { formatDate } from "../systems/CalendarSystem.js?v=2.0.44";
+import { getBuildingEmoji } from "../content/BuildingCatalog.js?v=2.0.44-20260615090902";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=2.0.44-20260615090902";
+import { formatDate } from "../systems/CalendarSystem.js?v=2.0.44-20260615090902";
 import {
   getActiveConstructionQueue,
   getAvailableConstructionQueue,
   getConstructionEtaDetails,
   getConstructionQueue,
   getDriftConstructionSlots
-} from "../systems/ConstructionSystem.js?v=2.0.44";
+} from "../systems/ConstructionSystem.js?v=2.0.44-20260615090902";
 
 function renderQueueItem(state, building, index, activeCount) {
   const isActive = index < activeCount;

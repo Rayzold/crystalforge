@@ -1,12 +1,12 @@
-import { BUILDING_ROLE_LEGEND } from "../content/BuildingCatalog.js?v=2.0.44";
+import { BUILDING_ROLE_LEGEND } from "../content/BuildingCatalog.js?v=2.0.44-20260615090902";
 import {
   BUILDING_IMAGE_FILENAME_SAMPLES,
   BUILDING_IMAGE_LOOKUP_EXTENSIONS
-} from "../content/BuildingImageFilenameGuide.js?v=2.0.44";
-import { APP_DISPLAY_VERSION, BUILD_NOTES, VERSIONING_RULES } from "../content/Config.js?v=2.0.44";
-import { GLOSSARY_TERMS } from "../content/GlossaryConfig.js?v=2.0.44";
-import { escapeHtml } from "../engine/Utils.js?v=2.0.44";
-import { getManualSaveMeta } from "../systems/StorageSystem.js?v=2.0.44";
+} from "../content/BuildingImageFilenameGuide.js?v=2.0.44-20260615090902";
+import { APP_DISPLAY_VERSION, BUILD_NOTES, VERSIONING_RULES } from "../content/Config.js?v=2.0.44-20260615090902";
+import { GLOSSARY_TERMS } from "../content/GlossaryConfig.js?v=2.0.44-20260615090902";
+import { escapeHtml } from "../engine/Utils.js?v=2.0.44-20260615090902";
+import { getManualSaveMeta } from "../systems/StorageSystem.js?v=2.0.44-20260615090902";
 
 function renderSectionNav() {
   const sections = [

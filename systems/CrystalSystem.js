@@ -1,4 +1,4 @@
-import { RARITY_ORDER } from "../content/Rarities.js?v=2.0.44";
+import { RARITY_ORDER } from "../content/Rarities.js?v=2.0.44-20260615090902";
 
 export function hasCrystalAvailable(state, rarity, amount = 1) {
   return (state.crystals[rarity] ?? 0) >= amount;

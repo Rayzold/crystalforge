@@ -4,30 +4,30 @@
 import {
   CITIZEN_RARITY_OUTPUT_MULTIPLIERS,
   CITIZEN_RARITY_UPKEEP_MULTIPLIERS
-} from "../content/CitizenConfig.js?v=2.0.44";
-import { RESOURCE_MINIMUMS } from "../content/Config.js?v=2.0.44";
-import { clamp } from "../engine/Utils.js?v=2.0.44";
-import { getDistrictSummary } from "./DistrictSystem.js?v=2.0.44";
-import { getBuildingTierResourceRate } from "./BuildingSystem.js?v=2.0.44";
+} from "../content/CitizenConfig.js?v=2.0.44-20260615090902";
+import { RESOURCE_MINIMUMS } from "../content/Config.js?v=2.0.44-20260615090902";
+import { clamp } from "../engine/Utils.js?v=2.0.44-20260615090902";
+import { getDistrictSummary } from "./DistrictSystem.js?v=2.0.44-20260615090902";
+import { getBuildingTierResourceRate } from "./BuildingSystem.js?v=2.0.44-20260615090902";
 import {
   getEquippedExpeditionRelics,
   getExpeditionRelicActiveBonuses,
   getLegendAssignmentDetails,
   getUniqueCitizenResourceBonuses
-} from "./ExpeditionSystem.js?v=2.0.44";
-import { getBuildingPlacementBonuses } from "./MapSystem.js?v=2.0.44";
-import { getCurrentTownFocus, getSuggestedFocusForAlert } from "./TownFocusSystem.js?v=2.0.44";
-import { iterateCitizenRarityEntries } from "./CitizenSystem.js?v=2.0.44";
+} from "./ExpeditionSystem.js?v=2.0.44-20260615090902";
+import { getBuildingPlacementBonuses } from "./MapSystem.js?v=2.0.44-20260615090902";
+import { getCurrentTownFocus, getSuggestedFocusForAlert } from "./TownFocusSystem.js?v=2.0.44-20260615090902";
+import { iterateCitizenRarityEntries } from "./CitizenSystem.js?v=2.0.44-20260615090902";
 import {
   applyBuildingWorkforceToResource,
   getBuildingWorkforceMultiplier,
   getWorkforceSummary
-} from "./WorkforceSystem.js?v=2.0.44";
+} from "./WorkforceSystem.js?v=2.0.44-20260615090902";
 import {
   getEventRollModifier,
   getFoodOutputMultiplier,
   getGoldOutputMultiplier
-} from "./CityConditionSystem.js?v=2.0.44";
+} from "./CityConditionSystem.js?v=2.0.44-20260615090902";
 
 const ECONOMY_RESOURCE_KEYS = ["gold", "food", "materials", "salvage", "mana", "prosperity"];
 
