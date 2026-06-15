@@ -1,4 +1,4 @@
-import { FIREBASE_CONFIG } from "../content/Config.js?v=2.0.44-20260615090902";
+import { FIREBASE_CONFIG } from "../content/Config.js?v=v1.7.20-20260615092143";
 
 const FIREBASE_SDK_VERSION = "12.10.0";
 

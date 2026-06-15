@@ -1,15 +1,15 @@
 // Cooldowns page — tracks per-effect cooldowns (Seeker, Oracle, NPC abilities,
 // custom GM-tracked recharges) and shows when they next become available.
 
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=2.0.44-20260615090902";
-import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js?v=2.0.44-20260615090902";
-import { MONTHS, DAYS_PER_MONTH } from "../content/CalendarConfig.js?v=2.0.44-20260615090902";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615092143";
+import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js?v=v1.7.20-20260615092143";
+import { MONTHS, DAYS_PER_MONTH } from "../content/CalendarConfig.js?v=v1.7.20-20260615092143";
 import {
   getCooldownReadyDay,
   getCooldownDaysRemaining,
   getCooldownTriggerChance,
   isCooldownReady
-} from "../systems/CooldownSystem.js?v=2.0.44-20260615090902";
+} from "../systems/CooldownSystem.js?v=v1.7.20-20260615092143";
 
 function renderStartDateSelector(startDayOffset) {
   const d = getStructuredDate(startDayOffset);

@@ -2,29 +2,29 @@
 // This file wires together state, actions, routing, save/load, manifestation,
 // admin commands, and top-level UI events. Most game-wide behavior eventually
 // passes through here, while lower-level systems keep the domain rules isolated.
-import { AdminConsole } from "./admin/AdminConsole.js?v=2.0.44-20260615090902";
-import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js?v=2.0.44-20260615090902";
+import { AdminConsole } from "./admin/AdminConsole.js?v=v1.7.20-20260615092143";
+import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js?v=v1.7.20-20260615092143";
 import {
   APP_VERSION,
   BUILDING_ACTIVE_THRESHOLD,
   FIREBASE_DEFAULT_REALM_ID,
   GM_QUICK_CRYSTAL_PACKS,
   SPEED_MULTIPLIERS
-} from "./content/Config.js?v=2.0.44-20260615090902";
-import { EVENT_POOLS } from "./content/EventPools.js?v=2.0.44-20260615090902";
-import { RARITY_ORDER } from "./content/Rarities.js?v=2.0.44-20260615090902";
-import { GameState } from "./engine/GameState.js?v=2.0.44-20260615090902";
-import { installModalKeyboardHandlers } from "./engine/ModalFocus.js?v=2.0.44-20260615090902";
-import { downscaleImageFile, formatNumber } from "./engine/Utils.js?v=2.0.44-20260615090902";
-import { AnimationEngine, getManifestRevealTotalDuration } from "./fx/AnimationEngine.js?v=2.0.44-20260615090902";
-import { AudioEngine } from "./fx/AudioEngine.js?v=2.0.44-20260615090902";
-import { ensureFirebaseAuth, getFirebaseUserId } from "./firebase/FirebaseConfig.js?v=2.0.44-20260615090902";
+} from "./content/Config.js?v=v1.7.20-20260615092143";
+import { EVENT_POOLS } from "./content/EventPools.js?v=v1.7.20-20260615092143";
+import { RARITY_ORDER } from "./content/Rarities.js?v=v1.7.20-20260615092143";
+import { GameState } from "./engine/GameState.js?v=v1.7.20-20260615092143";
+import { installModalKeyboardHandlers } from "./engine/ModalFocus.js?v=v1.7.20-20260615092143";
+import { downscaleImageFile, formatNumber } from "./engine/Utils.js?v=v1.7.20-20260615092143";
+import { AnimationEngine, getManifestRevealTotalDuration } from "./fx/AnimationEngine.js?v=v1.7.20-20260615092143";
+import { AudioEngine } from "./fx/AudioEngine.js?v=v1.7.20-20260615092143";
+import { ensureFirebaseAuth, getFirebaseUserId } from "./firebase/FirebaseConfig.js?v=v1.7.20-20260615092143";
 import {
   isFirebaseConfigured,
   loadFirebaseRealmState,
   saveFirebaseRealmState,
   subscribeFirebaseRealmState
-} from "./firebase/FirebaseSharedState.js?v=2.0.44-20260615090902";
+} from "./firebase/FirebaseSharedState.js?v=v1.7.20-20260615092143";
 import {
   formatBuildingExactQualityDisplay,
   empowerBuildingWithShards,
@@ -35,8 +35,8 @@ import {
   setBuildingOutputRates,
   setBuildingQuality,
   setBuildingRuinState
-} from "./systems/BuildingSystem.js?v=2.0.44-20260615090902";
-import { addMonthsToOffset, dateFromParts, formatDate, getMonthStartOffset, getStructuredDate } from "./systems/CalendarSystem.js?v=2.0.44-20260615090902";
+} from "./systems/BuildingSystem.js?v=v1.7.20-20260615092143";
+import { addMonthsToOffset, dateFromParts, formatDate, getMonthStartOffset, getStructuredDate } from "./systems/CalendarSystem.js?v=v1.7.20-20260615092143";
 import {
   addCitizens,
   applyCitizenBulkSet,
@@ -45,9 +45,9 @@ import {
   removeCitizens,
   resetCitizens,
   setCitizens
-} from "./systems/CitizenSystem.js?v=2.0.44-20260615090902";
-import { recalculateCityStats } from "./systems/CityStatsSystem.js?v=2.0.44-20260615090902";
-import { addCrystals, setCrystals } from "./systems/CrystalSystem.js?v=2.0.44-20260615090902";
+} from "./systems/CitizenSystem.js?v=v1.7.20-20260615092143";
+import { recalculateCityStats } from "./systems/CityStatsSystem.js?v=v1.7.20-20260615092143";
+import { addCrystals, setCrystals } from "./systems/CrystalSystem.js?v=v1.7.20-20260615092143";
 import {
   activateConstruction,
   getActiveConstructionQueue,
@@ -57,17 +57,17 @@ import {
   moveConstructionPriority,
   normalizeConstructionPriority,
   pauseConstruction
-} from "./systems/ConstructionSystem.js?v=2.0.44-20260615090902";
-import { resetDistrictLevels, setDistrictDefinition, setDistrictLevelOverride, getDistrictSummary } from "./systems/DistrictSystem.js?v=2.0.44-20260615090902";
+} from "./systems/ConstructionSystem.js?v=v1.7.20-20260615092143";
+import { resetDistrictLevels, setDistrictDefinition, setDistrictLevelOverride, getDistrictSummary } from "./systems/DistrictSystem.js?v=v1.7.20-20260615092143";
 import {
   clearDecisionSnooze,
   getDecisionInboxItems,
   getTopDecisionInboxItem,
   recordDecisionHistory,
   setDecisionSnooze
-} from "./systems/DecisionInboxSystem.js?v=2.0.44-20260615090902";
-import { setDriftEvolutionStageOverride, syncDriftEvolutionState } from "./systems/DriftEvolutionSystem.js?v=2.0.44-20260615090902";
-import { clearActiveEvents, triggerEvent } from "./systems/EventSystem.js?v=2.0.44-20260615090902";
+} from "./systems/DecisionInboxSystem.js?v=v1.7.20-20260615092143";
+import { setDriftEvolutionStageOverride, syncDriftEvolutionState } from "./systems/DriftEvolutionSystem.js?v=v1.7.20-20260615092143";
+import { clearActiveEvents, triggerEvent } from "./systems/EventSystem.js?v=v1.7.20-20260615092143";
 import {
   addManualUniqueCitizen,
   formatExpeditionDisplayName,
@@ -84,8 +84,8 @@ import {
   normalizeVehicleFleet,
   refreshExpeditionBoardIfNeeded,
   startExpedition
-} from "./systems/ExpeditionSystem.js?v=2.0.44-20260615090902";
-import { VEHICLE_DEFINITIONS } from "./content/VehicleConfig.js?v=2.0.44-20260615090902";
+} from "./systems/ExpeditionSystem.js?v=v1.7.20-20260615092143";
+import { VEHICLE_DEFINITIONS } from "./content/VehicleConfig.js?v=v1.7.20-20260615092143";
 import {
   addBehemoth,
   addBehemothAbility,
@@ -99,7 +99,7 @@ import {
   updateBehemothField,
   updateBehemothStat,
   updateBehemothUpkeep
-} from "./systems/BehemothSystem.js?v=2.0.44-20260615090902";
+} from "./systems/BehemothSystem.js?v=v1.7.20-20260615092143";
 import {
   addNpc,
   addNpcAbility,
@@ -111,7 +111,7 @@ import {
   updateNpcField,
   updateNpcStat,
   getCrafterCapacity
-} from "./systems/NpcSystem.js?v=2.0.44-20260615090902";
+} from "./systems/NpcSystem.js?v=v1.7.20-20260615092143";
 import {
   createCraftingItem,
   collectCraftingItem,
@@ -123,11 +123,11 @@ import {
   clearCollectedCraftingItems,
   pauseCraftingItem,
   resumeCraftingItem,
-} from "./systems/CraftingSystem.js?v=2.0.44-20260615090902";
-import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=2.0.44-20260615090902";
-import { addCooldown, removeCooldown, restartCooldown, markCooldownTriggered, ageCooldown, isCooldownReady, getCooldownReadyDay } from "./systems/CooldownSystem.js?v=2.0.44-20260615090902";
-import { generateMonthWeather } from "./systems/WeatherSystem.js?v=2.0.44-20260615090902";
-import { craftingCompletionDay } from "./systems/CraftingSystem.js?v=2.0.44-20260615090902";
+} from "./systems/CraftingSystem.js?v=v1.7.20-20260615092143";
+import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=v1.7.20-20260615092143";
+import { addCooldown, removeCooldown, restartCooldown, markCooldownTriggered, ageCooldown, isCooldownReady, getCooldownReadyDay } from "./systems/CooldownSystem.js?v=v1.7.20-20260615092143";
+import { generateMonthWeather } from "./systems/WeatherSystem.js?v=v1.7.20-20260615092143";
+import { craftingCompletionDay } from "./systems/CraftingSystem.js?v=v1.7.20-20260615092143";
 import {
   addAwakened,
   clearAwakenedImage,
@@ -135,7 +135,7 @@ import {
   setAwakenedImageData,
   updateAwakenedAttribute,
   updateAwakenedField
-} from "./systems/AwakenedSystem.js?v=2.0.44-20260615090902";
+} from "./systems/AwakenedSystem.js?v=v1.7.20-20260615092143";
 import {
   updatePlayerCharacterField,
   updatePlayerCharacterEquipmentSlot,
@@ -143,10 +143,10 @@ import {
   addPlayerCharacterWealthItem,
   removePlayerCharacterWealthItem,
   updatePlayerCharacterWealthItem
-} from "./systems/PlayerCharacterSystem.js?v=2.0.44-20260615090902";
-import { getDailyCitySnapshot } from "./systems/CitySnapshotSystem.js?v=2.0.44-20260615090902";
-import { manifestSelectedRarity } from "./systems/GachaSystem.js?v=2.0.44-20260615090902";
-import { addHistoryEntry } from "./systems/HistoryLogSystem.js?v=2.0.44-20260615090902";
+} from "./systems/PlayerCharacterSystem.js?v=v1.7.20-20260615092143";
+import { getDailyCitySnapshot } from "./systems/CitySnapshotSystem.js?v=v1.7.20-20260615092143";
+import { manifestSelectedRarity } from "./systems/GachaSystem.js?v=v1.7.20-20260615092143";
+import { addHistoryEntry } from "./systems/HistoryLogSystem.js?v=v1.7.20-20260615092143";
 import {
   canPlaceBuildingAt,
   clearBuildingPlacement,
@@ -156,8 +156,8 @@ import {
   getBuildingAtCell,
   isFortificationBuilding,
   setBuildingPlacement
-} from "./systems/MapSystem.js?v=2.0.44-20260615090902";
-import { addShards, convertShardsToCrystals, setShards } from "./systems/ShardSystem.js?v=2.0.44-20260615090902";
+} from "./systems/MapSystem.js?v=v1.7.20-20260615092143";
+import { addShards, convertShardsToCrystals, setShards } from "./systems/ShardSystem.js?v=v1.7.20-20260615092143";
 import {
   createLiveSessionResetState,
   createSessionSnapshot as createSessionSnapshotRecord,
@@ -175,15 +175,15 @@ import {
   saveGameState,
   saveManualState,
   validateAndMigrateSave
-} from "./systems/StorageSystem.js?v=2.0.44-20260615090902";
-import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js?v=2.0.44-20260615090902";
-import { applyCompletedGoalRewards } from "./systems/GoalSystem.js?v=2.0.44-20260615090902";
-import { forceTownFocus, getMayorAdvice, reopenTownFocusSelection, selectTownFocus, updateTownFocusAvailability } from "./systems/TownFocusSystem.js?v=2.0.44-20260615090902";
-import { getEmergencyStatus, getCityTrendSummary } from "./systems/ResourceSystem.js?v=2.0.44-20260615090902";
-import { Toasts } from "./ui/Toasts.js?v=2.0.44-20260615090902";
-import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js?v=2.0.44-20260615090902";
-import { UIRenderer } from "./ui/UIRenderer.js?v=2.0.44-20260615090902";
-import { createBlankPlayerCharacter, createBlankWealthItem } from "./ui/EquipmentSheetPage.js?v=2.0.44-20260615090902";
+} from "./systems/StorageSystem.js?v=v1.7.20-20260615092143";
+import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js?v=v1.7.20-20260615092143";
+import { applyCompletedGoalRewards } from "./systems/GoalSystem.js?v=v1.7.20-20260615092143";
+import { forceTownFocus, getMayorAdvice, reopenTownFocusSelection, selectTownFocus, updateTownFocusAvailability } from "./systems/TownFocusSystem.js?v=v1.7.20-20260615092143";
+import { getEmergencyStatus, getCityTrendSummary } from "./systems/ResourceSystem.js?v=v1.7.20-20260615092143";
+import { Toasts } from "./ui/Toasts.js?v=v1.7.20-20260615092143";
+import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js?v=v1.7.20-20260615092143";
+import { UIRenderer } from "./ui/UIRenderer.js?v=v1.7.20-20260615092143";
+import { createBlankPlayerCharacter, createBlankWealthItem } from "./ui/EquipmentSheetPage.js?v=v1.7.20-20260615092143";
 
 const root = document.querySelector("#app");
 const pageKey = document.body.dataset.page ?? "home";

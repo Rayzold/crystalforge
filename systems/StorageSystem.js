@@ -12,39 +12,39 @@ import {
   createEmptyCollection,
   createDefaultDistrictState,
   createDefaultRollTables
-} from "../content/Config.js?v=2.0.44-20260615090902";
-import { BASE_BUILDING_CATALOG, buildFlavorText } from "../content/BuildingCatalog.js?v=2.0.44-20260615090902";
-import { getNextRarity } from "../content/Rarities.js?v=2.0.44-20260615090902";
-import { createId, safeJsonParse } from "../engine/Utils.js?v=2.0.44-20260615090902";
-import { formatDate } from "./CalendarSystem.js?v=2.0.44-20260615090902";
+} from "../content/Config.js?v=v1.7.20-20260615092143";
+import { BASE_BUILDING_CATALOG, buildFlavorText } from "../content/BuildingCatalog.js?v=v1.7.20-20260615092143";
+import { getNextRarity } from "../content/Rarities.js?v=v1.7.20-20260615092143";
+import { createId, safeJsonParse } from "../engine/Utils.js?v=v1.7.20-20260615092143";
+import { formatDate } from "./CalendarSystem.js?v=v1.7.20-20260615092143";
 import {
   createCitizenDefinitionsSnapshot,
   createCitizenRarityRoster,
   normalizeCitizenRarityRoster,
   normalizeCitizens,
   syncCitizenTotalsFromRoster
-} from "./CitizenSystem.js?v=2.0.44-20260615090902";
-import { normalizeCrystalCollection } from "./CrystalSystem.js?v=2.0.44-20260615090902";
-import { recalculateCityStats } from "./CityStatsSystem.js?v=2.0.44-20260615090902";
-import { getDistrictSummary } from "./DistrictSystem.js?v=2.0.44-20260615090902";
-import { normalizeShardCollection } from "./ShardSystem.js?v=2.0.44-20260615090902";
-import { createMapCells } from "./MapSystem.js?v=2.0.44-20260615090902";
-import { createDefaultDriftEvolutionState, normalizeDriftEvolutionState, syncDriftEvolutionState } from "./DriftEvolutionSystem.js?v=2.0.44-20260615090902";
-import { getDriftConstructionSlots, normalizeConstructionPriority } from "./ConstructionSystem.js?v=2.0.44-20260615090902";
-import { createDefaultTownFocusState, normalizeTownFocusState } from "./TownFocusSystem.js?v=2.0.44-20260615090902";
-import { captureDailyCitySnapshot } from "./CitySnapshotSystem.js?v=2.0.44-20260615090902";
+} from "./CitizenSystem.js?v=v1.7.20-20260615092143";
+import { normalizeCrystalCollection } from "./CrystalSystem.js?v=v1.7.20-20260615092143";
+import { recalculateCityStats } from "./CityStatsSystem.js?v=v1.7.20-20260615092143";
+import { getDistrictSummary } from "./DistrictSystem.js?v=v1.7.20-20260615092143";
+import { normalizeShardCollection } from "./ShardSystem.js?v=v1.7.20-20260615092143";
+import { createMapCells } from "./MapSystem.js?v=v1.7.20-20260615092143";
+import { createDefaultDriftEvolutionState, normalizeDriftEvolutionState, syncDriftEvolutionState } from "./DriftEvolutionSystem.js?v=v1.7.20-20260615092143";
+import { getDriftConstructionSlots, normalizeConstructionPriority } from "./ConstructionSystem.js?v=v1.7.20-20260615092143";
+import { createDefaultTownFocusState, normalizeTownFocusState } from "./TownFocusSystem.js?v=v1.7.20-20260615092143";
+import { captureDailyCitySnapshot } from "./CitySnapshotSystem.js?v=v1.7.20-20260615092143";
 import {
   createDefaultExpeditionState,
   normalizeExpeditionState,
   normalizeUniqueCitizens,
   normalizeVehicleFleet
-} from "./ExpeditionSystem.js?v=2.0.44-20260615090902";
-import { createDefaultVehicleFleet } from "../content/VehicleConfig.js?v=2.0.44-20260615090902";
-import { normalizeBehemoths } from "./BehemothSystem.js?v=2.0.44-20260615090902";
-import { normalizeNpcs } from "./NpcSystem.js?v=2.0.44-20260615090902";
-import { normalizeAwakenedRoster } from "./AwakenedSystem.js?v=2.0.44-20260615090902";
-import { normalizeCraftingItems } from "./CraftingSystem.js?v=2.0.44-20260615090902";
-import { normalizeCooldowns } from "./CooldownSystem.js?v=2.0.44-20260615090902";
+} from "./ExpeditionSystem.js?v=v1.7.20-20260615092143";
+import { createDefaultVehicleFleet } from "../content/VehicleConfig.js?v=v1.7.20-20260615092143";
+import { normalizeBehemoths } from "./BehemothSystem.js?v=v1.7.20-20260615092143";
+import { normalizeNpcs } from "./NpcSystem.js?v=v1.7.20-20260615092143";
+import { normalizeAwakenedRoster } from "./AwakenedSystem.js?v=v1.7.20-20260615092143";
+import { normalizeCraftingItems } from "./CraftingSystem.js?v=v1.7.20-20260615092143";
+import { normalizeCooldowns } from "./CooldownSystem.js?v=v1.7.20-20260615092143";
 
 const SESSION_STATE_KEY = "crystal-forge-session-state-v1";
 const BUILD_NOTES_SEEN_KEY = "crystal-forge-build-notes-seen-v1";

@@ -844,7 +844,7 @@ textarea {
 
 .button,
 .icon-button {
-  padding: 8px 12px;
+  padding: 10px 14px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -856,6 +856,8 @@ textarea {
   letter-spacing: 0.05em;
   text-transform: uppercase;
   font-size: 0.9rem;
+  line-height: 1.2;
+  min-height: 38px;
   background:
     linear-gradient(135deg, rgba(229, 140, 255, 0.24), rgba(88, 184, 255, 0.18) 52%, rgba(240, 196, 130, 0.12)),
     var(--panel);
