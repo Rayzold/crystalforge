@@ -1,10 +1,10 @@
-import { getNextHoliday } from "../systems/CalendarSystem.js?v=v1.7.20-20260615125540";
-import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js?v=v1.7.20-20260615125540";
-import { renderChronicleCalendar, renderChronicleNotesList, renderWeatherInfoPanel } from "./ChronicleCalendar.js?v=v1.7.20-20260615125540";
-import { renderEventChainPanel } from "./EventChainPanel.js?v=v1.7.20-20260615125540";
-import { renderEventPanel } from "./EventPanel.js?v=v1.7.20-20260615125540";
-import { renderHistoryPanel } from "./HistoryPanel.js?v=v1.7.20-20260615125540";
-import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260615125540";
+import { getNextHoliday } from "../systems/CalendarSystem.js?v=v1.7.20-20260615130257";
+import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js?v=v1.7.20-20260615130257";
+import { renderChronicleCalendar, renderChronicleNotesList, renderWeatherInfoPanel } from "./ChronicleCalendar.js?v=v1.7.20-20260615130257";
+import { renderEventChainPanel } from "./EventChainPanel.js?v=v1.7.20-20260615130257";
+import { renderEventPanel } from "./EventPanel.js?v=v1.7.20-20260615130257";
+import { renderHistoryPanel } from "./HistoryPanel.js?v=v1.7.20-20260615130257";
+import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260615130257";
 
 function renderChronicleIntro(state) {
   const latestChronicle =

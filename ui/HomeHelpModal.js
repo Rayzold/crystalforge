@@ -1,5 +1,5 @@
-import { escapeHtml } from "../engine/Utils.js?v=v1.7.20-20260615125540";
-import { renderModal } from "./Modal.js?v=v1.7.20-20260615125540";
+import { escapeHtml } from "../engine/Utils.js?v=v1.7.20-20260615130257";
+import { renderModal } from "./Modal.js?v=v1.7.20-20260615130257";
 
 const RUNBOOK_STEPS = [
   "Grant crystals from the GM console.",

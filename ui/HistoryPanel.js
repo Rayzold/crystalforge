@@ -1,5 +1,5 @@
-import { escapeHtml } from "../engine/Utils.js?v=v1.7.20-20260615125540";
-import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260615125540";
+import { escapeHtml } from "../engine/Utils.js?v=v1.7.20-20260615130257";
+import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260615130257";
 
 function getHistoryIcon(category) {
   const icons = {

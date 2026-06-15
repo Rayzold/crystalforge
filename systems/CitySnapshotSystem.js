@@ -1,4 +1,4 @@
-import { calculateDailyResourceDelta, getEmergencyStatus } from "./ResourceSystem.js?v=v1.7.20-20260615125540";
+import { calculateDailyResourceDelta, getEmergencyStatus } from "./ResourceSystem.js?v=v1.7.20-20260615130257";
 
 function toConditionLabels(state) {
   const labels = [];

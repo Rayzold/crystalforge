@@ -1,7 +1,39 @@
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615125540";
-import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.20-20260615125540";
-import { renderCrystalSelector } from "./CrystalSelector.js?v=v1.7.20-20260615125540";
-import { renderManifestPanel } from "./ManifestPanel.js?v=v1.7.20-20260615125540";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615130257";
+import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js?v=v1.7.20-20260615130257";
+import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.20-20260615130257";
+import { renderCrystalSelector } from "./CrystalSelector.js?v=v1.7.20-20260615130257";
+import { renderManifestPanel } from "./ManifestPanel.js?v=v1.7.20-20260615130257";
+
+function renderQuickAddCrystals(state) {
+  return `
+    <section class="panel quick-add-crystals">
+      <div class="panel__header">
+        <h3>Quick Add Crystals</h3>
+        <span class="panel__subtle">Available stock per reality level</span>
+      </div>
+      <div class="quick-add-crystals__grid">
+        ${RARITY_ORDER.map((rarity) => {
+          const count = Number(state.crystals?.[rarity] ?? 0);
+          const color = RARITY_COLORS[rarity] ?? "#b4bcc8";
+          return `
+            <article class="quick-add-crystals__row" style="--rarity-color:${color}">
+              <div class="quick-add-crystals__head">
+                <span class="quick-add-crystals__dot" aria-hidden="true"></span>
+                <strong>${escapeHtml(rarity)}</strong>
+              </div>
+              <strong class="quick-add-crystals__count">${formatNumber(count, 0)}</strong>
+              <div class="quick-add-crystals__controls">
+                <button class="button button--ghost button--small" type="button" data-action="quick-adjust-crystal" data-rarity="${escapeHtml(rarity)}" data-delta="-1" ${count <= 0 ? "disabled" : ""}>−1</button>
+                <button class="button button--ghost button--small" type="button" data-action="quick-adjust-crystal" data-rarity="${escapeHtml(rarity)}" data-delta="1">+1</button>
+                <button class="button button--ghost button--small" type="button" data-action="quick-adjust-crystal" data-rarity="${escapeHtml(rarity)}" data-delta="5">+5</button>
+              </div>
+            </article>
+          `;
+        }).join("")}
+      </div>
+    </section>
+  `;
+}
 
 function renderForgeCommandDeck(state) {
   const totalRolls = Object.values(state.crystals).reduce((sum, value) => sum + (Number(value) || 0), 0);
@@ -116,6 +148,7 @@ export function renderForgePage(state) {
     subtitle: "Manifest buildings.",
     content: `
       ${renderForgeCommandDeck(state)}
+      ${renderQuickAddCrystals(state)}
       ${renderCrystalSelector(state)}
       ${renderManifestPanel(state)}
       ${renderForgeStage(state)}
