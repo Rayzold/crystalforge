@@ -591,7 +591,7 @@ const TOP_NAV_GROUPS = [
   { label: "Core",   keys: ["home", "forge", "economy", "city"] },
   { label: "People", keys: ["citizens", "npcs", "awakened", "uniques", "equipment"] },
   { label: "World",   keys: ["expeditions", "vehicles", "behemoths", "army", "chronicle"] },
-  { label: "Craft",   keys: ["crafting", "cooldowns", "help"] },
+  { label: "Craft",   keys: ["crafting", "cooldowns", "codex", "help"] },
   { label: "Session", keys: ["ultima", "campaign", "music", "battle"] }
 ];
 

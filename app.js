@@ -184,7 +184,7 @@ import { forceTownFocus, getMayorAdvice, reopenTownFocusSelection, selectTownFoc
 import { getEmergencyStatus, getCityTrendSummary, setResourceValue } from "./systems/ResourceSystem.js?v=v1.7.20-20260615130257";
 import { Toasts } from "./ui/Toasts.js?v=v1.7.20-20260615130257";
 import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js?v=v1.7.20-20260615130257";
-import { UIRenderer } from "./ui/UIRenderer.js?v=v1.7.20-20260615130257";
+import { UIRenderer } from "./ui/UIRenderer.js?v=v1.7.20-20260615190000";
 import { buildSearchIndex, filterSearchIndex, renderSearchResults } from "./ui/GlobalSearch.js?v=v1.7.20-20260615130257";
 import { createBlankPlayerCharacter, createBlankWealthItem } from "./ui/EquipmentSheetPage.js?v=v1.7.20-20260615130257";
 
@@ -3965,6 +3965,12 @@ root.addEventListener("click", async (event) => {
     case "toggle-dice-history":
       renderer.setTransientUi({ diceHistoryOpen: !renderer.transientUi.diceHistoryOpen }, getCurrentState());
       break;
+    case "reset-codex-filter":
+      renderer.setTransientUi(
+        { codexFilters: { rarity: "All", role: "All", discovery: "All" } },
+        getCurrentState()
+      );
+      break;
     case "toggle-top-nav-settings": {
       // Toggle the panel inline (avoid a full re-render so input focus is preserved).
       const panel = document.querySelector("[data-top-nav-settings-panel]");
@@ -5367,6 +5373,18 @@ root.addEventListener("change", (event) => {
       {
         catalogFilters: {
           ...(renderer.transientUi.catalogFilters ?? {}),
+          [target.dataset.filterKey]: target.value ?? "All"
+        }
+      },
+      getCurrentState()
+    );
+  }
+
+  if (target.dataset.action === "set-codex-filter") {
+    renderer.setTransientUi(
+      {
+        codexFilters: {
+          ...(renderer.transientUi.codexFilters ?? { rarity: "All", role: "All", discovery: "All" }),
           [target.dataset.filterKey]: target.value ?? "All"
         }
       },

@@ -19025,4 +19025,253 @@ body[data-theme="silver"] .collapse-toggle {
 .quick-add-crystals__controls { grid-area: controls; display: flex; gap: 6px; }
 .quick-add-crystals__controls .button { flex: 1; padding: 6px 10px; font-size: 0.85rem; }
 
+/* ─── Building Codex ────────────────────────────────────────────────────── */
+.codex-header { display: grid; gap: 16px; padding: 18px 20px; }
+.codex-header__overall {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+}
+.codex-header__overall h3 { margin: 6px 0 4px; font-size: 1.6rem; letter-spacing: 0.02em; }
+.codex-header__overall small { color: var(--muted); line-height: 1.5; display: block; max-width: 64ch; }
+.codex-header__ring {
+  --pct: 0;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--display-font);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text);
+  background:
+    conic-gradient(var(--accent) calc(var(--pct) * 1%), rgba(255, 255, 255, 0.08) 0);
+  position: relative;
+}
+.codex-header__ring::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: var(--bg-1);
+}
+.codex-header__ring span { position: relative; z-index: 1; }
+.codex-header__rarities {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+.codex-progress__rarity {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.10));
+  display: grid;
+  gap: 6px;
+}
+.codex-progress__rarity header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.codex-progress__rarity header strong { color: var(--text); font-family: var(--display-font); }
+.codex-progress__bar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+.codex-progress__bar span {
+  display: block;
+  height: 100%;
+  background: var(--rarity-color, var(--accent));
+  transition: width 240ms ease;
+}
+.codex-progress__rarity small { color: var(--muted); font-size: 0.85rem; text-align: right; }
+
+.codex-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 14px;
+  padding: 14px 18px;
+}
+.codex-filters__field { display: grid; gap: 4px; min-width: 160px; }
+.codex-filters__field span {
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.codex-filters__field select {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: var(--bg-1);
+  color: var(--text);
+}
+
+.codex-grid-panel { padding: 14px 16px 20px; }
+.codex-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
+}
+.codex-card {
+  display: grid;
+  grid-template-rows: 140px auto;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.18));
+  overflow: hidden;
+  transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+}
+.codex-card:hover { transform: translateY(-2px); border-color: rgba(255, 255, 255, 0.20); box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32); }
+.codex-card--discovered.rarity-common      { border-color: rgba(180, 188, 200, 0.45); }
+.codex-card--discovered.rarity-uncommon    { border-color: rgba(226, 179, 90, 0.55); }
+.codex-card--discovered.rarity-rare        { border-color: rgba(79, 220, 255, 0.55); }
+.codex-card--discovered.rarity-epic        { border-color: rgba(241, 91, 121, 0.55); }
+.codex-card--discovered.rarity-legendary   { border-color: rgba(159, 101, 255, 0.60); }
+.codex-card--discovered.rarity-beyond      { border-color: rgba(77, 121, 255, 0.70); }
+
+.codex-card__art {
+  position: relative;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(148, 201, 255, 0.14), transparent 50%),
+    linear-gradient(180deg, rgba(21, 31, 54, 0.92), rgba(10, 16, 31, 0.92));
+  overflow: hidden;
+}
+.codex-card__art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.codex-card__art-fallback {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  font-family: var(--display-font);
+  font-size: 2.4rem;
+  color: rgba(244, 248, 255, 0.78);
+}
+.codex-card__art--silhouette {
+  background:
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.03) 0 8px, transparent 8px 16px),
+    linear-gradient(180deg, rgba(20, 26, 44, 0.95), rgba(8, 12, 22, 0.95));
+}
+.codex-card__silhouette {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  font-family: var(--display-font);
+  font-size: 3.2rem;
+  color: rgba(141, 214, 255, 0.20);
+  letter-spacing: 0.08em;
+}
+.codex-card__owned {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(141, 214, 255, 0.45);
+  color: #cfe6ff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+.codex-card__owned--single { font-size: 0.7rem; }
+
+.codex-card__body { padding: 12px 14px 14px; display: grid; gap: 6px; }
+.codex-card__body header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.codex-card__role { display: inline-flex; gap: 4px; }
+.codex-card__rarity { color: rgba(244, 248, 255, 0.78); }
+.codex-card__body h4 { margin: 2px 0; font-size: 1.05rem; line-height: 1.2; }
+.codex-card--undiscovered .codex-card__body h4 { color: rgba(244, 248, 255, 0.40); letter-spacing: 0.4em; }
+.codex-card__district { color: rgba(214, 224, 249, 0.65); font-size: 0.85rem; margin: 0; }
+.codex-card__flavor { color: rgba(214, 224, 249, 0.72); font-size: 0.82rem; line-height: 1.4; margin: 4px 0 0; }
+.codex-card__footer {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.codex-card__footer strong { color: var(--text); font-family: var(--display-font); font-size: 0.95rem; }
+.codex-card__apex-flag {
+  margin-left: auto;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(240, 196, 130, 0.18);
+  border: 1px solid rgba(240, 196, 130, 0.45);
+  color: var(--accent-gold);
+  font-size: 0.7rem;
+  font-style: normal;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.codex-card__apex {
+  margin-top: 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(240, 196, 130, 0.08);
+  border: 1px solid rgba(240, 196, 130, 0.20);
+  font-size: 0.82rem;
+  color: rgba(244, 248, 255, 0.86);
+  line-height: 1.4;
+}
+.codex-card__apex span {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-gold);
+  margin-bottom: 2px;
+}
+
+@media (max-width: 600px) {
+  .codex-header__overall { grid-template-columns: 1fr; }
+  .codex-header__ring { justify-self: center; }
+  .codex-grid { grid-template-columns: 1fr; }
+}
+
+/* Parchment overrides — keep the codex readable in the warm theme. */
+[data-theme="parchment"] .codex-card {
+  background: linear-gradient(180deg, rgba(250, 244, 232, 0.95), rgba(237, 224, 196, 0.85));
+  border-color: rgba(101, 67, 33, 0.25);
+}
+[data-theme="parchment"] .codex-card__body header { color: rgba(101, 67, 33, 0.78); }
+[data-theme="parchment"] .codex-card__rarity { color: #2c1a0e; }
+[data-theme="parchment"] .codex-card__district,
+[data-theme="parchment"] .codex-card__flavor,
+[data-theme="parchment"] .codex-card__footer { color: rgba(101, 67, 33, 0.82); }
+[data-theme="parchment"] .codex-card__footer strong { color: #2c1a0e; }
+[data-theme="parchment"] .codex-card__art--silhouette {
+  background:
+    repeating-linear-gradient(45deg, rgba(101, 67, 33, 0.05) 0 8px, transparent 8px 16px),
+    linear-gradient(180deg, rgba(237, 224, 196, 0.88), rgba(216, 196, 160, 0.92));
+}
+[data-theme="parchment"] .codex-card__silhouette { color: rgba(101, 67, 33, 0.35); }
+[data-theme="parchment"] .codex-header__ring::before { background: rgba(250, 244, 232, 0.95); }
+[data-theme="parchment"] .codex-progress__rarity {
+  background: linear-gradient(180deg, rgba(250, 244, 232, 0.88), rgba(237, 224, 196, 0.78));
+  border-color: rgba(101, 67, 33, 0.22);
+}
+[data-theme="parchment"] .codex-progress__rarity header { color: rgba(101, 67, 33, 0.78); }
+[data-theme="parchment"] .codex-progress__bar { background: rgba(101, 67, 33, 0.10); }
+
+
 

@@ -62,6 +62,7 @@ export const PAGE_ROUTES = [
   { key: "crafting", label: "Crafting", href: "./crafting.html" },
   { key: "cooldowns", label: "Cooldowns", href: "./cooldowns.html" },
   { key: "chronicle", label: "Chronicle", href: "./chronicle.html" },
+  { key: "codex", label: "Codex", href: "./codex.html" },
   { key: "ultima", label: "Ultima", href: "./POWERS_REFERENCE.html" },
   { key: "campaign", label: "Campaign Index", href: "./NOTION_TOC.html" },
   { key: "music", label: "Music Guide", href: "./DND_MUSIC_GUIDE.html" },
