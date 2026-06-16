@@ -184,7 +184,7 @@ import { forceTownFocus, getMayorAdvice, reopenTownFocusSelection, selectTownFoc
 import { getEmergencyStatus, getCityTrendSummary, setResourceValue } from "./systems/ResourceSystem.js?v=v1.7.20-20260615130257";
 import { Toasts } from "./ui/Toasts.js?v=v1.7.20-20260615130257";
 import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js?v=v1.7.20-20260615130257";
-import { UIRenderer } from "./ui/UIRenderer.js?v=v1.7.20-20260615190002";
+import { UIRenderer } from "./ui/UIRenderer.js?v=v1.7.20-20260615190003";
 import { buildSearchIndex, filterSearchIndex, renderSearchResults } from "./ui/GlobalSearch.js?v=v1.7.20-20260615130257";
 import { createBlankPlayerCharacter, createBlankWealthItem } from "./ui/EquipmentSheetPage.js?v=v1.7.20-20260615130257";
 
@@ -3967,7 +3967,7 @@ root.addEventListener("click", async (event) => {
       break;
     case "reset-codex-filter":
       renderer.setTransientUi(
-        { codexFilters: { rarity: "All", role: "All", discovery: "All" } },
+        { codexFilters: { rarity: "All", role: "All", discovery: "All", quality: "All" } },
         getCurrentState()
       );
       break;
@@ -5390,7 +5390,7 @@ root.addEventListener("change", (event) => {
     renderer.setTransientUi(
       {
         codexFilters: {
-          ...(renderer.transientUi.codexFilters ?? { rarity: "All", role: "All", discovery: "All" }),
+          ...(renderer.transientUi.codexFilters ?? { rarity: "All", role: "All", discovery: "All", quality: "All" }),
           [target.dataset.filterKey]: target.value ?? "All"
         }
       },

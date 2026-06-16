@@ -13,14 +13,26 @@ import { RARITY_ORDER } from "../content/Rarities.js?v=v1.7.20-20260615130257";
 import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615130257";
 import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.20-20260615130257";
 
-const DEFAULT_FILTERS = { rarity: "All", role: "All", discovery: "All" };
+const DEFAULT_FILTERS = { rarity: "All", role: "All", discovery: "All", quality: "All" };
+
+// Quality bands, keyed by the value stored in transientUi.codexFilters.quality.
+// Each entry: { label, match(bestQuality) → boolean }. Quality is the BEST
+// quality across every (name, rarity) instance the player owns. 0 means none.
+const QUALITY_BANDS = [
+  { key: "0%",        label: "0% · Undiscovered", match: (q) => q <= 0 },
+  { key: "1-99%",     label: "1-99% · Incubating", match: (q) => q > 0 && q < 100 },
+  { key: "100-219%",  label: "100-219% · Active", match: (q) => q >= 100 && q < 220 },
+  { key: "220-349%",  label: "220-349% · Empowered", match: (q) => q >= 220 && q < 350 },
+  { key: "350%",      label: "350% · Apex", match: (q) => q >= 350 }
+];
 
 function getCodexFilters(state) {
   const f = state.transientUi?.codexFilters ?? {};
   return {
     rarity: typeof f.rarity === "string" ? f.rarity : DEFAULT_FILTERS.rarity,
     role: typeof f.role === "string" ? f.role : DEFAULT_FILTERS.role,
-    discovery: typeof f.discovery === "string" ? f.discovery : DEFAULT_FILTERS.discovery
+    discovery: typeof f.discovery === "string" ? f.discovery : DEFAULT_FILTERS.discovery,
+    quality: typeof f.quality === "string" ? f.quality : DEFAULT_FILTERS.quality
   };
 }
 
@@ -130,6 +142,13 @@ function renderCodexFilters(filters, revealNames) {
           <option value="Undiscovered" ${filters.discovery === "Undiscovered" ? "selected" : ""}>Undiscovered</option>
         </select>
       </label>
+      <label class="codex-filters__field">
+        <span>Quality</span>
+        <select data-action="set-codex-filter" data-filter-key="quality">
+          <option value="All" ${filters.quality === "All" ? "selected" : ""}>All qualities</option>
+          ${QUALITY_BANDS.map((band) => `<option value="${band.key}" ${filters.quality === band.key ? "selected" : ""}>${escapeHtml(band.label)}</option>`).join("")}
+        </select>
+      </label>
       <button
         class="codex-reveal-toggle ${revealNames ? "is-on" : ""}"
         type="button"
@@ -150,6 +169,7 @@ function renderCodexFilters(filters, revealNames) {
 }
 
 function applyFilters(entries, filters, discoveryIndex) {
+  const qualityBand = QUALITY_BANDS.find((b) => b.key === filters.quality);
   return entries.filter((entry) => {
     if (filters.rarity !== "All" && entry.rarity !== filters.rarity) return false;
     if (filters.role !== "All") {
@@ -160,6 +180,11 @@ function applyFilters(entries, filters, discoveryIndex) {
       const isDiscovered = discoveryIndex.has(indexKeyFor(entry));
       if (filters.discovery === "Discovered" && !isDiscovered) return false;
       if (filters.discovery === "Undiscovered" && isDiscovered) return false;
+    }
+    if (qualityBand) {
+      const instances = discoveryIndex.get(indexKeyFor(entry)) ?? [];
+      const best = bestInstanceQuality(instances);
+      if (!qualityBand.match(best)) return false;
     }
     return true;
   });

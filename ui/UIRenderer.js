@@ -33,7 +33,7 @@ import { renderAwakenedPage } from "./AwakenedPage.js?v=v1.7.20-20260615130257";
 import { renderArmyPage } from "./ArmyPage.js?v=v1.7.20-20260615130257";
 import { renderCraftingPage } from "./CraftingPage.js?v=v1.7.20-20260615130257";
 import { renderCooldownsPage } from "./CooldownsPage.js?v=v1.7.20-20260615130257";
-import { renderCodexPage } from "./CodexPage.js?v=v1.7.20-20260615190002";
+import { renderCodexPage } from "./CodexPage.js?v=v1.7.20-20260615190003";
 import { isCooldownReady } from "../systems/CooldownSystem.js?v=v1.7.20-20260615130257";
 import { getMayorSuggestions } from "../systems/TownFocusSystem.js?v=v1.7.20-20260615130257";
 import { getDefaultTownFocusPreviewId } from "./TownFocusShared.js?v=v1.7.20-20260615130257";
@@ -61,7 +61,8 @@ export class UIRenderer {
       codexFilters: {
         rarity: "All",
         role: "All",
-        discovery: "All"
+        discovery: "All",
+        quality: "All"
       },
       codexRevealNames: false,
       focusEventId: null,
