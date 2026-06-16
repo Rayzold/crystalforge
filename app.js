@@ -1,9 +1,9 @@
-﻿// Main application controller.
+// Main application controller.
 // This file wires together state, actions, routing, save/load, manifestation,
 // admin commands, and top-level UI events. Most game-wide behavior eventually
 // passes through here, while lower-level systems keep the domain rules isolated.
 import { AdminConsole } from "./admin/AdminConsole.js?v=v1.7.20-20260615130257";
-import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js?v=v1.7.20-20260615200000";
+import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js?v=v1.7.20-20260615210000";
 import {
   APP_VERSION,
   BUILDING_ACTIVE_THRESHOLD,

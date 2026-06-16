@@ -1,7 +1,7 @@
 // Central configuration and boot-time defaults.
 // This file defines versioning, starting presets, high-level tuning constants,
 // route metadata, and user-facing build notes that explain what changed.
-import { BUILDING_POOLS } from "./BuildingPools.js?v=v1.7.20-20260615130257";
+import { BUILDING_POOLS } from "./BuildingPools.js?v=v1.7.20-20260615210000";
 import { BASE_DISTRICT_CONFIG } from "./DistrictConfig.js?v=v1.7.20-20260615130257";
 import { CITIZEN_CLASSES } from "./CitizenConfig.js?v=v1.7.20-20260615130257";
 import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js?v=v1.7.20-20260615130257";

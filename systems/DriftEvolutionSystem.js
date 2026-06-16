@@ -1,4 +1,4 @@
-﻿import { BASE_BUILDING_CATALOG } from "../content/BuildingCatalog.js?v=v1.7.20-20260615200000";
+import { BASE_BUILDING_CATALOG } from "../content/BuildingCatalog.js?v=v1.7.20-20260615210000";
 import { DISTRICT_LEVEL_THRESHOLDS, BASE_DISTRICT_CONFIG } from "../content/DistrictConfig.js?v=v1.7.20-20260615130257";
 import { DRIFT_EVOLUTION_STAGES, DRIFT_POPULATION_GOALS } from "../content/DriftEvolutionConfig.js?v=v1.7.20-20260615130257";
 import { createBuildingGameplayProfile } from "./BalanceSystem.js?v=v1.7.20-20260615130257";

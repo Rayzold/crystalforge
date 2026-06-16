@@ -1,7 +1,7 @@
 // Building catalog source of truth.
 // This file classifies buildings, assigns flavor/district/tags/icons, and
 // creates the rarity-aware catalog entries used by manifestations and UI.
-import { BUILDING_POOLS } from "./BuildingPools.js?v=v1.7.20-20260615130257";
+import { BUILDING_POOLS } from "./BuildingPools.js?v=v1.7.20-20260615210000";
 import { RARITY_ORDER } from "./Rarities.js?v=v1.7.20-20260615130257";
 
 const KEYWORD_CLASSIFIERS = [
@@ -108,6 +108,7 @@ const BUILDING_DEFINITIONS = {
   "Torture Chambers": defineBuilding({ district: "Military District", tags: ["security", "military"], iconKey: "shield", flavorText: "Built for fear more than battle, these chambers turn cruelty into an instrument of control.", profile: gameplay({ upkeep: 12, defense: 4, security: 30, populationSupport: 5 }) }),
   "Wall/Fortifications": defineBuilding({ district: "Military District", tags: ["military", "security"], iconKey: "shield", flavorText: "This broader belt of defenses makes the city feel planned around survival rather than luck.", profile: gameplay({ upkeep: 20, defense: 60, security: 26 }) }),
   "Arcana Tower": defineBuilding({ district: "Arcane District", tags: ["arcane", "culture"], iconKey: "star", flavorText: "A landmark of disciplined sorcery, it makes knowledge feel vertical and power feel publicly undeniable.", profile: gameplay({ mana: 8, goods: 2, upkeep: 30, prosperity: 40, prestige: 80, populationSupport: 40 }) }),
+  "Leyline Spire": defineBuilding({ district: "Arcane District", tags: ["arcane"], iconKey: "star", flavorText: "A monumental lattice of runed conductors and singing crystal that doesn't just channel mana — it reaches deep into the leyline network beneath the Drift and pulls down whatever the currents carry.", apexNote: "Every full moon the Spire's reservoir crystal crystallizes into a Drift Relic — the GM rolls one random magic item on the standard treasure table, with rarer items more likely the longer the Spire has held Apex.", profile: gameplay({ mana: 100, upkeep: 35, prosperity: 60, prestige: 80, security: 12, populationSupport: 60 }) }),
   "Arcane Walls": defineBuilding({ district: "Military District", tags: ["military", "arcane"], iconKey: "shield", flavorText: "Runes sunk into the fortification itself make these walls feel defended before the first soldier arrives.", profile: gameplay({ mana: -1, upkeep: 30, defense: 100, security: 40 }) }),
   "Captain's Quarters": defineBuilding({ district: "Harbor District", tags: ["harbor", "housing"], iconKey: "anchor", flavorText: "Built high and set apart, this singular residence belongs to the Captain alone and makes rulership visibly personal.", profile: gameplay({ upkeep: 30, security: 60, populationSupport: 100 }) }),
   "Deathless Grounds": defineBuilding({ district: "Religious District", tags: ["religious", "military"], iconKey: "spire", flavorText: "Quiet, dreadful, and unnaturally persistent, this place suggests mortality has been negotiated rather than accepted.", profile: gameplay({ upkeep: 25, security: 40, health: 100 }) }),

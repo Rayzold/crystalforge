@@ -137,6 +137,7 @@ export const BUILDING_POOLS = {
     "Elemental Shipmaker",
     "Enchanted Forest",
     "Housing: Royal",
+    "Leyline Spire",
     "Mortality Limiter Remover",
     "Planar Anchor",
     "Planar Escape Pods",
