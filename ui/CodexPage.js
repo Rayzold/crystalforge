@@ -1,4 +1,4 @@
-// Building Codex — a "pokédex" for the city's building catalog.
+﻿// Building Codex — a "pokédex" for the city's building catalog.
 // Shows every (building name, rarity) entry in the canonical pools with
 // discovered / undiscovered state, manifest count, and per-rarity progress.
 // Filterable by rarity, building role (tag), and discovery state.
@@ -8,7 +8,7 @@ import {
   BUILDING_ROLE_LEGEND,
   createBaseBuildingCatalog,
   getCatalogKey
-} from "../content/BuildingCatalog.js?v=v1.7.20-20260615180000";
+} from "../content/BuildingCatalog.js?v=v1.7.20-20260615200000";
 import { RARITY_ORDER } from "../content/Rarities.js?v=v1.7.20-20260615130257";
 import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615130257";
 import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.20-20260615130257";

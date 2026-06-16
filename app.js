@@ -3,7 +3,7 @@
 // admin commands, and top-level UI events. Most game-wide behavior eventually
 // passes through here, while lower-level systems keep the domain rules isolated.
 import { AdminConsole } from "./admin/AdminConsole.js?v=v1.7.20-20260615130257";
-import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js?v=v1.7.20-20260615180000";
+import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js?v=v1.7.20-20260615200000";
 import {
   APP_VERSION,
   BUILDING_ACTIVE_THRESHOLD,
@@ -184,7 +184,7 @@ import { forceTownFocus, getMayorAdvice, reopenTownFocusSelection, selectTownFoc
 import { getEmergencyStatus, getCityTrendSummary, setResourceValue } from "./systems/ResourceSystem.js?v=v1.7.20-20260615130257";
 import { Toasts } from "./ui/Toasts.js?v=v1.7.20-20260615130257";
 import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js?v=v1.7.20-20260615130257";
-import { UIRenderer } from "./ui/UIRenderer.js?v=v1.7.20-20260615190003";
+import { UIRenderer } from "./ui/UIRenderer.js?v=v1.7.20-20260615200000";
 import { buildSearchIndex, filterSearchIndex, renderSearchResults } from "./ui/GlobalSearch.js?v=v1.7.20-20260615130257";
 import { createBlankPlayerCharacter, createBlankWealthItem } from "./ui/EquipmentSheetPage.js?v=v1.7.20-20260615130257";
 

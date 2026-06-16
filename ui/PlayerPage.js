@@ -2,7 +2,7 @@
 // It exposes the shared session state in a simplified read-mostly format with
 // manifest choices, incubator controls, active buildings, and table-safe info.
 import { APP_DISPLAY_VERSION, BUILD_NOTES, FIREBASE_DEFAULT_REALM_ID } from "../content/Config.js?v=v1.7.20-20260615130257";
-import { BUILDING_ROLE_LEGEND, getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615180000";
+import { BUILDING_ROLE_LEGEND, getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615200000";
 import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER, getCitizenHelpText } from "../content/CitizenConfig.js?v=v1.7.20-20260615130257";
 import { GLOSSARY_TERMS } from "../content/GlossaryConfig.js?v=v1.7.20-20260615130257";
 import { RARITY_ORDER } from "../content/Rarities.js?v=v1.7.20-20260615130257";

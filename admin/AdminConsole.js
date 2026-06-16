@@ -2,7 +2,7 @@
 // This file builds the hidden administration UI, unlock flow, and the direct
 // controls that modify crystals, buildings, citizens, events, and save tools.
 import { MONTHS } from "../content/CalendarConfig.js?v=v1.7.20-20260615130257";
-import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "../content/BuildingCatalog.js?v=v1.7.20-20260615180000";
+import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "../content/BuildingCatalog.js?v=v1.7.20-20260615200000";
 import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER, getCitizenHelpText } from "../content/CitizenConfig.js?v=v1.7.20-20260615130257";
 import { GM_QUICK_CRYSTAL_PACKS, GM_QUICK_EVENT_IDS, SPEED_MULTIPLIERS } from "../content/Config.js?v=v1.7.20-20260615130257";
 import { EVENT_POOLS } from "../content/EventPools.js?v=v1.7.20-20260615130257";

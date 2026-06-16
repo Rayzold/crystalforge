@@ -13,7 +13,7 @@ import {
   createDefaultDistrictState,
   createDefaultRollTables
 } from "../content/Config.js?v=v1.7.20-20260615130257";
-import { BASE_BUILDING_CATALOG, buildFlavorText } from "../content/BuildingCatalog.js?v=v1.7.20-20260615180000";
+import { BASE_BUILDING_CATALOG, buildFlavorText } from "../content/BuildingCatalog.js?v=v1.7.20-20260615200000";
 import { getNextRarity } from "../content/Rarities.js?v=v1.7.20-20260615130257";
 import { createId, safeJsonParse } from "../engine/Utils.js?v=v1.7.20-20260615130257";
 import { formatDate } from "./CalendarSystem.js?v=v1.7.20-20260615130257";

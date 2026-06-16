@@ -1,4 +1,4 @@
-﻿import { getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615180000";
+﻿import { getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615200000";
 import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615130257";
 import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.20-20260615130257";
 import {
