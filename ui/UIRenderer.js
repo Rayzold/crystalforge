@@ -33,7 +33,7 @@ import { renderAwakenedPage } from "./AwakenedPage.js?v=v1.7.20-20260615130257";
 import { renderArmyPage } from "./ArmyPage.js?v=v1.7.20-20260615130257";
 import { renderCraftingPage } from "./CraftingPage.js?v=v1.7.20-20260615130257";
 import { renderCooldownsPage } from "./CooldownsPage.js?v=v1.7.20-20260615130257";
-import { renderCodexPage } from "./CodexPage.js?v=v1.7.20-20260615190000";
+import { renderCodexPage } from "./CodexPage.js?v=v1.7.20-20260615190002";
 import { isCooldownReady } from "../systems/CooldownSystem.js?v=v1.7.20-20260615130257";
 import { getMayorSuggestions } from "../systems/TownFocusSystem.js?v=v1.7.20-20260615130257";
 import { getDefaultTownFocusPreviewId } from "./TownFocusShared.js?v=v1.7.20-20260615130257";
@@ -63,6 +63,7 @@ export class UIRenderer {
         role: "All",
         discovery: "All"
       },
+      codexRevealNames: false,
       focusEventId: null,
       councilModalOpen: false,
       councilModalCycleKey: null,

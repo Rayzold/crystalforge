@@ -105,7 +105,7 @@ function renderRoleOption(role, currentRole) {
   return `<option value="${role.key}" ${role.key === currentRole ? "selected" : ""}>${role.emoji} ${escapeHtml(role.label)}</option>`;
 }
 
-function renderCodexFilters(filters) {
+function renderCodexFilters(filters, revealNames) {
   const rarityOptions = ["All", ...RARITY_ORDER]
     .map((r) => `<option value="${r}" ${r === filters.rarity ? "selected" : ""}>${escapeHtml(r)}</option>`)
     .join("");
@@ -130,6 +130,20 @@ function renderCodexFilters(filters) {
           <option value="Undiscovered" ${filters.discovery === "Undiscovered" ? "selected" : ""}>Undiscovered</option>
         </select>
       </label>
+      <button
+        class="codex-reveal-toggle ${revealNames ? "is-on" : ""}"
+        type="button"
+        data-action="toggle-codex-reveal-names"
+        role="switch"
+        aria-checked="${revealNames ? "true" : "false"}"
+        title="${revealNames ? "Hide undiscovered building names" : "Reveal undiscovered building names"}"
+      >
+        <span class="codex-reveal-toggle__track"><span class="codex-reveal-toggle__thumb"></span></span>
+        <span class="codex-reveal-toggle__copy">
+          <strong>Reveal Names</strong>
+          <small>${revealNames ? "Showing names on undiscovered cards" : "Undiscovered cards stay as ???"}</small>
+        </span>
+      </button>
       <button class="button button--ghost" type="button" data-action="reset-codex-filter">Reset</button>
     </section>
   `;
@@ -207,10 +221,17 @@ function renderDiscoveredCard(entry, instances) {
   `;
 }
 
-function renderUndiscoveredCard(entry) {
+function renderUndiscoveredCard(entry, revealNames) {
   const role = getRoleForEntry(entry);
+  // When "Reveal Names" is on we surface the name + district so players can
+  // hunt for specific buildings, but keep the silhouette art and the apex
+  // bonus hidden so first-time manifestation still feels like a discovery.
+  const titleText = revealNames ? entry.displayName : "???";
+  const hintText = revealNames
+    ? `Roll a ${entry.rarity} crystal to manifest.`
+    : `Manifest a ${entry.rarity} crystal to reveal.`;
   return `
-    <article class="codex-card codex-card--undiscovered rarity-${entry.rarity.toLowerCase()}" data-rarity="${escapeHtml(entry.rarity)}">
+    <article class="codex-card codex-card--undiscovered ${revealNames ? "is-name-revealed" : ""} rarity-${entry.rarity.toLowerCase()}" data-rarity="${escapeHtml(entry.rarity)}">
       <div class="codex-card__art codex-card__art--silhouette" aria-hidden="true">
         <span class="codex-card__silhouette">?</span>
       </div>
@@ -219,22 +240,22 @@ function renderUndiscoveredCard(entry) {
           <span class="codex-card__role">${role.emoji} ${escapeHtml(role.label)}</span>
           <span class="codex-card__rarity">${escapeHtml(entry.rarity)}</span>
         </header>
-        <h4>???</h4>
-        <p class="codex-card__district">Manifest a ${escapeHtml(entry.rarity)} crystal to reveal.</p>
+        <h4>${escapeHtml(titleText)}</h4>
+        <p class="codex-card__district">${escapeHtml(hintText)}</p>
       </div>
     </article>
   `;
 }
 
-function renderCard(entry, discoveryIndex) {
+function renderCard(entry, discoveryIndex, revealNames) {
   const instances = discoveryIndex.get(indexKeyFor(entry));
   if (instances && instances.length) {
     return renderDiscoveredCard(entry, instances);
   }
-  return renderUndiscoveredCard(entry);
+  return renderUndiscoveredCard(entry, revealNames);
 }
 
-function renderCodexGrid(filteredEntries, discoveryIndex) {
+function renderCodexGrid(filteredEntries, discoveryIndex, revealNames) {
   if (!filteredEntries.length) {
     return `
       <section class="panel codex-grid-panel">
@@ -245,7 +266,7 @@ function renderCodexGrid(filteredEntries, discoveryIndex) {
   return `
     <section class="panel codex-grid-panel">
       <div class="codex-grid">
-        ${filteredEntries.map((entry) => renderCard(entry, discoveryIndex)).join("")}
+        ${filteredEntries.map((entry) => renderCard(entry, discoveryIndex, revealNames)).join("")}
       </div>
     </section>
   `;
@@ -256,14 +277,15 @@ export function renderCodexPage(state) {
   const discoveryIndex = buildDiscoveryIndex(state);
   const filters = getCodexFilters(state);
   const filtered = applyFilters(entries, filters, discoveryIndex);
+  const revealNames = state.transientUi?.codexRevealNames === true;
 
   return {
     title: "Building Codex",
     subtitle: `Track every building in the realm — currently ${entries.filter((e) => discoveryIndex.has(indexKeyFor(e))).length} of ${entries.length} discovered.`,
     content: `
       ${renderCodexHeader(state, entries, discoveryIndex)}
-      ${renderCodexFilters(filters)}
-      ${renderCodexGrid(filtered, discoveryIndex)}
+      ${renderCodexFilters(filters, revealNames)}
+      ${renderCodexGrid(filtered, discoveryIndex, revealNames)}
     `
   };
 }

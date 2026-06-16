@@ -184,7 +184,7 @@ import { forceTownFocus, getMayorAdvice, reopenTownFocusSelection, selectTownFoc
 import { getEmergencyStatus, getCityTrendSummary, setResourceValue } from "./systems/ResourceSystem.js?v=v1.7.20-20260615130257";
 import { Toasts } from "./ui/Toasts.js?v=v1.7.20-20260615130257";
 import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js?v=v1.7.20-20260615130257";
-import { UIRenderer } from "./ui/UIRenderer.js?v=v1.7.20-20260615190001";
+import { UIRenderer } from "./ui/UIRenderer.js?v=v1.7.20-20260615190002";
 import { buildSearchIndex, filterSearchIndex, renderSearchResults } from "./ui/GlobalSearch.js?v=v1.7.20-20260615130257";
 import { createBlankPlayerCharacter, createBlankWealthItem } from "./ui/EquipmentSheetPage.js?v=v1.7.20-20260615130257";
 
@@ -3968,6 +3968,12 @@ root.addEventListener("click", async (event) => {
     case "reset-codex-filter":
       renderer.setTransientUi(
         { codexFilters: { rarity: "All", role: "All", discovery: "All" } },
+        getCurrentState()
+      );
+      break;
+    case "toggle-codex-reveal-names":
+      renderer.setTransientUi(
+        { codexRevealNames: !renderer.transientUi.codexRevealNames },
         getCurrentState()
       );
       break;

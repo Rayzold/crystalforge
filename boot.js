@@ -1,4 +1,4 @@
-const APP_ENTRY = "./app.js?v=v1.7.20-20260615190001";
+const APP_ENTRY = "./app.js?v=v1.7.20-20260615190002";
 
 // Apply persisted theme BEFORE the app boots so the parchment palette doesn't
 // flash dark for a frame. The 📜 button in the top-nav writes this key.
