@@ -237,8 +237,8 @@ function renderDiscoveredCard(entry, instances) {
           ${isApex ? `<em class="codex-card__apex-flag">350% Apex</em>` : ""}
         </footer>
         ${
-          isApex && entry.apexNote
-            ? `<p class="codex-card__apex"><span>Apex bonus</span>${escapeHtml(entry.apexNote)}</p>`
+          entry.apexNote
+            ? `<p class="codex-card__apex ${isApex ? "is-apex-active" : "is-apex-locked"}"><span>${isApex ? "Apex bonus · Active" : "Apex bonus · Locked at 350%"}</span>${escapeHtml(entry.apexNote)}</p>`
             : ""
         }
       </div>

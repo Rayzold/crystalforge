@@ -19307,6 +19307,18 @@ body[data-theme="silver"] .collapse-toggle {
   color: var(--accent-gold);
   margin-bottom: 2px;
 }
+.codex-card__apex.is-apex-locked {
+  background: rgba(240, 196, 130, 0.05);
+  border-color: rgba(240, 196, 130, 0.12);
+  color: rgba(244, 248, 255, 0.62);
+}
+.codex-card__apex.is-apex-locked span { color: rgba(240, 196, 130, 0.55); }
+[data-theme="parchment"] .codex-card__apex.is-apex-locked {
+  background: rgba(180, 83, 9, 0.04);
+  border-color: rgba(180, 83, 9, 0.18);
+  color: rgba(101, 67, 33, 0.65);
+}
+[data-theme="parchment"] .codex-card__apex.is-apex-locked span { color: rgba(180, 83, 9, 0.70); }
 
 @media (max-width: 600px) {
   .codex-header__overall { grid-template-columns: 1fr; }
