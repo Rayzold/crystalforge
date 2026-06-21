@@ -13,9 +13,9 @@ import {
   getAwakenedAbilityTypeLabel,
   getAwakenedStatusDetail,
   getAwakenedStatusLabel
-} from "../content/AwakenedConfig.js?v=v1.7.20-20260615130257";
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615130257";
-import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.20-20260615130257";
+} from "../content/AwakenedConfig.js?v=v1.7.20-20260621141413";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260621141413";
+import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.20-20260621141413";
 
 function getAwakenedImageSrc(entry) {
   if (entry.imageData && entry.imageData.startsWith("data:image/")) {

@@ -1,24 +1,24 @@
 // Public/player-facing presentation page.
 // It exposes the shared session state in a simplified read-mostly format with
 // manifest choices, incubator controls, active buildings, and table-safe info.
-import { APP_DISPLAY_VERSION, BUILD_NOTES, FIREBASE_DEFAULT_REALM_ID } from "../content/Config.js?v=v1.7.20-20260615130257";
-import { BUILDING_ROLE_LEGEND, getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260615210000";
-import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER, getCitizenHelpText } from "../content/CitizenConfig.js?v=v1.7.20-20260615130257";
-import { GLOSSARY_TERMS } from "../content/GlossaryConfig.js?v=v1.7.20-20260615130257";
-import { RARITY_ORDER } from "../content/Rarities.js?v=v1.7.20-20260615130257";
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615130257";
-import { formatDate, getNextHoliday, getStructuredDate } from "../systems/CalendarSystem.js?v=v1.7.20-20260615130257";
-import { formatBuildingExactQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js?v=v1.7.20-20260615130257";
-import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js?v=v1.7.20-20260615130257";
-import { getTradeGoodsGoldMultiplier, getCityTrendSummary, getGoodsSummary, getResourceChainSummary } from "../systems/ResourceSystem.js?v=v1.7.20-20260615130257";
-import { getFoodOutputMultiplier, getGoldOutputMultiplier } from "../systems/CityConditionSystem.js?v=v1.7.20-20260615130257";
-import { getBuildingPlacementBonuses } from "../systems/MapSystem.js?v=v1.7.20-20260615130257";
-import { getMayorAdvice } from "../systems/TownFocusSystem.js?v=v1.7.20-20260615130257";
-import { applyBuildingWorkforceToResource, getBuildingWorkforceStatus, getBuildingWorkforceMultiplier, getWorkforceSummary } from "../systems/WorkforceSystem.js?v=v1.7.20-20260615130257";
-import { renderCrystalSelector } from "./CrystalSelector.js?v=v1.7.20-20260615130257";
-import { createHelpBubble } from "./HelpBubbles.js?v=v1.7.20-20260615130257";
-import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js?v=v1.7.20-20260615130257";
-import { renderManifestPanel } from "./ManifestPanel.js?v=v1.7.20-20260615130257";
+import { APP_DISPLAY_VERSION, BUILD_NOTES, FIREBASE_DEFAULT_REALM_ID } from "../content/Config.js?v=v1.7.20-20260621141413";
+import { BUILDING_ROLE_LEGEND, getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.20-20260621141413";
+import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER, getCitizenHelpText } from "../content/CitizenConfig.js?v=v1.7.20-20260621141413";
+import { GLOSSARY_TERMS } from "../content/GlossaryConfig.js?v=v1.7.20-20260621141413";
+import { RARITY_ORDER } from "../content/Rarities.js?v=v1.7.20-20260621141413";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260621141413";
+import { formatDate, getNextHoliday, getStructuredDate } from "../systems/CalendarSystem.js?v=v1.7.20-20260621141413";
+import { formatBuildingExactQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js?v=v1.7.20-20260621141413";
+import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js?v=v1.7.20-20260621141413";
+import { getTradeGoodsGoldMultiplier, getCityTrendSummary, getGoodsSummary, getResourceChainSummary } from "../systems/ResourceSystem.js?v=v1.7.20-20260621141413";
+import { getFoodOutputMultiplier, getGoldOutputMultiplier } from "../systems/CityConditionSystem.js?v=v1.7.20-20260621141413";
+import { getBuildingPlacementBonuses } from "../systems/MapSystem.js?v=v1.7.20-20260621141413";
+import { getMayorAdvice } from "../systems/TownFocusSystem.js?v=v1.7.20-20260621141413";
+import { applyBuildingWorkforceToResource, getBuildingWorkforceStatus, getBuildingWorkforceMultiplier, getWorkforceSummary } from "../systems/WorkforceSystem.js?v=v1.7.20-20260621141413";
+import { renderCrystalSelector } from "./CrystalSelector.js?v=v1.7.20-20260621141413";
+import { createHelpBubble } from "./HelpBubbles.js?v=v1.7.20-20260621141413";
+import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js?v=v1.7.20-20260621141413";
+import { renderManifestPanel } from "./ManifestPanel.js?v=v1.7.20-20260621141413";
 
 function renderStatusPill(state) {
   const connectionState = state.transientUi?.firebaseConnectionState ?? "idle";

@@ -1,6 +1,6 @@
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260615130257";
-import { getEmergencyStatus } from "../systems/ResourceSystem.js?v=v1.7.20-20260615130257";
-import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260615130257";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260621141413";
+import { getEmergencyStatus } from "../systems/ResourceSystem.js?v=v1.7.20-20260621141413";
+import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260621141413";
 
 export function renderResourcePanel(state) {
   const emergencyState = getEmergencyStatus(state);
@@ -9,14 +9,18 @@ export function renderResourcePanel(state) {
     ? `${topEmergency.label}: ${topEmergency.cause ?? topEmergency.details}${emergencyState.emergencies.length > 1 ? ` (+${emergencyState.emergencies.length - 1} more)` : ""}`
     : "Stable reserves";
 
+  const safeNumber = (raw) => {
+    const numeric = Number(raw);
+    return Number.isFinite(numeric) ? numeric : 0;
+  };
   const entries = [
-    ["Gold", state.resources.gold, "gold"],
-    ["Food", state.resources.food, "food"],
-    ["Materials", state.resources.materials, "materials"],
-    ["Salvage", state.resources.salvage ?? 0, "salvage"],
-    ["Mana", state.resources.mana, "mana"],
-    ["Population", state.resources.population, "population"],
-    ["Prosperity", state.resources.prosperity, "prosperity"]
+    ["Gold", safeNumber(state.resources.gold), "gold"],
+    ["Food", safeNumber(state.resources.food), "food"],
+    ["Materials", safeNumber(state.resources.materials), "materials"],
+    ["Salvage", safeNumber(state.resources.salvage), "salvage"],
+    ["Mana", safeNumber(state.resources.mana), "mana"],
+    ["Population", safeNumber(state.resources.population), "population"],
+    ["Prosperity", safeNumber(state.resources.prosperity), "prosperity"]
   ];
 
   const isEditing = Boolean(state.transientUi?.resourceQuickEdit);
