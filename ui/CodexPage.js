@@ -3,15 +3,15 @@
 // discovered / undiscovered state, manifest count, and per-rarity progress.
 // Filterable by rarity, building role (tag), and discovery state.
 
-import { BUILDING_POOLS } from "../content/BuildingPools.js?v=v1.7.20-20260621141413";
+import { BUILDING_POOLS } from "../content/BuildingPools.js?v=v1.7.20-20260621155633";
 import {
   BUILDING_ROLE_LEGEND,
   createBaseBuildingCatalog,
   getCatalogKey
-} from "../content/BuildingCatalog.js?v=v1.7.20-20260621141413";
-import { RARITY_ORDER } from "../content/Rarities.js?v=v1.7.20-20260621141413";
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260621141413";
-import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.20-20260621141413";
+} from "../content/BuildingCatalog.js?v=v1.7.20-20260621155633";
+import { RARITY_ORDER } from "../content/Rarities.js?v=v1.7.20-20260621155633";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260621155633";
+import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.20-20260621155633";
 
 const DEFAULT_FILTERS = { rarity: "All", role: "All", discovery: "All", quality: "All" };
 

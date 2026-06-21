@@ -4,30 +4,30 @@
 import {
   CITIZEN_RARITY_OUTPUT_MULTIPLIERS,
   CITIZEN_RARITY_UPKEEP_MULTIPLIERS
-} from "../content/CitizenConfig.js?v=v1.7.20-20260621141413";
-import { RESOURCE_MINIMUMS } from "../content/Config.js?v=v1.7.20-20260621141413";
-import { clamp } from "../engine/Utils.js?v=v1.7.20-20260621141413";
-import { getDistrictSummary } from "./DistrictSystem.js?v=v1.7.20-20260621141413";
-import { getBuildingTierResourceRate } from "./BuildingSystem.js?v=v1.7.20-20260621141413";
+} from "../content/CitizenConfig.js?v=v1.7.20-20260621155633";
+import { RESOURCE_MINIMUMS } from "../content/Config.js?v=v1.7.20-20260621155633";
+import { clamp } from "../engine/Utils.js?v=v1.7.20-20260621155633";
+import { getDistrictSummary } from "./DistrictSystem.js?v=v1.7.20-20260621155633";
+import { getBuildingTierResourceRate } from "./BuildingSystem.js?v=v1.7.20-20260621155633";
 import {
   getEquippedExpeditionRelics,
   getExpeditionRelicActiveBonuses,
   getLegendAssignmentDetails,
   getUniqueCitizenResourceBonuses
-} from "./ExpeditionSystem.js?v=v1.7.20-20260621141413";
-import { getBuildingPlacementBonuses } from "./MapSystem.js?v=v1.7.20-20260621141413";
-import { getCurrentTownFocus, getSuggestedFocusForAlert } from "./TownFocusSystem.js?v=v1.7.20-20260621141413";
-import { iterateCitizenRarityEntries } from "./CitizenSystem.js?v=v1.7.20-20260621141413";
+} from "./ExpeditionSystem.js?v=v1.7.20-20260621155633";
+import { getBuildingPlacementBonuses } from "./MapSystem.js?v=v1.7.20-20260621155633";
+import { getCurrentTownFocus, getSuggestedFocusForAlert } from "./TownFocusSystem.js?v=v1.7.20-20260621155633";
+import { iterateCitizenRarityEntries } from "./CitizenSystem.js?v=v1.7.20-20260621155633";
 import {
   applyBuildingWorkforceToResource,
   getBuildingWorkforceMultiplier,
   getWorkforceSummary
-} from "./WorkforceSystem.js?v=v1.7.20-20260621141413";
+} from "./WorkforceSystem.js?v=v1.7.20-20260621155633";
 import {
   getEventRollModifier,
   getFoodOutputMultiplier,
   getGoldOutputMultiplier
-} from "./CityConditionSystem.js?v=v1.7.20-20260621141413";
+} from "./CityConditionSystem.js?v=v1.7.20-20260621155633";
 
 const ECONOMY_RESOURCE_KEYS = ["gold", "food", "materials", "salvage", "mana", "prosperity"];
 
