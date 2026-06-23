@@ -18607,8 +18607,11 @@ body[data-theme="silver"] .collapse-toggle {
 }
 
 .city-workspace__sort select {
-  height: 28px;
-  font-size: 0.78rem;
+  height: 32px;
+  min-width: 168px;
+  padding: 4px 28px 4px 10px;
+  font-size: 0.82rem;
+  text-overflow: ellipsis;
 }
 
 .city-workspace__building-search {

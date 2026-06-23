@@ -1,10 +1,10 @@
 // Central configuration and boot-time defaults.
 // This file defines versioning, starting presets, high-level tuning constants,
 // route metadata, and user-facing build notes that explain what changed.
-import { BUILDING_POOLS } from "./BuildingPools.js?v=v1.7.20-20260623073844";
-import { BASE_DISTRICT_CONFIG } from "./DistrictConfig.js?v=v1.7.20-20260623073844";
-import { CITIZEN_CLASSES } from "./CitizenConfig.js?v=v1.7.20-20260623073844";
-import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js?v=v1.7.20-20260623073844";
+import { BUILDING_POOLS } from "./BuildingPools.js?v=v1.7.20-20260623075447";
+import { BASE_DISTRICT_CONFIG } from "./DistrictConfig.js?v=v1.7.20-20260623075447";
+import { CITIZEN_CLASSES } from "./CitizenConfig.js?v=v1.7.20-20260623075447";
+import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js?v=v1.7.20-20260623075447";
 
 export const APP_NAME = "Crystal Forge";
 // APP_VERSION must stay monotonic because Firebase publish safety compares builds numerically.

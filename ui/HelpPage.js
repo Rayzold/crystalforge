@@ -1,12 +1,12 @@
-import { BUILDING_ROLE_LEGEND } from "../content/BuildingCatalog.js?v=v1.7.20-20260623073844";
+import { BUILDING_ROLE_LEGEND } from "../content/BuildingCatalog.js?v=v1.7.20-20260623075447";
 import {
   BUILDING_IMAGE_FILENAME_SAMPLES,
   BUILDING_IMAGE_LOOKUP_EXTENSIONS
-} from "../content/BuildingImageFilenameGuide.js?v=v1.7.20-20260623073844";
-import { APP_DISPLAY_VERSION, BUILD_NOTES, VERSIONING_RULES } from "../content/Config.js?v=v1.7.20-20260623073844";
-import { GLOSSARY_TERMS } from "../content/GlossaryConfig.js?v=v1.7.20-20260623073844";
-import { escapeHtml } from "../engine/Utils.js?v=v1.7.20-20260623073844";
-import { getManualSaveMeta } from "../systems/StorageSystem.js?v=v1.7.20-20260623073844";
+} from "../content/BuildingImageFilenameGuide.js?v=v1.7.20-20260623075447";
+import { APP_DISPLAY_VERSION, BUILD_NOTES, VERSIONING_RULES } from "../content/Config.js?v=v1.7.20-20260623075447";
+import { GLOSSARY_TERMS } from "../content/GlossaryConfig.js?v=v1.7.20-20260623075447";
+import { escapeHtml } from "../engine/Utils.js?v=v1.7.20-20260623075447";
+import { getManualSaveMeta } from "../systems/StorageSystem.js?v=v1.7.20-20260623075447";
 
 function renderSectionNav() {
   const sections = [

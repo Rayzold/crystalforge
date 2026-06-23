@@ -1,10 +1,10 @@
-import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260623073844";
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260623073844";
-import { getStructuredDate } from "../systems/CalendarSystem.js?v=v1.7.20-20260623073844";
-import { formatBuildingExactQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js?v=v1.7.20-20260623073844";
-import { getOnboardingGoals } from "../systems/GoalSystem.js?v=v1.7.20-20260623073844";
-import { getCityTrendSummary } from "../systems/ResourceSystem.js?v=v1.7.20-20260623073844";
-import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.20-20260623073844";
+import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260623075447";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260623075447";
+import { getStructuredDate } from "../systems/CalendarSystem.js?v=v1.7.20-20260623075447";
+import { formatBuildingExactQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js?v=v1.7.20-20260623075447";
+import { getOnboardingGoals } from "../systems/GoalSystem.js?v=v1.7.20-20260623075447";
+import { getCityTrendSummary } from "../systems/ResourceSystem.js?v=v1.7.20-20260623075447";
+import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.20-20260623075447";
 
 function getQualityMultiplierReadout(building) {
   const multiplier = getBuildingMultiplier(building?.quality ?? 0);

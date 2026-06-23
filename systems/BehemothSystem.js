@@ -1,7 +1,7 @@
 // Behemoth bestiary system.
 // Provides creation, edit, and removal helpers for the GM-authored
 // roster of huge monsters captured and held at the Drift.
-import { createId } from "../engine/Utils.js?v=v1.7.20-20260623073844";
+import { createId } from "../engine/Utils.js?v=v1.7.20-20260623075447";
 import {
   BEHEMOTH_SIZES,
   BEHEMOTH_STATUSES,
@@ -9,7 +9,7 @@ import {
   BEHEMOTH_TEMPERAMENTS,
   BEHEMOTH_UPKEEP_RESOURCES,
   createDefaultBehemothStats
-} from "../content/BehemothConfig.js?v=v1.7.20-20260623073844";
+} from "../content/BehemothConfig.js?v=v1.7.20-20260623075447";
 
 const VALID_SIZE_IDS = new Set(BEHEMOTH_SIZES.map((entry) => entry.id));
 const VALID_STATUS_IDS = new Set(BEHEMOTH_STATUSES.map((entry) => entry.id));
