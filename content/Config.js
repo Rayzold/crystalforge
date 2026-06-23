@@ -1,10 +1,10 @@
 // Central configuration and boot-time defaults.
 // This file defines versioning, starting presets, high-level tuning constants,
 // route metadata, and user-facing build notes that explain what changed.
-import { BUILDING_POOLS } from "./BuildingPools.js?v=v1.7.20-20260621155633";
-import { BASE_DISTRICT_CONFIG } from "./DistrictConfig.js?v=v1.7.20-20260621155633";
-import { CITIZEN_CLASSES } from "./CitizenConfig.js?v=v1.7.20-20260621155633";
-import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js?v=v1.7.20-20260621155633";
+import { BUILDING_POOLS } from "./BuildingPools.js?v=v1.7.20-20260623073844";
+import { BASE_DISTRICT_CONFIG } from "./DistrictConfig.js?v=v1.7.20-20260623073844";
+import { CITIZEN_CLASSES } from "./CitizenConfig.js?v=v1.7.20-20260623073844";
+import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js?v=v1.7.20-20260623073844";
 
 export const APP_NAME = "Crystal Forge";
 // APP_VERSION must stay monotonic because Firebase publish safety compares builds numerically.
@@ -166,6 +166,18 @@ export const RESOURCE_MINIMUMS = {
   population: 0,
   prosperity: 0
 };
+
+// Citizen pay multiplier (0.5x .. 5x, 0.5 step) — scales the gold portion of
+// citizen upkeep and shifts morale up/down per step from 1x.
+export const SALARIES_LEVELS = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
+export const DEFAULT_SALARIES_LEVEL = 1;
+// Citizen effort multiplier (0.5x .. 2x, 0.1 step) — scales their production
+// and shifts morale down per step above 1x (or up below 1x).
+export const EFFORT_LEVELS = [0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2];
+export const DEFAULT_EFFORT_LEVEL = 1;
+// Morale deltas applied per step from baseline (1x).
+export const SALARIES_MORALE_PER_STEP = 4;
+export const EFFORT_MORALE_PER_STEP = -8;
 
 export const EVENT_STEP_CHANCES = {
   day: 0.05,

@@ -2,9 +2,13 @@
 // This file creates fresh game states, normalizes imported data, keeps manual
 // and session saves stable, and upgrades old save shapes into the current model.
 import {
+  DEFAULT_EFFORT_LEVEL,
+  DEFAULT_SALARIES_LEVEL,
   DEFAULT_START_PRESET,
   DEFAULT_START_STATE,
+  EFFORT_LEVELS,
   MANUAL_SAVE_KEY,
+  SALARIES_LEVELS,
   SAVE_VERSION,
   SPEED_MULTIPLIERS,
   START_STATE_PRESETS,
@@ -12,39 +16,39 @@ import {
   createEmptyCollection,
   createDefaultDistrictState,
   createDefaultRollTables
-} from "../content/Config.js?v=v1.7.20-20260621155633";
-import { BASE_BUILDING_CATALOG, buildFlavorText } from "../content/BuildingCatalog.js?v=v1.7.20-20260621155633";
-import { getNextRarity } from "../content/Rarities.js?v=v1.7.20-20260621155633";
-import { createId, safeJsonParse } from "../engine/Utils.js?v=v1.7.20-20260621155633";
-import { formatDate } from "./CalendarSystem.js?v=v1.7.20-20260621155633";
+} from "../content/Config.js?v=v1.7.20-20260623073844";
+import { BASE_BUILDING_CATALOG, buildFlavorText } from "../content/BuildingCatalog.js?v=v1.7.20-20260623073844";
+import { getNextRarity } from "../content/Rarities.js?v=v1.7.20-20260623073844";
+import { createId, safeJsonParse } from "../engine/Utils.js?v=v1.7.20-20260623073844";
+import { formatDate } from "./CalendarSystem.js?v=v1.7.20-20260623073844";
 import {
   createCitizenDefinitionsSnapshot,
   createCitizenRarityRoster,
   normalizeCitizenRarityRoster,
   normalizeCitizens,
   syncCitizenTotalsFromRoster
-} from "./CitizenSystem.js?v=v1.7.20-20260621155633";
-import { normalizeCrystalCollection } from "./CrystalSystem.js?v=v1.7.20-20260621155633";
-import { recalculateCityStats } from "./CityStatsSystem.js?v=v1.7.20-20260621155633";
-import { getDistrictSummary } from "./DistrictSystem.js?v=v1.7.20-20260621155633";
-import { normalizeShardCollection } from "./ShardSystem.js?v=v1.7.20-20260621155633";
-import { createMapCells } from "./MapSystem.js?v=v1.7.20-20260621155633";
-import { createDefaultDriftEvolutionState, normalizeDriftEvolutionState, syncDriftEvolutionState } from "./DriftEvolutionSystem.js?v=v1.7.20-20260621155633";
-import { getDriftConstructionSlots, normalizeConstructionPriority } from "./ConstructionSystem.js?v=v1.7.20-20260621155633";
-import { createDefaultTownFocusState, normalizeTownFocusState } from "./TownFocusSystem.js?v=v1.7.20-20260621155633";
-import { captureDailyCitySnapshot } from "./CitySnapshotSystem.js?v=v1.7.20-20260621155633";
+} from "./CitizenSystem.js?v=v1.7.20-20260623073844";
+import { normalizeCrystalCollection } from "./CrystalSystem.js?v=v1.7.20-20260623073844";
+import { recalculateCityStats } from "./CityStatsSystem.js?v=v1.7.20-20260623073844";
+import { getDistrictSummary } from "./DistrictSystem.js?v=v1.7.20-20260623073844";
+import { normalizeShardCollection } from "./ShardSystem.js?v=v1.7.20-20260623073844";
+import { createMapCells } from "./MapSystem.js?v=v1.7.20-20260623073844";
+import { createDefaultDriftEvolutionState, normalizeDriftEvolutionState, syncDriftEvolutionState } from "./DriftEvolutionSystem.js?v=v1.7.20-20260623073844";
+import { getDriftConstructionSlots, normalizeConstructionPriority } from "./ConstructionSystem.js?v=v1.7.20-20260623073844";
+import { createDefaultTownFocusState, normalizeTownFocusState } from "./TownFocusSystem.js?v=v1.7.20-20260623073844";
+import { captureDailyCitySnapshot } from "./CitySnapshotSystem.js?v=v1.7.20-20260623073844";
 import {
   createDefaultExpeditionState,
   normalizeExpeditionState,
   normalizeUniqueCitizens,
   normalizeVehicleFleet
-} from "./ExpeditionSystem.js?v=v1.7.20-20260621155633";
-import { createDefaultVehicleFleet } from "../content/VehicleConfig.js?v=v1.7.20-20260621155633";
-import { normalizeBehemoths } from "./BehemothSystem.js?v=v1.7.20-20260621155633";
-import { normalizeNpcs } from "./NpcSystem.js?v=v1.7.20-20260621155633";
-import { normalizeAwakenedRoster } from "./AwakenedSystem.js?v=v1.7.20-20260621155633";
-import { normalizeCraftingItems } from "./CraftingSystem.js?v=v1.7.20-20260621155633";
-import { normalizeCooldowns } from "./CooldownSystem.js?v=v1.7.20-20260621155633";
+} from "./ExpeditionSystem.js?v=v1.7.20-20260623073844";
+import { createDefaultVehicleFleet } from "../content/VehicleConfig.js?v=v1.7.20-20260623073844";
+import { normalizeBehemoths } from "./BehemothSystem.js?v=v1.7.20-20260623073844";
+import { normalizeNpcs } from "./NpcSystem.js?v=v1.7.20-20260623073844";
+import { normalizeAwakenedRoster } from "./AwakenedSystem.js?v=v1.7.20-20260623073844";
+import { normalizeCraftingItems } from "./CraftingSystem.js?v=v1.7.20-20260623073844";
+import { normalizeCooldowns } from "./CooldownSystem.js?v=v1.7.20-20260623073844";
 
 const SESSION_STATE_KEY = "crystal-forge-session-state-v1";
 const BUILD_NOTES_SEEN_KEY = "crystal-forge-build-notes-seen-v1";
@@ -168,6 +172,10 @@ export function createInitialState(preset = DEFAULT_START_PRESET) {
     sessionSnapshots: [],
     adminOverrides: {
       goods: 0
+    },
+    policySettings: {
+      salariesLevel: DEFAULT_SALARIES_LEVEL,
+      effortLevel: DEFAULT_EFFORT_LEVEL
     },
     dailyResourceModifiers: createDefaultDailyResourceModifiers(),
     settings: structuredClone(startState.settings),
@@ -456,6 +464,27 @@ function normalizeAdminOverrides(sourceOverrides, baseOverrides) {
   return normalized;
 }
 
+function snapToList(value, options, fallback) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) {
+    return fallback;
+  }
+  if (options.includes(numeric)) {
+    return numeric;
+  }
+  return options.reduce(
+    (closest, option) => (Math.abs(option - numeric) < Math.abs(closest - numeric) ? option : closest),
+    options[0] ?? fallback
+  );
+}
+
+function normalizePolicySettings(sourcePolicy) {
+  return {
+    salariesLevel: snapToList(sourcePolicy?.salariesLevel, SALARIES_LEVELS, DEFAULT_SALARIES_LEVEL),
+    effortLevel: snapToList(sourcePolicy?.effortLevel, EFFORT_LEVELS, DEFAULT_EFFORT_LEVEL)
+  };
+}
+
 const DAILY_RESOURCE_MODIFIER_KEYS = ["gold", "food", "materials", "salvage", "mana", "prosperity"];
 
 export function createDefaultDailyResourceModifiers() {
@@ -634,6 +663,7 @@ export function validateAndMigrateSave(rawSave) {
     townFocus: normalizeTownFocusState(rawSave.townFocus),
     sessionSnapshots: Array.isArray(rawSave.sessionSnapshots) ? rawSave.sessionSnapshots : [],
     adminOverrides: normalizeAdminOverrides(rawSave.adminOverrides, base.adminOverrides),
+    policySettings: normalizePolicySettings(rawSave.policySettings),
     dailyResourceModifiers: normalizeDailyResourceModifiers(rawSave.dailyResourceModifiers),
     settings: normalizeSettings(rawSave.settings, base.settings),
     ui: {

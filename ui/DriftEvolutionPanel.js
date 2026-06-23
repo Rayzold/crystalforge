@@ -1,11 +1,11 @@
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260621155633";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260623073844";
 import {
   getCurrentDriftEvolution,
   getDriftConstructionSlots,
   getNextDriftEvolutionStage,
   getPopulationGoals
-} from "../systems/DriftEvolutionSystem.js?v=v1.7.20-20260621155633";
-import { getActiveConstructionQueue } from "../systems/ConstructionSystem.js?v=v1.7.20-20260621155633";
+} from "../systems/DriftEvolutionSystem.js?v=v1.7.20-20260623073844";
+import { getActiveConstructionQueue } from "../systems/ConstructionSystem.js?v=v1.7.20-20260623073844";
 
 export function renderDriftEvolutionPanel(state, { compact = false } = {}) {
   const currentStage = getCurrentDriftEvolution(state);

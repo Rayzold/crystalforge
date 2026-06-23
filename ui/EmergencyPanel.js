@@ -1,6 +1,6 @@
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260621155633";
-import { getEmergencyStatus } from "../systems/ResourceSystem.js?v=v1.7.20-20260621155633";
-import { getSuggestedFocusForAlert } from "../systems/TownFocusSystem.js?v=v1.7.20-20260621155633";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260623073844";
+import { getEmergencyStatus } from "../systems/ResourceSystem.js?v=v1.7.20-20260623073844";
+import { getSuggestedFocusForAlert } from "../systems/TownFocusSystem.js?v=v1.7.20-20260623073844";
 
 function renderRunway(label, days, dailyDelta) {
   if (days === null) {

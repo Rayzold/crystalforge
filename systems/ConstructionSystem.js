@@ -1,17 +1,17 @@
 // Incubation and build-progress rules.
 // This system converts building points per day into quality gain, applies
 // support-bpd from completed structures, and computes ETA/stall information.
-import { BUILDING_ACTIVE_THRESHOLD, SPEED_MULTIPLIERS } from "../content/Config.js?v=v1.7.20-20260621155633";
-import { getBuildingConstructionSupportBpd } from "../content/BuildingCatalog.js?v=v1.7.20-20260621155633";
-import { RARITY_BUILD_POINTS_PER_PERCENT, RARITY_RANKS } from "../content/Rarities.js?v=v1.7.20-20260621155633";
-import { roundTo } from "../engine/Utils.js?v=v1.7.20-20260621155633";
-import { getDriftConstructionSlots, getDriftConstructionSpeedMultiplier } from "./DriftEvolutionSystem.js?v=v1.7.20-20260621155633";
-import { getBuildingMultiplier } from "./BuildingSystem.js?v=v1.7.20-20260621155633";
+import { BUILDING_ACTIVE_THRESHOLD, SPEED_MULTIPLIERS } from "../content/Config.js?v=v1.7.20-20260623073844";
+import { getBuildingConstructionSupportBpd } from "../content/BuildingCatalog.js?v=v1.7.20-20260623073844";
+import { RARITY_BUILD_POINTS_PER_PERCENT, RARITY_RANKS } from "../content/Rarities.js?v=v1.7.20-20260623073844";
+import { roundTo } from "../engine/Utils.js?v=v1.7.20-20260623073844";
+import { getDriftConstructionSlots, getDriftConstructionSpeedMultiplier } from "./DriftEvolutionSystem.js?v=v1.7.20-20260623073844";
+import { getBuildingMultiplier } from "./BuildingSystem.js?v=v1.7.20-20260623073844";
 import {
   getBuildingWorkforceCategory,
   getConstructionWorkforceSupportBpd,
   getWorkforceSummary
-} from "./WorkforceSystem.js?v=v1.7.20-20260621155633";
+} from "./WorkforceSystem.js?v=v1.7.20-20260623073844";
 
 export { getDriftConstructionSlots };
 

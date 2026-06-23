@@ -4,30 +4,30 @@
 import {
   CITIZEN_RARITY_OUTPUT_MULTIPLIERS,
   CITIZEN_RARITY_UPKEEP_MULTIPLIERS
-} from "../content/CitizenConfig.js?v=v1.7.20-20260621155633";
-import { RESOURCE_MINIMUMS } from "../content/Config.js?v=v1.7.20-20260621155633";
-import { clamp } from "../engine/Utils.js?v=v1.7.20-20260621155633";
-import { getDistrictSummary } from "./DistrictSystem.js?v=v1.7.20-20260621155633";
-import { getBuildingTierResourceRate } from "./BuildingSystem.js?v=v1.7.20-20260621155633";
+} from "../content/CitizenConfig.js?v=v1.7.20-20260623073844";
+import { DEFAULT_EFFORT_LEVEL, DEFAULT_SALARIES_LEVEL, RESOURCE_MINIMUMS } from "../content/Config.js?v=v1.7.20-20260623073844";
+import { clamp } from "../engine/Utils.js?v=v1.7.20-20260623073844";
+import { getDistrictSummary } from "./DistrictSystem.js?v=v1.7.20-20260623073844";
+import { getBuildingTierResourceRate } from "./BuildingSystem.js?v=v1.7.20-20260623073844";
 import {
   getEquippedExpeditionRelics,
   getExpeditionRelicActiveBonuses,
   getLegendAssignmentDetails,
   getUniqueCitizenResourceBonuses
-} from "./ExpeditionSystem.js?v=v1.7.20-20260621155633";
-import { getBuildingPlacementBonuses } from "./MapSystem.js?v=v1.7.20-20260621155633";
-import { getCurrentTownFocus, getSuggestedFocusForAlert } from "./TownFocusSystem.js?v=v1.7.20-20260621155633";
-import { iterateCitizenRarityEntries } from "./CitizenSystem.js?v=v1.7.20-20260621155633";
+} from "./ExpeditionSystem.js?v=v1.7.20-20260623073844";
+import { getBuildingPlacementBonuses } from "./MapSystem.js?v=v1.7.20-20260623073844";
+import { getCurrentTownFocus, getSuggestedFocusForAlert } from "./TownFocusSystem.js?v=v1.7.20-20260623073844";
+import { iterateCitizenRarityEntries } from "./CitizenSystem.js?v=v1.7.20-20260623073844";
 import {
   applyBuildingWorkforceToResource,
   getBuildingWorkforceMultiplier,
   getWorkforceSummary
-} from "./WorkforceSystem.js?v=v1.7.20-20260621155633";
+} from "./WorkforceSystem.js?v=v1.7.20-20260623073844";
 import {
   getEventRollModifier,
   getFoodOutputMultiplier,
   getGoldOutputMultiplier
-} from "./CityConditionSystem.js?v=v1.7.20-20260621155633";
+} from "./CityConditionSystem.js?v=v1.7.20-20260623073844";
 
 const ECONOMY_RESOURCE_KEYS = ["gold", "food", "materials", "salvage", "mana", "prosperity"];
 
@@ -112,12 +112,13 @@ function getBuildingProductionDelta(state, workforceSummary, tradeGoodsGoldMulti
 
 function getCitizenProductionDelta(state, goldOutputMultiplier, foodOutputMultiplier) {
   const deltas = createDeltaRecord();
+  const effortLevel = Number(state.policySettings?.effortLevel ?? DEFAULT_EFFORT_LEVEL) || DEFAULT_EFFORT_LEVEL;
 
   iterateCitizenRarityEntries(state, (citizenClass, rarity, count) => {
     const citizenDefinition = state.citizenDefinitions[citizenClass];
     const outputMultiplier = CITIZEN_RARITY_OUTPUT_MULTIPLIERS[rarity] ?? 1;
     for (const [resource, amount] of Object.entries(citizenDefinition.production)) {
-      let nextAmount = amount * count * outputMultiplier;
+      let nextAmount = amount * count * outputMultiplier * effortLevel;
       if (resource === "gold" && nextAmount > 0) {
         nextAmount *= goldOutputMultiplier;
       }
@@ -133,12 +134,14 @@ function getCitizenProductionDelta(state, goldOutputMultiplier, foodOutputMultip
 
 function getCitizenConsumptionDelta(state) {
   const deltas = createDeltaRecord();
+  const salariesLevel = Number(state.policySettings?.salariesLevel ?? DEFAULT_SALARIES_LEVEL) || DEFAULT_SALARIES_LEVEL;
 
   iterateCitizenRarityEntries(state, (citizenClass, rarity, count) => {
     const citizenDefinition = state.citizenDefinitions[citizenClass];
     const upkeepMultiplier = CITIZEN_RARITY_UPKEEP_MULTIPLIERS[rarity] ?? 1;
     for (const [resource, amount] of Object.entries(citizenDefinition.consumption)) {
-      deltas[resource] = (deltas[resource] ?? 0) - amount * count * upkeepMultiplier;
+      const policyMultiplier = resource === "gold" ? salariesLevel : 1;
+      deltas[resource] = (deltas[resource] ?? 0) - amount * count * upkeepMultiplier * policyMultiplier;
     }
   });
 

@@ -19025,6 +19025,17 @@ body[data-theme="silver"] .collapse-toggle {
 .quick-add-crystals__controls { grid-area: controls; display: flex; gap: 6px; }
 .quick-add-crystals__controls .button { flex: 1; padding: 6px 10px; font-size: 0.85rem; }
 
+.policy-panel__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.policy-panel__dial { display: grid; gap: 6px; padding: 12px 14px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; background: rgba(255, 255, 255, 0.03); }
+.policy-panel__dial-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.policy-panel__dial-head strong { font-size: 0.95rem; letter-spacing: 0.04em; }
+.policy-panel__dial-head em { font-style: normal; font-family: var(--display-font); font-size: 1.05rem; color: var(--accent); }
+.policy-panel__dial-hint { font-size: 0.78rem; line-height: 1.4; color: rgba(241, 247, 255, 0.62); margin: 0; }
+.policy-panel__dial-options { display: flex; flex-wrap: wrap; gap: 4px; }
+.policy-panel__step { padding: 4px 8px; min-height: 28px; font-size: 0.78rem; font-family: var(--label-font); letter-spacing: 0.03em; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; background: rgba(255, 255, 255, 0.03); color: var(--text); cursor: pointer; }
+.policy-panel__step:hover { border-color: rgba(141, 214, 255, 0.4); color: #f0e6cc; }
+.policy-panel__step.is-active { background: rgba(141, 214, 255, 0.16); border-color: rgba(141, 214, 255, 0.6); color: #f0e6cc; }
+
 /* ─── Building Codex ────────────────────────────────────────────────────── */
 .codex-header { display: grid; gap: 16px; padding: 18px 20px; }
 .codex-header__overall {

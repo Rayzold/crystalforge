@@ -1,7 +1,8 @@
-import { CITIZEN_DEFINITIONS } from "../content/CitizenConfig.js?v=v1.7.20-20260621155633";
-import { renderCitizenPanel } from "./CitizenPanel.js?v=v1.7.20-20260621155633";
-import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260621155633";
-import { escapeHtml } from "../engine/Utils.js?v=v1.7.20-20260621155633";
+import { CITIZEN_DEFINITIONS } from "../content/CitizenConfig.js?v=v1.7.20-20260623073844";
+import { renderCitizenPanel } from "./CitizenPanel.js?v=v1.7.20-20260623073844";
+import { renderPolicyPanel } from "./PolicyPanel.js?v=v1.7.20-20260623073844";
+import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260623073844";
+import { escapeHtml } from "../engine/Utils.js?v=v1.7.20-20260623073844";
 
 function renderCitizenCommand(state) {
   const sorted = Object.entries(state.citizens).sort((left, right) => right[1] - left[1]);
@@ -59,6 +60,7 @@ export function renderCitizensPage(state) {
     title: "Citizens",
     subtitle: "Population overview.",
     content: `
+      ${renderPolicyPanel(state)}
       ${renderCitizenPanel(state)}
     `,
     aside: `

@@ -1,14 +1,14 @@
 // Special NPC roster system.
 // Mirrors BehemothSystem but without daily resource upkeep — NPCs are
 // notable people the GM tracks with a simple character sheet.
-import { createId } from "../engine/Utils.js?v=v1.7.20-20260621155633";
+import { createId } from "../engine/Utils.js?v=v1.7.20-20260623073844";
 import {
   NPC_ROLES,
   NPC_STATUSES,
   NPC_STAT_KEYS,
   NPC_DISPOSITIONS,
   createDefaultNpcStats
-} from "../content/NpcConfig.js?v=v1.7.20-20260621155633";
+} from "../content/NpcConfig.js?v=v1.7.20-20260623073844";
 
 const VALID_ROLE_IDS = new Set(NPC_ROLES.map((entry) => entry.id));
 const VALID_STATUS_IDS = new Set(NPC_STATUSES.map((entry) => entry.id));

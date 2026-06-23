@@ -1,20 +1,26 @@
 // Aggregated city stat calculation.
 // This file turns citizens, buildings, districts, and condition modifiers into
 // the shared city-stat block used across the UI and downstream systems.
-import { CITIZEN_RARITY_OUTPUT_MULTIPLIERS } from "../content/CitizenConfig.js?v=v1.7.20-20260621155633";
-import { sumObjectValues } from "../engine/Utils.js?v=v1.7.20-20260621155633";
-import { getDistrictSummary } from "./DistrictSystem.js?v=v1.7.20-20260621155633";
-import { scalePopulationSupport } from "./DriftEvolutionSystem.js?v=v1.7.20-20260621155633";
-import { getUniqueCitizenStatBonuses } from "./ExpeditionSystem.js?v=v1.7.20-20260621155633";
-import { iterateCitizenRarityEntries } from "./CitizenSystem.js?v=v1.7.20-20260621155633";
-import { getBuildingPlacementBonuses } from "./MapSystem.js?v=v1.7.20-20260621155633";
-import { getCurrentTownFocus } from "./TownFocusSystem.js?v=v1.7.20-20260621155633";
-import { getGoodsOutputMultiplier, getHousingStrainPenalty } from "./CityConditionSystem.js?v=v1.7.20-20260621155633";
+import { CITIZEN_RARITY_OUTPUT_MULTIPLIERS } from "../content/CitizenConfig.js?v=v1.7.20-20260623073844";
+import {
+  DEFAULT_EFFORT_LEVEL,
+  DEFAULT_SALARIES_LEVEL,
+  EFFORT_MORALE_PER_STEP,
+  SALARIES_MORALE_PER_STEP
+} from "../content/Config.js?v=v1.7.20-20260623073844";
+import { sumObjectValues } from "../engine/Utils.js?v=v1.7.20-20260623073844";
+import { getDistrictSummary } from "./DistrictSystem.js?v=v1.7.20-20260623073844";
+import { scalePopulationSupport } from "./DriftEvolutionSystem.js?v=v1.7.20-20260623073844";
+import { getUniqueCitizenStatBonuses } from "./ExpeditionSystem.js?v=v1.7.20-20260623073844";
+import { iterateCitizenRarityEntries } from "./CitizenSystem.js?v=v1.7.20-20260623073844";
+import { getBuildingPlacementBonuses } from "./MapSystem.js?v=v1.7.20-20260623073844";
+import { getCurrentTownFocus } from "./TownFocusSystem.js?v=v1.7.20-20260623073844";
+import { getGoodsOutputMultiplier, getHousingStrainPenalty } from "./CityConditionSystem.js?v=v1.7.20-20260623073844";
 import {
   applyBuildingWorkforceToStat,
   getBuildingWorkforceMultiplier,
   getWorkforceSummary
-} from "./WorkforceSystem.js?v=v1.7.20-20260621155633";
+} from "./WorkforceSystem.js?v=v1.7.20-20260623073844";
 
 const EMPTY_CITY_STATS = {
   goods: 0,
@@ -161,6 +167,16 @@ export function recalculateCityStats(state) {
 
   nextStats.prosperity += state.resources.prosperity;
   nextStats.populationSupport = scalePopulationSupport(rawPopulationSupport);
+
+  // Policy dials: paying citizens more than baseline lifts morale, paying
+  // less drags it down. Pushing effort above 1x bleeds morale; cutting effort
+  // below 1x lifts it. Step = 0.5 for salaries, 0.1 for effort.
+  const salariesLevel = Number(state.policySettings?.salariesLevel ?? DEFAULT_SALARIES_LEVEL) || DEFAULT_SALARIES_LEVEL;
+  const effortLevel = Number(state.policySettings?.effortLevel ?? DEFAULT_EFFORT_LEVEL) || DEFAULT_EFFORT_LEVEL;
+  const salariesMoraleDelta = ((salariesLevel - 1) / 0.5) * SALARIES_MORALE_PER_STEP;
+  const effortMoraleDelta = ((effortLevel - 1) / 0.1) * EFFORT_MORALE_PER_STEP;
+  nextStats.morale += salariesMoraleDelta + effortMoraleDelta;
+
   const housingPenalty = getHousingStrainPenalty({ ...state, cityStats: { ...state.cityStats, populationSupport: nextStats.populationSupport } });
   nextStats.morale = Math.max(0, nextStats.morale - housingPenalty.morale);
   nextStats.health = Math.max(0, nextStats.health - housingPenalty.health);
