@@ -1,8 +1,8 @@
-import { CITIZEN_DEFINITIONS } from "../content/CitizenConfig.js?v=v1.7.20-20260627203042";
-import { renderCitizenPanel } from "./CitizenPanel.js?v=v1.7.20-20260627203042";
-import { renderPolicyPanel } from "./PolicyPanel.js?v=v1.7.20-20260627203042";
-import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260627203042";
-import { escapeHtml } from "../engine/Utils.js?v=v1.7.20-20260627203042";
+import { CITIZEN_DEFINITIONS } from "../content/CitizenConfig.js?v=v1.7.21-20260627203913";
+import { renderCitizenPanel } from "./CitizenPanel.js?v=v1.7.21-20260627203913";
+import { renderPolicyPanel } from "./PolicyPanel.js?v=v1.7.21-20260627203913";
+import { renderUiIcon } from "./UiIcons.js?v=v1.7.21-20260627203913";
+import { escapeHtml } from "../engine/Utils.js?v=v1.7.21-20260627203913";
 
 function renderCitizenCommand(state) {
   const sorted = Object.entries(state.citizens).sort((left, right) => right[1] - left[1]);

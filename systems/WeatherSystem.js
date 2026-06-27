@@ -24,13 +24,13 @@
 // String(dayOffset). Days with no override fall back to the deterministic
 // season pick (see CalendarSystem.getWeatherForDay).
 
-import { DAYS_PER_MONTH } from "../content/CalendarConfig.js?v=v1.7.20-20260627203042";
+import { DAYS_PER_MONTH } from "../content/CalendarConfig.js?v=v1.7.21-20260627203913";
 import {
   getSeasonForOffset,
   getCalmPoolForSeason,
   getDramaticPool,
   getStructuredDate
-} from "./CalendarSystem.js?v=v1.7.20-20260627203042";
+} from "./CalendarSystem.js?v=v1.7.21-20260627203913";
 
 const CALM_BIAS = 0.70;   // First-day bias when no previous day is available.
 

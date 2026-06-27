@@ -1,5 +1,5 @@
-import { formatNumber } from "../engine/Utils.js?v=v1.7.20-20260627203042";
-import { renderUiIcon } from "./UiIcons.js?v=v1.7.20-20260627203042";
+import { formatNumber } from "../engine/Utils.js?v=v1.7.21-20260627203913";
+import { renderUiIcon } from "./UiIcons.js?v=v1.7.21-20260627203913";
 
 export function renderStatsPanel(state) {
   const stats = state.cityStats;

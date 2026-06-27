@@ -1,8 +1,8 @@
-import { createId, formatNumber } from "../engine/Utils.js?v=v1.7.20-20260627203042";
-import { formatDate } from "./CalendarSystem.js?v=v1.7.20-20260627203042";
-import { getExpeditionRelicOverview } from "./ExpeditionSystem.js?v=v1.7.20-20260627203042";
-import { getEmergencyStatus } from "./ResourceSystem.js?v=v1.7.20-20260627203042";
-import { getTownFocusAvailability } from "./TownFocusSystem.js?v=v1.7.20-20260627203042";
+import { createId, formatNumber } from "../engine/Utils.js?v=v1.7.21-20260627203913";
+import { formatDate } from "./CalendarSystem.js?v=v1.7.21-20260627203913";
+import { getExpeditionRelicOverview } from "./ExpeditionSystem.js?v=v1.7.21-20260627203913";
+import { getEmergencyStatus } from "./ResourceSystem.js?v=v1.7.21-20260627203913";
+import { getTownFocusAvailability } from "./TownFocusSystem.js?v=v1.7.21-20260627203913";
 
 const URGENCY_ORDER = {
   critical: 0,

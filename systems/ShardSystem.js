@@ -1,5 +1,5 @@
-import { RARITY_ORDER } from "../content/Rarities.js?v=v1.7.20-20260627203042";
-import { addCrystals } from "./CrystalSystem.js?v=v1.7.20-20260627203042";
+import { RARITY_ORDER } from "../content/Rarities.js?v=v1.7.21-20260627203913";
+import { addCrystals } from "./CrystalSystem.js?v=v1.7.21-20260627203913";
 
 export const SHARDS_PER_CRYSTAL = 100;
 

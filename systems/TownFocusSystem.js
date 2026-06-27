@@ -1,7 +1,7 @@
-import { TOWN_FOCUS_DEFINITIONS, TOWN_FOCUS_INTERVAL_DAYS } from "../content/TownFocusConfig.js?v=v1.7.20-20260627203042";
-import { addHistoryEntry } from "./HistoryLogSystem.js?v=v1.7.20-20260627203042";
-import { addShards } from "./ShardSystem.js?v=v1.7.20-20260627203042";
-import { getActiveConstructionQueue, getAvailableConstructionQueue, getDriftConstructionSlots } from "./ConstructionSystem.js?v=v1.7.20-20260627203042";
+import { TOWN_FOCUS_DEFINITIONS, TOWN_FOCUS_INTERVAL_DAYS } from "../content/TownFocusConfig.js?v=v1.7.21-20260627203913";
+import { addHistoryEntry } from "./HistoryLogSystem.js?v=v1.7.21-20260627203913";
+import { addShards } from "./ShardSystem.js?v=v1.7.21-20260627203913";
+import { getActiveConstructionQueue, getAvailableConstructionQueue, getDriftConstructionSlots } from "./ConstructionSystem.js?v=v1.7.21-20260627203913";
 
 function uniqueFocuses(items) {
   return [...new Set(items.filter(Boolean))];

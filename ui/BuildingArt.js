@@ -1,4 +1,4 @@
-import { escapeHtml } from "../engine/Utils.js?v=v1.7.20-20260627203042";
+import { escapeHtml } from "../engine/Utils.js?v=v1.7.21-20260627203913";
 
 const SUPPORTED_BUILDING_ART_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp", ".svg"];
 

@@ -1,7 +1,7 @@
-import { RARITY_RANKS } from "../content/Rarities.js?v=v1.7.20-20260627203042";
-import { roundTo } from "../engine/Utils.js?v=v1.7.20-20260627203042";
-import { CITIZEN_RARITY_OUTPUT_MULTIPLIERS } from "../content/CitizenConfig.js?v=v1.7.20-20260627203042";
-import { iterateCitizenRarityEntries } from "./CitizenSystem.js?v=v1.7.20-20260627203042";
+import { RARITY_RANKS } from "../content/Rarities.js?v=v1.7.21-20260627203913";
+import { roundTo } from "../engine/Utils.js?v=v1.7.21-20260627203913";
+import { CITIZEN_RARITY_OUTPUT_MULTIPLIERS } from "../content/CitizenConfig.js?v=v1.7.21-20260627203913";
+import { iterateCitizenRarityEntries } from "./CitizenSystem.js?v=v1.7.21-20260627203913";
 
 const GENERAL_OUTPUT_FLOOR = 0.25;
 const SPECIALIST_OUTPUT_FLOOR = 0.7;
