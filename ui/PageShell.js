@@ -1,17 +1,17 @@
-import { APP_DISPLAY_VERSION, MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js?v=v1.7.21-20260628063649";
-import { getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.21-20260628063649";
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.21-20260628063649";
-import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js?v=v1.7.21-20260628063649";
-import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js?v=v1.7.21-20260628063649";
-import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js?v=v1.7.21-20260628063649";
-import { getDecisionHistory, getDecisionInboxItems } from "../systems/DecisionInboxSystem.js?v=v1.7.21-20260628063649";
-import { getCityTrendSummary } from "../systems/ResourceSystem.js?v=v1.7.21-20260628063649";
-import { getAllManualSaveMeta } from "../systems/StorageSystem.js?v=v1.7.21-20260628063649";
-import { getCurrentTownFocus, getMayorAdvice, getTownFocusAvailability } from "../systems/TownFocusSystem.js?v=v1.7.21-20260628063649";
-import { getCriticalAlerts, renderCrisisBanner } from "./CrisisBanner.js?v=v1.7.21-20260628063649";
-import { renderTownFocusBadge } from "./TownFocusShared.js?v=v1.7.21-20260628063649";
-import { renderUiIcon } from "./UiIcons.js?v=v1.7.21-20260628063649";
-import { renderGlobalSearchWidget } from "./GlobalSearch.js?v=v1.7.21-20260628063649";
+import { APP_DISPLAY_VERSION, MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js?v=v1.7.21-20260628204921";
+import { getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.21-20260628204921";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.21-20260628204921";
+import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js?v=v1.7.21-20260628204921";
+import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js?v=v1.7.21-20260628204921";
+import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js?v=v1.7.21-20260628204921";
+import { getDecisionHistory, getDecisionInboxItems } from "../systems/DecisionInboxSystem.js?v=v1.7.21-20260628204921";
+import { getCityTrendSummary } from "../systems/ResourceSystem.js?v=v1.7.21-20260628204921";
+import { getAllManualSaveMeta } from "../systems/StorageSystem.js?v=v1.7.21-20260628204921";
+import { getCurrentTownFocus, getMayorAdvice, getTownFocusAvailability } from "../systems/TownFocusSystem.js?v=v1.7.21-20260628204921";
+import { getCriticalAlerts, renderCrisisBanner } from "./CrisisBanner.js?v=v1.7.21-20260628204921";
+import { renderTownFocusBadge } from "./TownFocusShared.js?v=v1.7.21-20260628204921";
+import { renderUiIcon } from "./UiIcons.js?v=v1.7.21-20260628204921";
+import { renderGlobalSearchWidget } from "./GlobalSearch.js?v=v1.7.21-20260628204921";
 
 const HUD_ICON_KEYS = {
   Gold: "gold",

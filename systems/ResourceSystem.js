@@ -4,30 +4,30 @@
 import {
   CITIZEN_RARITY_OUTPUT_MULTIPLIERS,
   CITIZEN_RARITY_UPKEEP_MULTIPLIERS
-} from "../content/CitizenConfig.js?v=v1.7.21-20260628063649";
-import { DEFAULT_EFFORT_LEVEL, DEFAULT_SALARIES_LEVEL, RESOURCE_MINIMUMS } from "../content/Config.js?v=v1.7.21-20260628063649";
-import { clamp } from "../engine/Utils.js?v=v1.7.21-20260628063649";
-import { getDistrictSummary } from "./DistrictSystem.js?v=v1.7.21-20260628063649";
-import { getBuildingTierResourceRate } from "./BuildingSystem.js?v=v1.7.21-20260628063649";
+} from "../content/CitizenConfig.js?v=v1.7.21-20260628204921";
+import { DEFAULT_EFFORT_LEVEL, DEFAULT_SALARIES_LEVEL, RESOURCE_MINIMUMS } from "../content/Config.js?v=v1.7.21-20260628204921";
+import { clamp } from "../engine/Utils.js?v=v1.7.21-20260628204921";
+import { getDistrictSummary } from "./DistrictSystem.js?v=v1.7.21-20260628204921";
+import { getBuildingTierResourceRate } from "./BuildingSystem.js?v=v1.7.21-20260628204921";
 import {
   getEquippedExpeditionRelics,
   getExpeditionRelicActiveBonuses,
   getLegendAssignmentDetails,
   getUniqueCitizenResourceBonuses
-} from "./ExpeditionSystem.js?v=v1.7.21-20260628063649";
-import { getBuildingPlacementBonuses } from "./MapSystem.js?v=v1.7.21-20260628063649";
-import { getCurrentTownFocus, getSuggestedFocusForAlert } from "./TownFocusSystem.js?v=v1.7.21-20260628063649";
-import { iterateCitizenRarityEntries } from "./CitizenSystem.js?v=v1.7.21-20260628063649";
+} from "./ExpeditionSystem.js?v=v1.7.21-20260628204921";
+import { getBuildingPlacementBonuses } from "./MapSystem.js?v=v1.7.21-20260628204921";
+import { getCurrentTownFocus, getSuggestedFocusForAlert } from "./TownFocusSystem.js?v=v1.7.21-20260628204921";
+import { iterateCitizenRarityEntries } from "./CitizenSystem.js?v=v1.7.21-20260628204921";
 import {
   applyBuildingWorkforceToResource,
   getBuildingWorkforceMultiplier,
   getWorkforceSummary
-} from "./WorkforceSystem.js?v=v1.7.21-20260628063649";
+} from "./WorkforceSystem.js?v=v1.7.21-20260628204921";
 import {
   getEventRollModifier,
   getFoodOutputMultiplier,
   getGoldOutputMultiplier
-} from "./CityConditionSystem.js?v=v1.7.21-20260628063649";
+} from "./CityConditionSystem.js?v=v1.7.21-20260628204921";
 
 const ECONOMY_RESOURCE_KEYS = ["gold", "food", "materials", "salvage", "mana", "prosperity"];
 
@@ -919,7 +919,7 @@ export function getResourceChainSummary(state) {
 export function applyDailyResources(state) {
   const deltas = calculateDailyResourceDelta(state);
 
-  state.resources.gold = clamp(state.resources.gold + deltas.gold, RESOURCE_MINIMUMS.gold, 999999);
+  state.resources.gold = clamp(state.resources.gold + deltas.gold, RESOURCE_MINIMUMS.gold, 99999999);
   state.resources.food = clamp(state.resources.food + deltas.food, RESOURCE_MINIMUMS.food, 999999);
   state.resources.materials = clamp(state.resources.materials + deltas.materials, RESOURCE_MINIMUMS.materials, 999999);
   state.resources.salvage = clamp(state.resources.salvage + deltas.salvage, RESOURCE_MINIMUMS.salvage, 999999);

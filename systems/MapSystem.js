@@ -1,5 +1,5 @@
-import { MAP_ADJACENCY_CONFIG, MAP_CONFIG } from "../content/MapConfig.js?v=v1.7.21-20260628063649";
-import { addHistoryEntry } from "./HistoryLogSystem.js?v=v1.7.21-20260628063649";
+import { MAP_ADJACENCY_CONFIG, MAP_CONFIG } from "../content/MapConfig.js?v=v1.7.21-20260628204921";
+import { addHistoryEntry } from "./HistoryLogSystem.js?v=v1.7.21-20260628204921";
 
 const mapCellIndexCache = new WeakMap();
 const buildingCellIndexCache = new WeakMap();

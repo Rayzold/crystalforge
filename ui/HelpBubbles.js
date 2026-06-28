@@ -1,4 +1,4 @@
-import { escapeHtml } from "../engine/Utils.js?v=v1.7.21-20260628063649";
+import { escapeHtml } from "../engine/Utils.js?v=v1.7.21-20260628204921";
 
 const HELP_TEXT = {
   "Command Center": "Shows the most important session facts at a glance: current date, population, Drift level, and core resources.",
