@@ -2,8 +2,8 @@
 // This file wires together state, actions, routing, save/load, manifestation,
 // admin commands, and top-level UI events. Most game-wide behavior eventually
 // passes through here, while lower-level systems keep the domain rules isolated.
-import { AdminConsole } from "./admin/AdminConsole.js?v=v1.7.21-20260628030617";
-import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js?v=v1.7.21-20260628030617";
+import { AdminConsole } from "./admin/AdminConsole.js?v=v1.7.21-20260628063649";
+import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "./content/BuildingCatalog.js?v=v1.7.21-20260628063649";
 import {
   APP_VERSION,
   BUILDING_ACTIVE_THRESHOLD,
@@ -12,21 +12,21 @@ import {
   GM_QUICK_CRYSTAL_PACKS,
   SALARIES_LEVELS,
   SPEED_MULTIPLIERS
-} from "./content/Config.js?v=v1.7.21-20260628030617";
-import { EVENT_POOLS } from "./content/EventPools.js?v=v1.7.21-20260628030617";
-import { RARITY_ORDER } from "./content/Rarities.js?v=v1.7.21-20260628030617";
-import { GameState } from "./engine/GameState.js?v=v1.7.21-20260628030617";
-import { installModalKeyboardHandlers } from "./engine/ModalFocus.js?v=v1.7.21-20260628030617";
-import { downscaleImageFile, formatNumber } from "./engine/Utils.js?v=v1.7.21-20260628030617";
-import { AnimationEngine, getManifestRevealTotalDuration } from "./fx/AnimationEngine.js?v=v1.7.21-20260628030617";
-import { AudioEngine } from "./fx/AudioEngine.js?v=v1.7.21-20260628030617";
-import { ensureFirebaseAuth, getFirebaseUserId } from "./firebase/FirebaseConfig.js?v=v1.7.21-20260628030617";
+} from "./content/Config.js?v=v1.7.21-20260628063649";
+import { EVENT_POOLS } from "./content/EventPools.js?v=v1.7.21-20260628063649";
+import { RARITY_ORDER } from "./content/Rarities.js?v=v1.7.21-20260628063649";
+import { GameState } from "./engine/GameState.js?v=v1.7.21-20260628063649";
+import { installModalKeyboardHandlers } from "./engine/ModalFocus.js?v=v1.7.21-20260628063649";
+import { downscaleImageFile, formatNumber } from "./engine/Utils.js?v=v1.7.21-20260628063649";
+import { AnimationEngine, getManifestRevealTotalDuration } from "./fx/AnimationEngine.js?v=v1.7.21-20260628063649";
+import { AudioEngine } from "./fx/AudioEngine.js?v=v1.7.21-20260628063649";
+import { ensureFirebaseAuth, getFirebaseUserId } from "./firebase/FirebaseConfig.js?v=v1.7.21-20260628063649";
 import {
   isFirebaseConfigured,
   loadFirebaseRealmState,
   saveFirebaseRealmState,
   subscribeFirebaseRealmState
-} from "./firebase/FirebaseSharedState.js?v=v1.7.21-20260628030617";
+} from "./firebase/FirebaseSharedState.js?v=v1.7.21-20260628063649";
 import {
   formatBuildingExactQualityDisplay,
   clearBuildingImageData,
@@ -39,8 +39,8 @@ import {
   setBuildingOutputRates,
   setBuildingQuality,
   setBuildingRuinState
-} from "./systems/BuildingSystem.js?v=v1.7.21-20260628030617";
-import { addMonthsToOffset, dateFromParts, formatDate, getMonthStartOffset, getStructuredDate } from "./systems/CalendarSystem.js?v=v1.7.21-20260628030617";
+} from "./systems/BuildingSystem.js?v=v1.7.21-20260628063649";
+import { addMonthsToOffset, dateFromParts, formatDate, getMonthStartOffset, getStructuredDate } from "./systems/CalendarSystem.js?v=v1.7.21-20260628063649";
 import {
   addCitizens,
   applyCitizenBulkSet,
@@ -49,9 +49,9 @@ import {
   removeCitizens,
   resetCitizens,
   setCitizens
-} from "./systems/CitizenSystem.js?v=v1.7.21-20260628030617";
-import { recalculateCityStats } from "./systems/CityStatsSystem.js?v=v1.7.21-20260628030617";
-import { addCrystals, setCrystals } from "./systems/CrystalSystem.js?v=v1.7.21-20260628030617";
+} from "./systems/CitizenSystem.js?v=v1.7.21-20260628063649";
+import { recalculateCityStats } from "./systems/CityStatsSystem.js?v=v1.7.21-20260628063649";
+import { addCrystals, setCrystals } from "./systems/CrystalSystem.js?v=v1.7.21-20260628063649";
 import {
   activateConstruction,
   getActiveConstructionQueue,
@@ -61,17 +61,17 @@ import {
   moveConstructionPriority,
   normalizeConstructionPriority,
   pauseConstruction
-} from "./systems/ConstructionSystem.js?v=v1.7.21-20260628030617";
-import { resetDistrictLevels, setDistrictDefinition, setDistrictLevelOverride, getDistrictSummary } from "./systems/DistrictSystem.js?v=v1.7.21-20260628030617";
+} from "./systems/ConstructionSystem.js?v=v1.7.21-20260628063649";
+import { resetDistrictLevels, setDistrictDefinition, setDistrictLevelOverride, getDistrictSummary } from "./systems/DistrictSystem.js?v=v1.7.21-20260628063649";
 import {
   clearDecisionSnooze,
   getDecisionInboxItems,
   getTopDecisionInboxItem,
   recordDecisionHistory,
   setDecisionSnooze
-} from "./systems/DecisionInboxSystem.js?v=v1.7.21-20260628030617";
-import { setDriftEvolutionStageOverride, syncDriftEvolutionState } from "./systems/DriftEvolutionSystem.js?v=v1.7.21-20260628030617";
-import { clearActiveEvents, triggerEvent } from "./systems/EventSystem.js?v=v1.7.21-20260628030617";
+} from "./systems/DecisionInboxSystem.js?v=v1.7.21-20260628063649";
+import { setDriftEvolutionStageOverride, syncDriftEvolutionState } from "./systems/DriftEvolutionSystem.js?v=v1.7.21-20260628063649";
+import { clearActiveEvents, triggerEvent } from "./systems/EventSystem.js?v=v1.7.21-20260628063649";
 import {
   addManualUniqueCitizen,
   formatExpeditionDisplayName,
@@ -88,8 +88,8 @@ import {
   normalizeVehicleFleet,
   refreshExpeditionBoardIfNeeded,
   startExpedition
-} from "./systems/ExpeditionSystem.js?v=v1.7.21-20260628030617";
-import { VEHICLE_DEFINITIONS } from "./content/VehicleConfig.js?v=v1.7.21-20260628030617";
+} from "./systems/ExpeditionSystem.js?v=v1.7.21-20260628063649";
+import { VEHICLE_DEFINITIONS } from "./content/VehicleConfig.js?v=v1.7.21-20260628063649";
 import {
   addBehemoth,
   addBehemothAbility,
@@ -103,7 +103,7 @@ import {
   updateBehemothField,
   updateBehemothStat,
   updateBehemothUpkeep
-} from "./systems/BehemothSystem.js?v=v1.7.21-20260628030617";
+} from "./systems/BehemothSystem.js?v=v1.7.21-20260628063649";
 import {
   addNpc,
   addNpcAbility,
@@ -115,7 +115,7 @@ import {
   updateNpcField,
   updateNpcStat,
   getCrafterCapacity
-} from "./systems/NpcSystem.js?v=v1.7.21-20260628030617";
+} from "./systems/NpcSystem.js?v=v1.7.21-20260628063649";
 import {
   createCraftingItem,
   collectCraftingItem,
@@ -127,11 +127,11 @@ import {
   clearCollectedCraftingItems,
   pauseCraftingItem,
   resumeCraftingItem,
-} from "./systems/CraftingSystem.js?v=v1.7.21-20260628030617";
-import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=v1.7.21-20260628030617";
-import { addCooldown, removeCooldown, restartCooldown, markCooldownTriggered, ageCooldown, isCooldownReady, getCooldownReadyDay } from "./systems/CooldownSystem.js?v=v1.7.21-20260628030617";
-import { generateMonthWeather } from "./systems/WeatherSystem.js?v=v1.7.21-20260628030617";
-import { craftingCompletionDay } from "./systems/CraftingSystem.js?v=v1.7.21-20260628030617";
+} from "./systems/CraftingSystem.js?v=v1.7.21-20260628063649";
+import { findCraftingTemplate, CRAFTING_STATIONS, craftingTemplateCategory, describeCraftingStationBonuses } from "./ui/CraftingPage.js?v=v1.7.21-20260628063649";
+import { addCooldown, removeCooldown, restartCooldown, markCooldownTriggered, ageCooldown, isCooldownReady, getCooldownReadyDay } from "./systems/CooldownSystem.js?v=v1.7.21-20260628063649";
+import { generateMonthWeather } from "./systems/WeatherSystem.js?v=v1.7.21-20260628063649";
+import { craftingCompletionDay } from "./systems/CraftingSystem.js?v=v1.7.21-20260628063649";
 import {
   addAwakened,
   clearAwakenedImage,
@@ -139,7 +139,7 @@ import {
   setAwakenedImageData,
   updateAwakenedAttribute,
   updateAwakenedField
-} from "./systems/AwakenedSystem.js?v=v1.7.21-20260628030617";
+} from "./systems/AwakenedSystem.js?v=v1.7.21-20260628063649";
 import {
   updatePlayerCharacterField,
   updatePlayerCharacterEquipmentSlot,
@@ -147,10 +147,10 @@ import {
   addPlayerCharacterWealthItem,
   removePlayerCharacterWealthItem,
   updatePlayerCharacterWealthItem
-} from "./systems/PlayerCharacterSystem.js?v=v1.7.21-20260628030617";
-import { getDailyCitySnapshot } from "./systems/CitySnapshotSystem.js?v=v1.7.21-20260628030617";
-import { manifestSelectedRarity } from "./systems/GachaSystem.js?v=v1.7.21-20260628030617";
-import { addHistoryEntry } from "./systems/HistoryLogSystem.js?v=v1.7.21-20260628030617";
+} from "./systems/PlayerCharacterSystem.js?v=v1.7.21-20260628063649";
+import { getDailyCitySnapshot } from "./systems/CitySnapshotSystem.js?v=v1.7.21-20260628063649";
+import { manifestSelectedRarity } from "./systems/GachaSystem.js?v=v1.7.21-20260628063649";
+import { addHistoryEntry } from "./systems/HistoryLogSystem.js?v=v1.7.21-20260628063649";
 import {
   canPlaceBuildingAt,
   clearBuildingPlacement,
@@ -160,8 +160,8 @@ import {
   getBuildingAtCell,
   isFortificationBuilding,
   setBuildingPlacement
-} from "./systems/MapSystem.js?v=v1.7.21-20260628030617";
-import { addShards, convertShardsToCrystals, setShards } from "./systems/ShardSystem.js?v=v1.7.21-20260628030617";
+} from "./systems/MapSystem.js?v=v1.7.21-20260628063649";
+import { addShards, convertShardsToCrystals, setShards } from "./systems/ShardSystem.js?v=v1.7.21-20260628063649";
 import {
   createLiveSessionResetState,
   createSessionSnapshot as createSessionSnapshotRecord,
@@ -179,16 +179,16 @@ import {
   saveGameState,
   saveManualState,
   validateAndMigrateSave
-} from "./systems/StorageSystem.js?v=v1.7.21-20260628030617";
-import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js?v=v1.7.21-20260628030617";
-import { applyCompletedGoalRewards } from "./systems/GoalSystem.js?v=v1.7.21-20260628030617";
-import { forceTownFocus, getMayorAdvice, reopenTownFocusSelection, selectTownFocus, updateTownFocusAvailability } from "./systems/TownFocusSystem.js?v=v1.7.21-20260628030617";
-import { getEmergencyStatus, getCityTrendSummary, setResourceValue } from "./systems/ResourceSystem.js?v=v1.7.21-20260628030617";
-import { Toasts } from "./ui/Toasts.js?v=v1.7.21-20260628030617";
-import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js?v=v1.7.21-20260628030617";
-import { UIRenderer } from "./ui/UIRenderer.js?v=v1.7.21-20260628030617";
-import { buildSearchIndex, filterSearchIndex, renderSearchResults } from "./ui/GlobalSearch.js?v=v1.7.21-20260628030617";
-import { createBlankPlayerCharacter, createBlankWealthItem } from "./ui/EquipmentSheetPage.js?v=v1.7.21-20260628030617";
+} from "./systems/StorageSystem.js?v=v1.7.21-20260628063649";
+import { advanceTime, advanceTimeByDays } from "./systems/TimeSystem.js?v=v1.7.21-20260628063649";
+import { applyCompletedGoalRewards } from "./systems/GoalSystem.js?v=v1.7.21-20260628063649";
+import { forceTownFocus, getMayorAdvice, reopenTownFocusSelection, selectTownFocus, updateTownFocusAvailability } from "./systems/TownFocusSystem.js?v=v1.7.21-20260628063649";
+import { getEmergencyStatus, getCityTrendSummary, setResourceValue } from "./systems/ResourceSystem.js?v=v1.7.21-20260628063649";
+import { Toasts } from "./ui/Toasts.js?v=v1.7.21-20260628063649";
+import { getDefaultTownFocusPreviewId } from "./ui/TownFocusShared.js?v=v1.7.21-20260628063649";
+import { UIRenderer } from "./ui/UIRenderer.js?v=v1.7.21-20260628063649";
+import { buildSearchIndex, filterSearchIndex, renderSearchResults } from "./ui/GlobalSearch.js?v=v1.7.21-20260628063649";
+import { createBlankPlayerCharacter, createBlankWealthItem } from "./ui/EquipmentSheetPage.js?v=v1.7.21-20260628063649";
 
 const root = document.querySelector("#app");
 const pageKey = document.body.dataset.page ?? "home";
@@ -2191,6 +2191,35 @@ async function ensureLatestAppVersionBeforeFirebaseWrite(targetRealmId, state = 
   }
 }
 
+// Firestore caps a single document at 1 MB. Uploaded portraits/building art are
+// stored inline as base64 data URLs, so a realm with lots of custom art can blow
+// past that and make Cloud Save fail. If the payload is too big we drop the
+// inline image blobs from the published copy (local saves keep them) and report
+// it, instead of letting the write silently fail.
+const FIREBASE_DOC_SOFT_LIMIT_BYTES = 900_000;
+
+function stripInlineImageData(serializable) {
+  let stripped = 0;
+  const collections = [
+    serializable.buildings,
+    serializable.npcs,
+    serializable.awakened,
+    serializable.behemoths,
+    serializable.uniqueCitizens,
+    serializable.playerCharacters
+  ];
+  for (const collection of collections) {
+    if (!Array.isArray(collection)) continue;
+    for (const entry of collection) {
+      if (entry && typeof entry.imageData === "string" && entry.imageData.startsWith("data:image/")) {
+        entry.imageData = "";
+        stripped += 1;
+      }
+    }
+  }
+  return stripped;
+}
+
 async function publishSharedStateToFirebase(realmId, state = getCurrentState()) {
   await ensureLatestAppVersionBeforeFirebaseWrite(realmId, state);
   const serializable = createSerializableState(state);
@@ -2199,6 +2228,12 @@ async function publishSharedStateToFirebase(realmId, state = getCurrentState()) 
     adminUnlocked: false,
     adminOpen: false
   };
+
+  let imagesStripped = 0;
+  if (JSON.stringify(serializable).length > FIREBASE_DOC_SOFT_LIMIT_BYTES) {
+    imagesStripped = stripInlineImageData(serializable);
+  }
+
   await saveFirebaseRealmState(realmId, serializable, firebaseClientId, APP_VERSION);
   updateFirebasePublishedMeta(
     {
@@ -2208,6 +2243,7 @@ async function publishSharedStateToFirebase(realmId, state = getCurrentState()) 
     },
     "connected"
   );
+  return { imagesStripped };
 }
 
 function scheduleFirebaseAutoPublish(state) {
@@ -3370,8 +3406,12 @@ const actions = {
     },
     async saveFirebaseRealm() {
     try {
-      await publishSharedStateToFirebase(getPublishedFirebaseRealmId());
-      reportSuccess("Firebase save updated.", "publish");
+      const result = await publishSharedStateToFirebase(getPublishedFirebaseRealmId());
+      if (result?.imagesStripped > 0) {
+        reportSuccess(`Cloud save updated, but ${result.imagesStripped} uploaded image(s) were dropped to fit the cloud size limit. Use a local save to keep custom art.`, "publish");
+      } else {
+        reportSuccess("Firebase save updated.", "publish");
+      }
     } catch (error) {
       reportError(error.message);
     }

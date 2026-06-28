@@ -1,10 +1,10 @@
 // Expedition planning page.
 // This screen renders the rotating mission board, launch setup, and the return
 // feed that turns expeditions into a proper citizen-and-resource mini-game.
-import { EXPEDITION_APPROACHES, EXPEDITION_DURATION_OPTIONS, EXPEDITION_ORDER, EXPEDITION_TYPES } from "../content/ExpeditionConfig.js?v=v1.7.21-20260628030617";
-import { CITIZEN_DEFINITIONS } from "../content/CitizenConfig.js?v=v1.7.21-20260628030617";
-import { VEHICLE_DEFINITIONS, VEHICLE_ORDER, VEHICLE_TYPE_SECTIONS } from "../content/VehicleConfig.js?v=v1.7.21-20260628030617";
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.21-20260628030617";
+import { EXPEDITION_APPROACHES, EXPEDITION_DURATION_OPTIONS, EXPEDITION_ORDER, EXPEDITION_TYPES } from "../content/ExpeditionConfig.js?v=v1.7.21-20260628063649";
+import { CITIZEN_DEFINITIONS } from "../content/CitizenConfig.js?v=v1.7.21-20260628063649";
+import { VEHICLE_DEFINITIONS, VEHICLE_ORDER, VEHICLE_TYPE_SECTIONS } from "../content/VehicleConfig.js?v=v1.7.21-20260628063649";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.21-20260628063649";
 import {
   createExpeditionLaunchPreview,
   formatExpeditionDisplayName,
@@ -19,11 +19,11 @@ import {
   getEligibleExpeditionAwakened,
   getBusyExpeditionAwakenedIds,
   EXPEDITION_AWAKENED_GRADE_POWER
-} from "../systems/ExpeditionSystem.js?v=v1.7.21-20260628030617";
-import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.21-20260628030617";
-import { createHelpBubble } from "./HelpBubbles.js?v=v1.7.21-20260628030617";
-import { renderVehicleArt } from "./VehicleArt.js?v=v1.7.21-20260628030617";
-import { renderUiIcon } from "./UiIcons.js?v=v1.7.21-20260628030617";
+} from "../systems/ExpeditionSystem.js?v=v1.7.21-20260628063649";
+import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.21-20260628063649";
+import { createHelpBubble } from "./HelpBubbles.js?v=v1.7.21-20260628063649";
+import { renderVehicleArt } from "./VehicleArt.js?v=v1.7.21-20260628063649";
+import { renderUiIcon } from "./UiIcons.js?v=v1.7.21-20260628063649";
 
 const RESOURCE_LABELS = {
   food: "Food",

@@ -1,20 +1,20 @@
-import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.21-20260628030617";
-import { RARITY_COLORS } from "../content/Rarities.js?v=v1.7.21-20260628030617";
-import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js?v=v1.7.21-20260628030617";
-import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.21-20260628030617";
-import { getFoodOutputMultiplier, getGoldOutputMultiplier } from "../systems/CityConditionSystem.js?v=v1.7.21-20260628030617";
-import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier, isBuildingAtApex } from "../systems/BuildingSystem.js?v=v1.7.21-20260628030617";
+import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.21-20260628063649";
+import { RARITY_COLORS } from "../content/Rarities.js?v=v1.7.21-20260628063649";
+import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js?v=v1.7.21-20260628063649";
+import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.21-20260628063649";
+import { getFoodOutputMultiplier, getGoldOutputMultiplier } from "../systems/CityConditionSystem.js?v=v1.7.21-20260628063649";
+import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier, isBuildingAtApex } from "../systems/BuildingSystem.js?v=v1.7.21-20260628063649";
 import {
   getConstructionEtaDetails,
   getConstructionQueuePosition,
   getDriftConstructionSlots,
   isBuildingActivelyConstructed
-} from "../systems/ConstructionSystem.js?v=v1.7.21-20260628030617";
-import { getBuildingPlacementBonuses } from "../systems/MapSystem.js?v=v1.7.21-20260628030617";
-import { getTradeGoodsGoldMultiplier } from "../systems/ResourceSystem.js?v=v1.7.21-20260628030617";
-import { applyBuildingWorkforceToResource, getBuildingWorkforceStatus, getBuildingWorkforceMultiplier, getWorkforceSummary } from "../systems/WorkforceSystem.js?v=v1.7.21-20260628030617";
-import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.21-20260628030617";
-import { renderModal } from "./Modal.js?v=v1.7.21-20260628030617";
+} from "../systems/ConstructionSystem.js?v=v1.7.21-20260628063649";
+import { getBuildingPlacementBonuses } from "../systems/MapSystem.js?v=v1.7.21-20260628063649";
+import { getTradeGoodsGoldMultiplier } from "../systems/ResourceSystem.js?v=v1.7.21-20260628063649";
+import { applyBuildingWorkforceToResource, getBuildingWorkforceStatus, getBuildingWorkforceMultiplier, getWorkforceSummary } from "../systems/WorkforceSystem.js?v=v1.7.21-20260628063649";
+import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.21-20260628063649";
+import { renderModal } from "./Modal.js?v=v1.7.21-20260628063649";
 
 function renderList(items, inactive) {
   return Object.entries(items)

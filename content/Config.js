@@ -1,10 +1,10 @@
 // Central configuration and boot-time defaults.
 // This file defines versioning, starting presets, high-level tuning constants,
 // route metadata, and user-facing build notes that explain what changed.
-import { BUILDING_POOLS } from "./BuildingPools.js?v=v1.7.21-20260628030617";
-import { BASE_DISTRICT_CONFIG } from "./DistrictConfig.js?v=v1.7.21-20260628030617";
-import { CITIZEN_CLASSES } from "./CitizenConfig.js?v=v1.7.21-20260628030617";
-import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js?v=v1.7.21-20260628030617";
+import { BUILDING_POOLS } from "./BuildingPools.js?v=v1.7.21-20260628063649";
+import { BASE_DISTRICT_CONFIG } from "./DistrictConfig.js?v=v1.7.21-20260628063649";
+import { CITIZEN_CLASSES } from "./CitizenConfig.js?v=v1.7.21-20260628063649";
+import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js?v=v1.7.21-20260628063649";
 
 export const APP_NAME = "Crystal Forge";
 // APP_VERSION must stay monotonic because Firebase publish safety compares builds numerically.
@@ -175,9 +175,11 @@ export const DEFAULT_SALARIES_LEVEL = 1;
 // and shifts morale down per step above 1x (or up below 1x).
 export const EFFORT_LEVELS = [0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2];
 export const DEFAULT_EFFORT_LEVEL = 1;
-// Morale deltas applied per step from baseline (1x).
+// Morale deltas applied per step from baseline (1x). Effort is on a 0.1 step,
+// so the penalty is kept light — at max effort (2x, 10 steps) that is -40
+// morale, harsh but not an automatic floor-to-zero in a healthy city.
 export const SALARIES_MORALE_PER_STEP = 4;
-export const EFFORT_MORALE_PER_STEP = -8;
+export const EFFORT_MORALE_PER_STEP = -4;
 
 export const EVENT_STEP_CHANCES = {
   day: 0.05,

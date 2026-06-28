@@ -1,5 +1,5 @@
-import { escapeHtml } from "../engine/Utils.js?v=v1.7.21-20260628030617";
-import { renderUiIcon } from "./UiIcons.js?v=v1.7.21-20260628030617";
+import { escapeHtml } from "../engine/Utils.js?v=v1.7.21-20260628063649";
+import { renderUiIcon } from "./UiIcons.js?v=v1.7.21-20260628063649";
 
 export function renderEventPanel(state) {
   const focusedEventId = state.transientUi?.focusEventId ?? null;

@@ -1,5 +1,5 @@
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.21-20260628030617";
-import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.21-20260628030617";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.21-20260628063649";
+import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.21-20260628063649";
 
 let lastAnimatedManifestToken = null;
 

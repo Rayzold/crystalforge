@@ -104,7 +104,7 @@ assets/      audio/, images/buildings/, images/vehicles/, video/
 
 4. **Python may be a Windows Store stub** — if `start-server.ps1` fails, use a Node one-off server.
 
-5. **CSS text floor** — no `font-size` below `0.8rem` / `10px` anywhere in `styles.css`.
+5. **CSS text floor** — aim to keep `font-size` at or above ~`0.72rem` for readable secondary text; captions may dip lower. This is a guideline, not a hard rule: `styles.css` currently has ~85 sub-0.72rem declarations (smallest ~0.58rem), so don't treat any single small value as a regression. Don't add *new* text below ~0.7rem without a reason.
 
 6. **Catalog field propagation is two-step.** `content/BuildingCatalog.js` has `defineBuilding({...})` for source-of-truth definitions AND `createCatalogEntry()` that builds the runtime entry. Adding a new field requires updating BOTH — if you only add it to `defineBuilding`, the field is silently dropped before reaching the runtime catalog. Bit me with `apexNote` in this session.
 
