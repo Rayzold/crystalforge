@@ -1,10 +1,10 @@
-import { BUILDING_GRID_LIMIT } from "../content/Config.js?v=v1.7.21-20260627203913";
-import { getBuildingEconomySummary } from "../content/BuildingCatalog.js?v=v1.7.21-20260627203913";
-import { RARITY_ORDER } from "../content/Rarities.js?v=v1.7.21-20260627203913";
-import { sortBuildings } from "../engine/Utils.js?v=v1.7.21-20260627203913";
-import { getActiveConstructionQueue, getConstructionEtaDetails, getDriftConstructionSlots, isBuildingActivelyConstructed } from "../systems/ConstructionSystem.js?v=v1.7.21-20260627203913";
-import { getBuildingWorkforceStatus, getWorkforceSummary } from "../systems/WorkforceSystem.js?v=v1.7.21-20260627203913";
-import { renderBuildingCard } from "./BuildingCard.js?v=v1.7.21-20260627203913";
+import { BUILDING_GRID_LIMIT } from "../content/Config.js?v=v1.7.21-20260628030617";
+import { getBuildingEconomySummary } from "../content/BuildingCatalog.js?v=v1.7.21-20260628030617";
+import { RARITY_ORDER } from "../content/Rarities.js?v=v1.7.21-20260628030617";
+import { sortBuildings } from "../engine/Utils.js?v=v1.7.21-20260628030617";
+import { getActiveConstructionQueue, getConstructionEtaDetails, getDriftConstructionSlots, isBuildingActivelyConstructed } from "../systems/ConstructionSystem.js?v=v1.7.21-20260628030617";
+import { getBuildingWorkforceStatus, getWorkforceSummary } from "../systems/WorkforceSystem.js?v=v1.7.21-20260628030617";
+import { renderBuildingCard } from "./BuildingCard.js?v=v1.7.21-20260628030617";
 
 function getPinnedBuildingIds(state) {
   return new Set(state.settings?.pinnedBuildingIds ?? []);

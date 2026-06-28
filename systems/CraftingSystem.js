@@ -1,6 +1,6 @@
 // Crafting system — item lifecycle and daily upkeep.
 
-import { createId } from "../engine/Utils.js?v=v1.7.21-20260627203913";
+import { createId } from "../engine/Utils.js?v=v1.7.21-20260628030617";
 
 const RESOURCE_KEYS = ["gold", "mana", "materials", "salvage", "food"];
 

@@ -12,9 +12,9 @@ import {
   getBehemothSizeLabel,
   getBehemothStatusDetail,
   getBehemothStatusLabel
-} from "../content/BehemothConfig.js?v=v1.7.21-20260627203913";
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.21-20260627203913";
-import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.21-20260627203913";
+} from "../content/BehemothConfig.js?v=v1.7.21-20260628030617";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.21-20260628030617";
+import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.21-20260628030617";
 
 function renderBehemothSummaryThumb(behemoth) {
   const src = getBehemothImageSrc(behemoth);

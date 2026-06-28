@@ -1,12 +1,12 @@
-import { BUILDING_ROLE_LEGEND } from "../content/BuildingCatalog.js?v=v1.7.21-20260627203913";
+import { BUILDING_ROLE_LEGEND } from "../content/BuildingCatalog.js?v=v1.7.21-20260628030617";
 import {
   BUILDING_IMAGE_FILENAME_SAMPLES,
   BUILDING_IMAGE_LOOKUP_EXTENSIONS
-} from "../content/BuildingImageFilenameGuide.js?v=v1.7.21-20260627203913";
-import { APP_DISPLAY_VERSION, BUILD_NOTES, VERSIONING_RULES } from "../content/Config.js?v=v1.7.21-20260627203913";
-import { GLOSSARY_TERMS } from "../content/GlossaryConfig.js?v=v1.7.21-20260627203913";
-import { escapeHtml } from "../engine/Utils.js?v=v1.7.21-20260627203913";
-import { getManualSaveMeta } from "../systems/StorageSystem.js?v=v1.7.21-20260627203913";
+} from "../content/BuildingImageFilenameGuide.js?v=v1.7.21-20260628030617";
+import { APP_DISPLAY_VERSION, BUILD_NOTES, VERSIONING_RULES } from "../content/Config.js?v=v1.7.21-20260628030617";
+import { GLOSSARY_TERMS } from "../content/GlossaryConfig.js?v=v1.7.21-20260628030617";
+import { escapeHtml } from "../engine/Utils.js?v=v1.7.21-20260628030617";
+import { getManualSaveMeta } from "../systems/StorageSystem.js?v=v1.7.21-20260628030617";
 
 function renderSectionNav() {
   const sections = [

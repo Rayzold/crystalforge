@@ -8,14 +8,19 @@ export function roundTo(value, decimals = 2) {
 }
 
 export function formatNumber(value, decimals = 0) {
-  return roundTo(value, decimals).toLocaleString(undefined, {
+  // Guard against NaN/Infinity so corrupted or partial state never renders a
+  // literal "NaN" in the UI — fall back to a clean zero instead.
+  const numeric = Number(value);
+  const safe = Number.isFinite(numeric) ? numeric : 0;
+  return roundTo(safe, decimals).toLocaleString(undefined, {
     minimumFractionDigits: 0,
     maximumFractionDigits: decimals
   });
 }
 
 export function formatSigned(value, decimals = 2) {
-  const rounded = roundTo(value, decimals);
+  const numeric = Number(value);
+  const rounded = roundTo(Number.isFinite(numeric) ? numeric : 0, decimals);
   if (rounded === 0) {
     return "0";
   }

@@ -1,23 +1,23 @@
 // GM/admin console renderer and input handler.
 // This file builds the hidden administration UI, unlock flow, and the direct
 // controls that modify crystals, buildings, citizens, events, and save tools.
-import { MONTHS } from "../content/CalendarConfig.js?v=v1.7.21-20260627203913";
-import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "../content/BuildingCatalog.js?v=v1.7.21-20260627203913";
-import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER, getCitizenHelpText } from "../content/CitizenConfig.js?v=v1.7.21-20260627203913";
-import { GM_QUICK_CRYSTAL_PACKS, GM_QUICK_EVENT_IDS, SPEED_MULTIPLIERS } from "../content/Config.js?v=v1.7.21-20260627203913";
-import { EVENT_POOLS } from "../content/EventPools.js?v=v1.7.21-20260627203913";
-import { EXPEDITION_ORDER, EXPEDITION_TYPES } from "../content/ExpeditionConfig.js?v=v1.7.21-20260627203913";
-import { RARITY_ORDER } from "../content/Rarities.js?v=v1.7.21-20260627203913";
-import { TOWN_FOCUS_DEFINITIONS } from "../content/TownFocusConfig.js?v=v1.7.21-20260627203913";
-import { UNIQUE_CITIZEN_ARCHETYPES } from "../content/UniqueCitizenConfig.js?v=v1.7.21-20260627203913";
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.21-20260627203913";
-import { attachHelpBubbles, createHelpBubble } from "../ui/HelpBubbles.js?v=v1.7.21-20260627203913";
-import { renderModal } from "../ui/Modal.js?v=v1.7.21-20260627203913";
-import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.21-20260627203913";
-import { formatBuildingQualityDisplay, getBuildingOutputTypes, BUILDING_OUTPUT_RESOURCE_KEYS } from "../systems/BuildingSystem.js?v=v1.7.21-20260627203913";
-import { getDriftEvolutionStages } from "../systems/DriftEvolutionSystem.js?v=v1.7.21-20260627203913";
-import { getEconomyDebugSummary, getEconomyTopContributorsSummary } from "../systems/ResourceSystem.js?v=v1.7.21-20260627203913";
-import { getManualSaveMeta } from "../systems/StorageSystem.js?v=v1.7.21-20260627203913";
+import { MONTHS } from "../content/CalendarConfig.js?v=v1.7.21-20260628030617";
+import { createCatalogEntryFromInput, getBuildingEmoji, getCatalogKey } from "../content/BuildingCatalog.js?v=v1.7.21-20260628030617";
+import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER, getCitizenHelpText } from "../content/CitizenConfig.js?v=v1.7.21-20260628030617";
+import { GM_QUICK_CRYSTAL_PACKS, GM_QUICK_EVENT_IDS, SPEED_MULTIPLIERS } from "../content/Config.js?v=v1.7.21-20260628030617";
+import { EVENT_POOLS } from "../content/EventPools.js?v=v1.7.21-20260628030617";
+import { EXPEDITION_ORDER, EXPEDITION_TYPES } from "../content/ExpeditionConfig.js?v=v1.7.21-20260628030617";
+import { RARITY_ORDER } from "../content/Rarities.js?v=v1.7.21-20260628030617";
+import { TOWN_FOCUS_DEFINITIONS } from "../content/TownFocusConfig.js?v=v1.7.21-20260628030617";
+import { UNIQUE_CITIZEN_ARCHETYPES } from "../content/UniqueCitizenConfig.js?v=v1.7.21-20260628030617";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.21-20260628030617";
+import { attachHelpBubbles, createHelpBubble } from "../ui/HelpBubbles.js?v=v1.7.21-20260628030617";
+import { renderModal } from "../ui/Modal.js?v=v1.7.21-20260628030617";
+import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.21-20260628030617";
+import { formatBuildingQualityDisplay, getBuildingOutputTypes, BUILDING_OUTPUT_RESOURCE_KEYS } from "../systems/BuildingSystem.js?v=v1.7.21-20260628030617";
+import { getDriftEvolutionStages } from "../systems/DriftEvolutionSystem.js?v=v1.7.21-20260628030617";
+import { getEconomyDebugSummary, getEconomyTopContributorsSummary } from "../systems/ResourceSystem.js?v=v1.7.21-20260628030617";
+import { getManualSaveMeta } from "../systems/StorageSystem.js?v=v1.7.21-20260628030617";
 
 function options(values, selectedValue) {
   return values
