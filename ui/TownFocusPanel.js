@@ -1,13 +1,13 @@
-import { TOWN_FOCUS_DEFINITIONS } from "../content/TownFocusConfig.js?v=v1.7.21-20260628204921";
-import { escapeHtml } from "../engine/Utils.js?v=v1.7.21-20260628204921";
-import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.21-20260628204921";
-import { getCurrentTownFocus, getMayorSuggestions, getTownFocusAvailability } from "../systems/TownFocusSystem.js?v=v1.7.21-20260628204921";
+import { TOWN_FOCUS_DEFINITIONS } from "../content/TownFocusConfig.js?v=v1.7.21-20260629112345";
+import { escapeHtml } from "../engine/Utils.js?v=v1.7.21-20260629112345";
+import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.21-20260629112345";
+import { getCurrentTownFocus, getMayorSuggestions, getTownFocusAvailability } from "../systems/TownFocusSystem.js?v=v1.7.21-20260629112345";
 import {
   calculateTownFocusPreview,
   renderTownFocusBadge,
   renderTownFocusEffectSummary,
   renderTownFocusProjectionStrip
-} from "./TownFocusShared.js?v=v1.7.21-20260628204921";
+} from "./TownFocusShared.js?v=v1.7.21-20260629112345";
 
 export function renderTownFocusPanel(state, { expanded = false } = {}) {
   const currentFocus = getCurrentTownFocus(state);

@@ -8,7 +8,7 @@
 //
 // All times are stored in dayOffset units (the same scale as the calendar).
 
-import { createId } from "../engine/Utils.js?v=v1.7.21-20260628204921";
+import { createId } from "../engine/Utils.js?v=v1.7.21-20260629112345";
 
 export const COOLDOWN_TYPES = ["fixed", "dice", "percent"];
 export const COOLDOWN_SOURCE_TYPES = ["building", "npc", "custom"];

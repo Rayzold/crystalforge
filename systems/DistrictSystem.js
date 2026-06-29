@@ -1,4 +1,4 @@
-import { DISTRICT_LEVEL_THRESHOLDS } from "../content/DistrictConfig.js?v=v1.7.21-20260628204921";
+import { DISTRICT_LEVEL_THRESHOLDS } from "../content/DistrictConfig.js?v=v1.7.21-20260629112345";
 
 function getLevelFromCount(count) {
   return DISTRICT_LEVEL_THRESHOLDS.reduce((level, threshold, index) => {

@@ -1,4 +1,4 @@
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.21-20260628204921";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.21-20260629112345";
 import {
   DEFAULT_EFFORT_LEVEL,
   DEFAULT_SALARIES_LEVEL,
@@ -6,7 +6,7 @@ import {
   EFFORT_MORALE_PER_STEP,
   SALARIES_LEVELS,
   SALARIES_MORALE_PER_STEP
-} from "../content/Config.js?v=v1.7.21-20260628204921";
+} from "../content/Config.js?v=v1.7.21-20260629112345";
 
 function formatSignedNumber(value, decimals = 1) {
   if (value === 0) return "0";

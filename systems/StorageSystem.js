@@ -16,39 +16,39 @@ import {
   createEmptyCollection,
   createDefaultDistrictState,
   createDefaultRollTables
-} from "../content/Config.js?v=v1.7.21-20260628204921";
-import { BASE_BUILDING_CATALOG, buildFlavorText } from "../content/BuildingCatalog.js?v=v1.7.21-20260628204921";
-import { getNextRarity } from "../content/Rarities.js?v=v1.7.21-20260628204921";
-import { createId, safeJsonParse } from "../engine/Utils.js?v=v1.7.21-20260628204921";
-import { formatDate } from "./CalendarSystem.js?v=v1.7.21-20260628204921";
+} from "../content/Config.js?v=v1.7.21-20260629112345";
+import { BASE_BUILDING_CATALOG, buildFlavorText } from "../content/BuildingCatalog.js?v=v1.7.21-20260629112345";
+import { getNextRarity } from "../content/Rarities.js?v=v1.7.21-20260629112345";
+import { createId, safeJsonParse } from "../engine/Utils.js?v=v1.7.21-20260629112345";
+import { formatDate } from "./CalendarSystem.js?v=v1.7.21-20260629112345";
 import {
   createCitizenDefinitionsSnapshot,
   createCitizenRarityRoster,
   normalizeCitizenRarityRoster,
   normalizeCitizens,
   syncCitizenTotalsFromRoster
-} from "./CitizenSystem.js?v=v1.7.21-20260628204921";
-import { normalizeCrystalCollection } from "./CrystalSystem.js?v=v1.7.21-20260628204921";
-import { recalculateCityStats } from "./CityStatsSystem.js?v=v1.7.21-20260628204921";
-import { getDistrictSummary } from "./DistrictSystem.js?v=v1.7.21-20260628204921";
-import { normalizeShardCollection } from "./ShardSystem.js?v=v1.7.21-20260628204921";
-import { createMapCells } from "./MapSystem.js?v=v1.7.21-20260628204921";
-import { createDefaultDriftEvolutionState, normalizeDriftEvolutionState, syncDriftEvolutionState } from "./DriftEvolutionSystem.js?v=v1.7.21-20260628204921";
-import { getDriftConstructionSlots, normalizeConstructionPriority } from "./ConstructionSystem.js?v=v1.7.21-20260628204921";
-import { createDefaultTownFocusState, normalizeTownFocusState } from "./TownFocusSystem.js?v=v1.7.21-20260628204921";
-import { captureDailyCitySnapshot } from "./CitySnapshotSystem.js?v=v1.7.21-20260628204921";
+} from "./CitizenSystem.js?v=v1.7.21-20260629112345";
+import { normalizeCrystalCollection } from "./CrystalSystem.js?v=v1.7.21-20260629112345";
+import { recalculateCityStats } from "./CityStatsSystem.js?v=v1.7.21-20260629112345";
+import { getDistrictSummary } from "./DistrictSystem.js?v=v1.7.21-20260629112345";
+import { normalizeShardCollection } from "./ShardSystem.js?v=v1.7.21-20260629112345";
+import { createMapCells } from "./MapSystem.js?v=v1.7.21-20260629112345";
+import { createDefaultDriftEvolutionState, normalizeDriftEvolutionState, syncDriftEvolutionState } from "./DriftEvolutionSystem.js?v=v1.7.21-20260629112345";
+import { getDriftConstructionSlots, normalizeConstructionPriority } from "./ConstructionSystem.js?v=v1.7.21-20260629112345";
+import { createDefaultTownFocusState, normalizeTownFocusState } from "./TownFocusSystem.js?v=v1.7.21-20260629112345";
+import { captureDailyCitySnapshot } from "./CitySnapshotSystem.js?v=v1.7.21-20260629112345";
 import {
   createDefaultExpeditionState,
   normalizeExpeditionState,
   normalizeUniqueCitizens,
   normalizeVehicleFleet
-} from "./ExpeditionSystem.js?v=v1.7.21-20260628204921";
-import { createDefaultVehicleFleet } from "../content/VehicleConfig.js?v=v1.7.21-20260628204921";
-import { normalizeBehemoths } from "./BehemothSystem.js?v=v1.7.21-20260628204921";
-import { normalizeNpcs } from "./NpcSystem.js?v=v1.7.21-20260628204921";
-import { normalizeAwakenedRoster } from "./AwakenedSystem.js?v=v1.7.21-20260628204921";
-import { normalizeCraftingItems } from "./CraftingSystem.js?v=v1.7.21-20260628204921";
-import { normalizeCooldowns } from "./CooldownSystem.js?v=v1.7.21-20260628204921";
+} from "./ExpeditionSystem.js?v=v1.7.21-20260629112345";
+import { createDefaultVehicleFleet } from "../content/VehicleConfig.js?v=v1.7.21-20260629112345";
+import { normalizeBehemoths } from "./BehemothSystem.js?v=v1.7.21-20260629112345";
+import { normalizeNpcs } from "./NpcSystem.js?v=v1.7.21-20260629112345";
+import { normalizeAwakenedRoster } from "./AwakenedSystem.js?v=v1.7.21-20260629112345";
+import { normalizeCraftingItems } from "./CraftingSystem.js?v=v1.7.21-20260629112345";
+import { normalizeCooldowns } from "./CooldownSystem.js?v=v1.7.21-20260629112345";
 
 const SESSION_STATE_KEY = "crystal-forge-session-state-v1";
 const BUILD_NOTES_SEEN_KEY = "crystal-forge-build-notes-seen-v1";
@@ -293,7 +293,14 @@ function normalizeBuildingCatalog(sourceCatalog) {
       const entry = {
         ...baseEntry,
         ...sourceEntry,
-        imagePath: sourceEntry.imagePath ?? baseEntry.imagePath ?? null
+        imagePath: sourceEntry.imagePath ?? baseEntry.imagePath ?? null,
+        // Shipped apex notes are authoritative: if the base catalog defines one
+        // it wins, so updated/added notes reach existing saves. Buildings that
+        // ship without a note keep any GM-authored custom note from the save.
+        apexNote:
+          (typeof baseEntry.apexNote === "string" && baseEntry.apexNote.trim())
+            ? baseEntry.apexNote
+            : (sourceEntry.apexNote ?? baseEntry.apexNote ?? "")
       };
 
       return [
@@ -328,6 +335,9 @@ function normalizeBuildings(buildings, catalog) {
       typeof building.imageData === "string" && building.imageData.startsWith("data:image/")
         ? building.imageData
         : "",
+    // Instances bake apexNote at manifest time; re-sync from the resolved
+    // catalog so shipped note changes show on already-owned buildings.
+    apexNote: catalog?.[building.key]?.apexNote ?? building.apexNote ?? "",
     flavorText: building.flavorText ?? catalog?.[building.key]?.flavorText ?? null,
     mapPosition:
       typeof building.mapPosition?.q === "number" && typeof building.mapPosition?.r === "number"

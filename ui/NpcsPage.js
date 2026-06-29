@@ -10,10 +10,10 @@ import {
   getNpcRoleLabel,
   getNpcStatusDetail,
   getNpcStatusLabel
-} from "../content/NpcConfig.js?v=v1.7.21-20260628204921";
-import { NPC_CRAFTER_LEVELS } from "../systems/NpcSystem.js?v=v1.7.21-20260628204921";
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.21-20260628204921";
-import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.21-20260628204921";
+} from "../content/NpcConfig.js?v=v1.7.21-20260629112345";
+import { NPC_CRAFTER_LEVELS } from "../systems/NpcSystem.js?v=v1.7.21-20260629112345";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.21-20260629112345";
+import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.21-20260629112345";
 
 function renderNpcSummaryThumb(npc) {
   const src = getNpcImageSrc(npc);
