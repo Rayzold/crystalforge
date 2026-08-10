@@ -5,6 +5,21 @@
 
 ---
 
+## CSV Rule — read before touching any `.csv`
+
+**Never use a comma as the delimiter.** All CSVs in this folder are **caret-delimited (`^`), UTF-8 with BOM, CRLF**. Comma files import into Excel as a single column on this machine's locale.
+
+Two invariants keep them quote-free, so no field ever splits:
+
+1. delimiter is `^`
+2. **no field may contain a `^`** — it never occurs in this prose, so commas and semicolons are both safe inside fields
+
+Readers/writers must pass `delimiter='^'`. `convert-csv-to-caret.py` re-normalises every `dndbeyond-*.csv` and verifies zero quotes and non-ragged rows; run it after any hand edit.
+
+Excel does not auto-detect `^` on double-click — use **Data → From Text/CSV** and set the delimiter to `^`, or add a literal `sep=^` first line to the files (which would then need skipping in every reader).
+
+---
+
 ## One-Sentence Summary
 
 Crystal Forge is a static browser-based fantasy settlement simulator (GM control deck + player view) for running a shared city called "the Drift" — no bundler, no framework, plain ES modules.

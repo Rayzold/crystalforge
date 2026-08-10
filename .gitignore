@@ -10,3 +10,17 @@ coverage/
 *.log
 .DS_Store
 Thumbs.db
+
+# --- Scarred Lands campaign material: DM-facing, must NOT be published ---
+# These carry the game balance index and pregen/DM notes. The repo is public,
+# so keep them local. Only scarred-lands/index.html (the player codex) ships.
+dndbeyond-*.csv
+scarred-lands-catalogue.xlsx
+scarred-lands-roster.html
+scarred-lands-names.md
+scarred-lands-codex.html
+add-balance-index.py
+convert-csv-to-caret.py
+build-codex-book.py
+build-character-sheets.py
+build-catalogue-xlsx.py
