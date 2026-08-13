@@ -27,3 +27,8 @@ build-catalogue-xlsx.py
 scarred-lands-npcs-dm.html
 build-npcs.py
 check-npc-refs.py
+npc-data.py
+npc-portraits.py
+scarred-lands-npc-portraits.txt
+prepare-npc-images.py
+scarred-lands/img/*.png
