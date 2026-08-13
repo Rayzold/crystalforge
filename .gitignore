@@ -24,3 +24,6 @@ convert-csv-to-caret.py
 build-codex-book.py
 build-character-sheets.py
 build-catalogue-xlsx.py
+scarred-lands-npcs-dm.html
+build-npcs.py
+check-npc-refs.py
