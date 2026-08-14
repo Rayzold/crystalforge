@@ -5,6 +5,21 @@
 
 ---
 
+## CSV Rule — read before touching any `.csv`
+
+**Never use a comma as the delimiter.** All CSVs in this folder are **caret-delimited (`^`), UTF-8 with BOM, CRLF**. Comma files import into Excel as a single column on this machine's locale.
+
+Two invariants keep them quote-free, so no field ever splits:
+
+1. delimiter is `^`
+2. **no field may contain a `^`** — it never occurs in this prose, so commas and semicolons are both safe inside fields
+
+Readers/writers must pass `delimiter='^'`. `convert-csv-to-caret.py` re-normalises every `dndbeyond-*.csv` and verifies zero quotes and non-ragged rows; run it after any hand edit.
+
+Excel does not auto-detect `^` on double-click — use **Data → From Text/CSV** and set the delimiter to `^`, or add a literal `sep=^` first line to the files (which would then need skipping in every reader).
+
+---
+
 ## One-Sentence Summary
 
 Crystal Forge is a static browser-based fantasy settlement simulator (GM control deck + player view) for running a shared city called "the Drift" — no bundler, no framework, plain ES modules.
@@ -187,6 +202,14 @@ The 📜 / 🌙 button in the top-nav fires `data-action="toggle-theme"`. Implem
 ## Session Log
 
 > After each session, append an entry. Keep entries short — 3–5 bullets max. Delete entries older than ~10 sessions.
+
+### 2026-08-14 — The Drift Register reaches 100 (scarred-lands, not the simulator)
+- `scarred-lands/npcs.html` now carries exactly 100 NPCs — 33 heroes / 34 unaligned / 33 villains — assembled by `build-npcs.py` from ten `npc-wave*.py` modules, plus a d100 roll table (heroes 01–33, unaligned 34–67, villains 68–100) and filters by race / class / role / free text / sort.
+- 200 portraits generated in ComfyUI (Krea2 turbo, CFG 1.0, 8 steps; busts 832×1216, full-body 768×1344) and converted by `prepare-npc-images.py`. ComfyUI's output dir is `AppData\Local\Comfy-Desktop\ComfyUI-Shared\output`, **not** Documents. Windows Python has no Pillow — run the converter from the Linux sandbox instead.
+- Prompt trap, now hit twice (Ushra, then Nis): "fully covered" does not hold when the prompt describes skin in detail and clothing in two words. Name the garments — closed coat, high collar, trousers, boots.
+- `check-npc-refs-N.py` caught real errors in every wave; wave 10 alone had six spells assigned to classes whose list does not contain them. Note the Bard list has **no** 9th-level spell in the catalogue at all.
+- `.gitignore` covers `npc-wave*.py` and `check-npc-refs*.py` — those files carry every secret, hook and leverage and must never be pushed.
+- Last commit: `e7fcdc3`.
 
 ### 2026-06-15 — Codex page + source-tree mojibake sweep
 - Added Building Codex (`codex.html`, `ui/CodexPage.js`) to the Craft top-nav group: per-rarity progress bars, overall % ring, filters by rarity / role / discovery, discovered cards show art + apex bonus, undiscovered show silhouettes. Verified live with 139 cards (93% discovered on the test save).
