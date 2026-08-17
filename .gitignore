@@ -24,6 +24,12 @@ convert-csv-to-caret.py
 build-codex-book.py
 build-character-sheets.py
 build-catalogue-xlsx.py
+build-wave9-csv.py
+spells-wave9-data.py
+HOWTO-ddb-spell-upload.md
+HANDOFF-subclass-spells.md
+subclass-spells-wave*.md
+spell-entry-sheet.html
 scarred-lands-npcs-dm.html
 build-npcs.py
 # every wave and every pre-flight, present and future — these carry the secrets
@@ -34,3 +40,5 @@ npc-portraits.py
 scarred-lands-npc-portraits.txt
 prepare-npc-images.py
 scarred-lands/img/*.png
+the-emberdown-prisoners.html
+build-prisoner-sheets.py
