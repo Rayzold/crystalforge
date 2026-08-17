@@ -1,6 +1,6 @@
-import { TOWN_FOCUS_DEFINITIONS } from "../content/TownFocusConfig.js?v=v1.7.21-20260629112345";
-import { escapeHtml } from "../engine/Utils.js?v=v1.7.21-20260629112345";
-import { renderTownFocusBadge } from "./TownFocusShared.js?v=v1.7.21-20260629112345";
+import { TOWN_FOCUS_DEFINITIONS } from "../content/TownFocusConfig.js?v=v1.7.21-20260817120405";
+import { escapeHtml } from "../engine/Utils.js?v=v1.7.21-20260817120405";
+import { renderTownFocusBadge } from "./TownFocusShared.js?v=v1.7.21-20260817120405";
 
 export function renderTownFocusCeremonyOverlay(state) {
   const ceremony = state.transientUi?.focusCeremony;

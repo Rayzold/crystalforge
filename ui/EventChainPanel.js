@@ -1,6 +1,6 @@
-import { EVENT_POOLS } from "../content/EventPools.js?v=v1.7.21-20260629112345";
-import { escapeHtml } from "../engine/Utils.js?v=v1.7.21-20260629112345";
-import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.21-20260629112345";
+import { EVENT_POOLS } from "../content/EventPools.js?v=v1.7.21-20260817120405";
+import { escapeHtml } from "../engine/Utils.js?v=v1.7.21-20260817120405";
+import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.21-20260817120405";
 
 function getEventName(eventId) {
   return EVENT_POOLS.find((event) => event.id === eventId)?.name ?? eventId;

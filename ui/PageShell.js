@@ -1,17 +1,17 @@
-import { APP_DISPLAY_VERSION, MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js?v=v1.7.21-20260629112345";
-import { getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.21-20260629112345";
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.21-20260629112345";
-import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js?v=v1.7.21-20260629112345";
-import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js?v=v1.7.21-20260629112345";
-import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js?v=v1.7.21-20260629112345";
-import { getDecisionHistory, getDecisionInboxItems } from "../systems/DecisionInboxSystem.js?v=v1.7.21-20260629112345";
-import { getCityTrendSummary } from "../systems/ResourceSystem.js?v=v1.7.21-20260629112345";
-import { getAllManualSaveMeta } from "../systems/StorageSystem.js?v=v1.7.21-20260629112345";
-import { getCurrentTownFocus, getMayorAdvice, getTownFocusAvailability } from "../systems/TownFocusSystem.js?v=v1.7.21-20260629112345";
-import { getCriticalAlerts, renderCrisisBanner } from "./CrisisBanner.js?v=v1.7.21-20260629112345";
-import { renderTownFocusBadge } from "./TownFocusShared.js?v=v1.7.21-20260629112345";
-import { renderUiIcon } from "./UiIcons.js?v=v1.7.21-20260629112345";
-import { renderGlobalSearchWidget } from "./GlobalSearch.js?v=v1.7.21-20260629112345";
+import { APP_DISPLAY_VERSION, MASCOT_MEDIA, PAGE_ROUTES } from "../content/Config.js?v=v1.7.21-20260817120405";
+import { getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.21-20260817120405";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.21-20260817120405";
+import { formatDate, getStructuredDate } from "../systems/CalendarSystem.js?v=v1.7.21-20260817120405";
+import { formatBuildingExactQualityDisplay, formatBuildingQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js?v=v1.7.21-20260817120405";
+import { getActiveConstructionQueue, getAvailableConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js?v=v1.7.21-20260817120405";
+import { getDecisionHistory, getDecisionInboxItems } from "../systems/DecisionInboxSystem.js?v=v1.7.21-20260817120405";
+import { getCityTrendSummary } from "../systems/ResourceSystem.js?v=v1.7.21-20260817120405";
+import { getAllManualSaveMeta } from "../systems/StorageSystem.js?v=v1.7.21-20260817120405";
+import { getCurrentTownFocus, getMayorAdvice, getTownFocusAvailability } from "../systems/TownFocusSystem.js?v=v1.7.21-20260817120405";
+import { getCriticalAlerts, renderCrisisBanner } from "./CrisisBanner.js?v=v1.7.21-20260817120405";
+import { renderTownFocusBadge } from "./TownFocusShared.js?v=v1.7.21-20260817120405";
+import { renderUiIcon } from "./UiIcons.js?v=v1.7.21-20260817120405";
+import { renderGlobalSearchWidget } from "./GlobalSearch.js?v=v1.7.21-20260817120405";
 
 const HUD_ICON_KEYS = {
   Gold: "gold",
@@ -43,6 +43,8 @@ const ROUTE_GLYPHS = {
   ultima: "\u{1F52E}",
   campaign: "\u{1F4CB}",
   music: "\u266a",
+  compendium: "\u{1F4D6}",
+  register: "\u{1F5C3}\ufe0f",
   help: "\u2754"
 };
 
@@ -592,7 +594,8 @@ const TOP_NAV_GROUPS = [
   { label: "People", keys: ["citizens", "npcs", "awakened", "uniques", "equipment"] },
   { label: "World",   keys: ["expeditions", "vehicles", "behemoths", "army", "chronicle"] },
   { label: "Craft",   keys: ["crafting", "cooldowns", "codex", "help"] },
-  { label: "Session", keys: ["ultima", "campaign", "music", "battle"] }
+  { label: "Session", keys: ["ultima", "campaign", "music", "battle"] },
+  { label: "Scarred Lands", keys: ["compendium", "register"] }
 ];
 
 function renderTopNavGroup(group, pageKey, badges) {

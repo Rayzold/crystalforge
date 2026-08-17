@@ -1,4 +1,4 @@
-import { escapeHtml } from "../engine/Utils.js?v=v1.7.21-20260629112345";
+import { escapeHtml } from "../engine/Utils.js?v=v1.7.21-20260817120405";
 
 const ENTITY_TYPES = [
   { key: "building", label: "Building", glyph: "\u{1F3D9}️" },

@@ -1,6 +1,6 @@
-import { APP_DISPLAY_VERSION, BUILD_NOTES } from "../content/Config.js?v=v1.7.21-20260629112345";
-import { escapeHtml } from "../engine/Utils.js?v=v1.7.21-20260629112345";
-import { renderUiIcon } from "./UiIcons.js?v=v1.7.21-20260629112345";
+import { APP_DISPLAY_VERSION, BUILD_NOTES } from "../content/Config.js?v=v1.7.21-20260817120405";
+import { escapeHtml } from "../engine/Utils.js?v=v1.7.21-20260817120405";
+import { renderUiIcon } from "./UiIcons.js?v=v1.7.21-20260817120405";
 
 export function renderBuildNotesModal(state) {
   if (!state.transientUi?.buildNotesOpen) {

@@ -1,10 +1,10 @@
 // Central configuration and boot-time defaults.
 // This file defines versioning, starting presets, high-level tuning constants,
 // route metadata, and user-facing build notes that explain what changed.
-import { BUILDING_POOLS } from "./BuildingPools.js?v=v1.7.21-20260629112345";
-import { BASE_DISTRICT_CONFIG } from "./DistrictConfig.js?v=v1.7.21-20260629112345";
-import { CITIZEN_CLASSES } from "./CitizenConfig.js?v=v1.7.21-20260629112345";
-import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js?v=v1.7.21-20260629112345";
+import { BUILDING_POOLS } from "./BuildingPools.js?v=v1.7.21-20260817120405";
+import { BASE_DISTRICT_CONFIG } from "./DistrictConfig.js?v=v1.7.21-20260817120405";
+import { CITIZEN_CLASSES } from "./CitizenConfig.js?v=v1.7.21-20260817120405";
+import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js?v=v1.7.21-20260817120405";
 
 export const APP_NAME = "Crystal Forge";
 // APP_VERSION must stay monotonic because Firebase publish safety compares builds numerically.
@@ -66,6 +66,8 @@ export const PAGE_ROUTES = [
   { key: "ultima", label: "Ultima", href: "./POWERS_REFERENCE.html" },
   { key: "campaign", label: "Campaign Index", href: "./NOTION_TOC.html" },
   { key: "music", label: "Music Guide", href: "./DND_MUSIC_GUIDE.html" },
+  { key: "compendium", label: "Homebrew Codex", href: "./scarred-lands/index.html" },
+  { key: "register", label: "Drift Register", href: "./scarred-lands/npcs.html" },
   { key: "help", label: "Help", href: "./help.html" }
 ];
 export const BUILD_NOTES = [

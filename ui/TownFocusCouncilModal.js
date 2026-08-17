@@ -1,14 +1,14 @@
-import { TOWN_FOCUS_DEFINITIONS } from "../content/TownFocusConfig.js?v=v1.7.21-20260629112345";
-import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js?v=v1.7.21-20260629112345";
-import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.21-20260629112345";
-import { getMayorSuggestions, getTownFocusAvailability } from "../systems/TownFocusSystem.js?v=v1.7.21-20260629112345";
-import { renderModal } from "./Modal.js?v=v1.7.21-20260629112345";
+import { TOWN_FOCUS_DEFINITIONS } from "../content/TownFocusConfig.js?v=v1.7.21-20260817120405";
+import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js?v=v1.7.21-20260817120405";
+import { formatDate } from "../systems/CalendarSystem.js?v=v1.7.21-20260817120405";
+import { getMayorSuggestions, getTownFocusAvailability } from "../systems/TownFocusSystem.js?v=v1.7.21-20260817120405";
+import { renderModal } from "./Modal.js?v=v1.7.21-20260817120405";
 import {
   calculateTownFocusPreview,
   getDefaultTownFocusPreviewId,
   renderTownFocusBadge,
   renderTownFocusEffectSummary
-} from "./TownFocusShared.js?v=v1.7.21-20260629112345";
+} from "./TownFocusShared.js?v=v1.7.21-20260817120405";
 
 function renderMetricCard(label, projected, change, decimals = 2) {
   return `

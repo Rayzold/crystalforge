@@ -1,4 +1,4 @@
-import { UNIQUE_CITIZEN_FULL_NAMES } from "./UniqueCitizenNamePools.js?v=v1.7.21-20260629112345";
+import { UNIQUE_CITIZEN_FULL_NAMES } from "./UniqueCitizenNamePools.js?v=v1.7.21-20260817120405";
 
 export const UNIQUE_CITIZEN_ARCHETYPES = [
   {
