@@ -1,10 +1,11 @@
-import { renderUiIcon } from "./UiIcons.js?v=v1.7.21-20260817120405";
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.21-20260817120405";
-import { getStructuredDate } from "../systems/CalendarSystem.js?v=v1.7.21-20260817120405";
-import { formatBuildingExactQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js?v=v1.7.21-20260817120405";
-import { getOnboardingGoals } from "../systems/GoalSystem.js?v=v1.7.21-20260817120405";
-import { getCityTrendSummary } from "../systems/ResourceSystem.js?v=v1.7.21-20260817120405";
-import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.21-20260817120405";
+import { renderUiIcon } from "./UiIcons.js?v=v1.7.22-20260904120000";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.22-20260904120000";
+import { getStructuredDate } from "../systems/CalendarSystem.js?v=v1.7.22-20260904120000";
+import { formatBuildingExactQualityDisplay, getBuildingMultiplier } from "../systems/BuildingSystem.js?v=v1.7.22-20260904120000";
+import { getOnboardingGoals } from "../systems/GoalSystem.js?v=v1.7.22-20260904120000";
+import { getCityTrendSummary } from "../systems/ResourceSystem.js?v=v1.7.22-20260904120000";
+import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.22-20260904120000";
+import { DRIFT_BELOW_REGIONS } from "../content/Config.js?v=v1.7.22-20260904120000";
 
 function getQualityMultiplierReadout(building) {
   const multiplier = getBuildingMultiplier(building?.quality ?? 0);
@@ -209,6 +210,46 @@ function renderRecentSignals(state) {
   `;
 }
 
+function renderDriftPosition(state) {
+  const current = state.settings?.driftRegion ?? null;
+  const match = DRIFT_BELOW_REGIONS.find((region) => region.name === current) ?? null;
+  const belowHref = match
+    ? `./scarred-lands/players.html?region=${match.slug}`
+    : "./scarred-lands/players.html";
+  const options = [`<option value="">Adrift — position unset</option>`]
+    .concat(
+      DRIFT_BELOW_REGIONS.map(
+        (region) =>
+          `<option value="${escapeHtml(region.name)}" ${region.name === current ? "selected" : ""}>${escapeHtml(region.name)}</option>`
+      )
+    )
+    .join("");
+
+  return `
+    <section class="scene-panel drift-position-panel">
+      <div class="panel__header">
+        <div>
+          <h3>The Drift · Where It Floats</h3>
+          <span class="panel__subtle">A flying island adrift over the Scarred Lands</span>
+        </div>
+      </div>
+      <div class="drift-position">
+        <p class="drift-position__current">
+          ${match ? `Currently above <strong>${escapeHtml(match.name)}</strong>` : "The Drift's position is unset."}
+        </p>
+        <label class="drift-position__label" for="drift-region-select">Set the region below</label>
+        <select id="drift-region-select" class="input drift-position__select" data-action="set-drift-region">
+          ${options}
+        </select>
+        <a class="button button--ghost drift-position__link ${match ? "" : "is-disabled"}" href="${belowHref}">
+          See the world below →
+        </a>
+        <p class="drift-position__hint">Opens the World Catalogue filtered to whoever lives in that region.</p>
+      </div>
+    </section>
+  `;
+}
+
 export function renderHomePage(state) {
   return {
     title: "Home",
@@ -219,6 +260,7 @@ export function renderHomePage(state) {
       ${renderFeaturedBuildings(state)}
     `,
     aside: `
+      ${renderDriftPosition(state)}
       ${renderRecentSignals(state)}
     `
   };

@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scarred Lands — World Catalogue</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--night:#121A2C;--panel:#1A2338;--panel-2:#212C45;--rule:#2E3B58;--star:#E9DFC8;
+ --dim:#8E9CBA;--gold:#D4AF4F;--cyan:#77AEBE;--rose:#C0697E;--green:#7FA87C;
+ --serif:"Fraunces","Iowan Old Style",Georgia,serif;--sans:"Archivo","Segoe UI",system-ui,sans-serif}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:var(--night);color:var(--star);font-family:var(--sans);font-size:15px;line-height:1.55;min-height:100vh;
+ background-image:radial-gradient(circle at 14% 8%,rgba(119,174,190,.09),transparent 45%),
+                  radial-gradient(circle at 86% 84%,rgba(212,175,79,.07),transparent 50%)}
+.wrap{max-width:1360px;margin:0 auto;padding:32px 26px 90px}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap;
+ border-bottom:1px solid var(--rule);padding-bottom:16px;margin-bottom:16px}
+h1{font-family:var(--serif);font-weight:900;font-size:30px;letter-spacing:-.015em;margin:0}
+.sub{color:var(--dim);font-size:13.5px;margin:5px 0 0}
+.count{color:var(--dim);font-size:12.5px;text-align:right;font-variant-numeric:tabular-nums}
+.count b{color:var(--star);font-weight:600}
+.hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.langtog{display:flex;gap:6px}
+.langtog button{background:none;border:1px solid var(--rule);color:var(--dim);border-radius:5px;
+ font-family:var(--sans);font-size:12px;padding:4px 10px;cursor:pointer;letter-spacing:.03em}
+.langtog button:hover{border-color:var(--cyan);color:var(--star)}
+.langtog button.on{border-color:var(--gold);color:var(--gold)}
+.sitebar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:12.5px;
+ padding:8px 0 14px;margin-bottom:8px;border-bottom:1px solid var(--rule)}
+.sitebar a{color:var(--dim);text-decoration:none}.sitebar a:hover{color:var(--star)}
+.sitebar .home{color:var(--gold);font-weight:600}
+.tabbar{display:flex;gap:6px;margin:0 0 18px;flex-wrap:wrap}
+.tabbar button{background:none;border:1px solid var(--rule);color:var(--dim);border-radius:6px;
+ font-family:var(--sans);font-size:14px;padding:7px 16px;cursor:pointer}
+.tabbar button:hover{border-color:var(--cyan);color:var(--star)}
+.tabbar button.on{background:var(--panel-2);border-color:var(--gold);color:var(--gold);font-weight:600}
+.grid{display:grid;grid-template-columns:274px 1fr;gap:28px;align-items:start}
+@media(max-width:920px){.grid{grid-template-columns:1fr}}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+/* rail / facets */
+.rail{position:sticky;top:16px}
+.searchbox{width:100%;background:var(--panel);color:var(--star);border:1px solid var(--rule);
+ border-radius:6px;padding:9px 11px;font-family:var(--sans);font-size:14px;margin-bottom:18px}
+.searchbox::placeholder{color:var(--dim)}
+.facet{margin-bottom:18px;border-bottom:1px solid var(--rule);padding-bottom:16px}
+.facet:last-child{border-bottom:0}
+.facet h3{font-size:12px;font-weight:600;color:var(--dim);letter-spacing:.05em;text-transform:uppercase;margin:0 0 9px;
+ display:flex;justify-content:space-between;align-items:center}
+.facet .flist{display:flex;flex-direction:column;gap:1px;max-height:224px;overflow:auto;margin:-2px -4px;padding:2px 4px}
+.chk{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--dim);cursor:pointer;
+ padding:4px 6px;border-radius:4px}
+.chk:hover{background:var(--panel);color:var(--star)}
+.chk input{accent-color:var(--gold);margin:0;flex:none}
+.chk.on{color:var(--star)}
+.chk .lbl{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chk .n{font-size:11.5px;color:var(--dim);font-variant-numeric:tabular-nums}
+.chk.on .n{color:var(--gold)}
+select.f{width:100%;background:var(--panel);color:var(--star);border:1px solid var(--rule);
+ border-radius:5px;padding:7px 9px;font-family:var(--sans);font-size:13.5px}
+.slider{padding:6px 2px 2px}
+.slider .read{font-size:13px;color:var(--star);margin-bottom:10px}
+.slider .read b{color:var(--gold);font-variant-numeric:tabular-nums}
+.dual{position:relative;height:30px}
+.dual input[type=range]{position:absolute;left:0;top:8px;width:100%;margin:0;background:none;
+ -webkit-appearance:none;appearance:none;pointer-events:none;height:4px}
+.dual input[type=range]::-webkit-slider-runnable-track{height:4px;background:transparent}
+.dual input[type=range]::-moz-range-track{height:4px;background:transparent}
+.dual input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;pointer-events:auto;
+ width:16px;height:16px;border-radius:50%;background:var(--gold);border:2px solid var(--night);cursor:pointer;margin-top:-6px}
+.dual input[type=range]::-moz-range-thumb{pointer-events:auto;width:16px;height:16px;border-radius:50%;
+ background:var(--gold);border:2px solid var(--night);cursor:pointer}
+.dual .track{position:absolute;left:0;right:0;top:8px;height:4px;border-radius:2px;background:var(--rule)}
+.dual .fill{position:absolute;top:8px;height:4px;border-radius:2px;background:var(--gold)}
+.clearbtn{width:100%;background:none;border:1px solid var(--rule);color:var(--dim);border-radius:5px;
+ font-family:var(--sans);font-size:13px;padding:8px;cursor:pointer;margin-top:4px}
+.clearbtn:hover{border-color:var(--rose);color:var(--star)}
+/* content */
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.result-n{font-size:13.5px;color:var(--dim)}.result-n b{color:var(--star);font-weight:600;font-variant-numeric:tabular-nums}
+.sortrow{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--dim)}
+.sortrow select{background:var(--panel);color:var(--star);border:1px solid var(--rule);border-radius:5px;
+ padding:6px 8px;font-family:var(--sans);font-size:13px}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:14px}
+.npc-card{background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:14px 15px;cursor:pointer;
+ display:flex;flex-direction:column;gap:8px;text-align:left;font-family:var(--sans);color:inherit}
+.npc-card:hover{border-color:var(--cyan);background:var(--panel-2)}
+.npc-card .nm{font-family:var(--serif);font-weight:600;font-size:17px;line-height:1.15;letter-spacing:-.01em}
+.npc-card .who{font-size:12.5px;color:var(--dim);line-height:1.4}
+.npc-card .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:2px}
+.tags{display:flex;gap:5px;flex-wrap:wrap}
+.tag{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--panel-2);color:var(--dim);white-space:nowrap}
+.tag.reg{color:var(--cyan)}
+.pill{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.d-good{background:rgba(127,168,124,.16);color:var(--green)}
+.d-mid{background:rgba(142,156,186,.16);color:var(--dim)}
+.d-bad{background:rgba(192,105,126,.16);color:var(--rose)}
+.lvlcr{font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums}
+.lvlcr b{color:var(--star);font-weight:600}
+.empty{background:var(--panel);border:1px dashed var(--rule);border-radius:8px;padding:44px 32px;text-align:center;color:var(--dim)}
+.empty h3{font-family:var(--serif);color:var(--star);font-weight:600;font-size:20px;margin:0 0 8px}
+/* pager */
+.pager{display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap;margin-top:24px}
+.pager button{background:var(--panel);border:1px solid var(--rule);color:var(--dim);border-radius:5px;
+ font-family:var(--sans);font-size:13px;padding:6px 11px;cursor:pointer;font-variant-numeric:tabular-nums;min-width:36px}
+.pager button:hover:not(:disabled){border-color:var(--cyan);color:var(--star)}
+.pager button.on{border-color:var(--gold);color:var(--gold);font-weight:600}
+.pager button:disabled{opacity:.35;cursor:default}
+.pager .gap{color:var(--dim);padding:0 2px}
+/* group + settlement cards */
+.stack{display:flex;flex-direction:column;gap:14px}
+.big-card{background:var(--panel);border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+.bc-head{padding:15px 18px;display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap;cursor:pointer}
+.big-card:hover .bc-head{background:var(--panel-2)}
+.bc-name{font-family:var(--serif);font-weight:600;font-size:20px;letter-spacing:-.01em;margin:0}
+.bc-meta{color:var(--dim);font-size:13px;margin:5px 0 0}
+.bc-stats{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.bc-stat{text-align:center}.bc-stat b{display:block;font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}
+.bc-stat i{font-style:normal;font-size:11px;color:var(--dim)}
+.bc-body{padding:0 18px 16px;border-top:1px solid var(--rule)}
+.memlist{list-style:none;margin:12px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px}
+.memlist button{width:100%;text-align:left;background:var(--panel-2);border:1px solid var(--rule);border-radius:5px;
+ color:var(--star);font-family:var(--sans);font-size:13px;padding:7px 10px;cursor:pointer;display:flex;justify-content:space-between;gap:8px}
+.memlist button:hover{border-color:var(--cyan)}
+.memlist .mc{color:var(--dim);font-size:11.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.backrow{margin-bottom:16px}
+.backbtn{background:none;border:1px solid var(--rule);color:var(--dim);border-radius:5px;
+ font-family:var(--sans);font-size:13px;padding:7px 14px;cursor:pointer}
+.backbtn:hover{border-color:var(--cyan);color:var(--star)}
+/* detail overlay */
+.detail-overlay{position:fixed;inset:0;background:rgba(9,13,24,.72);backdrop-filter:blur(3px);
+ display:flex;justify-content:center;align-items:flex-start;padding:40px 20px;overflow:auto;z-index:50}
+.detail-panel{background:var(--night);border:1px solid var(--rule);border-radius:10px;max-width:640px;width:100%;
+ box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.dp-close{position:sticky;top:0;float:right;background:var(--panel);border:1px solid var(--rule);color:var(--dim);
+ border-radius:6px;width:34px;height:34px;font-size:17px;cursor:pointer;margin:12px 12px 0 0;z-index:2}
+.dp-close:hover{border-color:var(--rose);color:var(--star)}
+.dp-load{padding:60px 30px;text-align:center;color:var(--dim)}
+.head{padding:22px 24px 16px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap}
+.name{font-family:var(--serif);font-weight:900;font-size:28px;line-height:1.05;letter-spacing:-.02em;margin:0}
+.who{color:var(--dim);font-size:14px;margin:7px 0 0}
+.eyebrow{font-size:11.5px;font-weight:600;color:var(--cyan);letter-spacing:.06em;text-transform:uppercase;margin:0 0 5px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));border-bottom:1px solid var(--rule)}
+.stat{padding:11px 15px;border-right:1px solid var(--rule)}
+.stat:last-child{border-right:0}
+.stat b{display:block;font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2}
+.stat i{font-style:normal;font-size:11.5px;color:var(--dim)}
+.dbody{padding:18px 24px 24px}
+.blk{margin-bottom:15px}.blk:last-child{margin-bottom:0}
+.blk h4{font-size:12.5px;font-weight:600;color:var(--cyan);margin:0 0 3px}
+.blk p{margin:0;max-width:74ch}
+ul.items{margin:0;padding-left:18px}
+/* mobile drawer */
+.drawer-toggle{display:none;background:var(--gold);color:#191F2E;border:0;border-radius:6px;font-weight:600;
+ font-family:var(--sans);font-size:14px;padding:10px 16px;cursor:pointer;margin-bottom:16px;width:100%}
+.drawer-scrim{display:none}
+@media(max-width:920px){
+ .drawer-toggle{display:block}
+ .rail{position:fixed;top:0;left:0;bottom:0;width:300px;max-width:86vw;background:var(--night);border-right:1px solid var(--rule);
+  z-index:60;padding:20px;overflow:auto;transform:translateX(-105%);transition:transform .22s ease}
+ body.drawer-open .rail{transform:none}
+ body.drawer-open .drawer-scrim{display:block;position:fixed;inset:0;background:rgba(9,13,24,.6);z-index:55}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="sitebar" aria-label="Scarred Lands">
+  <a class="home" href="../gm.html">↑ The Drift</a>
+  <a href="./index.html">Homebrew Codex</a>
+  <span style="color:var(--gold)">World Catalogue</span>
+  <a href="./npcs.html">Drift Register</a>
+</nav>
+<header>
+  <div><h1>World Catalogue</h1>
+    <p class="sub">The world below the Drift — ten thousand souls across eight regions. Filter, don't scroll.</p></div>
+  <div class="hdr-right"><div class="langtog" id="langtog"></div><p class="count" id="count"></p></div>
+</header>
+<div class="tabbar" id="tabbar"></div>
+<button class="drawer-toggle" id="drawerToggle">Filters</button>
+<div class="grid">
+  <aside class="rail" id="rail" aria-label="Filters"></aside>
+  <main class="content" id="content"><div class="empty"><h3>Loading the world…</h3><p>Fetching the catalogue. The index is a little over a megabyte — one moment.</p></div></main>
+</div>
+</div>
+<div class="drawer-scrim" id="scrim"></div>
+<div class="detail-overlay" id="detail" hidden></div>
+
+<script>
+"use strict";
+
+/* ---------- shared helpers (parseCSV mirrors the roller's parser) ---------- */
+function parseCSV(t,d){if(t.charCodeAt(0)===0xFEFF)t=t.slice(1);const R=[];let r=[],f="",q=false;
+ for(let i=0;i<t.length;i++){const c=t[i];
+  if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
+  else if(c==='"')q=true;else if(c===d){r.push(f);f=""}
+  else if(c==="\n"){r.push(f);f="";R.push(r);r=[]}else if(c!=="\r")f+=c}
+ if(f.length||r.length){r.push(f);R.push(r)}return R.filter(x=>x.length>1)}
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const slug=s=>s.toLowerCase().replace(/'/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const crNum=cr=>{const s=String(cr==null?"":cr).trim();if(!s||s==="-"||s==="—")return 0;
+ if(s.includes("/")){const[a,b]=s.split("/").map(Number);return b?a/b:0}const n=parseFloat(s);return isNaN(n)?0:n};
+const dispoClass=v=>/Friendly|Φιλικ/.test(v)?"d-good":/Hostile|Εχθρικ/.test(v)?"d-bad":"d-mid";
+function debounce(fn,ms){let h;return(...a)=>{clearTimeout(h);h=setTimeout(()=>fn(...a),ms)}}
+function toObjects(rows){const h=rows[0].map(x=>x.trim());return rows.slice(1).map(r=>{const o={};h.forEach((k,i)=>o[k]=(r[i]||"").trim());return o})}
+
+/* ---------- config ---------- */
+const DATA_DIR="./data-players/";
+const PAGE_SIZE=36;
+const TABS=[["catalogue","NPCs"],["groups","Groups"],["settlements","Settlements"]];
+const SORTS=[["name","Name A–Z"],["lvl-desc","Level high→low"],["lvl-asc","Level low→high"],["cr-desc","CR high→low"],["cr-asc","CR low→high"]];
+const T={en:{people:"souls",members:"members",strong:"strong",pop:"pop.",statted:"statted here",
+   noNpc:"No one matches those filters.",noNpcSub:"Loosen a filter, or clear them all.",
+   npcTab:"NPC",clear:"Clear all filters",searchNpc:"Search name or role…",searchGrp:"Search group name…",searchSet:"Search settlement…",
+   level:"Level",settlement:"Settlement",anySet:"Any settlement",results:"results",sortBy:"Sort",
+   region:"Region",faction:"Faction",cls:"Class",anc:"Ancestry",disp:"Disposition",type:"Type",kind:"Kind",
+   loadDetail:"Opening the file…",backGrid:"← Back",membersHere:"Who lives here",noneStatted:"No statted NPCs recorded for this settlement.",
+   filters:"Filters",done:"Done"},
+  gr:{people:"ψυχές",members:"μέλη",strong:"δυνατοί",pop:"πληθ.",statted:"εδώ",
+   noNpc:"Κανείς δεν ταιριάζει.",noNpcSub:"Χαλάρωσε ή καθάρισε τα φίλτρα.",
+   npcTab:"NPC",clear:"Καθαρισμός φίλτρων",searchNpc:"Αναζήτηση ονόματος ή ρόλου…",searchGrp:"Αναζήτηση ομάδας…",searchSet:"Αναζήτηση οικισμού…",
+   level:"Επίπεδο",settlement:"Οικισμός",anySet:"Κάθε οικισμός",results:"αποτελέσματα",sortBy:"Ταξινόμηση",
+   region:"Περιοχή",faction:"Παράταξη",cls:"Κλάση",anc:"Καταγωγή",disp:"Διάθεση",type:"Τύπος",kind:"Είδος",
+   loadDetail:"Άνοιγμα…",backGrid:"← Πίσω",membersHere:"Ποιοι ζουν εδώ",noneStatted:"Δεν υπάρχουν καταγεγραμμένοι NPC εδώ.",
+   filters:"Φίλτρα",done:"Έτοιμο"}};
+let LANG=(()=>{try{return localStorage.getItem("sl_lang")==="gr"?"gr":"en"}catch(e){return"en"}})();
+const tr=k=>(T[LANG]||T.en)[k];
+
+/* ---------- state ---------- */
+const model={tab:"catalogue",sort:"name",page:1,detail:null,setDetail:null,
+ f:{region:new Set(),faction:new Set(),cls:new Set(),anc:new Set(),disp:new Set(),
+    type:new Set(),kind:new Set(),lmin:1,lmax:20,settlement:"",q:""}};
+let npcIndex=[],byId=new Map(),regionsList=[],settleFromIndex=new Map(),loaded=false;
+let groups=null,settlements=null,settleById=new Map();
+const shardCache=new Map();          // slug|lang -> Map(id->full row)
+
+/* ---------- URL <-> state ---------- */
+const enc=set=>[...set].map(encodeURIComponent).join(",");
+const decSet=s=>new Set((s||"").split(",").filter(Boolean).map(decodeURIComponent));
+function serialize(){
+ const f=model.f,p=new URLSearchParams();
+ if(model.tab!=="catalogue")p.set("tab",model.tab);
+ if(f.region.size)p.set("region",[...f.region].map(slug).join(","));
+ if(f.faction.size)p.set("faction",enc(f.faction));
+ if(f.cls.size)p.set("cls",enc(f.cls));
+ if(f.anc.size)p.set("anc",enc(f.anc));
+ if(f.disp.size)p.set("disp",enc(f.disp));
+ if(f.type.size)p.set("type",enc(f.type));
+ if(f.kind.size)p.set("kind",enc(f.kind));
+ if(f.lmin!==1)p.set("lmin",f.lmin);
+ if(f.lmax!==20)p.set("lmax",f.lmax);
+ if(f.settlement)p.set("set",f.settlement);
+ if(f.q)p.set("q",f.q);
+ if(model.sort!=="name")p.set("sort",model.sort);
+ if(model.page>1)p.set("p",model.page);
+ if(model.detail)p.set("npc",model.detail);
+ if(LANG!=="en")p.set("lang",LANG);
+ const qs=p.toString();return qs?"?"+qs:location.pathname;
+}
+function readURL(){
+ const p=new URLSearchParams(location.search),f=model.f;
+ model.tab=p.get("tab")||"catalogue";if(!TABS.some(t=>t[0]===model.tab))model.tab="catalogue";
+ f.faction=decSet(p.get("faction"));f.cls=decSet(p.get("cls"));f.anc=decSet(p.get("anc"));
+ f.disp=decSet(p.get("disp"));f.type=decSet(p.get("type"));f.kind=decSet(p.get("kind"));
+ f.lmin=Math.max(1,Math.min(20,+p.get("lmin")||1));f.lmax=Math.max(f.lmin,Math.min(20,+p.get("lmax")||20));
+ f.settlement=p.get("set")||"";f.q=p.get("q")||"";
+ model.sort=p.get("sort")||"name";if(!SORTS.some(s=>s[0]===model.sort))model.sort="name";
+ model.page=Math.max(1,+p.get("p")||1);model.detail=p.get("npc")||null;
+ if(p.get("lang")==="gr")LANG="gr";
+ model._regionSlugs=(p.get("region")||"").split(",").filter(Boolean); // resolved to names after load
+}
+function pushURL(replace){const url=serialize();
+ try{history[replace?"replaceState":"pushState"]({},"",url)}catch(e){}}
+
+/* ---------- data load ---------- */
+async function fetchText(name){const r=await fetch(DATA_DIR+name,{cache:"no-cache"});
+ if(!r.ok)throw new Error(name+" — HTTP "+r.status);return r.text()}
+function indexFile(){return LANG==="gr"?"index_GR.csv":"index.csv"}
+function shardFile(sl){return LANG==="gr"?`npcs-${sl}_GR.csv`:`npcs-${sl}.csv`}
+
+async function loadIndex(){
+ loaded=false;
+ const rows=parseCSV(await fetchText(indexFile()),"^");
+ npcIndex=toObjects(rows);
+ byId=new Map();settleFromIndex=new Map();
+ for(const n of npcIndex){
+  n.lvl=parseInt(n.Level,10)||1;n.crn=crNum(n.CR);
+  const m=(n.Settlement||"").match(/\(([^)]+)\)\s*$/);
+  n.settlementId=m?m[1]:"";n.settlementName=m?n.Settlement.slice(0,m.index).trim():(n.Settlement||"");
+  byId.set(n.ID,n);
+  if(n.settlementId&&!settleFromIndex.has(n.settlementId))
+   settleFromIndex.set(n.settlementId,{id:n.settlementId,name:n.settlementName,region:n.Region});
+ }
+ regionsList=[...new Set(npcIndex.map(n=>n.Region))].sort();
+ // resolve region slugs captured from the URL into names
+ if(model._regionSlugs&&model._regionSlugs.length){
+  const bySlug=new Map(regionsList.map(r=>[slug(r),r]));
+  model.f.region=new Set(model._regionSlugs.map(s=>bySlug.get(s)).filter(Boolean));
+  model._regionSlugs=null;
+ }
+ loaded=true;
+}
+async function loadGroups(){if(groups)return;groups=toObjects(parseCSV(await fetchText("groups.csv"),"^"))}
+async function loadSettlements(){if(settlements)return;
+ settlements=toObjects(parseCSV(await fetchText("settlements.csv"),"^"));
+ settleById=new Map(settlements.map(s=>[s.Settlement_ID,s]))}
+async function loadShard(sl){const key=sl+"|"+LANG;if(shardCache.has(key))return shardCache.get(key);
+ const map=new Map(toObjects(parseCSV(await fetchText(shardFile(sl)),"^")).map(r=>[r.ID,r]));
+ shardCache.set(key,map);return map}
+
+/* ---------- filtering + facet counts ---------- */
+function npcMatch(n,skip){const f=model.f;
+ if(skip!=="region"&&f.region.size&&!f.region.has(n.Region))return false;
+ if(skip!=="faction"&&f.faction.size&&!f.faction.has(n.Faction))return false;
+ if(skip!=="cls"&&f.cls.size&&!f.cls.has(n.Class))return false;
+ if(skip!=="anc"&&f.anc.size&&!f.anc.has(n.Ancestry))return false;
+ if(skip!=="disp"&&f.disp.size&&!f.disp.has(n.Disposition))return false;
+ if(skip!=="level"&&(n.lvl<f.lmin||n.lvl>f.lmax))return false;
+ if(skip!=="settlement"&&f.settlement&&n.settlementId!==f.settlement)return false;
+ if(skip!=="q"&&f.q){const q=f.q.toLowerCase();
+  if(!((n.Name||"").toLowerCase().includes(q)||(n.Role||"").toLowerCase().includes(q)))return false}
+ return true}
+function grpMatch(g,skip){const f=model.f;
+ if(skip!=="region"&&f.region.size&&!f.region.has(g.Region))return false;
+ if(skip!=="faction"&&f.faction.size&&!f.faction.has(g.Faction))return false;
+ if(skip!=="disp"&&f.disp.size&&!f.disp.has(g.Disposition))return false;
+ if(skip!=="type"&&f.type.size&&!f.type.has(g.Type))return false;
+ if(skip!=="q"&&f.q&&!(g.Group_Name||"").toLowerCase().includes(f.q.toLowerCase()))return false;
+ return true}
+function setMatch(s,skip){const f=model.f;
+ if(skip!=="region"&&f.region.size&&!f.region.has(s.Region))return false;
+ if(skip!=="kind"&&f.kind.size&&!f.kind.has(s.Kind))return false;
+ if(skip!=="q"&&f.q&&!(s.Name||"").toLowerCase().includes(f.q.toLowerCase()))return false;
+ return true}
+function counts(data,matchFn,field,facetKey){const m=new Map();
+ for(const r of data){if(matchFn(r,facetKey)){const v=r[field];if(v&&v!=="-")m.set(v,(m.get(v)||0)+1)}}return m}
+function sortVals(map,selected){
+ const arr=[...map.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
+ for(const v of selected)if(!map.has(v))arr.push([v,0]);   // keep selected-but-empty visible
+ return arr}
+const sortCmp={name:(a,b)=>a.Name.localeCompare(b.Name),
+ "lvl-desc":(a,b)=>b.lvl-a.lvl||a.Name.localeCompare(b.Name),
+ "lvl-asc":(a,b)=>a.lvl-b.lvl||a.Name.localeCompare(b.Name),
+ "cr-desc":(a,b)=>b.crn-a.crn||a.Name.localeCompare(b.Name),
+ "cr-asc":(a,b)=>a.crn-b.crn||a.Name.localeCompare(b.Name)};
+
+/* ---------- rail ---------- */
+function facetBlock(key,field,map){
+ const sel=model.f[key],rows=sortVals(map,sel);
+ return `<div class="facet"><h3>${esc(tr(key))}${sel.size?`<span class="n" style="color:var(--gold);font-weight:600">${sel.size}</span>`:""}</h3>
+  <div class="flist">${rows.map(([v,n])=>`<label class="chk ${sel.has(v)?'on':''}">
+   <input type="checkbox" data-facet="${key}" data-value="${esc(v)}" ${sel.has(v)?'checked':''}>
+   <span class="lbl">${esc(v)}</span><span class="n">${n.toLocaleString()}</span></label>`).join("")}</div></div>`;
+}
+function renderRail(){
+ const rail=document.getElementById("rail");const f=model.f;
+ const ph=model.tab==="groups"?tr("searchGrp"):model.tab==="settlements"?tr("searchSet"):tr("searchNpc");
+ let html=`<input class="searchbox" id="search" type="search" placeholder="${esc(ph)}" value="${esc(f.q)}" autocomplete="off">`;
+ if(model.tab==="catalogue"){
+  html+=facetBlock("region","Region",counts(npcIndex,npcMatch,"Region","region"));
+  html+=facetBlock("faction","Faction",counts(npcIndex,npcMatch,"Faction","faction"));
+  html+=facetBlock("cls","Class",counts(npcIndex,npcMatch,"Class","cls"));
+  html+=facetBlock("anc","Ancestry",counts(npcIndex,npcMatch,"Ancestry","anc"));
+  html+=facetBlock("disp","Disposition",counts(npcIndex,npcMatch,"Disposition","disp"));
+  // level slider
+  html+=`<div class="facet"><h3>${esc(tr("level"))}</h3><div class="slider">
+   <div class="read"><b>${f.lmin}</b> – <b>${f.lmax}</b></div>
+   <div class="dual"><div class="track"></div><div class="fill" id="lvlfill"></div>
+    <input type="range" id="lmin" min="1" max="20" value="${f.lmin}">
+    <input type="range" id="lmax" min="1" max="20" value="${f.lmax}"></div></div></div>`;
+  // settlement dropdown (limited to selected regions)
+  const opts=[...settleFromIndex.values()]
+   .filter(s=>!f.region.size||f.region.has(s.region))
+   .sort((a,b)=>a.name.localeCompare(b.name));
+  html+=`<div class="facet"><h3>${esc(tr("settlement"))}</h3>
+   <select class="f" id="setSel"><option value="">${esc(tr("anySet"))}</option>
+   ${opts.map(s=>`<option value="${esc(s.id)}" ${f.settlement===s.id?'selected':''}>${esc(s.name)}</option>`).join("")}</select></div>`;
+ }else if(model.tab==="groups"&&groups){
+  html+=facetBlock("region","Region",counts(groups,grpMatch,"Region","region"));
+  html+=facetBlock("faction","Faction",counts(groups,grpMatch,"Faction","faction"));
+  html+=facetBlock("type","Type",counts(groups,grpMatch,"Type","type"));
+  html+=facetBlock("disp","Disposition",counts(groups,grpMatch,"Disposition","disp"));
+ }else if(model.tab==="settlements"&&settlements){
+  html+=facetBlock("region","Region",counts(settlements,setMatch,"Region","region"));
+  html+=facetBlock("kind","Kind",counts(settlements,setMatch,"Kind","kind"));
+ }
+ html+=`<button class="clearbtn" id="clearAll">${esc(tr("clear"))}</button>`;
+ rail.innerHTML=html;bindRail();
+}
+function bindRail(){
+ const s=document.getElementById("search");
+ if(s)s.oninput=debounce(e=>{model.f.q=e.target.value;model.page=1;pushURL(true);renderContent();renderRail()
+  ;const el=document.getElementById("search");if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}},170);
+ document.querySelectorAll("[data-facet]").forEach(c=>c.onchange=()=>{
+  const set=model.f[c.dataset.facet],v=c.dataset.value;
+  if(c.checked)set.add(v);else set.delete(v);
+  if(c.dataset.facet==="region")model.f.settlement=validSettlement();
+  model.page=1;pushURL(true);renderRail();renderContent()});
+ const lmin=document.getElementById("lmin"),lmax=document.getElementById("lmax");
+ if(lmin&&lmax){const upd=()=>{let a=+lmin.value,b=+lmax.value;if(a>b){[a,b]=[b,a]}
+   model.f.lmin=a;model.f.lmax=b;paintSlider();
+   document.querySelector(".slider .read").innerHTML=`<b>${a}</b> – <b>${b}</b>`;
+   model.page=1;renderContent();};
+  lmin.oninput=upd;lmax.oninput=upd;
+  lmin.onchange=lmax.onchange=()=>{pushURL(true);renderRail()};paintSlider()}
+ const setSel=document.getElementById("setSel");
+ if(setSel)setSel.onchange=()=>{model.f.settlement=setSel.value;model.page=1;pushURL(true);renderContent();renderRail()};
+ const clr=document.getElementById("clearAll");if(clr)clr.onclick=clearAll;
+}
+function paintSlider(){const fill=document.getElementById("lvlfill");if(!fill)return;
+ const a=(model.f.lmin-1)/19*100,b=(model.f.lmax-1)/19*100;fill.style.left=a+"%";fill.style.width=(b-a)+"%"}
+function validSettlement(){const s=model.f.settlement;if(!s)return"";
+ const rec=settleFromIndex.get(s);return(!model.f.region.size||(rec&&model.f.region.has(rec.region)))?s:""}
+function clearAll(){const f=model.f;
+ f.region.clear();f.faction.clear();f.cls.clear();f.anc.clear();f.disp.clear();f.type.clear();f.kind.clear();
+ f.lmin=1;f.lmax=20;f.settlement="";f.q="";model.page=1;pushURL(true);renderRail();renderContent()}
+
+/* ---------- content: catalogue ---------- */
+function npcCardMini(n){
+ const sub=n.Subclass&&n.Subclass!=="-"?" · "+esc(n.Subclass):"";
+ return `<button class="npc-card" data-npc="${esc(n.ID)}">
+  <div class="nm">${esc(n.Name)}</div>
+  <div class="who">${esc(n.Ancestry)} ${esc(n.Class)}${sub}<br>${esc(n.Role)} · ${esc(n.Faction)}</div>
+  <div class="foot"><span class="lvlcr">Lv <b>${n.lvl}</b> · CR <b>${esc(n.CR)}</b></span>
+   <span class="pill ${dispoClass(n.Disposition)}">${esc(n.Disposition)}</span></div>
+  <div class="tags"><span class="tag reg">${esc(n.Region)}</span>${n.settlementName?`<span class="tag">${esc(n.settlementName)}</span>`:""}</div>
+ </button>`;
+}
+function renderCatalogue(){
+ const list=npcIndex.filter(n=>npcMatch(n,null)).sort(sortCmp[model.sort]);
+ const total=list.length,pages=Math.max(1,Math.ceil(total/PAGE_SIZE));
+ if(model.page>pages)model.page=pages;
+ const start=(model.page-1)*PAGE_SIZE,slice=list.slice(start,start+PAGE_SIZE);
+ let html=`<div class="toolbar">
+   <div class="result-n"><b>${total.toLocaleString()}</b> ${esc(tr("results"))}</div>
+   <div class="sortrow"><span>${esc(tr("sortBy"))}</span><select id="sortSel">
+     ${SORTS.map(([v,l])=>`<option value="${v}" ${model.sort===v?'selected':''}>${esc(l)}</option>`).join("")}</select></div></div>`;
+ html+=total?`<div class="cat-grid">${slice.map(npcCardMini).join("")}</div>${pager(pages)}`
+  :`<div class="empty"><h3>${esc(tr("noNpc"))}</h3><p>${esc(tr("noNpcSub"))}</p></div>`;
+ document.getElementById("content").innerHTML=html;
+ const ss=document.getElementById("sortSel");if(ss)ss.onchange=()=>{model.sort=ss.value;model.page=1;pushURL(true);renderCatalogue()};
+ bindPager();bindNpcButtons();
+ document.getElementById("count").innerHTML=`<b>${npcIndex.length.toLocaleString()}</b> ${esc(tr("people"))} · <b>${regionsList.length}</b> ${LANG==="gr"?"περιοχές":"regions"}`;
+}
+function pager(pages){if(pages<=1)return"";const p=model.page,out=[];
+ const btn=(i,lab,on,dis)=>`<button data-page="${i}" ${on?'class="on"':''} ${dis?'disabled':''}>${lab==null?i:lab}</button>`;
+ out.push(btn(p-1,"‹",false,p===1));
+ const span=new Set([1,2,pages-1,pages,p-1,p,p+1]);let last=0;
+ for(let i=1;i<=pages;i++){if(!span.has(i))continue;if(i-last>1)out.push('<span class="gap">…</span>');out.push(btn(i,null,i===p,false));last=i}
+ out.push(btn(p+1,"›",false,p===pages));
+ return `<div class="pager">${out.join("")}</div>`}
+function bindPager(){document.querySelectorAll("[data-page]").forEach(b=>b.onclick=()=>{
+ model.page=+b.dataset.page;pushURL(true);
+ (model.tab==="catalogue"?renderCatalogue:renderContent)();window.scrollTo({top:0,behavior:"smooth"})})}
+
+/* ---------- content: groups ---------- */
+function renderGroups(){
+ if(!groups){document.getElementById("content").innerHTML=loadingBox();return}
+ const list=groups.filter(g=>grpMatch(g,null)).sort((a,b)=>a.Group_Name.localeCompare(b.Group_Name));
+ let html=`<div class="toolbar"><div class="result-n"><b>${list.length.toLocaleString()}</b> ${esc(tr("results"))}</div></div>`;
+ html+=list.length?`<div class="stack">${list.map(groupCard).join("")}</div>`
+  :`<div class="empty"><h3>${esc(tr("noNpc"))}</h3><p>${esc(tr("noNpcSub"))}</p></div>`;
+ document.getElementById("content").innerHTML=html;
+ document.querySelectorAll("[data-grp]").forEach(h=>h.onclick=()=>{
+  const body=document.getElementById("gb-"+h.dataset.grp);if(body)body.hidden=!body.hidden});
+ bindNpcButtons();
+ document.getElementById("count").innerHTML=`<b>${groups.length.toLocaleString()}</b> ${LANG==="gr"?"ομάδες":"groups"}`;
+}
+function groupCard(g){
+ const ids=(g.Leader+" "+g.Members).match(/SL-\d+/g)||[];
+ const mem=ids.map(id=>byId.get(id)).filter(Boolean);
+ const rows=mem.map(n=>`<li><button data-npc="${esc(n.ID)}"><span>${esc(n.Name)}</span>
+   <span class="mc">${esc(n.Class)} ${n.lvl} · CR ${esc(n.CR)}</span></button></li>`).join("");
+ return `<div class="big-card"><div class="bc-head" data-grp="${esc(g.Group_ID)}">
+   <div><p class="bc-name">${esc(g.Group_Name)}</p>
+    <p class="bc-meta">${esc(g.Type)} · ${esc(g.Faction)} · ${esc(g.Region)}</p></div>
+   <div class="bc-stats">
+    <div class="bc-stat"><b>${esc(g.Size)}</b><i>${esc(tr("strong"))}</i></div>
+    <div class="bc-stat"><b>${esc(g.Total_CR)}</b><i>total CR</i></div>
+    <span class="pill ${dispoClass(g.Disposition)}">${esc(g.Disposition)}</span></div></div>
+   <div class="bc-body" id="gb-${esc(g.Group_ID)}" hidden>
+    ${mem.length?`<ul class="memlist">${rows}</ul>`:`<p style="color:var(--dim);margin:12px 0 0">—</p>`}</div></div>`;
+}
+
+/* ---------- content: settlements ---------- */
+function renderSettlements(){
+ if(!settlements){document.getElementById("content").innerHTML=loadingBox();return}
+ if(model.setDetail)return renderSettlementDetail(model.setDetail);
+ const list=settlements.filter(s=>setMatch(s,null)).sort((a,b)=>a.Name.localeCompare(b.Name));
+ let html=`<div class="toolbar"><div class="result-n"><b>${list.length.toLocaleString()}</b> ${esc(tr("results"))}</div></div>`;
+ html+=list.length?`<div class="stack">${list.map(settleCard).join("")}</div>`
+  :`<div class="empty"><h3>${esc(tr("noNpc"))}</h3><p>${esc(tr("noNpcSub"))}</p></div>`;
+ document.getElementById("content").innerHTML=html;
+ document.querySelectorAll("[data-set]").forEach(h=>h.onclick=()=>{model.setDetail=h.dataset.set;renderSettlements();window.scrollTo({top:0,behavior:"smooth"})});
+ document.getElementById("count").innerHTML=`<b>${settlements.length.toLocaleString()}</b> ${LANG==="gr"?"οικισμοί":"settlements"}`;
+}
+function settleCard(s){
+ return `<div class="big-card"><div class="bc-head" data-set="${esc(s.Settlement_ID)}">
+   <div><p class="bc-name">${esc(s.Name)}</p>
+    <p class="bc-meta">${esc(s.Kind)} · ${esc(s.Region)} · ${esc(tr("pop"))} ${(+s.Population||0).toLocaleString()}${s.Note?` — ${esc(s.Note)}`:""}</p></div>
+   <div class="bc-stats"><div class="bc-stat"><b>${esc(s.Statted_NPCs)}</b><i>${esc(tr("statted"))}</i></div></div></div></div>`;
+}
+function renderSettlementDetail(id){
+ const s=settleById.get(id);const here=npcIndex.filter(n=>n.settlementId===id).sort(sortCmp.name);
+ let html=`<div class="backrow"><button class="backbtn" id="backSet">${esc(tr("backGrid"))}</button></div>
+  <div class="big-card"><div class="bc-head" style="cursor:default">
+   <div><p class="bc-name">${esc(s?s.Name:id)}</p>
+    <p class="bc-meta">${s?`${esc(s.Kind)} · ${esc(s.Region)} · ${esc(tr("pop"))} ${(+s.Population||0).toLocaleString()}`:""}</p>
+    ${s&&s.Note?`<p class="bc-meta">${esc(s.Note)}</p>`:""}</div></div></div>
+  <h3 style="font-family:var(--serif);font-weight:600;font-size:18px;margin:22px 0 12px">${esc(tr("membersHere"))} <span style="color:var(--dim);font-weight:400">(${here.length})</span></h3>`;
+ html+=here.length?`<div class="cat-grid">${here.map(npcCardMini).join("")}</div>`
+  :`<div class="empty"><p>${esc(tr("noneStatted"))}</p></div>`;
+ document.getElementById("content").innerHTML=html;
+ document.getElementById("backSet").onclick=()=>{model.setDetail=null;renderSettlements()};
+ bindNpcButtons();
+}
+function loadingBox(){return `<div class="empty"><h3>Loading…</h3><p>${esc(tr("loadDetail"))}</p></div>`}
+
+/* ---------- NPC detail overlay (lazy shard) ---------- */
+function bindNpcButtons(){document.querySelectorAll("[data-npc]").forEach(b=>b.onclick=()=>openNpc(b.dataset.npc))}
+async function openNpc(id){
+ model.detail=id;pushURL(false);
+ const ov=document.getElementById("detail");ov.hidden=false;
+ ov.innerHTML=`<div class="detail-panel"><button class="dp-close" data-close>×</button><div class="dp-load">${esc(tr("loadDetail"))}</div></div>`;
+ bindOverlay();
+ const idx=byId.get(id);if(!idx){renderNpcDetail(null,id);return}
+ try{const shard=await loadShard(slug(idx.Region));renderNpcDetail(shard.get(id)||{...idx},id)}
+ catch(e){renderNpcDetail({...idx},id)}
+}
+function renderNpcDetail(n,id){
+ const ov=document.getElementById("detail");if(model.detail!==id)return;
+ if(!n){ov.innerHTML=`<div class="detail-panel"><button class="dp-close" data-close>×</button>
+   <div class="dp-load">Not found.</div></div>`;bindOverlay();return}
+ const sub=n.Subclass&&n.Subclass!=="-"?" · "+esc(n.Subclass):"";
+ const items=(n.Notable_Items||"").split(";").map(x=>x.trim()).filter(Boolean);
+ const spells=n.Key_Spells&&n.Key_Spells!=="-"?n.Key_Spells:"";
+ const con=n.Constellation&&n.Constellation!=="-"?n.Constellation:"";
+ const has=k=>n[k]&&n[k]!=="-";
+ ov.innerHTML=`<div class="detail-panel"><button class="dp-close" data-close>×</button>
+  <div class="head"><div><p class="eyebrow">${esc(n.Region)}${n.settlementName?" · "+esc(n.settlementName):(n.Settlement?" · "+esc(n.Settlement):"")}</p>
+    <h2 class="name">${esc(n.Name)}</h2>
+    <p class="who">${esc(n.Gender||"")} ${esc(n.Ancestry||"")} — ${esc(n.Class||"")}${sub}<br>${esc(n.Role||"")} · ${esc(n.Faction||"")}</p></div>
+    <span class="pill ${dispoClass(n.Disposition||"")}">${esc(n.Disposition||"")}</span></div>
+  <div class="stats">
+    <div class="stat"><b>${esc(n.Level)}</b><i>Level</i></div>
+    <div class="stat"><b>${esc(n.CR)}</b><i>CR</i></div>
+    ${has("AC")?`<div class="stat"><b>${esc(n.AC)}</b><i>AC</i></div>`:""}
+    ${has("HP")?`<div class="stat"><b>${esc(n.HP)}</b><i>HP</i></div>`:""}
+    ${has("Attack_Bonus")?`<div class="stat"><b>${esc(n.Attack_Bonus)}</b><i>To hit</i></div>`:""}</div>
+  <div class="dbody">
+    ${has("Main_Attack")?`<div class="blk"><h4>Main attack</h4><p>${esc(n.Main_Attack)}${has("Damage")?" — "+esc(n.Damage):""}</p></div>`:""}
+    ${spells?`<div class="blk"><h4>Spells that matter</h4><p>${esc(spells)}</p></div>`:""}
+    ${con?`<div class="blk"><h4>Constellation</h4><p>${esc(con)}</p></div>`:""}
+    ${has("First_Met")?`<div class="blk"><h4>First met</h4><p>${esc(n.First_Met)}</p></div>`:""}
+    ${has("Speech_Quirks")?`<div class="blk"><h4>Voice</h4><p>${esc(n.Speech_Quirks)}</p></div>`:""}
+    ${items.length?`<div class="blk"><h4>Carrying</h4><ul class="items">${items.map(i=>`<li>${esc(i)}</li>`).join("")}</ul></div>`:""}
+  </div></div>`;
+ bindOverlay();
+}
+function closeNpc(){const ov=document.getElementById("detail");ov.hidden=true;ov.innerHTML="";
+ if(model.detail){model.detail=null;pushURL(true)}}
+function bindOverlay(){const ov=document.getElementById("detail");
+ ov.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeNpc);
+ ov.onclick=e=>{if(e.target===ov)closeNpc()}}
+
+/* ---------- tabs, lang, chrome ---------- */
+function drawTabs(){document.getElementById("tabbar").innerHTML=
+ TABS.map(([k,l])=>`<button data-tab="${k}" class="${model.tab===k?'on':''}">${esc(l)}</button>`).join("");
+ document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab))}
+async function switchTab(tab){if(tab===model.tab)return;model.tab=tab;model.page=1;model.setDetail=null;
+ drawTabs();document.getElementById("content").innerHTML=loadingBox();
+ if(tab==="groups")await loadGroups();if(tab==="settlements")await loadSettlements();
+ pushURL(false);renderRail();renderContent();document.body.classList.remove("drawer-open")}
+function renderContent(){
+ if(model.tab==="catalogue")renderCatalogue();
+ else if(model.tab==="groups")renderGroups();
+ else renderSettlements();
+}
+function drawLang(){const el=document.getElementById("langtog");
+ el.innerHTML=[["en","EN"],["gr","ΕΛ"]].map(([k,l])=>`<button class="${LANG===k?'on':''}" data-lang="${k}">${l}</button>`).join("");
+ el.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{if(b.dataset.lang!==LANG)changeLang(b.dataset.lang)})}
+async function changeLang(lang){LANG=lang;try{localStorage.setItem("sl_lang",lang)}catch(e){}
+ model.f.disp.clear();               // disposition strings are language-specific
+ shardCache.clear();groups=null;settlements=null;
+ drawLang();document.getElementById("content").innerHTML=loadingBox();
+ await loadIndex();
+ if(model.tab==="groups")await loadGroups();if(model.tab==="settlements")await loadSettlements();
+ pushURL(true);renderRail();renderContent();
+ if(model.detail)openNpc(model.detail)}
+
+/* ---------- boot ---------- */
+async function boot(){
+ readURL();drawLang();drawTabs();
+ try{await loadIndex()}catch(e){
+  document.getElementById("content").innerHTML=`<div class="empty"><h3>Couldn't load the catalogue</h3><p>${esc(e.message)}</p></div>`;return}
+ if(model.tab==="groups")await loadGroups();if(model.tab==="settlements")await loadSettlements();
+ renderRail();renderContent();
+ if(model.detail)openNpc(model.detail);
+}
+document.getElementById("drawerToggle").onclick=()=>document.body.classList.add("drawer-open");
+document.getElementById("scrim").onclick=()=>document.body.classList.remove("drawer-open");
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){
+ if(!document.getElementById("detail").hidden)closeNpc();else document.body.classList.remove("drawer-open")}});
+window.addEventListener("popstate",async()=>{
+ readURL();
+ if(model._regionSlugs&&model._regionSlugs.length&&regionsList.length){
+  const bySlug=new Map(regionsList.map(r=>[slug(r),r]));
+  model.f.region=new Set(model._regionSlugs.map(s=>bySlug.get(s)).filter(Boolean));model._regionSlugs=null}
+ drawLang();drawTabs();
+ if(model.tab==="groups")await loadGroups();if(model.tab==="settlements")await loadSettlements();
+ renderRail();renderContent();
+ const ov=document.getElementById("detail");
+ if(model.detail){openNpc(model.detail)}else if(!ov.hidden){ov.hidden=true;ov.innerHTML=""}});
+boot();
+</script>
+</body>
+</html>

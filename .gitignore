@@ -42,3 +42,4 @@ prepare-npc-images.py
 scarred-lands/img/*.png
 the-emberdown-prisoners.html
 build-prisoner-sheets.py
+campaign-context.md

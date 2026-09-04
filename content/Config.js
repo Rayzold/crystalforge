@@ -1,14 +1,14 @@
 // Central configuration and boot-time defaults.
 // This file defines versioning, starting presets, high-level tuning constants,
 // route metadata, and user-facing build notes that explain what changed.
-import { BUILDING_POOLS } from "./BuildingPools.js?v=v1.7.21-20260817120405";
-import { BASE_DISTRICT_CONFIG } from "./DistrictConfig.js?v=v1.7.21-20260817120405";
-import { CITIZEN_CLASSES } from "./CitizenConfig.js?v=v1.7.21-20260817120405";
-import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js?v=v1.7.21-20260817120405";
+import { BUILDING_POOLS } from "./BuildingPools.js?v=v1.7.22-20260904120000";
+import { BASE_DISTRICT_CONFIG } from "./DistrictConfig.js?v=v1.7.22-20260904120000";
+import { CITIZEN_CLASSES } from "./CitizenConfig.js?v=v1.7.22-20260904120000";
+import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js?v=v1.7.22-20260904120000";
 
 export const APP_NAME = "Crystal Forge";
 // APP_VERSION must stay monotonic because Firebase publish safety compares builds numerically.
-export const APP_VERSION = "v1.7.21";
+export const APP_VERSION = "v1.7.22";
 // Release maturity is tracked separately so unreleased builds do not need to pretend they are public/stable.
 export const APP_RELEASE_STAGE = "preview";
 const RELEASE_STAGE_LABELS = {
@@ -68,9 +68,26 @@ export const PAGE_ROUTES = [
   { key: "music", label: "Music Guide", href: "./DND_MUSIC_GUIDE.html" },
   { key: "compendium", label: "Homebrew Codex", href: "./scarred-lands/index.html" },
   { key: "register", label: "Drift Register", href: "./scarred-lands/npcs.html" },
+  { key: "catalogue", label: "World Catalogue", href: "./scarred-lands/players.html" },
+  { key: "roller", label: "GM Roller", href: "./scarred-lands/roller.html" },
   { key: "help", label: "Help", href: "./help.html" }
 ];
+
+// The Drift is a flying island; it floats above one of the world-below regions.
+// The `slug` MUST match the region shards that scarred-lands/players.html serves,
+// so the deep-link `players.html?region=<slug>` lands on the right catalogue view.
+// (The Drift itself is not listed — it hovers over the world, not over itself.)
+export const DRIFT_BELOW_REGIONS = [
+  { name: "New Grandia", slug: "new-grandia" },
+  { name: "Thundermount", slug: "thundermount" },
+  { name: "Wyldermoore", slug: "wyldermoore" },
+  { name: "Frozen Edge", slug: "frozen-edge" },
+  { name: "Fur Wehn", slug: "fur-wehn" },
+  { name: "The Otherside", slug: "the-otherside" },
+  { name: "Datasphere's Reach", slug: "dataspheres-reach" }
+];
 export const BUILD_NOTES = [
+  "The Scarred Lands dropdown now reaches the whole world below the Drift: a World Catalogue of 10,000 NPCs you can filter by region, faction, class, ancestry, disposition and level, plus a GM Roller for daily weather-and-encounter draws. The GM home now sets which region the Drift floats above, the player screen shows it, and 'See the world below' deep-links straight into that region's catalogue.",
   "A new Army page consolidates the city's fighting strength in one muster: martial citizen units split offensive/defensive, Awakened operatives by grade, active defensive structures, the vessel fleet, and held behemoth war beasts.",
   "Three new anti-scrying defense buildings join the catalog — Prohibition Tower (Rare), Brain Fog Tower (Epic), and Privacy Mantle (Legendary) — and buildings can now carry a GM note describing the special bonus they gain at 350%, shown on building cards and the dossier. Newly shipped buildings now also merge into existing saves' roll tables so they become rollable.",
   "A new Awakened page joins the management routes: track the superhumans of the Scarred Lands with power grades F through S, ability archetypes from the world bible, six attributes, recruitment status, portraits, and lore.",

@@ -1,26 +1,26 @@
 // Aggregated city stat calculation.
 // This file turns citizens, buildings, districts, and condition modifiers into
 // the shared city-stat block used across the UI and downstream systems.
-import { CITIZEN_RARITY_OUTPUT_MULTIPLIERS } from "../content/CitizenConfig.js?v=v1.7.21-20260817120405";
+import { CITIZEN_RARITY_OUTPUT_MULTIPLIERS } from "../content/CitizenConfig.js?v=v1.7.22-20260904120000";
 import {
   DEFAULT_EFFORT_LEVEL,
   DEFAULT_SALARIES_LEVEL,
   EFFORT_MORALE_PER_STEP,
   SALARIES_MORALE_PER_STEP
-} from "../content/Config.js?v=v1.7.21-20260817120405";
-import { sumObjectValues } from "../engine/Utils.js?v=v1.7.21-20260817120405";
-import { getDistrictSummary } from "./DistrictSystem.js?v=v1.7.21-20260817120405";
-import { scalePopulationSupport } from "./DriftEvolutionSystem.js?v=v1.7.21-20260817120405";
-import { getUniqueCitizenStatBonuses } from "./ExpeditionSystem.js?v=v1.7.21-20260817120405";
-import { iterateCitizenRarityEntries } from "./CitizenSystem.js?v=v1.7.21-20260817120405";
-import { getBuildingPlacementBonuses } from "./MapSystem.js?v=v1.7.21-20260817120405";
-import { getCurrentTownFocus } from "./TownFocusSystem.js?v=v1.7.21-20260817120405";
-import { getGoodsOutputMultiplier, getHousingStrainPenalty } from "./CityConditionSystem.js?v=v1.7.21-20260817120405";
+} from "../content/Config.js?v=v1.7.22-20260904120000";
+import { sumObjectValues } from "../engine/Utils.js?v=v1.7.22-20260904120000";
+import { getDistrictSummary } from "./DistrictSystem.js?v=v1.7.22-20260904120000";
+import { scalePopulationSupport } from "./DriftEvolutionSystem.js?v=v1.7.22-20260904120000";
+import { getUniqueCitizenStatBonuses } from "./ExpeditionSystem.js?v=v1.7.22-20260904120000";
+import { iterateCitizenRarityEntries } from "./CitizenSystem.js?v=v1.7.22-20260904120000";
+import { getBuildingPlacementBonuses } from "./MapSystem.js?v=v1.7.22-20260904120000";
+import { getCurrentTownFocus } from "./TownFocusSystem.js?v=v1.7.22-20260904120000";
+import { getGoodsOutputMultiplier, getHousingStrainPenalty } from "./CityConditionSystem.js?v=v1.7.22-20260904120000";
 import {
   applyBuildingWorkforceToStat,
   getBuildingWorkforceMultiplier,
   getWorkforceSummary
-} from "./WorkforceSystem.js?v=v1.7.21-20260817120405";
+} from "./WorkforceSystem.js?v=v1.7.22-20260904120000";
 
 const EMPTY_CITY_STATS = {
   goods: 0,

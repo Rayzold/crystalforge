@@ -1,0 +1,421 @@
+﻿Weather_ID^Weather^Nav^Nav_Name^Monster_Range^d20^Area_Effect
+W01^The Calm^D^Drizzle^None^1^Dust settles for the first time in days, and the roads show every track laid down during the last storm.
+W01^The Calm^D^Drizzle^None^2^Standing water goes glassy and mirror-still, doubling the sky in every crater and wheel-rut.
+W01^The Calm^D^Drizzle^None^3^Insects return in numbers nobody remembers, thick enough over the grass to be heard as a hum.
+W01^The Calm^D^Drizzle^None^4^Shield pylons idle down to a low amber standby, and the towns beneath them go strangely quiet.
+W01^The Calm^D^Drizzle^None^5^Scavenger birds circle high and unhurried, marking the bodies the last weather left behind.
+W01^The Calm^D^Drizzle^None^6^Grass and scrub stand fully upright for once, unbent by wind, and the ground looks unfamiliar because of it.
+W01^The Calm^D^Drizzle^None^7^Smoke from cookfires rises dead vertical, visible for miles, which is exactly the problem.
+W01^The Calm^D^Drizzle^None^8^Wells and cisterns clear as sediment drops out, and the water tastes of nothing at all.
+W01^The Calm^D^Drizzle^None^9^Old ruins throw hard, precise shadows, and outlines nobody has seen properly in years become legible.
+W01^The Calm^D^Drizzle^None^10^Savage sign appears everywhere at once: fresh snares, cut brush, footprints heading toward every settlement.
+W01^The Calm^D^Drizzle^None^11^The horizon is genuinely visible, which unnerves anyone who has spent a season in cyclone country.
+W01^The Calm^D^Drizzle^None^12^Carrion flies thicken over the roadside, the only sound for a hundred paces in any direction.
+W01^The Calm^D^Drizzle^None^13^Field crops that survived stand undamaged and ripe, and every farmer in reach is out harvesting at once.
+W01^The Calm^D^Drizzle^None^14^Caravan traffic triples within a day, and every waystation is over capacity by nightfall.
+W01^The Calm^D^Drizzle^None^15^Sound carries absurdly far — a hammer strike at a mile, a voice at half that.
+W01^The Calm^D^Drizzle^None^16^Salvage crews strip wrecks openly in daylight, working fast against the weather's return.
+W01^The Calm^D^Drizzle^None^17^Night sky is fully clear, and constellations normally lost to cloud are visible down to the horizon.
+W01^The Calm^D^Drizzle^None^18^Livestock refuse to settle despite the good weather, watching the sky as though disagreeing with it.
+W01^The Calm^D^Drizzle^None^19^Roads dry out and harden, and cart wheels ring on packed earth instead of sinking.
+W01^The Calm^D^Drizzle^None^20^Every drifter you pass looks over their shoulder at least once, out of pure habit.
+W02^Petrichor Rain^D^Drizzle^D–C^1^The smell arrives before the rain does and clings to cloth, cargo and hair for days afterward.
+W02^Petrichor Rain^D^Drizzle^D–C^2^Dust turns to a thin slick that takes footprints perfectly and holds them long after you have gone.
+W02^Petrichor Rain^D^Drizzle^D–C^3^Stone darkens unevenly, and old carvings and worn inscriptions become readable for the first time in years.
+W02^Petrichor Rain^D^Drizzle^D–C^4^Every low point fills with a shallow, sweet-smelling film that will not evaporate on schedule.
+W02^Petrichor Rain^D^Drizzle^D–C^5^Beasts within a mile lift their heads and turn toward the rain, tracking it rather than sheltering from it.
+W02^Petrichor Rain^D^Drizzle^D–C^6^Cargo tarps must be checked hourly; the smell soaks through canvas and ruins food stores.
+W02^Petrichor Rain^D^Drizzle^D–C^7^Moss and lichen swell visibly on north-facing walls, spreading a hand's width in an afternoon.
+W02^Petrichor Rain^D^Drizzle^D–C^8^Wheel ruts fill and hold water that stays perfectly clear instead of muddying.
+W02^Petrichor Rain^D^Drizzle^D–C^9^The air cools four or five degrees and stays there, long after the drizzle has stopped.
+W02^Petrichor Rain^D^Drizzle^D–C^10^Wooden structures swell and doors stop closing properly across a whole settlement.
+W02^Petrichor Rain^D^Drizzle^D–C^11^Wolf-tier monsters follow the scent line rather than the road, cutting across open ground.
+W02^Petrichor Rain^D^Drizzle^D–C^12^Leather goes soft and dark, and every saddle and strap needs reworking afterward.
+W02^Petrichor Rain^D^Drizzle^D–C^13^Birds fall silent entirely, and the absence is more noticeable than the rain.
+W02^Petrichor Rain^D^Drizzle^D–C^14^Iron fittings bloom rust overnight at a rate that should take a season.
+W02^Petrichor Rain^D^Drizzle^D–C^15^The rain does not drum. It lands without sound, which is what unsettles new drifters most.
+W02^Petrichor Rain^D^Drizzle^D–C^16^Standing crops give off the same petrichor smell for a week, and cannot be sold as clean.
+W02^Petrichor Rain^D^Drizzle^D–C^17^Savage clans light green-wood fires deliberately, using smoke to cut the scent from their camps.
+W02^Petrichor Rain^D^Drizzle^D–C^18^Distant terrain looks closer than it is; the haze flattens depth and ruins range estimates.
+W02^Petrichor Rain^D^Drizzle^D–C^19^Dogs and pack animals become unmanageable, pulling toward the open ground rather than shelter.
+W02^Petrichor Rain^D^Drizzle^D–C^20^The ground stays tacky for three days, and anything parked on it sinks a finger's depth.
+W03^Skyquakes^C^Cyclone^D–C^1^The first boom knocks loose scree from every slope in earshot, and rockfall continues for an hour.
+W03^Skyquakes^C^Cyclone^D–C^2^Windows, glass containers and shardlight housings crack across a whole settlement in the same instant.
+W03^Skyquakes^C^Cyclone^D–C^3^Standing water jumps in its basin with each report, ringing out in concentric patterns.
+W03^Skyquakes^C^Cyclone^D–C^4^Birds abandon the region entirely within minutes and do not return for days.
+W03^Skyquakes^C^Cyclone^D–C^5^Loose masonry comes off old ruins, and structures that survived the Scarring finally give way.
+W03^Skyquakes^C^Cyclone^D–C^6^The ground shakes progressively, each tremor arriving slightly before the sound that caused it.
+W03^Skyquakes^C^Cyclone^D–C^7^Cargo shifts and settles in every cart; loads secured that morning need resecuring by noon.
+W03^Skyquakes^C^Cyclone^D–C^8^Dust hangs permanently at knee height, shaken up faster than it can fall.
+W03^Skyquakes^C^Cyclone^D–C^9^Livestock stampede blindly, and fencing across the region is written off.
+W03^Skyquakes^C^Cyclone^D–C^10^Visibility stays excellent throughout, which makes the region feel deceptively safe.
+W03^Skyquakes^C^Cyclone^D–C^11^Wells silt up as their linings crack, and clean water becomes the day's real problem.
+W03^Skyquakes^C^Cyclone^D–C^12^Deaf monsters move through open ground with total confidence, hunting purely on sight.
+W03^Skyquakes^C^Cyclone^D–C^13^Bells, chimes and hanging metal ring continuously, and nobody can hear an approach.
+W03^Skyquakes^C^Cyclone^D–C^14^Cliff faces shear along old fault lines, redrawing routes that were reliable last week.
+W03^Skyquakes^C^Cyclone^D–C^15^Sound arrives from the wrong direction as the booms echo off ridge lines.
+W03^Skyquakes^C^Cyclone^D–C^16^Eggs, glassware and instruments are simply written off before the day begins.
+W03^Skyquakes^C^Cyclone^D–C^17^Shield generators trip and reset repeatedly, flickering the barrier over entire towns.
+W03^Skyquakes^C^Cyclone^D–C^18^Sand and grit work into every hinge, lock and mechanism within the hour.
+W03^Skyquakes^C^Cyclone^D–C^19^Buried things surface: bones, wreckage, and occasionally a sealed container nobody buried.
+W03^Skyquakes^C^Cyclone^D–C^20^By evening, everyone in the region is shouting to be heard, even indoors, even in silence.
+W04^Thunder Booms^C^Cyclone^D–C^1^Every metal object in the open draws a strike, and abandoned wrecks burn along the roadside for miles.
+W04^Thunder Booms^C^Cyclone^D–C^2^Static builds until hair stands up and touching a cart rail throws a spark you feel in the teeth.
+W04^Thunder Booms^C^Cyclone^D–C^3^Rails, pipes and structural steel in old ruins glow faintly and stay hot for hours.
+W04^Thunder Booms^C^Cyclone^D–C^4^The air smells of ozone and scorched stone, sharp enough to taste at the back of the throat.
+W04^Thunder Booms^C^Cyclone^D–C^5^Sand fuses into small glass tubes wherever a bolt lands, leaving branching scars across the ground.
+W04^Thunder Booms^C^Cyclone^D–C^6^Shield pylons overload and cities go dark in rolling sequence as nodes trip.
+W04^Thunder Booms^C^Cyclone^D–C^7^Livestock with metal tack die first, and the smell carries a long way downwind.
+W04^Thunder Booms^C^Cyclone^D–C^8^Nails work loose from timber as the wood chars around them.
+W04^Thunder Booms^C^Cyclone^D–C^9^Drifters strip weapons and armor and cache them, leaving whole caravans effectively unarmed.
+W04^Thunder Booms^C^Cyclone^D–C^10^Water in metal containers boils, splits the seams, and scalds anything nearby.
+W04^Thunder Booms^C^Cyclone^D–C^11^Lightning strikes the same high points repeatedly, and those points become navigational landmarks.
+W04^Thunder Booms^C^Cyclone^D–C^12^Compasses spin uselessly, and anyone navigating by instrument is lost within the hour.
+W04^Thunder Booms^C^Cyclone^D–C^13^Grass fires start in a dozen places at once and spread unpredictably against the wind.
+W04^Thunder Booms^C^Cyclone^D–C^14^Buried metal draws strikes upward, cratering roads over old pipework.
+W04^Thunder Booms^C^Cyclone^D–C^15^Anything electrical fails permanently, not temporarily; devices are dead afterward.
+W04^Thunder Booms^C^Cyclone^D–C^16^Monsters avoid open metal too, funnelling them onto the same wooden bridges and stone paths you need.
+W04^Thunder Booms^C^Cyclone^D–C^17^The sky flickers continuously rather than flashing, giving light without ever being bright.
+W04^Thunder Booms^C^Cyclone^D–C^18^Old battlefields cook off — ordnance and salvage detonate across the region through the night.
+W04^Thunder Booms^C^Cyclone^D–C^19^Rain, when it comes, is warm and carries the taste of iron filings.
+W04^Thunder Booms^C^Cyclone^D–C^20^Afterward the landscape is stitched with black glass lines that stay visible for years.
+W05^Living Cyclones^C^Cyclone^D–B^1^The calm before is total — no birdsong, no breeze, nothing moving in the grass.
+W05^Living Cyclones^C^Cyclone^D–B^2^Multiple funnels form at once across the horizon, each drifting on a different heading.
+W05^Living Cyclones^C^Cyclone^D–B^3^Topsoil strips down to bedrock in wide curving swathes, and the region changes color overnight.
+W05^Living Cyclones^C^Cyclone^D–B^4^Debris orbits at height for hours: doors, signage, whole cartwheels turning in the air.
+W05^Living Cyclones^C^Cyclone^D–B^5^Roads are erased entirely, and every waypoint marker in a district is relocated or gone.
+W05^Living Cyclones^C^Cyclone^D–B^6^Water is drawn straight up out of ponds, leaving the beds dry and the fish stranded.
+W05^Living Cyclones^C^Cyclone^D–B^7^The funnels carry elemental charge and discharge it into the ground where they touch down.
+W05^Living Cyclones^C^Cyclone^D–B^8^Livestock and monsters alike are simply lifted and dropped miles away, alive and furious.
+W05^Living Cyclones^C^Cyclone^D–B^9^Sound arrives as a low continuous roar with no direction, making it impossible to place the nearest funnel.
+W05^Living Cyclones^C^Cyclone^D–B^10^Structures survive or vanish with no middle ground, and neighbouring buildings fare oppositely.
+W05^Living Cyclones^C^Cyclone^D–B^11^Trees are stripped of bark on one side only, marking the passage of each funnel afterward.
+W05^Living Cyclones^C^Cyclone^D–B^12^Airborne grit scours paint, sigils and signage off every surface facing the approach.
+W05^Living Cyclones^C^Cyclone^D–B^13^Whole caravans are found intact a valley over, undamaged and empty.
+W05^Living Cyclones^C^Cyclone^D–B^14^Dust walls hundreds of feet high cut visibility to nothing without warning, then clear just as fast.
+W05^Living Cyclones^C^Cyclone^D–B^15^Dragon-tier creatures ride the updrafts deliberately, arriving from directions nobody watches.
+W05^Living Cyclones^C^Cyclone^D–B^16^Shield domes hold but hum audibly under the load, and the sound frightens people more than the storm.
+W05^Living Cyclones^C^Cyclone^D–B^17^The ground beneath a touchdown is left polished smooth and slightly warm.
+W05^Living Cyclones^C^Cyclone^D–B^18^Rivers change course where a funnel crosses them, and fords vanish permanently.
+W05^Living Cyclones^C^Cyclone^D–B^19^Anything not tied down is gone; anything tied down takes the post with it.
+W05^Living Cyclones^C^Cyclone^D–B^20^Afterward the land is scattered with objects from a hundred miles away, and salvagers work for weeks.
+W06^Nanite Storm^C^Cyclone^D–C^1^Clouds condense out of metallic surfaces themselves, forming close to the ground and rising.
+W06^Nanite Storm^C^Cyclone^D–C^2^The rain tastes bitter and metallic, and coats every surface in a film that dries to grey dust.
+W06^Nanite Storm^C^Cyclone^D–C^3^Machinery left in the open reconfigures overnight into shapes that serve no purpose anyone recognises.
+W06^Nanite Storm^C^Cyclone^D–C^4^Vermin and small animals emerge altered: plated, jointed wrong, and far harder to kill.
+W06^Nanite Storm^C^Cyclone^D–C^5^Glass and diamond stay clean while everything beside them corrodes, which is how you spot safe shelter.
+W06^Nanite Storm^C^Cyclone^D–C^6^Wrecks and scrap piles begin to move slowly, reassembling into structures with no builder.
+W06^Nanite Storm^C^Cyclone^D–C^7^Wounds seal wrongly, closing over with a hard grey seam instead of scar tissue.
+W06^Nanite Storm^C^Cyclone^D–C^8^Weapons in the open gain edges they did not have, and become unsafe to hold.
+W06^Nanite Storm^C^Cyclone^D–C^9^Fences, rails and railway line grow spurs and branches like a metal thicket.
+W06^Nanite Storm^C^Cyclone^D–C^10^The Datasphere floods with noise in the region, and every signal comes back garbled.
+W06^Nanite Storm^C^Cyclone^D–C^11^Monsters upgrade mid-encounter — a wolf-tier creature acquires armor plating within a single fight.
+W06^Nanite Storm^C^Cyclone^D–C^12^Water sources go faintly reflective and cannot be purified by any ordinary method.
+W06^Nanite Storm^C^Cyclone^D–C^13^Crops die back to the root, and what regrows is inedible and slightly warm to the touch.
+W06^Nanite Storm^C^Cyclone^D–C^14^Old wounds and set bones ache as fillings, pins and buried shrapnel respond to the storm.
+W06^Nanite Storm^C^Cyclone^D–C^15^Buildings acquire growths on their windward faces, hard and grey and slowly spreading.
+W06^Nanite Storm^C^Cyclone^D–C^16^The dust that settles afterward is faintly magnetic and clings to anything ferrous.
+W06^Nanite Storm^C^Cyclone^D–C^17^Shardlights flicker in a rhythm that is not random, and the Awakened refuse to explain it.
+W06^Nanite Storm^C^Cyclone^D–C^18^Doors, locks and hinges seize as their mechanisms are quietly redesigned from within.
+W06^Nanite Storm^C^Cyclone^D–C^19^Livestock refuse to drink, and will die of thirst rather than touch open water.
+W06^Nanite Storm^C^Cyclone^D–C^20^A week later, the region's scrap is worth triple — and is illegal to bring inside a city shield.
+W07^Elemental Bursts^B^Blizzard^C–B^1^Anything holding a charge detonates: shardlights, cells, focus items, and every device in a pack.
+W07^Elemental Bursts^B^Blizzard^C–B^2^Discharges bloom in mid-air with no source, scorching the ground beneath in perfect circles.
+W07^Elemental Bursts^B^Blizzard^C–B^3^Fire, frost and lightning effects occur within a hundred paces of each other, following no pattern.
+W07^Elemental Bursts^B^Blizzard^C–B^4^Frost forms on one face of a boulder while the opposite face cracks from heat.
+W07^Elemental Bursts^B^Blizzard^C–B^5^Every powered installation in the region fails at once, and shield towers go fully dark.
+W07^Elemental Bursts^B^Blizzard^C–B^6^The ground is left ringed with alternating scorch marks and frozen patches that persist for days.
+W07^Elemental Bursts^B^Blizzard^C–B^7^Wooden structures survive intact while anything metal or powered is destroyed outright.
+W07^Elemental Bursts^B^Blizzard^C–B^8^Only organic creatures move through the region; constructs and augmented things stay away entirely.
+W07^Elemental Bursts^B^Blizzard^C–B^9^Air pressure shifts violently with each burst, popping ears and rupturing sealed containers.
+W07^Elemental Bursts^B^Blizzard^C–B^10^Water flash-freezes and flash-boils in the same pool minutes apart.
+W07^Elemental Bursts^B^Blizzard^C–B^11^Savage clans move openly and confidently, carrying nothing but wood, bone and stone.
+W07^Elemental Bursts^B^Blizzard^C–B^12^Stored fuel and volatiles cook off, and supply caches across the district are lost.
+W07^Elemental Bursts^B^Blizzard^C–B^13^Sand fuses, ice sheets form, and the terrain becomes a patchwork that no map accounts for.
+W07^Elemental Bursts^B^Blizzard^C–B^14^Lightning-struck trees keep burning from the inside for days afterward.
+W07^Elemental Bursts^B^Blizzard^C–B^15^Focus items and enchanted gear discharge harmlessly or catastrophically, with no way to predict which.
+W07^Elemental Bursts^B^Blizzard^C–B^16^The Datasphere is entirely unreachable, and the silence is total.
+W07^Elemental Bursts^B^Blizzard^C–B^17^Livestock die from the bursts rather than from monsters; the losses are counted in herds.
+W07^Elemental Bursts^B^Blizzard^C–B^18^Anything buried and powered surfaces violently, cratering roads and floors.
+W07^Elemental Bursts^B^Blizzard^C–B^19^The sky shows no clouds at all, which makes the bursts feel like the ground's doing.
+W07^Elemental Bursts^B^Blizzard^C–B^20^Afterward, the region is littered with slag, ice and fused sand in the same square mile.
+W08^Ice Blossoms^B^Blizzard^B^1^Temperature drops so fast that breath fogs mid-sentence and stays hanging.
+W08^Ice Blossoms^B^Blizzard^B^2^Crystal formations bloom outward from every surface, growing visibly over the course of an hour.
+W08^Ice Blossoms^B^Blizzard^B^3^Roads glaze over completely, and any slope becomes impassable to wheeled traffic.
+W08^Ice Blossoms^B^Blizzard^B^4^The crystals ring faintly when the wind moves them, a constant thin chiming across the whole region.
+W08^Ice Blossoms^B^Blizzard^B^5^Rivers freeze from the banks inward, trapping anything caught mid-crossing.
+W08^Ice Blossoms^B^Blizzard^B^6^Visibility is superb — the air is utterly clear, and you can see the dragon coming from miles out.
+W08^Ice Blossoms^B^Blizzard^B^7^Stone splits as water in its cracks expands, and old ruins shed whole faces.
+W08^Ice Blossoms^B^Blizzard^B^8^Vegetation is encased rather than killed, preserved standing until the thaw drops it dead.
+W08^Ice Blossoms^B^Blizzard^B^9^Every footprint from the previous week is sealed under glass-clear ice and perfectly legible.
+W08^Ice Blossoms^B^Blizzard^B^10^Livestock go down on the ice and cannot rise; herds are lost in a single night.
+W08^Ice Blossoms^B^Blizzard^B^11^The blossoms grow across doorways and shutters, sealing buildings shut from outside.
+W08^Ice Blossoms^B^Blizzard^B^12^Water stores freeze solid, and cracking them open takes half a day's fuel.
+W08^Ice Blossoms^B^Blizzard^B^13^Dragon-tier creatures move with total confidence on the ice while everything else slips.
+W08^Ice Blossoms^B^Blizzard^B^14^Sound carries strangely, sharp and close, as though the region has walls.
+W08^Ice Blossoms^B^Blizzard^B^15^Metal becomes dangerous to touch bare-handed and bonds instantly to skin.
+W08^Ice Blossoms^B^Blizzard^B^16^The formations refract shardlight into hard bright fragments, ruining night vision.
+W08^Ice Blossoms^B^Blizzard^B^17^Shield domes ice over from the outside and their surfaces go opaque.
+W08^Ice Blossoms^B^Blizzard^B^18^The crystals are load-bearing at first and shatter without warning some hours later.
+W08^Ice Blossoms^B^Blizzard^B^19^Spilled oil spreads under the ice rather than on it, and stays liquid for days.
+W08^Ice Blossoms^B^Blizzard^B^20^After the thaw, the ground is left scoured, cracked, and littered with everything the ice was holding.
+W09^Moonbows^B^Blizzard^C–A^1^They appear at full strength with no build-up, arcing across the night sky in a single moment.
+W09^Moonbows^B^Blizzard^C–A^2^Colour falls on the landscape wrongly — grass reads violet, stone reads green, skin reads grey.
+W09^Moonbows^B^Blizzard^C–A^3^Shadows are cast in several directions at once and none of them match the moons.
+W09^Moonbows^B^Blizzard^C–A^4^Every animal in the region goes flat to the ground and stays there until the bow fades.
+W09^Moonbows^B^Blizzard^C–A^5^The light does not illuminate so much as replace, and familiar terrain becomes unrecognisable.
+W09^Moonbows^B^Blizzard^C–A^6^Water surfaces hold the bow's reflection long after the sky has cleared.
+W09^Moonbows^B^Blizzard^C–A^7^Calamity-tier creatures gather beneath the arc and do not immediately hunt.
+W09^Moonbows^B^Blizzard^C–A^8^The Ode to the Moons carries for miles and cannot be located by direction.
+W09^Moonbows^B^Blizzard^C–A^9^Shardlights and torches are drowned out entirely; artificial light stops functioning as light.
+W09^Moonbows^B^Blizzard^C–A^10^Dust in the air becomes visible as fine drifting colour, mapping every air current.
+W09^Moonbows^B^Blizzard^C–A^11^The bow's footprint on the ground is a visible band, and crossing into it is instantly obvious.
+W09^Moonbows^B^Blizzard^C–A^12^Anything under the arc casts no shadow at all for as long as it stands there.
+W09^Moonbows^B^Blizzard^C–A^13^Sound within the band arrives delayed by a beat, which ruins any attempt at coordination.
+W09^Moonbows^B^Blizzard^C–A^14^Plants open as though it were dawn, and close again the moment the bow passes.
+W09^Moonbows^B^Blizzard^C–A^15^Datasphere signals invert — messages arrive before they are sent, then vanish from the record.
+W09^Moonbows^B^Blizzard^C–A^16^Old scars, brands and tattoos glow faintly on anyone standing in the light.
+W09^Moonbows^B^Blizzard^C–A^17^The three moons are all visible during a moonbow, including the one that usually is not.
+W09^Moonbows^B^Blizzard^C–A^18^Monsters that pass beneath the arc emerge a slightly different colour and do not seem to notice.
+W09^Moonbows^B^Blizzard^C–A^19^The bow moves slowly across the landscape and everything beneath it goes silent in sequence.
+W09^Moonbows^B^Blizzard^C–A^20^By dawn there is no physical trace at all, and half the party will disagree about what they saw.
+W10^Umbral Tempest^B^Blizzard^B–A^1^Daylight drains from the landscape in under a minute, going from noon to absolute dark.
+W10^Umbral Tempest^B^Blizzard^B–A^2^The thunderbolts absorb light rather than emit it, leaving darker seams behind them in the air.
+W10^Umbral Tempest^B^Blizzard^B–A^3^Purple sparks crawl along cloud undersides, the only thing visible in any direction.
+W10^Umbral Tempest^B^Blizzard^B–A^4^Shardlights work but their beams end abruptly, cut off at a fixed distance as though hitting a wall.
+W10^Umbral Tempest^B^Blizzard^B–A^5^Fires burn without casting light, giving heat and nothing else.
+W10^Umbral Tempest^B^Blizzard^B–A^6^Shield domes go black and the cities inside them lose all sense of time.
+W10^Umbral Tempest^B^Blizzard^B–A^7^Anything reflective stops reflecting; mirrors and water surfaces read as flat black.
+W10^Umbral Tempest^B^Blizzard^B–A^8^Monsters that fear light are drawn in from surrounding regions and pack into the dark.
+W10^Umbral Tempest^B^Blizzard^B–A^9^Distance is unjudgeable; a wall at arm's length and a ridge at a mile feel identical.
+W10^Umbral Tempest^B^Blizzard^B–A^10^Sound becomes the only navigation, and every drifter starts counting paces aloud.
+W10^Umbral Tempest^B^Blizzard^B–A^11^Vegetation wilts within hours as though a season of darkness passed in one afternoon.
+W10^Umbral Tempest^B^Blizzard^B–A^12^The darkness pools in low ground first, filling valleys before it takes the ridges.
+W10^Umbral Tempest^B^Blizzard^B–A^13^Signal fires and lamps are useless for communication, and whole caravans lose contact.
+W10^Umbral Tempest^B^Blizzard^B–A^14^Livestock go completely docile, standing still and silent wherever the dark caught them.
+W10^Umbral Tempest^B^Blizzard^B–A^15^Anything carried into the tempest lit stays warm to the touch afterward, and dimmer than before.
+W10^Umbral Tempest^B^Blizzard^B–A^16^The edges of the storm are hard, not gradual — you step from full daylight into nothing.
+W10^Umbral Tempest^B^Blizzard^B–A^17^Datasphere nodes report the region as unmapped for the duration.
+W10^Umbral Tempest^B^Blizzard^B–A^18^Shardlight batteries drain at ten times the normal rate and cannot be recharged inside.
+W10^Umbral Tempest^B^Blizzard^B–A^19^Afterward, the returning daylight is painful and everyone in the region is half-blind for an hour.
+W10^Umbral Tempest^B^Blizzard^B–A^20^Things are found in the open afterward that were locked inside buildings before it started.
+W11^Flat Rain^B^Blizzard^B–A^1^Rain travels horizontally with enough force to strip bark, paint and skin from any exposed face.
+W11^Flat Rain^B^Blizzard^B–A^2^One enormous cloud draws water from every other cloud in the sky, visibly emptying them.
+W11^Flat Rain^B^Blizzard^B–A^3^Windward walls are scoured back to bare material within an hour.
+W11^Flat Rain^B^Blizzard^B–A^4^Nothing pools on the ground; the water simply keeps moving across it and away.
+W11^Flat Rain^B^Blizzard^B–A^5^Shelter only works if it faces the right direction, and the direction shifts without warning.
+W11^Flat Rain^B^Blizzard^B–A^6^Wounds open on anything caught in the open, and blood is carried away as fast as it appears.
+W11^Flat Rain^B^Blizzard^B–A^7^Whole hillsides are stripped of topsoil laterally, exposing root systems and buried structures.
+W11^Flat Rain^B^Blizzard^B–A^8^Signage, markers and route stones are sandblasted illegible in a single storm.
+W11^Flat Rain^B^Blizzard^B–A^9^Monsters fight each other across the region rather than hunting, and the pattern repeats.
+W11^Flat Rain^B^Blizzard^B–A^10^Doors and shutters on the windward side are forced inward regardless of how they are barred.
+W11^Flat Rain^B^Blizzard^B–A^11^Standing water is driven uphill along the slope of the land.
+W11^Flat Rain^B^Blizzard^B–A^12^Trees bend and stay bent, and the whole region grows permanently leaning afterward.
+W11^Flat Rain^B^Blizzard^B–A^13^The sound is a continuous hiss rather than a drumming, and it does not vary.
+W11^Flat Rain^B^Blizzard^B–A^14^Anything with a broad surface — tarps, sails, shields — becomes unmanageable or lethal.
+W11^Flat Rain^B^Blizzard^B–A^15^Livestock are driven against fencing and pile up there until the fencing gives.
+W11^Flat Rain^B^Blizzard^B–A^16^Shield domes deform visibly under the pressure and the surface ripples.
+W11^Flat Rain^B^Blizzard^B–A^17^Old graves and shallow burials are opened along exposed slopes.
+W11^Flat Rain^B^Blizzard^B–A^18^The rain carries grit, and everything it touches ends up polished and slightly abraded.
+W11^Flat Rain^B^Blizzard^B–A^19^Fires cannot be lit anywhere in the open, including inside anything with a windward opening.
+W11^Flat Rain^B^Blizzard^B–A^20^Afterward, the land looks combed — every loose thing lying in the same direction.
+W12^Psionic Storm^B^Blizzard^D–A^1^A rainbow shimmer crosses the sky with no rain, and the air develops a pressure behind the eyes.
+W12^Psionic Storm^B^Blizzard^D–A^2^Animals across the region behave wrongly: predators grazing, herd beasts turning to face the storm.
+W12^Psionic Storm^B^Blizzard^D–A^3^Datasphere traffic garbles into fragments of speech nobody transmitted.
+W12^Psionic Storm^B^Blizzard^D–A^4^Hallucinations are shared — two people describe the same thing that is not there.
+W12^Psionic Storm^B^Blizzard^D–A^5^Every drifter in the region reports the same buzzing note at the same pitch.
+W12^Psionic Storm^B^Blizzard^D–A^6^Written records change while unattended, and nobody can prove they were different before.
+W12^Psionic Storm^B^Blizzard^D–A^7^Monsters of every tier appear simultaneously, from wolf to Calamity, ignoring one another.
+W12^Psionic Storm^B^Blizzard^D–A^8^Old memories surface with total clarity while recent ones become unreliable.
+W12^Psionic Storm^B^Blizzard^D–A^9^Structures feel wrong in their proportions; corridors seem longer walking one way than the other.
+W12^Psionic Storm^B^Blizzard^D–A^10^Psionic dampeners overheat and fail within an hour of exposure.
+W12^Psionic Storm^B^Blizzard^D–A^11^Latent abilities awaken in one person in a hundred, usually violently.
+W12^Psionic Storm^B^Blizzard^D–A^12^Livestock go mute; not silent by choice, but unable to make sound at all.
+W12^Psionic Storm^B^Blizzard^D–A^13^Sleepers in the region share a dream and wake within a minute of each other.
+W12^Psionic Storm^B^Blizzard^D–A^14^Navigation fails as landmarks read as familiar regardless of whether they are.
+W12^Psionic Storm^B^Blizzard^D–A^15^Objects are moved without contact, slowly, and only when unobserved.
+W12^Psionic Storm^B^Blizzard^D–A^16^The storm has no physical footprint — the ground afterward is entirely undisturbed.
+W12^Psionic Storm^B^Blizzard^D–A^17^Speech becomes difficult; people reach for words and retrieve the wrong ones.
+W12^Psionic Storm^B^Blizzard^D–A^18^Anyone who has been struck before feels the approach hours ahead of the shimmer.
+W12^Psionic Storm^B^Blizzard^D–A^19^Divisions form fast among groups sheltering together, over nothing anyone can later name.
+W12^Psionic Storm^B^Blizzard^D–A^20^Afterward, the region reports missing time — a few minutes, consistently, everywhere.
+W13^Shadowstorms^A^Avalanche^D–C^1^Shadows lengthen far past what the light angle allows, and keep lengthening.
+W13^Shadowstorms^A^Avalanche^D–C^2^Lights flicker across the whole district and no source can be found for the interference.
+W13^Shadowstorms^A^Avalanche^D–C^3^Electronic equipment corrupts rather than fails, returning wrong answers confidently.
+W13^Shadowstorms^A^Avalanche^D–C^4^Animals fall completely silent, and the silence spreads outward ahead of the storm.
+W13^Shadowstorms^A^Avalanche^D–C^5^Apparitions move at the edge of vision and resolve into nothing when approached directly.
+W13^Shadowstorms^A^Avalanche^D–C^6^Visibility drops to a few paces, but the darkness is textured rather than empty.
+W13^Shadowstorms^A^Avalanche^D–C^7^Shadows detach from their objects and remain when the object is moved.
+W13^Shadowstorms^A^Avalanche^D–C^8^Divine artifacts glow steadily and are the only reliable light in the region.
+W13^Shadowstorms^A^Avalanche^D–C^9^Doors are found open that were locked, and closed that were propped.
+W13^Shadowstorms^A^Avalanche^D–C^10^Reflections lag behind their subjects by a fraction of a second.
+W13^Shadowstorms^A^Avalanche^D–C^11^Actual monster activity stays low, which makes every drifter more nervous rather than less.
+W13^Shadowstorms^A^Avalanche^D–C^12^Names are heard called from empty ground, correctly and in familiar voices.
+W13^Shadowstorms^A^Avalanche^D–C^13^Shield generators report intrusions continuously and nothing is ever found.
+W13^Shadowstorms^A^Avalanche^D–C^14^Cold spots move through buildings on their own paths, unrelated to doors or drafts.
+W13^Shadowstorms^A^Avalanche^D–C^15^Written notes and route markings are altered subtly and legibly.
+W13^Shadowstorms^A^Avalanche^D–C^16^Fires burn low and blue regardless of fuel.
+W13^Shadowstorms^A^Avalanche^D–C^17^Anyone left alone reports company; anyone in a group reports being watched from outside it.
+W13^Shadowstorms^A^Avalanche^D–C^18^The storm leaves no residue, no damage, and no evidence of having occurred.
+W13^Shadowstorms^A^Avalanche^D–C^19^Dogs will not enter affected buildings and cannot be made to.
+W13^Shadowstorms^A^Avalanche^D–C^20^Afterward, the region's records disagree with everyone's memory of the same three days.
+W14^Chrono Fog^A^Avalanche^D–A^1^Clocks in the region disagree with each other and with themselves minute to minute.
+W14^Chrono Fog^A^Avalanche^D–A^2^Fog banks sit in distinct zones, and time runs at a different rate inside each.
+W14^Chrono Fog^A^Avalanche^D–A^3^Ghost images of past events replay in place: carts that are not there, fires long out.
+W14^Chrono Fog^A^Avalanche^D–A^4^Vegetation ages or reverts within a single zone — saplings and deadfall side by side.
+W14^Chrono Fog^A^Avalanche^D–A^5^Datasphere timestamps arrive from several different eras at once.
+W14^Chrono Fog^A^Avalanche^D–A^6^Ruins appear briefly intact, complete with their original signage, then decay again.
+W14^Chrono Fog^A^Avalanche^D–A^7^A person walking a straight line emerges older or younger than the person beside them.
+W14^Chrono Fog^A^Avalanche^D–A^8^Food spoils or unspoils depending on which pocket of fog it is carried through.
+W14^Chrono Fog^A^Avalanche^D–A^9^Sound arrives out of order; a shout is heard after its echo.
+W14^Chrono Fog^A^Avalanche^D–A^10^Time Wraiths circle the densest zones and are visible as distortions rather than shapes.
+W14^Chrono Fog^A^Avalanche^D–A^11^Structures show wear from centuries that have not happened yet.
+W14^Chrono Fog^A^Avalanche^D–A^12^Anything left in the fog overnight is found weathered by decades or restored to new.
+W14^Chrono Fog^A^Avalanche^D–A^13^Footprints appear ahead of the party on untrodden ground, in their own boots.
+W14^Chrono Fog^A^Avalanche^D–A^14^Wounds close and reopen as the bearer moves between zones.
+W14^Chrono Fog^A^Avalanche^D–A^15^The fog does not drift with the wind and cannot be dispersed.
+W14^Chrono Fog^A^Avalanche^D–A^16^Bodies are found from expeditions that have not yet set out.
+W14^Chrono Fog^A^Avalanche^D–A^17^Fires burn down to ash in seconds or refuse to consume fuel at all.
+W14^Chrono Fog^A^Avalanche^D–A^18^The region's maps become unreliable as roads revert to earlier alignments.
+W14^Chrono Fog^A^Avalanche^D–A^19^Someone always emerges who has been missing for years and does not know it.
+W14^Chrono Fog^A^Avalanche^D–A^20^Afterward the fog lifts instantly, and everything inside is left at whatever age it reached.
+W15^Volcanic Storm^A^Avalanche^C–S^1^The ground vibrates for days beforehand, and the tremor is felt before anything is seen.
+W15^Volcanic Storm^A^Avalanche^C–S^2^Sulfur smell saturates the region and clings to water, food and cloth.
+W15^Volcanic Storm^A^Avalanche^C–S^3^Ash falls thick enough to bury roads, and every landmark below head height disappears.
+W15^Volcanic Storm^A^Avalanche^C–S^4^Magma rain sets fires wherever it lands, and the fires spread faster than anyone can respond.
+W15^Volcanic Storm^A^Avalanche^C–S^5^The sky goes brick-red at midday and stays that colour into the night.
+W15^Volcanic Storm^A^Avalanche^C–S^6^Geysers activate across the district, including in places with no prior thermal activity.
+W15^Volcanic Storm^A^Avalanche^C–S^7^Rivers run warm, then hot, then stop carrying anything alive.
+W15^Volcanic Storm^A^Avalanche^C–S^8^Pyroclastic flows follow valley floors, which are exactly the routes carts must use.
+W15^Volcanic Storm^A^Avalanche^C–S^9^Ash buries vegetation and smothers it; whole forests are lost standing upright.
+W15^Volcanic Storm^A^Avalanche^C–S^10^Breathing becomes the primary problem, and unsealed shelter is no shelter at all.
+W15^Volcanic Storm^A^Avalanche^C–S^11^Structures collapse under ash load rather than burning, roofs first.
+W15^Volcanic Storm^A^Avalanche^C–S^12^Apocalypse-tier fire entities emerge from the vents and move outward from them.
+W15^Volcanic Storm^A^Avalanche^C–S^13^Water sources are poisoned by ashfall and cannot be filtered clean.
+W15^Volcanic Storm^A^Avalanche^C–S^14^Metal softens where it is exposed and blades taken through the region come out warped.
+W15^Volcanic Storm^A^Avalanche^C–S^15^Visibility is measured in paces and the ash blocks light entirely at midday.
+W15^Volcanic Storm^A^Avalanche^C–S^16^New ground forms as flows cool, and the map is wrong afterward in permanent ways.
+W15^Volcanic Storm^A^Avalanche^C–S^17^Livestock suffocate before they burn, and the losses are total across the region.
+W15^Volcanic Storm^A^Avalanche^C–S^18^Shield domes hold heat in and the cities beneath them become ovens.
+W15^Volcanic Storm^A^Avalanche^C–S^19^Static builds in the ash cloud and lightning plays through it constantly.
+W15^Volcanic Storm^A^Avalanche^C–S^20^Afterward the region is grey, level and silent, and stays that way for years.
+W16^Anti-Gravity Vortex^A^Avalanche^A–S+^1^Small objects begin drifting upward hours before anything else happens.
+W16^Anti-Gravity Vortex^A^Avalanche^A–S+^2^Water leaves its basins and rises in coherent columns and spheres.
+W16^Anti-Gravity Vortex^A^Avalanche^A–S+^3^Metallic objects accelerate upward and become high-velocity projectiles in every direction.
+W16^Anti-Gravity Vortex^A^Avalanche^A–S+^4^A low hum saturates the region and is felt in the chest rather than heard.
+W16^Anti-Gravity Vortex^A^Avalanche^A–S+^5^Animals levitate helplessly and are killed by the debris rather than the fall.
+W16^Anti-Gravity Vortex^A^Avalanche^A–S+^6^Topsoil, gravel and loose stone lift as a single layer, exposing bedrock and buried structures.
+W16^Anti-Gravity Vortex^A^Avalanche^A–S+^7^Buildings come apart upward, roofs first, then walls, in complete silence.
+W16^Anti-Gravity Vortex^A^Avalanche^A–S+^8^Anything tethered with metal cable is destroyed as the cable becomes the weapon.
+W16^Anti-Gravity Vortex^A^Avalanche^A–S+^9^Dust and debris orbit at altitude in a visible ring around the vortex eye.
+W16^Anti-Gravity Vortex^A^Avalanche^A–S+^10^Fires burn as spheres and consume their fuel from the outside in.
+W16^Anti-Gravity Vortex^A^Avalanche^A–S+^11^Blood pools wrongly, and injuries in the region behave in ways no field medic expects.
+W16^Anti-Gravity Vortex^A^Avalanche^A–S+^12^Cataclysmic-tier creatures are documented inside the eye and appear entirely unaffected.
+W16^Anti-Gravity Vortex^A^Avalanche^A–S+^13^Shield domes invert their curvature and the generators tear free of their foundations.
+W16^Anti-Gravity Vortex^A^Avalanche^A–S+^14^Sound travels oddly, arriving from above regardless of the source's position.
+W16^Anti-Gravity Vortex^A^Avalanche^A–S+^15^Buried wreckage from before the Scarring is lifted intact into open air.
+W16^Anti-Gravity Vortex^A^Avalanche^A–S+^16^Anything that goes up comes down when the vortex passes, over a wide and unpredictable area.
+W16^Anti-Gravity Vortex^A^Avalanche^A–S+^17^The eye is calm, and drifters who reach it report perfect stillness and no gravity at all.
+W16^Anti-Gravity Vortex^A^Avalanche^A–S+^18^Loose ordnance and old munitions rise, collide and detonate at height.
+W16^Anti-Gravity Vortex^A^Avalanche^A–S+^19^Rivers empty upward and the beds are left dry and scoured to stone.
+W16^Anti-Gravity Vortex^A^Avalanche^A–S+^20^Afterward the region is littered with everything the vortex held, dropped from a great height.
+W17^Necrotic Shroud^A^Avalanche^A–S^1^Plants wither in visible waves as the fog front advances across open ground.
+W17^Necrotic Shroud^A^Avalanche^A–S^2^The fog is greenish, cold, and heavier than air, pooling in cellars and low ground first.
+W17^Necrotic Shroud^A^Avalanche^A–S^3^Every animal capable of leaving has left before the shroud arrives.
+W17^Necrotic Shroud^A^Avalanche^A–S^4^Voices of the dead are audible, speaking normally, in languages the region no longer uses.
+W17^Necrotic Shroud^A^Avalanche^A–S^5^Datasphere signals stop entirely inside the fog, with no static and no error — just absence.
+W17^Necrotic Shroud^A^Avalanche^A–S^6^Living tissue degrades on prolonged contact, starting with the extremities.
+W17^Necrotic Shroud^A^Avalanche^A–S^7^Undead already present are empowered and multiply, and burial grounds do not stay closed.
+W17^Necrotic Shroud^A^Avalanche^A–S^8^The smell of decay is present without any source that can be found.
+W17^Necrotic Shroud^A^Avalanche^A–S^9^Water sources go stagnant within hours regardless of flow rate.
+W17^Necrotic Shroud^A^Avalanche^A–S^10^Divine artifacts burn bright and clear here, and are the only reliable defence.
+W17^Necrotic Shroud^A^Avalanche^A–S^11^Food stores spoil through sealed containers.
+W17^Necrotic Shroud^A^Avalanche^A–S^12^Wounds refuse to close and old scars split open along their original lines.
+W17^Necrotic Shroud^A^Avalanche^A–S^13^Fires burn but give almost no heat.
+W17^Necrotic Shroud^A^Avalanche^A–S^14^Structures rot at accelerated rates — timber goes soft, mortar crumbles, iron flakes.
+W17^Necrotic Shroud^A^Avalanche^A–S^15^The fog does not disperse in wind and moves against it when it moves at all.
+W17^Necrotic Shroud^A^Avalanche^A–S^16^Anyone who dies inside the shroud does not stay down for long.
+W17^Necrotic Shroud^A^Avalanche^A–S^17^Shield domes filter it partially, and the cities beneath report a thin green haze at street level.
+W17^Necrotic Shroud^A^Avalanche^A–S^18^Sound is deadened; shouting carries no further than speaking.
+W17^Necrotic Shroud^A^Avalanche^A–S^19^The dead speak to specific people by name, and only they can hear it.
+W17^Necrotic Shroud^A^Avalanche^A–S^20^Afterward the ground is barren for a season and nothing planted in it takes.
+W18^Glass Rain^A^Avalanche^A–S^1^A faint tinkling arrives on the wind minutes before anything falls.
+W18^Glass Rain^A^Avalanche^A–S^2^The sky develops a hard glassy shimmer and the sun refracts into fragments across it.
+W18^Glass Rain^A^Avalanche^A–S^3^Probe shards fall first — small, sparse, and easy to mistake for hail.
+W18^Glass Rain^A^Avalanche^A–S^4^Microscopic shards hang in the air and enter the lungs of anything breathing unfiltered.
+W18^Glass Rain^A^Avalanche^A–S^5^Building-sized panels fall intact and shatter on impact, clearing everything within a hundred paces.
+W18^Glass Rain^A^Avalanche^A–S^6^Actual diamonds fall among the glass, and the ground afterward is genuinely valuable.
+W18^Glass Rain^A^Avalanche^A–S^7^The smell of hot sand saturates the region before the first shard lands.
+W18^Glass Rain^A^Avalanche^A–S^8^Roads become impassable to anything without sealed tyres or tracks.
+W18^Glass Rain^A^Avalanche^A–S^9^Vegetation is shredded to stubble and the ground glitters where it stood.
+W18^Glass Rain^A^Avalanche^A–S^10^Water sources fill with suspended glass and cannot be drunk from at all.
+W18^Glass Rain^A^Avalanche^A–S^11^Livestock die from inhalation days later, long after the storm has passed.
+W18^Glass Rain^A^Avalanche^A–S^12^Light refracts unpredictably off the accumulated shards, and the region becomes blinding at dawn.
+W18^Glass Rain^A^Avalanche^A–S^13^Shield domes are scoured to opacity and must be replaced rather than cleaned.
+W18^Glass Rain^A^Avalanche^A–S^14^Structures survive but every window, lens and shardlight housing in the region is destroyed.
+W18^Glass Rain^A^Avalanche^A–S^15^Salvagers arrive within a day and die at a predictable rate collecting diamonds.
+W18^Glass Rain^A^Avalanche^A–S^16^Apocalypse-tier creatures move through unharmed, and the shards break against them.
+W18^Glass Rain^A^Avalanche^A–S^17^Sound is sharp and glittering and carries badly over the accumulated debris.
+W18^Glass Rain^A^Avalanche^A–S^18^Anything soft-sided is destroyed; tents, tarps and canvas caravans are total losses.
+W18^Glass Rain^A^Avalanche^A–S^19^The accumulated glass shifts underfoot for weeks afterward and cuts through boot leather.
+W18^Glass Rain^A^Avalanche^A–S^20^The region is left beautiful, lethal, and impossible to cross on foot for a season.
+W19^Waterfall Shower^A^Avalanche^A–S^1^The environment feels unnaturally dry in the hours before, and everyone's throat goes rough.
+W19^Waterfall Shower^A^Avalanche^A–S^2^It begins like ordinary rain and gives no other warning at all.
+W19^Waterfall Shower^A^Avalanche^A–S^3^Water condenses at altitude into masses that fall as whole rivers rather than droplets.
+W19^Waterfall Shower^A^Avalanche^A–S^4^The falls move across the landscape, so static shelter is no protection.
+W19^Waterfall Shower^A^Avalanche^A–S^5^Impact zones are flattened completely — structures, trees and terrain features alike.
+W19^Waterfall Shower^A^Avalanche^A–S^6^Flash floods run in every direction at once, following no drainage that makes sense.
+W19^Waterfall Shower^A^Avalanche^A–S^7^Dry riverbeds fill and overtop within minutes and change course permanently.
+W19^Waterfall Shower^A^Avalanche^A–S^8^The noise makes communication impossible beyond arm's length.
+W19^Waterfall Shower^A^Avalanche^A–S^9^Monsters go into a frenzy and attack everything, including each other.
+W19^Waterfall Shower^A^Avalanche^A–S^10^Ground saturates instantly and anything heavy sinks where it stands.
+W19^Waterfall Shower^A^Avalanche^A–S^11^Debris rafts form and travel miles, carrying wreckage and bodies into new districts.
+W19^Waterfall Shower^A^Avalanche^A–S^12^Bridges and fords are removed entirely, and the region is cut into isolated pockets.
+W19^Waterfall Shower^A^Avalanche^A–S^13^Cellars, mines and tunnels fill top to bottom without warning.
+W19^Waterfall Shower^A^Avalanche^A–S^14^The falls leave circular scours in bedrock that stay visible for generations.
+W19^Waterfall Shower^A^Avalanche^A–S^15^Air pressure drops sharply under a fall and ears rupture at close range.
+W19^Waterfall Shower^A^Avalanche^A–S^16^Shield domes shed the water but the runoff destroys everything at the dome's perimeter.
+W19^Waterfall Shower^A^Avalanche^A–S^17^Livestock drown in open ground, nowhere near any water source.
+W19^Waterfall Shower^A^Avalanche^A–S^18^Apocalypse-tier creatures fight openly and the region becomes a battlefield nobody chose.
+W19^Waterfall Shower^A^Avalanche^A–S^19^Between falls there are minutes of complete calm, which lures people out.
+W19^Waterfall Shower^A^Avalanche^A–S^20^Afterward the region is scoured, reshaped, and littered with whatever the water carried.
+W20^Cosmic Storm^S^Scarring^A–S+^1^The horizon appears to shatter, and by the time it is visible the storm has already begun.
+W20^Cosmic Storm^S^Scarring^A–S+^2^Objects, creatures and whole landscape features appear and vanish without transition.
+W20^Cosmic Storm^S^Scarring^A–S+^3^Terrain rearranges — a ridge stands where a valley was and the road ends in open air.
+W20^Cosmic Storm^S^Scarring^A–S+^4^Colours occur that nobody in the party can name or agree on.
+W20^Cosmic Storm^S^Scarring^A–S+^5^Gravity, light and sound each stop behaving consistently, independently of one another.
+W20^Cosmic Storm^S^Scarring^A–S+^6^Structures exist in two states at once and are dangerous to enter in either.
+W20^Cosmic Storm^S^Scarring^A–S+^7^The storm cannot be flown around, tunnelled under, or outrun.
+W20^Cosmic Storm^S^Scarring^A–S+^8^Three tiers of monster emerge together, and the largest ignore the others entirely.
+W20^Cosmic Storm^S^Scarring^A–S+^9^Datasphere nodes report the region as multiple contradictory locations simultaneously.
+W20^Cosmic Storm^S^Scarring^A–S+^10^Water runs in directions unrelated to slope.
+W20^Cosmic Storm^S^Scarring^A–S+^11^People are separated by a few paces and lose each other completely.
+W20^Cosmic Storm^S^Scarring^A–S+^12^Shield domes fail in ways their engineers cannot afterward explain or reproduce.
+W20^Cosmic Storm^S^Scarring^A–S+^13^Things that were destroyed years ago stand whole, and are solid to the touch.
+W20^Cosmic Storm^S^Scarring^A–S+^14^Distance stops being reliable; a hundred paces takes an hour or a heartbeat.
+W20^Cosmic Storm^S^Scarring^A–S+^15^The sky shows constellations that do not exist and the three moons in the wrong order.
+W20^Cosmic Storm^S^Scarring^A–S+^16^Fires burn without fuel and cannot be extinguished.
+W20^Cosmic Storm^S^Scarring^A–S+^17^Anything left behind is not there afterward, and anything abandoned elsewhere may be.
+W20^Cosmic Storm^S^Scarring^A–S+^18^The storm's edge is visible as a hard line and does not move predictably.
+W20^Cosmic Storm^S^Scarring^A–S+^19^Survivors describe entirely different events in the same location at the same time.
+W20^Cosmic Storm^S^Scarring^A–S+^20^Afterward the region is subtly wrong, and cartographers argue for years about what changed.
+W21^Dimensional Scars^S^Scarring^Any–S+^1^It begins as ordinary rain, which is why so many caravans are caught by it.
+W21^Dimensional Scars^S^Scarring^Any–S+^2^Closed portals appear on walls, floors, cart-beds and open ground as dark seams.
+W21^Dimensional Scars^S^Scarring^Any–S+^3^The seams open in sequence, and the sound is the same each time.
+W21^Dimensional Scars^S^Scarring^Any–S+^4^Creatures emerge continuously from every rift, of any tier, without pattern.
+W21^Dimensional Scars^S^Scarring^Any–S+^5^Air from elsewhere comes through — wrong temperature, wrong smell, wrong pressure.
+W21^Dimensional Scars^S^Scarring^Any–S+^6^Light from the rifts falls in colours that do not match the sky above them.
+W21^Dimensional Scars^S^Scarring^Any–S+^7^The ground around each scar is scorched, frozen or crystallised depending on what lies beyond.
+W21^Dimensional Scars^S^Scarring^Any–S+^8^Rifts open inside structures, and buildings become the most dangerous place to shelter.
+W21^Dimensional Scars^S^Scarring^Any–S+^9^The largest creatures cannot fit through, and can be heard trying.
+W21^Dimensional Scars^S^Scarring^Any–S+^10^Navigation is impossible; movement in any direction crosses more rifts than it avoids.
+W21^Dimensional Scars^S^Scarring^Any–S+^11^Shield domes are penetrated from inside, as scars open within the perimeter.
+W21^Dimensional Scars^S^Scarring^Any–S+^12^Objects fall through from elsewhere: wreckage, bones, and things with no reference in any record.
+W21^Dimensional Scars^S^Scarring^Any–S+^13^Rifts close as suddenly as they open, sometimes with something halfway through.
+W21^Dimensional Scars^S^Scarring^Any–S+^14^Vegetation near a scar mutates within hours into forms that seed and spread.
+W21^Dimensional Scars^S^Scarring^Any–S+^15^The Datasphere floods with data from sources that do not exist.
+W21^Dimensional Scars^S^Scarring^Any–S+^16^Water drains through open scars and whole reservoirs empty into elsewhere.
+W21^Dimensional Scars^S^Scarring^Any–S+^17^Sound comes back through the rifts delayed and distorted, in voices from the other side.
+W21^Dimensional Scars^S^Scarring^Any–S+^18^Even Awakened and high-tier drifters shelter rather than fight; the numbers are simply wrong.
+W21^Dimensional Scars^S^Scarring^Any–S+^19^The region afterward holds permanent scar sites that reopen on no schedule anyone has found.
+W21^Dimensional Scars^S^Scarring^Any–S+^20^Every new Dimensional Scar adds to the world's monster population permanently.

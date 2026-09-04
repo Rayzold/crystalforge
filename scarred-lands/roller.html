@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scarred Lands — Campaign Roller</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--night:#121A2C;--panel:#1A2338;--panel-2:#212C45;--rule:#2E3B58;--star:#E9DFC8;
+ --dim:#8E9CBA;--gold:#D4AF4F;--cyan:#77AEBE;--rose:#C0697E;--green:#7FA87C;
+ --serif:"Fraunces","Iowan Old Style",Georgia,serif;--sans:"Archivo","Segoe UI",system-ui,sans-serif}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:var(--night);color:var(--star);font-family:var(--sans);font-size:15px;line-height:1.55;min-height:100vh;
+ background-image:radial-gradient(circle at 14% 8%,rgba(119,174,190,.09),transparent 45%),
+                  radial-gradient(circle at 86% 84%,rgba(212,175,79,.07),transparent 50%)}
+.wrap{max-width:1220px;margin:0 auto;padding:32px 26px 90px}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap;
+ border-bottom:1px solid var(--rule);padding-bottom:16px;margin-bottom:24px}
+h1{font-family:var(--serif);font-weight:900;font-size:30px;letter-spacing:-.015em;margin:0}
+.sub{color:var(--dim);font-size:13.5px;margin:5px 0 0}
+.count{color:var(--dim);font-size:12.5px;text-align:right;font-variant-numeric:tabular-nums}
+.count b{color:var(--star);font-weight:600}
+.hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.langtog{display:flex;gap:6px}
+.langtog button{background:none;border:1px solid var(--rule);color:var(--dim);border-radius:5px;
+ font-family:var(--sans);font-size:12px;padding:4px 10px;cursor:pointer;letter-spacing:.03em}
+.langtog button:hover{border-color:var(--cyan);color:var(--star)}
+.langtog button.on{border-color:var(--gold);color:var(--gold)}
+.sitebar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:12.5px;
+ padding:8px 0 14px;margin-bottom:8px;border-bottom:1px solid var(--rule)}
+.sitebar a{color:var(--dim);text-decoration:none}.sitebar a:hover{color:var(--star)}
+.sitebar .home{color:var(--gold);font-weight:600}
+.grid{display:grid;grid-template-columns:282px 1fr;gap:28px;align-items:start}
+@media(max-width:920px){.grid{grid-template-columns:1fr}}
+.controls h2{font-size:12.5px;font-weight:600;color:var(--dim);margin:0 0 8px}
+.controls section{margin-bottom:22px}
+.regions{display:flex;flex-direction:column;gap:2px}
+.rg{display:flex;justify-content:space-between;gap:10px;background:none;border:0;border-left:2px solid transparent;
+ color:var(--dim);font-family:var(--sans);font-size:14px;text-align:left;padding:6px 10px;cursor:pointer;width:100%;border-radius:0 4px 4px 0}
+.rg:hover{background:var(--panel);color:var(--star)}
+.rg[aria-pressed="true"]{background:var(--panel-2);color:var(--star);border-left-color:var(--gold)}
+.rg span{font-size:11.5px;color:var(--dim);font-variant-numeric:tabular-nums}
+.rg[aria-pressed="true"] span{color:var(--gold)}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+label.f{font-size:13px;color:var(--dim);flex:1}
+select,input[type=number]{background:var(--panel);color:var(--star);border:1px solid var(--rule);
+ border-radius:4px;padding:5px 7px;font-family:var(--sans);font-size:13px;max-width:150px}
+.toggle{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--dim);cursor:pointer;margin-bottom:8px}
+.toggle input{margin-top:3px;accent-color:var(--gold)}
+.btn{width:100%;background:var(--gold);color:#191F2E;border:0;border-radius:5px;font-weight:600;
+ font-family:var(--sans);font-size:15px;padding:12px;cursor:pointer}
+.btn:hover{background:#E2C066}
+.btn.ghost{background:none;border:1px solid var(--rule);color:var(--dim);font-weight:500;font-size:13.5px;padding:9px;margin-top:8px}
+.btn.ghost:hover{border-color:var(--cyan);color:var(--star)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.hint{font-size:12px;color:var(--dim);margin:9px 0 0}
+kbd{background:var(--panel-2);border:1px solid var(--rule);border-radius:3px;padding:1px 5px;font-size:11px}
+.drop{border:1px dashed var(--rule);border-radius:8px;padding:44px 32px;text-align:center;background:var(--panel)}
+.drop.over{border-color:var(--gold);background:var(--panel-2)}
+.drop h3{font-family:var(--serif);font-weight:600;font-size:22px;margin:0 0 8px}
+.drop p{color:var(--dim);margin:0 auto 16px;max-width:52ch;font-size:14px}
+.file{display:inline-block;background:var(--panel-2);border:1px solid var(--rule);border-radius:5px;padding:9px 16px;cursor:pointer;font-size:14px}
+.file:hover{border-color:var(--gold)}.file input{display:none}
+.loaded{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:14px;font-size:12.5px;color:var(--dim)}
+.tick{color:var(--green)}
+.err{color:var(--rose);font-size:13px;margin-top:12px}
+.day{animation:deal .34s cubic-bezier(.2,.7,.3,1)}
+@keyframes deal{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.day{animation:none}}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:8px;overflow:hidden;margin-bottom:15px}
+.eyebrow{font-size:11.5px;font-weight:600;color:var(--cyan);letter-spacing:.06em;text-transform:uppercase;margin:0 0 5px}
+.datebar{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;
+ padding:14px 24px;background:var(--panel-2);border:1px solid var(--rule);border-radius:8px;margin-bottom:15px}
+.datebar b{font-family:var(--serif);font-size:19px;font-weight:600}
+.datebar span{color:var(--dim);font-size:13px}
+.holiday{color:var(--gold);font-weight:600;font-size:13px}
+.wx-head{padding:19px 24px 15px;display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap}
+.wx-name{font-family:var(--serif);font-weight:900;font-size:28px;line-height:1.08;margin:0;letter-spacing:-.02em}
+.wx-meta{color:var(--dim);font-size:13px;margin:6px 0 0}
+.nav{font-size:12.5px;font-weight:600;padding:4px 11px;border-radius:99px;white-space:nowrap}
+.nav-D{background:rgba(127,168,124,.16);color:var(--green)}
+.nav-C{background:rgba(119,174,190,.16);color:var(--cyan)}
+.nav-B{background:rgba(212,175,79,.16);color:var(--gold)}
+.nav-A{background:rgba(192,105,126,.16);color:var(--rose)}
+.nav-S{background:var(--rose);color:#16101A}
+.wx-effect{padding:14px 24px 18px;border-top:1px solid var(--rule);display:flex;gap:14px;align-items:flex-start}
+.d20{flex:none;width:36px;height:36px;border:1px solid var(--rule);border-radius:6px;display:grid;place-items:center;
+ font-variant-numeric:tabular-nums;font-weight:600;color:var(--gold);background:var(--panel-2)}
+.wx-effect p{margin:0;max-width:72ch}
+.head{padding:19px 24px 16px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap}
+.name{font-family:var(--serif);font-weight:900;font-size:30px;line-height:1.05;letter-spacing:-.02em;margin:0}
+.who{color:var(--dim);font-size:14px;margin:7px 0 0}
+.pill{font-size:12.5px;font-weight:600;padding:4px 11px;border-radius:99px;white-space:nowrap}
+.d-good{background:rgba(127,168,124,.16);color:var(--green)}
+.d-mid{background:rgba(142,156,186,.16);color:var(--dim)}
+.d-bad{background:rgba(192,105,126,.16);color:var(--rose)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));border-bottom:1px solid var(--rule)}
+.stat{padding:11px 15px;border-right:1px solid var(--rule)}
+.stat:last-child{border-right:0}
+.stat b{display:block;font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2}
+.stat i{font-style:normal;font-size:11.5px;color:var(--dim)}
+.body{padding:18px 24px 20px}
+.blk{margin-bottom:15px}.blk:last-child{margin-bottom:0}
+.blk h4{font-size:12.5px;font-weight:600;color:var(--cyan);margin:0 0 3px}
+.blk p{margin:0;max-width:74ch}
+ul.items{margin:0;padding-left:18px}
+.why{padding:11px 24px;border-top:1px solid var(--rule);background:var(--panel-2);font-size:12.5px;color:var(--dim)}
+.why b{color:var(--star);font-weight:600}
+.diff{display:inline-block;margin-left:7px;padding:2px 8px;border-radius:99px;font-size:11.5px;font-weight:600}
+.f-triv{background:rgba(142,156,186,.16);color:var(--dim)}
+.f-easy{background:rgba(127,168,124,.16);color:var(--green)}
+.f-med{background:rgba(119,174,190,.16);color:var(--cyan)}
+.f-hard{background:rgba(212,175,79,.16);color:var(--gold)}
+.f-deadly{background:var(--rose);color:#16101A}
+table.mem{width:100%;border-collapse:collapse;font-size:13.5px}
+table.mem th{text-align:left;font-size:11.5px;color:var(--dim);font-weight:600;padding:0 0 6px;border-bottom:1px solid var(--rule)}
+table.mem td{padding:6px 10px 6px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+table.mem td.n{font-variant-numeric:tabular-nums;color:var(--dim);white-space:nowrap}
+.lead{color:var(--gold);font-weight:600}
+.cast{margin-top:18px}
+.cast h2{font-size:12.5px;font-weight:600;color:var(--dim);margin:0 0 8px}
+.cast ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:7px}
+.cast button{background:var(--panel);border:1px solid var(--rule);border-radius:4px;color:var(--dim);
+ font-family:var(--sans);font-size:12.5px;padding:5px 10px;cursor:pointer}
+.cast button:hover{border-color:var(--cyan);color:var(--star)}
+.cast .x{color:var(--rose);margin-left:6px}
+.save{background:none;border:1px solid var(--rule);color:var(--dim);border-radius:5px;font-family:var(--sans);
+ font-size:12.5px;padding:5px 12px;cursor:pointer}
+.save:hover{border-color:var(--gold);color:var(--star)}
+.save.on{border-color:var(--gold);color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="sitebar" aria-label="Scarred Lands">
+  <a class="home" href="../gm.html">↑ The Drift</a>
+  <a href="./index.html">Homebrew Codex</a>
+  <a href="./players.html">World Catalogue</a>
+  <a href="./npcs.html">Drift Register</a>
+  <span style="color:var(--gold)">GM Roller</span>
+</nav>
+<header>
+  <div><h1>Campaign Roller</h1>
+    <p class="sub">A date, the weather it brings, and who the party runs into because of it.</p></div>
+  <div class="hdr-right"><div class="langtog" id="langtog"></div><p class="count" id="count"></p></div>
+</header>
+<div class="grid">
+  <div class="controls">
+    <section><h2>Region</h2><div class="regions" id="regions"></div></section>
+    <section><h2>Date</h2>
+      <div class="row"><label class="f" for="mon">Month</label>
+        <select id="mon"><option value="">Random</option></select></div>
+      <div class="row"><label class="f" for="day">Day</label>
+        <input type="number" id="day" min="1" max="28" placeholder="random" style="max-width:80px"></div>
+    </section>
+    <section><h2>Encounter</h2>
+      <label class="toggle"><input type="radio" name="mode" value="npc" checked><span>A single NPC</span></label>
+      <label class="toggle"><input type="radio" name="mode" value="group"><span>A group</span></label>
+      <label class="toggle"><input type="checkbox" id="wxDriven" checked>
+        <span>Weather decides who is out</span></label>
+      <label class="toggle"><input type="checkbox" id="rare">
+        <span>Allow rare weather at full odds</span></label>
+      <div class="row" style="margin-top:10px"><label class="f">Party</label>
+        <input type="number" id="psize" min="1" max="10" value="6" style="max-width:56px">
+        <span style="color:var(--dim);font-size:12px">×</span>
+        <select id="plvl" style="max-width:66px"></select></div>
+    </section>
+    <section>
+      <button class="btn" id="roll" disabled>Roll the day</button>
+      <button class="btn ghost" id="reWx" disabled>Reroll weather only</button>
+      <button class="btn ghost" id="reWho" disabled>Reroll who you meet</button>
+      <p class="hint">Press <kbd>R</kbd> to roll a new day.</p>
+    </section>
+  </div>
+  <div>
+    <div id="stage">
+      <div class="drop" id="drop">
+        <h3>Load your Scarred Lands files</h3>
+        <p>Drop them all in at once, in any order — NPCs, weather, calendar, holidays, groups, settlements. Each is recognised by its columns. English or Greek. Nothing leaves your browser.</p>
+        <label class="file">Choose files<input type="file" id="fileInput" accept=".csv,text/csv" multiple></label>
+        <div class="loaded" id="loaded"></div>
+        <p class="err" id="err" hidden></p>
+      </div>
+    </div>
+    <div class="cast" id="castWrap" hidden><h2>Saved cast</h2><ul id="castList"></ul></div>
+  </div>
+</div>
+</div>
+<script>
+"use strict";
+const NAV_W={D:45,C:18,B:7,A:2.5,S:0.5}, NAV_W_RARE={D:30,C:20,B:14,A:8,S:4};
+const REGION_WX={
+ "The Drift":{"Living Cyclones":2,"Skyquakes":1.5,"Nanite Storm":1.5,"Flat Rain":1.5,"The Calm":1.2},
+ "New Grandia":{"The Calm":1.5,"Shadowstorms":1.5,"Psionic Storm":1.3,"Thunder Booms":1.2,"Volcanic Storm":.3},
+ "Thundermount":{"Volcanic Storm":3,"Skyquakes":2.5,"Thunder Booms":2,"Elemental Bursts":1.5,"Ice Blossoms":.5},
+ "Wyldermoore":{"Necrotic Shroud":3,"Shadowstorms":2,"Moonbows":1.5,"Petrichor Rain":1.5,"Volcanic Storm":.2},
+ "Frozen Edge":{"Ice Blossoms":4,"Umbral Tempest":1.5,"Flat Rain":1.3,"Volcanic Storm":.2},
+ "Fur Wehn":{"Petrichor Rain":2,"The Calm":1.5,"Waterfall Shower":1.5,"Living Cyclones":1.2},
+ "The Otherside":{"Umbral Tempest":3,"Dimensional Scars":3,"Shadowstorms":2,"Necrotic Shroud":1.5,"The Calm":.4},
+ "Datasphere's Reach":{"Nanite Storm":3,"Chrono Fog":3,"Psionic Storm":2.5,"Cosmic Storm":2,"The Calm":.6}};
+const WX_NPC={
+ "The Calm":{def:1,fac:{"Drifters":3,"Independent":1.6},band:{"1-4":1.6,"5-10":1.2,"11-15":.7,"16-20":.4},why:"traffic triples and everyone travels"},
+ "Petrichor Rain":{def:1,fac:{"Drifters":1.5},cls:{"Ranger":1.5,"Druid":1.5},why:"the scent draws trackers and beasts alike"},
+ "Skyquakes":{def:1,fac:{"Thundermount Guild":2},cls:{"Fighter":1.3,"Barbarian":1.3},why:"only crews with a reason to be out stay out"},
+ "Thunder Booms":{def:1,cls:{"Fighter":.4,"Paladin":.4,"Artificer":.5,"Druid":1.8,"Warlock":1.5,"Monk":1.6},why:"anyone in metal has cached their gear and gone to ground"},
+ "Living Cyclones":{def:.7,cls:{"Ranger":1.8,"Druid":2,"Barbarian":1.4},band:{"11-15":1.6,"16-20":2},why:"only the experienced read the funnels well enough to move"},
+ "Nanite Storm":{def:.5,fac:{"The Awakened":4},anc:{"Awakened Construct":3},cls:{"Artificer":2.5,"Wizard":1.5},why:"the Awakened are at home in it and everyone else shelters"},
+ "Elemental Bursts":{def:1,cls:{"Artificer":.3,"Wizard":.6,"Sorcerer":.6,"Barbarian":2,"Monk":2,"Ranger":1.5},why:"anything powered is a liability, so wood and bone come out"},
+ "Ice Blossoms":{def:.8,fac:{"Lifeweavers":2.5},cls:{"Cleric":1.6,"Druid":1.6},band:{"1-4":.6},why:"the ice kills the unprepared, so medics and locals dominate"},
+ "Moonbows":{def:.8,cls:{"Druid":3,"Cleric":1.8,"Warlock":1.8,"Sorcerer":1.6},why:"star-readers and the devout come out for it deliberately"},
+ "Umbral Tempest":{def:.35,cls:{"Rogue":3,"Monk":2.5,"Warlock":2.5},sub:{"Gloom Stalker":4,"Warrior of Shadow":4},why:"only those who see in the dark can work in it"},
+ "Flat Rain":{def:.7,cls:{"Fighter":1.4,"Barbarian":1.6},band:{"1-4":.5,"16-20":1.5},why:"the exposed are flayed, so only the durable are moving"},
+ "Psionic Storm":{def:.8,cls:{"Sorcerer":2.5,"Warlock":2.5,"Bard":1.6},sub:{"Soulknife":3,"Psi Warrior":3,"Aberrant Sorcery":3,"The Great Old One":3},why:"latent minds wake up and are drawn toward it"},
+ "Shadowstorms":{def:.8,cls:{"Rogue":2.2,"Warlock":2,"Cleric":1.6},why:"good cover for anyone who would rather not be seen"},
+ "Chrono Fog":{def:.6,fac:{"The Awakened":2.5},cls:{"Wizard":2.5,"Druid":1.5},band:{"11-15":1.5,"16-20":2},why:"only scholars and the very experienced enter the zones on purpose"},
+ "Volcanic Storm":{def:.4,fac:{"Thundermount Guild":2},band:{"1-4":.2,"5-10":.6,"11-15":2,"16-20":3.5},why:"a region that kills the unprepared outright"},
+ "Anti-Gravity Vortex":{def:.3,cls:{"Sorcerer":2,"Wizard":2,"Druid":1.6},band:{"1-4":.15,"11-15":2.5,"16-20":4},why:"survivable only by fliers and veterans"},
+ "Necrotic Shroud":{def:.4,cls:{"Cleric":4,"Paladin":3},sub:{"Grave Domain":5,"Oath of Devotion":2.5},why:"the shroud belongs to the dead and to those who answer them"},
+ "Glass Rain":{def:.4,fac:{"Independent":2},band:{"1-4":.2,"11-15":2,"16-20":3},why:"salvagers chase the diamonds and die at a steady rate"},
+ "Waterfall Shower":{def:.35,band:{"1-4":.15,"11-15":2,"16-20":3.5},why:"nothing low-level survives being caught in the open"},
+ "Cosmic Storm":{def:.2,band:{"1-4":.05,"5-10":.3,"11-15":2.5,"16-20":6},why:"almost nobody who meets one is ordinary"},
+ "Dimensional Scars":{def:.25,fac:{"The Otherside":2.5},band:{"1-4":.1,"11-15":2.5,"16-20":5},why:"whatever comes through is not from here, and neither is most of who fights it"}};
+
+/* CR -> XP, and the party thresholds that turn XP into a verdict */
+const CR_XP={"0":10,"1/8":25,"1/4":50,"1/2":100,"1":200,"2":450,"3":700,"4":1100,"5":1800,"6":2300,
+ "7":2900,"8":3900,"9":5000,"10":5900,"11":7200,"12":8400,"13":10000,"14":11500,"15":13000,
+ "16":15000,"17":18000,"18":20000,"19":22000,"20":25000};
+const THRESH=[[25,50,75,100],[50,100,150,200],[75,150,225,400],[125,250,375,500],[250,500,750,1100],
+ [300,600,900,1400],[350,750,1100,1700],[450,900,1400,2100],[550,1100,1600,2400],[600,1200,1900,2800],
+ [800,1600,2400,3600],[1000,2000,3000,4500],[1100,2200,3400,5100],[1250,2500,3800,5700],
+ [1400,2800,4300,6400],[1600,3200,4800,7200],[2000,3900,5900,8800],[2100,4200,6300,9500],
+ [2400,4900,7300,10900],[2800,5700,8500,12700]];
+const MULT=n=>n<2?1:n===2?1.5:n<=6?2:n<=10?2.5:n<=14?3:4;
+
+let NPCS=[],WX=[],CAL=[],HOL=[],GRP=[],SET=[],REGIONS=[],region=null,cur=null,F={},WF={},GF={},SF={},cast=[];
+
+function parseCSV(t,d){if(t.charCodeAt(0)===0xFEFF)t=t.slice(1);const R=[];let r=[],f="",q=false;
+ for(let i=0;i<t.length;i++){const c=t[i];
+  if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
+  else if(c==='"')q=true;else if(c===d){r.push(f);f=""}
+  else if(c==="\n"){r.push(f);f="";R.push(r);r=[]}else if(c!=="\r")f+=c}
+ if(f.length||r.length){r.push(f);R.push(r)}return R.filter(x=>x.length>1)}
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const NPC_COLS={name:["Name","Όνομα"],gender:["Gender","Φύλο"],role:["Role","Ρόλος"],
+ dispo:["Disposition","Διάθεση"],attack:["Main_Attack","Κύρια_Επίθεση"],bonus:["Attack_Bonus","Bonus_Επίθεσης"],
+ dmg:["Damage","Ζημιά"],spells:["Key_Spells","Βασικά_Spells"],items:["Notable_Items","Αξιοσημείωτα_Αντικείμενα"],
+ met:["First_Met","Πρώτη_Συνάντηση"],speech:["Speech_Quirks","Ιδιαιτερότητες_Ομιλίας"],
+ tactics:["Tactics_Note","Τακτική_Μάχης"],conn:["Connections"],set:["Settlement"],cr:["CR"],
+ con:["Constellation"],id:["ID"],anc:["Ancestry"],cls:["Class"],sub:["Subclass"],lvl:["Level"],
+ fac:["Faction"],reg:["Region"],ac:["AC"],hp:["HP"]};
+function mapCols(h,s){const m={};for(const k in s){const i=s[k].findIndex(n=>h.includes(n));
+ if(i>=0)m[k]=h.indexOf(s[k][i])}return m}
+
+function ingest(text){
+ const t=parseCSV(text,"^");if(t.length<2)throw new Error("That file has no rows.");
+ const h=t[0].map(x=>x.trim()),body=t.slice(1).map(r=>r.map(x=>x.trim()));
+ if(h.includes("Multiplier")){CAL=body.map(r=>({m:r[1],w:r[3],mul:parseFloat(r[4])||1}));return"calendar"}
+ if(h.includes("Holiday")){HOL=body.map(r=>({m:r[0],d:+r[2],name:r[3],note:r[4],pull:r[5],pw:parseFloat(r[6])||0}));return"holidays"}
+ if(h.includes("Group_Name")){GF=mapCols(h,{id:["Group_ID"],name:["Group_Name"],type:["Type"],fac:["Faction"],
+   reg:["Region"],size:["Size"],lead:["Leader"],mem:["Members"],llvl:["Leader_Level"],cr:["Total_CR"],
+   dispo:["Disposition"],purp:["Current_Purpose"]});GRP=body;return"groups"}
+ if(h.includes("Settlement_ID")){SF=mapCols(h,{id:["Settlement_ID"],name:["Name"],kind:["Kind"],reg:["Region"],
+   pop:["Population"],note:["Note"]});SET=body;return"settlements"}
+ if(h.includes("Weather")){WF=mapCols(h,{effect:["Area_Effect","Επίδραση_Περιοχής"],w:["Weather"],nav:["Nav"],
+   navname:["Nav_Name"],mon:["Monster_Range"],d20:["d20"]});WX=body.filter(r=>r[WF.w]);return"weather"}
+ if(h.includes("Name")||h.includes("Όνομα")){F=mapCols(h,NPC_COLS);
+   NPCS=body.filter(r=>r[F.name]);NPCS.forEach(r=>r.lvl=parseInt(r[F.lvl],10)||1);
+   REGIONS=[...new Set(NPCS.map(r=>r[F.reg]))].sort();region=REGIONS[0];return"npc"}
+ throw new Error("Unrecognised file — expected one of the Scarred Lands exports.");
+}
+function afterLoad(){
+ const parts=[["NPCs",NPCS.length],["Weather",WX.length?WX.length/20+" phenomena":0],
+   ["Calendar",CAL.length?"12 months":0],["Holidays",HOL.length],["Groups",GRP.length],["Settlements",SET.length]];
+ const loadedEl=document.getElementById("loaded");
+ if(loadedEl)loadedEl.innerHTML=parts.map(([n,v])=>
+   `<span class="${v?'tick':''}">${v?'✓':'·'} ${n}${v?' '+v:''}</span>`).join("");
+ const ready=NPCS.length&&WX.length;
+ ["roll","reWx","reWho"].forEach(id=>document.getElementById(id).disabled=!ready);
+ if(NPCS.length)drawRegions();
+ if(CAL.length){const ms=[...new Set(CAL.map(c=>c.m))];
+   document.getElementById("mon").innerHTML='<option value="">Random</option>'+ms.map(m=>`<option>${esc(m)}</option>`).join("")}
+ if(ready){document.getElementById("count").innerHTML=
+   `<b>${NPCS.length.toLocaleString()}</b> NPCs · <b>${GRP.length}</b> groups · <b>${SET.length}</b> settlements`;
+   rollDay()}
+}
+function drawRegions(){const el=document.getElementById("regions");
+ el.innerHTML=REGIONS.map(r=>{const n=NPCS.filter(x=>x[F.reg]===r).length;
+  return `<button class="rg" data-r="${esc(r)}" aria-pressed="${r===region}"><span style="flex:1;color:inherit;font-size:14px">${esc(r)}</span><span>${n}</span></button>`}).join("");
+ el.querySelectorAll(".rg").forEach(b=>b.onclick=()=>{region=b.dataset.r;
+  el.querySelectorAll(".rg").forEach(x=>x.setAttribute("aria-pressed",x===b));rollDay()})}
+function w8(list,f){const t=list.reduce((s,x)=>s+f(x),0);if(t<=0)return list[Math.floor(Math.random()*list.length)];
+ let x=Math.random()*t;for(const i of list){x-=f(i);if(x<=0)return i}return list[list.length-1]}
+
+function rollDate(){
+ const months=CAL.length?[...new Set(CAL.map(c=>c.m))]:[""];
+ const pick=document.getElementById("mon").value||months[Math.floor(Math.random()*months.length)];
+ const dIn=parseInt(document.getElementById("day").value,10);
+ const day=(dIn>=1&&dIn<=28)?dIn:1+Math.floor(Math.random()*28);
+ const hol=HOL.find(h=>h.m===pick&&h.d===day)||null;
+ return {month:pick,day,hol};
+}
+function rollWeather(date){
+ const names=[...new Set(WX.map(r=>r[WF.w]))];
+ const table=document.getElementById("rare").checked?NAV_W_RARE:NAV_W;
+ const pick=w8(names,n=>{
+   const row=WX.find(r=>r[WF.w]===n);
+   let w=(table[row[WF.nav]]??1)*((REGION_WX[region]||{})[n]??1);
+   if(date.month){const c=CAL.find(c=>c.m===date.month&&c.w===n);if(c)w*=c.mul}
+   if(date.hol&&date.hol.pull===n)w*=date.hol.pw||1;
+   return w});
+ const rows=WX.filter(r=>r[WF.w]===pick);
+ return rows[Math.floor(Math.random()*rows.length)];
+}
+const band=l=>l<=4?"1-4":l<=10?"5-10":l<=15?"11-15":"16-20";
+function npcW(n,wx,reasons){
+ if(!document.getElementById("wxDriven").checked)return 1;
+ const R=WX_NPC[wx];if(!R)return 1;let w=R.def??1;
+ const add=(m,l)=>{w*=m;if(reasons&&m!==1)reasons.push(l+" ×"+m)};
+ if(R.fac&&R.fac[n[F.fac]])add(R.fac[n[F.fac]],n[F.fac]);
+ if(R.anc&&R.anc[n[F.anc]])add(R.anc[n[F.anc]],n[F.anc]);
+ if(R.cls&&R.cls[n[F.cls]])add(R.cls[n[F.cls]],n[F.cls]);
+ if(R.sub&&R.sub[n[F.sub]])add(R.sub[n[F.sub]],n[F.sub]);
+ if(R.band&&R.band[band(n.lvl)])add(R.band[band(n.lvl)],"level "+band(n.lvl));
+ return Math.max(w,1e-4)}
+function rollNpc(wx){const pool=NPCS.filter(n=>n[F.reg]===region);
+ return pool.length?w8(pool,n=>npcW(n,wx)):null}
+function rollGroup(wx){
+ const pool=GRP.filter(g=>g[GF.reg]===region);if(!pool.length)return null;
+ return w8(pool,g=>{const R=WX_NPC[wx];if(!R||!document.getElementById("wxDriven").checked)return 1;
+   let w=R.def??1;if(R.fac&&R.fac[g[GF.fac]])w*=R.fac[g[GF.fac]];return Math.max(w,1e-4)})}
+function memberIds(g){return (g[GF.lead]+" "+g[GF.mem]).match(/SL-\d+/g)||[]}
+function xpOf(cr){return CR_XP[cr]!==undefined?CR_XP[cr]:0}
+function verdict(xp,n){
+ const size=Math.max(1,+document.getElementById("psize").value||1);
+ const lvl=Math.min(20,Math.max(1,+document.getElementById("plvl").value||1));
+ const t=THRESH[lvl-1].map(v=>v*size);
+ const adj=xp*MULT(n);
+ if(adj<t[0])return["Trivial","f-triv"];
+ if(adj<t[1])return["Easy","f-easy"];
+ if(adj<t[2])return["Medium","f-med"];
+ if(adj<t[3])return["Hard","f-hard"];
+ return["Deadly","f-deadly"]}
+const dispoClass=v=>/Friendly|Φιλικ/.test(v)?"d-good":/Hostile|Εχθρικ/.test(v)?"d-bad":"d-mid";
+function settleOf(name){if(!SET.length||!name)return null;
+ const m=name.match(/\(([^)]+)\)/);return m?SET.find(s=>s[SF.id]===m[1]):null}
+
+function npcCard(n,wx){
+ const reasons=[];npcW(n,wx,reasons);
+ const R=WX_NPC[wx],driven=document.getElementById("wxDriven").checked;
+ const [lab,cls]=verdict(xpOf(n[F.cr]),1);
+ const items=(n[F.items]||"").split(";").map(s=>s.trim()).filter(Boolean);
+ const conns=F.conn!==undefined?(n[F.conn]||"").split(";").map(s=>s.trim()).filter(Boolean):[];
+ const sub=n[F.sub]&&n[F.sub]!=="-"?" · "+esc(n[F.sub]):"";
+ const spells=n[F.spells]&&n[F.spells]!=="-"?n[F.spells]:"";
+ const con=F.con!==undefined&&n[F.con]&&n[F.con]!=="-"?n[F.con]:"";
+ const st=settleOf(F.set!==undefined?n[F.set]:"");
+ const saved=cast.some(c=>c.id===n[F.id]);
+ return `<div class="card">
+  <div class="head"><div><p class="eyebrow">Who is out in it</p>
+    <h2 class="name">${esc(n[F.name])}</h2>
+    <p class="who">${esc(n[F.gender]||"")} ${esc(n[F.anc]||"")} — ${esc(n[F.cls]||"")}${sub}<br>
+      ${esc(n[F.role]||"")}, ${esc(n[F.fac]||"")}${F.set!==undefined?" · "+esc(n[F.set]):""}</p></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span class="pill ${dispoClass(n[F.dispo]||"")}">${esc(n[F.dispo]||"")}</span>
+      <button class="save ${saved?'on':''}" data-save="${esc(n[F.id])}">${saved?'Saved':'Save'}</button></div></div>
+  <div class="stats">
+    <div class="stat"><b>${n.lvl}</b><i>Level</i></div>
+    <div class="stat"><b>${esc(n[F.cr]||"—")}<span class="diff ${cls}">${lab}</span></b><i>CR</i></div>
+    <div class="stat"><b>${esc(n[F.ac])}</b><i>AC</i></div>
+    <div class="stat"><b>${esc(n[F.hp])}</b><i>HP</i></div>
+    <div class="stat"><b>${esc(n[F.bonus])}</b><i>To hit</i></div></div>
+  <div class="body">
+    <div class="blk"><h4>Main attack</h4><p>${esc(n[F.attack])} — ${esc(n[F.dmg])}</p></div>
+    ${spells?`<div class="blk"><h4>Spells that matter</h4><p>${esc(spells)}</p></div>`:""}
+    ${con?`<div class="blk"><h4>Constellation</h4><p>${esc(con)}</p></div>`:""}
+    <div class="blk"><h4>First met</h4><p>${esc(n[F.met])}</p></div>
+    <div class="blk"><h4>Voice</h4><p>${esc(n[F.speech])}</p></div>
+    <div class="blk"><h4>In a fight</h4><p>${esc(n[F.tactics])}</p></div>
+    ${items.length?`<div class="blk"><h4>Carrying</h4><ul class="items">${items.map(i=>`<li>${esc(i)}</li>`).join("")}</ul></div>`:""}
+    ${conns.length?`<div class="blk"><h4>Ties</h4><ul class="items">${conns.map(i=>`<li>${esc(i)}</li>`).join("")}</ul></div>`:""}
+    ${st?`<div class="blk"><h4>Home</h4><p>${esc(st[SF.name])} — ${esc(st[SF.kind])}, population ${esc(st[SF.pop])}. It ${esc(st[SF.note])}.</p></div>`:""}
+  </div>
+  ${driven&&R?`<div class="why"><b>Why this one:</b> ${esc(R.why)}.${reasons.length?" Weighting — "+esc(reasons.join(", "))+".":" No specific weighting matched."}</div>`
+   :`<div class="why"><b>Flat draw</b> — weather is not influencing who you meet.</div>`}</div>`;
+}
+function groupCard(g,wx){
+ const ids=memberIds(g);
+ const mem=ids.map(id=>NPCS.find(n=>n[F.id]===id)).filter(Boolean);
+ const xp=mem.reduce((s,n)=>s+xpOf(n[F.cr]),0);
+ const [lab,cls]=verdict(xp,mem.length||+g[GF.size]);
+ const saved=cast.some(c=>c.id===g[GF.id]);
+ const rows=mem.map((n,i)=>`<tr><td class="${i===0?'lead':''}">${esc(n[F.name])}${i===0?' · leader':''}</td>
+   <td class="n">${esc(n[F.cls])} ${n.lvl}</td><td class="n">CR ${esc(n[F.cr])}</td>
+   <td class="n">AC ${esc(n[F.ac])} · ${esc(n[F.hp])} hp</td></tr>`).join("");
+ return `<div class="card">
+  <div class="head"><div><p class="eyebrow">Who is out in it</p>
+    <h2 class="name">${esc(g[GF.name])}</h2>
+    <p class="who">${esc(g[GF.type])} · ${esc(g[GF.fac])} · ${esc(g[GF.size])} strong<br>${esc(g[GF.purp])}</p></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span class="pill ${dispoClass(g[GF.dispo]||"")}">${esc(g[GF.dispo]||"")}</span>
+      <button class="save ${saved?'on':''}" data-save="${esc(g[GF.id])}">${saved?'Saved':'Save'}</button></div></div>
+  <div class="stats">
+    <div class="stat"><b>${esc(g[GF.size])}</b><i>Members</i></div>
+    <div class="stat"><b>${esc(g[GF.cr])}</b><i>Total CR</i></div>
+    <div class="stat"><b>${xp.toLocaleString()}</b><i>XP</i></div>
+    <div class="stat"><b>×${MULT(mem.length||+g[GF.size])}<span class="diff ${cls}">${lab}</span></b><i>Group mult.</i></div></div>
+  <div class="body">${mem.length?`<table class="mem"><tr><th>Member</th><th>Class</th><th>CR</th><th>Defence</th></tr>${rows}</table>`
+    :`<p style="color:var(--dim);margin:0">Load the NPC file to see this group's members.</p>`}</div>
+  <div class="why"><b>Encounter budget:</b> ${xp.toLocaleString()} XP × ${MULT(mem.length||+g[GF.size])} for group size,
+    against ${esc(document.getElementById("psize").value)} PCs at level ${esc(document.getElementById("plvl").value)}.</div></div>`;
+}
+function render(){
+ if(!cur)return;
+ const {date,wx,who,isGroup}=cur;
+ const nav=wx[WF.nav];
+ const dl=date.month?`${esc(date.month)} ${date.day}`:"Undated";
+ const season=CAL.length&&date.month?"":"";
+ document.getElementById("stage").innerHTML=`<div class="day">
+  <div class="datebar"><div><b>${dl}</b> <span>· ${esc(region)}</span></div>
+   ${date.hol?`<div class="holiday">${esc(date.hol.name)}${date.hol.note?` — ${esc(date.hol.note)}`:""}</div>`:`<span>an ordinary day</span>`}</div>
+  <div class="card">
+   <div class="wx-head"><div><p class="eyebrow">Weather</p>
+     <h2 class="wx-name">${esc(wx[WF.w])}</h2>
+     <p class="wx-meta">Nav ${esc(nav)} — ${esc(wx[WF.navname])} · monsters ${esc(wx[WF.mon])}</p></div>
+     <span class="nav nav-${esc(nav)}">Nav ${esc(nav)}</span></div>
+   <div class="wx-effect"><div class="d20">${esc(wx[WF.d20])}</div><p>${esc(wx[WF.effect])}</p></div></div>
+  ${who?(isGroup?groupCard(who,wx[WF.w]):npcCard(who,wx[WF.w])):
+    `<div class="drop"><h3>Nobody is out</h3><p>No ${isGroup?"group":"NPC"} is recorded for ${esc(region)}.</p></div>`}
+ </div>`;
+ document.querySelectorAll("[data-save]").forEach(b=>b.onclick=()=>toggleSave(b.dataset.save));
+}
+function isGroupMode(){return document.querySelector('input[name=mode]:checked').value==="group"}
+function rollWho(wxName){return isGroupMode()?rollGroup(wxName):rollNpc(wxName)}
+function rollDay(){const date=rollDate();const wx=rollWeather(date);
+ cur={date,wx,who:rollWho(wx[WF.w]),isGroup:isGroupMode()};render()}
+function reWx(){if(!cur)return rollDay();const wx=rollWeather(cur.date);cur.wx=wx;render()}
+function reWho(){if(!cur)return rollDay();cur.isGroup=isGroupMode();cur.who=rollWho(cur.wx[WF.w]);render()}
+
+/* saved cast — localStorage on a hosted site, degrades quietly if blocked */
+function loadCast(){
+ try{ const r=localStorage.getItem("sl_cast"); if(r)cast=JSON.parse(r)||[]; }
+ catch(e){ /* no saved cast yet, or storage unavailable */ }
+ drawCast();
+}
+function persist(){
+ try{ localStorage.setItem("sl_cast",JSON.stringify(cast)); }catch(e){}
+}
+function toggleSave(id){
+ const i=cast.findIndex(c=>c.id===id);
+ if(i>=0)cast.splice(i,1);
+ else{
+  const n=NPCS.find(x=>x[F.id]===id);
+  const g=GRP.find(x=>x[GF.id]===id);
+  if(n)cast.push({id,label:n[F.name],kind:"npc"});
+  else if(g)cast.push({id,label:g[GF.name],kind:"group"});
+ }
+ persist();drawCast();render();
+}
+function drawCast(){
+ const w=document.getElementById("castWrap");w.hidden=!cast.length;
+ document.getElementById("castList").innerHTML=cast.map((c,i)=>
+  `<li><button data-open="${i}">${esc(c.label)}<span class="x" data-del="${i}">×</span></button></li>`).join("");
+ document.querySelectorAll("[data-open]").forEach(b=>b.onclick=e=>{
+  if(e.target.dataset.del!==undefined){toggleSave(cast[+e.target.dataset.del].id);return}
+  const c=cast[+b.dataset.open];
+  const n=NPCS.find(x=>x[F.id]===c.id),g=GRP.find(x=>x[GF.id]===c.id);
+  if(!cur)return;
+  cur.who=n||g;cur.isGroup=!n&&!!g;render()});
+}
+function fail(m){const e=document.getElementById("err");if(e){e.textContent=m;e.hidden=false}}
+function readFile(f){const e=document.getElementById("err");if(e)e.hidden=true;
+ const fr=new FileReader();fr.onload=()=>{try{ingest(fr.result);afterLoad()}catch(x){fail(x.message)}};
+ fr.onerror=()=>fail("That file could not be read.");fr.readAsText(f,"utf-8")}
+document.getElementById("fileInput").addEventListener("change",e=>[...e.target.files].forEach(readFile));
+const drop=document.getElementById("drop");
+["dragenter","dragover"].forEach(v=>document.addEventListener(v,e=>{e.preventDefault();drop&&drop.classList.add("over")}));
+["dragleave","drop"].forEach(v=>document.addEventListener(v,e=>{e.preventDefault();drop&&drop.classList.remove("over")}));
+document.addEventListener("drop",e=>[...(e.dataTransfer?e.dataTransfer.files:[])].forEach(readFile));
+document.getElementById("plvl").innerHTML=[...Array(20)].map((_,i)=>`<option ${i===11?"selected":""}>${i+1}</option>`).join("");
+document.getElementById("roll").onclick=rollDay;
+document.getElementById("reWx").onclick=reWx;
+document.getElementById("reWho").onclick=reWho;
+["wxDriven","rare"].forEach(id=>document.getElementById(id).onchange=reWho);
+document.querySelectorAll('input[name=mode]').forEach(r=>r.onchange=reWho);
+["psize","plvl","mon","day"].forEach(id=>document.getElementById(id).onchange=()=>{
+ if(id==="mon"||id==="day")rollDay();else render()});
+document.addEventListener("keydown",e=>{
+ if(e.key.toLowerCase()==="r"&&!/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName)&&NPCS.length&&WX.length)rollDay()});
+
+/* ---- Hosted mode: fetch the CSVs from ./data/ on load, feed the existing ingest().
+   Drag-and-drop above still works as a fallback if a fetch fails. ---- */
+const DATA_DIR="./data/";
+const FILES={
+ npc:{en:"scarred_lands_npcs_v2.csv",gr:"scarred_lands_npcs_v2_GR.csv"},
+ wx:{en:"scarred_lands_weather_effects.csv",gr:"scarred_lands_weather_effects_GR.csv"},
+ neutral:["scarred_lands_groups.csv","scarred_lands_settlements.csv","scarred_lands_weather_calendar.csv","scarred_lands_holidays.csv"]};
+let LANG=(()=>{try{return localStorage.getItem("sl_lang")==="gr"?"gr":"en";}catch(e){return "en";}})();
+
+async function fetchCsv(name){
+ const r=await fetch(DATA_DIR+name,{cache:"no-cache"});
+ if(!r.ok)throw new Error(name+" — HTTP "+r.status);
+ return await r.text();
+}
+function showLoading(msg){
+ const s=document.getElementById("stage");
+ if(s)s.innerHTML=`<div class="drop"><h3>Loading…</h3><p>${esc(msg)}</p></div>`;
+}
+function showFetchFailed(m){
+ const s=document.getElementById("stage");
+ if(!s)return;
+ s.innerHTML=`<div class="drop" id="drop"><h3>Load your Scarred Lands files</h3>
+   <p>Couldn't fetch the hosted data (${esc(m)}). Drop the CSVs here instead — nothing leaves your browser.</p>
+   <label class="file">Choose files<input type="file" id="fileInput" accept=".csv,text/csv" multiple></label>
+   <div class="loaded" id="loaded"></div><p class="err">${esc(m)}</p></div>`;
+ document.getElementById("fileInput").addEventListener("change",e=>[...e.target.files].forEach(readFile));
+}
+function drawLang(){
+ const el=document.getElementById("langtog");if(!el)return;
+ el.innerHTML=[["en","EN"],["gr","ΕΛ"]].map(([k,l])=>
+  `<button class="${LANG===k?'on':''}" data-lang="${k}">${l}</button>`).join("");
+ el.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{if(b.dataset.lang!==LANG)boot(b.dataset.lang);});
+}
+async function boot(lang){
+ const prev=region;
+ showLoading(lang==="gr"?"Φόρτωση δεδομένων… (το αρχείο NPC είναι ~9MB, μια στιγμή)":"Fetching the world… (the NPC file is ~5MB, one moment)");
+ try{
+  ingest(await fetchCsv(FILES.npc[lang]));
+  ingest(await fetchCsv(FILES.wx[lang]));
+  if(!GRP.length||!SET.length||!CAL.length||!HOL.length){
+   for(const f of FILES.neutral){ingest(await fetchCsv(f));}
+  }
+  LANG=lang;try{localStorage.setItem("sl_lang",lang);}catch(e){}
+  drawLang();
+  if(prev&&REGIONS.includes(prev))region=prev;
+  afterLoad();
+ }catch(e){ showFetchFailed(e.message); }
+}
+
+drawLang();
+loadCast();
+boot(LANG);
+</script>
+</body>
+</html>

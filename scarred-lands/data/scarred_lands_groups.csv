@@ -1,0 +1,344 @@
+﻿Group_ID^Group_Name^Type^Faction^Region^Size^Leader^Members^Leader_Level^Total_CR^Disposition^Current_Purpose
+GRP-0001^72 Charter^Charter^Drifters^The Drift^8^SL-08738 (Verity Vane)^SL-06865, SL-06353, SL-08198, SL-03149, SL-02187, SL-04354, SL-09857^18^43.5^Neutral^hunting the crew that took their last convoy
+GRP-0002^the Pale Train^Train^Drifters^The Drift^3^SL-05301 (Raiann Garrick)^SL-01557, SL-04354^20^22.0^Neutral^reopening a route that has been closed two seasons
+GRP-0003^15 Charter^Charter^Drifters^The Drift^4^SL-08443 (Corvo Merrick)^SL-08184, SL-08216, SL-07494^6^7.25^Friendly^carrying serum north before it spoils
+GRP-0004^90 Charter^Charter^Drifters^The Drift^3^SL-08089 (Portia Kestrelmoor)^SL-05380, SL-05362^7^6.5^Friendly^hunting the crew that took their last convoy
+GRP-0005^the Glass Train^Train^Drifters^The Drift^6^SL-02600 (Yorick Stoneglass)^SL-02911, SL-05295, SL-01834, SL-03556, SL-05811^10^16.25^Friendly^hunting the crew that took their last convoy
+GRP-0006^the Bitter Train^Train^Drifters^The Drift^4^SL-03083 (Beran Ashgrave)^SL-07549, SL-06146, SL-03447^10^9.25^Friendly^running a charter east and losing time to weather
+GRP-0007^Bitter Escort^Escort^Drifters^The Drift^4^SL-06767 (Cael Cain)^SL-08649, SL-03651, SL-07505^20^22.0^Hostile^running a charter east and losing time to weather
+GRP-0008^the Hollow Train^Train^Drifters^The Drift^3^SL-01333 (Ulmar Ashgrove)^SL-05478, SL-00685^10^10.0^Neutral^reopening a route that has been closed two seasons
+GRP-0009^Sunken Escort^Escort^Drifters^The Drift^4^SL-04213 (Myev Longstride)^SL-04997, SL-07726, SL-02666^8^11.5^Friendly^reopening a route that has been closed two seasons
+GRP-0010^the Sunken Train^Train^Drifters^The Drift^7^SL-06598 (Therai Lock)^SL-07643, SL-00158, SL-07631, SL-04498, SL-00881, SL-05654^20^32.62^Neutral^carrying serum north before it spoils
+GRP-0011^35 Charter^Charter^Drifters^The Drift^4^SL-03892 (Anakis Bramblecote)^SL-03187, SL-00330, SL-05536^17^15.75^Friendly^hunting the crew that took their last convoy
+GRP-0012^26 Charter^Charter^Drifters^The Drift^3^SL-07357 (Surina Zell)^SL-05394, SL-04965^12^16.0^Hostile^running a charter east and losing time to weather
+GRP-0013^72 Charter^Charter^Drifters^The Drift^7^SL-04669 (Sigrun Winterfall)^SL-04432, SL-08193, SL-03484, SL-01454, SL-05295, SL-09791^15^40.0^Friendly^carrying serum north before it spoils
+GRP-0014^Narrow Escort^Escort^Drifters^The Drift^5^SL-07773 (Brynn Vale)^SL-01173, SL-04921, SL-02440, SL-07564^12^19.5^Hostile^escorting a cargo nobody will name
+GRP-0015^the Salt Train^Train^Drifters^The Drift^5^SL-05301 (Raiann Garrick)^SL-05450, SL-01115, SL-04314, SL-02706^20^36.0^Neutral^escorting a cargo nobody will name
+GRP-0016^the Ashen Train^Train^Drifters^The Drift^4^SL-05801 (Vaunea Brackwater)^SL-00056, SL-00266, SL-05427^8^8.75^Neutral^escorting a cargo nobody will name
+GRP-0017^Hollow Escort^Escort^Drifters^The Drift^4^SL-04905 (Bettany Ashgrave)^SL-00237, SL-06032, SL-07385^8^9.25^Neutral^carrying serum north before it spoils
+GRP-0018^4 Charter^Charter^Drifters^The Drift^4^SL-01619 (Norin Yarrow)^SL-04391, SL-05311, SL-01371^14^13.62^Friendly^reopening a route that has been closed two seasons
+GRP-0019^17 Charter^Charter^Drifters^The Drift^5^SL-01232 (Cadence Quarrick)^SL-07631, SL-09791, SL-07791, SL-05654^20^19.12^Neutral^reopening a route that has been closed two seasons
+GRP-0020^86 Charter^Charter^Drifters^The Drift^3^SL-07643 (Kathra Flint)^SL-03993, SL-07213^14^21.0^Hostile^reopening a route that has been closed two seasons
+GRP-0021^Broken Escort^Escort^Drifters^The Drift^5^SL-07643 (Kathra Flint)^SL-04448, SL-07451, SL-01410, SL-05081^14^24.12^Neutral^reopening a route that has been closed two seasons
+GRP-0022^Fourth Perimeter Patrol^Patrol^Guardians^The Drift^3^SL-06069 (Caelynn Tallow)^SL-00054, SL-08905^14^12.0^Friendly^enforcing a curfew they privately disagree with
+GRP-0023^Pale Relief Company^Relief^Guardians^The Drift^6^SL-04794 (Hollis Everdene)^SL-08082, SL-05218, SL-03608, SL-02602, SL-00036^20^35.0^Hostile^enforcing a curfew they privately disagree with
+GRP-0024^Hard Relief Company^Relief^Guardians^The Drift^3^SL-09489 (Faelar Meriden)^SL-04171, SL-00155^11^8.25^Neutral^enforcing a curfew they privately disagree with
+GRP-0025^Kettering's Company^Company^Independent^The Drift^6^SL-03314 (Nol Hollowmere)^SL-06325, SL-07751, SL-02743, SL-02552, SL-00373^9^19.0^Friendly^running salvage ahead of a weather front
+GRP-0026^the Narrow Crew^Crew^Independent^The Drift^4^SL-01670 (Donaar Jorvik)^SL-02910, SL-08130, SL-07486^10^20.0^Neutral^taking any work that pays and pretending to be choosy
+GRP-0027^the Thin Crew^Crew^Independent^The Drift^7^SL-00613 (Rilla Vale)^SL-01871, SL-02362, SL-07272, SL-07973, SL-08600, SL-02743^15^38.0^Friendly^running salvage ahead of a weather front
+GRP-0028^the Bright Band^Band^Independent^The Drift^8^SL-09020 (Dorien Eastmere)^SL-03820, SL-00508, SL-03458, SL-07751, SL-01934, SL-07478, SL-04667^14^32.25^Neutral^smuggling across a border that moved last month
+GRP-0029^Yardley's Company^Company^Independent^The Drift^3^SL-07568 (Marick Hollis)^SL-07601, SL-05290^16^17.5^Friendly^taking any work that pays and pretending to be choosy
+GRP-0030^the Old Band^Band^Independent^The Drift^3^SL-03433 (Verity Quick)^SL-07636, SL-07478^8^8.12^Friendly^taking any work that pays and pretending to be choosy
+GRP-0031^the North Band^Band^Independent^The Drift^8^SL-08657 (Kairon Dross)^SL-03313, SL-06375, SL-06518, SL-02992, SL-05134, SL-05292, SL-00518^17^35.38^Friendly^taking any work that pays and pretending to be choosy
+GRP-0032^the Glass Band^Band^Independent^The Drift^4^SL-06619 (Quillion Havelock)^SL-07370, SL-03328, SL-00323^6^9.0^Hostile^smuggling across a border that moved last month
+GRP-0033^Renn's Company^Company^Independent^The Drift^5^SL-09765 (Diesa Ashby)^SL-08396, SL-03458, SL-02214, SL-05225^10^18.5^Hostile^taking any work that pays and pretending to be choosy
+GRP-0034^the Waking Band^Band^Independent^The Drift^4^SL-05082 (Thava Ivorel)^SL-06042, SL-01182, SL-07921^7^7.38^Hostile^taking any work that pays and pretending to be choosy
+GRP-0035^the Rust Crew^Crew^Independent^The Drift^6^SL-09467 (Orianna Sunder)^SL-00508, SL-04020, SL-03901, SL-05528, SL-07918^11^12.25^Hostile^smuggling across a border that moved last month
+GRP-0036^the Ember Band^Band^Independent^The Drift^4^SL-04305 (Ysolde Cinderhaugh)^SL-05876, SL-01514, SL-00087^13^18.5^Hostile^running salvage ahead of a weather front
+GRP-0037^the Broken Crew^Crew^Independent^The Drift^5^SL-04406 (Anakis Larkspur)^SL-06139, SL-07263, SL-05270, SL-00618^19^27.25^Friendly^hunting a bounty three other crews have failed
+GRP-0038^the Red Crew^Crew^Independent^The Drift^4^SL-03713 (Corrin Dross)^SL-06574, SL-05612, SL-00079^13^14.38^Hostile^running salvage ahead of a weather front
+GRP-0039^the Rust Band^Band^Independent^The Drift^8^SL-08422 (Edda Harrow)^SL-01985, SL-03965, SL-05290, SL-06148, SL-07921, SL-01316, SL-07918^8^9.62^Neutral^taking any work that pays and pretending to be choosy
+GRP-0040^Draye's Company^Company^Independent^The Drift^3^SL-04712 (Ellyjobell Corr)^SL-06345, SL-05020^10^8.12^Hostile^running salvage ahead of a weather front
+GRP-0041^the Long Ledger^Ledger^The Otherside^The Drift^4^SL-08590 (Beran Renn)^SL-08483, SL-05997, SL-04589^18^19.75^Friendly^enforcing terms that have just been broken
+GRP-0042^the Deep Ledger^Ledger^The Otherside^The Drift^8^SL-04056 (Ossa Ravel)^SL-08575, SL-06683, SL-07573, SL-01084, SL-07207, SL-09166, SL-00473^13^45.12^Friendly^enforcing terms that have just been broken
+GRP-0043^the Red Ledger^Ledger^The Otherside^The Drift^6^SL-03052 (Sable Quenby)^SL-08188, SL-08858, SL-03502, SL-04181, SL-00712^18^34.25^Neutral^enforcing terms that have just been broken
+GRP-0044^Glass Relief Company^Relief^Guardians^New Grandia^5^SL-05963 (Orzad Marsh)^SL-02749, SL-05979, SL-02268, SL-05236^4^2.88^Friendly^hunting something that got inside the perimeter
+GRP-0045^Hollow Relief Company^Relief^Guardians^New Grandia^5^SL-02776 (Rionach Marrowgate)^SL-09925, SL-02474, SL-00739, SL-03818^8^11.12^Friendly^enforcing a curfew they privately disagree with
+GRP-0046^Tenth Watch, Old Gate^Watch^Guardians^New Grandia^5^SL-00800 (Ea Jarrow)^SL-09093, SL-01712, SL-03843, SL-09268^5^5.12^Neutral^hunting something that got inside the perimeter
+GRP-0047^Ninth Perimeter Patrol^Patrol^Guardians^New Grandia^4^SL-02776 (Rionach Marrowgate)^SL-08394, SL-08591, SL-09753^8^11.12^Friendly^rotating out after a bad shift and not talking about it
+GRP-0048^Cold Relief Company^Relief^Guardians^New Grandia^3^SL-06544 (Doran Ivorel)^SL-06905, SL-02358^4^1.5^Hostile^hunting something that got inside the perimeter
+GRP-0049^Nine Relief Company^Relief^Guardians^New Grandia^6^SL-07661 (Roywyn Nornfield)^SL-00966, SL-04344, SL-00658, SL-04366, SL-03290^19^38.5^Neutral^enforcing a curfew they privately disagree with
+GRP-0050^Third Watch, High Gate^Watch^Guardians^New Grandia^3^SL-09505 (Amber Palgrave)^SL-05035, SL-05963^11^14.0^Friendly^holding a wall section under strength
+GRP-0051^Twelfth Perimeter Patrol^Patrol^Guardians^New Grandia^5^SL-04211 (Dov Oakhollow)^SL-07467, SL-01948, SL-08076, SL-09359^20^22.38^Neutral^rotating out after a bad shift and not talking about it
+GRP-0052^Third Watch, River Gate^Watch^Guardians^New Grandia^3^SL-09469 (Rosie Cain)^SL-00745, SL-07487^4^1.62^Friendly^enforcing a curfew they privately disagree with
+GRP-0053^Thin Relief Company^Relief^Guardians^New Grandia^7^SL-00196 (Filigree)^SL-00880, SL-08471, SL-02262, SL-02749, SL-01885, SL-04637^9^13.25^Hostile^escorting an inspector nobody wants here
+GRP-0054^Seventh Watch, Old Gate^Watch^Guardians^New Grandia^3^SL-03765 (Cael Quick)^SL-01134, SL-09268^5^6.12^Neutral^enforcing a curfew they privately disagree with
+GRP-0055^Sixth Watch, Low Gate^Watch^Guardians^New Grandia^4^SL-04839 (Ezekiel Brack)^SL-08895, SL-03017, SL-01634^10^9.5^Hostile^escorting an inspector nobody wants here
+GRP-0056^Third Inspectorate^Inspectorate^New Grandia Authority^New Grandia^4^SL-02264 (Dimble Sorrow)^SL-07218, SL-00859, SL-02502^10^17.0^Neutral^processing a district's paperwork three months late
+GRP-0057^First Inspectorate^Inspectorate^New Grandia Authority^New Grandia^4^SL-02946 (Adria Rookwood)^SL-02375, SL-03123, SL-05674^9^10.0^Friendly^registering refugees faster than the shelters can take them
+GRP-0058^Third Inspectorate^Inspectorate^New Grandia Authority^New Grandia^3^SL-02918 (Wrath Stonebridge)^SL-03168, SL-07431^11^9.0^Neutral^quietly investigating one of their own
+GRP-0059^Fifth Inspectorate^Inspectorate^New Grandia Authority^New Grandia^4^SL-08722 (Thava Netherby)^SL-00987, SL-09242, SL-01507^11^18.5^Hostile^processing a district's paperwork three months late
+GRP-0060^Bitter District Levy^Levy^New Grandia Authority^New Grandia^3^SL-07446 (Mardred Eversholt)^SL-08162, SL-04665^11^10.12^Neutral^seizing goods on a technicality
+GRP-0061^Long Bureau Detail^Bureau^New Grandia Authority^New Grandia^4^SL-00836 (Finnan Thornbury)^SL-05418, SL-05021, SL-07414^13^15.25^Neutral^quietly investigating one of their own
+GRP-0062^Salt Bureau Detail^Bureau^New Grandia Authority^New Grandia^5^SL-03431 (Krell Winterfall)^SL-01528, SL-00859, SL-07292, SL-06245^9^19.12^Neutral^registering refugees faster than the shelters can take them
+GRP-0063^North District Levy^Levy^New Grandia Authority^New Grandia^6^SL-09993 (Anakis Hollowmere)^SL-02773, SL-09028, SL-00305, SL-04004, SL-04487^17^18.0^Friendly^seizing goods on a technicality
+GRP-0064^Bitter Bureau Detail^Bureau^New Grandia Authority^New Grandia^5^SL-03789 (Galen Longbarrow)^SL-03199, SL-03588, SL-05227, SL-03483^9^16.12^Friendly^auditing shield expenditure and finding a hole in it
+GRP-0065^Ashen Bureau Detail^Bureau^New Grandia Authority^New Grandia^3^SL-04284 (Ilmar Bellwether)^SL-06703, SL-04616^17^24.0^Hostile^auditing shield expenditure and finding a hole in it
+GRP-0066^Deep Bureau Detail^Bureau^New Grandia Authority^New Grandia^4^SL-01014 (Eldon Hollowmere)^SL-09299, SL-06974, SL-05494^13^21.0^Hostile^processing a district's paperwork three months late
+GRP-0067^Rust District Levy^Levy^New Grandia Authority^New Grandia^5^SL-03093 (Halloway Nornfield)^SL-04072, SL-01210, SL-07328, SL-08723^10^17.12^Neutral^processing a district's paperwork three months late
+GRP-0068^Sunken District Levy^Levy^New Grandia Authority^New Grandia^5^SL-06703 (Opal Thornbury)^SL-05075, SL-07646, SL-05017, SL-08891^12^18.12^Neutral^registering refugees faster than the shelters can take them
+GRP-0069^Fifth Inspectorate^Inspectorate^New Grandia Authority^New Grandia^3^SL-04747 (Ilka Ambry)^SL-03943, SL-04100^6^5.5^Friendly^processing a district's paperwork three months late
+GRP-0070^Seventh Inspectorate^Inspectorate^New Grandia Authority^New Grandia^4^SL-00109 (Raiann Vale)^SL-03429, SL-02906, SL-00621^12^17.0^Neutral^quietly investigating one of their own
+GRP-0071^Tenth Inspectorate^Inspectorate^New Grandia Authority^New Grandia^6^SL-00290 (Hadarai Dural)^SL-00760, SL-06782, SL-03048, SL-02876, SL-07974^10^19.5^Neutral^seizing goods on a technicality
+GRP-0072^Red Bureau Detail^Bureau^New Grandia Authority^New Grandia^4^SL-04783 (Mila Ashcombe)^SL-06949, SL-08846, SL-04727^10^11.25^Neutral^registering refugees faster than the shelters can take them
+GRP-0073^Grey District Levy^Levy^New Grandia Authority^New Grandia^3^SL-08318 (Bimpnottin Cain)^SL-07075, SL-09726^18^21.0^Neutral^seizing goods on a technicality
+GRP-0074^the Salt Chorus^Chorus^The Awakened^New Grandia^6^SL-03241 (Rurik Lamphrey)^SL-07412, SL-00829, SL-09528, SL-02822, SL-06867^15^25.5^Friendly^protecting a node that woke up recently
+GRP-0075^Node Cluster Salt^Cluster^The Awakened^New Grandia^3^SL-08932 (Bettany Hollowmere)^SL-02462, SL-08124^5^4.0^Neutral^protecting a node that woke up recently
+GRP-0076^the Quiet Chorus^Chorus^The Awakened^New Grandia^6^SL-09103 (Skorr Sunder)^SL-03505, SL-08932, SL-01453, SL-02398, SL-02124^10^12.5^Neutral^cataloguing a ruin that keeps changing
+GRP-0077^the Cold Crew^Crew^Independent^New Grandia^4^SL-02659 (Temperance Westerly)^SL-03691, SL-05790, SL-03735^20^20.5^Neutral^taking any work that pays and pretending to be choosy
+GRP-0078^Fallowfield's Company^Company^Independent^New Grandia^4^SL-09048 (Greta Wintersby)^SL-04136, SL-04178, SL-03222^16^23.0^Neutral^hunting a bounty three other crews have failed
+GRP-0079^the Broken Crew^Crew^Independent^New Grandia^8^SL-03728 (Emmery Charnwood)^SL-09071, SL-01540, SL-09519, SL-08941, SL-00267, SL-05694, SL-09205^14^18.62^Neutral^taking any work that pays and pretending to be choosy
+GRP-0080^Sunder's Company^Company^Independent^New Grandia^6^SL-05444 (Hollis Roe)^SL-04526, SL-03978, SL-09301, SL-05936, SL-00516^13^28.0^Neutral^taking any work that pays and pretending to be choosy
+GRP-0081^the Glass Band^Band^Independent^New Grandia^4^SL-05642 (Gorrun Corr)^SL-02402, SL-06030, SL-06130^14^17.25^Hostile^smuggling across a border that moved last month
+GRP-0082^the Hard Crew^Crew^Independent^New Grandia^5^SL-07611 (Quiet-Unit)^SL-05918, SL-06636, SL-05752, SL-01976^15^10.88^Friendly^running salvage ahead of a weather front
+GRP-0083^the Broken Band^Band^Independent^New Grandia^3^SL-05170 (Kesh-Da Wend)^SL-00573, SL-00653^15^14.0^Neutral^hunting a bounty three other crews have failed
+GRP-0084^Ashlow's Company^Company^Independent^New Grandia^4^SL-03955 (Melech Tanglewood)^SL-09418, SL-05588, SL-08819^10^16.5^Neutral^taking any work that pays and pretending to be choosy
+GRP-0085^the Iron Crew^Crew^Independent^New Grandia^4^SL-00580 (Karash Stonebridge)^SL-04666, SL-02583, SL-05470^19^26.0^Friendly^smuggling across a border that moved last month
+GRP-0086^Fourth Perimeter Patrol^Patrol^Guardians^Thundermount^4^SL-06919 (Sorrel Dross)^SL-02120, SL-07504, SL-04787^10^5.62^Neutral^rotating out after a bad shift and not talking about it
+GRP-0087^Thirteenth Perimeter Patrol^Patrol^Guardians^Thundermount^4^SL-06908 (Finnan Farrow)^SL-02074, SL-02050, SL-00004^10^9.5^Neutral^escorting an inspector nobody wants here
+GRP-0088^Tenth Perimeter Patrol^Patrol^Guardians^Thundermount^6^SL-09688 (Yrsa Palgrave)^SL-05452, SL-09369, SL-05618, SL-01513, SL-04829^17^26.5^Neutral^rotating out after a bad shift and not talking about it
+GRP-0089^Sixth Perimeter Patrol^Patrol^Guardians^Thundermount^7^SL-09375 (Cera Hearthstone)^SL-05334, SL-04792, SL-05784, SL-05529, SL-09075, SL-04524^17^40.5^Neutral^holding a wall section under strength
+GRP-0090^Second Rescue Crew^Rescue^Thundermount Guild^Thundermount^4^SL-07645 (Vola Garrick)^SL-00928, SL-07271, SL-05120^8^10.25^Neutral^digging out a collapse with people still in it
+GRP-0091^Eighth Rescue Crew^Rescue^Thundermount Guild^Thundermount^8^SL-07745 (Cadence Wintersby)^SL-02386, SL-03018, SL-02063, SL-06599, SL-02451, SL-09123, SL-07997^18^34.25^Neutral^working a shaft the assay says should be closed
+GRP-0092^Third Rescue Crew^Rescue^Thundermount Guild^Thundermount^7^SL-04648 (Sorka Southgate)^SL-05313, SL-04753, SL-00136, SL-05396, SL-01980, SL-04131^7^14.62^Neutral^arguing over an ore reading nobody can explain
+GRP-0093^the Nine Assay Team^Assay^Thundermount Guild^Thundermount^3^SL-08217 (Mila Ravel)^SL-00931, SL-06693^18^17.5^Neutral^working a shaft the assay says should be closed
+GRP-0094^Thirteenth Rescue Crew^Rescue^Thundermount Guild^Thundermount^7^SL-01607 (Nazh Corr)^SL-05443, SL-04810, SL-09317, SL-06830, SL-05204, SL-03069^10^18.62^Neutral^hauling out a find they have not reported
+GRP-0095^Ninth Rescue Crew^Rescue^Thundermount Guild^Thundermount^4^SL-01532 (Therai Frostwell)^SL-00592, SL-08936, SL-06349^17^16.25^Neutral^running an unlicensed cut and covering it
+GRP-0096^Second Rescue Crew^Rescue^Thundermount Guild^Thundermount^4^SL-02077 (Aukan Halloway)^SL-04200, SL-08993, SL-04953^18^28.0^Neutral^running an unlicensed cut and covering it
+GRP-0097^Shaft Crew 43^Crew^Thundermount Guild^Thundermount^6^SL-09176 (Cael Deepwell)^SL-02399, SL-01262, SL-02982, SL-01152, SL-08104^16^41.25^Neutral^running an unlicensed cut and covering it
+GRP-0098^the Low Assay Team^Assay^Thundermount Guild^Thundermount^3^SL-07009 (Sable-Case Brine)^SL-02937, SL-02178^10^9.12^Neutral^digging out a collapse with people still in it
+GRP-0099^Sixth Rescue Crew^Rescue^Thundermount Guild^Thundermount^4^SL-02077 (Aukan Halloway)^SL-00486, SL-01649, SL-08152^18^20.25^Friendly^digging out a collapse with people still in it
+GRP-0100^the Bitter Assay Team^Assay^Thundermount Guild^Thundermount^6^SL-06140 (Hetch Stoneglass)^SL-02922, SL-08684, SL-04272, SL-07256, SL-03481^18^27.75^Neutral^working a shaft the assay says should be closed
+GRP-0101^Tenth Rescue Crew^Rescue^Thundermount Guild^Thundermount^5^SL-07014 (Ferris Thornbury)^SL-07946, SL-07645, SL-08619, SL-02046^9^14.25^Neutral^arguing over an ore reading nobody can explain
+GRP-0102^Tenth Rescue Crew^Rescue^Thundermount Guild^Thundermount^4^SL-01822 (Adria Kestrelmoor)^SL-03211, SL-08381, SL-03717^10^12.75^Neutral^arguing over an ore reading nobody can explain
+GRP-0103^Twelfth Rescue Crew^Rescue^Thundermount Guild^Thundermount^5^SL-07438 (Eldon Mourn)^SL-02756, SL-03211, SL-06637, SL-08152^18^24.75^Neutral^hauling out a find they have not reported
+GRP-0104^Shaft Crew 51^Crew^Thundermount Guild^Thundermount^5^SL-06850 (Halla Garrick)^SL-07376, SL-02847, SL-05443, SL-06830^14^28.0^Neutral^arguing over an ore reading nobody can explain
+GRP-0105^the Long Assay Team^Assay^Thundermount Guild^Thundermount^3^SL-01550 (Rionach Fallowfield)^SL-02000, SL-09747^14^15.0^Friendly^arguing over an ore reading nobody can explain
+GRP-0106^Shaft Crew 82^Crew^Thundermount Guild^Thundermount^4^SL-06939 (Ilma Mallory)^SL-00631, SL-00671, SL-01479^11^12.25^Neutral^running an unlicensed cut and covering it
+GRP-0107^the Old Assay Team^Assay^Thundermount Guild^Thundermount^4^SL-00974 (Marla Orlow)^SL-02998, SL-06052, SL-03796^15^19.5^Neutral^arguing over an ore reading nobody can explain
+GRP-0108^Shaft Crew 28^Crew^Thundermount Guild^Thundermount^5^SL-08566 (Rolen Marrowgate)^SL-08993, SL-04543, SL-02426, SL-06166^13^28.0^Hostile^digging out a collapse with people still in it
+GRP-0109^the Broken Assay Team^Assay^Thundermount Guild^Thundermount^5^SL-04331 (Nissa Ulverston)^SL-01683, SL-04360, SL-09005, SL-05688^15^23.12^Neutral^hauling out a find they have not reported
+GRP-0110^the Sable Assay Team^Assay^Thundermount Guild^Thundermount^5^SL-09593 (Fitz Lindmark)^SL-08545, SL-02212, SL-07157, SL-06653^13^35.0^Neutral^digging out a collapse with people still in it
+GRP-0111^the Pale Assay Team^Assay^Thundermount Guild^Thundermount^3^SL-07307 (Vrell Kestrelmoor)^SL-01255, SL-01626^5^2.75^Neutral^digging out a collapse with people still in it
+GRP-0112^Wrenfield's Company^Company^Independent^Thundermount^4^SL-07775 (Fenna Whitlock)^SL-04371, SL-01560, SL-02835^15^24.12^Neutral^smuggling across a border that moved last month
+GRP-0113^the Rust Crew^Crew^Independent^Thundermount^5^SL-02979 (Verity Yarrowdale)^SL-00779, SL-08171, SL-01409, SL-05972^9^9.12^Friendly^hunting a bounty three other crews have failed
+GRP-0114^the Silent Band^Band^Independent^Thundermount^5^SL-07025 (Nol Winterfall)^SL-03962, SL-09240, SL-06812, SL-06011^13^15.12^Neutral^hunting a bounty three other crews have failed
+GRP-0115^Bramblecote's Company^Company^Independent^Thundermount^3^SL-07850 (Dov Yarrow)^SL-04795, SL-06798^8^12.0^Neutral^smuggling across a border that moved last month
+GRP-0116^Ravel's Company^Company^Independent^Thundermount^7^SL-07314 (Halla Dross)^SL-01377, SL-01600, SL-01604, SL-01106, SL-06557, SL-02343^18^24.75^Neutral^smuggling across a border that moved last month
+GRP-0117^Havelock's Company^Company^Independent^Thundermount^3^SL-00361 (Skamos Everdene)^SL-01583, SL-07384^6^7.5^Neutral^smuggling across a border that moved last month
+GRP-0118^the Narrow Crew^Crew^Independent^Thundermount^6^SL-06655 (Elara Whitlock)^SL-08200, SL-07850, SL-01583, SL-09952, SL-07241^9^17.75^Neutral^taking any work that pays and pretending to be choosy
+GRP-0119^the Sunken Crew^Crew^Independent^Thundermount^4^SL-07847 (Lerissa Drayton)^SL-01600, SL-03511, SL-06986^10^16.25^Friendly^hunting a bounty three other crews have failed
+GRP-0120^the Rust Band^Band^Independent^Thundermount^5^SL-04210 (Halloway Vance)^SL-01560, SL-04349, SL-02487, SL-09163^19^24.75^Neutral^smuggling across a border that moved last month
+GRP-0121^the Cold Band^Band^Independent^Thundermount^7^SL-00783 (Osric Sunder)^SL-07565, SL-02979, SL-07532, SL-06643, SL-06617, SL-09367^20^38.0^Neutral^taking any work that pays and pretending to be choosy
+GRP-0122^the Deep Band^Band^Independent^Thundermount^4^SL-06529 (Eglath Pike)^SL-00963, SL-01887, SL-06011^14^16.12^Friendly^smuggling across a border that moved last month
+GRP-0123^Harrow's Company^Company^Independent^Thundermount^3^SL-07998 (Bekk Ambry)^SL-04966, SL-00485^12^13.25^Friendly^running salvage ahead of a weather front
+GRP-0124^Garrick's Company^Company^Independent^Thundermount^5^SL-06954 (Tazha Vale)^SL-09237, SL-00730, SL-08445, SL-09976^9^14.62^Neutral^hunting a bounty three other crews have failed
+GRP-0125^67 Charter^Charter^Drifters^Thundermount^3^SL-05501 (Nashka Fallowfield)^SL-01205, SL-08279^16^17.0^Friendly^running a charter east and losing time to weather
+GRP-0126^the Bright Train^Train^Drifters^Thundermount^4^SL-09700 (Gorrun Quillon)^SL-03938, SL-00088, SL-03550^10^10.12^Neutral^reopening a route that has been closed two seasons
+GRP-0127^Pale Escort^Escort^Drifters^Thundermount^8^SL-05460 (Gavriela Stonebridge)^SL-02162, SL-04692, SL-05194, SL-05045, SL-09015, SL-07117, SL-05920^12^26.88^Neutral^escorting a cargo nobody will name
+GRP-0128^Thin Escort^Escort^Drifters^Thundermount^6^SL-02276 (Aselle Tenbury)^SL-01051, SL-01074, SL-03360, SL-04999, SL-04814^10^21.0^Neutral^escorting a cargo nobody will name
+GRP-0129^Quiet Grove^Grove^Wilds Circles^Wyldermoore^6^SL-09446 (Maveith Ironvane)^SL-09157, SL-02333, SL-09468, SL-00844, SL-04744^12^22.38^Neutral^reading the sky and disagreeing about it
+GRP-0130^the Circle of Sunken^Circle^Wilds Circles^Wyldermoore^7^SL-09918 (Gadreel Goldhollow)^SL-07883, SL-09365, SL-08346, SL-00817, SL-07306, SL-01535^17^33.75^Friendly^holding ground against a clearance crew
+GRP-0131^Wardens of Last^Wardens^Wilds Circles^Wyldermoore^3^SL-02417 (Isolde Cain)^SL-06481, SL-01936^8^9.0^Neutral^tracking a Scar that has reopened
+GRP-0132^Wardens of Silent^Wardens^Wilds Circles^Wyldermoore^4^SL-00349 (Hakka Mossgrave)^SL-05744, SL-04080, SL-09248^12^16.12^Friendly^teaching a rite to someone who should not have it
+GRP-0133^the Circle of Ashen^Circle^Wilds Circles^Wyldermoore^6^SL-06367 (Aselle Whitlock)^SL-01505, SL-06420, SL-06285, SL-04653, SL-03073^18^25.75^Friendly^reading the sky and disagreeing about it
+GRP-0134^Wardens of Iron^Wardens^Wilds Circles^Wyldermoore^4^SL-03540 (Tarin Stoneglass)^SL-09169, SL-04085, SL-09686^12^13.75^Neutral^holding ground against a clearance crew
+GRP-0135^Wardens of Low^Wardens^Wilds Circles^Wyldermoore^5^SL-02383 (Wren Pinfold)^SL-00141, SL-04386, SL-03582, SL-05601^8^9.0^Neutral^reading the sky and disagreeing about it
+GRP-0136^the Circle of Waking^Circle^Wilds Circles^Wyldermoore^5^SL-04990 (Marla Larkspur)^SL-03908, SL-00632, SL-02775, SL-09414^9^14.75^Neutral^holding ground against a clearance crew
+GRP-0137^the Circle of Thin^Circle^Wilds Circles^Wyldermoore^7^SL-09918 (Gadreel Goldhollow)^SL-02114, SL-03924, SL-01936, SL-06041, SL-07086, SL-01844^17^17.62^Neutral^teaching a rite to someone who should not have it
+GRP-0138^the Circle of Grey^Circle^Wilds Circles^Wyldermoore^5^SL-00926 (Nessa Renn)^SL-02516, SL-01575, SL-08670, SL-02809^17^23.25^Friendly^teaching a rite to someone who should not have it
+GRP-0139^Wardens of Grey^Wardens^Wilds Circles^Wyldermoore^4^SL-04791 (Grimna Deepwell)^SL-03540, SL-09685, SL-06060^14^18.25^Friendly^teaching a rite to someone who should not have it
+GRP-0140^Wardens of Sable^Wardens^Wilds Circles^Wyldermoore^3^SL-00786 (Dov Southgate)^SL-09935, SL-02809^5^4.25^Friendly^reading the sky and disagreeing about it
+GRP-0141^the Circle of Bright^Circle^Wilds Circles^Wyldermoore^8^SL-07139 (Corrin Kirkwall)^SL-08392, SL-03404, SL-08967, SL-01902, SL-07093, SL-08670, SL-09248^13^39.12^Neutral^reading the sky and disagreeing about it
+GRP-0142^the Circle of Ashen^Circle^Wilds Circles^Wyldermoore^6^SL-09926 (Halla Ashby)^SL-02179, SL-02582, SL-05744, SL-09935, SL-09289^11^23.12^Friendly^reading the sky and disagreeing about it
+GRP-0143^the Waking Night Watch^Watch^Wyldermoore Village^Wyldermoore^3^SL-08664 (Hana Everdene)^SL-04214, SL-06197^6^7.25^Friendly^burying more people than the season should have taken
+GRP-0144^the Grey Night Watch^Watch^Wyldermoore Village^Wyldermoore^4^SL-06808 (Rurik Wrenfield)^SL-09787, SL-02741, SL-06824^12^19.0^Neutral^preparing for Leafwilt 28 and refusing to discuss it
+GRP-0145^the Vigil of Rust^Vigil^Wyldermoore Village^Wyldermoore^7^SL-08834 (Faelar Drayton)^SL-05978, SL-04209, SL-00059, SL-05129, SL-05633, SL-05342^14^31.25^Friendly^walking the boundary each night without explaining why
+GRP-0146^the Stone Kin^Kin^Wyldermoore Village^Wyldermoore^5^SL-02346 (Storri Vale)^SL-07246, SL-03560, SL-02855, SL-05348^13^25.0^Friendly^preparing for Leafwilt 28 and refusing to discuss it
+GRP-0147^the Vigil of Stone^Vigil^Wyldermoore Village^Wyldermoore^7^SL-04045 (Rhoda Sable)^SL-09955, SL-05141, SL-00083, SL-05686, SL-08201, SL-02256^17^44.5^Neutral^burying more people than the season should have taken
+GRP-0148^the Long Night Watch^Watch^Wyldermoore Village^Wyldermoore^3^SL-09788 (Ossa Barrow)^SL-09832, SL-02802^18^15.5^Hostile^burying more people than the season should have taken
+GRP-0149^the Vigil of Bright^Vigil^Wyldermoore Village^Wyldermoore^3^SL-04732 (Rhys Lindmark)^SL-02517, SL-07731^16^19.25^Hostile^walking the boundary each night without explaining why
+GRP-0150^the Nine Kin^Kin^Wyldermoore Village^Wyldermoore^4^SL-06324 (Rune Orlow)^SL-01703, SL-09787, SL-03143^11^19.0^Neutral^hiding someone the Authority wants
+GRP-0151^the Deep Kin^Kin^Wyldermoore Village^Wyldermoore^4^SL-00059 (Hollow Ravel)^SL-04858, SL-03161, SL-07471^10^13.5^Neutral^hiding someone the Authority wants
+GRP-0152^the Vigil of Rust^Vigil^Wyldermoore Village^Wyldermoore^5^SL-01760 (Fenna Dunwich)^SL-02320, SL-07177, SL-05105, SL-00748^14^29.0^Neutral^preparing for Leafwilt 28 and refusing to discuss it
+GRP-0153^the Sunken Night Watch^Watch^Wyldermoore Village^Wyldermoore^7^SL-09788 (Ossa Barrow)^SL-00993, SL-07246, SL-05193, SL-08536, SL-02468, SL-02418^18^45.0^Hostile^preparing for Leafwilt 28 and refusing to discuss it
+GRP-0154^the Vigil of Long^Vigil^Wyldermoore Village^Wyldermoore^5^SL-01992 (Nyx Ingram)^SL-04087, SL-09832, SL-08631, SL-04489^10^20.0^Neutral^burying more people than the season should have taken
+GRP-0155^the Vigil of Thin^Vigil^Wyldermoore Village^Wyldermoore^3^SL-06552 (Orrin Kirkwall)^SL-06092, SL-09105^20^28.0^Neutral^walking the boundary each night without explaining why
+GRP-0156^the Vigil of Last^Vigil^Wyldermoore Village^Wyldermoore^4^SL-01739 (Fourteen Vane)^SL-09200, SL-07085, SL-01445^9^13.5^Friendly^walking the boundary each night without explaining why
+GRP-0157^the Vigil of Sunken^Vigil^Wyldermoore Village^Wyldermoore^4^SL-03814 (Loras Nornfield)^SL-07927, SL-03087, SL-03189^13^20.12^Neutral^burying more people than the season should have taken
+GRP-0158^the Vigil of Long^Vigil^Wyldermoore Village^Wyldermoore^4^SL-01053 (Bevan Tallow)^SL-08189, SL-05154, SL-02795^12^14.5^Friendly^preparing for Leafwilt 28 and refusing to discuss it
+GRP-0159^Underhill's Company^Company^Independent^Wyldermoore^3^SL-00916 (Opal Blackfell)^SL-04512, SL-01216^9^5.38^Neutral^running salvage ahead of a weather front
+GRP-0160^the Old Crew^Crew^Independent^Wyldermoore^8^SL-01559 (Kesh Kettering)^SL-08829, SL-04167, SL-08223, SL-08233, SL-02544, SL-05780, SL-03764^10^19.88^Neutral^running salvage ahead of a weather front
+GRP-0161^the Last Band^Band^Independent^Wyldermoore^3^SL-06136 (Ilya Marrowgate)^SL-05578, SL-05971^7^4.12^Neutral^hunting a bounty three other crews have failed
+GRP-0162^Orlow's Company^Company^Independent^Wyldermoore^3^SL-09635 (Marek Northwind)^SL-08435, SL-07296^9^9.5^Neutral^taking any work that pays and pretending to be choosy
+GRP-0163^the Deep Crew^Crew^Independent^Wyldermoore^4^SL-00725 (Greta Zell)^SL-00487, SL-02904, SL-00121^17^16.62^Neutral^hunting a bounty three other crews have failed
+GRP-0164^the Old Crew^Crew^Independent^Wyldermoore^3^SL-09384 (Amber Quarrick)^SL-04033, SL-05635^8^10.0^Neutral^running salvage ahead of a weather front
+GRP-0165^the Hollow Band^Band^Independent^Wyldermoore^8^SL-08285 (Krasha Stonebridge)^SL-02519, SL-05037, SL-03213, SL-02896, SL-05504, SL-01566, SL-06210^20^31.5^Neutral^hunting a bounty three other crews have failed
+GRP-0166^the Ember Band^Band^Independent^Wyldermoore^4^SL-02266 (Edda Tanglewood)^SL-00724, SL-06942, SL-09566^14^26.0^Neutral^smuggling across a border that moved last month
+GRP-0167^the Sunken Crew^Crew^Independent^Wyldermoore^6^SL-08285 (Krasha Stonebridge)^SL-00724, SL-02896, SL-06067, SL-03297, SL-07479^20^28.38^Neutral^hunting a bounty three other crews have failed
+GRP-0168^the Bright Crew^Crew^Independent^Wyldermoore^7^SL-06589 (Alric Ravensmere)^SL-08223, SL-08028, SL-01038, SL-07018, SL-01216, SL-05971^14^17.75^Friendly^running salvage ahead of a weather front
+GRP-0169^the Waking Band^Band^Independent^Wyldermoore^8^SL-07622 (Serah Ravel)^SL-03945, SL-09484, SL-07018, SL-06500, SL-04751, SL-08745, SL-03932^9^9.62^Neutral^taking any work that pays and pretending to be choosy
+GRP-0170^the Bitter Train^Train^Drifters^Wyldermoore^6^SL-05656 (Zael Tallowmere)^SL-03346, SL-02017, SL-02509, SL-09272, SL-01999^13^17.88^Hostile^reopening a route that has been closed two seasons
+GRP-0171^20 Charter^Charter^Drifters^Wyldermoore^6^SL-09054 (Cael Bramblecote)^SL-09717, SL-02447, SL-01860, SL-03589, SL-03440^16^28.12^Friendly^running a charter east and losing time to weather
+GRP-0172^5 Charter^Charter^Drifters^Frozen Edge^6^SL-06847 (Ellyjobell Grimsby)^SL-07153, SL-07599, SL-05655, SL-02925, SL-00146^17^26.12^Neutral^running a charter east and losing time to weather
+GRP-0173^the Broken Train^Train^Drifters^Frozen Edge^6^SL-01149 (Etch Netherby)^SL-02466, SL-05053, SL-06661, SL-00885, SL-07255^19^33.0^Neutral^escorting a cargo nobody will name
+GRP-0174^Bitter Escort^Escort^Drifters^Frozen Edge^8^SL-08309 (Finnan Ryke)^SL-07476, SL-08015, SL-05171, SL-01078, SL-05294, SL-07500, SL-01077^18^40.62^Neutral^running a charter east and losing time to weather
+GRP-0175^21 Charter^Charter^Drifters^Frozen Edge^5^SL-07346 (Hask Dane)^SL-01078, SL-00756, SL-02461, SL-03798^15^18.12^Friendly^carrying serum north before it spoils
+GRP-0176^the Low Train^Train^Drifters^Frozen Edge^5^SL-06836 (Ilesse Frostwell)^SL-04581, SL-02938, SL-02247, SL-06840^10^13.62^Hostile^escorting a cargo nobody will name
+GRP-0177^50 Charter^Charter^Drifters^Frozen Edge^3^SL-03098 (Halia Westerly)^SL-02938, SL-03798^8^7.12^Friendly^escorting a cargo nobody will name
+GRP-0178^the Bright Crew^Crew^Independent^Frozen Edge^5^SL-00274 (Engong Underhill)^SL-04678, SL-02660, SL-01873, SL-04277^19^20.12^Neutral^smuggling across a border that moved last month
+GRP-0179^Fallowfield's Company^Company^Independent^Frozen Edge^3^SL-06308 (Thalai Wend)^SL-04752, SL-05047^7^5.12^Neutral^taking any work that pays and pretending to be choosy
+GRP-0180^the Long Crew^Crew^Independent^Frozen Edge^4^SL-03221 (Fenn Hollowmere)^SL-06311, SL-05775, SL-07521^10^12.12^Neutral^smuggling across a border that moved last month
+GRP-0181^the Narrow Band^Band^Independent^Frozen Edge^7^SL-01553 (Flint-Unit Lindmark)^SL-09963, SL-06308, SL-08964, SL-01021, SL-08917, SL-05762^12^26.12^Neutral^taking any work that pays and pretending to be choosy
+GRP-0182^Northwind's Company^Company^Independent^Frozen Edge^8^SL-01369 (Nomen Halberd)^SL-03948, SL-00797, SL-04415, SL-02870, SL-01165, SL-02353, SL-00735^14^34.12^Neutral^hunting a bounty three other crews have failed
+GRP-0183^the Ashen Crew^Crew^Independent^Frozen Edge^6^SL-07429 (Peren Wickham)^SL-03791, SL-04697, SL-09974, SL-03144, SL-00213^20^35.12^Neutral^taking any work that pays and pretending to be choosy
+GRP-0184^the Hollow Band^Band^Independent^Frozen Edge^3^SL-06888 (Needle)^SL-05604, SL-07589^7^6.0^Neutral^taking any work that pays and pretending to be choosy
+GRP-0185^the Silent Crew^Crew^Independent^Frozen Edge^6^SL-09591 (Toma Coldmouth)^SL-00571, SL-05977, SL-02894, SL-05165, SL-00922^9^13.62^Neutral^taking any work that pays and pretending to be choosy
+GRP-0186^the Old Crew^Crew^Independent^Frozen Edge^6^SL-06421 (Kildrak Kildare)^SL-03513, SL-07360, SL-01824, SL-04226, SL-04164^14^30.12^Friendly^taking any work that pays and pretending to be choosy
+GRP-0187^the North Band^Band^Independent^Frozen Edge^4^SL-03601 (Volen Thornbury)^SL-00397, SL-09860, SL-02590^6^7.0^Friendly^taking any work that pays and pretending to be choosy
+GRP-0188^the Last Crew^Crew^Independent^Frozen Edge^4^SL-06389 (Vesh Penhallow)^SL-01362, SL-08805, SL-05762^4^1.75^Neutral^hunting a bounty three other crews have failed
+GRP-0189^the Salt Crew^Crew^Independent^Frozen Edge^4^SL-03617 (Lorien Vellacott)^SL-08874, SL-01471, SL-00454^10^14.5^Neutral^smuggling across a border that moved last month
+GRP-0190^the Low Band^Band^Independent^Frozen Edge^5^SL-05826 (Ansel Tenbury)^SL-03448, SL-01906, SL-08768, SL-03642^14^16.38^Friendly^smuggling across a border that moved last month
+GRP-0191^Wickham's Company^Company^Independent^Frozen Edge^4^SL-03617 (Lorien Vellacott)^SL-01361, SL-05238, SL-03642^10^11.12^Neutral^running salvage ahead of a weather front
+GRP-0192^Second Serum Ward^Ward^Lifeweavers^Frozen Edge^8^SL-07242 (Nyssa Oakhollow)^SL-07037, SL-01805, SL-05603, SL-00052, SL-00015, SL-02935, SL-03231^8^9.5^Neutral^treating something they have never seen before
+GRP-0193^the Old Line^Line^Lifeweavers^Frozen Edge^8^SL-08860 (Vayne Palgrave)^SL-07444, SL-03703, SL-08368, SL-01180, SL-09023, SL-03308, SL-06490^14^36.25^Neutral^treating something they have never seen before
+GRP-0194^Glass Relief Station^Station^Lifeweavers^Frozen Edge^4^SL-04255 (Cael Penhallow)^SL-06665, SL-01345, SL-04348^20^28.0^Friendly^holding a relief line that keeps moving
+GRP-0195^Narrow Relief Station^Station^Lifeweavers^Frozen Edge^5^SL-08365 (Junia Thornbury)^SL-09023, SL-05032, SL-09221, SL-09698^12^17.38^Neutral^escorting wounded across ice that will not hold
+GRP-0196^Thirteenth Serum Ward^Ward^Lifeweavers^Frozen Edge^3^SL-06682 (Fourteen Rookwood)^SL-04635, SL-05357^16^18.0^Hostile^holding a relief line that keeps moving
+GRP-0197^Tenth Serum Ward^Ward^Lifeweavers^Frozen Edge^5^SL-01486 (Bardryn Fallowfield)^SL-01460, SL-07347, SL-01687, SL-01837^8^12.12^Neutral^holding a relief line that keeps moving
+GRP-0198^Cold Relief Station^Station^Lifeweavers^Frozen Edge^3^SL-02511 (Marick Garrick)^SL-07767, SL-06994^17^11.5^Friendly^running short on serum and rationing by triage
+GRP-0199^Ninth Serum Ward^Ward^Lifeweavers^Frozen Edge^4^SL-04255 (Cael Penhallow)^SL-01512, SL-03184, SL-01728^20^24.5^Hostile^escorting wounded across ice that will not hold
+GRP-0200^Long Relief Station^Station^Lifeweavers^Frozen Edge^4^SL-02222 (Kildrak Vance)^SL-01752, SL-03055, SL-07243^17^28.0^Friendly^holding a relief line that keeps moving
+GRP-0201^First Serum Ward^Ward^Lifeweavers^Frozen Edge^5^SL-06330 (Vaeril Varsk)^SL-03042, SL-08533, SL-00131, SL-02945^15^28.0^Neutral^escorting wounded across ice that will not hold
+GRP-0202^the Broken Line^Line^Lifeweavers^Frozen Edge^5^SL-06449 (Torbera Lamphrey)^SL-07928, SL-01805, SL-07767, SL-03231^6^5.38^Neutral^treating something they have never seen before
+GRP-0203^Tenth Serum Ward^Ward^Lifeweavers^Frozen Edge^5^SL-02106 (Kestrel Rookwood)^SL-01429, SL-06701, SL-02473, SL-05451^10^13.25^Friendly^running short on serum and rationing by triage
+GRP-0204^Fifth Serum Ward^Ward^Lifeweavers^Frozen Edge^6^SL-08426 (Rosie Marsh)^SL-04927, SL-01358, SL-09147, SL-04993, SL-02594^15^36.0^Friendly^running short on serum and rationing by triage
+GRP-0205^Fourth Serum Ward^Ward^Lifeweavers^Frozen Edge^6^SL-04064 (Rurik Dural)^SL-07541, SL-01385, SL-07119, SL-06442, SL-09239^19^36.5^Neutral^running short on serum and rationing by triage
+GRP-0206^the Cold Line^Line^Lifeweavers^Frozen Edge^6^SL-07870 (Gwyn Bramblecote)^SL-05153, SL-02194, SL-05670, SL-01728, SL-07986^12^22.75^Hostile^holding a relief line that keeps moving
+GRP-0207^the Ember Line^Line^Lifeweavers^Frozen Edge^4^SL-00131 (Lorna Ashby)^SL-06442, SL-02045, SL-08584^8^7.75^Neutral^escorting wounded across ice that will not hold
+GRP-0208^Glass Relief Station^Station^Lifeweavers^Frozen Edge^3^SL-01124 (Bram Lock)^SL-09762, SL-01687^10^11.0^Neutral^running short on serum and rationing by triage
+GRP-0209^the Bitter Line^Line^Lifeweavers^Frozen Edge^8^SL-03454 (Raiann Windrell)^SL-02085, SL-04113, SL-04877, SL-02089, SL-07347, SL-05973, SL-03466^17^39.38^Neutral^holding a relief line that keeps moving
+GRP-0210^Twelfth Perimeter Patrol^Patrol^Guardians^Frozen Edge^6^SL-08351 (Anvil-Case Quillon)^SL-01522, SL-04593, SL-00888, SL-09703, SL-08939^10^18.0^Neutral^rotating out after a bad shift and not talking about it
+GRP-0211^Sixth Perimeter Patrol^Patrol^Guardians^Frozen Edge^4^SL-00785 (Fira Tallowmere)^SL-02513, SL-07173, SL-01809^12^14.38^Friendly^rotating out after a bad shift and not talking about it
+GRP-0212^Bright Relief Company^Relief^Guardians^Frozen Edge^3^SL-01469 (Wilda Ashcombe)^SL-00575, SL-05124^6^7.12^Neutral^enforcing a curfew they privately disagree with
+GRP-0213^Old Relief Company^Relief^Guardians^Frozen Edge^3^SL-03486 (Larien Mossgrave)^SL-01043, SL-07029^9^11.0^Neutral^escorting an inspector nobody wants here
+GRP-0214^Salt Escort^Escort^Drifters^Fur Wehn^5^SL-04345 (Fenna Penhallow)^SL-07666, SL-07550, SL-00497, SL-04654^14^27.0^Neutral^escorting a cargo nobody will name
+GRP-0215^17 Charter^Charter^Drifters^Fur Wehn^5^SL-01671 (Ossa Quill)^SL-00830, SL-01318, SL-02241, SL-04115^13^14.12^Friendly^reopening a route that has been closed two seasons
+GRP-0216^85 Charter^Charter^Drifters^Fur Wehn^6^SL-01688 (Amber Vance)^SL-03379, SL-07858, SL-00603, SL-02101, SL-07448^13^26.5^Neutral^running a charter east and losing time to weather
+GRP-0217^the Ember Train^Train^Drifters^Fur Wehn^5^SL-02964 (Delia Yarrowdale)^SL-04657, SL-02613, SL-07662, SL-07234^12^12.88^Neutral^escorting a cargo nobody will name
+GRP-0218^52 Charter^Charter^Drifters^Fur Wehn^6^SL-07919 (Ferris Drayton)^SL-03844, SL-00354, SL-01368, SL-06927, SL-03579^19^42.0^Neutral^escorting a cargo nobody will name
+GRP-0219^87 Charter^Charter^Drifters^Fur Wehn^4^SL-06002 (Keothi Quenby)^SL-02471, SL-00275, SL-08156^10^13.25^Neutral^hunting the crew that took their last convoy
+GRP-0220^Sable Escort^Escort^Drifters^Fur Wehn^4^SL-06097 (Iridia Stell)^SL-09231, SL-00899, SL-00965^8^12.0^Neutral^running a charter east and losing time to weather
+GRP-0221^30 Charter^Charter^Drifters^Fur Wehn^4^SL-03636 (Lorna Mourn)^SL-05873, SL-04533, SL-04941^13^16.0^Friendly^hunting the crew that took their last convoy
+GRP-0222^50 Charter^Charter^Drifters^Fur Wehn^3^SL-08522 (Gavriela Ostergaard)^SL-04654, SL-06035^19^18.0^Neutral^carrying serum north before it spoils
+GRP-0223^44 Charter^Charter^Drifters^Fur Wehn^8^SL-07118 (Feriel Palgrave)^SL-07550, SL-00603, SL-00193, SL-04304, SL-00246, SL-09497, SL-03294^14^27.62^Neutral^reopening a route that has been closed two seasons
+GRP-0224^Glass Escort^Escort^Drifters^Fur Wehn^3^SL-08708 (Nyx Cinderhaugh)^SL-02964, SL-02967^14^21.0^Neutral^running a charter east and losing time to weather
+GRP-0225^the Nine Train^Train^Drifters^Fur Wehn^5^SL-09991 (Corvo Wrenfield)^SL-00280, SL-00603, SL-06000, SL-06603^15^30.0^Neutral^carrying serum north before it spoils
+GRP-0226^the Stone Train^Train^Drifters^Fur Wehn^5^SL-00497 (Otren Lamphrey)^SL-06525, SL-03825, SL-07976, SL-02170^7^9.25^Neutral^hunting the crew that took their last convoy
+GRP-0227^the Broken Train^Train^Drifters^Fur Wehn^6^SL-09161 (Galen Windrell)^SL-02323, SL-09092, SL-09282, SL-09971, SL-04283^15^37.0^Neutral^reopening a route that has been closed two seasons
+GRP-0228^Cold Escort^Escort^Drifters^Fur Wehn^4^SL-05848 (Sylve Tanglewood)^SL-09958, SL-06468, SL-04773^19^17.5^Neutral^reopening a route that has been closed two seasons
+GRP-0229^Sable Escort^Escort^Drifters^Fur Wehn^5^SL-07118 (Feriel Palgrave)^SL-09381, SL-04941, SL-01562, SL-02867^14^12.25^Friendly^carrying serum north before it spoils
+GRP-0230^57 Charter^Charter^Drifters^Fur Wehn^4^SL-02515 (Sella Corr)^SL-01997, SL-00286, SL-04327^20^23.12^Neutral^reopening a route that has been closed two seasons
+GRP-0231^Tanglewood's Company^Company^Independent^Fur Wehn^4^SL-08505 (Glass-Case Ashby)^SL-00790, SL-05556, SL-04582^17^23.25^Neutral^taking any work that pays and pretending to be choosy
+GRP-0232^the Cold Band^Band^Independent^Fur Wehn^4^SL-09458 (Nessa Marsh)^SL-02361, SL-01009, SL-00393^10^11.25^Neutral^smuggling across a border that moved last month
+GRP-0233^the Deep Band^Band^Independent^Fur Wehn^5^SL-09164 (Hollow Prendergast)^SL-01294, SL-00077, SL-02154, SL-04235^15^19.12^Neutral^taking any work that pays and pretending to be choosy
+GRP-0234^Marrowgate's Company^Company^Independent^Fur Wehn^6^SL-02337 (Brynn Ashlow)^SL-00390, SL-07969, SL-04413, SL-00990, SL-03524^10^20.5^Neutral^smuggling across a border that moved last month
+GRP-0235^Wend's Company^Company^Independent^Fur Wehn^5^SL-03044 (Wendel Eversholt)^SL-02864, SL-04192, SL-08013, SL-00990^12^21.0^Neutral^smuggling across a border that moved last month
+GRP-0236^the Cold Band^Band^Independent^Fur Wehn^4^SL-03391 (Selis Tenbury)^SL-05513, SL-04582, SL-03137^19^16.38^Neutral^running salvage ahead of a weather front
+GRP-0237^Lock's Company^Company^Independent^Fur Wehn^3^SL-08470 (Corvin Netherby)^SL-04567, SL-00697^5^4.5^Neutral^running salvage ahead of a weather front
+GRP-0238^Sunder's Company^Company^Independent^Fur Wehn^4^SL-01852 (Ilka Flint)^SL-01727, SL-01813, SL-03403^10^18.0^Neutral^hunting a bounty three other crews have failed
+GRP-0239^the Deep Crew^Crew^Independent^Fur Wehn^4^SL-07682 (Orrin Pell)^SL-04644, SL-00912, SL-00913^16^34.0^Neutral^hunting a bounty three other crews have failed
+GRP-0240^the Iron Band^Band^Independent^Fur Wehn^3^SL-00343 (Nadarr Pell)^SL-02219, SL-05689^10^11.12^Neutral^taking any work that pays and pretending to be choosy
+GRP-0241^the Hard Band^Band^Independent^Fur Wehn^5^SL-03391 (Selis Tenbury)^SL-01519, SL-06115, SL-04983, SL-00960^19^33.5^Neutral^running salvage ahead of a weather front
+GRP-0242^the Grey Band^Band^Independent^Fur Wehn^3^SL-07087 (Bekk Harkaway)^SL-00867, SL-07784^10^10.0^Friendly^taking any work that pays and pretending to be choosy
+GRP-0243^Ingram's Company^Company^Independent^Fur Wehn^3^SL-07651 (Rurik Barrow)^SL-09067, SL-01762^8^11.0^Friendly^running salvage ahead of a weather front
+GRP-0244^the Hard Crew^Crew^Independent^Fur Wehn^4^SL-05164 (Korinn Kettering)^SL-09559, SL-05676, SL-03310^12^15.12^Neutral^taking any work that pays and pretending to be choosy
+GRP-0245^Ashlow's Company^Company^Independent^Fur Wehn^3^SL-07754 (Tessa Ravel)^SL-08624, SL-07806^12^20.0^Neutral^hunting a bounty three other crews have failed
+GRP-0246^Harrow's Company^Company^Independent^Fur Wehn^6^SL-09350 (Brannor Sunder)^SL-09236, SL-03116, SL-03716, SL-02220, SL-00697^10^17.5^Friendly^smuggling across a border that moved last month
+GRP-0247^Meriden's Company^Company^Independent^Fur Wehn^4^SL-09493 (Bettany Merrick)^SL-02064, SL-01762, SL-06813^14^16.5^Hostile^smuggling across a border that moved last month
+GRP-0248^the Glass Crew^Crew^Independent^Fur Wehn^7^SL-02707 (Lirael Quill)^SL-05182, SL-06252, SL-03495, SL-00033, SL-05273, SL-00007^10^28.12^Hostile^smuggling across a border that moved last month
+GRP-0249^Eleventh Perimeter Patrol^Patrol^Guardians^Fur Wehn^4^SL-06506 (Rhoda Flint)^SL-02169, SL-05882, SL-09225^9^13.12^Friendly^hunting something that got inside the perimeter
+GRP-0250^Twelfth Perimeter Patrol^Patrol^Guardians^Fur Wehn^3^SL-08865 (Isolde Windrell)^SL-02650, SL-07727^10^10.25^Neutral^enforcing a curfew they privately disagree with
+GRP-0251^Nine Relief Company^Relief^Guardians^Fur Wehn^7^SL-06434 (Nyx Eastmere)^SL-04627, SL-07071, SL-01872, SL-05940, SL-07558, SL-06159^10^20.75^Friendly^enforcing a curfew they privately disagree with
+GRP-0252^Wardens of Long^Wardens^Wilds Circles^Fur Wehn^8^SL-03958 (Mardred Cask)^SL-03029, SL-04335, SL-06573, SL-08556, SL-04845, SL-00307, SL-09691^11^22.38^Neutral^teaching a rite to someone who should not have it
+GRP-0253^the Circle of Glass^Circle^Wilds Circles^Fur Wehn^4^SL-03118 (Grum Stell)^SL-02754, SL-06823, SL-06361^9^7.0^Friendly^tracking a Scar that has reopened
+GRP-0254^Red Grove^Grove^Wilds Circles^Fur Wehn^4^SL-03885 (Merric Merrick)^SL-01742, SL-06778, SL-00488^8^10.0^Neutral^tracking a Scar that has reopened
+GRP-0255^the Circle of Salt^Circle^Wilds Circles^Fur Wehn^5^SL-04734 (Jessa Wardlow)^SL-03020, SL-02560, SL-07760, SL-02479^16^17.0^Neutral^tracking a Scar that has reopened
+GRP-0256^the Circle of Deep^Circle^Wilds Circles^Fur Wehn^4^SL-02588 (Aselle Tallow)^SL-03885, SL-03020, SL-06823^9^12.25^Neutral^tracking a Scar that has reopened
+GRP-0257^the Bitter Ledger^Ledger^The Otherside^The Otherside^5^SL-09340 (Halloway Zell)^SL-00798, SL-08724, SL-07015, SL-05843^11^18.12^Neutral^enforcing terms that have just been broken
+GRP-0258^the North Hand^Hand^The Otherside^The Otherside^5^SL-05576 (Ilyria Fallowfield)^SL-00235, SL-04880, SL-04494, SL-01697^10^12.75^Friendly^collecting on a ledger of debts across three districts
+GRP-0259^Sixth Seal^Seal^The Otherside^The Otherside^4^SL-07719 (Bram Coldharbour)^SL-03710, SL-08167, SL-07084^5^4.25^Friendly^escorting something sealed and refusing to name it
+GRP-0260^the Long Hand^Hand^The Otherside^The Otherside^3^SL-01245 (Rune Dane)^SL-02410, SL-08058^19^17.12^Hostile^looking for a signature they were told existed
+GRP-0261^the Low Hand^Hand^The Otherside^The Otherside^6^SL-02897 (Fenn Coldmouth)^SL-04481, SL-03043, SL-07045, SL-00268, SL-04528^14^21.25^Neutral^looking for a signature they were told existed
+GRP-0262^Eighth Seal^Seal^The Otherside^The Otherside^4^SL-01564 (Ashe Harkaway)^SL-01627, SL-06372, SL-01952^9^14.5^Neutral^enforcing terms that have just been broken
+GRP-0263^the Narrow Hand^Hand^The Otherside^The Otherside^4^SL-04332 (Dorran Oxley)^SL-03647, SL-07107, SL-02410^17^27.0^Friendly^looking for a signature they were told existed
+GRP-0264^the Cold Hand^Hand^The Otherside^The Otherside^4^SL-06650 (Ruvik Quarrick)^SL-07939, SL-06126, SL-00570^9^13.12^Neutral^enforcing terms that have just been broken
+GRP-0265^the Glass Ledger^Ledger^The Otherside^The Otherside^3^SL-07937 (Manneo Ravel)^SL-03025, SL-09997^5^3.5^Friendly^looking for a signature they were told existed
+GRP-0266^the Nine Hand^Hand^The Otherside^The Otherside^3^SL-03767 (Rennick Lamphrey)^SL-08778, SL-05794^4^1.38^Neutral^looking for a signature they were told existed
+GRP-0267^the Pale Ledger^Ledger^The Otherside^The Otherside^4^SL-04332 (Dorran Oxley)^SL-03324, SL-06923, SL-05691^17^21.12^Neutral^enforcing terms that have just been broken
+GRP-0268^Fifth Seal^Seal^The Otherside^The Otherside^7^SL-09330 (Thokk Yarrow)^SL-06613, SL-00218, SL-05802, SL-04414, SL-08058, SL-06422^17^28.5^Neutral^looking for a signature they were told existed
+GRP-0269^the Rust Ledger^Ledger^The Otherside^The Otherside^4^SL-09238 (Durga Hollis)^SL-08806, SL-08369, SL-08836^14^22.0^Neutral^collecting on a ledger of debts across three districts
+GRP-0270^the Ember Hand^Hand^The Otherside^The Otherside^4^SL-03163 (Ferra Barrow)^SL-09154, SL-07865, SL-00374^10^14.5^Friendly^escorting something sealed and refusing to name it
+GRP-0271^Third Seal^Seal^The Otherside^The Otherside^7^SL-01759 (Sutha Karrow)^SL-02239, SL-05196, SL-07004, SL-05363, SL-04873, SL-03867^15^29.25^Hostile^escorting something sealed and refusing to name it
+GRP-0272^the Bright Hand^Hand^The Otherside^The Otherside^4^SL-06383 (Kallista Mourn)^SL-03401, SL-05864, SL-01276^9^9.25^Neutral^enforcing terms that have just been broken
+GRP-0273^the Stone Hand^Hand^The Otherside^The Otherside^5^SL-09400 (Perra Cain)^SL-08604, SL-00841, SL-06455, SL-09573^14^22.62^Friendly^looking for a signature they were told existed
+GRP-0274^the Long Hand^Hand^The Otherside^The Otherside^4^SL-06846 (Zoll Vexley)^SL-08659, SL-08302, SL-00788^13^11.38^Neutral^enforcing terms that have just been broken
+GRP-0275^Eighth Seal^Seal^The Otherside^The Otherside^7^SL-04160 (Manneo Voss)^SL-02823, SL-05600, SL-09752, SL-07849, SL-07190, SL-08058^9^14.5^Friendly^looking for a signature they were told existed
+GRP-0276^the Bright Ledger^Ledger^The Otherside^The Otherside^6^SL-04711 (Jillian Fenwright)^SL-05433, SL-00218, SL-00185, SL-08029, SL-03867^13^20.0^Neutral^enforcing terms that have just been broken
+GRP-0277^the Silent Hand^Hand^The Otherside^The Otherside^4^SL-03697 (Garret Nettles)^SL-01437, SL-05843, SL-03278^9^10.25^Hostile^looking for a signature they were told existed
+GRP-0278^the Low Hand^Hand^The Otherside^The Otherside^3^SL-00464 (Ossa Cobble)^SL-07470, SL-03278^11^6.25^Hostile^enforcing terms that have just been broken
+GRP-0279^the Waking Ledger^Ledger^The Otherside^The Otherside^4^SL-03478 (Alby Deepwell)^SL-01194, SL-07937, SL-03469^14^14.5^Neutral^looking for a signature they were told existed
+GRP-0280^the Thin Hand^Hand^The Otherside^The Otherside^4^SL-07958 (Fenwick Bramblecote)^SL-00099, SL-04490, SL-06287^13^22.0^Neutral^enforcing terms that have just been broken
+GRP-0281^Tenth Seal^Seal^The Otherside^The Otherside^5^SL-01107 (Orias Yarrowdale)^SL-00186, SL-01627, SL-07553, SL-01411^11^20.25^Neutral^collecting on a ledger of debts across three districts
+GRP-0282^Fourth Seal^Seal^The Otherside^The Otherside^6^SL-08031 (Bardin Lamphrey)^SL-09019, SL-02630, SL-02306, SL-08405, SL-07132^9^18.38^Friendly^enforcing terms that have just been broken
+GRP-0283^Sunken Escort^Escort^Drifters^The Otherside^5^SL-08388 (Yorick Glasswell)^SL-04473, SL-08164, SL-03132, SL-05673^13^13.62^Hostile^hunting the crew that took their last convoy
+GRP-0284^North Escort^Escort^Drifters^The Otherside^4^SL-09047 (Emmery Merrick)^SL-01613, SL-03998, SL-07063^15^18.5^Neutral^reopening a route that has been closed two seasons
+GRP-0285^the Thin Train^Train^Drifters^The Otherside^4^SL-07820 (Orrin Zell)^SL-03224, SL-08913, SL-08707^6^6.75^Neutral^hunting the crew that took their last convoy
+GRP-0286^Pale Escort^Escort^Drifters^The Otherside^5^SL-06276 (Quillion Wintersby)^SL-08761, SL-09773, SL-03426, SL-00370^9^10.62^Friendly^reopening a route that has been closed two seasons
+GRP-0287^Ryke's Company^Company^Independent^The Otherside^4^SL-06984 (Thotham Quarrick)^SL-06329, SL-07793, SL-07290^10^14.5^Friendly^running salvage ahead of a weather front
+GRP-0288^the Last Crew^Crew^Independent^The Otherside^5^SL-06141 (Kildrak Larkspur)^SL-04470, SL-08785, SL-08332, SL-08258^11^14.62^Neutral^hunting a bounty three other crews have failed
+GRP-0289^the Bitter Band^Band^Independent^The Otherside^5^SL-03480 (Rhoda Brack)^SL-04170, SL-05786, SL-07787, SL-03799^11^21.0^Hostile^taking any work that pays and pretending to be choosy
+GRP-0290^Brack's Company^Company^Independent^The Otherside^3^SL-04944 (Balda Quill)^SL-03826, SL-04897^15^12.0^Neutral^hunting a bounty three other crews have failed
+GRP-0291^the Low Band^Band^Independent^The Otherside^5^SL-09137 (Rune Dunwich)^SL-00858, SL-07697, SL-07473, SL-08288^13^28.0^Friendly^smuggling across a border that moved last month
+GRP-0292^Elmsworth's Company^Company^Independent^The Otherside^3^SL-08490 (Ilesse Rookwood)^SL-04661, SL-06062^6^8.0^Friendly^taking any work that pays and pretending to be choosy
+GRP-0293^the Silent Crew^Crew^Independent^The Otherside^6^SL-02341 (Perrin Thornbury)^SL-00427, SL-00337, SL-00595, SL-09741, SL-06031^8^12.75^Hostile^taking any work that pays and pretending to be choosy
+GRP-0294^the Cold Crew^Crew^Independent^The Otherside^3^SL-07908 (Marla Quill)^SL-05760, SL-06648^18^30.0^Neutral^hunting a bounty three other crews have failed
+GRP-0295^the North Band^Band^Independent^The Otherside^5^SL-00427 (Kansif Goldhollow)^SL-06268, SL-07744, SL-08785, SL-00282^8^13.12^Neutral^smuggling across a border that moved last month
+GRP-0296^Yarrowdale's Company^Company^Independent^The Otherside^4^SL-09306 (Chime Drayton)^SL-03580, SL-02495, SL-00950^19^26.0^Friendly^smuggling across a border that moved last month
+GRP-0297^the Nine Crew^Crew^Independent^The Otherside^5^SL-09133 (Filigree Inglewood)^SL-06460, SL-07142, SL-07359, SL-01711^16^23.75^Neutral^taking any work that pays and pretending to be choosy
+GRP-0298^Overstone's Company^Company^Independent^The Otherside^4^SL-04944 (Balda Quill)^SL-06815, SL-08603, SL-02156^15^19.5^Neutral^hunting a bounty three other crews have failed
+GRP-0299^the Narrow Band^Band^Independent^The Otherside^7^SL-06491 (Rosie Flint)^SL-07212, SL-06851, SL-04392, SL-06062, SL-04037, SL-04385^17^22.75^Neutral^smuggling across a border that moved last month
+GRP-0300^the Rust Band^Band^Independent^The Otherside^7^SL-02406 (Bront Kildare)^SL-08458, SL-00546, SL-02617, SL-06801, SL-08687, SL-04059^11^28.12^Hostile^hunting a bounty three other crews have failed
+GRP-0301^the Pale Crew^Crew^Independent^Datasphere's Reach^5^SL-09018 (Nissa Northwind)^SL-08376, SL-05779, SL-06873, SL-09444^8^5.5^Neutral^hunting a bounty three other crews have failed
+GRP-0302^the Low Crew^Crew^Independent^Datasphere's Reach^3^SL-08107 (Brynn Pell)^SL-01179, SL-06499^14^9.38^Neutral^taking any work that pays and pretending to be choosy
+GRP-0303^the Stone Crew^Crew^Independent^Datasphere's Reach^3^SL-06333 (Nyssa Mourn)^SL-09394, SL-05839^10^8.12^Friendly^taking any work that pays and pretending to be choosy
+GRP-0304^the Ashen Crew^Crew^Independent^Datasphere's Reach^6^SL-03593 (Ivory)^SL-07728, SL-07406, SL-02021, SL-05414, SL-02275^16^31.5^Friendly^taking any work that pays and pretending to be choosy
+GRP-0305^the Narrow Band^Band^Independent^Datasphere's Reach^7^SL-00309 (Aukan Zell)^SL-09584, SL-06061, SL-02271, SL-08911, SL-03167, SL-07240^9^12.0^Neutral^hunting a bounty three other crews have failed
+GRP-0306^Thistlewood's Company^Company^Independent^Datasphere's Reach^3^SL-07422 (Lys Tenbury)^SL-03015, SL-05624^9^15.0^Neutral^taking any work that pays and pretending to be choosy
+GRP-0307^the Last Crew^Crew^Independent^Datasphere's Reach^5^SL-02813 (Kaelen Inglewood)^SL-08760, SL-01096, SL-05687, SL-09464^9^14.25^Neutral^smuggling across a border that moved last month
+GRP-0308^the North Crew^Crew^Independent^Datasphere's Reach^6^SL-01457 (Onni Quick)^SL-07852, SL-00614, SL-00006, SL-08291, SL-09444^19^25.38^Neutral^hunting a bounty three other crews have failed
+GRP-0309^the Bright Band^Band^Independent^Datasphere's Reach^6^SL-07902 (Wrenna Orrick)^SL-08044, SL-02068, SL-07604, SL-08376, SL-03075^9^17.12^Neutral^hunting a bounty three other crews have failed
+GRP-0310^the Old Band^Band^Independent^Datasphere's Reach^3^SL-03192 (Ekemon Palgrave)^SL-05449, SL-07734^6^9.0^Friendly^taking any work that pays and pretending to be choosy
+GRP-0311^Havelock's Company^Company^Independent^Datasphere's Reach^6^SL-01457 (Onni Quick)^SL-08879, SL-04530, SL-01055, SL-04821, SL-01399^19^36.25^Neutral^taking any work that pays and pretending to be choosy
+GRP-0312^Roe's Company^Company^Independent^Datasphere's Reach^5^SL-07469 (Brand Farthing)^SL-06214, SL-05048, SL-05900, SL-09921^11^13.62^Friendly^taking any work that pays and pretending to be choosy
+GRP-0313^Rust Escort^Escort^Drifters^Datasphere's Reach^6^SL-06895 (Sovan Deepwell)^SL-09118, SL-03370, SL-09694, SL-03763, SL-01778^10^20.75^Neutral^carrying serum north before it spoils
+GRP-0314^Stone Escort^Escort^Drifters^Datasphere's Reach^6^SL-08073 (Thokk Yardley)^SL-00961, SL-02799, SL-01212, SL-01989, SL-04979^20^32.5^Hostile^escorting a cargo nobody will name
+GRP-0315^the Deep Train^Train^Drifters^Datasphere's Reach^3^SL-05152 (Bardin Redgrave)^SL-03891, SL-01815^2^0.62^Friendly^reopening a route that has been closed two seasons
+GRP-0316^Thirteenth Inspectorate^Inspectorate^New Grandia Authority^Datasphere's Reach^5^SL-02780 (Halla Thornbury)^SL-05112, SL-00060, SL-01111, SL-01140^15^23.5^Neutral^registering refugees faster than the shelters can take them
+GRP-0317^Narrow District Levy^Levy^New Grandia Authority^Datasphere's Reach^5^SL-05514 (Edda Quarrick)^SL-04286, SL-09961, SL-05040, SL-06995^15^21.38^Neutral^processing a district's paperwork three months late
+GRP-0318^Quiet District Levy^Levy^New Grandia Authority^Datasphere's Reach^3^SL-05112 (Ythra Sorrow)^SL-06548, SL-06585^10^15.0^Neutral^quietly investigating one of their own
+GRP-0319^Thin Bureau Detail^Bureau^New Grandia Authority^Datasphere's Reach^7^SL-07872 (Shautha Blackfell)^SL-05169, SL-02966, SL-00248, SL-09738, SL-08397, SL-07259^10^25.5^Neutral^processing a district's paperwork three months late
+GRP-0320^Node Cluster Old^Cluster^The Awakened^Datasphere's Reach^4^SL-00729 (Denn Draye)^SL-09890, SL-01378, SL-03649^9^12.0^Neutral^translating a fragment that says their own names
+GRP-0321^Fifth Index^Index^The Awakened^Datasphere's Reach^6^SL-02721 (Aelar Ingram)^SL-06331, SL-09392, SL-08146, SL-05306, SL-02933^19^34.25^Neutral^translating a fragment that says their own names
+GRP-0322^Thirteenth Index^Index^The Awakened^Datasphere's Reach^6^SL-07202 (Meridian Renn)^SL-09126, SL-05401, SL-03059, SL-01492, SL-06204^15^26.5^Neutral^protecting a node that woke up recently
+GRP-0323^Node Cluster Iron^Cluster^The Awakened^Datasphere's Reach^5^SL-03894 (Jelenneth Harrow)^SL-03512, SL-08176, SL-00582, SL-00277^18^28.25^Friendly^protecting a node that woke up recently
+GRP-0324^the Rust Chorus^Chorus^The Awakened^Datasphere's Reach^5^SL-01158 (Ferris Ostergaard)^SL-07204, SL-09408, SL-03950, SL-02149^11^12.5^Neutral^translating a fragment that says their own names
+GRP-0325^the Old Chorus^Chorus^The Awakened^Datasphere's Reach^4^SL-02075 (Sigrun Brack)^SL-06537, SL-02125, SL-02407^9^10.5^Neutral^protecting a node that woke up recently
+GRP-0326^Node Cluster Glass^Cluster^The Awakened^Datasphere's Reach^8^SL-09186 (Rilla Ashby)^SL-07264, SL-05401, SL-03839, SL-05306, SL-00160, SL-05630, SL-09944^10^23.0^Neutral^cataloguing a ruin that keeps changing
+GRP-0327^the Long Chorus^Chorus^The Awakened^Datasphere's Reach^6^SL-00550 (Sovan Coldmouth)^SL-04231, SL-02900, SL-00953, SL-00251, SL-07491^10^20.38^Friendly^broadcasting to something that has begun answering
+GRP-0328^the Nine Chorus^Chorus^The Awakened^Datasphere's Reach^4^SL-02581 (Rionach Vell)^SL-03107, SL-06962, SL-02933^13^14.75^Friendly^broadcasting to something that has begun answering
+GRP-0329^Fourth Index^Index^The Awakened^Datasphere's Reach^5^SL-09291 (Nol Yarrow)^SL-01108, SL-00105, SL-09973, SL-06676^10^11.75^Hostile^translating a fragment that says their own names
+GRP-0330^the Ashen Chorus^Chorus^The Awakened^Datasphere's Reach^5^SL-08570 (Rennick Halloway)^SL-04870, SL-02816, SL-01391, SL-02076^18^25.62^Neutral^protecting a node that woke up recently
+GRP-0331^Node Cluster Red^Cluster^The Awakened^Datasphere's Reach^4^SL-06495 (Callie Kirkwall)^SL-03107, SL-07170, SL-06768^13^19.0^Neutral^translating a fragment that says their own names
+GRP-0332^Node Cluster Hollow^Cluster^The Awakened^Datasphere's Reach^5^SL-07825 (Miraeth Crane)^SL-06355, SL-07219, SL-02726, SL-09944^15^22.25^Neutral^cataloguing a ruin that keeps changing
+GRP-0333^the Bitter Chorus^Chorus^The Awakened^Datasphere's Reach^3^SL-08754 (Dimble Palgrave)^SL-09410, SL-01895^20^17.5^Neutral^protecting a node that woke up recently
+GRP-0334^Node Cluster Cold^Cluster^The Awakened^Datasphere's Reach^3^SL-02699 (Edda Ashenford)^SL-04707, SL-06116^14^16.0^Neutral^protecting a node that woke up recently
+GRP-0335^Node Cluster Quiet^Cluster^The Awakened^Datasphere's Reach^3^SL-03894 (Jelenneth Harrow)^SL-06537, SL-01785^18^17.5^Neutral^broadcasting to something that has begun answering
+GRP-0336^Sixth Index^Index^The Awakened^Datasphere's Reach^6^SL-05200 (Dial Stallard)^SL-03990, SL-03884, SL-04308, SL-05605, SL-09300^18^28.12^Neutral^protecting a node that woke up recently
+GRP-0337^Eleventh Index^Index^The Awakened^Datasphere's Reach^5^SL-06447 (Cirwen Renn)^SL-08474, SL-01229, SL-05401, SL-04900^11^27.0^Friendly^cataloguing a ruin that keeps changing
+GRP-0338^Node Cluster Silent^Cluster^The Awakened^Datasphere's Reach^4^SL-07327 (Doran Flint)^SL-09436, SL-06391, SL-09198^15^16.5^Hostile^protecting a node that woke up recently
+GRP-0339^Fifth Index^Index^The Awakened^Datasphere's Reach^4^SL-07101 (Helja Ironmark)^SL-06175, SL-03293, SL-01391^18^23.5^Neutral^cataloguing a ruin that keeps changing
+GRP-0340^Third Index^Index^The Awakened^Datasphere's Reach^4^SL-01487 (Imogen Cain)^SL-07405, SL-02865, SL-00988^9^12.5^Friendly^cataloguing a ruin that keeps changing
+GRP-0341^the Quiet Chorus^Chorus^The Awakened^Datasphere's Reach^4^SL-02829 (Dial Voss)^SL-07395, SL-07782, SL-06337^19^18.0^Friendly^cataloguing a ruin that keeps changing
+GRP-0342^Fifth Index^Index^The Awakened^Datasphere's Reach^5^SL-05831 (Andry Inglewood)^SL-07363, SL-05889, SL-02934, SL-07295^17^22.25^Neutral^cataloguing a ruin that keeps changing
+GRP-0343^the Hollow Chorus^Chorus^The Awakened^Datasphere's Reach^5^SL-02699 (Edda Ashenford)^SL-06112, SL-09253, SL-06114, SL-01924^14^25.5^Neutral^broadcasting to something that has begun answering

@@ -1,0 +1,97 @@
+﻿Settlement_ID^Name^Kind^Region^Population^Note^Statted_NPCs
+SET-001^Ember Halt^Trade halt^The Drift^243^will not take Otherside currency^17
+SET-002^Long Waystation^Salvage camp^The Drift^4191^has a standing order to admit no one after dark^357
+SET-003^Iron Halt^Fortified relay^The Drift^180^keeps its shield cells in a locked cellar and counts them nightly^13
+SET-004^Far Post^Waystation^The Drift^500^has changed hands three times this year^46
+SET-005^Ash Depot^Waystation^The Drift^893^survives entirely on toll income^88
+SET-006^Grey Crossing^Salvage camp^The Drift^265^has a standing order to admit no one after dark^33
+SET-007^Low Crossing^Salvage camp^The Drift^1120^keeps its shield cells in a locked cellar and counts them nightly^96
+SET-008^Nine Stop^Fortified relay^The Drift^399^keeps its shield cells in a locked cellar and counts them nightly^32
+SET-009^Far Crossing^Trade halt^The Drift^296^will not take Otherside currency^18
+SET-010^Pale Depot^Trade halt^The Drift^665^will not take Otherside currency^45
+SET-011^Ember Crossing^Salvage camp^The Drift^435^survives entirely on toll income^36
+SET-012^Dust Depot^Trade halt^The Drift^5331^has changed hands three times this year^469
+SET-013^Old Quarter^Industrial ward^New Grandia^1457^is where the lower city goes to disappear^68
+SET-014^Assay Ward^Outer terrace^New Grandia^135^hosts an academy annexe nobody funds^3
+SET-015^Old Rampart^Shielded quarter^New Grandia^1178^hosts an academy annexe nobody funds^50
+SET-016^Lower Row^Outer terrace^New Grandia^2143^was rebuilt after a shield failure and shows it^101
+SET-017^Vault Quarter^Shielded quarter^New Grandia^540^is a district the Authority has stopped patrolling properly^26
+SET-018^Chandler's District^Industrial ward^New Grandia^185^was rebuilt after a shield failure and shows it^4
+SET-019^Lantern Row^Outer terrace^New Grandia^4227^is a district the Authority has stopped patrolling properly^203
+SET-020^Old Row^Industrial ward^New Grandia^4457^is where the lower city goes to disappear^229
+SET-021^Mill Quarter^City district^New Grandia^5486^was rebuilt after a shield failure and shows it^295
+SET-022^Mill District^Industrial ward^New Grandia^258^hosts an academy annexe nobody funds^14
+SET-023^Old Terrace^Shielded quarter^New Grandia^5220^is where the lower city goes to disappear^230
+SET-024^Chandler's Rampart^Outer terrace^New Grandia^487^is a district the Authority has stopped patrolling properly^27
+SET-025^Ore Adit^Shaft camp^Thundermount^233^hears the mountain and takes that seriously^28
+SET-026^Copper Adit^Guild works^Thundermount^444^is working a seam that should have run out^31
+SET-027^Deep Cut^Refinery^Thundermount^3796^is working a seam that should have run out^366
+SET-028^Deep Works^Refinery^Thundermount^169^hears the mountain and takes that seriously^19
+SET-029^Deep Adit^Refinery^Thundermount^311^has a shaft nobody is allowed into^34
+SET-030^Copper Shafttown^Guild works^Thundermount^192^runs on Guild credit and nothing else^14
+SET-031^Deep Camp^Guild works^Thundermount^118^hears the mountain and takes that seriously^7
+SET-032^Thunder Camp^Guild works^Thundermount^702^is working a seam that should have run out^69
+SET-033^Slag Shafttown^Guild works^Thundermount^1426^hears the mountain and takes that seriously^143
+SET-034^Slag Head^Shaft camp^Thundermount^238^lost eleven people last season and has not replaced them^16
+SET-035^Anvil Head^Refinery^Thundermount^5370^lost eleven people last season and has not replaced them^500
+SET-036^Slag Cut^Shaft camp^Thundermount^240^is working a seam that should have run out^23
+SET-037^Thorn Barrow^Grave-village^Wyldermoore^427^marks its doors before dusk, every night^19
+SET-038^Willow Hollow^Grave-village^Wyldermoore^2297^has more graves than living residents^111
+SET-039^Still Hollow^Farmstead cluster^Wyldermoore^1360^feeds anyone who arrives and asks nothing^89
+SET-040^Bell Barrow^Shrine hamlet^Wyldermoore^502^has more graves than living residents^35
+SET-041^Bell Hollow^Shrine hamlet^Wyldermoore^4872^has more graves than living residents^271
+SET-042^Ash End^Farmstead cluster^Wyldermoore^228^feeds anyone who arrives and asks nothing^13
+SET-043^Mourn Hollow^Village^Wyldermoore^660^has more graves than living residents^32
+SET-044^Grave Green^Village^Wyldermoore^4993^rings a bell at an hour nobody explains^282
+SET-045^Bell End^Farmstead cluster^Wyldermoore^188^rings a bell at an hour nobody explains^12
+SET-046^Wither Hollow^Shrine hamlet^Wyldermoore^128^marks its doors before dusk, every night^8
+SET-047^Wither Barrow^Farmstead cluster^Wyldermoore^5745^will not discuss what happened two winters ago^329
+SET-048^Mourn Village^Village^Wyldermoore^872^rings a bell at an hour nobody explains^49
+SET-049^Serum Station^Relief station^Frozen Edge^144^was built on a floe and has moved since^9
+SET-050^White Shelter^Anchorage^Frozen Edge^1024^rations serum by triage and argues about it^75
+SET-051^White Camp^Ice camp^Frozen Edge^3349^logs every arrival and every failure to arrive^227
+SET-052^Rime Station^Anchorage^Frozen Edge^2690^keeps a fire lit that has not gone out in years^163
+SET-053^Rime Camp^Relief station^Frozen Edge^278^was built on a floe and has moved since^12
+SET-054^Break Shelter^Ice camp^Frozen Edge^1173^rations serum by triage and argues about it^85
+SET-055^Break Anchorage^Relief station^Frozen Edge^76^logs every arrival and every failure to arrive^8
+SET-056^Last Anchorage^Research hut^Frozen Edge^1024^keeps a fire lit that has not gone out in years^69
+SET-057^Last Hut^Relief station^Frozen Edge^3563^rations serum by triage and argues about it^218
+SET-058^White Line^Ice camp^Frozen Edge^2801^was built on a floe and has moved since^171
+SET-059^First Hut^Relief station^Frozen Edge^2746^is the last shelter before open ice^158
+SET-060^Cold Line^Relief station^Frozen Edge^906^was built on a floe and has moved since^55
+SET-061^Old Crossing^Market town^Fur Wehn^102^is the last place east that keeps written records^7
+SET-062^Wide Waypost^Caravanserai^Fur Wehn^5245^is the last place east that keeps written records^284
+SET-063^Trader's Waypost^Border post^Fur Wehn^1591^takes coin from four countries^85
+SET-064^Wide Market^Caravanserai^Fur Wehn^2781^is the last place east that keeps written records^148
+SET-065^Verge Market^Border post^Fur Wehn^132^sits on a border that has moved twice^6
+SET-066^Green Ford^Market town^Fur Wehn^63^sits on a border that has moved twice^2
+SET-067^Wide Caravanserai^River ford^Fur Wehn^4783^sits on a border that has moved twice^256
+SET-068^Verge Caravanserai^River ford^Fur Wehn^981^takes coin from four countries^52
+SET-069^Old Market^Caravanserai^Fur Wehn^5877^takes coin from four countries^331
+SET-070^Long Crossing^Caravanserai^Fur Wehn^913^sits on a border that has moved twice^60
+SET-071^Verge Ford^Border post^Fur Wehn^134^sits on a border that has moved twice^3
+SET-072^Long Ford^River ford^Fur Wehn^259^is where charters get stamped or forged^16
+SET-073^Quiet Steading^Warded hold^The Otherside^131^keeps its wards renewed by someone nobody has met^8
+SET-074^Third House^Sealed steading^The Otherside^464^has a room that is always kept empty^28
+SET-075^Sealed Hold^Contract house^The Otherside^4400^has a room that is always kept empty^277
+SET-076^Grey House^Warded hold^The Otherside^667^burns something every dawn and will not say what^36
+SET-077^Cinder Reach^Broker's court^The Otherside^2495^burns something every dawn and will not say what^145
+SET-078^Owed Court^Warded hold^The Otherside^1229^burns something every dawn and will not say what^57
+SET-079^Cinder Court^Sealed steading^The Otherside^113^admits visitors only by prior arrangement^8
+SET-080^Third Reach^Warded hold^The Otherside^4451^keeps its wards renewed by someone nobody has met^258
+SET-081^Cinder Gate^Warded hold^The Otherside^66^admits visitors only by prior arrangement^2
+SET-082^Bound House^Contract house^The Otherside^4196^burns something every dawn and will not say what^288
+SET-083^Grey Reach^Contract house^The Otherside^157^has a room that is always kept empty^9
+SET-084^Last Reach^Broker's court^The Otherside^2140^has a room that is always kept empty^134
+SET-085^Fourth Array^Awakened cluster^Datasphere's Reach^648^is quiet in a way that is measurably unusual^123
+SET-086^Index Relay^Awakened cluster^Datasphere's Reach^652^houses an archive that rewrites itself^140
+SET-087^Pale Node^Awakened cluster^Datasphere's Reach^250^is quiet in a way that is measurably unusual^62
+SET-088^Silent Array^Node site^Datasphere's Reach^391^woke up on its own and has been inhabited since^77
+SET-089^Bright Relay^Node site^Datasphere's Reach^602^woke up on its own and has been inhabited since^114
+SET-090^Ninth Node^Awakened cluster^Datasphere's Reach^740^broadcasts on a schedule nobody set^144
+SET-091^Silent Node^Ruin settlement^Datasphere's Reach^1250^is quiet in a way that is measurably unusual^232
+SET-092^Waking Terminus^Signal array^Datasphere's Reach^1133^is mapped differently every time it is mapped^219
+SET-093^Index Cluster^Ruin settlement^Datasphere's Reach^131^is mapped differently every time it is mapped^23
+SET-094^Ninth Cluster^Node site^Datasphere's Reach^287^is mapped differently every time it is mapped^50
+SET-095^Open Cluster^Signal array^Datasphere's Reach^85^is quiet in a way that is measurably unusual^24
+SET-096^Pale Array^Ruin settlement^Datasphere's Reach^200^houses an archive that rewrites itself^42

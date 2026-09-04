@@ -19367,3 +19367,17 @@ body[data-theme="silver"] .collapse-toggle {
 
 
 
+
+/* ── The Drift · Where It Floats (GM home position hook → World Catalogue) ── */
+.drift-position { display: flex; flex-direction: column; gap: 10px; padding: 4px 2px 2px; }
+.drift-position__current { margin: 0; color: var(--text-1, #d7cbb0); font-size: 0.95rem; }
+.drift-position__current strong { color: var(--accent-gold, #d4af4f); }
+.drift-position__label { font-size: 0.72rem; letter-spacing: .04em; text-transform: uppercase; color: var(--text-2, #9aa4bd); }
+.drift-position__select { width: 100%; }
+.drift-position__link { align-self: flex-start; }
+.drift-position__link.is-disabled { opacity: .45; pointer-events: none; }
+.drift-position__hint { margin: 0; font-size: 0.72rem; color: var(--text-2, #9aa4bd); }
+[data-theme="parchment"] .drift-position__current { color: rgba(101, 67, 33, 0.92); }
+[data-theme="parchment"] .drift-position__current strong { color: #8a5a12; }
+[data-theme="parchment"] .drift-position__label,
+[data-theme="parchment"] .drift-position__hint { color: rgba(101, 67, 33, 0.7); }
