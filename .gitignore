@@ -43,3 +43,10 @@ scarred-lands/img/*.png
 the-emberdown-prisoners.html
 build-prisoner-sheets.py
 campaign-context.md
+
+# --- Local-only: Python bytecode, office locks, DM/scratch material (never publish) ---
+# .pyc here mirror the gitignored secret npc-wave*/build-*/*-data scripts and are decompilable
+__pycache__/
+*.pyc
+.~lock.*#
+undercroft-of-the-silverleaf.md
