@@ -28,13 +28,13 @@ Crystal Forge is a static browser-based fantasy settlement simulator (GM control
 
 ## Current Version
 
-- `APP_VERSION = "v1.7.20"` — `content/Config.js`. Monotonic, used by Firebase publish safety checks.
+- `APP_VERSION = "v1.7.22"` — `content/Config.js`. Monotonic, used by Firebase publish safety checks.
 - `APP_RELEASE_STAGE = "preview"`
 - `SAVE_VERSION = 12`
 - `MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3"`
-- Last pushed: `1f713f1 feat(codex): pokédex-style Building Codex page tracks discovery progress`
+- Last pushed: `b48a1c8 feat(scarred-lands): World Catalogue + GM Roller online, and the Drift's position bridges to both`
 
-**Cache-buster:** boot.js entry now uses **timestamp form** `?v=v1.7.20-YYYYMMDDHHMMSS` (current `20260615190000`). Older modules still on the legacy `?v=2.0.X` are gradually being migrated. When bumping, prefer the timestamp form for consistency.
+**Cache-buster:** the whole tree is now uniform on the **timestamp form** `?v=v1.7.22-20260904120000` (the legacy `?v=2.0.X` tokens are fully gone). Bump by global-replacing the single current token string across all `*.js`/`*.html` (593 occurrences) — one `perl -pi -e` sweep does it — and bump `APP_VERSION` for user-facing changes.
 
 ---
 
@@ -202,6 +202,13 @@ The 📜 / 🌙 button in the top-nav fires `data-action="toggle-theme"`. Implem
 ## Session Log
 
 > After each session, append an entry. Keep entries short — 3–5 bullets max. Delete entries older than ~10 sessions.
+
+### 2026-09-04 — World Catalogue + GM Roller published; the Drift's position bridges the two apps
+- New `scarred-lands/players.html` — a faceted, e-commerce-style catalogue over **10,000** player-safe NPCs (8 region shards). Index-driven live-count facets, level slider, region-scoped settlement dropdown, paginated 36/page, sort, `?region=<slug>` URL state, lazy shard-loaded detail, Groups + Settlements tabs, EN/ΕΛ, mobile drawer. **No link to the GM roller.**
+- Data pipeline is `build-scarred-lands-players.cjs` (re-runnable, repo root): reads GM CSVs from `scarred-lands/data/`, strips GM-only cols (`Tactics_Note`, `Connections`, groups' `Current_Purpose`), shards by region into `scarred-lands/data-players/`. **User chose to publish BOTH `data/` (GM, secrets included) and `data-players/` publicly** — ~29 MB of CSV now in the repo.
+- `scarred-lands/roller.html` (from prior session) auto-fetches `./data/` on load. Bug fixed this session: `afterLoad()` wrote to `#loaded` after `showLoading()` had removed it → caught+mislabeled as "fetch failed". Guarded the write. Region slugs are the shared contract between roller shards, catalogue shards, and the simulator hook.
+- Simulator hook: Scarred Lands nav dropdown now = compendium/register/**catalogue/roller**; GM home card sets `settings.driftRegion` (7 world-below regions), persists + publishes, deep-links `players.html?region=<slug>`; player session banner shows it. Handler is `set-drift-region` in app.js (change-delegation, next to `set-dice-type`).
+- Bumped `APP_VERSION` v1.7.21→v1.7.22 + build note; global cache-buster sweep (one token, 118 files). Last commit: `b48a1c8`.
 
 ### 2026-08-14 — The Drift Register reaches 100 (scarred-lands, not the simulator)
 - `scarred-lands/npcs.html` now carries exactly 100 NPCs — 33 heroes / 34 unaligned / 33 villains — assembled by `build-npcs.py` from ten `npc-wave*.py` modules, plus a d100 roll table (heroes 01–33, unaligned 34–67, villains 68–100) and filters by race / class / role / free text / sort.
