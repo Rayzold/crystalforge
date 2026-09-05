@@ -1,8 +1,8 @@
-import { SPEED_MULTIPLIERS } from "../content/Config.js?v=v1.7.22-20260904120000";
-import { formatDate, getNextHoliday, getStructuredDate } from "../systems/CalendarSystem.js?v=v1.7.22-20260904120000";
-import { getTownFocusAvailability } from "../systems/TownFocusSystem.js?v=v1.7.22-20260904120000";
-import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js?v=v1.7.22-20260904120000";
-import { renderConstructionQueuePanel } from "./ConstructionQueuePanel.js?v=v1.7.22-20260904120000";
+import { SPEED_MULTIPLIERS } from "../content/Config.js?v=v1.7.23-20260905130000";
+import { formatDate, getNextHoliday, getStructuredDate } from "../systems/CalendarSystem.js?v=v1.7.23-20260905130000";
+import { getTownFocusAvailability } from "../systems/TownFocusSystem.js?v=v1.7.23-20260905130000";
+import { getHolidayGlyph, getHolidayTypeClass } from "./HolidayPresentation.js?v=v1.7.23-20260905130000";
+import { renderConstructionQueuePanel } from "./ConstructionQueuePanel.js?v=v1.7.23-20260905130000";
 
 export function renderCalendarPanel(state, options = {}) {
   const date = getStructuredDate(state.calendar.dayOffset);

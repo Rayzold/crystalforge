@@ -3,18 +3,18 @@
 // systems that own each piece: martial citizens, Awakened operatives, defensive
 // structures, the vehicle fleet, and held behemoth war beasts. Editing happens
 // on each source page — this screen just consolidates the picture.
-import { CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER } from "../content/CitizenConfig.js?v=v1.7.22-20260904120000";
+import { CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER } from "../content/CitizenConfig.js?v=v1.7.23-20260905130000";
 import {
   AWAKENED_GRADES,
   getAwakenedAbilityTypeLabel,
   getAwakenedStatusLabel
-} from "../content/AwakenedConfig.js?v=v1.7.22-20260904120000";
-import { VEHICLE_DEFINITIONS, VEHICLE_ORDER } from "../content/VehicleConfig.js?v=v1.7.22-20260904120000";
-import { getBehemothStatusLabel } from "../content/BehemothConfig.js?v=v1.7.22-20260904120000";
-import { getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.22-20260904120000";
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.22-20260904120000";
-import { getAvailableVehicleCounts, getVehicleAssignments } from "../systems/ExpeditionSystem.js?v=v1.7.22-20260904120000";
-import { getBuildingMultiplier } from "../systems/BuildingSystem.js?v=v1.7.22-20260904120000";
+} from "../content/AwakenedConfig.js?v=v1.7.23-20260905130000";
+import { VEHICLE_DEFINITIONS, VEHICLE_ORDER } from "../content/VehicleConfig.js?v=v1.7.23-20260905130000";
+import { getBehemothStatusLabel } from "../content/BehemothConfig.js?v=v1.7.23-20260905130000";
+import { getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.23-20260905130000";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.23-20260905130000";
+import { getAvailableVehicleCounts, getVehicleAssignments } from "../systems/ExpeditionSystem.js?v=v1.7.23-20260905130000";
+import { getBuildingMultiplier } from "../systems/BuildingSystem.js?v=v1.7.23-20260905130000";
 
 const BEHEMOTH_HELD_STATUSES = new Set(["captured", "bonded"]);
 const AWAKENED_GRADE_RANK = Object.fromEntries(AWAKENED_GRADES.map((grade, index) => [grade.id, index]));

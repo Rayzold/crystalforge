@@ -1,4 +1,4 @@
-import { deepClone } from "./Utils.js?v=v1.7.22-20260904120000";
+import { deepClone } from "./Utils.js?v=v1.7.23-20260905130000";
 
 export class GameState {
   constructor(initialState) {

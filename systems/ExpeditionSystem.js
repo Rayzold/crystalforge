@@ -8,22 +8,22 @@ import {
   EXPEDITION_MISSION_TEMPLATES,
   EXPEDITION_ORDER,
   EXPEDITION_TYPES
-} from "../content/ExpeditionConfig.js?v=v1.7.22-20260904120000";
-import { CITIZEN_RARITY_OUTPUT_MULTIPLIERS } from "../content/CitizenConfig.js?v=v1.7.22-20260904120000";
-import { UNIQUE_CITIZEN_ARCHETYPES, drawUniqueCitizenFullName } from "../content/UniqueCitizenConfig.js?v=v1.7.22-20260904120000";
-import { VEHICLE_DEFINITIONS, VEHICLE_ORDER, createDefaultVehicleFleet } from "../content/VehicleConfig.js?v=v1.7.22-20260904120000";
-import { RARITY_ORDER } from "../content/Rarities.js?v=v1.7.22-20260904120000";
-import { clamp, createId, roundTo } from "../engine/Utils.js?v=v1.7.22-20260904120000";
-import { addCrystals } from "./CrystalSystem.js?v=v1.7.22-20260904120000";
+} from "../content/ExpeditionConfig.js?v=v1.7.23-20260905130000";
+import { CITIZEN_RARITY_OUTPUT_MULTIPLIERS } from "../content/CitizenConfig.js?v=v1.7.23-20260905130000";
+import { UNIQUE_CITIZEN_ARCHETYPES, drawUniqueCitizenFullName } from "../content/UniqueCitizenConfig.js?v=v1.7.23-20260905130000";
+import { VEHICLE_DEFINITIONS, VEHICLE_ORDER, createDefaultVehicleFleet } from "../content/VehicleConfig.js?v=v1.7.23-20260905130000";
+import { RARITY_ORDER } from "../content/Rarities.js?v=v1.7.23-20260905130000";
+import { clamp, createId, roundTo } from "../engine/Utils.js?v=v1.7.23-20260905130000";
+import { addCrystals } from "./CrystalSystem.js?v=v1.7.23-20260905130000";
 import {
   addCitizenRarityBundle,
   addCitizensByRarity,
   takeCitizensFromRoster
-} from "./CitizenSystem.js?v=v1.7.22-20260904120000";
-import { formatDate } from "./CalendarSystem.js?v=v1.7.22-20260904120000";
-import { addHistoryEntry } from "./HistoryLogSystem.js?v=v1.7.22-20260904120000";
-import { addShards } from "./ShardSystem.js?v=v1.7.22-20260904120000";
-import { getCurrentTownFocus } from "./TownFocusSystem.js?v=v1.7.22-20260904120000";
+} from "./CitizenSystem.js?v=v1.7.23-20260905130000";
+import { formatDate } from "./CalendarSystem.js?v=v1.7.23-20260905130000";
+import { addHistoryEntry } from "./HistoryLogSystem.js?v=v1.7.23-20260905130000";
+import { addShards } from "./ShardSystem.js?v=v1.7.23-20260905130000";
+import { getCurrentTownFocus } from "./TownFocusSystem.js?v=v1.7.23-20260905130000";
 
 const RESOURCE_KEYS = ["food", "gold", "materials", "mana"];
 const EXPEDITION_RESOURCE_REWARD_KEYS = ["gold", "food", "materials", "salvage", "mana", "prosperity"];

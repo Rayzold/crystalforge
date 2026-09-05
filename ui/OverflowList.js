@@ -1,6 +1,6 @@
-import { BUILDING_GRID_LIMIT } from "../content/Config.js?v=v1.7.22-20260904120000";
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.22-20260904120000";
-import { getVisibleBuildings } from "./BuildingGrid.js?v=v1.7.22-20260904120000";
+import { BUILDING_GRID_LIMIT } from "../content/Config.js?v=v1.7.23-20260905130000";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.23-20260905130000";
+import { getVisibleBuildings } from "./BuildingGrid.js?v=v1.7.23-20260905130000";
 
 export function renderOverflowList(state) {
   const overflow = getVisibleBuildings(state).slice(BUILDING_GRID_LIMIT);

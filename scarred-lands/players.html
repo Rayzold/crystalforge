@@ -137,6 +137,11 @@ select.f{width:100%;background:var(--panel);color:var(--star);border:1px solid v
 .dp-close{position:sticky;top:0;float:right;background:var(--panel);border:1px solid var(--rule);color:var(--dim);
  border-radius:6px;width:34px;height:34px;font-size:17px;cursor:pointer;margin:12px 12px 0 0;z-index:2}
 .dp-close:hover{border-color:var(--rose);color:var(--star)}
+.head-actions{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.copybtn{background:var(--panel);border:1px solid var(--rule);color:var(--dim);border-radius:5px;
+ font-family:var(--sans);font-size:12px;padding:5px 11px;cursor:pointer;white-space:nowrap}
+.copybtn:hover{border-color:var(--cyan);color:var(--star)}
+.copybtn.done{border-color:var(--green);color:var(--green)}
 .dp-load{padding:60px 30px;text-align:center;color:var(--dim)}
 .head{padding:22px 24px 16px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap}
 .name{font-family:var(--serif);font-weight:900;font-size:28px;line-height:1.05;letter-spacing:-.02em;margin:0}
@@ -217,16 +222,18 @@ const T={en:{people:"souls",members:"members",strong:"strong",pop:"pop.",statted
    level:"Level",settlement:"Settlement",anySet:"Any settlement",results:"results",sortBy:"Sort",
    region:"Region",faction:"Faction",cls:"Class",anc:"Ancestry",disp:"Disposition",type:"Type",kind:"Kind",
    loadDetail:"Opening the file…",backGrid:"← Back",membersHere:"Who lives here",noneStatted:"No statted NPCs recorded for this settlement.",
-   filters:"Filters",done:"Done"},
+   filters:"Filters",done:"Done",copySb:"Copy statblock",copied:"Copied ✓",copyFail:"Copy failed"},
   gr:{people:"ψυχές",members:"μέλη",strong:"δυνατοί",pop:"πληθ.",statted:"εδώ",
    noNpc:"Κανείς δεν ταιριάζει.",noNpcSub:"Χαλάρωσε ή καθάρισε τα φίλτρα.",
    npcTab:"NPC",clear:"Καθαρισμός φίλτρων",searchNpc:"Αναζήτηση ονόματος ή ρόλου…",searchGrp:"Αναζήτηση ομάδας…",searchSet:"Αναζήτηση οικισμού…",
    level:"Επίπεδο",settlement:"Οικισμός",anySet:"Κάθε οικισμός",results:"αποτελέσματα",sortBy:"Ταξινόμηση",
    region:"Περιοχή",faction:"Παράταξη",cls:"Κλάση",anc:"Καταγωγή",disp:"Διάθεση",type:"Τύπος",kind:"Είδος",
    loadDetail:"Άνοιγμα…",backGrid:"← Πίσω",membersHere:"Ποιοι ζουν εδώ",noneStatted:"Δεν υπάρχουν καταγεγραμμένοι NPC εδώ.",
-   filters:"Φίλτρα",done:"Έτοιμο"}};
+   filters:"Φίλτρα",done:"Έτοιμο",copySb:"Αντιγραφή",copied:"Αντιγράφηκε ✓",copyFail:"Αποτυχία"}};
 let LANG=(()=>{try{return localStorage.getItem("sl_lang")==="gr"?"gr":"en"}catch(e){return"en"}})();
 const tr=k=>(T[LANG]||T.en)[k];
+// Which region the simulator says the Drift floats above (shared same-origin localStorage).
+const DRIFT_REGION=(()=>{try{return localStorage.getItem("sl_drift_region")||""}catch(e){return""}})();
 
 /* ---------- state ---------- */
 const model={tab:"catalogue",sort:"name",page:1,detail:null,setDetail:null,
@@ -350,9 +357,10 @@ const sortCmp={name:(a,b)=>a.Name.localeCompare(b.Name),
 function facetBlock(key,field,map){
  const sel=model.f[key],rows=sortVals(map,sel);
  return `<div class="facet"><h3>${esc(tr(key))}${sel.size?`<span class="n" style="color:var(--gold);font-weight:600">${sel.size}</span>`:""}</h3>
-  <div class="flist">${rows.map(([v,n])=>`<label class="chk ${sel.has(v)?'on':''}">
+  <div class="flist">${rows.map(([v,n])=>{const drift=key==="region"&&v===DRIFT_REGION;
+   return `<label class="chk ${sel.has(v)?'on':''}" ${drift?'title="The Drift currently floats above here"':''}>
    <input type="checkbox" data-facet="${key}" data-value="${esc(v)}" ${sel.has(v)?'checked':''}>
-   <span class="lbl">${esc(v)}</span><span class="n">${n.toLocaleString()}</span></label>`).join("")}</div></div>`;
+   <span class="lbl">${drift?'<span style="color:var(--gold)">⛯</span> ':''}${esc(v)}</span><span class="n">${n.toLocaleString()}</span></label>`}).join("")}</div></div>`;
 }
 function renderRail(){
  const rail=document.getElementById("rail");const f=model.f;
@@ -542,7 +550,10 @@ function renderNpcDetail(n,id){
   <div class="head"><div><p class="eyebrow">${esc(n.Region)}${n.settlementName?" · "+esc(n.settlementName):(n.Settlement?" · "+esc(n.Settlement):"")}</p>
     <h2 class="name">${esc(n.Name)}</h2>
     <p class="who">${esc(n.Gender||"")} ${esc(n.Ancestry||"")} — ${esc(n.Class||"")}${sub}<br>${esc(n.Role||"")} · ${esc(n.Faction||"")}</p></div>
-    <span class="pill ${dispoClass(n.Disposition||"")}">${esc(n.Disposition||"")}</span></div>
+    <div class="head-actions">
+      <span class="pill ${dispoClass(n.Disposition||"")}">${esc(n.Disposition||"")}</span>
+      <button class="copybtn" data-copy type="button">${esc(tr("copySb"))}</button>
+    </div></div>
   <div class="stats">
     <div class="stat"><b>${esc(n.Level)}</b><i>Level</i></div>
     <div class="stat"><b>${esc(n.CR)}</b><i>CR</i></div>
@@ -558,6 +569,35 @@ function renderNpcDetail(n,id){
     ${items.length?`<div class="blk"><h4>Carrying</h4><ul class="items">${items.map(i=>`<li>${esc(i)}</li>`).join("")}</ul></div>`:""}
   </div></div>`;
  bindOverlay();
+ const cb=ov.querySelector("[data-copy]");if(cb)cb.onclick=()=>copyStatblock(n,cb);
+}
+function npcStatblockText(n){
+ const has=k=>n[k]&&n[k]!=="-";
+ const L=[];
+ if(n.Name)L.push(n.Name);
+ const sub=has("Subclass")?` (${n.Subclass})`:"";
+ const who=`${n.Gender||""} ${n.Ancestry||""} ${n.Class||""}${sub}`.replace(/\s+/g," ").trim();
+ const role=[n.Role,n.Faction].filter(x=>x&&x!=="-").join(", ");
+ const line2=[who,role].filter(Boolean).join(" — ");if(line2)L.push(line2);
+ const place=[n.Region,n.settlementName||n.Settlement,n.Disposition].filter(x=>x&&x!=="-").join(" · ");if(place)L.push(place);
+ const stat=[`Level ${n.Level}`,`CR ${n.CR}`];
+ if(has("AC"))stat.push(`AC ${n.AC}`);if(has("HP"))stat.push(`HP ${n.HP}`);if(has("Attack_Bonus"))stat.push(`To hit ${n.Attack_Bonus}`);
+ L.push(stat.join(" · "));
+ if(has("Main_Attack"))L.push(`Attack: ${n.Main_Attack}${has("Damage")?", "+n.Damage:""}`);
+ if(has("Key_Spells"))L.push(`Spells: ${n.Key_Spells}`);
+ if(has("Constellation"))L.push(`Constellation: ${n.Constellation}`);
+ if(has("First_Met"))L.push(`First met: ${n.First_Met}`);
+ if(has("Speech_Quirks"))L.push(`Voice: ${n.Speech_Quirks}`);
+ if(has("Notable_Items"))L.push(`Carrying: ${n.Notable_Items}`);
+ return L.join("\n");
+}
+async function copyStatblock(n,btn){
+ const text=npcStatblockText(n);let ok=false;
+ try{await navigator.clipboard.writeText(text);ok=true;}
+ catch(e){try{const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.opacity="0";
+   document.body.appendChild(ta);ta.focus();ta.select();ok=document.execCommand("copy");document.body.removeChild(ta);}catch(_){ok=false;}}
+ const orig=btn.textContent;btn.textContent=ok?tr("copied"):tr("copyFail");btn.classList.toggle("done",ok);
+ setTimeout(()=>{btn.textContent=orig;btn.classList.remove("done");},1500);
 }
 function closeNpc(){const ov=document.getElementById("detail");ov.hidden=true;ov.innerHTML="";
  if(model.detail){model.detail=null;pushURL(true)}}

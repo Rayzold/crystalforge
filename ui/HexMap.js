@@ -1,9 +1,9 @@
-import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.22-20260904120000";
-import { MAP_CONFIG, MAP_TERRAIN_THEMES } from "../content/MapConfig.js?v=v1.7.22-20260904120000";
-import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js?v=v1.7.22-20260904120000";
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.22-20260904120000";
-import { getConstructionEtaDetails } from "../systems/ConstructionSystem.js?v=v1.7.22-20260904120000";
-import { getBuildingMultiplier } from "../systems/BuildingSystem.js?v=v1.7.22-20260904120000";
+import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.23-20260905130000";
+import { MAP_CONFIG, MAP_TERRAIN_THEMES } from "../content/MapConfig.js?v=v1.7.23-20260905130000";
+import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js?v=v1.7.23-20260905130000";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.23-20260905130000";
+import { getConstructionEtaDetails } from "../systems/ConstructionSystem.js?v=v1.7.23-20260905130000";
+import { getBuildingMultiplier } from "../systems/BuildingSystem.js?v=v1.7.23-20260905130000";
 import {
   canPlaceBuildingAt,
   getBuildingAtCell,
@@ -12,7 +12,7 @@ import {
   getCellKey,
   getNeighborCoords,
   isFortificationBuilding
-} from "../systems/MapSystem.js?v=v1.7.22-20260904120000";
+} from "../systems/MapSystem.js?v=v1.7.23-20260905130000";
 
 const HEX_NEIGHBORS = [
   [1, 0],

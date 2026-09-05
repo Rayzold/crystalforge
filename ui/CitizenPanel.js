@@ -1,7 +1,7 @@
-import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER, getCitizenHelpText } from "../content/CitizenConfig.js?v=v1.7.22-20260904120000";
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.22-20260904120000";
-import { createHelpBubble } from "./HelpBubbles.js?v=v1.7.22-20260904120000";
-import { renderUiIcon } from "./UiIcons.js?v=v1.7.22-20260904120000";
+import { CITIZEN_CLASSES, CITIZEN_DEFINITIONS, CITIZEN_GROUP_ORDER, getCitizenHelpText } from "../content/CitizenConfig.js?v=v1.7.23-20260905130000";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.23-20260905130000";
+import { createHelpBubble } from "./HelpBubbles.js?v=v1.7.23-20260905130000";
+import { renderUiIcon } from "./UiIcons.js?v=v1.7.23-20260905130000";
 
 const CITIZEN_ICON_KEYS = {
   Farmers: "food",
