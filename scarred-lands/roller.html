@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%B2%3C/text%3E%3C/svg%3E">
 <title>Scarred Lands — Campaign Roller</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -528,11 +530,11 @@ async function boot(lang){
  const prev=region;
  showLoading(lang==="gr"?"Φόρτωση δεδομένων… (το αρχείο NPC είναι ~9MB, μια στιγμή)":"Fetching the world… (the NPC file is ~5MB, one moment)");
  try{
-  ingest(await fetchCsv(FILES.npc[lang]));
-  ingest(await fetchCsv(FILES.wx[lang]));
-  if(!GRP.length||!SET.length||!CAL.length||!HOL.length){
-   for(const f of FILES.neutral){ingest(await fetchCsv(f));}
-  }
+  // Fetch the CSVs concurrently (their ingest order doesn't matter — each keys off its own columns).
+  const needNeutral=!GRP.length||!SET.length||!CAL.length||!HOL.length;
+  const names=[FILES.npc[lang],FILES.wx[lang],...(needNeutral?FILES.neutral:[])];
+  const texts=await Promise.all(names.map(fetchCsv));
+  for(const t of texts)ingest(t);
   LANG=lang;try{localStorage.setItem("sl_lang",lang);}catch(e){}
   drawLang();
   // Follow the Drift: on first load default to the region the simulator says it floats above.

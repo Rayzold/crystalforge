@@ -46,7 +46,15 @@ function processNpcFile(inName, suffix) {
   const lines = readLines(path.join(IN, inName));
   const src = lines[0].split("^");
   if (src.length !== NPC_HEADER_EN.length)
-    console.warn(`  ! ${inName}: expected ${NPC_HEADER_EN.length} columns, found ${src.length}`);
+    throw new Error(`${inName}: expected ${NPC_HEADER_EN.length} columns, found ${src.length} — schema changed; update NPC_HEADER_EN / DROP_IDX before re-running.`);
+  // The English export must match the canonical schema by name; we slice GM columns by INDEX,
+  // so a silent column reorder/rename would leak or mislabel data. Fail loud instead. (The Greek
+  // file renames headers, so only positions can be checked there — the length check above covers it.)
+  if (suffix === "") {
+    const mismatch = NPC_HEADER_EN.findIndex((name, i) => src[i] !== name);
+    if (mismatch >= 0)
+      throw new Error(`${inName}: column ${mismatch} is "${src[mismatch]}", expected "${NPC_HEADER_EN[mismatch]}" — schema changed; update NPC_HEADER_EN / DROP_IDX (Tactics_Note, Connections) before re-running.`);
+  }
   const regionAt = REGION_AT;
   const keepFull = KEEP_FULL;
   const keepIndex = KEEP_INDEX;

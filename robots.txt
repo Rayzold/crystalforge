@@ -1,0 +1,18 @@
+# Crystal Forge — GitHub Pages project site served at /crystalforge/
+#
+# IMPORTANT: robots.txt is only honored at the HOST ROOT
+# (https://rayzold.github.io/robots.txt). This copy lives at
+# /crystalforge/robots.txt, which the major crawlers do NOT read. To actually
+# bind Googlebot etc., copy the rules below into a robots.txt at the root of the
+# rayzold.github.io Pages repo. The GM roller page also carries a <meta
+# robots="noindex"> tag, which works regardless of this file.
+#
+# Player-safe material (the World Catalogue, its data-players shards, the
+# Homebrew Codex, the Drift Register) is intentionally left crawlable.
+
+User-agent: *
+# GM-only: the campaign roller and its full CSVs, which include GM notes
+# (Tactics_Note, Connections). These are fetched by script, not linked, so they
+# are already unlikely to be crawled — this is defense in depth.
+Disallow: /crystalforge/scarred-lands/data/
+Disallow: /crystalforge/scarred-lands/roller.html
