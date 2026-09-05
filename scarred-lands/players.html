@@ -83,6 +83,17 @@ select.f{width:100%;background:var(--panel);color:var(--star);border:1px solid v
 .sortrow{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--dim)}
 .sortrow select{background:var(--panel);color:var(--star);border:1px solid var(--rule);border-radius:5px;
  padding:6px 8px;font-family:var(--sans);font-size:13px}
+.randbtn{background:var(--panel);border:1px solid var(--rule);color:var(--star);border-radius:5px;
+ font-family:var(--sans);font-size:13px;padding:6px 11px;cursor:pointer;white-space:nowrap}
+.randbtn:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
+.randbtn:disabled{opacity:.4;cursor:default}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--panel-2);border:1px solid var(--rule);
+ color:var(--star);border-radius:99px;font-family:var(--sans);font-size:12.5px;padding:4px 10px;cursor:pointer;max-width:100%}
+.chip:hover{border-color:var(--rose)}
+.chip-x{color:var(--dim);font-size:14px;line-height:1}.chip:hover .chip-x{color:var(--rose)}
+.chip--clear{background:none;color:var(--dim);border-style:dashed}
+.chip--clear:hover{border-color:var(--cyan);color:var(--star)}
 .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:14px}
 .npc-card{background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:14px 15px;cursor:pointer;
  display:flex;flex-direction:column;gap:8px;text-align:left;font-family:var(--sans);color:inherit}
@@ -222,14 +233,14 @@ const T={en:{people:"souls",members:"members",strong:"strong",pop:"pop.",statted
    level:"Level",settlement:"Settlement",anySet:"Any settlement",results:"results",sortBy:"Sort",
    region:"Region",faction:"Faction",cls:"Class",anc:"Ancestry",disp:"Disposition",type:"Type",kind:"Kind",
    loadDetail:"Opening the file…",backGrid:"← Back",membersHere:"Who lives here",noneStatted:"No statted NPCs recorded for this settlement.",
-   filters:"Filters",done:"Done",copySb:"Copy statblock",copied:"Copied ✓",copyFail:"Copy failed"},
+   filters:"Filters",done:"Done",copySb:"Copy statblock",copied:"Copied ✓",copyFail:"Copy failed",random:"🎲 Surprise me"},
   gr:{people:"ψυχές",members:"μέλη",strong:"δυνατοί",pop:"πληθ.",statted:"εδώ",
    noNpc:"Κανείς δεν ταιριάζει.",noNpcSub:"Χαλάρωσε ή καθάρισε τα φίλτρα.",
    npcTab:"NPC",clear:"Καθαρισμός φίλτρων",searchNpc:"Αναζήτηση ονόματος ή ρόλου…",searchGrp:"Αναζήτηση ομάδας…",searchSet:"Αναζήτηση οικισμού…",
    level:"Επίπεδο",settlement:"Οικισμός",anySet:"Κάθε οικισμός",results:"αποτελέσματα",sortBy:"Ταξινόμηση",
    region:"Περιοχή",faction:"Παράταξη",cls:"Κλάση",anc:"Καταγωγή",disp:"Διάθεση",type:"Τύπος",kind:"Είδος",
    loadDetail:"Άνοιγμα…",backGrid:"← Πίσω",membersHere:"Ποιοι ζουν εδώ",noneStatted:"Δεν υπάρχουν καταγεγραμμένοι NPC εδώ.",
-   filters:"Φίλτρα",done:"Έτοιμο",copySb:"Αντιγραφή",copied:"Αντιγράφηκε ✓",copyFail:"Αποτυχία"}};
+   filters:"Φίλτρα",done:"Έτοιμο",copySb:"Αντιγραφή",copied:"Αντιγράφηκε ✓",copyFail:"Αποτυχία",random:"🎲 Έκπληξη"}};
 let LANG=(()=>{try{return localStorage.getItem("sl_lang")==="gr"?"gr":"en"}catch(e){return"en"}})();
 const tr=k=>(T[LANG]||T.en)[k];
 // Which region the simulator says the Drift floats above (shared same-origin localStorage).
@@ -362,6 +373,36 @@ function facetBlock(key,field,map){
    <input type="checkbox" data-facet="${key}" data-value="${esc(v)}" ${sel.has(v)?'checked':''}>
    <span class="lbl">${drift?'<span style="color:var(--gold)">⛯</span> ':''}${esc(v)}</span><span class="n">${n.toLocaleString()}</span></label>`}).join("")}</div></div>`;
 }
+// ---------- active-filter chips (removable, visible above results — key on mobile) ----------
+function activeChips(){
+ const f=model.f,chips=[];
+ const multi=model.tab==="groups"?["region","faction","type","disp"]
+   :model.tab==="settlements"?["region","kind"]
+   :["region","faction","cls","anc","disp"];
+ for(const key of multi)for(const v of f[key])chips.push({facet:key,value:v,label:v});
+ if(model.tab==="catalogue"){
+  if(f.lmin!==1||f.lmax!==20)chips.push({facet:"level",value:"",label:`${tr("level")} ${f.lmin}–${f.lmax}`});
+  if(f.settlement){const s=settleFromIndex.get(f.settlement);chips.push({facet:"settlement",value:"",label:s?s.name:f.settlement});}
+ }
+ if(f.q)chips.push({facet:"q",value:"",label:`"${f.q}"`});
+ return chips;
+}
+function chipsBar(){
+ const chips=activeChips();if(!chips.length)return"";
+ return `<div class="chips">${chips.map(c=>
+   `<button class="chip" data-chip-facet="${c.facet}" data-chip-value="${esc(c.value)}" title="Remove">${esc(c.label)}<span class="chip-x">×</span></button>`).join("")}
+   <button class="chip chip--clear" data-chip-clear>${esc(tr("clear"))}</button></div>`;
+}
+function bindChips(){
+ document.querySelectorAll("[data-chip-facet]").forEach(b=>b.onclick=()=>{
+  const facet=b.dataset.chipFacet,value=b.dataset.chipValue,f=model.f;
+  if(["region","faction","cls","anc","disp","type","kind"].includes(facet))f[facet].delete(value);
+  else if(facet==="level"){f.lmin=1;f.lmax=20;}
+  else if(facet==="settlement")f.settlement="";
+  else if(facet==="q")f.q="";
+  model.page=1;pushURL(true);renderRail();renderContent();});
+ const clr=document.querySelector("[data-chip-clear]");if(clr)clr.onclick=clearAll;
+}
 function renderRail(){
  const rail=document.getElementById("rail");const f=model.f;
  const ph=model.tab==="groups"?tr("searchGrp"):model.tab==="settlements"?tr("searchSet"):tr("searchNpc");
@@ -441,14 +482,19 @@ function renderCatalogue(){
  const total=list.length,pages=Math.max(1,Math.ceil(total/PAGE_SIZE));
  if(model.page>pages)model.page=pages;
  const start=(model.page-1)*PAGE_SIZE,slice=list.slice(start,start+PAGE_SIZE);
- let html=`<div class="toolbar">
+ let html=`${chipsBar()}<div class="toolbar">
    <div class="result-n"><b>${total.toLocaleString()}</b> ${esc(tr("results"))}</div>
-   <div class="sortrow"><span>${esc(tr("sortBy"))}</span><select id="sortSel">
+   <div class="sortrow">
+     <button class="randbtn" data-random type="button" ${total?"":"disabled"}>${esc(tr("random"))}</button>
+     <span>${esc(tr("sortBy"))}</span><select id="sortSel">
      ${SORTS.map(([v,l])=>`<option value="${v}" ${model.sort===v?'selected':''}>${esc(l)}</option>`).join("")}</select></div></div>`;
  html+=total?`<div class="cat-grid">${slice.map(npcCardMini).join("")}</div>${pager(pages)}`
   :`<div class="empty"><h3>${esc(tr("noNpc"))}</h3><p>${esc(tr("noNpcSub"))}</p></div>`;
  document.getElementById("content").innerHTML=html;
  const ss=document.getElementById("sortSel");if(ss)ss.onchange=()=>{model.sort=ss.value;model.page=1;pushURL(true);renderCatalogue()};
+ const rb=document.querySelector("[data-random]");if(rb)rb.onclick=()=>{
+   const pool=npcIndex.filter(n=>npcMatch(n,null));if(!pool.length)return;
+   openNpc(pool[Math.floor(Math.random()*pool.length)].ID)};
  bindPager();bindNpcButtons();
  document.getElementById("count").innerHTML=`<b>${npcIndex.length.toLocaleString()}</b> ${esc(tr("people"))} · <b>${regionsList.length}</b> ${LANG==="gr"?"περιοχές":"regions"}`;
 }
@@ -467,7 +513,7 @@ function bindPager(){document.querySelectorAll("[data-page]").forEach(b=>b.oncli
 function renderGroups(){
  if(!groups){document.getElementById("content").innerHTML=loadingBox();return}
  const list=groups.filter(g=>grpMatch(g,null)).sort((a,b)=>a.Group_Name.localeCompare(b.Group_Name));
- let html=`<div class="toolbar"><div class="result-n"><b>${list.length.toLocaleString()}</b> ${esc(tr("results"))}</div></div>`;
+ let html=`${chipsBar()}<div class="toolbar"><div class="result-n"><b>${list.length.toLocaleString()}</b> ${esc(tr("results"))}</div></div>`;
  html+=list.length?`<div class="stack">${list.map(groupCard).join("")}</div>`
   :`<div class="empty"><h3>${esc(tr("noNpc"))}</h3><p>${esc(tr("noNpcSub"))}</p></div>`;
  document.getElementById("content").innerHTML=html;
@@ -497,7 +543,7 @@ function renderSettlements(){
  if(!settlements){document.getElementById("content").innerHTML=loadingBox();return}
  if(model.setDetail)return renderSettlementDetail(model.setDetail);
  const list=settlements.filter(s=>setMatch(s,null)).sort((a,b)=>a.Name.localeCompare(b.Name));
- let html=`<div class="toolbar"><div class="result-n"><b>${list.length.toLocaleString()}</b> ${esc(tr("results"))}</div></div>`;
+ let html=`${chipsBar()}<div class="toolbar"><div class="result-n"><b>${list.length.toLocaleString()}</b> ${esc(tr("results"))}</div></div>`;
  html+=list.length?`<div class="stack">${list.map(settleCard).join("")}</div>`
   :`<div class="empty"><h3>${esc(tr("noNpc"))}</h3><p>${esc(tr("noNpcSub"))}</p></div>`;
  document.getElementById("content").innerHTML=html;
@@ -617,6 +663,7 @@ function renderContent(){
  if(model.tab==="catalogue")renderCatalogue();
  else if(model.tab==="groups")renderGroups();
  else renderSettlements();
+ bindChips();
 }
 function drawLang(){const el=document.getElementById("langtog");
  el.innerHTML=[["en","EN"],["gr","ΕΛ"]].map(([k,l])=>`<button class="${LANG===k?'on':''}" data-lang="${k}">${l}</button>`).join("");
