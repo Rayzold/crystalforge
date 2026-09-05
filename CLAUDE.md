@@ -28,13 +28,13 @@ Crystal Forge is a static browser-based fantasy settlement simulator (GM control
 
 ## Current Version
 
-- `APP_VERSION = "v1.7.22"` — `content/Config.js`. Monotonic, used by Firebase publish safety checks.
+- `APP_VERSION = "v1.7.23"` — `content/Config.js`. Monotonic, used by Firebase publish safety checks.
 - `APP_RELEASE_STAGE = "preview"`
 - `SAVE_VERSION = 12`
 - `MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3"`
-- Last pushed: `b48a1c8 feat(scarred-lands): World Catalogue + GM Roller online, and the Drift's position bridges to both`
+- Last pushed: `d81a78c feat(scarred-lands): the Drift's region follows across all three tools; copy-statblock in the catalogue`
 
-**Cache-buster:** the whole tree is now uniform on the **timestamp form** `?v=v1.7.22-20260904120000` (the legacy `?v=2.0.X` tokens are fully gone). Bump by global-replacing the single current token string across all `*.js`/`*.html` (593 occurrences) — one `perl -pi -e` sweep does it — and bump `APP_VERSION` for user-facing changes.
+**Cache-buster:** the whole tree is now uniform on the **timestamp form** `?v=v1.7.23-20260905130000` (the legacy `?v=2.0.X` tokens are fully gone). Bump by global-replacing the single current token string across all `*.js`/`*.html` (593 occurrences) — one `perl -pi -e` sweep does it — and bump `APP_VERSION` for user-facing changes.
 
 ---
 
@@ -202,6 +202,12 @@ The 📜 / 🌙 button in the top-nav fires `data-action="toggle-theme"`. Implem
 ## Session Log
 
 > After each session, append an entry. Keep entries short — 3–5 bullets max. Delete entries older than ~10 sessions.
+
+### 2026-09-05 — Region-sync bridge + copy-statblock (post-publish polish)
+- **Same-origin localStorage bridge**: `app.js` `mirrorDriftRegion(state)` writes `settings.driftRegion` → `localStorage["sl_drift_region"]` both in the gameState subscriber AND once at init (subscriber does NOT fire on first load — that gap cost a debug cycle). All `/crystalforge/` pages share this key. The roller (`roller.html` boot + drawRegions) now defaults to and ⛯-marks the Drift's region; the catalogue (`players.html` facetBlock) ⛯-marks it in the Region facet.
+- **Copy statblock**: `players.html` NPC detail gains a button → `npcStatblockText(n)` (player-safe plain text) → `navigator.clipboard.writeText`. Works only under real user activation (secure context ✓); verified live via a real click (harness confirmed the OS clipboard write). EN/ΕΛ keys `copySb/copied/copyFail`.
+- Verification trap: `computer left_click` with an **emulated** (scaled) viewport lands in the wrong frame — reset to native (`preset:"desktop"`) so screenshot coords map 1:1, then click by coordinate. Programmatic `.click()` and `javascript_tool` calls carry no user activation, so clipboard writes fail there regardless.
+- Bumped `APP_VERSION` v1.7.22→v1.7.23 + build note; token sweep to `v1.7.23-20260905130000`. Last commit: `d81a78c`.
 
 ### 2026-09-04 — World Catalogue + GM Roller published; the Drift's position bridges the two apps
 - New `scarred-lands/players.html` — a faceted, e-commerce-style catalogue over **10,000** player-safe NPCs (8 region shards). Index-driven live-count facets, level slider, region-scoped settlement dropdown, paginated 36/page, sort, `?region=<slug>` URL state, lazy shard-loaded detail, Groups + Settlements tabs, EN/ΕΛ, mobile drawer. **No link to the GM roller.**
