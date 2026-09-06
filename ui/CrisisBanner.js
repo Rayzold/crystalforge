@@ -1,6 +1,6 @@
-import { escapeHtml } from "../engine/Utils.js?v=v1.7.23-20260905130000";
-import { getEmergencyStatus } from "../systems/ResourceSystem.js?v=v1.7.23-20260905130000";
-import { getSuggestedFocusForAlert, getSuggestedFocusForEvent } from "../systems/TownFocusSystem.js?v=v1.7.23-20260905130000";
+import { escapeHtml } from "../engine/Utils.js?v=v1.7.24-20260907120000";
+import { getEmergencyStatus } from "../systems/ResourceSystem.js?v=v1.7.24-20260907120000";
+import { getSuggestedFocusForAlert, getSuggestedFocusForEvent } from "../systems/TownFocusSystem.js?v=v1.7.24-20260907120000";
 
 const RARITY_WEIGHTS = {
   Common: 1,

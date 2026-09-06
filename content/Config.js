@@ -1,14 +1,14 @@
 // Central configuration and boot-time defaults.
 // This file defines versioning, starting presets, high-level tuning constants,
 // route metadata, and user-facing build notes that explain what changed.
-import { BUILDING_POOLS } from "./BuildingPools.js?v=v1.7.23-20260905130000";
-import { BASE_DISTRICT_CONFIG } from "./DistrictConfig.js?v=v1.7.23-20260905130000";
-import { CITIZEN_CLASSES } from "./CitizenConfig.js?v=v1.7.23-20260905130000";
-import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js?v=v1.7.23-20260905130000";
+import { BUILDING_POOLS } from "./BuildingPools.js?v=v1.7.24-20260907120000";
+import { BASE_DISTRICT_CONFIG } from "./DistrictConfig.js?v=v1.7.24-20260907120000";
+import { CITIZEN_CLASSES } from "./CitizenConfig.js?v=v1.7.24-20260907120000";
+import { RARITY_ORDER, RARITY_POWER } from "./Rarities.js?v=v1.7.24-20260907120000";
 
 export const APP_NAME = "Crystal Forge";
 // APP_VERSION must stay monotonic because Firebase publish safety compares builds numerically.
-export const APP_VERSION = "v1.7.23";
+export const APP_VERSION = "v1.7.24";
 // Release maturity is tracked separately so unreleased builds do not need to pretend they are public/stable.
 export const APP_RELEASE_STAGE = "preview";
 const RELEASE_STAGE_LABELS = {
@@ -69,6 +69,7 @@ export const PAGE_ROUTES = [
   { key: "compendium", label: "Homebrew Codex", href: "./scarred-lands/index.html" },
   { key: "register", label: "Drift Register", href: "./scarred-lands/npcs.html" },
   { key: "catalogue", label: "World Catalogue", href: "./scarred-lands/players.html" },
+  { key: "gmcatalogue", label: "GM Catalogue", href: "./scarred-lands/gm-catalogue.html" },
   { key: "roller", label: "GM Roller", href: "./scarred-lands/roller.html" },
   { key: "help", label: "Help", href: "./help.html" }
 ];
@@ -87,6 +88,7 @@ export const DRIFT_BELOW_REGIONS = [
   { name: "Datasphere's Reach", slug: "dataspheres-reach" }
 ];
 export const BUILD_NOTES = [
+  "A GM Catalogue joins the Scarred Lands dropdown: the same faceted browser as the World Catalogue, but over the full GM records — each NPC's tactics and ties restored, and each group's true purpose shown. It's noindex'd and GM-only, the browsable companion to the encounter roller.",
   "The Drift's position now travels with you: set which region it floats above on the GM home, and the Scarred Lands GM Roller opens on that region while the World Catalogue marks it — one shared world across all three tools. Each NPC in the catalogue also gets a one-click 'Copy statblock' for pasting into notes or a VTT.",
   "The Scarred Lands dropdown now reaches the whole world below the Drift: a World Catalogue of 10,000 NPCs you can filter by region, faction, class, ancestry, disposition and level, plus a GM Roller for daily weather-and-encounter draws. The GM home now sets which region the Drift floats above, the player screen shows it, and 'See the world below' deep-links straight into that region's catalogue.",
   "A new Army page consolidates the city's fighting strength in one muster: martial citizen units split offensive/defensive, Awakened operatives by grade, active defensive structures, the vessel fleet, and held behemoth war beasts.",

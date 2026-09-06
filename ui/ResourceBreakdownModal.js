@@ -1,9 +1,9 @@
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.23-20260905130000";
-import { getActiveConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js?v=v1.7.23-20260905130000";
-import { getBasePopulationSupport } from "../systems/DriftEvolutionSystem.js?v=v1.7.23-20260905130000";
-import { getHousingStrainPenalty } from "../systems/CityConditionSystem.js?v=v1.7.23-20260905130000";
-import { getEconomyContributionBreakdown, getEconomyDebugSummary } from "../systems/ResourceSystem.js?v=v1.7.23-20260905130000";
-import { renderUiIcon } from "./UiIcons.js?v=v1.7.23-20260905130000";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.24-20260907120000";
+import { getActiveConstructionQueue, getConstructionEtaDetails } from "../systems/ConstructionSystem.js?v=v1.7.24-20260907120000";
+import { getBasePopulationSupport } from "../systems/DriftEvolutionSystem.js?v=v1.7.24-20260907120000";
+import { getHousingStrainPenalty } from "../systems/CityConditionSystem.js?v=v1.7.24-20260907120000";
+import { getEconomyContributionBreakdown, getEconomyDebugSummary } from "../systems/ResourceSystem.js?v=v1.7.24-20260907120000";
+import { renderUiIcon } from "./UiIcons.js?v=v1.7.24-20260907120000";
 
 const RESOURCE_META = {
   gold: {

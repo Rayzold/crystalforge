@@ -16,3 +16,4 @@ User-agent: *
 # are already unlikely to be crawled — this is defense in depth.
 Disallow: /crystalforge/scarred-lands/data/
 Disallow: /crystalforge/scarred-lands/roller.html
+Disallow: /crystalforge/scarred-lands/gm-catalogue.html

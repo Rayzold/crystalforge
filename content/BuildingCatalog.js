@@ -1,8 +1,8 @@
 // Building catalog source of truth.
 // This file classifies buildings, assigns flavor/district/tags/icons, and
 // creates the rarity-aware catalog entries used by manifestations and UI.
-import { BUILDING_POOLS } from "./BuildingPools.js?v=v1.7.23-20260905130000";
-import { RARITY_ORDER } from "./Rarities.js?v=v1.7.23-20260905130000";
+import { BUILDING_POOLS } from "./BuildingPools.js?v=v1.7.24-20260907120000";
+import { RARITY_ORDER } from "./Rarities.js?v=v1.7.24-20260907120000";
 
 const KEYWORD_CLASSIFIERS = [
   { match: ["farm", "apiary", "pond", "garden", "grove", "fish", "mill", "grain", "barn", "butcher", "smokehouse", "herbal", "beast", "cider", "water trough"], district: "Agricultural District", tags: ["agriculture"], iconKey: "leaf" },

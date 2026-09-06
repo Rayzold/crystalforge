@@ -10,8 +10,8 @@
 // with [data-town-map-mount], pulls cells/buildings/overlay from state,
 // draws into the canvas, and wires mouse interactions.
 
-import { MAP_CONFIG } from "../content/MapConfig.js?v=v1.7.23-20260905130000";
-import { RARITY_COLORS } from "../content/Rarities.js?v=v1.7.23-20260905130000";
+import { MAP_CONFIG } from "../content/MapConfig.js?v=v1.7.24-20260907120000";
+import { RARITY_COLORS } from "../content/Rarities.js?v=v1.7.24-20260907120000";
 
 const TWO_PI = Math.PI * 2;
 const SQRT3 = Math.sqrt(3);

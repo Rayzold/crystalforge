@@ -1,11 +1,11 @@
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.23-20260905130000";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.24-20260907120000";
 import {
   formatExpeditionDisplayName,
   getCurrentPendingExpeditionJourney,
   getExpeditionJourneyOptionPreview,
   getExpeditionJourneyProjection
-} from "../systems/ExpeditionSystem.js?v=v1.7.23-20260905130000";
-import { renderUiIcon } from "./UiIcons.js?v=v1.7.23-20260905130000";
+} from "../systems/ExpeditionSystem.js?v=v1.7.24-20260907120000";
+import { renderUiIcon } from "./UiIcons.js?v=v1.7.24-20260907120000";
 
 function formatSignedDelta(value, decimals = 0) {
   const numericValue = Number(value ?? 0) || 0;

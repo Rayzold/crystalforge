@@ -1,8 +1,8 @@
-import { TOWN_FOCUS_DEFINITIONS } from "../content/TownFocusConfig.js?v=v1.7.23-20260905130000";
-import { RARITY_ORDER } from "../content/Rarities.js?v=v1.7.23-20260905130000";
-import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js?v=v1.7.23-20260905130000";
-import { calculateDailyResourceDelta } from "../systems/ResourceSystem.js?v=v1.7.23-20260905130000";
-import { getCurrentTownFocus, getMayorSuggestions } from "../systems/TownFocusSystem.js?v=v1.7.23-20260905130000";
+import { TOWN_FOCUS_DEFINITIONS } from "../content/TownFocusConfig.js?v=v1.7.24-20260907120000";
+import { RARITY_ORDER } from "../content/Rarities.js?v=v1.7.24-20260907120000";
+import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js?v=v1.7.24-20260907120000";
+import { calculateDailyResourceDelta } from "../systems/ResourceSystem.js?v=v1.7.24-20260907120000";
+import { getCurrentTownFocus, getMayorSuggestions } from "../systems/TownFocusSystem.js?v=v1.7.24-20260907120000";
 
 const RESOURCE_KEYS = ["gold", "food", "materials", "mana", "prosperity"];
 const STAT_KEYS = ["defense", "security", "morale", "health", "prestige", "prosperity"];

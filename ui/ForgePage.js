@@ -1,8 +1,8 @@
-import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.23-20260905130000";
-import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js?v=v1.7.23-20260905130000";
-import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.23-20260905130000";
-import { renderCrystalSelector } from "./CrystalSelector.js?v=v1.7.23-20260905130000";
-import { renderManifestPanel } from "./ManifestPanel.js?v=v1.7.23-20260905130000";
+import { escapeHtml, formatNumber } from "../engine/Utils.js?v=v1.7.24-20260907120000";
+import { RARITY_COLORS, RARITY_ORDER } from "../content/Rarities.js?v=v1.7.24-20260907120000";
+import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.24-20260907120000";
+import { renderCrystalSelector } from "./CrystalSelector.js?v=v1.7.24-20260907120000";
+import { renderManifestPanel } from "./ManifestPanel.js?v=v1.7.24-20260907120000";
 
 function renderQuickAddCrystals(state) {
   return `

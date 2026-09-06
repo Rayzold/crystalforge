@@ -4,7 +4,7 @@
 // slice is empty the page renders a single starter character so the screen is
 // never blank — actual persistence requires hooking the data-action handlers
 // listed in the integration block at the bottom of this file.
-import { escapeHtml } from "../engine/Utils.js?v=v1.7.23-20260905130000";
+import { escapeHtml } from "../engine/Utils.js?v=v1.7.24-20260907120000";
 
 // 13 slots, distributed into a 3-column paper-doll layout (left | center | right).
 // Column + order pins each slot to a CSS grid cell.
@@ -1053,7 +1053,7 @@ const PAGE_STYLES = `
 //      PAGE_ROUTES.push({ key: "equipment", label: "Equipment", path: "./equipment.html" });
 //
 // 2. Add a case to your router/UIRenderer switch:
-//      import { renderEquipmentSheetPage } from "./ui/EquipmentSheetPage.js?v=v1.7.23-20260905130000";
+//      import { renderEquipmentSheetPage } from "./ui/EquipmentSheetPage.js?v=v1.7.24-20260907120000";
 //      case "equipment": return renderEquipmentSheetPage(state);
 //
 // 3. Initialize state slice (idempotent, in your state bootstrap):

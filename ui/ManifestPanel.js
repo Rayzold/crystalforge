@@ -1,7 +1,7 @@
-import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.23-20260905130000";
-import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js?v=v1.7.23-20260905130000";
-import { formatBuildingExactQualityDisplay, getBuildingCatalogStatusLabel, getBuildingMultiplier } from "../systems/BuildingSystem.js?v=v1.7.23-20260905130000";
-import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.23-20260905130000";
+import { getBuildingEconomySummary, getBuildingEmoji } from "../content/BuildingCatalog.js?v=v1.7.24-20260907120000";
+import { escapeHtml, formatNumber, formatSigned } from "../engine/Utils.js?v=v1.7.24-20260907120000";
+import { formatBuildingExactQualityDisplay, getBuildingCatalogStatusLabel, getBuildingMultiplier } from "../systems/BuildingSystem.js?v=v1.7.24-20260907120000";
+import { renderBuildingArt } from "./BuildingArt.js?v=v1.7.24-20260907120000";
 
 function renderMetricList(entries, emptyLabel) {
   if (!entries.length) {
