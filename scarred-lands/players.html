@@ -96,9 +96,14 @@ select.f{width:100%;background:var(--panel);color:var(--star);border:1px solid v
 .chip--clear{background:none;color:var(--dim);border-style:dashed}
 .chip--clear:hover{border-color:var(--cyan);color:var(--star)}
 .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:14px}
-.npc-card{background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:14px 15px;cursor:pointer;
+.npc-card{background:var(--panel);border:1px solid var(--rule);border-left-width:3px;border-radius:8px;padding:14px 15px 13px;cursor:pointer;
  display:flex;flex-direction:column;gap:8px;text-align:left;font-family:var(--sans);color:inherit}
 .npc-card:hover{border-color:var(--cyan);background:var(--panel-2)}
+.nc-head{display:flex;gap:10px;align-items:flex-start}
+.nc-avatar{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+ font-family:var(--sans);font-weight:700;font-size:13px;letter-spacing:.02em;color:#ece3cf;
+ box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.nc-id{min-width:0}
 .npc-card .nm{font-family:var(--serif);font-weight:600;font-size:17px;line-height:1.15;letter-spacing:-.01em}
 .npc-card .who{font-size:12.5px;color:var(--dim);line-height:1.4}
 .npc-card .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:2px}
@@ -220,6 +225,11 @@ const slug=s=>s.toLowerCase().replace(/'/g,"").replace(/[^a-z0-9]+/g,"-").replac
 const crNum=cr=>{const s=String(cr==null?"":cr).trim();if(!s||s==="-"||s==="—")return 0;
  if(s.includes("/")){const[a,b]=s.split("/").map(Number);return b?a/b:0}const n=parseFloat(s);return isNaN(n)?0:n};
 const dispoClass=v=>/Friendly|Φιλικ/.test(v)?"d-good":/Hostile|Εχθρικ/.test(v)?"d-bad":"d-mid";
+// Give each NPC a visual anchor: a monogram disc tinted by class (a curated hue per
+// standard class, hashed fallback for anything else), and a matching card accent.
+const CLASS_HUE={Fighter:6,Barbarian:18,Ranger:130,Druid:96,Rogue:284,Monk:38,Bard:322,Cleric:48,Paladin:212,Wizard:248,Sorcerer:350,Warlock:266,Artificer:190};
+const classHue=cls=>CLASS_HUE[cls]??([...String(cls||"")].reduce((a,c)=>a+c.charCodeAt(0),0)%360);
+const initials=name=>{const p=String(name||"").trim().split(/\s+/);return((p[0]||"")[0]||"?")+((p[1]||"")[0]||"")};
 function debounce(fn,ms){let h;return(...a)=>{clearTimeout(h);h=setTimeout(()=>fn(...a),ms)}}
 function toObjects(rows){const h=rows[0].map(x=>x.trim());return rows.slice(1).map(r=>{const o={};h.forEach((k,i)=>o[k]=(r[i]||"").trim());return o})}
 
@@ -470,9 +480,11 @@ function clearAll(){const f=model.f;
 /* ---------- content: catalogue ---------- */
 function npcCardMini(n){
  const sub=n.Subclass&&n.Subclass!=="-"?" · "+esc(n.Subclass):"";
- return `<button class="npc-card" data-npc="${esc(n.ID)}">
-  <div class="nm">${esc(n.Name)}</div>
-  <div class="who">${esc(n.Ancestry)} ${esc(n.Class)}${sub}<br>${esc(n.Role)} · ${esc(n.Faction)}</div>
+ const h=classHue(n.Class);
+ return `<button class="npc-card" data-npc="${esc(n.ID)}" style="border-left-color:hsl(${h} 60% 52%)">
+  <div class="nc-head"><span class="nc-avatar" style="background:hsl(${h} 46% 40%)" aria-hidden="true">${esc(initials(n.Name))}</span>
+   <div class="nc-id"><div class="nm">${esc(n.Name)}</div>
+    <div class="who">${esc(n.Ancestry)} ${esc(n.Class)}${sub}<br>${esc(n.Role)} · ${esc(n.Faction)}</div></div></div>
   <div class="foot"><span class="lvlcr">Lv <b>${n.lvl}</b> · CR <b>${esc(n.CR)}</b></span>
    <span class="pill ${dispoClass(n.Disposition)}">${esc(n.Disposition)}</span></div>
   <div class="tags"><span class="tag reg">${esc(n.Region)}</span>${n.settlementName?`<span class="tag">${esc(n.settlementName)}</span>`:""}</div>

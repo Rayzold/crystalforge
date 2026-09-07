@@ -97,9 +97,14 @@ select.f{width:100%;background:var(--panel);color:var(--star);border:1px solid v
 .chip--clear{background:none;color:var(--dim);border-style:dashed}
 .chip--clear:hover{border-color:var(--cyan);color:var(--star)}
 .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:14px}
-.npc-card{background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:14px 15px;cursor:pointer;
+.npc-card{background:var(--panel);border:1px solid var(--rule);border-left-width:3px;border-radius:8px;padding:14px 15px 13px;cursor:pointer;
  display:flex;flex-direction:column;gap:8px;text-align:left;font-family:var(--sans);color:inherit}
 .npc-card:hover{border-color:var(--cyan);background:var(--panel-2)}
+.nc-head{display:flex;gap:10px;align-items:flex-start}
+.nc-avatar{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+ font-family:var(--sans);font-weight:700;font-size:13px;letter-spacing:.02em;color:#ece3cf;
+ box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.nc-id{min-width:0}
 .npc-card .nm{font-family:var(--serif);font-weight:600;font-size:17px;line-height:1.15;letter-spacing:-.01em}
 .npc-card .who{font-size:12.5px;color:var(--dim);line-height:1.4}
 .npc-card .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:2px}
@@ -175,6 +180,9 @@ ul.items{margin:0;padding-left:18px}
 .gm-tag{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.06em;color:#16101A;
  background:var(--rose);border-radius:3px;padding:1px 5px;margin-left:6px;vertical-align:middle}
 .bc-purpose{color:var(--gold)!important;font-style:italic}
+.tie-link{background:none;border:0;padding:0;margin:0;font:inherit;color:var(--cyan);cursor:pointer;
+ text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px}
+.tie-link:hover{color:var(--star)}
 /* mobile drawer */
 .drawer-toggle{display:none;background:var(--gold);color:#191F2E;border:0;border-radius:6px;font-weight:600;
  font-family:var(--sans);font-size:14px;padding:10px 16px;cursor:pointer;margin-bottom:16px;width:100%}
@@ -228,6 +236,15 @@ const slug=s=>s.toLowerCase().replace(/'/g,"").replace(/[^a-z0-9]+/g,"-").replac
 const crNum=cr=>{const s=String(cr==null?"":cr).trim();if(!s||s==="-"||s==="—")return 0;
  if(s.includes("/")){const[a,b]=s.split("/").map(Number);return b?a/b:0}const n=parseFloat(s);return isNaN(n)?0:n};
 const dispoClass=v=>/Friendly|Φιλικ/.test(v)?"d-good":/Hostile|Εχθρικ/.test(v)?"d-bad":"d-mid";
+// Give each NPC a visual anchor: a monogram disc tinted by class (a curated hue per
+// standard class, hashed fallback for anything else), and a matching card accent.
+const CLASS_HUE={Fighter:6,Barbarian:18,Ranger:130,Druid:96,Rogue:284,Monk:38,Bard:322,Cleric:48,Paladin:212,Wizard:248,Sorcerer:350,Warlock:266,Artificer:190};
+const classHue=cls=>CLASS_HUE[cls]??([...String(cls||"")].reduce((a,c)=>a+c.charCodeAt(0),0)%360);
+const initials=name=>{const p=String(name||"").trim().split(/\s+/);return((p[0]||"")[0]||"?")+((p[1]||"")[0]||"")};
+// Turn SL-#### references in a Ties string into buttons that open that NPC (relationship web).
+const linkTies=text=>esc(text).replace(/SL-\d+(\s*\([^)]*\))?/g,m=>{
+ const id=(m.match(/SL-\d+/)||[])[0];
+ return id&&byId.has(id)?`<button class="tie-link" data-npc="${id}">${m}</button>`:m;});
 function debounce(fn,ms){let h;return(...a)=>{clearTimeout(h);h=setTimeout(()=>fn(...a),ms)}}
 function toObjects(rows){const h=rows[0].map(x=>x.trim());return rows.slice(1).map(r=>{const o={};h.forEach((k,i)=>o[k]=(r[i]||"").trim());return o})}
 // The GM NPC exports are position-identical across languages (Greek renames headers only),
@@ -479,9 +496,11 @@ function clearAll(){const f=model.f;
 /* ---------- content: catalogue ---------- */
 function npcCardMini(n){
  const sub=n.Subclass&&n.Subclass!=="-"?" · "+esc(n.Subclass):"";
- return `<button class="npc-card" data-npc="${esc(n.ID)}">
-  <div class="nm">${esc(n.Name)}</div>
-  <div class="who">${esc(n.Ancestry)} ${esc(n.Class)}${sub}<br>${esc(n.Role)} · ${esc(n.Faction)}</div>
+ const h=classHue(n.Class);
+ return `<button class="npc-card" data-npc="${esc(n.ID)}" style="border-left-color:hsl(${h} 60% 52%)">
+  <div class="nc-head"><span class="nc-avatar" style="background:hsl(${h} 46% 40%)" aria-hidden="true">${esc(initials(n.Name))}</span>
+   <div class="nc-id"><div class="nm">${esc(n.Name)}</div>
+    <div class="who">${esc(n.Ancestry)} ${esc(n.Class)}${sub}<br>${esc(n.Role)} · ${esc(n.Faction)}</div></div></div>
   <div class="foot"><span class="lvlcr">Lv <b>${n.lvl}</b> · CR <b>${esc(n.CR)}</b></span>
    <span class="pill ${dispoClass(n.Disposition)}">${esc(n.Disposition)}</span></div>
   <div class="tags"><span class="tag reg">${esc(n.Region)}</span>${n.settlementName?`<span class="tag">${esc(n.settlementName)}</span>`:""}</div>
@@ -622,10 +641,11 @@ function renderNpcDetail(n,id){
     ${has("Speech_Quirks")?`<div class="blk"><h4>Voice</h4><p>${esc(n.Speech_Quirks)}</p></div>`:""}
     ${items.length?`<div class="blk"><h4>Carrying</h4><ul class="items">${items.map(i=>`<li>${esc(i)}</li>`).join("")}</ul></div>`:""}
     ${has("Tactics_Note")?`<div class="blk blk--gm"><h4>In a fight <span class="gm-tag">GM</span></h4><p>${esc(n.Tactics_Note)}</p></div>`:""}
-    ${conns.length?`<div class="blk blk--gm"><h4>Ties <span class="gm-tag">GM</span></h4><ul class="items">${conns.map(i=>`<li>${esc(i)}</li>`).join("")}</ul></div>`:""}
+    ${conns.length?`<div class="blk blk--gm"><h4>Ties <span class="gm-tag">GM</span></h4><ul class="items">${conns.map(i=>`<li>${linkTies(i)}</li>`).join("")}</ul></div>`:""}
   </div></div>`;
  bindOverlay();
  const cb=ov.querySelector("[data-copy]");if(cb)cb.onclick=()=>copyStatblock(n,cb);
+ ov.querySelectorAll(".tie-link[data-npc]").forEach(b=>b.onclick=()=>openNpc(b.dataset.npc));
 }
 function npcStatblockText(n){
  const has=k=>n[k]&&n[k]!=="-";
