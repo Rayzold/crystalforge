@@ -95,6 +95,28 @@ select.f{width:100%;background:var(--panel);color:var(--star);border:1px solid v
 .chip-x{color:var(--dim);font-size:14px;line-height:1}.chip:hover .chip-x{color:var(--rose)}
 .chip--clear{background:none;color:var(--dim);border-style:dashed}
 .chip--clear:hover{border-color:var(--cyan);color:var(--star)}
+.viewtog{background:var(--panel);border:1px solid var(--rule);color:var(--dim);border-radius:5px;
+ font-family:var(--sans);font-size:13px;padding:6px 11px;cursor:pointer;white-space:nowrap}
+.viewtog:hover{border-color:var(--cyan);color:var(--star)}
+.foot-right{display:flex;gap:7px;align-items:center}
+.crchip{font-size:11px;font-weight:600;padding:2px 7px;border-radius:99px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.crchip--low{background:rgba(142,156,186,.16);color:var(--dim)}
+.crchip--mid{background:rgba(119,174,190,.18);color:var(--cyan)}
+.crchip--high{background:rgba(212,175,79,.18);color:var(--gold)}
+.crchip--max{background:var(--rose);color:#16101A}
+.table-wrap{overflow-x:auto;border:1px solid var(--rule);border-radius:8px}
+.npc-table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:640px}
+.npc-table thead th{position:sticky;top:0;background:var(--panel-2);text-align:left;font-size:11px;font-weight:600;
+ letter-spacing:.04em;text-transform:uppercase;color:var(--dim);padding:9px 12px;border-bottom:1px solid var(--rule);white-space:nowrap}
+.npc-table th.num,.npc-table td.num{text-align:center;font-variant-numeric:tabular-nums}
+.npc-row{cursor:pointer;border-bottom:1px solid var(--rule)}
+.npc-row:last-child{border-bottom:0}
+.npc-row:hover{background:var(--panel-2)}
+.npc-row td{padding:9px 12px;vertical-align:middle}
+.npc-row .row-dot{display:inline-block;width:11px;height:11px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.npc-row .rn{font-family:var(--serif);font-weight:600;font-size:14.5px}
+.npc-row .rn small{display:block;font-family:var(--sans);font-weight:400;font-size:11.5px;color:var(--dim);letter-spacing:0}
+.npc-row .rc{color:var(--star)}
 .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:14px}
 .npc-card{background:var(--panel);border:1px solid var(--rule);border-left-width:3px;border-radius:8px;padding:14px 15px 13px;cursor:pointer;
  display:flex;flex-direction:column;gap:8px;text-align:left;font-family:var(--sans);color:inherit}
@@ -244,21 +266,21 @@ const T={en:{people:"souls",members:"members",strong:"strong",pop:"pop.",statted
    level:"Level",settlement:"Settlement",anySet:"Any settlement",results:"results",sortBy:"Sort",
    region:"Region",faction:"Faction",cls:"Class",anc:"Ancestry",disp:"Disposition",type:"Type",kind:"Kind",
    loadDetail:"Opening the file…",backGrid:"← Back",membersHere:"Who lives here",noneStatted:"No statted NPCs recorded for this settlement.",
-   filters:"Filters",done:"Done",copySb:"Copy statblock",copied:"Copied ✓",copyFail:"Copy failed",random:"🎲 Surprise me"},
+   filters:"Filters",done:"Done",copySb:"Copy statblock",copied:"Copied ✓",copyFail:"Copy failed",random:"🎲 Surprise me",listView:"List",cardsView:"Cards"},
   gr:{people:"ψυχές",members:"μέλη",strong:"δυνατοί",pop:"πληθ.",statted:"εδώ",
    noNpc:"Κανείς δεν ταιριάζει.",noNpcSub:"Χαλάρωσε ή καθάρισε τα φίλτρα.",
    npcTab:"NPC",clear:"Καθαρισμός φίλτρων",searchNpc:"Αναζήτηση ονόματος ή ρόλου…",searchGrp:"Αναζήτηση ομάδας…",searchSet:"Αναζήτηση οικισμού…",
    level:"Επίπεδο",settlement:"Οικισμός",anySet:"Κάθε οικισμός",results:"αποτελέσματα",sortBy:"Ταξινόμηση",
    region:"Περιοχή",faction:"Παράταξη",cls:"Κλάση",anc:"Καταγωγή",disp:"Διάθεση",type:"Τύπος",kind:"Είδος",
    loadDetail:"Άνοιγμα…",backGrid:"← Πίσω",membersHere:"Ποιοι ζουν εδώ",noneStatted:"Δεν υπάρχουν καταγεγραμμένοι NPC εδώ.",
-   filters:"Φίλτρα",done:"Έτοιμο",copySb:"Αντιγραφή",copied:"Αντιγράφηκε ✓",copyFail:"Αποτυχία",random:"🎲 Έκπληξη"}};
+   filters:"Φίλτρα",done:"Έτοιμο",copySb:"Αντιγραφή",copied:"Αντιγράφηκε ✓",copyFail:"Αποτυχία",random:"🎲 Έκπληξη",listView:"Λίστα",cardsView:"Κάρτες"}};
 let LANG=(()=>{try{return localStorage.getItem("sl_lang")==="gr"?"gr":"en"}catch(e){return"en"}})();
 const tr=k=>(T[LANG]||T.en)[k];
 // Which region the simulator says the Drift floats above (shared same-origin localStorage).
 const DRIFT_REGION=(()=>{try{return localStorage.getItem("sl_drift_region")||""}catch(e){return""}})();
 
 /* ---------- state ---------- */
-const model={tab:"catalogue",sort:"name",page:1,detail:null,setDetail:null,
+const model={tab:"catalogue",sort:"name",page:1,view:"cards",detail:null,setDetail:null,
  f:{region:new Set(),faction:new Set(),cls:new Set(),anc:new Set(),disp:new Set(),
     type:new Set(),kind:new Set(),lmin:1,lmax:20,settlement:"",q:""}};
 let npcIndex=[],byId=new Map(),regionsList=[],settleFromIndex=new Map(),loaded=false;
@@ -283,6 +305,7 @@ function serialize(){
  if(f.settlement)p.set("set",f.settlement);
  if(f.q)p.set("q",f.q);
  if(model.sort!=="name")p.set("sort",model.sort);
+ if(model.view!=="cards")p.set("view",model.view);
  if(model.page>1)p.set("p",model.page);
  if(model.detail)p.set("npc",model.detail);
  if(LANG!=="en")p.set("lang",LANG);
@@ -296,6 +319,7 @@ function readURL(){
  f.lmin=Math.max(1,Math.min(20,+p.get("lmin")||1));f.lmax=Math.max(f.lmin,Math.min(20,+p.get("lmax")||20));
  f.settlement=p.get("set")||"";f.q=p.get("q")||"";
  model.sort=p.get("sort")||"name";if(!SORTS.some(s=>s[0]===model.sort))model.sort="name";
+ const vw=p.get("view")||(()=>{try{return localStorage.getItem("sl_view")}catch(e){return null}})();model.view=vw==="list"?"list":"cards";
  model.page=Math.max(1,+p.get("p")||1);model.detail=p.get("npc")||null;
  if(p.get("lang")==="gr")LANG="gr";
  model._regionSlugs=(p.get("region")||"").split(",").filter(Boolean); // resolved to names after load
@@ -478,6 +502,7 @@ function clearAll(){const f=model.f;
  f.lmin=1;f.lmax=20;f.settlement="";f.q="";model.page=1;pushURL(true);renderRail();renderContent()}
 
 /* ---------- content: catalogue ---------- */
+const crBand=crn=>crn<=2?"low":crn<=7?"mid":crn<=12?"high":"max";
 function npcCardMini(n){
  const sub=n.Subclass&&n.Subclass!=="-"?" · "+esc(n.Subclass):"";
  const h=classHue(n.Class);
@@ -485,10 +510,29 @@ function npcCardMini(n){
   <div class="nc-head"><span class="nc-avatar" style="background:hsl(${h} 46% 40%)" aria-hidden="true">${esc(initials(n.Name))}</span>
    <div class="nc-id"><div class="nm">${esc(n.Name)}</div>
     <div class="who">${esc(n.Ancestry)} ${esc(n.Class)}${sub}<br>${esc(n.Role)} · ${esc(n.Faction)}</div></div></div>
-  <div class="foot"><span class="lvlcr">Lv <b>${n.lvl}</b> · CR <b>${esc(n.CR)}</b></span>
-   <span class="pill ${dispoClass(n.Disposition)}">${esc(n.Disposition)}</span></div>
+  <div class="foot"><span class="lvlcr">Lv <b>${n.lvl}</b></span>
+   <span class="foot-right"><span class="crchip crchip--${crBand(n.crn)}">CR ${esc(n.CR)}</span>
+    <span class="pill ${dispoClass(n.Disposition)}">${esc(n.Disposition)}</span></span></div>
   <div class="tags"><span class="tag reg">${esc(n.Region)}</span>${n.settlementName?`<span class="tag">${esc(n.settlementName)}</span>`:""}</div>
  </button>`;
+}
+function npcRow(n){
+ const sub=n.Subclass&&n.Subclass!=="-"?" · "+esc(n.Subclass):"";
+ const h=classHue(n.Class);
+ return `<tr class="npc-row" data-npc="${esc(n.ID)}">
+  <td><span class="row-dot" style="background:hsl(${h} 55% 50%)" title="${esc(n.Class)}"></span></td>
+  <td class="rn">${esc(n.Name)}<small>${esc(n.Ancestry)} · ${esc(n.Role)}</small></td>
+  <td class="rc">${esc(n.Class)}${sub}</td>
+  <td class="num">${n.lvl}</td>
+  <td class="num"><span class="crchip crchip--${crBand(n.crn)}">${esc(n.CR)}</span></td>
+  <td>${esc(n.Region)}</td>
+  <td><span class="pill ${dispoClass(n.Disposition)}">${esc(n.Disposition)}</span></td>
+ </tr>`;
+}
+function catBody(slice){
+ return model.view==="list"
+  ? `<div class="table-wrap"><table class="npc-table"><thead><tr><th aria-hidden="true"></th><th>Name</th><th>Class</th><th class="num">Lv</th><th class="num">CR</th><th>Region</th><th>Disposition</th></tr></thead><tbody>${slice.map(npcRow).join("")}</tbody></table></div>`
+  : `<div class="cat-grid">${slice.map(npcCardMini).join("")}</div>`;
 }
 function renderCatalogue(){
  const list=npcIndex.filter(n=>npcMatch(n,null)).sort(sortCmp[model.sort]);
@@ -498,13 +542,17 @@ function renderCatalogue(){
  let html=`${chipsBar()}<div class="toolbar">
    <div class="result-n"><b>${total.toLocaleString()}</b> ${esc(tr("results"))}</div>
    <div class="sortrow">
+     <button class="viewtog" data-view-toggle type="button" title="${model.view==="list"?"Switch to cards":"Switch to a compact list"}">${model.view==="list"?"▦ "+esc(tr("cardsView")):"☰ "+esc(tr("listView"))}</button>
      <button class="randbtn" data-random type="button" ${total?"":"disabled"}>${esc(tr("random"))}</button>
      <span>${esc(tr("sortBy"))}</span><select id="sortSel">
      ${SORTS.map(([v,l])=>`<option value="${v}" ${model.sort===v?'selected':''}>${esc(l)}</option>`).join("")}</select></div></div>`;
- html+=total?`<div class="cat-grid">${slice.map(npcCardMini).join("")}</div>${pager(pages)}`
+ html+=total?`${catBody(slice)}${pager(pages)}`
   :`<div class="empty"><h3>${esc(tr("noNpc"))}</h3><p>${esc(tr("noNpcSub"))}</p></div>`;
  document.getElementById("content").innerHTML=html;
  const ss=document.getElementById("sortSel");if(ss)ss.onchange=()=>{model.sort=ss.value;model.page=1;pushURL(true);renderCatalogue()};
+ const vt=document.querySelector("[data-view-toggle]");if(vt)vt.onclick=()=>{
+   model.view=model.view==="list"?"cards":"list";try{localStorage.setItem("sl_view",model.view)}catch(e){}
+   pushURL(true);renderCatalogue()};
  const rb=document.querySelector("[data-random]");if(rb)rb.onclick=()=>{
    const pool=npcIndex.filter(n=>npcMatch(n,null));if(!pool.length)return;
    openNpc(pool[Math.floor(Math.random()*pool.length)].ID)};
@@ -701,8 +749,11 @@ async function boot(){
 }
 document.getElementById("drawerToggle").onclick=()=>document.body.classList.add("drawer-open");
 document.getElementById("scrim").onclick=()=>document.body.classList.remove("drawer-open");
-document.addEventListener("keydown",e=>{if(e.key==="Escape"){
- if(!document.getElementById("detail").hidden)closeNpc();else document.body.classList.remove("drawer-open")}});
+document.addEventListener("keydown",e=>{
+ if(e.key==="Escape"){if(!document.getElementById("detail").hidden)closeNpc();else document.body.classList.remove("drawer-open");return}
+ // "/" focuses the search box (unless already typing, or a modifier is held)
+ if(e.key==="/"&&!e.metaKey&&!e.ctrlKey&&!e.altKey&&!/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)){
+  const s=document.getElementById("search");if(s){e.preventDefault();s.focus();s.select()}}});
 window.addEventListener("popstate",async()=>{
  readURL();
  if(model._regionSlugs&&model._regionSlugs.length&&regionsList.length){
