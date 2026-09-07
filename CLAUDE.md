@@ -28,13 +28,13 @@ Crystal Forge is a static browser-based fantasy settlement simulator (GM control
 
 ## Current Version
 
-- `APP_VERSION = "v1.7.23"` — `content/Config.js`. Monotonic, used by Firebase publish safety checks.
+- `APP_VERSION = "v1.7.24"` — `content/Config.js`. Monotonic, used by Firebase publish safety checks.
 - `APP_RELEASE_STAGE = "preview"`
 - `SAVE_VERSION = 12`
 - `MANUAL_SAVE_KEY = "crystal-forge-manual-save-v3"`
-- Last pushed: `d81a78c feat(scarred-lands): the Drift's region follows across all three tools; copy-statblock in the catalogue`
+- Last pushed: `6961683 feat(scarred-lands): GM Catalogue — the browsable, full-record view of every NPC`
 
-**Cache-buster:** the whole tree is now uniform on the **timestamp form** `?v=v1.7.23-20260905130000` (the legacy `?v=2.0.X` tokens are fully gone). Bump by global-replacing the single current token string across all `*.js`/`*.html` (593 occurrences) — one `perl -pi -e` sweep does it — and bump `APP_VERSION` for user-facing changes.
+**Cache-buster:** the whole tree is now uniform on the **timestamp form** `?v=v1.7.24-20260907120000` (the legacy `?v=2.0.X` tokens are fully gone). Bump by global-replacing the single current token string across all `*.js`/`*.html` (593 occurrences) — one `perl -pi -e` sweep does it — and bump `APP_VERSION` for user-facing changes.
 
 ---
 
@@ -202,6 +202,11 @@ The 📜 / 🌙 button in the top-nav fires `data-action="toggle-theme"`. Implem
 ## Session Log
 
 > After each session, append an entry. Keep entries short — 3–5 bullets max. Delete entries older than ~10 sessions.
+
+### 2026-09-07 — GM Catalogue (browse everything, with secrets) + hardening
+- New `scarred-lands/gm-catalogue.html` (commit `6961683`) — answers "how does a GM view everything." A copy of `players.html` that reads the **full** GM exports from `./data/` (25 cols) instead of the player-safe shards: NPC detail restores **In a fight** (Tactics_Note) + **Ties** (Connections) with a rose `.blk--gm` accent, group cards show **Current_Purpose**, copy-statblock includes both. **Columns mapped by INDEX** (`toNpcObjects`/`NPC_COLS`) so the position-identical Greek export works; no lazy shards (full records in memory, instant detail). noindex'd; in the nav dropdown (`gmcatalogue` key) + roller sitebar; robots.txt disallows it. `players.html` stays player-safe (no link to it).
+- Prior commit `0e10543` (also this session): emoji favicons on players/roller (🌍/🎲/🗺️ — data-URI, kills the /favicon.ico 404); roller now **parallel-fetches** its 6 CSVs (Promise.all) + is noindex'd; `robots.txt` at repo root (NOTE: only honored at the rayzold.github.io ROOT — project-path copy is best-effort; the noindex metas do the real work); `build-scarred-lands-players.cjs` now **throws** on any English-header schema drift instead of mislabeling.
+- Bumped `APP_VERSION` v1.7.23→v1.7.24; token sweep to `v1.7.24-20260907120000`.
 
 ### 2026-09-05 — Region-sync bridge + copy-statblock (post-publish polish)
 - **Same-origin localStorage bridge**: `app.js` `mirrorDriftRegion(state)` writes `settings.driftRegion` → `localStorage["sl_drift_region"]` both in the gameState subscriber AND once at init (subscriber does NOT fire on first load — that gap cost a debug cycle). All `/crystalforge/` pages share this key. The roller (`roller.html` boot + drawRegions) now defaults to and ⛯-marks the Drift's region; the catalogue (`players.html` facetBlock) ⛯-marks it in the Region facet.
