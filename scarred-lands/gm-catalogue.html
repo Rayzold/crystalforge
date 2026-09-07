@@ -12,11 +12,16 @@
 <style>
 :root{--night:#121A2C;--panel:#1A2338;--panel-2:#212C45;--rule:#2E3B58;--star:#E9DFC8;
  --dim:#8E9CBA;--gold:#D4AF4F;--cyan:#77AEBE;--rose:#C0697E;--green:#7FA87C;
+ --amb-1:198;--amb-2:45;--amb-a:.09;
  --serif:"Fraunces","Iowan Old Style",Georgia,serif;--sans:"Archivo","Segoe UI",system-ui,sans-serif}
 *{box-sizing:border-box}html,body{margin:0;padding:0}
 body{background:var(--night);color:var(--star);font-family:var(--sans);font-size:15px;line-height:1.55;min-height:100vh;
- background-image:radial-gradient(circle at 14% 8%,rgba(119,174,190,.09),transparent 45%),
-                  radial-gradient(circle at 86% 84%,rgba(212,175,79,.07),transparent 50%)}
+ background-attachment:fixed;transition:background-color .5s ease;
+ background-image:
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cg fill='%23E9DFC8'%3E%3Ccircle cx='24' cy='38' r='1.1' opacity='.45'/%3E%3Ccircle cx='190' cy='22' r='.8' opacity='.3'/%3E%3Ccircle cx='120' cy='92' r='.7' opacity='.35'/%3E%3Ccircle cx='232' cy='140' r='1.2' opacity='.4'/%3E%3Ccircle cx='60' cy='150' r='.7' opacity='.28'/%3E%3Ccircle cx='160' cy='192' r='.9' opacity='.34'/%3E%3Ccircle cx='30' cy='220' r='1' opacity='.4'/%3E%3Ccircle cx='205' cy='245' r='.7' opacity='.26'/%3E%3Ccircle cx='95' cy='250' r='.8' opacity='.3'/%3E%3Ccircle cx='250' cy='70' r='.7' opacity='.3'/%3E%3Ccircle cx='140' cy='46' r='.6' opacity='.25'/%3E%3Ccircle cx='80' cy='108' r='.9' opacity='.32'/%3E%3C/g%3E%3C/svg%3E"),
+  radial-gradient(circle at 14% 8%,hsla(var(--amb-1) 62% 55% / var(--amb-a)),transparent 46%),
+  radial-gradient(circle at 86% 84%,hsla(var(--amb-2) 58% 52% / calc(var(--amb-a) * .8)),transparent 52%)}
+body.region-tinted{--amb-a:.22}
 .wrap{max-width:1360px;margin:0 auto;padding:32px 26px 90px}
 header{display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap;
  border-bottom:1px solid var(--rule);padding-bottom:16px;margin-bottom:16px}
@@ -58,6 +63,7 @@ h1{font-family:var(--serif);font-weight:900;font-size:30px;letter-spacing:-.015e
 .chk input{accent-color:var(--gold);margin:0;flex:none}
 .chk.on{color:var(--star)}
 .chk .lbl{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.reg-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:baseline;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}
 .chk .n{font-size:11.5px;color:var(--dim);font-variant-numeric:tabular-nums}
 .chk.on .n{color:var(--gold)}
 select.f{width:100%;background:var(--panel);color:var(--star);border:1px solid var(--rule);
@@ -263,6 +269,15 @@ const dispoClass=v=>/Friendly|Φιλικ/.test(v)?"d-good":/Hostile|Εχθρικ
 const CLASS_HUE={Fighter:6,Barbarian:18,Ranger:130,Druid:96,Rogue:284,Monk:38,Bard:322,Cleric:48,Paladin:212,Wizard:248,Sorcerer:350,Warlock:266,Artificer:190};
 const classHue=cls=>CLASS_HUE[cls]??([...String(cls||"")].reduce((a,c)=>a+c.charCodeAt(0),0)%360);
 const initials=name=>{const p=String(name||"").trim().split(/\s+/);return((p[0]||"")[0]||"?")+((p[1]||"")[0]||"")};
+// A signature hue per region — themes the ambient background + facet dots.
+const REGION_HUE={"The Drift":216,"New Grandia":42,"Thundermount":16,"Wyldermoore":96,"Frozen Edge":190,"Fur Wehn":158,"The Otherside":270,"Datasphere's Reach":322};
+// Wash the page in the selected region's colour when exactly one region is picked.
+function applyAmbient(){
+ const sel=[...(model.f.region||[])];const hue=sel.length===1?REGION_HUE[sel[0]]:null;
+ const rs=document.documentElement.style;
+ if(hue!=null){rs.setProperty("--amb-1",hue);rs.setProperty("--amb-2",hue);document.body.classList.add("region-tinted");}
+ else{rs.removeProperty("--amb-1");rs.removeProperty("--amb-2");document.body.classList.remove("region-tinted");}
+}
 // Turn SL-#### references in a Ties string into buttons that open that NPC (relationship web).
 const linkTies=text=>esc(text).replace(/SL-\d+(\s*\([^)]*\))?/g,m=>{
  const id=(m.match(/SL-\d+/)||[])[0];
@@ -420,9 +435,10 @@ function facetBlock(key,field,map){
  const sel=model.f[key],rows=sortVals(map,sel);
  return `<div class="facet"><h3>${esc(tr(key))}${sel.size?`<span class="n" style="color:var(--gold);font-weight:600">${sel.size}</span>`:""}</h3>
   <div class="flist">${rows.map(([v,n])=>{const drift=key==="region"&&v===DRIFT_REGION;
+   const regDot=key==="region"&&REGION_HUE[v]!=null?`<span class="reg-dot" style="background:hsl(${REGION_HUE[v]} 55% 52%)"></span>`:"";
    return `<label class="chk ${sel.has(v)?'on':''}" ${drift?'title="The Drift currently floats above here"':''}>
    <input type="checkbox" data-facet="${key}" data-value="${esc(v)}" ${sel.has(v)?'checked':''}>
-   <span class="lbl">${drift?'<span style="color:var(--gold)">⛯</span> ':''}${esc(v)}</span><span class="n">${n.toLocaleString()}</span></label>`}).join("")}</div></div>`;
+   <span class="lbl">${regDot}${drift?'<span style="color:var(--gold)">⛯</span> ':''}${esc(v)}</span><span class="n">${n.toLocaleString()}</span></label>`}).join("")}</div></div>`;
 }
 // ---------- active-filter chips (removable, visible above results — key on mobile) ----------
 function activeChips(){
@@ -667,8 +683,9 @@ function renderNpcDetail(n,id){
  const spells=n.Key_Spells&&n.Key_Spells!=="-"?n.Key_Spells:"";
  const con=n.Constellation&&n.Constellation!=="-"?n.Constellation:"";
  const has=k=>n[k]&&n[k]!=="-";
+ const rh=REGION_HUE[n.Region];
  ov.innerHTML=`<div class="detail-panel"><button class="dp-close" data-close>×</button>
-  <div class="head"><div><p class="eyebrow">${esc(n.Region)}${n.settlementName?" · "+esc(n.settlementName):(n.Settlement?" · "+esc(n.Settlement):"")}</p>
+  <div class="head"${rh!=null?` style="background:linear-gradient(165deg,hsla(${rh} 60% 50% / .16),transparent 78%)"`:""}><div><p class="eyebrow">${esc(n.Region)}${n.settlementName?" · "+esc(n.settlementName):(n.Settlement?" · "+esc(n.Settlement):"")}</p>
     <h2 class="name">${esc(n.Name)}</h2>
     <p class="who">${esc(n.Gender||"")} ${esc(n.Ancestry||"")} — ${esc(n.Class||"")}${sub}<br>${esc(n.Role||"")} · ${esc(n.Faction||"")}</p></div>
     <div class="head-actions">
@@ -740,6 +757,7 @@ async function switchTab(tab){if(tab===model.tab)return;model.tab=tab;model.page
  if(tab==="groups")await loadGroups();if(tab==="settlements")await loadSettlements();
  pushURL(false);renderRail();renderContent();document.body.classList.remove("drawer-open")}
 function renderContent(){
+ applyAmbient();
  if(model.tab==="catalogue")renderCatalogue();
  else if(model.tab==="groups")renderGroups();
  else renderSettlements();
