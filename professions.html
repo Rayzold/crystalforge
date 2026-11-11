@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Drift — Professions</title>
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./professions/professions.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="eyebrow">Scarred Lands · The Drift</span>
+      <h1>Professions</h1>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button type="button" data-tab="player" class="cur">Ο χαρακτήρας μου</button>
+      <button type="button" data-tab="log">Rolls</button>
+      <button type="button" data-tab="recipes">Recipes</button>
+      <button type="button" data-tab="gm" hidden>DM</button>
+    </nav>
+    <button type="button" class="theme" id="theme-toggle" aria-label="Αλλαγή θέματος">Νύχτα</button>
+  </header>
+
+  <main id="view" class="page">
+    <p class="muted">Φόρτωση…</p>
+  </main>
+
+  <footer class="foot">
+    <span id="downtime-badge"></span>
+    <span id="uid-line" class="muted"></span>
+  </footer>
+
+  <script type="module" src="./professions/app.js"></script>
+</body>
+</html>
