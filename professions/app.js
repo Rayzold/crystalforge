@@ -402,6 +402,8 @@ async function boot() {
   if (safeGet(THEME_KEY) === "night") { document.body.classList.add("night"); $("#theme-toggle").textContent = "Μέρα"; }
   if (IS_GM_VIEW) document.querySelector('[data-tab="gm"]').hidden = false;
   ui.uid = await store.currentUid();
+  // Shown before any Firestore read, so the DM can copy it even when the rules still deny.
+  if (IS_GM_VIEW) $("#uid-line").textContent = `uid: ${ui.uid}`;
   const membership = await store.loadMyMembership();
   ui.myCharId = membership?.charId ?? null;
   // Fallback: the session was lost (cleared storage, new device) but the code was remembered.
