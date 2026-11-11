@@ -270,6 +270,7 @@ function viewGM() {
             <button class="act ghost" data-act="edit-character" data-char="${c.id}">Επεξεργασία</button>
             ${c.isNpc ? "" : `<button class="act ghost" data-act="new-code" data-char="${c.id}">Κωδικός παίκτη</button>`}
           </div>
+          ${ui.lastCode?.charId === c.id ? `<div style="margin-top:.4rem">Κωδικός: <strong style="user-select:all">${esc(ui.lastCode.code)}</strong></div>` : ""}
         </div>`).join("")}
     </div>`;
 }
@@ -346,8 +347,10 @@ document.addEventListener("click", (ev) => {
     if (act === "new-code") {
       const code = generateClaimCode(() => crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32);
       await store.createClaim(code, char);
-      try { await navigator.clipboard.writeText(code); } catch { /* no clipboard permission */ }
-      toast(`Κωδικός για ${charById(char)?.name}: ${code} (αντιγράφηκε)`);
+      // The clipboard promise can hang without focus/permission, so never await it before showing the code.
+      navigator.clipboard?.writeText(code).catch(() => {});
+      ui.lastCode = { charId: char, code };
+      render();
     }
   });
 });
