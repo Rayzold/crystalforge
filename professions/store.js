@@ -4,6 +4,7 @@
 
 import { loadFirebaseRuntime } from "../firebase/FirebaseConfig.js?v=v1.7.24-20260907120000";
 import { approveEntry, createProject, createRollEntry, normalizeCharacter, rejectEntry } from "./model.js";
+import { applyGatherEntry, createGatherEntry } from "./gathering.js";
 
 const REALM = "main";
 
@@ -61,13 +62,20 @@ export async function loadAll() {
 /** Live updates for the whole crafting realm. Returns an unsubscribe function. */
 export async function subscribeAll(callback) {
   const { fs, db } = await runtime();
-  const state = { realm: null, characters: [], projects: [], log: [] };
+  const state = { realm: null, characters: [], projects: [], log: [], gathering: [], gatheringError: null };
   const emit = () => callback({ ...state });
   const unsubs = [
     fs.onSnapshot(realmRef(fs, db), (s) => { state.realm = s.exists() ? s.data() : null; emit(); }),
     fs.onSnapshot(sub(fs, db, "characters"), (s) => { state.characters = s.docs.map(withId); emit(); }),
     fs.onSnapshot(sub(fs, db, "projects"), (s) => { state.projects = s.docs.map(withId); emit(); }),
-    fs.onSnapshot(fs.query(sub(fs, db, "log"), fs.orderBy("createdAt", "desc")), (s) => { state.log = s.docs.map(withId); emit(); })
+    fs.onSnapshot(fs.query(sub(fs, db, "log"), fs.orderBy("createdAt", "desc")), (s) => { state.log = s.docs.map(withId); emit(); }),
+    // Separate error handler: until the gathering rules are published, this listener
+    // is denied, and the rest of the page must keep working.
+    fs.onSnapshot(
+      fs.query(sub(fs, db, "gathering"), fs.orderBy("createdAt", "desc")),
+      (s) => { state.gathering = s.docs.map(withId); state.gatheringError = null; emit(); },
+      (err) => { state.gatheringError = err?.code ?? String(err); emit(); }
+    )
   ];
   return () => unsubs.forEach((u) => u());
 }
@@ -174,4 +182,42 @@ export async function rejectRoll(entryId) {
   const snap = await fs.getDoc(ref);
   if (!snap.exists()) throw new Error("Το roll δεν υπάρχει.");
   await fs.updateDoc(ref, { status: rejectEntry(snap.data()).status });
+}
+
+// ─── Gathering ───────────────────────────────────────────────────────────────
+
+/** Player (or GM for an NPC) records a gathering result; pending until approved. */
+export async function submitGather(args) {
+  const { fs, db, uid } = await runtime();
+  const entry = createGatherEntry({ ...args, uid });
+  const ref = await fs.addDoc(sub(fs, db, "gathering"), { ...entry, createdAt: fs.serverTimestamp() });
+  return { id: ref.id, ...entry };
+}
+
+/** Approves a gathering entry and applies it to the character, atomically. */
+export async function approveGather(entryId) {
+  const { fs, db } = await runtime();
+  await fs.runTransaction(db, async (tx) => {
+    const entryRef = sub(fs, db, "gathering", entryId);
+    const entrySnap = await tx.get(entryRef);
+    if (!entrySnap.exists()) throw new Error("Η καταχώριση δεν υπάρχει.");
+    const entry = entrySnap.data();
+    if (entry.status !== "pending") throw new Error("Έχει ήδη κριθεί.");
+    const charRef = sub(fs, db, "characters", entry.charId);
+    const charSnap = await tx.get(charRef);
+    if (!charSnap.exists()) throw new Error("Ο χαρακτήρας δεν υπάρχει.");
+    tx.update(charRef, applyGatherEntry(normalizeCharacter(charSnap.data()), entry));
+    tx.update(entryRef, { status: "approved" });
+  });
+}
+
+export async function rejectGather(entryId) {
+  const { fs, db } = await runtime();
+  await fs.updateDoc(sub(fs, db, "gathering", entryId), { status: "rejected" });
+}
+
+/** GM: sets the level of each region (1–20 or "endgame"); empty clears it. */
+export async function saveRegionLevels(levels) {
+  const { fs, db } = await runtime();
+  await fs.setDoc(realmRef(fs, db), { regionLevels: levels }, { mergeFields: ["regionLevels"] });
 }

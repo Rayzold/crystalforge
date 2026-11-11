@@ -1,4 +1,4 @@
-// Run: node --test professions/rules.test.js
+// Run: node --test professions/rules.test.js professions/model.test.js professions/gathering.test.js
 import { test } from "node:test";
 import assert from "node:assert/strict";
 

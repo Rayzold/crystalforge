@@ -11,7 +11,7 @@
 //   crafting/{realm}/log/{id}           one roll = one downtime week of one crafter
 
 import {
-  applyWeek, checkModifier, keptDie, MAX_PROFESSIONS, resolveWeek, rollMode
+  applyWeek, canCraftRarity, checkModifier, keptDie, MAX_PROFESSIONS, resolveWeek, rollMode
 } from "./rules.js";
 import { findRecipe, isRightFacility, PROFESSIONS } from "./recipes.js";
 
@@ -58,10 +58,25 @@ export function normalizeCharacter(raw) {
   for (const t of RESOURCE_TYPES) resources[t] = Math.max(0, Number(raw.resources?.[t] ?? 0));
   const pb = raw.proficiencyBonus ?? 2;
   if (!Number.isInteger(pb) || pb < 2 || pb > 6) throw new Error("Proficiency bonus must be 2–6");
+  const level = raw.level ?? 1;
+  if (!Number.isInteger(level) || level < 1 || level > 20) throw new Error("Level must be 1–20");
+  const counts = (obj) => Object.fromEntries(
+    Object.entries(obj ?? {})
+      .map(([k, v]) => [String(k).trim(), Math.max(0, Math.floor(Number(v) || 0))])
+      .filter(([k]) => k)
+  );
   return {
     name: raw.name.trim(),
     isNpc: Boolean(raw.isNpc),
     proficiencyBonus: pb,
+    level,
+    // Archaeology: fragments per origin, magic fragments per origin, relics found.
+    fragments: counts(raw.fragments),
+    magicFragments: counts(raw.magicFragments),
+    assemblyBlockedAt: counts(raw.assemblyBlockedAt),
+    relics: (raw.relics ?? [])
+      .filter((r) => r && r.origin && Number(r.value) > 0)
+      .map((r) => ({ origin: String(r.origin), value: Number(r.value) })),
     abilityMods,
     skills,
     professions,
@@ -78,6 +93,7 @@ export function rollContext(character, recipe, facility) {
   const rightFacility = isRightFacility(recipe, facility);
   const ability = SKILL_ABILITY[recipe.skill];
   return {
+    pbOk: canCraftRarity(character.proficiencyBonus ?? 2, recipe.rarity),
     inProfession,
     rightFacility,
     skillProficient,
@@ -115,8 +131,12 @@ export function weeksUsed(log, charId, downtimeId) {
 }
 
 /** Can this character roll another week on this project right now? Returns { ok, reason }. */
-export function canRoll({ downtime, log, charId, project }) {
+export function canRoll({ downtime, log, charId, project, character = null }) {
   if (!downtime?.open) return { ok: false, reason: "Δεν υπάρχει ανοιχτό downtime." };
+  const recipe = findRecipe(project.recipeId);
+  if (character && recipe && !canCraftRarity(character.proficiencyBonus ?? 2, recipe.rarity)) {
+    return { ok: false, reason: `Ένα ${recipe.rarity} item θέλει proficiency bonus +${recipe.minPb}.` };
+  }
   if (project.status !== "active") return { ok: false, reason: "Το project δεν είναι ενεργό." };
   if (!project.crafters.includes(charId)) return { ok: false, reason: "Ο χαρακτήρας δεν δουλεύει σε αυτό το project." };
   if (weeksUsed(log, charId, downtime.id) >= downtime.weeks) {

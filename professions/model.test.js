@@ -21,7 +21,7 @@ test("normalizeCharacter: defaults and validation", () => {
   assert.equal(alchemist.resources.herb, 0);
   assert.equal(alchemist.isNpc, false);
   assert.throws(() => normalizeCharacter({ name: "X", professions: ["alchemy", "tailoring", "inscription"] }), /At most 2/);
-  assert.throws(() => normalizeCharacter({ name: "X", professions: ["cooking"] }), /Unknown profession/);
+  assert.throws(() => normalizeCharacter({ name: "X", professions: ["pottery"] }), /Unknown profession/);
   assert.throws(() => normalizeCharacter({ name: "X", skills: { Cooking: "proficient" } }), /Unknown skill/);
   assert.throws(() => normalizeCharacter({ name: "X", proficiencyBonus: 9 }), /Proficiency/);
   assert.throws(() => normalizeCharacter({ professions: [] }), /name/);

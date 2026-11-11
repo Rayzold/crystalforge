@@ -81,6 +81,18 @@ service cloud.firestore {
         allow update, delete: if isGM();
       }
 
+      // Gathering results happen during travel, not downtime: no downtimeOpen() check.
+      match /gathering/{entryId} {
+        allow read: if signedIn();
+        allow create: if isGM() || (
+          isMember()
+          && request.resource.data.charId == myCharId()
+          && request.resource.data.createdBy == request.auth.uid
+          && request.resource.data.status == "pending"
+        );
+        allow update, delete: if isGM();
+      }
+
       match /log/{entryId} {
         allow read: if signedIn();
         allow create: if isGM() || (

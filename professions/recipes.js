@@ -1,20 +1,37 @@
 // Scarred Lands Professions — professions and recipes catalogue.
 // The repo is public: only SRD item names and our own mechanics, no text from the book.
 //
-// DRAFT: default skills per profession and the starter recipe list are proposals
-// until the DM confirms them (state/crafting-plan.md §6, question 5).
+// DRAFT: tools are from the book; facilities, default skills and the starter
+// recipe list are house-rule proposals until the DM confirms them.
 
-import { costFor, dcFor, weeksFor } from "./rules.js";
+import { costFor, dcFor, MIN_PB_BY_RARITY, weeksFor } from "./rules.js";
 
-// Profession → which Drift facilities count as the "right facility",
-// and the default skill a recipe uses unless it overrides it.
+// Every profession of the book. `tools`: any one of them is the prerequisite (book).
+// Production: `facilities` are the Drift buildings that count as the right facility
+// (house rule), `defaultSkill` is the skill a recipe uses unless it overrides it (house rule).
+// Gathering: `skill` is the check, `resource` is what it yields.
+// An empty `facilities` list means no Drift building helps yet (DM to decide).
 export const PROFESSIONS = {
-  alchemy:       { label: "Alchemy",       tool: "Alchemist's Supplies",   facilities: ["Alchemist", "Apothecary"],   defaultSkill: "Medicine" },
-  blacksmithing: { label: "Blacksmithing", tool: "Smith's Tools",          facilities: ["Blacksmith", "Dragonforge"], defaultSkill: "Athletics" },
-  inscription:   { label: "Inscription",   tool: "Calligrapher's Supplies", facilities: ["Library", "Arcana Tower"],   defaultSkill: "Arcana" },
-  tailoring:     { label: "Tailoring",     tool: "Weaver's Tools",         facilities: ["Weaver's Hall"],              defaultSkill: "Sleight of Hand" },
-  engineering:   { label: "Engineering",   tool: "Tinker's Tools",         facilities: ["Techcrafter", "Engineers' Guild"], defaultSkill: "Investigation" }
+  // Production
+  alchemy:        { kind: "production", label: "Alchemy",        tools: ["Alchemist's Supplies", "Herbalism Kit"],                      facilities: ["Alchemist", "Apothecary"],          defaultSkill: "Medicine" },
+  blacksmithing:  { kind: "production", label: "Blacksmithing",  tools: ["Mason's Tools", "Smith's Tools"],                             facilities: ["Blacksmith", "Dragonforge"],        defaultSkill: "Athletics" },
+  cooking:        { kind: "production", label: "Cooking",        tools: ["Brewer's Supplies", "Cook's Utensils"],                       facilities: [],                                   defaultSkill: "Survival" },
+  enchanting:     { kind: "production", label: "Enchanting",     tools: ["Carpenter's Tools", "Potter's Tools", "Woodcarver's Tools"],  facilities: ["Arcana Tower", "Enchanted Forest"], defaultSkill: "Arcana" },
+  engineering:    { kind: "production", label: "Engineering",    tools: ["Tinker's Tools"],                                             facilities: ["Techcrafter", "Engineers' Guild"],  defaultSkill: "Investigation" },
+  inscription:    { kind: "production", label: "Inscription",    tools: ["Calligrapher's Supplies", "Cartographer's Tools", "Painter's Supplies"], facilities: ["Library", "Arcana Tower"], defaultSkill: "Arcana" },
+  jewelcrafting:  { kind: "production", label: "Jewelcrafting",  tools: ["Glassblower's Tools", "Jeweler's Tools"],                     facilities: [],                                   defaultSkill: "Sleight of Hand" },
+  leatherworking: { kind: "production", label: "Leatherworking", tools: ["Cobbler's Tools", "Leatherworker's Tools"],                   facilities: [],                                   defaultSkill: "Survival" },
+  tailoring:      { kind: "production", label: "Tailoring",      tools: ["Weaver's Tools"],                                             facilities: ["Weaver's Hall"],                    defaultSkill: "Sleight of Hand" },
+  // Gathering
+  herbalism:   { kind: "gathering", label: "Herbalism",   tools: ["Herbalism Kit"],          skill: "Survival", resource: "herb" },
+  mining:      { kind: "gathering", label: "Mining",      tools: ["Mason's Tools"],          skill: "Survival", resource: "ore" },
+  skinning:    { kind: "gathering", label: "Skinning",    tools: ["Leatherworker's Tools"],  skill: "Survival", resource: "leather" },
+  fishing:     { kind: "gathering", label: "Fishing",     tools: [],                         skill: "Survival", resource: "fish" },
+  archaeology: { kind: "gathering", label: "Archaeology", tools: [], requiresSkill: "History", skill: "History", resource: null }
 };
+
+export const PRODUCTION = Object.keys(PROFESSIONS).filter((k) => PROFESSIONS[k].kind === "production");
+export const GATHERING = Object.keys(PROFESSIONS).filter((k) => PROFESSIONS[k].kind === "gathering");
 
 // id, name, profession, rarity, consumable, optional skill override.
 const RAW_RECIPES = [
@@ -36,13 +53,14 @@ const RAW_RECIPES = [
 /** Fills in skill, DC, weeks and cost from the profession and the rules. */
 export function buildRecipe(raw) {
   const profession = PROFESSIONS[raw.profession];
-  if (!profession) throw new Error(`Unknown profession: ${raw.profession}`);
+  if (!profession || profession.kind !== "production") throw new Error(`Unknown production profession: ${raw.profession}`);
   const consumable = Boolean(raw.consumable);
   return {
     ...raw,
     consumable,
     skill: raw.skill ?? profession.defaultSkill,
     dc: dcFor(raw.rarity),
+    minPb: MIN_PB_BY_RARITY[raw.rarity],
     weeks: weeksFor(raw.rarity, { consumable }),
     cost: costFor(raw.rarity, { consumable })
   };
@@ -57,5 +75,5 @@ export function findRecipe(id) {
 /** True when the facility counts as the right one for the recipe's profession. */
 export function isRightFacility(recipe, facility) {
   if (!facility) return false;
-  return PROFESSIONS[recipe.profession].facilities.includes(facility);
+  return (PROFESSIONS[recipe.profession].facilities ?? []).includes(facility);
 }
