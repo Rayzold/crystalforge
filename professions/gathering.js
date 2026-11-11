@@ -18,7 +18,7 @@ export const TRAVEL_PROFESSIONS = ["herbalism", "mining", "fishing"];
 /** Scarred Lands regions; the DM sets their level in the realm doc (`regionLevels`). */
 export const REGIONS = [
   "The Drift", "Frozen Edge", "Fur Wehn", "New Grandia",
-  "Thundermount", "Wyldermoore", "Dataspheres Reach", "The Otherside"
+  "Thundermount", "Wyldermoore", "The Otherside", "The Scar"
 ];
 
 /** Does the character practice this gathering profession? Fishing needs no proficiency (book). */
