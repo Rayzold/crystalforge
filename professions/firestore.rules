@@ -1,5 +1,5 @@
 // Scarred Lands Professions — Firestore rules.
-// This file is the WHOLE rule set: it repeats the live realm rule,
+// This file is the WHOLE rule set, realm included,
 // so it can replace what is in Firebase → Firestore → Rules. Put your GM UID in
 // both places marked YOUR_GM_UID_HERE (via isGM()). Players sign in anonymously and claim a character
 // with the code the GM gives them.
@@ -19,11 +19,12 @@ service cloud.firestore {
       return signedIn() && request.auth.uid == "YOUR_GM_UID_HERE";
     }
 
-    // Crystal Forge realm: kept exactly as it is live (2026-11-11). Any signed-in
-    // (anonymous) user can write it. FIREBASE_GM_RULES.txt shows the GM-only version;
-    // switching to it is a separate decision, after checking which pages write the realm.
+    // Crystal Forge realm: everyone signed in reads, only the GM writes (2026-11-12).
+    // The only writer in the code is publishSharedStateToFirebase (app.js). If you
+    // publish from another browser, add its uid to isGM().
     match /realms/{realmId} {
-      allow read, write: if signedIn();
+      allow read: if signedIn();
+      allow write: if isGM();
     }
 
     match /crafting/{realm} {
