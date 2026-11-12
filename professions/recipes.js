@@ -10,17 +10,17 @@ import { costFor, dcFor, MIN_PB_BY_RARITY, weeksFor } from "./rules.js";
 // Production: `facilities` are the Drift buildings that count as the right facility
 // (house rule), `defaultSkill` is the skill a recipe uses unless it overrides it (house rule).
 // Gathering: `skill` is the check, `resource` is what it yields.
-// An empty `facilities` list means no Drift building helps yet (DM to decide).
+// Facilities for cooking, jewelcrafting and leatherworking chosen 2026-11-12.
 export const PROFESSIONS = {
   // Production
   alchemy:        { kind: "production", label: "Alchemy",        tools: ["Alchemist's Supplies", "Herbalism Kit"],                      facilities: ["Alchemist", "Apothecary"],          defaultSkill: "Medicine" },
   blacksmithing:  { kind: "production", label: "Blacksmithing",  tools: ["Mason's Tools", "Smith's Tools"],                             facilities: ["Blacksmith", "Dragonforge"],        defaultSkill: "Athletics" },
-  cooking:        { kind: "production", label: "Cooking",        tools: ["Brewer's Supplies", "Cook's Utensils"],                       facilities: [],                                   defaultSkill: "Survival" },
+  cooking:        { kind: "production", label: "Cooking",        tools: ["Brewer's Supplies", "Cook's Utensils"],                       facilities: ["Community Oven", "Bakery", "Smokehouse", "Brewery"], defaultSkill: "Survival" },
   enchanting:     { kind: "production", label: "Enchanting",     tools: ["Carpenter's Tools", "Potter's Tools", "Woodcarver's Tools"],  facilities: ["Arcana Tower", "Enchanted Forest"], defaultSkill: "Arcana" },
   engineering:    { kind: "production", label: "Engineering",    tools: ["Tinker's Tools"],                                             facilities: ["Techcrafter", "Engineers' Guild"],  defaultSkill: "Investigation" },
   inscription:    { kind: "production", label: "Inscription",    tools: ["Calligrapher's Supplies", "Cartographer's Tools", "Painter's Supplies"], facilities: ["Library", "Arcana Tower"], defaultSkill: "Arcana" },
-  jewelcrafting:  { kind: "production", label: "Jewelcrafting",  tools: ["Glassblower's Tools", "Jeweler's Tools"],                     facilities: [],                                   defaultSkill: "Sleight of Hand" },
-  leatherworking: { kind: "production", label: "Leatherworking", tools: ["Cobbler's Tools", "Leatherworker's Tools"],                   facilities: [],                                   defaultSkill: "Survival" },
+  jewelcrafting:  { kind: "production", label: "Jewelcrafting",  tools: ["Glassblower's Tools", "Jeweler's Tools"],                     facilities: ["Jewelry Shop", "Mint"],                                   defaultSkill: "Sleight of Hand" },
+  leatherworking: { kind: "production", label: "Leatherworking", tools: ["Cobbler's Tools", "Leatherworker's Tools"],                   facilities: ["Tannery"],                                   defaultSkill: "Survival" },
   tailoring:      { kind: "production", label: "Tailoring",      tools: ["Weaver's Tools"],                                             facilities: ["Weaver's Hall"],                    defaultSkill: "Sleight of Hand" },
   // Gathering
   herbalism:   { kind: "gathering", label: "Herbalism",   tools: ["Herbalism Kit"],          skill: "Survival", resource: "herb" },
