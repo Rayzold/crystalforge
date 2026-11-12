@@ -90,6 +90,7 @@ function viewProjectCard(p, character) {
       ${helpers.length ? `<div class="muted">Βοηθοί: ${helpers.join(", ")}</div>` : ""}
       ${progressBar(p)}
       <div class="muted">${p.weeksDone}/${p.weeksTarget} εβδομάδες</div>
+      ${p.status === "complete" ? `<div class="ok" style="margin-top:.4rem">Έτοιμο. Πρόσθεσέ το στο <a href="./equipment.html">Equipment sheet</a> του χαρακτήρα σου.</div>` : ""}
       ${ctx && p.status === "active" ? `
         <div class="row" style="margin-top:.5rem">
           ${modeChip(ctx.mode)} <span>d20 ${sign(ctx.modifier)} vs DC ${ctx.dc}</span>
