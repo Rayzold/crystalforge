@@ -1,8 +1,8 @@
 // Scarred Lands Professions — professions and recipes catalogue.
 // The repo is public: only SRD item names and our own mechanics, no text from the book.
 //
-// DRAFT: tools are from the book; facilities, default skills and the starter
-// recipe list are house-rule proposals until the DM confirms them.
+// Tools are from the book. Facilities and default skills are house rules, confirmed
+// by the DM on 2026-11-12. The starter recipe list is still a draft.
 
 import { costFor, dcFor, MIN_PB_BY_RARITY, weeksFor } from "./rules.js";
 
